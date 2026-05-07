@@ -204,7 +204,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.borderColor),
         boxShadow: [

@@ -127,196 +127,237 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSizes.spacingL),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                context.t.features.auth.appTitle,
-                textAlign: TextAlign.center,
-                style: AppTypography.h1.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
-                ),
+      backgroundColor: AppColors.background,
+      body: Column(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.primaryLight],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              const SizedBox(height: AppSizes.spacingM),
-              Text(
-                context.t.features.auth.appSubtitle,
-                textAlign: TextAlign.center,
-                style: AppTypography.body1.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: AppSizes.spacingL),
-              Text(
-                context.t.features.auth.login,
-                style: AppTypography.h2.copyWith(color: AppColors.textPrimary),
-              ),
-              const SizedBox(height: AppSizes.spacingL),
-              TextField(
-                key: ValueKey(_usePhoneLogin ? 'phone' : 'email'),
-                controller: _identifierController,
-                focusNode: _identifierFocusNode,
-                enabled: !authState.isLoading,
-                keyboardType: _usePhoneLogin
-                    ? TextInputType.phone
-                    : TextInputType.emailAddress,
-                maxLength: _usePhoneLogin ? 10 : null,
-                inputFormatters: _usePhoneLogin
-                    ? [FilteringTextInputFormatter.digitsOnly]
-                    : null,
-                style: AppTypography.body1,
-                decoration: InputDecoration(
-                  labelText: _usePhoneLogin
-                      ? context.t.features.auth.phone
-                      : context.t.features.auth.email,
-                  hintText: _usePhoneLogin
-                      ? context.t.features.auth.phoneHint
-                      : context.t.features.auth.emailHint,
-                  prefixText: _usePhoneLogin ? '+90 ' : null,
-                  prefixIcon: Icon(
-                    _usePhoneLogin
-                        ? Icons.phone_outlined
-                        : Icons.email_outlined,
-                    size: AppSizes.iconSize,
-                  ),
-                  counterText: '',
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.spacingM,
-                    vertical: AppSizes.spacingM,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSizes.spacingM),
-              TextField(
-                controller: _passwordController,
-                enabled: !authState.isLoading,
-                obscureText: _obscurePassword,
-                style: AppTypography.body1,
-                decoration: InputDecoration(
-                  labelText: context.t.features.auth.password,
-                  hintText: context.t.features.auth.passwordHint,
-                  prefixIcon: Icon(
-                    Icons.lock_outlined,
-                    size: AppSizes.iconSize,
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      size: AppSizes.iconSize,
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: SizedBox(
+                height: 200,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.apartment_rounded,
+                        color: Colors.white,
+                        size: 32,
+                      ),
                     ),
-                    onPressed: () {
-                      setState(() => _obscurePassword = !_obscurePassword);
-                    },
-                    iconSize: AppSizes.iconTouchTarget,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.spacingM,
-                    vertical: AppSizes.spacingM,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSizes.spacingL),
-              ElevatedButton(
-                onPressed: authState.isLoading
-                    ? null
-                    : () => _handleLogin(context),
-                child: authState.isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(context.t.features.auth.login),
-              ),
-              const SizedBox(height: AppSizes.spacingM),
-              OutlinedButton.icon(
-                onPressed: authState.isLoading ? null : _toggleLoginMode,
-                icon: Icon(
-                  _usePhoneLogin
-                      ? Icons.email_outlined
-                      : Icons.phone_iphone_outlined,
-                  size: 20,
-                ),
-                label: Text(
-                  _usePhoneLogin
-                      ? context.t.features.auth.emailLogin
-                      : context.t.features.auth.phoneLogin,
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: BorderSide(color: AppColors.primary, width: 1.5),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSizes.spacingM,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-                  ),
-                  textStyle: AppTypography.body1.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSizes.spacingL),
-              Row(
-                children: [
-                  Expanded(
-                    child: Divider(color: AppColors.border, thickness: 1),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.spacingM,
+                    const SizedBox(height: AppSizes.spacingM),
+                    Text(
+                      context.t.features.auth.appTitle,
+                      style: AppTypography.h2.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                    child: Text(
-                      context.t.features.auth.or,
+                    const SizedBox(height: AppSizes.spacingXS),
+                    Text(
+                      context.t.features.auth.appSubtitle,
+                      style: AppTypography.body2.copyWith(
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSizes.spacingL),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      context.t.features.auth.login,
+                      style: AppTypography.h2.copyWith(color: AppColors.textPrimary),
+                    ),
+                    const SizedBox(height: AppSizes.spacingL),
+                    TextField(
+                      key: ValueKey(_usePhoneLogin ? 'phone' : 'email'),
+                      controller: _identifierController,
+                      focusNode: _identifierFocusNode,
+                      enabled: !authState.isLoading,
+                      keyboardType: _usePhoneLogin
+                          ? TextInputType.phone
+                          : TextInputType.emailAddress,
+                      maxLength: _usePhoneLogin ? 10 : null,
+                      inputFormatters: _usePhoneLogin
+                          ? [FilteringTextInputFormatter.digitsOnly]
+                          : null,
+                      style: AppTypography.body1,
+                      decoration: InputDecoration(
+                        labelText: _usePhoneLogin
+                            ? context.t.features.auth.phone
+                            : context.t.features.auth.email,
+                        hintText: _usePhoneLogin
+                            ? context.t.features.auth.phoneHint
+                            : context.t.features.auth.emailHint,
+                        prefixText: _usePhoneLogin ? '+90 ' : null,
+                        prefixIcon: Icon(
+                          _usePhoneLogin
+                              ? Icons.phone_outlined
+                              : Icons.email_outlined,
+                          size: AppSizes.iconSize,
+                        ),
+                        counterText: '',
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.spacingM,
+                          vertical: AppSizes.spacingM,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.spacingM),
+                    TextField(
+                      controller: _passwordController,
+                      enabled: !authState.isLoading,
+                      obscureText: _obscurePassword,
+                      style: AppTypography.body1,
+                      decoration: InputDecoration(
+                        labelText: context.t.features.auth.password,
+                        hintText: context.t.features.auth.passwordHint,
+                        prefixIcon: Icon(
+                          Icons.lock_outlined,
+                          size: AppSizes.iconSize,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            size: AppSizes.iconSize,
+                          ),
+                          onPressed: () {
+                            setState(() => _obscurePassword = !_obscurePassword);
+                          },
+                          iconSize: AppSizes.iconTouchTarget,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.spacingM,
+                          vertical: AppSizes.spacingM,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.spacingL),
+                    ElevatedButton(
+                      onPressed: authState.isLoading
+                          ? null
+                          : () => _handleLogin(context),
+                      child: authState.isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(context.t.features.auth.login),
+                    ),
+                    const SizedBox(height: AppSizes.spacingM),
+                    OutlinedButton.icon(
+                      onPressed: authState.isLoading ? null : _toggleLoginMode,
+                      icon: Icon(
+                        _usePhoneLogin
+                            ? Icons.email_outlined
+                            : Icons.phone_iphone_outlined,
+                        size: 20,
+                      ),
+                      label: Text(
+                        _usePhoneLogin
+                            ? context.t.features.auth.emailLogin
+                            : context.t.features.auth.phoneLogin,
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: BorderSide(color: AppColors.primary, width: 1.5),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSizes.spacingM,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+                        ),
+                        textStyle: AppTypography.body1.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.spacingL),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Divider(color: AppColors.border, thickness: 1),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSizes.spacingM,
+                          ),
+                          child: Text(
+                            context.t.features.auth.or,
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(color: AppColors.border, thickness: 1),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSizes.spacingL),
+                    AltActionButton(
+                      icon: Icons.person_add_outlined,
+                      title: context.t.features.auth.noAccount,
+                      onTap: authState.isLoading
+                          ? null
+                          : () => context.push('/register'),
+                      isEnabled: !authState.isLoading,
+                    ),
+                    const SizedBox(height: AppSizes.spacingM),
+                    AltActionButton(
+                      icon: Icons.vpn_key_outlined,
+                      title: context.t.features.auth.joinWithCode,
+                      onTap: authState.isLoading ? null : () => context.push('/join'),
+                      isEnabled: !authState.isLoading,
+                    ),
+                    const SizedBox(height: AppSizes.spacingXL),
+                    Text(
+                      '${context.t.features.auth.copyright} v${AppConstants.appVersion}',
+                      textAlign: TextAlign.center,
                       style: AppTypography.caption.copyWith(
                         color: AppColors.textSecondary,
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Divider(color: AppColors.border, thickness: 1),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSizes.spacingL),
-              AltActionButton(
-                icon: Icons.person_add_outlined,
-                title: context.t.features.auth.noAccount,
-                onTap: authState.isLoading
-                    ? null
-                    : () => context.push('/register'),
-                isEnabled: !authState.isLoading,
-              ),
-              const SizedBox(height: AppSizes.spacingM),
-              AltActionButton(
-                icon: Icons.vpn_key_outlined,
-                title: context.t.features.auth.joinWithCode,
-                onTap: authState.isLoading ? null : () => context.push('/join'),
-                isEnabled: !authState.isLoading,
-              ),
-              const SizedBox(height: AppSizes.spacingXL),
-              Text(
-                '${context.t.features.auth.copyright} v${AppConstants.appVersion}',
-                textAlign: TextAlign.center,
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.textSecondary,
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

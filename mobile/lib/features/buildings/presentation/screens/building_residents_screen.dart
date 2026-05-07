@@ -116,7 +116,7 @@ class BuildingResidentsScreen extends ConsumerWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.white24,
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.apartment,
@@ -138,13 +138,13 @@ class BuildingResidentsScreen extends ConsumerWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.location_on_outlined,
-                  size: 18, color: Colors.white70),
+              Icon(Icons.location_on_outlined,
+                  size: 18, color: Colors.white.withValues(alpha: 0.7)),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   building.address,
-                  style: AppTypography.body2.copyWith(color: Colors.white70),
+                  style: AppTypography.body2.copyWith(color: Colors.white.withValues(alpha: 0.7)),
                 ),
               ),
             ],
@@ -162,7 +162,7 @@ class BuildingResidentsScreen extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.borderColor),
       ),
@@ -177,14 +177,14 @@ class BuildingResidentsScreen extends ConsumerWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: AppColors.primaryLight.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     '$index',
                     style: AppTypography.body1.copyWith(
-                      color: Colors.white,
+                      color: AppColors.primary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -272,7 +272,7 @@ class BuildingResidentsScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingXL),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.borderColor),
       ),

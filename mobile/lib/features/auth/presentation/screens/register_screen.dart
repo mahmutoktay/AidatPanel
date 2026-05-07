@@ -165,31 +165,75 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return PopScope(
       canPop: !authState.isLoading,
       child: Scaffold(
-        body: SafeArea(
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSizes.spacingL),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      context.t.features.auth.appTitle,
-                      textAlign: TextAlign.center,
-                      style: AppTypography.h1.copyWith(
-                        color: AppColors.primary,
+        backgroundColor: AppColors.background,
+        body: Stack(
+          children: [
+            Column(
+              children: [
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.primary, AppColors.primaryLight],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: SafeArea(
+                    bottom: false,
+                    child: SizedBox(
+                      height: 160,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.apartment_rounded,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                          ),
+                          const SizedBox(height: AppSizes.spacingM),
+                          Text(
+                            context.t.features.auth.appTitle,
+                            style: AppTypography.h2.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: AppSizes.spacingXS),
+                          Text(
+                            context.t.features.auth.appSubtitle,
+                            style: AppTypography.body2.copyWith(
+                              color: Colors.white.withValues(alpha: 0.85),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: AppSizes.spacingL),
-                    Text(
-                      context.t.features.auth.createAccount,
-                      textAlign: TextAlign.center,
-                      style: AppTypography.h2.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
                     ),
-                    const SizedBox(height: AppSizes.spacingL),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(AppSizes.spacingL),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            context.t.features.auth.createAccount,
+                            style: AppTypography.h2.copyWith(color: AppColors.textPrimary),
+                          ),
+                          const SizedBox(height: AppSizes.spacingL),
                     TextField(
                       controller: _nameController,
                       enabled: !authState.isLoading,
@@ -376,16 +420,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ],
                 ),
               ),
-              Positioned(
-                top: AppSizes.spacingM,
-                left: AppSizes.spacingM,
+                  ),
+                ),
+              ],
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              child: SafeArea(
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: authState.isLoading ? null : () => context.pop(),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

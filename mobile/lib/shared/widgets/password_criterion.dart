@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 
 class PasswordCriterion extends StatelessWidget {
   final String text;
@@ -10,10 +11,10 @@ class PasswordCriterion extends StatelessWidget {
     required this.isMet,
   });
 
-  static const _metIcon = Icon(Icons.check_circle, color: Colors.green, size: 16);
-  static const _unmetIcon = Icon(Icons.cancel, color: Colors.red, size: 16);
-  static const _metStyle = TextStyle(color: Colors.green, fontSize: 12);
-  static const _unmetStyle = TextStyle(color: Colors.red, fontSize: 12);
+  static const _metIcon = Icon(Icons.check_circle, color: AppColors.success, size: 16);
+  static const _unmetIcon = Icon(Icons.cancel, color: AppColors.error, size: 16);
+  static const _metStyle = TextStyle(color: AppColors.success, fontSize: 12);
+  static const _unmetStyle = TextStyle(color: AppColors.error, fontSize: 12);
 
   @override
   Widget build(BuildContext context) {

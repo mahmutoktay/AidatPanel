@@ -5,6 +5,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/settings_tab.dart';
+import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
@@ -92,24 +93,13 @@ class _ResidentDashboardScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${context.t.common.welcome}, $userName',
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
+          _ResidentWelcomeCard(userName: userName),
           const SizedBox(height: AppSizes.spacingL),
           _buildQuickActionsRow(),
           const SizedBox(height: AppSizes.spacingL),
           Text(
             context.t.common.recentTransactions,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+            style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
           ),
           const SizedBox(height: AppSizes.spacingM),
           _buildTransactionHistory(),
@@ -203,9 +193,15 @@ class _ResidentDashboardScreenState
   }
 
   Widget _buildTransactionHistory() {
-    // TODO: Backend API'den işlem geçmişini çek
-    // Şimdilik: Boş liste göster
     final transactions = <Map<String, String>>[];
+
+    if (transactions.isEmpty) {
+      return EmptyStateWidget(
+        icon: Icons.receipt_long_outlined,
+        title: context.t.common.recentTransactions,
+        subtitle: context.t.common.comingSoon,
+      );
+    }
 
     return Column(
       children: transactions
@@ -214,7 +210,7 @@ class _ResidentDashboardScreenState
               margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
               padding: const EdgeInsets.all(AppSizes.spacingM),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.borderColor),
               ),
@@ -265,4 +261,101 @@ class _ResidentDashboardScreenState
     );
   }
 
+}
+
+class _ResidentWelcomeCard extends StatelessWidget {
+  final String userName;
+
+  const _ResidentWelcomeCard({required this.userName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.spacingL),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryLight],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${context.t.common.welcome}, $userName',
+            style: AppTypography.h3.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingXS),
+          Text(
+            context.t.features.apartments.residentPanel,
+            style: AppTypography.body2.copyWith(
+              color: Colors.white.withValues(alpha: 0.85),
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingL),
+          Row(
+            children: [
+              _WelcomeMetric(
+                icon: Icons.receipt_outlined,
+                value: '—',
+                label: context.t.common.dues,
+              ),
+              Container(
+                width: 1,
+                height: 32,
+                margin: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
+                color: Colors.white.withValues(alpha: 0.3),
+              ),
+              _WelcomeMetric(
+                icon: Icons.check_circle_outline,
+                value: '—',
+                label: context.t.common.lastPayment,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WelcomeMetric extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+
+  const _WelcomeMetric({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 18),
+        const SizedBox(height: AppSizes.spacingXS),
+        Text(
+          value,
+          style: AppTypography.h3.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        Text(
+          label,
+          style: AppTypography.caption.copyWith(
+            color: Colors.white.withValues(alpha: 0.75),
+          ),
+        ),
+      ],
+    );
+  }
 }
