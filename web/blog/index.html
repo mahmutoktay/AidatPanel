@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog | AidatPanel - Apartman Yönetim Rehberi</title>
+    <meta name="description" content="Apartman ve site yönetimi hakkında ipuçları, aidat takip yöntemleri ve güncel mevzuat bilgileri.">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .blog-header { text-align: center; padding: 60px 20px; background: linear-gradient(135deg, var(--light-bg) 0%, var(--bg) 100%); border-bottom: 1px solid var(--border-light); }
+        .blog-header h1 { color: var(--primary); font-size: 42px; margin-bottom: 16px; }
+        .blog-header p { color: var(--text-sec); font-size: 20px; max-width: 600px; margin: 0 auto; }
+        
+        .blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; padding: 60px 0; }
+        
+        .blog-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 16px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
+        .blog-card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); border-color: var(--accent); }
+        
+        .blog-image { width: 100%; height: 200px; background-color: var(--light-bg); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 48px; border-bottom: 1px solid var(--border-light); }
+        
+        .blog-content { padding: 30px; flex-grow: 1; display: flex; flex-direction: column; }
+        .blog-category { color: var(--accent); font-weight: 700; font-size: 14px; text-transform: uppercase; margin-bottom: 10px; }
+        .blog-content h2 { color: var(--primary); font-size: 22px; margin: 0 0 15px 0; line-height: 1.4; }
+        .blog-content p { color: var(--text-sec); font-size: 16px; margin-bottom: 20px; flex-grow: 1; }
+        
+        .read-more { color: var(--primary); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; transition: color 0.3s ease; }
+        .read-more:hover { color: var(--accent); }
+        .read-more i { margin-left: 8px; transition: transform 0.3s ease; }
+        .read-more:hover i { transform: translateX(5px); }
+
+        body.dark-mode .blog-card { background-color: #1E293B; border-color: #334155; }
+        body.dark-mode .blog-image { background-color: #0F172A; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container nav-bar">
+            <a href="../index.html" class="logo" style="text-decoration: none;">Aidat<span>Panel</span></a>
+            
+            <div class="nav-right">
+                <a href="../fiyatlandirma.html" class="btn btn-accent btn-sm">Planlar</a>
+                <button id="theme-toggle" class="theme-btn" title="Gece/Gündüz Modu">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="blog-header">
+            <div class="container">
+                <h1>AidatPanel Blog</h1>
+                <p>Apartman ve site yönetiminde işinizi kolaylaştıracak profesyonel ipuçları, mevzuat güncellemeleri ve rehberler.</p>
+            </div>
+        </section>
+
+        <section class="container">
+            <div class="blog-grid">
+                
+                <article class="blog-card">
+                    <div class="blog-image"><i class="fas fa-building"></i></div>
+                    <div class="blog-content">
+                        <div class="blog-category">Yönetim Rehberi</div>
+                        <h2>Apartman Yöneticisinin Görevleri Nelerdir? 2026 Güncel Kılavuz</h2>
+                        <p>Yeni bir apartman yöneticisiyseniz, yasal sorumluluklarınızı ve yapmanız gerekenleri adım adım bu rehberde bulabilirsiniz.</p>
+                        <a href="javascript:void(0);" onclick="alert('Bu blog yazısı çok yakında eklenecektir. Takipte kalın!')" class="read-more">Devamını Oku <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </article>
+
+                <article class="blog-card">
+                    <div class="blog-image"><i class="fas fa-wallet"></i></div>
+                    <div class="blog-content">
+                        <div class="blog-category">Finans & Aidat</div>
+                        <h2>Ödenmeyen Aidatlar İçin Yasal Süreç Nasıl Başlatılır?</h2>
+                        <p>Komşuluk ilişkilerini bozmadan, ödenmeyen aidatlar için izlenmesi gereken hukuki adımlar ve ihtarname süreci hakkında her şey.</p>
+                        <a href="javascript:void(0);" onclick="alert('Bu blog yazısı çok yakında eklenecektir. Takipte kalın!')" class="read-more">Devamını Oku <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </article>
+
+                <article class="blog-card">
+                    <div class="blog-image"><i class="fas fa-mobile-alt"></i></div>
+                    <div class="blog-content">
+                        <div class="blog-category">Dijitalleşme</div>
+                        <h2>Apartman Yönetiminde Excel Yerine Neden Uygulama Kullanmalısınız?</h2>
+                        <p>Geleneksel defter ve Excel tablolarının yarattığı zaman kaybından kurtulup dijitalleşmenin apartmanlara sağladığı 5 büyük avantaj.</p>
+                        <a href="javascript:void(0);" onclick="alert('Bu blog yazısı çok yakında eklenecektir. Takipte kalın!')" class="read-more">Devamını Oku <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 AidatPanel. Tüm hakları saklıdır. | 
+                <a href="../kvkk.html" target="_blank">KVKK</a> | 
+                <a href="../gizlilik.html" target="_blank">Gizlilik Politikası</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        const icon = themeToggle.querySelector('i');
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            if (body.classList.contains('dark-mode')) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+                icon.style.color = '#F59E0B';
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+                icon.style.color = '';
+            }
+        });
+    </script>
+</body>
+</html>
