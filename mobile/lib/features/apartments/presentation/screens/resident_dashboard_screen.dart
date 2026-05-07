@@ -25,7 +25,12 @@ class _ResidentDashboardScreenState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    final initialIndex = ref.read(residentTabIndexProvider);
+    _tabController = TabController(
+      length: 4,
+      vsync: this,
+      initialIndex: initialIndex,
+    );
     _tabController.addListener(() {
       ref.read(residentTabIndexProvider.notifier).state = _tabController.index;
     });
@@ -260,7 +265,6 @@ class _ResidentDashboardScreenState
           .toList(),
     );
   }
-
 }
 
 class _ResidentWelcomeCard extends StatelessWidget {
@@ -308,7 +312,9 @@ class _ResidentWelcomeCard extends StatelessWidget {
               Container(
                 width: 1,
                 height: 32,
-                margin: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
+                margin: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.spacingL,
+                ),
                 color: Colors.white.withValues(alpha: 0.3),
               ),
               _WelcomeMetric(

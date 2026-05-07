@@ -179,7 +179,11 @@ class _ProfileCard extends StatelessWidget {
   const _ProfileCard({required this.user});
 
   String get _initials {
-    final parts = user.name.trim().split(' ').where((p) => p.isNotEmpty).toList();
+    final parts = user.name
+        .trim()
+        .split(' ')
+        .where((p) => p.isNotEmpty)
+        .toList();
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
@@ -328,7 +332,11 @@ class _LanguageOption extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 24),
+              Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.primary,
+                size: 24,
+              ),
           ],
         ),
       ),
@@ -571,7 +579,7 @@ class _LogoutButton extends ConsumerWidget {
                       ),
                       onPressed: () async {
                         Navigator.pop(sheetContext);
-                        await ref.read(authStateProvider.notifier).logout();
+                        await ref.read(authStateProvider.notifier).logout(ref);
                         if (!context.mounted) return;
                         context.go('/');
                       },

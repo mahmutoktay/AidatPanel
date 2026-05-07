@@ -28,7 +28,12 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    final initialIndex = ref.read(managerTabIndexProvider);
+    _tabController = TabController(
+      length: 4,
+      vsync: this,
+      initialIndex: initialIndex,
+    );
     _tabController.addListener(() {
       ref.read(managerTabIndexProvider.notifier).state = _tabController.index;
     });
@@ -102,7 +107,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     final collectionRate = buildings.isEmpty
         ? 0.0
         : buildings.map((b) => b.collectionRate).reduce((a, b) => a + b) /
-            buildings.length;
+              buildings.length;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSizes.spacingL),
@@ -541,7 +546,11 @@ class _HeroSummaryCard extends StatelessWidget {
                   label: context.t.common.totalApartments,
                 ),
               ),
-              Container(width: 1, height: 40, color: Colors.white.withValues(alpha: 0.3)),
+              Container(
+                width: 1,
+                height: 40,
+                color: Colors.white.withValues(alpha: 0.3),
+              ),
               Expanded(
                 child: _MetricItem(
                   icon: Icons.trending_up,
@@ -549,7 +558,11 @@ class _HeroSummaryCard extends StatelessWidget {
                   label: context.t.common.collection,
                 ),
               ),
-              Container(width: 1, height: 40, color: Colors.white.withValues(alpha: 0.3)),
+              Container(
+                width: 1,
+                height: 40,
+                color: Colors.white.withValues(alpha: 0.3),
+              ),
               Expanded(
                 child: _MetricItem(
                   icon: Icons.pending_outlined,
@@ -582,10 +595,7 @@ class _MetricItem extends StatelessWidget {
       children: [
         Icon(icon, color: Colors.white, size: 22),
         const SizedBox(height: 4),
-        Text(
-          value,
-          style: AppTypography.h3.copyWith(color: Colors.white),
-        ),
+        Text(value, style: AppTypography.h3.copyWith(color: Colors.white)),
         const SizedBox(height: 2),
         Text(
           label,

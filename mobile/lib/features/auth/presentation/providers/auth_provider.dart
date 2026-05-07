@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/storage/secure_storage.dart';
+import '../../../../shared/providers/navigation_provider.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
@@ -69,10 +70,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
   String _errorMessage(Object e) =>
       e is ApiException ? e.message : 'Bir hata oluştu';
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String email, String password, WidgetRef ref) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final user = await _authRepository.login(email, password);
+      // Reset tab index on successful login
+      resetManagerTabIndex(ref);
+      resetResidentTabIndex(ref);
       state = state.copyWith(
         isLoading: false,
         user: user,
@@ -104,6 +108,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String password,
     String name,
     String? phone,
+    WidgetRef ref,
   ) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -114,6 +119,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         name,
         phone,
       );
+      // Reset tab index on successful join
+      resetManagerTabIndex(ref);
+      resetResidentTabIndex(ref);
       state = state.copyWith(
         isLoading: false,
         user: user,
@@ -124,9 +132,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> logout() async {
+  Future<void> logout(WidgetRef ref) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
+      // Reset tab index on logout
+      resetManagerTabIndex(ref);
+      resetResidentTabIndex(ref);
       await _authRepository.logout();
       await Future.delayed(const Duration(milliseconds: 500));
       state = AuthState();

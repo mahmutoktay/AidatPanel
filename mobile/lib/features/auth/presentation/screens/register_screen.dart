@@ -25,7 +25,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   static final _upperRegex = RegExp(r'[A-Z]');
   static final _lowerRegex = RegExp(r'[a-z]');
   static final _digitRegex = RegExp(r'\d');
-  static final _specialRegex = RegExp(r'[@$!%*?&]');
+  static final _specialRegex = RegExp(r'[@$!%*?&.]');
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
@@ -144,7 +144,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authState = ref.watch(authStateProvider);
 
     ref.listen(authStateProvider, (previous, next) {
-      if (next.registrationSuccess && !(previous?.registrationSuccess ?? false)) {
+      if (next.registrationSuccess &&
+          !(previous?.registrationSuccess ?? false)) {
         ref
             .read(toastProvider.notifier)
             .show(
@@ -223,7 +224,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       child: Container(
                         decoration: const BoxDecoration(
                           color: AppColors.background,
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(28),
+                          ),
                         ),
                         child: SingleChildScrollView(
                           padding: const EdgeInsets.all(AppSizes.spacingL),
@@ -232,7 +235,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             children: [
                               Text(
                                 context.t.features.auth.createAccount,
-                                style: AppTypography.h2.copyWith(color: AppColors.textPrimary),
+                                style: AppTypography.h2.copyWith(
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
                               const SizedBox(height: AppSizes.spacingL),
                               TextField(
@@ -257,7 +262,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: AppSizes.spacingM),
+                              const SizedBox(
+                                height: AppSizes.spacingFieldSpacing,
+                              ),
                               TextField(
                                 controller: _emailController,
                                 enabled: !authState.isLoading,
@@ -289,11 +296,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ),
                                 onChanged: (value) {
                                   setState(() {
-                                    _emailError = InputValidators.validateEmail(value);
+                                    _emailError = InputValidators.validateEmail(
+                                      value,
+                                    );
                                   });
                                 },
                               ),
-                              const SizedBox(height: AppSizes.spacingM),
+                              const SizedBox(
+                                height: AppSizes.spacingFieldSpacing,
+                              ),
                               TextField(
                                 controller: _phoneController,
                                 enabled: !authState.isLoading,
@@ -301,8 +312,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 maxLength: 10,
                                 style: AppTypography.body1,
                                 decoration: InputDecoration(
-                                  labelText: context.t.features.auth.phoneOptional,
-                                  hintText: context.t.features.auth.phoneHintOptional,
+                                  labelText:
+                                      context.t.features.auth.phoneOptional,
+                                  hintText:
+                                      context.t.features.auth.phoneHintOptional,
                                   prefixText: '+90 ',
                                   prefixIcon: Icon(
                                     Icons.phone_outlined,
@@ -324,51 +337,100 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     ),
                                   ),
                                 ),
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
                                 onChanged: (value) {
                                   setState(() {
-                                    _phoneError = InputValidators.validatePhone(value);
+                                    _phoneError = InputValidators.validatePhone(
+                                      value,
+                                    );
                                   });
                                 },
                               ),
-                              const SizedBox(height: AppSizes.spacingM),
+                              const SizedBox(
+                                height: AppSizes.spacingFieldSpacing,
+                              ),
                               PasswordField(
                                 controller: _passwordController,
                                 obscureText: _obscurePassword,
                                 labelText: context.t.features.auth.password,
                                 hintText: context.t.features.auth.passwordHint,
                                 onToggleVisibility: () {
-                                  setState(() => _obscurePassword = !_obscurePassword);
+                                  setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  );
                                 },
                                 enabled: !authState.isLoading,
                                 onChanged: (value) {
                                   setState(() {
-                                    _hasMinLength = value.length >= 8;
+                                    _hasMinLength = value.length >= 6;
                                     _hasUpperCase = _upperRegex.hasMatch(value);
                                     _hasLowerCase = _lowerRegex.hasMatch(value);
                                     _hasNumber = _digitRegex.hasMatch(value);
-                                    _hasSpecialChar = _specialRegex.hasMatch(value);
+                                    _hasSpecialChar = _specialRegex.hasMatch(
+                                      value,
+                                    );
                                   });
                                 },
                                 focusNode: _passwordFocusNode,
                                 passwordCriteria: _passwordFocusNode.hasFocus
                                     ? Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          PasswordCriterion(text: context.t.features.auth.minLength, isMet: _hasMinLength),
-                                          PasswordCriterion(text: context.t.features.auth.hasUpperCase, isMet: _hasUpperCase),
-                                          PasswordCriterion(text: context.t.features.auth.hasLowerCase, isMet: _hasLowerCase),
-                                          PasswordCriterion(text: context.t.features.auth.hasNumber, isMet: _hasNumber),
-                                          PasswordCriterion(text: context.t.features.auth.hasSpecialChar, isMet: _hasSpecialChar),
+                                          PasswordCriterion(
+                                            text: context
+                                                .t
+                                                .features
+                                                .auth
+                                                .minLength,
+                                            isMet: _hasMinLength,
+                                          ),
+                                          PasswordCriterion(
+                                            text: context
+                                                .t
+                                                .features
+                                                .auth
+                                                .hasUpperCase,
+                                            isMet: _hasUpperCase,
+                                          ),
+                                          PasswordCriterion(
+                                            text: context
+                                                .t
+                                                .features
+                                                .auth
+                                                .hasLowerCase,
+                                            isMet: _hasLowerCase,
+                                          ),
+                                          PasswordCriterion(
+                                            text: context
+                                                .t
+                                                .features
+                                                .auth
+                                                .hasNumber,
+                                            isMet: _hasNumber,
+                                          ),
+                                          PasswordCriterion(
+                                            text: context
+                                                .t
+                                                .features
+                                                .auth
+                                                .hasSpecialChar,
+                                            isMet: _hasSpecialChar,
+                                          ),
                                         ],
                                       )
                                     : null,
                               ),
-                              const SizedBox(height: AppSizes.spacingM),
+                              const SizedBox(
+                                height: AppSizes.spacingFieldSpacing,
+                              ),
                               PasswordField(
                                 controller: _confirmPasswordController,
                                 obscureText: _obscureConfirmPassword,
-                                labelText: context.t.features.auth.confirmPassword,
+                                labelText:
+                                    context.t.features.auth.confirmPassword,
                                 hintText: context.t.features.auth.passwordHint,
                                 onToggleVisibility: () {
                                   setState(
@@ -379,16 +441,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 enabled: !authState.isLoading,
                                 onChanged: (value) {
                                   setState(() {
-                                    _passwordsMatch = value == _passwordController.text;
+                                    _passwordsMatch =
+                                        value == _passwordController.text;
                                   });
                                 },
-                                helperText: _confirmPasswordController.text.isEmpty
+                                helperText:
+                                    _confirmPasswordController.text.isEmpty
                                     ? null
                                     : _passwordsMatch
                                     ? null
-                                    : context.t.features.auth.passwordsDoNotMatch,
+                                    : context
+                                          .t
+                                          .features
+                                          .auth
+                                          .passwordsDoNotMatch,
                               ),
-                              const SizedBox(height: AppSizes.spacingM),
+                              const SizedBox(
+                                height: AppSizes.spacingFieldSpacing,
+                              ),
                               ElevatedButton(
                                 onPressed: authState.isLoading
                                     ? null
@@ -397,7 +467,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     ? const SizedBox(
                                         height: 20,
                                         width: 20,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
                                       )
                                     : Text(context.t.features.auth.register),
                               ),

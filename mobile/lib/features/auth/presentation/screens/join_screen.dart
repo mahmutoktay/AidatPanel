@@ -27,7 +27,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
   static final _upperRegex = RegExp(r'[A-Z]');
   static final _lowerRegex = RegExp(r'[a-z]');
   static final _digitRegex = RegExp(r'\d');
-  static final _specialRegex = RegExp(r'[@$!%*?&]');
+  static final _specialRegex = RegExp(r'[@$!%*?&.]');
   late TextEditingController _inviteCodeController;
   late TextEditingController _emailController;
   late TextEditingController _nameController;
@@ -80,7 +80,10 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (inviteCode.isEmpty || email.isEmpty || name.isEmpty || password.isEmpty) {
+    if (inviteCode.isEmpty ||
+        email.isEmpty ||
+        name.isEmpty ||
+        password.isEmpty) {
       ref
           .read(toastProvider.notifier)
           .show(
@@ -107,7 +110,9 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
           : emailError == 'email_invalid'
           ? context.t.validation.emailInvalid
           : context.t.validation.emailTooLong;
-      ref.read(toastProvider.notifier).show(errorMessage, type: ToastType.error);
+      ref
+          .read(toastProvider.notifier)
+          .show(errorMessage, type: ToastType.error);
       return;
     }
 
@@ -154,7 +159,14 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
 
     ref
         .read(authStateProvider.notifier)
-        .join(inviteCode, email, password, name, phone.isEmpty ? null : phone);
+        .join(
+          inviteCode,
+          email,
+          password,
+          name,
+          phone.isEmpty ? null : phone,
+          ref,
+        );
   }
 
   @override
@@ -218,7 +230,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                               size: 32,
                             ),
                           ),
-                          const SizedBox(height: AppSizes.spacingM),
+                          const SizedBox(height: AppSizes.spacingFieldSpacing),
                           Text(
                             context.t.features.auth.appTitle,
                             style: AppTypography.h2.copyWith(
@@ -240,7 +252,9 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                       child: Container(
                         decoration: const BoxDecoration(
                           color: AppColors.background,
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(28),
+                          ),
                         ),
                         child: SingleChildScrollView(
                           padding: const EdgeInsets.all(AppSizes.spacingL),
@@ -250,11 +264,13 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                               TextField(
                                 controller: _inviteCodeController,
                                 enabled: !authState.isLoading,
-                                textCapitalization: TextCapitalization.characters,
+                                textCapitalization:
+                                    TextCapitalization.characters,
                                 style: AppTypography.body1,
                                 decoration: InputDecoration(
                                   labelText: context.t.features.auth.inviteCode,
-                                  hintText: context.t.features.auth.inviteCodeHint,
+                                  hintText:
+                                      context.t.features.auth.inviteCodeHint,
                                   prefixIcon: Icon(
                                     Icons.vpn_key_outlined,
                                     size: AppSizes.iconSize,
@@ -265,22 +281,31 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                                     vertical: AppSizes.spacingM,
                                   ),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSizes.inputRadius,
+                                    ),
                                   ),
                                 ),
                                 onChanged: (value) {
                                   setState(() {
                                     if (value.isNotEmpty &&
-                                        !AuthValidators.isValidInviteCode(value)) {
-                                      _inviteCodeError =
-                                          context.t.features.auth.invalidInviteCodeFormat;
+                                        !AuthValidators.isValidInviteCode(
+                                          value,
+                                        )) {
+                                      _inviteCodeError = context
+                                          .t
+                                          .features
+                                          .auth
+                                          .invalidInviteCodeFormat;
                                     } else {
                                       _inviteCodeError = null;
                                     }
                                   });
                                 },
                               ),
-                              const SizedBox(height: AppSizes.spacingM),
+                              const SizedBox(
+                                height: AppSizes.spacingFieldSpacing,
+                              ),
                               TextField(
                                 controller: _emailController,
                                 enabled: !authState.isLoading,
@@ -298,11 +323,15 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                                     vertical: AppSizes.spacingM,
                                   ),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSizes.inputRadius,
+                                    ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: AppSizes.spacingM),
+                              const SizedBox(
+                                height: AppSizes.spacingFieldSpacing,
+                              ),
                               TextField(
                                 controller: _nameController,
                                 enabled: !authState.isLoading,
@@ -319,11 +348,15 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                                     vertical: AppSizes.spacingM,
                                   ),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSizes.inputRadius,
+                                    ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: AppSizes.spacingM),
+                              const SizedBox(
+                                height: AppSizes.spacingFieldSpacing,
+                              ),
                               TextField(
                                 controller: _phoneController,
                                 enabled: !authState.isLoading,
@@ -331,8 +364,10 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                                 maxLength: 10,
                                 style: AppTypography.body1,
                                 decoration: InputDecoration(
-                                  labelText: context.t.features.auth.phoneOptional,
-                                  hintText: context.t.features.auth.phoneHintOptional,
+                                  labelText:
+                                      context.t.features.auth.phoneOptional,
+                                  hintText:
+                                      context.t.features.auth.phoneHintOptional,
                                   prefixText: '+90 ',
                                   prefixIcon: Icon(
                                     Icons.phone_outlined,
@@ -345,60 +380,112 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                                     vertical: AppSizes.spacingM,
                                   ),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSizes.inputRadius,
+                                    ),
                                   ),
                                 ),
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
                                 onChanged: (value) {
                                   setState(() {
                                     if (value.isNotEmpty &&
                                         !AuthValidators.isValidPhone(value)) {
-                                      _phoneError =
-                                          context.t.features.auth.invalidPhoneNumber;
+                                      _phoneError = context
+                                          .t
+                                          .features
+                                          .auth
+                                          .invalidPhoneNumber;
                                     } else {
                                       _phoneError = null;
                                     }
                                   });
                                 },
                               ),
-                              const SizedBox(height: AppSizes.spacingM),
+                              const SizedBox(
+                                height: AppSizes.spacingFieldSpacing,
+                              ),
                               PasswordField(
                                 controller: _passwordController,
                                 obscureText: _obscurePassword,
                                 labelText: context.t.features.auth.password,
                                 hintText: context.t.features.auth.passwordHint,
                                 onToggleVisibility: () {
-                                  setState(() => _obscurePassword = !_obscurePassword);
+                                  setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  );
                                 },
                                 enabled: !authState.isLoading,
                                 onChanged: (value) {
                                   setState(() {
-                                    _hasMinLength = value.length >= 8;
+                                    _hasMinLength = value.length >= 6;
                                     _hasUpperCase = _upperRegex.hasMatch(value);
                                     _hasLowerCase = _lowerRegex.hasMatch(value);
                                     _hasNumber = _digitRegex.hasMatch(value);
-                                    _hasSpecialChar = _specialRegex.hasMatch(value);
+                                    _hasSpecialChar = _specialRegex.hasMatch(
+                                      value,
+                                    );
                                   });
                                 },
                                 focusNode: _passwordFocusNode,
                                 passwordCriteria: _passwordFocusNode.hasFocus
                                     ? Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          PasswordCriterion(text: context.t.features.auth.minLength, isMet: _hasMinLength),
-                                          PasswordCriterion(text: context.t.features.auth.hasUpperCase, isMet: _hasUpperCase),
-                                          PasswordCriterion(text: context.t.features.auth.hasLowerCase, isMet: _hasLowerCase),
-                                          PasswordCriterion(text: context.t.features.auth.hasNumber, isMet: _hasNumber),
-                                          PasswordCriterion(text: context.t.features.auth.hasSpecialChar, isMet: _hasSpecialChar),
+                                          PasswordCriterion(
+                                            text: context
+                                                .t
+                                                .features
+                                                .auth
+                                                .minLength,
+                                            isMet: _hasMinLength,
+                                          ),
+                                          PasswordCriterion(
+                                            text: context
+                                                .t
+                                                .features
+                                                .auth
+                                                .hasUpperCase,
+                                            isMet: _hasUpperCase,
+                                          ),
+                                          PasswordCriterion(
+                                            text: context
+                                                .t
+                                                .features
+                                                .auth
+                                                .hasLowerCase,
+                                            isMet: _hasLowerCase,
+                                          ),
+                                          PasswordCriterion(
+                                            text: context
+                                                .t
+                                                .features
+                                                .auth
+                                                .hasNumber,
+                                            isMet: _hasNumber,
+                                          ),
+                                          PasswordCriterion(
+                                            text: context
+                                                .t
+                                                .features
+                                                .auth
+                                                .hasSpecialChar,
+                                            isMet: _hasSpecialChar,
+                                          ),
                                         ],
                                       )
                                     : null,
                               ),
-                              const SizedBox(height: AppSizes.spacingM),
+                              const SizedBox(
+                                height: AppSizes.spacingFieldSpacing,
+                              ),
                               PasswordField(
                                 controller: _confirmPasswordController,
                                 obscureText: _obscureConfirmPassword,
-                                labelText: context.t.features.auth.confirmPassword,
+                                labelText:
+                                    context.t.features.auth.confirmPassword,
                                 hintText: context.t.features.auth.passwordHint,
                                 onToggleVisibility: () {
                                   setState(
@@ -409,14 +496,20 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                                 enabled: !authState.isLoading,
                                 onChanged: (value) {
                                   setState(() {
-                                    _passwordsMatch = value == _passwordController.text;
+                                    _passwordsMatch =
+                                        value == _passwordController.text;
                                   });
                                 },
-                                helperText: _confirmPasswordController.text.isEmpty
+                                helperText:
+                                    _confirmPasswordController.text.isEmpty
                                     ? null
                                     : _passwordsMatch
                                     ? null
-                                    : context.t.features.auth.passwordsDoNotMatch,
+                                    : context
+                                          .t
+                                          .features
+                                          .auth
+                                          .passwordsDoNotMatch,
                               ),
                               const SizedBox(height: AppSizes.spacingL),
                               ElevatedButton(
@@ -427,11 +520,15 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                                     ? const SizedBox(
                                         height: 20,
                                         width: 20,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
                                       )
                                     : Text(context.t.features.auth.join),
                               ),
-                              const SizedBox(height: AppSizes.spacingM),
+                              const SizedBox(
+                                height: AppSizes.spacingFieldSpacing,
+                              ),
                               AltActionButton(
                                 icon: Icons.person_add_outlined,
                                 title: context.t.features.auth.areYouManager,

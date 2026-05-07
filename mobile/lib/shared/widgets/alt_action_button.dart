@@ -28,10 +28,8 @@ class AltActionButton extends StatelessWidget {
         onTap: isEnabled ? onTap : null,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.spacingM,
-            vertical: AppSizes.spacingM,
-          ),
+          height: AppSizes.buttonHeightSecondary,
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSizes.cardRadius),
             border: Border.all(

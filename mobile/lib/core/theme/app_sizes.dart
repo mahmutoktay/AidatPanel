@@ -14,6 +14,7 @@ class AppSizes {
   static const double spacingXS = 6.0; // +2
   static const double spacingS = 12.0; // +4
   static const double spacingM = 20.0; // +4
+  static const double spacingFieldSpacing = 14.0; // TextField arası
   static const double spacingL = 28.0; // +4
   static const double spacingXL = 36.0; // +4
   static const double spacingXXL = 56.0; // +8

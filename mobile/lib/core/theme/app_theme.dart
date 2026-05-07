@@ -27,12 +27,29 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          minimumSize: const Size(double.infinity, 48),
+          minimumSize: const Size(
+            double.infinity,
+            AppSizes.buttonHeightSecondary,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
           textStyle: AppTypography.button,
           elevation: 0,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          minimumSize: const Size(
+            double.infinity,
+            AppSizes.buttonHeightSecondary,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          textStyle: AppTypography.button,
+          side: const BorderSide(color: AppColors.primary),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -44,7 +61,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 17,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: AppColors.border),
@@ -62,7 +82,9 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.error),
         ),
         hintStyle: AppTypography.body1.copyWith(color: AppColors.textDisabled),
-        labelStyle: AppTypography.label.copyWith(color: AppColors.textSecondary),
+        labelStyle: AppTypography.label.copyWith(
+          color: AppColors.textSecondary,
+        ),
       ),
       textTheme: TextTheme(
         displayLarge: AppTypography.h1.copyWith(color: AppColors.textPrimary),
@@ -70,7 +92,9 @@ class AppTheme {
         displaySmall: AppTypography.h3.copyWith(color: AppColors.textPrimary),
         bodyLarge: AppTypography.body1.copyWith(color: AppColors.textPrimary),
         bodyMedium: AppTypography.body2.copyWith(color: AppColors.textPrimary),
-        bodySmall: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+        bodySmall: AppTypography.caption.copyWith(
+          color: AppColors.textSecondary,
+        ),
         labelLarge: AppTypography.label.copyWith(color: AppColors.textPrimary),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -86,9 +110,15 @@ class AppTheme {
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return IconThemeData(color: AppColors.primary, size: AppSizes.iconSize);
+            return IconThemeData(
+              color: AppColors.primary,
+              size: AppSizes.iconSize,
+            );
           }
-          return IconThemeData(color: AppColors.textDisabled, size: AppSizes.iconSize);
+          return IconThemeData(
+            color: AppColors.textDisabled,
+            size: AppSizes.iconSize,
+          );
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {

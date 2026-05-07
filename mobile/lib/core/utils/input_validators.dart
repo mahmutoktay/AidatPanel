@@ -14,13 +14,13 @@ class InputValidators {
   static final nameRegex = RegExp(r'^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,50}$');
 
   static final passwordRegex = RegExp(
-    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
+    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{6,}$',
   );
 
   static final _pwUpperRegex = RegExp(r'[A-Z]');
   static final _pwLowerRegex = RegExp(r'[a-z]');
   static final _pwDigitRegex = RegExp(r'[0-9]');
-  static final _pwSpecialRegex = RegExp(r'[@$!%*?&]');
+  static final _pwSpecialRegex = RegExp(r'[@$!%*?&.]');
 
   /// Email validation - returns error keys for localization
   static String? validateEmail(String? value) {
@@ -60,7 +60,7 @@ class InputValidators {
       return 'password_required';
     }
 
-    if (value.length < 8) {
+    if (value.length < 6) {
       return 'password_too_short';
     }
 
@@ -212,7 +212,7 @@ class InputValidators {
   static int getPasswordStrength(String password) {
     int strength = 0;
 
-    if (password.length >= 8) strength++;
+    if (password.length >= 6) strength++;
     if (password.contains(_pwUpperRegex)) strength++;
     if (password.contains(_pwLowerRegex)) strength++;
     if (password.contains(_pwDigitRegex)) strength++;

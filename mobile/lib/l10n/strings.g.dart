@@ -6,7 +6,7 @@
 /// Locales: 2
 /// Strings: 426 (213 per locale)
 ///
-/// Built on 2026-05-07 at 13:27 UTC
+/// Built on 2026-05-07 at 18:21 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -302,7 +302,7 @@ class _StringsValidationEn {
 	String get phoneRequired => 'Phone number cannot be empty';
 	String get phoneInvalid => 'Phone number must be 10 digits';
 	String get passwordRequired => 'Password cannot be empty';
-	String get passwordTooShort => 'Password must be at least 8 characters';
+	String get passwordTooShort => 'Password must be at least 6 characters';
 	String get passwordTooLong => 'Password is too long';
 	String get passwordUppercaseRequired => 'Password must contain at least 1 uppercase letter';
 	String get passwordLowercaseRequired => 'Password must contain at least 1 lowercase letter';
@@ -404,7 +404,7 @@ class _StringsFeaturesAuthEn {
 	String get nameHint => 'Ex: Furkan Kaya';
 	String get phoneOptional => 'Phone (Optional)';
 	String get phoneHintOptional => '5XX XXX XXXX';
-	String get minLength => 'At least 8 characters';
+	String get minLength => 'At least 6 characters';
 	String get hasUpperCase => 'At least 1 uppercase letter';
 	String get hasLowerCase => 'At least 1 lowercase letter';
 	String get hasNumber => 'At least 1 number';
@@ -611,7 +611,7 @@ class _StringsValidationTr implements _StringsValidationEn {
 	@override String get phoneRequired => 'Telefon numarası boş bırakılamaz';
 	@override String get phoneInvalid => 'Telefon numarası 10 haneli olmalıdır';
 	@override String get passwordRequired => 'Şifre boş bırakılamaz';
-	@override String get passwordTooShort => 'Şifre en az 8 karakter olmalıdır';
+	@override String get passwordTooShort => 'Şifre en az 6 karakter olmalıdır';
 	@override String get passwordTooLong => 'Şifre çok uzun';
 	@override String get passwordUppercaseRequired => 'Şifrede en az 1 büyük harf olmalıdır';
 	@override String get passwordLowercaseRequired => 'Şifrede en az 1 küçük harf olmalıdır';
@@ -713,7 +713,7 @@ class _StringsFeaturesAuthTr implements _StringsFeaturesAuthEn {
 	@override String get nameHint => 'Örn: Furkan Kaya';
 	@override String get phoneOptional => 'Telefon (Opsiyonel)';
 	@override String get phoneHintOptional => '5XX XXX XXXX';
-	@override String get minLength => 'En az 8 karakter';
+	@override String get minLength => 'En az 6 karakter';
 	@override String get hasUpperCase => 'En az 1 büyük harf';
 	@override String get hasLowerCase => 'En az 1 küçük harf';
 	@override String get hasNumber => 'En az 1 rakam';
@@ -880,7 +880,7 @@ extension on Translations {
 			case 'validation.phoneRequired': return 'Phone number cannot be empty';
 			case 'validation.phoneInvalid': return 'Phone number must be 10 digits';
 			case 'validation.passwordRequired': return 'Password cannot be empty';
-			case 'validation.passwordTooShort': return 'Password must be at least 8 characters';
+			case 'validation.passwordTooShort': return 'Password must be at least 6 characters';
 			case 'validation.passwordTooLong': return 'Password is too long';
 			case 'validation.passwordUppercaseRequired': return 'Password must contain at least 1 uppercase letter';
 			case 'validation.passwordLowercaseRequired': return 'Password must contain at least 1 lowercase letter';
@@ -938,7 +938,7 @@ extension on Translations {
 			case 'features.auth.nameHint': return 'Ex: Furkan Kaya';
 			case 'features.auth.phoneOptional': return 'Phone (Optional)';
 			case 'features.auth.phoneHintOptional': return '5XX XXX XXXX';
-			case 'features.auth.minLength': return 'At least 8 characters';
+			case 'features.auth.minLength': return 'At least 6 characters';
 			case 'features.auth.hasUpperCase': return 'At least 1 uppercase letter';
 			case 'features.auth.hasLowerCase': return 'At least 1 lowercase letter';
 			case 'features.auth.hasNumber': return 'At least 1 number';
@@ -1101,7 +1101,7 @@ extension on _StringsTr {
 			case 'validation.phoneRequired': return 'Telefon numarası boş bırakılamaz';
 			case 'validation.phoneInvalid': return 'Telefon numarası 10 haneli olmalıdır';
 			case 'validation.passwordRequired': return 'Şifre boş bırakılamaz';
-			case 'validation.passwordTooShort': return 'Şifre en az 8 karakter olmalıdır';
+			case 'validation.passwordTooShort': return 'Şifre en az 6 karakter olmalıdır';
 			case 'validation.passwordTooLong': return 'Şifre çok uzun';
 			case 'validation.passwordUppercaseRequired': return 'Şifrede en az 1 büyük harf olmalıdır';
 			case 'validation.passwordLowercaseRequired': return 'Şifrede en az 1 küçük harf olmalıdır';
@@ -1159,7 +1159,7 @@ extension on _StringsTr {
 			case 'features.auth.nameHint': return 'Örn: Furkan Kaya';
 			case 'features.auth.phoneOptional': return 'Telefon (Opsiyonel)';
 			case 'features.auth.phoneHintOptional': return '5XX XXX XXXX';
-			case 'features.auth.minLength': return 'En az 8 karakter';
+			case 'features.auth.minLength': return 'En az 6 karakter';
 			case 'features.auth.hasUpperCase': return 'En az 1 büyük harf';
 			case 'features.auth.hasLowerCase': return 'En az 1 küçük harf';
 			case 'features.auth.hasNumber': return 'En az 1 rakam';
