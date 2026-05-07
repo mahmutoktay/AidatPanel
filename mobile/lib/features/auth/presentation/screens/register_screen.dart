@@ -165,23 +165,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return PopScope(
       canPop: !authState.isLoading,
       child: Scaffold(
-        backgroundColor: AppColors.background,
         body: Stack(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.primary, AppColors.primaryLight],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+            Positioned.fill(
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: SizedBox(
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: SafeArea(
+                bottom: false,
+                child: Column(
+                  children: [
+                    SizedBox(
                       height: 160,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -217,213 +219,213 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ],
                       ),
                     ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                    ),
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(AppSizes.spacingL),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            context.t.features.auth.createAccount,
-                            style: AppTypography.h2.copyWith(color: AppColors.textPrimary),
+                    Expanded(
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                        ),
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(AppSizes.spacingL),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                context.t.features.auth.createAccount,
+                                style: AppTypography.h2.copyWith(color: AppColors.textPrimary),
+                              ),
+                              const SizedBox(height: AppSizes.spacingL),
+                              TextField(
+                                controller: _nameController,
+                                enabled: !authState.isLoading,
+                                style: AppTypography.body1,
+                                decoration: InputDecoration(
+                                  labelText: context.t.features.auth.name,
+                                  hintText: context.t.features.auth.nameHint,
+                                  prefixIcon: Icon(
+                                    Icons.person_outline,
+                                    size: AppSizes.iconSize,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: AppSizes.spacingM,
+                                    vertical: AppSizes.spacingM,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      AppSizes.inputRadius,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: AppSizes.spacingM),
+                              TextField(
+                                controller: _emailController,
+                                enabled: !authState.isLoading,
+                                keyboardType: TextInputType.emailAddress,
+                                style: AppTypography.body1,
+                                decoration: InputDecoration(
+                                  labelText: context.t.features.auth.email,
+                                  hintText: context.t.features.auth.emailHint,
+                                  prefixIcon: Icon(
+                                    Icons.email_outlined,
+                                    size: AppSizes.iconSize,
+                                  ),
+                                  errorText: _emailError == null
+                                      ? null
+                                      : _emailError == 'email_required'
+                                      ? context.t.validation.emailRequired
+                                      : _emailError == 'email_invalid'
+                                      ? context.t.validation.emailInvalid
+                                      : context.t.validation.emailTooLong,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: AppSizes.spacingM,
+                                    vertical: AppSizes.spacingM,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      AppSizes.inputRadius,
+                                    ),
+                                  ),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _emailError = InputValidators.validateEmail(value);
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: AppSizes.spacingM),
+                              TextField(
+                                controller: _phoneController,
+                                enabled: !authState.isLoading,
+                                keyboardType: TextInputType.number,
+                                maxLength: 10,
+                                style: AppTypography.body1,
+                                decoration: InputDecoration(
+                                  labelText: context.t.features.auth.phoneOptional,
+                                  hintText: context.t.features.auth.phoneHintOptional,
+                                  prefixText: '+90 ',
+                                  prefixIcon: Icon(
+                                    Icons.phone_outlined,
+                                    size: AppSizes.iconSize,
+                                  ),
+                                  counterText: '',
+                                  errorText: _phoneError == null
+                                      ? null
+                                      : _phoneError == 'phone_required'
+                                      ? context.t.validation.phoneRequired
+                                      : context.t.validation.phoneInvalid,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: AppSizes.spacingM,
+                                    vertical: AppSizes.spacingM,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      AppSizes.inputRadius,
+                                    ),
+                                  ),
+                                ),
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                onChanged: (value) {
+                                  setState(() {
+                                    _phoneError = InputValidators.validatePhone(value);
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: AppSizes.spacingM),
+                              PasswordField(
+                                controller: _passwordController,
+                                obscureText: _obscurePassword,
+                                labelText: context.t.features.auth.password,
+                                hintText: context.t.features.auth.passwordHint,
+                                onToggleVisibility: () {
+                                  setState(() => _obscurePassword = !_obscurePassword);
+                                },
+                                enabled: !authState.isLoading,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _hasMinLength = value.length >= 8;
+                                    _hasUpperCase = _upperRegex.hasMatch(value);
+                                    _hasLowerCase = _lowerRegex.hasMatch(value);
+                                    _hasNumber = _digitRegex.hasMatch(value);
+                                    _hasSpecialChar = _specialRegex.hasMatch(value);
+                                  });
+                                },
+                                focusNode: _passwordFocusNode,
+                                passwordCriteria: _passwordFocusNode.hasFocus
+                                    ? Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          PasswordCriterion(text: context.t.features.auth.minLength, isMet: _hasMinLength),
+                                          PasswordCriterion(text: context.t.features.auth.hasUpperCase, isMet: _hasUpperCase),
+                                          PasswordCriterion(text: context.t.features.auth.hasLowerCase, isMet: _hasLowerCase),
+                                          PasswordCriterion(text: context.t.features.auth.hasNumber, isMet: _hasNumber),
+                                          PasswordCriterion(text: context.t.features.auth.hasSpecialChar, isMet: _hasSpecialChar),
+                                        ],
+                                      )
+                                    : null,
+                              ),
+                              const SizedBox(height: AppSizes.spacingM),
+                              PasswordField(
+                                controller: _confirmPasswordController,
+                                obscureText: _obscureConfirmPassword,
+                                labelText: context.t.features.auth.confirmPassword,
+                                hintText: context.t.features.auth.passwordHint,
+                                onToggleVisibility: () {
+                                  setState(
+                                    () => _obscureConfirmPassword =
+                                        !_obscureConfirmPassword,
+                                  );
+                                },
+                                enabled: !authState.isLoading,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _passwordsMatch = value == _passwordController.text;
+                                  });
+                                },
+                                helperText: _confirmPasswordController.text.isEmpty
+                                    ? null
+                                    : _passwordsMatch
+                                    ? null
+                                    : context.t.features.auth.passwordsDoNotMatch,
+                              ),
+                              const SizedBox(height: AppSizes.spacingM),
+                              ElevatedButton(
+                                onPressed: authState.isLoading
+                                    ? null
+                                    : () => _handleRegister(context),
+                                child: authState.isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : Text(context.t.features.auth.register),
+                              ),
+                              const SizedBox(height: AppSizes.spacingS),
+                              AltActionButton(
+                                icon: Icons.login_outlined,
+                                title: context.t.features.auth.hasAccount,
+                                onTap: authState.isLoading
+                                    ? null
+                                    : () => context.go('/login'),
+                                isEnabled: !authState.isLoading,
+                              ),
+                              const SizedBox(height: AppSizes.spacingL),
+                              Text(
+                                '${context.t.features.auth.copyright} v${AppConstants.appVersion}',
+                                textAlign: TextAlign.center,
+                                style: AppTypography.caption.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: AppSizes.spacingL),
-                    TextField(
-                      controller: _nameController,
-                      enabled: !authState.isLoading,
-                      style: AppTypography.body1,
-                      decoration: InputDecoration(
-                        labelText: context.t.features.auth.name,
-                        hintText: context.t.features.auth.nameHint,
-                        prefixIcon: Icon(
-                          Icons.person_outline,
-                          size: AppSizes.iconSize,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.spacingM,
-                          vertical: AppSizes.spacingM,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSizes.inputRadius,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    TextField(
-                      controller: _emailController,
-                      enabled: !authState.isLoading,
-                      keyboardType: TextInputType.emailAddress,
-                      style: AppTypography.body1,
-                      decoration: InputDecoration(
-                        labelText: context.t.features.auth.email,
-                        hintText: context.t.features.auth.emailHint,
-                        prefixIcon: Icon(
-                          Icons.email_outlined,
-                          size: AppSizes.iconSize,
-                        ),
-                        errorText: _emailError == null
-                            ? null
-                            : _emailError == 'email_required'
-                            ? context.t.validation.emailRequired
-                            : _emailError == 'email_invalid'
-                            ? context.t.validation.emailInvalid
-                            : context.t.validation.emailTooLong,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.spacingM,
-                          vertical: AppSizes.spacingM,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSizes.inputRadius,
-                          ),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          _emailError = InputValidators.validateEmail(value);
-                        });
-                      },
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    TextField(
-                      controller: _phoneController,
-                      enabled: !authState.isLoading,
-                      keyboardType: TextInputType.number,
-                      maxLength: 10,
-                      style: AppTypography.body1,
-                      decoration: InputDecoration(
-                        labelText: context.t.features.auth.phoneOptional,
-                        hintText: context.t.features.auth.phoneHintOptional,
-                        prefixText: '+90 ',
-                        prefixIcon: Icon(
-                          Icons.phone_outlined,
-                          size: AppSizes.iconSize,
-                        ),
-                        counterText: '',
-                        errorText: _phoneError == null
-                            ? null
-                            : _phoneError == 'phone_required'
-                            ? context.t.validation.phoneRequired
-                            : context.t.validation.phoneInvalid,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.spacingM,
-                          vertical: AppSizes.spacingM,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSizes.inputRadius,
-                          ),
-                        ),
-                      ),
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onChanged: (value) {
-                        setState(() {
-                          _phoneError = InputValidators.validatePhone(value);
-                        });
-                      },
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    PasswordField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      labelText: context.t.features.auth.password,
-                      hintText: context.t.features.auth.passwordHint,
-                      onToggleVisibility: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      },
-                      enabled: !authState.isLoading,
-                      onChanged: (value) {
-                        setState(() {
-                          _hasMinLength = value.length >= 8;
-                          _hasUpperCase = _upperRegex.hasMatch(value);
-                          _hasLowerCase = _lowerRegex.hasMatch(value);
-                          _hasNumber = _digitRegex.hasMatch(value);
-                          _hasSpecialChar = _specialRegex.hasMatch(value);
-                        });
-                      },
-                      focusNode: _passwordFocusNode,
-                      passwordCriteria: _passwordFocusNode.hasFocus
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                PasswordCriterion(text: context.t.features.auth.minLength, isMet: _hasMinLength),
-                                PasswordCriterion(text: context.t.features.auth.hasUpperCase, isMet: _hasUpperCase),
-                                PasswordCriterion(text: context.t.features.auth.hasLowerCase, isMet: _hasLowerCase),
-                                PasswordCriterion(text: context.t.features.auth.hasNumber, isMet: _hasNumber),
-                                PasswordCriterion(text: context.t.features.auth.hasSpecialChar, isMet: _hasSpecialChar),
-                              ],
-                            )
-                          : null,
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    PasswordField(
-                      controller: _confirmPasswordController,
-                      obscureText: _obscureConfirmPassword,
-                      labelText: context.t.features.auth.confirmPassword,
-                      hintText: context.t.features.auth.passwordHint,
-                      onToggleVisibility: () {
-                        setState(
-                          () => _obscureConfirmPassword =
-                              !_obscureConfirmPassword,
-                        );
-                      },
-                      enabled: !authState.isLoading,
-                      onChanged: (value) {
-                        setState(() {
-                          _passwordsMatch = value == _passwordController.text;
-                        });
-                      },
-                      helperText: _confirmPasswordController.text.isEmpty
-                          ? null
-                          : _passwordsMatch
-                          ? null
-                          : context.t.features.auth.passwordsDoNotMatch,
-                    ),
-                    const SizedBox(height: AppSizes.spacingL),
-                    ElevatedButton(
-                      onPressed: authState.isLoading
-                          ? null
-                          : () => _handleRegister(context),
-                      child: authState.isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(context.t.features.auth.register),
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    AltActionButton(
-                      icon: Icons.login_outlined,
-                      title: context.t.features.auth.hasAccount,
-                      onTap: authState.isLoading
-                          ? null
-                          : () => context.go('/login'),
-                      isEnabled: !authState.isLoading,
-                    ),
-                    const SizedBox(height: AppSizes.spacingXL),
-                    Text(
-                      '${context.t.features.auth.copyright} v${AppConstants.appVersion}',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
                 ),
               ),
-                  ),
-                ),
-              ],
             ),
             Positioned(
               top: 0,

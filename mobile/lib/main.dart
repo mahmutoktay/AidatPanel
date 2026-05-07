@@ -21,7 +21,7 @@ Future<void> initLocale() async {
       AppLocaleUtils.parseLocaleParts(languageCode: savedLanguage),
     );
   } else {
-    LocaleSettings.useDeviceLocale();
+    LocaleSettings.setLocale(AppLocale.tr);
   }
 }
 

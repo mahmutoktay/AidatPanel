@@ -263,7 +263,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: AppSizes.spacingL),
+                    const SizedBox(height: AppSizes.spacingM),
                     ElevatedButton(
                       onPressed: authState.isLoading
                           ? null
@@ -276,7 +276,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             )
                           : Text(context.t.features.auth.login),
                     ),
-                    const SizedBox(height: AppSizes.spacingM),
+                    const SizedBox(height: AppSizes.spacingS),
                     OutlinedButton.icon(
                       onPressed: authState.isLoading ? null : _toggleLoginMode,
                       icon: Icon(
@@ -294,7 +294,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         foregroundColor: AppColors.primary,
                         side: BorderSide(color: AppColors.primary, width: 1.5),
                         padding: const EdgeInsets.symmetric(
-                          vertical: AppSizes.spacingM,
+                          vertical: 10,
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppSizes.cardRadius),
@@ -304,7 +304,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: AppSizes.spacingL),
+                    const SizedBox(height: AppSizes.spacingM),
                     Row(
                       children: [
                         Expanded(
@@ -326,7 +326,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: AppSizes.spacingL),
+                    const SizedBox(height: AppSizes.spacingM),
                     AltActionButton(
                       icon: Icons.person_add_outlined,
                       title: context.t.features.auth.noAccount,
@@ -342,7 +342,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onTap: authState.isLoading ? null : () => context.push('/join'),
                       isEnabled: !authState.isLoading,
                     ),
-                    const SizedBox(height: AppSizes.spacingXL),
+                    const SizedBox(height: AppSizes.spacingL),
                     Text(
                       '${context.t.features.auth.copyright} v${AppConstants.appVersion}',
                       textAlign: TextAlign.center,

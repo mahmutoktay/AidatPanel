@@ -4,7 +4,11 @@
       "Bash(git checkout *)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(flutter run *)"
+      "Bash(flutter run *)",
+      "Bash(dart analyze *)",
+      "Bash(flutter analyze *)",
+      "PowerShell(Copy-Item \"C:\\\\AidatPanel\\\\mobile\\\\build\\\\app\\\\outputs\\\\flutter-apk\\\\app-release.apk\" \"C:\\\\AidatPanel\\\\APK\\\\v0.1.0\\\\aidatpanel-v0.1.0-release.apk\"; Get-Item \"C:\\\\AidatPanel\\\\APK\\\\v0.1.0\\\\aidatpanel-v0.1.0-release.apk\" | Select-Object Name, @{N='Size \\(MB\\)';E={[math]::Round\\($_.Length/1MB, 1\\)}})",
+      "PowerShell(Get-Item \"C:\\\\AidatPanel\\\\APK\\\\v0.1.0\\\\aidatpanel-v0.1.0-release.apk\" | Select-Object Name, @{N='Size_MB';E={[math]::Round\\($_.Length/1MB, 1\\)}}, LastWriteTime)"
     ]
   }
 }

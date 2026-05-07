@@ -181,201 +181,293 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     return PopScope(
       canPop: !authState.isLoading,
       child: Scaffold(
-        body: SafeArea(
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSizes.spacingL),
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: SafeArea(
+                bottom: false,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      context.t.features.auth.appTitle,
-                      textAlign: TextAlign.center,
-                      style: AppTypography.h1.copyWith(
-                        color: AppColors.primary,
+                    SizedBox(
+                      height: 140,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.apartment_rounded,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                          ),
+                          const SizedBox(height: AppSizes.spacingM),
+                          Text(
+                            context.t.features.auth.appTitle,
+                            style: AppTypography.h2.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: AppSizes.spacingXS),
+                          Text(
+                            context.t.features.auth.joinApartment,
+                            style: AppTypography.body2.copyWith(
+                              color: Colors.white.withValues(alpha: 0.85),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: AppSizes.spacingL),
-                    Text(
-                      context.t.features.auth.joinApartment,
-                      textAlign: TextAlign.center,
-                      style: AppTypography.h2.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSizes.spacingL),
-                    TextField(
-                      controller: _inviteCodeController,
-                      enabled: !authState.isLoading,
-                      textCapitalization: TextCapitalization.characters,
-                      decoration: InputDecoration(
-                        labelText: context.t.features.auth.inviteCode,
-                        hintText: context.t.features.auth.inviteCodeHint,
-                        prefixIcon: const Icon(Icons.vpn_key_outlined),
-                        errorText: _inviteCodeError,
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          if (value.isNotEmpty &&
-                              !AuthValidators.isValidInviteCode(value)) {
-                            _inviteCodeError =
-                                context.t.features.auth.invalidInviteCodeFormat;
-                          } else {
-                            _inviteCodeError = null;
-                          }
-                        });
-                      },
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    TextField(
-                      controller: _emailController,
-                      enabled: !authState.isLoading,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: context.t.features.auth.email,
-                        hintText: context.t.features.auth.emailHint,
-                        prefixIcon: const Icon(Icons.email_outlined),
-                      ),
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    TextField(
-                      controller: _nameController,
-                      enabled: !authState.isLoading,
-                      decoration: InputDecoration(
-                        labelText: context.t.features.auth.name,
-                        hintText: context.t.features.auth.nameHint,
-                        prefixIcon: const Icon(Icons.person_outline),
-                      ),
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    TextField(
-                      controller: _phoneController,
-                      enabled: !authState.isLoading,
-                      keyboardType: TextInputType.number,
-                      maxLength: 10,
-                      decoration: InputDecoration(
-                        labelText: context.t.features.auth.phoneOptional,
-                        hintText: context.t.features.auth.phoneHintOptional,
-                        prefixText: '+90 ',
-                        prefixIcon: const Icon(Icons.phone_outlined),
-                        counterText: '',
-                        errorText: _phoneError,
-                      ),
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onChanged: (value) {
-                        setState(() {
-                          if (value.isNotEmpty &&
-                              !AuthValidators.isValidPhone(value)) {
-                            _phoneError =
-                                context.t.features.auth.invalidPhoneNumber;
-                          } else {
-                            _phoneError = null;
-                          }
-                        });
-                      },
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    PasswordField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      labelText: context.t.features.auth.password,
-                      hintText: context.t.features.auth.passwordHint,
-                      onToggleVisibility: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      },
-                      enabled: !authState.isLoading,
-                      onChanged: (value) {
-                        setState(() {
-                          _hasMinLength = value.length >= 8;
-                          _hasUpperCase = _upperRegex.hasMatch(value);
-                          _hasLowerCase = _lowerRegex.hasMatch(value);
-                          _hasNumber = _digitRegex.hasMatch(value);
-                          _hasSpecialChar = _specialRegex.hasMatch(value);
-                        });
-                      },
-                      focusNode: _passwordFocusNode,
-                      passwordCriteria: _passwordFocusNode.hasFocus
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                PasswordCriterion(text: context.t.features.auth.minLength, isMet: _hasMinLength),
-                                PasswordCriterion(text: context.t.features.auth.hasUpperCase, isMet: _hasUpperCase),
-                                PasswordCriterion(text: context.t.features.auth.hasLowerCase, isMet: _hasLowerCase),
-                                PasswordCriterion(text: context.t.features.auth.hasNumber, isMet: _hasNumber),
-                                PasswordCriterion(text: context.t.features.auth.hasSpecialChar, isMet: _hasSpecialChar),
-                              ],
-                            )
-                          : null,
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    PasswordField(
-                      controller: _confirmPasswordController,
-                      obscureText: _obscureConfirmPassword,
-                      labelText: context.t.features.auth.confirmPassword,
-                      hintText: context.t.features.auth.passwordHint,
-                      onToggleVisibility: () {
-                        setState(
-                          () => _obscureConfirmPassword =
-                              !_obscureConfirmPassword,
-                        );
-                      },
-                      enabled: !authState.isLoading,
-                      onChanged: (value) {
-                        setState(() {
-                          _passwordsMatch = value == _passwordController.text;
-                        });
-                      },
-                      helperText: _confirmPasswordController.text.isEmpty
-                          ? null
-                          : _passwordsMatch
-                          ? null
-                          : context.t.features.auth.passwordsDoNotMatch,
-                    ),
-                    const SizedBox(height: AppSizes.spacingL),
-                    ElevatedButton(
-                      onPressed: authState.isLoading
-                          ? null
-                          : () => _handleJoin(context),
-                      child: authState.isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(context.t.features.auth.join),
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    AltActionButton(
-                      icon: Icons.person_add_outlined,
-                      title: context.t.features.auth.areYouManager,
-                      onTap: authState.isLoading
-                          ? null
-                          : () => context.push('/register'),
-                      isEnabled: !authState.isLoading,
-                    ),
-                    const SizedBox(height: AppSizes.spacingXL),
-                    Text(
-                      '${context.t.features.auth.copyright} v${AppConstants.appVersion}',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textSecondary,
+                    Expanded(
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                        ),
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(AppSizes.spacingL),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              TextField(
+                                controller: _inviteCodeController,
+                                enabled: !authState.isLoading,
+                                textCapitalization: TextCapitalization.characters,
+                                style: AppTypography.body1,
+                                decoration: InputDecoration(
+                                  labelText: context.t.features.auth.inviteCode,
+                                  hintText: context.t.features.auth.inviteCodeHint,
+                                  prefixIcon: Icon(
+                                    Icons.vpn_key_outlined,
+                                    size: AppSizes.iconSize,
+                                  ),
+                                  errorText: _inviteCodeError,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: AppSizes.spacingM,
+                                    vertical: AppSizes.spacingM,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                                  ),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value.isNotEmpty &&
+                                        !AuthValidators.isValidInviteCode(value)) {
+                                      _inviteCodeError =
+                                          context.t.features.auth.invalidInviteCodeFormat;
+                                    } else {
+                                      _inviteCodeError = null;
+                                    }
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: AppSizes.spacingM),
+                              TextField(
+                                controller: _emailController,
+                                enabled: !authState.isLoading,
+                                keyboardType: TextInputType.emailAddress,
+                                style: AppTypography.body1,
+                                decoration: InputDecoration(
+                                  labelText: context.t.features.auth.email,
+                                  hintText: context.t.features.auth.emailHint,
+                                  prefixIcon: Icon(
+                                    Icons.email_outlined,
+                                    size: AppSizes.iconSize,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: AppSizes.spacingM,
+                                    vertical: AppSizes.spacingM,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: AppSizes.spacingM),
+                              TextField(
+                                controller: _nameController,
+                                enabled: !authState.isLoading,
+                                style: AppTypography.body1,
+                                decoration: InputDecoration(
+                                  labelText: context.t.features.auth.name,
+                                  hintText: context.t.features.auth.nameHint,
+                                  prefixIcon: Icon(
+                                    Icons.person_outline,
+                                    size: AppSizes.iconSize,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: AppSizes.spacingM,
+                                    vertical: AppSizes.spacingM,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: AppSizes.spacingM),
+                              TextField(
+                                controller: _phoneController,
+                                enabled: !authState.isLoading,
+                                keyboardType: TextInputType.number,
+                                maxLength: 10,
+                                style: AppTypography.body1,
+                                decoration: InputDecoration(
+                                  labelText: context.t.features.auth.phoneOptional,
+                                  hintText: context.t.features.auth.phoneHintOptional,
+                                  prefixText: '+90 ',
+                                  prefixIcon: Icon(
+                                    Icons.phone_outlined,
+                                    size: AppSizes.iconSize,
+                                  ),
+                                  counterText: '',
+                                  errorText: _phoneError,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: AppSizes.spacingM,
+                                    vertical: AppSizes.spacingM,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                                  ),
+                                ),
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value.isNotEmpty &&
+                                        !AuthValidators.isValidPhone(value)) {
+                                      _phoneError =
+                                          context.t.features.auth.invalidPhoneNumber;
+                                    } else {
+                                      _phoneError = null;
+                                    }
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: AppSizes.spacingM),
+                              PasswordField(
+                                controller: _passwordController,
+                                obscureText: _obscurePassword,
+                                labelText: context.t.features.auth.password,
+                                hintText: context.t.features.auth.passwordHint,
+                                onToggleVisibility: () {
+                                  setState(() => _obscurePassword = !_obscurePassword);
+                                },
+                                enabled: !authState.isLoading,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _hasMinLength = value.length >= 8;
+                                    _hasUpperCase = _upperRegex.hasMatch(value);
+                                    _hasLowerCase = _lowerRegex.hasMatch(value);
+                                    _hasNumber = _digitRegex.hasMatch(value);
+                                    _hasSpecialChar = _specialRegex.hasMatch(value);
+                                  });
+                                },
+                                focusNode: _passwordFocusNode,
+                                passwordCriteria: _passwordFocusNode.hasFocus
+                                    ? Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          PasswordCriterion(text: context.t.features.auth.minLength, isMet: _hasMinLength),
+                                          PasswordCriterion(text: context.t.features.auth.hasUpperCase, isMet: _hasUpperCase),
+                                          PasswordCriterion(text: context.t.features.auth.hasLowerCase, isMet: _hasLowerCase),
+                                          PasswordCriterion(text: context.t.features.auth.hasNumber, isMet: _hasNumber),
+                                          PasswordCriterion(text: context.t.features.auth.hasSpecialChar, isMet: _hasSpecialChar),
+                                        ],
+                                      )
+                                    : null,
+                              ),
+                              const SizedBox(height: AppSizes.spacingM),
+                              PasswordField(
+                                controller: _confirmPasswordController,
+                                obscureText: _obscureConfirmPassword,
+                                labelText: context.t.features.auth.confirmPassword,
+                                hintText: context.t.features.auth.passwordHint,
+                                onToggleVisibility: () {
+                                  setState(
+                                    () => _obscureConfirmPassword =
+                                        !_obscureConfirmPassword,
+                                  );
+                                },
+                                enabled: !authState.isLoading,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _passwordsMatch = value == _passwordController.text;
+                                  });
+                                },
+                                helperText: _confirmPasswordController.text.isEmpty
+                                    ? null
+                                    : _passwordsMatch
+                                    ? null
+                                    : context.t.features.auth.passwordsDoNotMatch,
+                              ),
+                              const SizedBox(height: AppSizes.spacingL),
+                              ElevatedButton(
+                                onPressed: authState.isLoading
+                                    ? null
+                                    : () => _handleJoin(context),
+                                child: authState.isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : Text(context.t.features.auth.join),
+                              ),
+                              const SizedBox(height: AppSizes.spacingM),
+                              AltActionButton(
+                                icon: Icons.person_add_outlined,
+                                title: context.t.features.auth.areYouManager,
+                                onTap: authState.isLoading
+                                    ? null
+                                    : () => context.push('/register'),
+                                isEnabled: !authState.isLoading,
+                              ),
+                              const SizedBox(height: AppSizes.spacingXL),
+                              Text(
+                                '${context.t.features.auth.copyright} v${AppConstants.appVersion}',
+                                textAlign: TextAlign.center,
+                                style: AppTypography.caption.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              Positioned(
-                top: AppSizes.spacingM,
-                left: AppSizes.spacingM,
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              child: SafeArea(
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: authState.isLoading ? null : () => context.pop(),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
