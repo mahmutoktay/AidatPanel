@@ -169,6 +169,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         body: Stack(
           children: [
             Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Container(
                   decoration: const BoxDecoration(
