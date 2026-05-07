@@ -43,7 +43,7 @@ class SettingsTab extends ConsumerWidget {
                 icon: Icons.language,
                 title: context.t.common.language,
                 trailing: currentLocale == AppLocale.tr ? 'Türkçe' : 'English',
-                onTap: () => _showLanguageDialog(context, ref),
+                onTap: () => _showLanguageSheet(context, ref),
               ),
               const _Divider(),
               _SettingsTile(
@@ -87,7 +87,6 @@ class SettingsTab extends ConsumerWidget {
           ),
           const SizedBox(height: AppSizes.spacingXL),
 
-          // Token expiry test button (DEBUG ONLY - production'da gizli)
           if (kDebugMode) ...[
             _TokenTestButton(),
             const SizedBox(height: AppSizes.spacingM),
@@ -106,75 +105,51 @@ class SettingsTab extends ConsumerWidget {
         .show(context.t.common.comingSoon, type: ToastType.info);
   }
 
-  void _showLanguageDialog(BuildContext context, WidgetRef ref) {
+  void _showLanguageSheet(BuildContext context, WidgetRef ref) {
     final currentLocale = ref.read(localeProvider);
-    showDialog<void>(
+    showModalBottomSheet<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(context.t.common.language),
-        content: Column(
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: EdgeInsets.fromLTRB(
+          AppSizes.spacingL,
+          AppSizes.spacingS,
+          AppSizes.spacingL,
+          AppSizes.spacingL + MediaQuery.of(context).padding.bottom,
+        ),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildLanguageOption(
-              context: dialogContext,
-              title: context.t.common.turkishLanguage,
+            _BottomSheetHandle(),
+            const SizedBox(height: AppSizes.spacingM),
+            Text(context.t.common.language, style: AppTypography.h3),
+            const SizedBox(height: AppSizes.spacingL),
+            _LanguageOption(
+              flag: '🇹🇷',
+              title: 'Türkçe',
+              subtitle: 'Turkish',
               isSelected: currentLocale == AppLocale.tr,
               onTap: () {
                 changeLocale(ref, AppLocale.tr);
-                Navigator.pop(dialogContext);
+                Navigator.pop(sheetContext);
               },
             ),
-            const SizedBox(height: 12),
-            _buildLanguageOption(
-              context: dialogContext,
-              title: context.t.common.englishLanguage,
+            const SizedBox(height: AppSizes.spacingS),
+            _LanguageOption(
+              flag: '🇬🇧',
+              title: 'English',
+              subtitle: 'İngilizce',
               isSelected: currentLocale == AppLocale.en,
               onTap: () {
                 changeLocale(ref, AppLocale.en);
-                Navigator.pop(dialogContext);
+                Navigator.pop(sheetContext);
               },
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLanguageOption({
-    required BuildContext context,
-    required String title,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.borderColor,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: AppTypography.body1.copyWith(
-                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
-              ),
-            ),
-            if (isSelected)
-              Icon(Icons.check_circle, color: AppColors.primary, size: 24),
+            const SizedBox(height: AppSizes.spacingM),
           ],
         ),
       ),
@@ -216,21 +191,25 @@ class _ProfileCard extends StatelessWidget {
     final roleLabel = user.role == UserRole.manager
         ? context.t.common.manager
         : context.t.common.resident;
+
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingL),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryLight],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 32,
-            backgroundColor: AppColors.primary,
+            backgroundColor: Colors.white,
             child: Text(
               _initials,
-              style: AppTypography.h2.copyWith(color: Colors.white),
+              style: AppTypography.h2.copyWith(color: AppColors.primary),
             ),
           ),
           const SizedBox(width: AppSizes.spacingM),
@@ -240,9 +219,7 @@ class _ProfileCard extends StatelessWidget {
               children: [
                 Text(
                   user.name,
-                  style: AppTypography.h3.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
+                  style: AppTypography.h3.copyWith(color: Colors.white),
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSizes.spacingXS),
@@ -250,7 +227,7 @@ class _ProfileCard extends StatelessWidget {
                   Text(
                     user.email,
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -258,16 +235,9 @@ class _ProfileCard extends StatelessWidget {
                   Text(
                     user.phone!,
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                     overflow: TextOverflow.ellipsis,
-                  ),
-                ] else ...[
-                  Text(
-                    '-',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
                   ),
                 ],
                 const SizedBox(height: AppSizes.spacingS),
@@ -277,20 +247,106 @@ class _ProfileCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     roleLabel,
-                    style: AppTypography.label.copyWith(
-                      color: AppColors.primary,
-                    ),
+                    style: AppTypography.label.copyWith(color: Colors.white),
                   ),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LanguageOption extends StatelessWidget {
+  final String flag;
+  final String title;
+  final String subtitle;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _LanguageOption({
+    required this.flag,
+    required this.title,
+    required this.subtitle,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.spacingM,
+          vertical: AppSizes.spacingM,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.07)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Text(flag, style: const TextStyle(fontSize: 28)),
+            const SizedBox(width: AppSizes.spacingM),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTypography.body1.copyWith(
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.textPrimary,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 24),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomSheetHandle extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: AppColors.border,
+          borderRadius: BorderRadius.circular(2),
+        ),
       ),
     );
   }
@@ -408,7 +464,7 @@ class _LogoutButton extends ConsumerWidget {
       onPressed: authState.isLoading
           ? null
           : () => _confirmLogout(context, ref),
-      icon: const Icon(Icons.logout, size: AppSizes.iconSize),
+      icon: const Icon(Icons.logout_rounded, size: AppSizes.iconSize),
       label: Text(context.t.common.logout),
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.error,
@@ -424,99 +480,113 @@ class _LogoutButton extends ConsumerWidget {
   }
 
   void _confirmLogout(BuildContext context, WidgetRef ref) {
-    showDialog<void>(
+    showModalBottomSheet<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: EdgeInsets.fromLTRB(
+          AppSizes.spacingL,
+          AppSizes.spacingS,
+          AppSizes.spacingL,
+          AppSizes.spacingL + MediaQuery.of(context).padding.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.logout, color: AppColors.error),
-            const SizedBox(width: 8),
-            Text(context.t.common.logout),
+            _BottomSheetHandle(),
+            const SizedBox(height: AppSizes.spacingL),
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.logout_rounded,
+                size: 36,
+                color: AppColors.error,
+              ),
+            ),
+            const SizedBox(height: AppSizes.spacingM),
+            Text(
+              context.t.common.logout,
+              style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+            ),
+            const SizedBox(height: AppSizes.spacingS),
+            Text(
+              context.t.common.logoutConfirm,
+              style: AppTypography.body1.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSizes.spacingXL),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: AppSizes.buttonHeightSecondary,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(sheetContext),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textPrimary,
+                        side: const BorderSide(
+                          color: AppColors.borderColor,
+                          width: 1.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppSizes.buttonRadius,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        context.t.common.cancel,
+                        style: AppTypography.button.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSizes.spacingM),
+                Expanded(
+                  child: SizedBox(
+                    height: AppSizes.buttonHeightSecondary,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.error,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppSizes.buttonRadius,
+                          ),
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: () async {
+                        Navigator.pop(sheetContext);
+                        await ref.read(authStateProvider.notifier).logout();
+                        if (!context.mounted) return;
+                        context.go('/');
+                      },
+                      child: Text(
+                        context.t.common.logout,
+                        style: AppTypography.button,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
-        content: Text(
-          context.t.common.logoutConfirm,
-          style: AppTypography.body1,
-        ),
-        actionsPadding: const EdgeInsets.fromLTRB(
-          AppSizes.spacingM,
-          0,
-          AppSizes.spacingM,
-          AppSizes.spacingM,
-        ),
-        actions: [
-          _DialogActionRow(
-            confirmLabel: context.t.common.logout,
-            confirmColor: AppColors.error,
-            onConfirm: () async {
-              Navigator.pop(dialogContext);
-              await ref.read(authStateProvider.notifier).logout();
-              if (!context.mounted) return;
-              context.go('/');
-            },
-          ),
-        ],
       ),
-    );
-  }
-}
-
-class _DialogActionRow extends StatelessWidget {
-  final String confirmLabel;
-  final Color confirmColor;
-  final VoidCallback onConfirm;
-
-  const _DialogActionRow({
-    required this.confirmLabel,
-    required this.confirmColor,
-    required this.onConfirm,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: AppSizes.buttonHeightSecondary,
-            child: OutlinedButton(
-              onPressed: () => Navigator.pop(context),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: BorderSide(color: AppColors.borderColor, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(
-                context.t.common.cancel,
-                style: const TextStyle(fontSize: 16),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: AppSizes.spacingS),
-        Expanded(
-          child: SizedBox(
-            height: AppSizes.buttonHeightSecondary,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: confirmColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: onConfirm,
-              child: Text(
-                confirmLabel,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

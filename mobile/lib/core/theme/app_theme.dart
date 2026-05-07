@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
+import 'app_sizes.dart';
 import 'app_typography.dart';
 
 class AppTheme {
@@ -78,6 +79,26 @@ class AppTheme {
         unselectedItemColor: AppColors.textDisabled,
         elevation: 8,
         type: BottomNavigationBarType.fixed,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.surface,
+        indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return IconThemeData(color: AppColors.primary, size: AppSizes.iconSize);
+          }
+          return IconThemeData(color: AppColors.textDisabled, size: AppSizes.iconSize);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppTypography.caption.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w700,
+            );
+          }
+          return AppTypography.caption.copyWith(color: AppColors.textDisabled);
+        }),
       ),
     );
   }

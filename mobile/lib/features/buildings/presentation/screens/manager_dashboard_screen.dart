@@ -56,27 +56,31 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
           _buildSettingsTab(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
+      bottomNavigationBar: NavigationBar(
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
             label: context.t.common.home,
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.apartment),
+          NavigationDestination(
+            icon: const Icon(Icons.apartment_outlined),
+            selectedIcon: const Icon(Icons.apartment),
             label: context.t.common.buildings,
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.receipt),
+          NavigationDestination(
+            icon: const Icon(Icons.receipt_outlined),
+            selectedIcon: const Icon(Icons.receipt),
             label: context.t.common.dues,
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.settings),
+          NavigationDestination(
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
             label: context.t.common.settings,
           ),
         ],
-        currentIndex: ref.watch(managerTabIndexProvider),
-        onTap: (index) {
+        selectedIndex: ref.watch(managerTabIndexProvider),
+        onDestinationSelected: (index) {
           ref.read(managerTabIndexProvider.notifier).state = index;
           _tabController.animateTo(index);
         },
@@ -88,21 +92,30 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     final buildings = ref.watch(buildingsStoreProvider).value ?? [];
     final authState = ref.watch(authStateProvider);
     final userName = authState.user?.name ?? context.t.common.user;
+
+    int totalApartments = 0;
+    int occupiedApartments = 0;
+    for (final b in buildings) {
+      totalApartments += b.totalApartments;
+      occupiedApartments += b.occupiedApartments;
+    }
+    final collectionRate = buildings.isEmpty
+        ? 0.0
+        : buildings.map((b) => b.collectionRate).reduce((a, b) => a + b) /
+            buildings.length;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSizes.spacingL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${context.t.common.welcome}, $userName',
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+          _HeroSummaryCard(
+            userName: userName,
+            totalApartments: totalApartments,
+            occupiedApartments: occupiedApartments,
+            collectionRate: collectionRate,
+            pendingCount: totalApartments - occupiedApartments,
           ),
-          const SizedBox(height: AppSizes.spacingL),
-          _buildStatsRow(context),
           const SizedBox(height: AppSizes.spacingL),
           Text(
             context.t.common.managedBuildings,
@@ -389,85 +402,6 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     return const SettingsTab();
   }
 
-  Widget _buildStatsRow(BuildContext context) {
-    final buildings = ref.watch(buildingsStoreProvider).value ?? [];
-
-    // Toplam daire ve dolu daire hesapla
-    int totalApartments = 0;
-    int occupiedApartments = 0;
-    for (final building in buildings) {
-      totalApartments += building.totalApartments;
-      occupiedApartments += building.occupiedApartments;
-    }
-
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: _buildStatCard(
-              title: context.t.common.totalApartments,
-              value: totalApartments.toString(),
-              icon: Icons.apartment_outlined,
-            ),
-          ),
-          const SizedBox(width: AppSizes.spacingM),
-          Expanded(
-            child: _buildStatCard(
-              title: context.t.common.occupiedApartments,
-              value: occupiedApartments.toString(),
-              icon: Icons.check_circle_outlined,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard({
-    required String title,
-    required String value,
-    required IconData icon,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.primaryLight,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: Colors.white, size: 32),
-                const SizedBox(height: AppSizes.spacingXS),
-                Text(
-                  value,
-                  style: AppTypography.h2.copyWith(color: Colors.white),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Center(
-              child: Text(
-                title,
-                style: AppTypography.body2.copyWith(color: Colors.white70),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   List<Widget> _buildBuildingCards(List<BuildingEntity> buildings) {
     return buildings
         .map(
@@ -550,6 +484,115 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
         Text(
           label,
           style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+        ),
+      ],
+    );
+  }
+}
+
+class _HeroSummaryCard extends StatelessWidget {
+  final String userName;
+  final int totalApartments;
+  final int occupiedApartments;
+  final double collectionRate;
+  final int pendingCount;
+
+  const _HeroSummaryCard({
+    required this.userName,
+    required this.totalApartments,
+    required this.occupiedApartments,
+    required this.collectionRate,
+    required this.pendingCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.spacingL),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryLight],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${context.t.common.welcome}, $userName',
+            style: AppTypography.h3.copyWith(color: Colors.white),
+          ),
+          const SizedBox(height: AppSizes.spacingXS),
+          Text(
+            context.t.common.managedBuildings,
+            style: AppTypography.body1.copyWith(
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingL),
+          Row(
+            children: [
+              Expanded(
+                child: _MetricItem(
+                  icon: Icons.apartment_outlined,
+                  value: totalApartments.toString(),
+                  label: context.t.common.totalApartments,
+                ),
+              ),
+              Container(width: 1, height: 40, color: Colors.white.withValues(alpha: 0.3)),
+              Expanded(
+                child: _MetricItem(
+                  icon: Icons.trending_up,
+                  value: '%${collectionRate.toStringAsFixed(0)}',
+                  label: context.t.common.collection,
+                ),
+              ),
+              Container(width: 1, height: 40, color: Colors.white.withValues(alpha: 0.3)),
+              Expanded(
+                child: _MetricItem(
+                  icon: Icons.pending_outlined,
+                  value: pendingCount.toString(),
+                  label: context.t.common.pendingStatus,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricItem extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+
+  const _MetricItem({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.white, size: 22),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: AppTypography.h3.copyWith(color: Colors.white),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: AppTypography.caption.copyWith(
+            color: Colors.white.withValues(alpha: 0.8),
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
     );

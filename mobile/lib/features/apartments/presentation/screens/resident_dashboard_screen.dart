@@ -52,27 +52,31 @@ class _ResidentDashboardScreenState
           _buildSettingsTab(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
+      bottomNavigationBar: NavigationBar(
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
             label: context.t.common.home,
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.receipt),
+          NavigationDestination(
+            icon: const Icon(Icons.receipt_outlined),
+            selectedIcon: const Icon(Icons.receipt),
             label: context.t.common.dues,
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.warning_outlined),
+          NavigationDestination(
+            icon: const Icon(Icons.warning_amber_outlined),
+            selectedIcon: const Icon(Icons.warning_amber_rounded),
             label: context.t.common.issues,
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.settings),
+          NavigationDestination(
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
             label: context.t.common.settings,
           ),
         ],
-        currentIndex: ref.watch(residentTabIndexProvider),
-        onTap: (index) {
+        selectedIndex: ref.watch(residentTabIndexProvider),
+        onDestinationSelected: (index) {
           ref.read(residentTabIndexProvider.notifier).state = index;
           _tabController.animateTo(index);
         },
