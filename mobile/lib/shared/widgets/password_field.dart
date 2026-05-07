@@ -50,6 +50,10 @@ class PasswordField extends StatelessWidget {
               onPressed: onToggleVisibility,
             ),
             helperText: helperText,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 17,
+            ),
             border: borderColor != null
                 ? OutlineInputBorder(
                     borderSide: BorderSide(color: borderColor!),

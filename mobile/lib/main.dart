@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/secure_storage.dart';
@@ -9,8 +11,14 @@ import 'l10n/strings.g.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initAppInfo();
   await initLocale();
   runApp(const ProviderScope(child: MyApp()));
+}
+
+Future<void> initAppInfo() async {
+  final packageInfo = await PackageInfo.fromPlatform();
+  AppConstants.appVersion = packageInfo.version;
 }
 
 Future<void> initLocale() async {
