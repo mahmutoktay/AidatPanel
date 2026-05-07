@@ -169,7 +169,8 @@
       "expiresAt": "Son kullanma:",
       "remaining": "Kalan:",
       "activeCodeNote": "Bu kod aktifken aynı daireye yeni kod üretilemez. Yeni kod için önce mevcut kodu iptal etmelisin.",
-      "backToMainMenu": "Ana Menüye Dön"
+      "backToMainMenu": "Ana Menüye Dön",
+      "tekrarDene": "Tekrar Dene"
     },
     "auth": {
       "register": "Kaydol",

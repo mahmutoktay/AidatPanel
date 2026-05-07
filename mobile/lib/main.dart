@@ -3,17 +3,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/storage/secure_storage.dart';
 import 'shared/widgets/toast_overlay.dart';
 import 'l10n/strings.g.dart';
 
-void main() {
-  initLocale();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initLocale();
   runApp(const ProviderScope(child: MyApp()));
 }
 
-void initLocale() {
-  // Varsayılan locale'i Türkçe yap
-  LocaleSettings.setLocale(AppLocale.tr);
+Future<void> initLocale() async {
+  final storage = SecureStorage();
+  final savedLanguage = await storage.getLanguage();
+  if (savedLanguage != null) {
+    LocaleSettings.setLocale(
+      AppLocaleUtils.parseLocaleParts(languageCode: savedLanguage),
+    );
+  } else {
+    LocaleSettings.useDeviceLocale();
+  }
 }
 
 class MyApp extends StatelessWidget {

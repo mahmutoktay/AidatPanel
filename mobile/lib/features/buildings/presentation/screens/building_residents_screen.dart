@@ -42,7 +42,7 @@ class BuildingResidentsScreen extends ConsumerWidget {
                 onPressed: () => ref
                     .read(apartmentsStoreProvider(building.id).notifier)
                     .loadApartments(),
-                child: const Text('Tekrar Dene'),
+                child: Text(context.t.features.buildings.tekrarDene),
               ),
             ],
           ),

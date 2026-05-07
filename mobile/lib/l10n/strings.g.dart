@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 424 (212 per locale)
+/// Strings: 426 (213 per locale)
 ///
-/// Built on 2026-05-07 at 11:51 UTC
+/// Built on 2026-05-07 at 13:27 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -369,6 +369,7 @@ class _StringsFeaturesBuildingsEn {
 	String get remaining => 'Remaining:';
 	String get activeCodeNote => 'While this code is active, you cannot generate a new code for the same apartment. You must revoke the current code first.';
 	String get backToMainMenu => 'Back to Main Menu';
+	String get tekrarDene => 'Try Again';
 }
 
 // Path: features.auth
@@ -677,6 +678,7 @@ class _StringsFeaturesBuildingsTr implements _StringsFeaturesBuildingsEn {
 	@override String get remaining => 'Kalan:';
 	@override String get activeCodeNote => 'Bu kod aktifken aynı daireye yeni kod üretilemez. Yeni kod için önce mevcut kodu iptal etmelisin.';
 	@override String get backToMainMenu => 'Ana Menüye Dön';
+	@override String get tekrarDene => 'Tekrar Dene';
 }
 
 // Path: features.auth
@@ -910,6 +912,7 @@ extension on Translations {
 			case 'features.buildings.remaining': return 'Remaining:';
 			case 'features.buildings.activeCodeNote': return 'While this code is active, you cannot generate a new code for the same apartment. You must revoke the current code first.';
 			case 'features.buildings.backToMainMenu': return 'Back to Main Menu';
+			case 'features.buildings.tekrarDene': return 'Try Again';
 			case 'features.auth.register': return 'Register';
 			case 'features.auth.login': return 'Login';
 			case 'features.auth.join': return 'Join';
@@ -1130,6 +1133,7 @@ extension on _StringsTr {
 			case 'features.buildings.remaining': return 'Kalan:';
 			case 'features.buildings.activeCodeNote': return 'Bu kod aktifken aynı daireye yeni kod üretilemez. Yeni kod için önce mevcut kodu iptal etmelisin.';
 			case 'features.buildings.backToMainMenu': return 'Ana Menüye Dön';
+			case 'features.buildings.tekrarDene': return 'Tekrar Dene';
 			case 'features.auth.register': return 'Kaydol';
 			case 'features.auth.login': return 'Giriş Yap';
 			case 'features.auth.join': return 'Katıl';

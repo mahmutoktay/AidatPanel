@@ -1,0 +1,60 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Slang: Watch",
+      "type": "shell",
+      "command": "dart run slang watch",
+      "options": {
+        "cwd": "${workspaceFolder}/mobile"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "label": "Slang Watch"
+      }
+    },
+    {
+      "label": "Slang: Generate",
+      "type": "shell",
+      "command": "dart run slang",
+      "options": {
+        "cwd": "${workspaceFolder}/mobile"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "i18n: Sync",
+      "type": "shell",
+      "command": "dart run tool/i18n_scan.dart",
+      "options": {
+        "cwd": "${workspaceFolder}/mobile"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "i18n: Çevrilmemiş String Tara",
+      "type": "shell",
+      "command": "dart run tool/check_translations.dart",
+      "options": {
+        "cwd": "${workspaceFolder}/mobile"
+      },
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ]
+}

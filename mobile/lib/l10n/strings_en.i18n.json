@@ -169,7 +169,8 @@
       "expiresAt": "Expires at:",
       "remaining": "Remaining:",
       "activeCodeNote": "While this code is active, you cannot generate a new code for the same apartment. You must revoke the current code first.",
-      "backToMainMenu": "Back to Main Menu"
+      "backToMainMenu": "Back to Main Menu",
+      "tekrarDene": "Try Again"
     },
     "auth": {
       "register": "Register",
