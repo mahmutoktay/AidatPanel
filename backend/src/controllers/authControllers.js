@@ -2,17 +2,30 @@ import { prisma } from "../config/db.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateTokens.js";
+import { validateInviteCode } from "../services/authService.js";
 
 const register = async (req, res, next) => {
   try {
     const { name, email, phone, password } = req.body;
 
+    // Email kontrolü
     const mevcutKullanici = await prisma.user.findUnique({
       where: { email: email },
     });
     if (mevcutKullanici) {
       return res.status(409).json({ success: false, message: "Bu email adresi zaten kullanılıyor." });
     }
+
+    // Telefon numarası kontrolü (eğer verildiyse)
+    if (phone) {
+      const mevcutTelefon = await prisma.user.findUnique({
+        where: { phone: phone },
+      });
+      if (mevcutTelefon) {
+        return res.status(409).json({ success: false, message: "Bu telefon numarası zaten kullanılıyor." });
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
@@ -108,11 +121,9 @@ const refreshToken = async (req, res, next) => {
   }
 };
 
-import { validateInviteCode } from "./inviteCodeController.js";
-
 const join = async (req, res, next) => {
   try {
-    const { name, email, password, inviteCode } = req.body;
+    const { name, email, phone, password, inviteCode } = req.body;
 
     // Davet kodunu doğrula
     const inviteCodeData = await validateInviteCode(inviteCode);
@@ -128,31 +139,50 @@ const join = async (req, res, next) => {
       });
     }
 
+    // Telefon numarası kontrolü (eğer verildiyse)
+    if (phone) {
+      const mevcutTelefon = await prisma.user.findUnique({
+        where: { phone: phone },
+      });
+      if (mevcutTelefon) {
+        return res.status(409).json({
+          success: false,
+          message: "Bu telefon numarası zaten kullanılıyor."
+        });
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // RESIDENT olarak kullanıcı oluştur
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        passwordHash: hashedPassword,
-        role: "RESIDENT",
-        apartmentId: inviteCodeData.apartmentId
-      },
-    });
+    // Transaction: kullanıcı oluştur + davet kodunu kullanıldı işaretle
+    const result = await prisma.$transaction(async (tx) => {
+      // RESIDENT olarak kullanıcı oluştur
+      const user = await tx.user.create({
+        data: {
+          name,
+          email,
+          phone,
+          passwordHash: hashedPassword,
+          role: "RESIDENT",
+          apartmentId: inviteCodeData.apartmentId
+        },
+      });
 
-    // Davet kodunu kullanıldı olarak işaretle
-    await prisma.inviteCode.update({
-      where: { id: inviteCodeData.id },
-      data: {
-        usedAt: new Date(),
-        usedBy: user.id,
-      },
+      // Davet kodunu kullanıldı olarak işaretle
+      await tx.inviteCode.update({
+        where: { id: inviteCodeData.id },
+        data: {
+          usedAt: new Date(),
+          usedBy: user.id,
+        },
+      });
+
+      return user;
     });
 
     // Token'lar oluştur
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const accessToken = generateAccessToken(result);
+    const refreshToken = generateRefreshToken(result);
 
     res.status(201).json({
       success: true,
@@ -161,13 +191,14 @@ const join = async (req, res, next) => {
         accessToken,
         refreshToken,
         user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          apartmentId: user.apartmentId,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
+          id: result.id,
+          email: result.email,
+          name: result.name,
+          phone: result.phone,
+          role: result.role,
+          apartmentId: result.apartmentId,
+          createdAt: result.createdAt,
+          updatedAt: result.updatedAt,
         }
       }
     });

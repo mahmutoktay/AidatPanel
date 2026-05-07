@@ -26,9 +26,9 @@ model User {
   // Yönetici ilişkileri
   managedBuildings Building[] @relation("BuildingManager")
 
-  // Sakin ilişkileri
+  // Sakin ilişkileri (one-to-one)
   apartment   Apartment? @relation(fields: [apartmentId], references: [id])
-  apartmentId String?
+  apartmentId String? @unique
 
   // Ortak
   notifications Notification[]
@@ -77,6 +77,12 @@ model Building {
   manager           User        @relation("BuildingManager", fields: [managerId], references: [id])
   apartments        Apartment[]
   expenses          Expense[]
+  
+  // Aidat ayarları
+  dueAmount         Decimal?    @db.Decimal(10, 2)  // Daire başına aidat
+  dueDay            Int         @default(1)         // Her ayın kaçıncı günü
+  currency          String      @default("TRY")
+  
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
@@ -89,7 +95,7 @@ model Apartment {
   floor       Int?
   buildingId  String
   building    Building     @relation(fields: [buildingId], references: [id])
-  residents   User[]
+  resident    User?        // Tek sakin (one-to-one)
   dues        Due[]
   inviteCodes InviteCode[]
   tickets     Ticket[]
@@ -119,13 +125,16 @@ model Due {
   currency    String    @default("TRY")
   month       Int // 1-12
   year        Int
+  dueDate     DateTime                      // Ödeme son tarihi
   status      DueStatus @default(PENDING)
   paidAt      DateTime?
+  overdueDays Int?      @default(0)         // Kaç gün gecikti
   note        String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([apartmentId])
+  @@index([status, dueDate])
 }
 
 enum DueStatus {

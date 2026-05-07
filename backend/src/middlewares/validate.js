@@ -129,6 +129,20 @@ export const buildingSchemas = {
         .min(1, "Daire sayısı en az 1 olmalıdır")
         .max(50, "Daire sayısı en fazla 50 olabilir")
         .optional(),
+      dueAmount: z
+        .number()
+        .positive("Aidat tutarı pozitif olmalıdır")
+        .optional(),
+      dueDay: z
+        .number()
+        .int("Aidat günü tam sayı olmalıdır")
+        .min(1, "Aidat günü 1-28 arasında olmalıdır")
+        .max(28, "Aidat günü 1-28 arasında olmalıdır")
+        .optional(),
+      currency: z
+        .string()
+        .length(3, "Para birimi 3 karakter olmalıdır (TRY, USD, EUR)")
+        .optional(),
     }),
   },
 
@@ -226,6 +240,59 @@ export const apartmentSchemas = {
   generateInviteCode: {
     params: z.object({
       apartmentId: z.string().uuid("Geçerli bir daire ID'si giriniz"),
+    }),
+  },
+};
+
+/**
+ * Due (Aidat) endpoint'leri için validation schemaları
+ */
+export const dueSchemas = {
+  getByBuilding: {
+    params: z.object({
+      buildingId: z.string().uuid("Geçerli bir bina ID'si giriniz"),
+    }),
+    query: z.object({
+      month: z.string().optional(),
+      year: z.string().optional(),
+      status: z.enum(["PENDING", "PAID", "OVERDUE", "WAIVED"]).optional(),
+    }).optional(),
+  },
+
+  updateStatus: {
+    params: z.object({
+      dueId: z.string().uuid("Geçerli bir aidat ID'si giriniz"),
+    }),
+    body: z.object({
+      status: z.enum(["PENDING", "PAID", "OVERDUE", "WAIVED"], {
+        errorMap: () => ({ message: "Geçersiz durum değeri" }),
+      }),
+      paidAt: z.string().datetime().optional(),
+      note: z.string().max(500, "Not en fazla 500 karakter olabilir").optional(),
+    }),
+  },
+
+  updateAmount: {
+    params: z.object({
+      buildingId: z.string().uuid("Geçerli bir bina ID'si giriniz"),
+    }),
+    body: z.object({
+      dueAmount: z
+        .number()
+        .positive("Aidat tutarı pozitif olmalıdır"),
+      dueDay: z
+        .number()
+        .int("Aidat günü tam sayı olmalıdır")
+        .min(1, "Aidat günü 1-28 arasında olmalıdır")
+        .max(28, "Aidat günü 1-28 arasında olmalıdır")
+        .optional(),
+      currency: z
+        .string()
+        .length(3, "Para birimi 3 karakter olmalıdır")
+        .optional(),
+      affectCurrent: z
+        .boolean()
+        .optional(),
     }),
   },
 };

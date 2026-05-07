@@ -6,9 +6,9 @@ import bcrypt from "bcryptjs";
  */
 export const createUserService = async (userData) => {
   const { name, email, password, role = "MANAGER", apartmentId = null } = userData;
-  
+
   const hashedPassword = await bcrypt.hash(password, 10);
-  
+
   return await prisma.user.create({
     data: {
       name,
@@ -38,26 +38,27 @@ export const validatePassword = async (plainPassword, hashedPassword) => {
 
 /**
  * Davet kodu kontrolü servisi
+ * Hata durumunda Error throw eder (controller ile uyumlu)
  */
-export const validateInviteCode = async (inviteCode) => {
-  const code = await prisma.inviteCode.findUnique({
-    where: { code: inviteCode },
-    include: { apartment: true }
+export const validateInviteCode = async (code) => {
+  const inviteCode = await prisma.inviteCode.findUnique({
+    where: { code },
+    include: { apartment: { include: { building: true } } }
   });
 
-  if (!code) {
-    return { valid: false, error: "Geçersiz davet kodu." };
+  if (!inviteCode) {
+    throw new Error("Geçersiz davet kodu.");
   }
 
-  if (code.usedAt) {
-    return { valid: false, error: "Bu davet kodu zaten kullanılmış." };
+  if (inviteCode.usedAt) {
+    throw new Error("Bu davet kodu zaten kullanılmış.");
   }
 
-  if (code.expiresAt < new Date()) {
-    return { valid: false, error: "Davet kodunun süresi dolmuş." };
+  if (inviteCode.expiresAt < new Date()) {
+    throw new Error("Davet kodunun süresi dolmuş.");
   }
 
-  return { valid: true, code, apartment: code.apartment };
+  return inviteCode;
 };
 
 /**

@@ -1,10 +1,32 @@
 import { prisma } from "../config/db.js";
 import crypto from "crypto";
 
+/**
+ * Benzersiz davet kodu üret (collision durumunda retry)
+ */
+const generateUniqueCode = async (maxRetries = 3) => {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    // 12 karakterlik rastgele kod üret: APXX-XXXX-XXXX
+    const code = crypto.randomBytes(4).toString('hex').toUpperCase();
+    const formattedCode = `AP${code.slice(0, 2)}-${code.slice(2, 6)}-${code.slice(6, 10)}`;
+
+    // Kodun benzersiz olduğunu kontrol et
+    const existing = await prisma.inviteCode.findUnique({
+      where: { code: formattedCode }
+    });
+
+    if (!existing) {
+      return formattedCode;
+    }
+  }
+
+  throw new Error("Benzersiz davet kodu üretilemedi. Lütfen tekrar deneyin.");
+};
+
 // Davet kodu üret
 const generateInviteCode = async (req, res, next) => {
   try {
-    // api/v1/buildings/:id/aparments/:id/
+    // POST /api/v1/apartments/:apartmentId/invite-code
     const { apartmentId } = req.params;
     const managerId = req.user.id;
 
@@ -23,9 +45,8 @@ const generateInviteCode = async (req, res, next) => {
       });
     }
 
-    // 12 karakterlik rastgele kod üret
-    const code = crypto.randomBytes(6).toString('hex').toUpperCase();
-    const formattedCode = `AP${code.slice(0, 3)}-${code.slice(3, 6)}-${code.slice(6, 9)}`;
+    // Benzersiz kod üret
+    const formattedCode = await generateUniqueCode();
 
     // 7 gün geçerlilik süresi
     const expiresAt = new Date();

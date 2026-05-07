@@ -13,6 +13,7 @@ export const getApartmentsService = async (buildingId, managerId) => {
 
   return await prisma.apartment.findMany({
     where: { buildingId },
+    include: { resident: true },
     orderBy: { number: "asc" },
   });
 };
