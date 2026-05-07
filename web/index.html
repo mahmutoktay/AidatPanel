@@ -14,7 +14,8 @@
             <div class="logo">Aidat<span>Panel</span></div>
             
             <div class="nav-right">
-                <a href="javascript:void(0);" onclick="akilliIndir()" class="btn btn-accent btn-sm">Hemen İndir</a>
+                <a href="fiyatlandirma.html" class="btn btn-accent btn-sm">Planlar</a>
+                
                 <button id="theme-toggle" class="theme-btn" title="Gece/Gündüz Modu">
                     <i class="fas fa-moon"></i>
                 </button>
@@ -28,17 +29,18 @@
                 <h1>Apartman yönetimi artık çok daha sade.</h1>
                 <p>Aidatları takip etmek, giderleri raporlamak ve sakinlerle iletişim kurmak hiç bu kadar kolay olmamıştı.</p>
                 <div class="store-buttons">
-                  <a href="https://apps.apple.com/tr/app/aidatpanel/id000000000" target="_blank" class="store-link">
-                     <img src="assets/apple-icon.png" alt="App Store'dan İndirin" class="store-img">
-                     </a>
-                     <a href="https://play.google.com/store/apps/details?id=com.aidatpanel.app" target="_blank" class="store-link">
-                    <img src="assets/google-icon.png" alt="Google Play'den Alın" class="store-img">
+                    <a href="https://apps.apple.com/tr/app/aidatpanel/id000000000" target="_blank" class="store-link">
+                        <img src="assets/apple-icon.png" alt="App Store'dan İndirin" class="store-img">
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=com.aidatpanel.app" target="_blank" class="store-link">
+                        <img src="assets/google-icon.png" alt="Google Play'den Alın" class="store-img">
                     </a>
                 </div>
             </div>
         </section>
 
-        <section class="features container">
+        <section class="features container" id="ozellikler">
+            <h2 style="grid-column: 1 / -1; text-align: center; margin-bottom: 40px;">Neden AidatPanel?</h2>
             <div class="feature-card">
                 <h3>📊 Aidat Takibi</h3>
                 <p>Kimin ödeyip kimin ödemediğini tek ekranda görün, gecikenlere otomatik hatırlatıcı gönderin.</p>
@@ -53,33 +55,44 @@
             </div>
         </section>
 
-       <section class="pricing container" id="indir">
-    <h2>Size Uygun Planı Seçin</h2>
-    <div class="pricing-grid">
-        
-        <div class="price-card">
-            <h3>Aylık</h3>
-            <div class="price">99₺ <span>/ ay</span></div>
-            <p>Her ay düzenli ödeme</p>
-            <br>
-            <a href="https://wa.me/905441941443?text=Merhaba,%20AidatPanel%20Aylık%20(99₺)%20planı%20hakkında%20bilgi%20almak%20istiyorum." target="_blank" class="btn btn-primary" style="width: 100%;">
-                <i class="fab fa-whatsapp"></i> Aylık Planı Seç
-            </a>
-        </div>
+        <section class="how-it-works container" id="nasil-calisir" style="padding: 80px 0; border-top: 1px solid var(--border-light);">
+            <h2 style="text-align: center; color: var(--primary); font-size: 36px; margin-bottom: 60px;">Sadece 3 Adımda Yönetime Başlayın</h2>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 40px;">
+                <div style="flex: 1; min-width: 250px; text-align: center;">
+                    <div style="width: 80px; height: 80px; background: var(--light-bg); color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin: 0 auto 20px;">1</div>
+                    <h3 style="color: var(--primary); font-size: 22px; margin-bottom: 10px;">Hesabınızı Oluşturun</h3>
+                    <p style="color: var(--text-sec); font-size: 16px;">Uygulamayı indirin ve yöneticisi olduğunuz apartmanı saniyeler içinde sisteme ekleyin.</p>
+                </div>
+                <div style="flex: 1; min-width: 250px; text-align: center;">
+                    <div style="width: 80px; height: 80px; background: var(--light-bg); color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin: 0 auto 20px;">2</div>
+                    <h3 style="color: var(--primary); font-size: 22px; margin-bottom: 10px;">Sakinleri Davet Edin</h3>
+                    <p style="color: var(--text-sec); font-size: 16px;">Sistem üzerinden otomatik oluşan davet kodunu apartman WhatsApp grubunuzda paylaşın.</p>
+                </div>
+                <div style="flex: 1; min-width: 250px; text-align: center;">
+                    <div style="width: 80px; height: 80px; background: var(--light-bg); color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin: 0 auto 20px;">3</div>
+                    <h3 style="color: var(--primary); font-size: 22px; margin-bottom: 10px;">Oturduğunuz yerden Yönetin</h3>
+                    <p style="color: var(--text-sec); font-size: 16px;">Aidatları toplayın, duyuruları yapın ve tüm finansal süreci tek bir ekrandan yönetin.</p>
+                </div>
+            </div>
+        </section>
 
-        <div class="price-card popular">
-            <span class="badge">En Avantajlı</span>
-            <h3>Yıllık</h3>
-            <div class="price">799₺ <span>/ yıl</span></div>
-            <p>Yıllık ödemede büyük tasarruf</p>
-            <br>
-            <a href="https://wa.me/905441941443?text=Merhaba,%20AidatPanel%20Yıllık%20(799₺)%20planı%20hakkında%20bilgi%20almak%20istiyorum." target="_blank" class="btn btn-accent" style="width: 100%;">
-                <i class="fab fa-whatsapp"></i> Yıllık Planı Seç
-            </a>
-        </div>
-
-    </div>
-</section>
+        <section class="faq container" id="sss" style="padding: 80px 0; border-top: 1px solid var(--border-light);">
+            <h2 style="text-align: center; color: var(--primary); margin-bottom: 40px; font-size: 36px;">Sıkça Sorulan Sorular</h2>
+            <div style="max-width: 800px; margin: 0 auto;">
+                <details style="background: var(--white); border: 1px solid var(--border-light); border-radius: 10px; margin-bottom: 15px; padding: 20px; cursor: pointer;">
+                    <summary style="font-size: 20px; font-weight: 700; color: var(--primary); outline: none;">Ücretsiz plan ne kadar süre geçerli?</summary>
+                    <p style="margin-top: 15px; color: var(--text-sec); font-size: 18px;">Ücretsiz planımız ömür boyu geçerlidir. 5 daireye kadar olan binalarınızı hiçbir ücret ödemeden yönetmeye devam edebilirsiniz.</p>
+                </details>
+                <details style="background: var(--white); border: 1px solid var(--border-light); border-radius: 10px; margin-bottom: 15px; padding: 20px; cursor: pointer;">
+                    <summary style="font-size: 20px; font-weight: 700; color: var(--primary); outline: none;">Birden fazla apartman yönetebilir miyim?</summary>
+                    <p style="margin-top: 15px; color: var(--text-sec); font-size: 18px;">Evet, Premium plana geçtiğinizde tek bir hesaptan sınırsız sayıda apartman, site veya iş merkezi ekleyebilir ve hepsini ayrı ayrı yönetebilirsiniz.</p>
+                </details>
+                <details style="background: var(--white); border: 1px solid var(--border-light); border-radius: 10px; margin-bottom: 15px; padding: 20px; cursor: pointer;">
+                    <summary style="font-size: 20px; font-weight: 700; color: var(--primary); outline: none;">Verilerim güvende mi?</summary>
+                    <p style="margin-top: 15px; color: var(--text-sec); font-size: 18px;">Kesinlikle. Tüm verileriniz üst düzey şifreleme yöntemleriyle güvenli sunucularımızda saklanır ve düzenli olarak yedeklenir. KVKK standartlarına tam uyumluyuz.</p>
+                </details>
+            </div>
+        </section>
     </main>
 
     <footer>
@@ -92,40 +105,20 @@
     </footer>
 
     <script>
-
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
         const icon = themeToggle.querySelector('i');
 
         themeToggle.addEventListener('click', () => {
             body.classList.toggle('dark-mode');
-            
             if (body.classList.contains('dark-mode')) {
                 icon.classList.replace('fa-moon', 'fa-sun');
-                icon.style.color = '#F59E0B'; // Sarımsı güneş
+                icon.style.color = '#F59E0B';
             } else {
                 icon.classList.replace('fa-sun', 'fa-moon');
-                icon.style.color = ''; // Orijinal renk
+                icon.style.color = '';
             }
         });
-        // Cihaza göre indirme linkini belirleyen fonksiyon
-function akilliIndir() {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-
-    // iOS kontrolü (iPhone, iPad, iPod)
-    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-        window.location.href = "https://apps.apple.com/tr/app/aidatpanel/id000000000";
-    } 
-    // Android kontrolü
-    else if (/android/i.test(userAgent)) {
-        window.location.href = "https://play.google.com/store/apps/details?id=com.aidatpanel.app";
-    } 
-    // Masaüstü bilgisayar ise aşağıya, indirme bölümüne kaydır
-    else {
-        const indirBolumu = document.getElementById('indir');
-        indirBolumu.scrollIntoView({ behavior: 'smooth' });
-    }
-}
     </script>
 </body>
 </html>
