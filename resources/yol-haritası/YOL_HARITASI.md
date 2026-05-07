@@ -67,6 +67,10 @@
 - [x] 76+ API endpoint tanımlı (`api_constants.dart`)
 - [x] API Base URL: `https://api.aidatpanel.com/api/v1`
 
+### Çıkış Kapısı — Faz 0
+> Tüm görevler `[x]` + `ONAY: Furkan ✅` (`FAZ_DURUMU.md`'de)  
+> Bu iki koşul olmadan Faz 1'e geçilemez. **TAMAMLANDI ✅**
+
 ---
 
 ## FAZ 1 — Dues (Aidat) + Dashboard (AKTİF)
@@ -99,6 +103,10 @@
   - `mobile/lib/features/buildings/presentation/screens/add_building_screen.dart:56`
   - `mobile/lib/features/buildings/presentation/widgets/invite_code_result_view.dart:38`
 
+### Çıkış Kapısı — Faz 1
+> Tüm görevler `[x]` + `ONAY: Furkan ✅` (`FAZ_DURUMU.md`'de)  
+> Bu iki koşul olmadan Faz 2'ye geçilemez.
+
 ---
 
 ## FAZ 2 — Notifications + Expenses
@@ -125,6 +133,10 @@
 - [ ] Gider ekleme formu (kategori seçimi + tutar + açıklama)
 - [ ] Makbuz fotoğrafı yükleme
 
+### Çıkış Kapısı — Faz 2
+> Tüm görevler `[x]` + `ONAY: Furkan ✅` (`FAZ_DURUMU.md`'de)  
+> Bu iki koşul olmadan Faz 3'e geçilemez.
+
 ---
 
 ## FAZ 3 — Tickets + Reports
@@ -147,6 +159,10 @@
 - [ ] Aylık özet rapor ekranı (gelir/gider tablosu)
 - [ ] PDF export (planlama aşamasında — lib belirlenmeli)
 
+### Çıkış Kapısı — Faz 3
+> Tüm görevler `[x]` + `ONAY: Furkan ✅` (`FAZ_DURUMU.md`'de)  
+> Bu iki koşul olmadan Faz 4'e geçilemez.
+
 ---
 
 ## FAZ 4 — Subscription + Profile
@@ -163,6 +179,10 @@
 - [ ] `POST /me/password` — şifre değiştirme ekranı
 - [ ] `POST /me/language` — dil değiştirme (mevcut locale_provider ile entegrasyon)
 - [ ] Çıkış yapma (Logout) ekranı/butonu
+
+### Çıkış Kapısı — Faz 4
+> Tüm görevler `[x]` + `ONAY: Furkan ✅` (`FAZ_DURUMU.md`'de)  
+> Bu iki koşul olmadan Faz 5'e geçilemez.
 
 ---
 
@@ -185,6 +205,10 @@
 - [ ] Profil fotoğrafı önbellekleme
 - [ ] API response önbellekleme (uygun endpoint'ler için)
 - [ ] Büyük liste performansı (pagination implemente edilmesi)
+
+### Çıkış Kapısı — Faz 5
+> Tüm görevler `[x]` + `ONAY: Furkan ✅` (`FAZ_DURUMU.md`'de)  
+> Bu iki koşul olmadan Faz 6'ya geçilemez.
 
 ---
 
