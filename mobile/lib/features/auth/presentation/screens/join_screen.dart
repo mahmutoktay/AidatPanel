@@ -45,6 +45,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
   bool _hasNumber = false;
   bool _hasSpecialChar = false;
   bool _passwordsMatch = false;
+  DateTime? _lastBackPressAt;
 
   @override
   void initState() {
@@ -190,8 +191,27 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
       }
     });
 
-    return PopScope(
-      canPop: !authState.isLoading,
+    return WillPopScope(
+      onWillPop: () async {
+        if (authState.isLoading) return false;
+        final canPop = Navigator.of(context).canPop();
+        if (canPop) return true;
+
+        final now = DateTime.now();
+        final shouldExit = _lastBackPressAt != null &&
+            now.difference(_lastBackPressAt!) < const Duration(seconds: 2);
+        if (shouldExit) {
+          await SystemNavigator.pop();
+          return true;
+        }
+        _lastBackPressAt = now;
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(content: Text(context.t.common.pressBackAgainToExit)),
+          );
+        return false;
+      },
       child: Scaffold(
         body: Stack(
           children: [

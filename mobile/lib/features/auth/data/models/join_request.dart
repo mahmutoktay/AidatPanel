@@ -14,12 +14,13 @@ class JoinRequest {
   });
 
   Map<String, dynamic> toJson() {
+    final cleanPhone = phone?.trim();
     return {
       'inviteCode': inviteCode,
       'email': email,
       'password': password,
       'name': name,
-      'phone': phone,
+      if (cleanPhone != null && cleanPhone.isNotEmpty) 'phone': cleanPhone,
     };
   }
 }

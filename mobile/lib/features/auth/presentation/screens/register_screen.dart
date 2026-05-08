@@ -42,6 +42,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _hasNumber = false;
   bool _hasSpecialChar = false;
   bool _passwordsMatch = false;
+  DateTime? _lastBackPressAt;
 
   @override
   void initState() {
@@ -163,8 +164,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
     });
 
-    return PopScope(
-      canPop: !authState.isLoading,
+    return WillPopScope(
+      onWillPop: () async {
+        if (authState.isLoading) return false;
+        final canPop = Navigator.of(context).canPop();
+        if (canPop) return true;
+
+        final now = DateTime.now();
+        final shouldExit = _lastBackPressAt != null &&
+            now.difference(_lastBackPressAt!) < const Duration(seconds: 2);
+        if (shouldExit) {
+          await SystemNavigator.pop();
+          return true;
+        }
+        _lastBackPressAt = now;
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(content: Text(context.t.common.pressBackAgainToExit)),
+          );
+        return false;
+      },
       child: Scaffold(
         body: Stack(
           children: [
@@ -324,8 +344,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   counterText: '',
                                   errorText: _phoneError == null
                                       ? null
-                                      : _phoneError == 'phone_required'
-                                      ? context.t.validation.phoneRequired
                                       : context.t.validation.phoneInvalid,
                                   contentPadding: const EdgeInsets.symmetric(
                                     horizontal: AppSizes.spacingM,
@@ -342,9 +360,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ],
                                 onChanged: (value) {
                                   setState(() {
-                                    _phoneError = InputValidators.validatePhone(
-                                      value,
-                                    );
+                                    _phoneError = value.trim().isEmpty
+                                        ? null
+                                        : InputValidators.validatePhone(value);
                                   });
                                 },
                               ),

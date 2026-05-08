@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 426 (213 per locale)
+/// Strings: 480 (240 per locale)
 ///
-/// Built on 2026-05-07 at 18:21 UTC
+/// Built on 2026-05-08 at 15:58 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -194,6 +194,7 @@ class _StringsCommonEn {
 	String get tokenExpiryTest => 'Token Expiry Check (Test)';
 	String get tokenExpired => 'Token EXPIRED! Redirecting to login screen.';
 	String get tokenActive => 'Token active! Remaining time';
+	String get pressBackAgainToExit => 'Press back again to exit';
 	String get home => 'Home';
 	String get buildings => 'Buildings';
 	String get dues => 'Dues';
@@ -279,6 +280,32 @@ class _StringsCommonEn {
 	String get paidStatus => 'Paid';
 	String get pendingStatus => 'Pending';
 	String get overdueStatus => 'Overdue';
+	String get waivedStatus => 'Waived';
+	String get all => 'All';
+	String get status => 'Status';
+	String get month => 'Month';
+	String get monthJanuary => 'January';
+	String get monthFebruary => 'February';
+	String get monthMarch => 'March';
+	String get monthApril => 'April';
+	String get monthMay => 'May';
+	String get monthJune => 'June';
+	String get monthJuly => 'July';
+	String get monthAugust => 'August';
+	String get monthSeptember => 'September';
+	String get monthOctober => 'October';
+	String get monthNovember => 'November';
+	String get monthDecember => 'December';
+	String get year => 'Year';
+	String get note => 'Note';
+	String get bulkCreate => 'Bulk Create';
+	String get createDues => 'Create Dues';
+	String get myDuesHistory => 'My Dues History';
+	String get buildingDues => 'Building Dues';
+	String get noDuesYet => 'No dues records yet';
+	String get duesUpdated => 'Dues status updated';
+	String get duesCreated => 'Dues created';
+	String get amount => 'Amount';
 	String get perMonth => '/ month';
 	String get floorLabel => 'FLOOR';
 	String get apartmentLabel => 'APT';
@@ -503,6 +530,7 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get tokenExpiryTest => 'Token Süresi Kontrol (Test)';
 	@override String get tokenExpired => 'Token süresi DOLMUŞ! Login ekranına atılıyorsunuz.';
 	@override String get tokenActive => 'Token aktif! Kalan süre';
+	@override String get pressBackAgainToExit => 'Çıkmak için geri tuşuna tekrar basın';
 	@override String get home => 'Ana Sayfa';
 	@override String get buildings => 'Binalar';
 	@override String get dues => 'Aidatlar';
@@ -588,6 +616,32 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get paidStatus => 'Ödendi';
 	@override String get pendingStatus => 'Bekliyor';
 	@override String get overdueStatus => 'Gecikmiş';
+	@override String get waivedStatus => 'Muaf';
+	@override String get all => 'Tümü';
+	@override String get status => 'Durum';
+	@override String get month => 'Ay';
+	@override String get monthJanuary => 'Ocak';
+	@override String get monthFebruary => 'Şubat';
+	@override String get monthMarch => 'Mart';
+	@override String get monthApril => 'Nisan';
+	@override String get monthMay => 'Mayıs';
+	@override String get monthJune => 'Haziran';
+	@override String get monthJuly => 'Temmuz';
+	@override String get monthAugust => 'Ağustos';
+	@override String get monthSeptember => 'Eylül';
+	@override String get monthOctober => 'Ekim';
+	@override String get monthNovember => 'Kasım';
+	@override String get monthDecember => 'Aralık';
+	@override String get year => 'Yıl';
+	@override String get note => 'Not';
+	@override String get bulkCreate => 'Toplu Oluştur';
+	@override String get createDues => 'Aidat Oluştur';
+	@override String get myDuesHistory => 'Aidat Geçmişim';
+	@override String get buildingDues => 'Bina Aidatları';
+	@override String get noDuesYet => 'Henüz aidat kaydı yok';
+	@override String get duesUpdated => 'Aidat durumu güncellendi';
+	@override String get duesCreated => 'Aidatlar oluşturuldu';
+	@override String get amount => 'Tutar';
 	@override String get perMonth => '/ ay';
 	@override String get floorLabel => 'KAT';
 	@override String get apartmentLabel => 'DAİRE';
@@ -781,6 +835,7 @@ extension on Translations {
 			case 'common.tokenExpiryTest': return 'Token Expiry Check (Test)';
 			case 'common.tokenExpired': return 'Token EXPIRED! Redirecting to login screen.';
 			case 'common.tokenActive': return 'Token active! Remaining time';
+			case 'common.pressBackAgainToExit': return 'Press back again to exit';
 			case 'common.home': return 'Home';
 			case 'common.buildings': return 'Buildings';
 			case 'common.dues': return 'Dues';
@@ -866,6 +921,32 @@ extension on Translations {
 			case 'common.paidStatus': return 'Paid';
 			case 'common.pendingStatus': return 'Pending';
 			case 'common.overdueStatus': return 'Overdue';
+			case 'common.waivedStatus': return 'Waived';
+			case 'common.all': return 'All';
+			case 'common.status': return 'Status';
+			case 'common.month': return 'Month';
+			case 'common.monthJanuary': return 'January';
+			case 'common.monthFebruary': return 'February';
+			case 'common.monthMarch': return 'March';
+			case 'common.monthApril': return 'April';
+			case 'common.monthMay': return 'May';
+			case 'common.monthJune': return 'June';
+			case 'common.monthJuly': return 'July';
+			case 'common.monthAugust': return 'August';
+			case 'common.monthSeptember': return 'September';
+			case 'common.monthOctober': return 'October';
+			case 'common.monthNovember': return 'November';
+			case 'common.monthDecember': return 'December';
+			case 'common.year': return 'Year';
+			case 'common.note': return 'Note';
+			case 'common.bulkCreate': return 'Bulk Create';
+			case 'common.createDues': return 'Create Dues';
+			case 'common.myDuesHistory': return 'My Dues History';
+			case 'common.buildingDues': return 'Building Dues';
+			case 'common.noDuesYet': return 'No dues records yet';
+			case 'common.duesUpdated': return 'Dues status updated';
+			case 'common.duesCreated': return 'Dues created';
+			case 'common.amount': return 'Amount';
 			case 'common.perMonth': return '/ month';
 			case 'common.floorLabel': return 'FLOOR';
 			case 'common.apartmentLabel': return 'APT';
@@ -1002,6 +1083,7 @@ extension on _StringsTr {
 			case 'common.tokenExpiryTest': return 'Token Süresi Kontrol (Test)';
 			case 'common.tokenExpired': return 'Token süresi DOLMUŞ! Login ekranına atılıyorsunuz.';
 			case 'common.tokenActive': return 'Token aktif! Kalan süre';
+			case 'common.pressBackAgainToExit': return 'Çıkmak için geri tuşuna tekrar basın';
 			case 'common.home': return 'Ana Sayfa';
 			case 'common.buildings': return 'Binalar';
 			case 'common.dues': return 'Aidatlar';
@@ -1087,6 +1169,32 @@ extension on _StringsTr {
 			case 'common.paidStatus': return 'Ödendi';
 			case 'common.pendingStatus': return 'Bekliyor';
 			case 'common.overdueStatus': return 'Gecikmiş';
+			case 'common.waivedStatus': return 'Muaf';
+			case 'common.all': return 'Tümü';
+			case 'common.status': return 'Durum';
+			case 'common.month': return 'Ay';
+			case 'common.monthJanuary': return 'Ocak';
+			case 'common.monthFebruary': return 'Şubat';
+			case 'common.monthMarch': return 'Mart';
+			case 'common.monthApril': return 'Nisan';
+			case 'common.monthMay': return 'Mayıs';
+			case 'common.monthJune': return 'Haziran';
+			case 'common.monthJuly': return 'Temmuz';
+			case 'common.monthAugust': return 'Ağustos';
+			case 'common.monthSeptember': return 'Eylül';
+			case 'common.monthOctober': return 'Ekim';
+			case 'common.monthNovember': return 'Kasım';
+			case 'common.monthDecember': return 'Aralık';
+			case 'common.year': return 'Yıl';
+			case 'common.note': return 'Not';
+			case 'common.bulkCreate': return 'Toplu Oluştur';
+			case 'common.createDues': return 'Aidat Oluştur';
+			case 'common.myDuesHistory': return 'Aidat Geçmişim';
+			case 'common.buildingDues': return 'Bina Aidatları';
+			case 'common.noDuesYet': return 'Henüz aidat kaydı yok';
+			case 'common.duesUpdated': return 'Aidat durumu güncellendi';
+			case 'common.duesCreated': return 'Aidatlar oluşturuldu';
+			case 'common.amount': return 'Tutar';
 			case 'common.perMonth': return '/ ay';
 			case 'common.floorLabel': return 'KAT';
 			case 'common.apartmentLabel': return 'DAİRE';

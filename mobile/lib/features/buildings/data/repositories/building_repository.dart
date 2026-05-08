@@ -8,6 +8,9 @@ abstract class BuildingRepository {
     required String city,
     int? totalFloors,
     int? apartmentsPerFloor,
+    double? dueAmount,
+    int? dueDay,
+    String? currency,
   });
   Future<BuildingEntity> updateBuilding({
     required String id,

@@ -5,8 +5,8 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/join_screen.dart';
-import '../../features/buildings/presentation/screens/manager_dashboard_screen.dart';
-import '../../features/apartments/presentation/screens/resident_dashboard_screen.dart';
+import '../../features/dashboard/presentation/screens/manager_dashboard_screen.dart';
+import '../../features/dashboard/presentation/screens/resident_dashboard_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 
 class AppRouter {

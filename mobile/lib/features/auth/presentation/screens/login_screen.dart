@@ -26,6 +26,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   late FocusNode _identifierFocusNode;
   bool _obscurePassword = true;
   bool _usePhoneLogin = false;
+  DateTime? _lastBackPressAt;
 
   @override
   void initState() {
@@ -55,6 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _handleLogin(BuildContext context) {
+    if (ref.read(authStateProvider).isLoading) return;
     final raw = _identifierController.text.trim();
     final password = _passwordController.text;
 
@@ -126,8 +128,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     });
 
-    return Scaffold(
-      body: Container(
+    return WillPopScope(
+      onWillPop: () async {
+        final canPop = Navigator.of(context).canPop();
+        if (canPop) return true;
+
+        final now = DateTime.now();
+        final shouldExit = _lastBackPressAt != null &&
+            now.difference(_lastBackPressAt!) < const Duration(seconds: 2);
+        if (shouldExit) {
+          await SystemNavigator.pop();
+          return true;
+        }
+        _lastBackPressAt = now;
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(content: Text(context.t.common.pressBackAgainToExit)),
+          );
+        return false;
+      },
+      child: Scaffold(
+        body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [AppColors.primary, AppColors.primaryLight],
@@ -382,6 +404,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

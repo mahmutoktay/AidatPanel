@@ -8,6 +8,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
+import '../../../apartments/data/apartments_store.dart';
 import '../../data/buildings_store.dart';
 import '../../data/cities_data.dart';
 
@@ -376,10 +377,18 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
     final floors = int.tryParse(_floorsController.text.trim()) ?? 0;
     final apartmentsPerFloor =
         int.tryParse(_apartmentsPerFloorController.text.trim()) ?? 0;
+    final dueAmount = double.tryParse(_monthlyDuesController.text.trim());
 
     if (floors <= 0 || apartmentsPerFloor <= 0) {
       ref.read(toastProvider.notifier).show(
             context.t.common.floorApartmentMustBePositive,
+            type: ToastType.error,
+          );
+      return;
+    }
+    if (dueAmount == null || dueAmount <= 0) {
+      ref.read(toastProvider.notifier).show(
+            context.t.common.fillRequiredFields,
             type: ToastType.error,
           );
       return;
@@ -394,6 +403,9 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
           city: _selectedCity!,
           totalFloors: floors,
           apartmentsPerFloor: apartmentsPerFloor,
+          dueAmount: dueAmount,
+          dueDay: 1,
+          currency: 'TRY',
         );
 
     if (!mounted) return;
@@ -405,10 +417,44 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       return;
     }
 
+    await _seedApartmentsIfNeeded(
+      buildingId: id,
+      floors: floors,
+      apartmentsPerFloor: apartmentsPerFloor,
+    );
+
     ref
         .read(toastProvider.notifier)
         .show(context.t.common.buildingAddedSuccess, type: ToastType.success);
     context.pop();
+  }
+
+  Future<void> _seedApartmentsIfNeeded({
+    required String buildingId,
+    required int floors,
+    required int apartmentsPerFloor,
+  }) async {
+    // TEMP COMPATIBILITY FALLBACK:
+    // Some backend deployments create only the building record and do not seed apartments
+    // during createBuilding. In that case, we seed apartments from mobile once.
+    // Remove this fallback after backend createBuilding consistently auto-creates apartments.
+    final apartmentRepository = ref.read(apartmentRepositoryProvider);
+    final existing = await apartmentRepository.fetchApartments(buildingId);
+    if (existing.isNotEmpty) {
+      return;
+    }
+
+    for (var floor = 1; floor <= floors; floor++) {
+      for (var unit = 0; unit < apartmentsPerFloor; unit++) {
+        final letter = String.fromCharCode(65 + unit);
+        final number = '$floor$letter';
+        await apartmentRepository.createApartment(
+          buildingId: buildingId,
+          number: number,
+          floor: floor,
+        );
+      }
+    }
   }
 }
 

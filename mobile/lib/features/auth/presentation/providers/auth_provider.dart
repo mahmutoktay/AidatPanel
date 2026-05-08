@@ -71,6 +71,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       e is ApiException ? e.message : 'Bir hata oluştu';
 
   Future<void> login(String email, String password, WidgetRef ref) async {
+    if (state.isLoading) return;
     state = state.copyWith(isLoading: true, error: null);
     try {
       final user = await _authRepository.login(email, password);

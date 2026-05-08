@@ -28,6 +28,9 @@ class BuildingRepositoryImpl implements BuildingRepository {
     required String city,
     int? totalFloors,
     int? apartmentsPerFloor,
+    double? dueAmount,
+    int? dueDay,
+    String? currency,
   }) async {
     try {
       final model = await _remoteDataSource.createBuilding(
@@ -36,6 +39,9 @@ class BuildingRepositoryImpl implements BuildingRepository {
         city: city,
         totalFloors: totalFloors,
         apartmentsPerFloor: apartmentsPerFloor,
+        dueAmount: dueAmount,
+        dueDay: dueDay,
+        currency: currency,
       );
       return model.toEntity();
     } on ApiException {

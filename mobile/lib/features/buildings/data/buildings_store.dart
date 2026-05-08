@@ -42,6 +42,9 @@ class BuildingsNotifier
     required String city,
     int? totalFloors,
     int? apartmentsPerFloor,
+    double? dueAmount,
+    int? dueDay,
+    String? currency,
   }) async {
     try {
       final building = await _repository.createBuilding(
@@ -50,6 +53,9 @@ class BuildingsNotifier
         city: city,
         totalFloors: totalFloors,
         apartmentsPerFloor: apartmentsPerFloor,
+        dueAmount: dueAmount,
+        dueDay: dueDay,
+        currency: currency,
       );
       final current = state.value ?? [];
       state = AsyncValue.data([...current, building]);

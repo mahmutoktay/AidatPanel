@@ -12,11 +12,12 @@ class RegisterRequest {
   });
 
   Map<String, dynamic> toJson() {
+    final cleanPhone = phone?.trim();
     return {
       'email': email,
       'password': password,
       'name': name,
-      'phone': phone,
+      if (cleanPhone != null && cleanPhone.isNotEmpty) 'phone': cleanPhone,
     };
   }
 }

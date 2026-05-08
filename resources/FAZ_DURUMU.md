@@ -72,30 +72,30 @@
 **ONAY:** BEKLİYOR — `ONAY: Furkan ✅` satırı Furkan tarafından yazılacak
 
 ### Dues (features/dues/)
-- [ ] DueEntity tanımı (features/dues/domain/entities/due_entity.dart)
-- [ ] DueModel (JSON serialization, features/dues/data/models/)
-- [ ] DuesRemoteDataSource:
-  - [ ] GET /buildings/{id}/dues — bina aidat listesi
-  - [ ] GET /apartments/{id}/dues — daire aidat listesi
-  - [ ] GET /me/dues — sakin kendi aidatları
-  - [ ] PATCH /dues/{id}/status — ödeme durumu güncelleme
-  - [ ] POST /buildings/{id}/dues/bulk — toplu aidat oluşturma
-- [ ] DuesRepository + impl
-- [ ] DuesNotifier (Riverpod StateNotifier)
-- [ ] Yönetici: Aidat listesi ekranı (bina bazlı, ödendi/bekliyor filtresi)
-- [ ] Yönetici: Manuel ödeme durumu güncelleme
-- [ ] Yönetici: Toplu aidat oluşturma formu
-- [ ] Sakin: Kendi aidat geçmişi ekranı
+- [x] DueEntity tanımı (features/dues/domain/entities/due_entity.dart)
+- [x] DueModel (JSON serialization, features/dues/data/models/)
+- [x] DuesRemoteDataSource:
+  - [x] GET /buildings/{id}/dues — bina aidat listesi
+  - [x] GET /apartments/{id}/dues — daire aidat listesi
+  - [x] GET /me/dues — sakin kendi aidatları
+  - [x] PATCH /dues/{id}/status — ödeme durumu güncelleme
+  - [x] POST /buildings/{id}/dues/bulk — toplu aidat oluşturma
+- [x] DuesRepository + impl
+- [x] DuesNotifier (Riverpod StateNotifier)
+- [x] Yönetici: Aidat listesi ekranı (bina bazlı, ödendi/bekliyor filtresi)
+- [x] Yönetici: Manuel ödeme durumu güncelleme
+- [x] Yönetici: Toplu aidat oluşturma formu
+- [x] Sakin: Kendi aidat geçmişi ekranı
 
 ### Dashboard (features/dashboard/)
-- [ ] Manager Dashboard'u tam ekrana taşı (şu an buildings/presentation içinde)
-- [ ] Resident Dashboard'u tam ekrana taşı (şu an apartments/presentation içinde)
-- [ ] Dashboard summary card'ları (toplam daire, ödeme oranı, gecikme sayısı)
+- [x] Manager Dashboard'u tam ekrana taşı (şu an buildings/presentation içinde)
+- [x] Resident Dashboard'u tam ekrana taşı (şu an apartments/presentation içinde)
+- [x] Dashboard summary card'ları (toplam daire, ödeme oranı, gecikme sayısı)
 
 ### Teknik Borç Temizliği
-- [ ] ListView.children → ListView.builder (invite_code_screen.dart:304)
-- [ ] ListView.children → ListView.builder (add_building_screen.dart:56)
-- [ ] ListView.children → ListView.builder (invite_code_result_view.dart:38)
+- [x] ListView.children → ListView.builder (invite_code_screen.dart:304)
+- [x] ListView.children → ListView.builder (add_building_screen.dart:56)
+- [x] ListView.children → ListView.builder (invite_code_result_view.dart:38)
 
 ### Çıkış Kapısı
 Yukarıdaki tüm `[ ]` → `[x]` olmadan ve Furkan onayı olmadan Faz 2 başlamaz.

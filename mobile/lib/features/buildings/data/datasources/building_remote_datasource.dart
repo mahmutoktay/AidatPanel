@@ -10,6 +10,9 @@ abstract class BuildingRemoteDataSource {
     required String city,
     int? totalFloors,
     int? apartmentsPerFloor,
+    double? dueAmount,
+    int? dueDay,
+    String? currency,
   });
   Future<BuildingModel> updateBuilding({
     required String id,
@@ -42,6 +45,9 @@ class BuildingRemoteDataSourceImpl implements BuildingRemoteDataSource {
     required String city,
     int? totalFloors,
     int? apartmentsPerFloor,
+    double? dueAmount,
+    int? dueDay,
+    String? currency,
   }) async {
     final body = <String, dynamic>{
       'name': name,
@@ -49,6 +55,9 @@ class BuildingRemoteDataSourceImpl implements BuildingRemoteDataSource {
       'city': city,
       'totalFloors': ?totalFloors,
       'apartmentsPerFloor': ?apartmentsPerFloor,
+      'dueAmount': ?dueAmount,
+      'dueDay': ?dueDay,
+      'currency': ?currency,
     };
     final response = await _dioClient.post(ApiConstants.buildings, data: body);
     return BuildingModel.fromJson(
