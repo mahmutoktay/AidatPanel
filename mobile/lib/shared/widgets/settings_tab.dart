@@ -581,6 +581,11 @@ class _LogoutButton extends ConsumerWidget {
                         Navigator.pop(sheetContext);
                         await ref.read(authStateProvider.notifier).logout(ref);
                         if (!context.mounted) return;
+                        ref.read(toastProvider.notifier).show(
+                              context.t.common.logoutSuccess,
+                              type: ToastType.success,
+                              duration: const Duration(seconds: 4),
+                            );
                         context.go('/');
                       },
                       child: Text(

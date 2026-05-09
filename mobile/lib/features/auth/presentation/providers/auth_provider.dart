@@ -72,7 +72,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> login(String email, String password, WidgetRef ref) async {
     if (state.isLoading) return;
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final user = await _authRepository.login(email, password);
       // Reset tab index on successful login
@@ -82,6 +82,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoading: false,
         user: user,
         isAuthenticated: true,
+        clearError: true,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: _errorMessage(e));
@@ -94,10 +95,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String name,
     String? phone,
   ) async {
-    state = state.copyWith(isLoading: true, error: null);
+    if (state.isLoading) return;
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       await _authRepository.register(email, password, name, phone);
-      state = state.copyWith(isLoading: false, registrationSuccess: true);
+      state = state.copyWith(
+        isLoading: false,
+        registrationSuccess: true,
+        clearError: true,
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: _errorMessage(e));
     }
@@ -111,7 +117,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String? phone,
     WidgetRef ref,
   ) async {
-    state = state.copyWith(isLoading: true, error: null);
+    if (state.isLoading) return;
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final user = await _authRepository.join(
         inviteCode,
@@ -127,6 +134,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoading: false,
         user: user,
         isAuthenticated: true,
+        clearError: true,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: _errorMessage(e));

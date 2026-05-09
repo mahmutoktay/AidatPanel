@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 480 (240 per locale)
+/// Strings: 484 (242 per locale)
 ///
-/// Built on 2026-05-08 at 15:58 UTC
+/// Built on 2026-05-08 at 22:10 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -175,6 +175,7 @@ class _StringsCommonEn {
 	String get join => 'Join';
 	String get confirmMessage => 'Are you sure?';
 	String get logoutConfirm => 'Are you sure you want to logout?';
+	String get logoutSuccess => 'Signed out successfully.';
 	String get account => 'Account';
 	String get changePassword => 'Change Password';
 	String get language => 'Language';
@@ -412,6 +413,7 @@ class _StringsFeaturesAuthEn {
 	String get passwordRequired => 'Password required';
 	String get errorOccurred => 'An error occurred';
 	String get registrationSuccess => 'Account created. You can now log in.';
+	String get loginSuccess => 'Signed in successfully. Welcome.';
 	String get appTitle => 'AidatPanel';
 	String get appSubtitle => 'Apartment Management System';
 	String get phone => 'Phone';
@@ -511,6 +513,7 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get join => 'Katıl';
 	@override String get confirmMessage => 'Emin misiniz?';
 	@override String get logoutConfirm => 'Çıkış yapmak istediğinize emin misiniz?';
+	@override String get logoutSuccess => 'Başarıyla çıkış yaptınız.';
 	@override String get account => 'Hesap';
 	@override String get changePassword => 'Şifre Değiştir';
 	@override String get language => 'Dil';
@@ -748,6 +751,7 @@ class _StringsFeaturesAuthTr implements _StringsFeaturesAuthEn {
 	@override String get passwordRequired => 'Şifre gerekli';
 	@override String get errorOccurred => 'Bir hata oluştu';
 	@override String get registrationSuccess => 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.';
+	@override String get loginSuccess => 'Giriş başarılı. Hoş geldiniz.';
 	@override String get appTitle => 'AidatPanel';
 	@override String get appSubtitle => 'Apartman Yönetim Sistemi';
 	@override String get phone => 'Telefon';
@@ -816,6 +820,7 @@ extension on Translations {
 			case 'common.join': return 'Join';
 			case 'common.confirmMessage': return 'Are you sure?';
 			case 'common.logoutConfirm': return 'Are you sure you want to logout?';
+			case 'common.logoutSuccess': return 'Signed out successfully.';
 			case 'common.account': return 'Account';
 			case 'common.changePassword': return 'Change Password';
 			case 'common.language': return 'Language';
@@ -1000,6 +1005,7 @@ extension on Translations {
 			case 'features.auth.passwordRequired': return 'Password required';
 			case 'features.auth.errorOccurred': return 'An error occurred';
 			case 'features.auth.registrationSuccess': return 'Account created. You can now log in.';
+			case 'features.auth.loginSuccess': return 'Signed in successfully. Welcome.';
 			case 'features.auth.appTitle': return 'AidatPanel';
 			case 'features.auth.appSubtitle': return 'Apartment Management System';
 			case 'features.auth.phone': return 'Phone';
@@ -1064,6 +1070,7 @@ extension on _StringsTr {
 			case 'common.join': return 'Katıl';
 			case 'common.confirmMessage': return 'Emin misiniz?';
 			case 'common.logoutConfirm': return 'Çıkış yapmak istediğinize emin misiniz?';
+			case 'common.logoutSuccess': return 'Başarıyla çıkış yaptınız.';
 			case 'common.account': return 'Hesap';
 			case 'common.changePassword': return 'Şifre Değiştir';
 			case 'common.language': return 'Dil';
@@ -1248,6 +1255,7 @@ extension on _StringsTr {
 			case 'features.auth.passwordRequired': return 'Şifre gerekli';
 			case 'features.auth.errorOccurred': return 'Bir hata oluştu';
 			case 'features.auth.registrationSuccess': return 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.';
+			case 'features.auth.loginSuccess': return 'Giriş başarılı. Hoş geldiniz.';
 			case 'features.auth.appTitle': return 'AidatPanel';
 			case 'features.auth.appSubtitle': return 'Apartman Yönetim Sistemi';
 			case 'features.auth.phone': return 'Telefon';

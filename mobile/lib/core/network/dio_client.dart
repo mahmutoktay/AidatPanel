@@ -105,7 +105,14 @@ class DioClient {
     DioException error,
     ErrorInterceptorHandler handler,
   ) async {
-    if (error.response?.statusCode == 401) {
+    // Wrong credentials on login/register/join also return 401. If we still have a
+    // refresh token from an old session, retrying those requests after refresh
+    // loops forever and keeps authState.isLoading stuck true.
+    final requestPath = error.requestOptions.path;
+    final isPublicAuthRequest =
+        _publicPaths.any((p) => requestPath.endsWith(p));
+
+    if (error.response?.statusCode == 401 && !isPublicAuthRequest) {
       final refreshToken = await _secureStorage.getRefreshToken();
       if (refreshToken != null) {
         try {

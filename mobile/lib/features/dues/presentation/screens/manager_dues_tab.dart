@@ -103,7 +103,8 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           ),
           const SizedBox(height: AppSizes.spacingM),
           DropdownButtonFormField<String>(
-            value: _selectedBuildingId,
+            key: ValueKey<String?>('dues_building_${_selectedBuildingId ?? 'none'}'),
+            initialValue: _selectedBuildingId,
             isExpanded: true,
             menuMaxHeight: 240,
             items: buildings
@@ -133,7 +134,8 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           ),
           const SizedBox(height: AppSizes.spacingM),
           DropdownButtonFormField<DueStatus?>(
-            value: _statusFilter,
+            key: ValueKey<String>('dues_status_${_statusFilter?.name ?? 'all'}'),
+            initialValue: _statusFilter,
             isExpanded: true,
             menuMaxHeight: 240,
             items: [
@@ -204,7 +206,8 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<int>(
-                  value: _selectedMonth,
+                  key: ValueKey<String>('dues_month_${_selectedMonth ?? 0}'),
+                  initialValue: _selectedMonth,
                   isExpanded: true,
                   menuMaxHeight: 240,
                   items: List.generate(
@@ -228,7 +231,8 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
               const SizedBox(width: AppSizes.spacingS),
               Expanded(
                 child: DropdownButtonFormField<int>(
-                  value: _selectedYear,
+                  key: ValueKey<String>('dues_year_${_selectedYear ?? 0}'),
+                  initialValue: _selectedYear,
                   isExpanded: true,
                   menuMaxHeight: 240,
                   items: _yearOptions()
@@ -265,7 +269,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           SizedBox(
             height: AppSizes.buttonHeightSecondary,
             child: ElevatedButton(
-              onPressed: isLoading ? null : () => _createBulk(context),
+              onPressed: isLoading ? null : () => _createBulk(),
               child: Text(context.t.common.createDues),
             ),
           ),
@@ -311,7 +315,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
               ),
               PopupMenuButton<DueStatus>(
                 icon: const Icon(Icons.more_vert),
-                onSelected: (status) => _updateStatus(context, due.id, status),
+                onSelected: (status) => _updateStatus(due.id, status),
                 itemBuilder: (_) => [
                   PopupMenuItem(
                     value: DueStatus.paid,
@@ -356,7 +360,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     );
   }
 
-  Future<void> _createBulk(BuildContext context) async {
+  Future<void> _createBulk() async {
     if (_selectedBuildingId == null) return;
     final amount = double.tryParse(_amountController.text.trim());
     final month = _selectedMonth;
@@ -380,7 +384,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     _noteController.clear();
   }
 
-  Future<void> _updateStatus(BuildContext context, String dueId, DueStatus status) async {
+  Future<void> _updateStatus(String dueId, DueStatus status) async {
     await ref.read(duesNotifierProvider.notifier).updateStatus(
           dueId: dueId,
           status: status,

@@ -167,6 +167,7 @@ Yeni endpoint → `mobile/lib/core/constants/api_constants.dart`'a ekle, datasou
 
 ### Kod Standartları
 
+- Geri tuşu / “çift geri çıkış” / kök ekranda çıkış: **`WillPopScope` kullanılmaz** → **`PopScope`** (`canPop` + `onPopInvokedWithResult`). Güncel Android geri hattı (predictive back) ve Flutter önerisiyle uyumlu.
 - String literaller UI'a yazılamaz → `context.t.xxx` ile i18n
 - i18n eklemek için: her iki JSON dosyasını güncelle → `flutter pub run build_runner build --delete-conflicting-outputs`
 - Token'lar loglanamaz, `SharedPreferences`'a yazılamaz (sadece `SecureStorage`)

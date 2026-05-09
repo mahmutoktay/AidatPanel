@@ -38,7 +38,11 @@ class ToastNotifier extends StateNotifier<List<ToastMessage>> {
 
   int _idCounter = 0;
 
-  void show(String message, {ToastType type = ToastType.info}) {
+  void show(
+    String message, {
+    ToastType type = ToastType.info,
+    Duration? duration,
+  }) {
     final id = '${DateTime.now().millisecondsSinceEpoch}_${_idCounter++}';
     final toast = ToastMessage(id: id, message: message, type: type);
 
@@ -49,7 +53,8 @@ class ToastNotifier extends StateNotifier<List<ToastMessage>> {
       _markAsExiting(oldest.id);
     }
 
-    Future.delayed(displayDuration, () {
+    final visibleFor = duration ?? displayDuration;
+    Future.delayed(visibleFor, () {
       _markAsExiting(id);
     });
   }

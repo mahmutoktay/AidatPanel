@@ -14,7 +14,6 @@ import '../../../../shared/widgets/password_field.dart';
 import '../../../../shared/widgets/password_criterion.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../providers/auth_provider.dart';
-import '../../domain/entities/user_entity.dart';
 
 class JoinScreen extends ConsumerStatefulWidget {
   const JoinScreen({super.key});
@@ -175,13 +174,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     final authState = ref.watch(authStateProvider);
 
     ref.listen(authStateProvider, (previous, next) {
-      if (next.isAuthenticated) {
-        if (next.user?.role == UserRole.manager) {
-          context.go('/manager-dashboard');
-        } else {
-          context.go('/resident-dashboard');
-        }
-      } else if (next.error != null && next.error != previous?.error) {
+      if (next.error != null && next.error != previous?.error) {
         ref
             .read(toastProvider.notifier)
             .show(
@@ -191,26 +184,30 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
       }
     });
 
-    return WillPopScope(
-      onWillPop: () async {
-        if (authState.isLoading) return false;
-        final canPop = Navigator.of(context).canPop();
-        if (canPop) return true;
-
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (authState.isLoading) return;
+        final nav = Navigator.of(context);
+        if (nav.canPop()) {
+          nav.pop();
+          return;
+        }
         final now = DateTime.now();
         final shouldExit = _lastBackPressAt != null &&
             now.difference(_lastBackPressAt!) < const Duration(seconds: 2);
         if (shouldExit) {
           await SystemNavigator.pop();
-          return true;
+          return;
         }
         _lastBackPressAt = now;
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
             SnackBar(content: Text(context.t.common.pressBackAgainToExit)),
           );
-        return false;
       },
       child: Scaffold(
         body: Stack(

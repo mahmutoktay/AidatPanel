@@ -1,38 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/auth/presentation/screens/splash_screen.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../features/auth/domain/entities/user_entity.dart' show UserRole;
+import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/screens/join_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
-import '../../features/auth/presentation/screens/join_screen.dart';
+import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/dashboard/presentation/screens/manager_dashboard_screen.dart';
 import '../../features/dashboard/presentation/screens/resident_dashboard_screen.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
 
-class AppRouter {
-  static final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 
-  static final GoRouter router = GoRouter(
-    navigatorKey: _rootNavigatorKey,
+/// Auth state değişince [GoRouter] redirect’inin yeniden çalışması için gerekli.
+final appRouterProvider = Provider<GoRouter>((ref) {
+  final refreshListenable = ValueNotifier<int>(0);
+  ref.listen<AuthState>(authStateProvider, (previous, next) {
+    refreshListenable.value++;
+  });
+  ref.onDispose(refreshListenable.dispose);
+
+  return GoRouter(
+    navigatorKey: rootNavigatorKey,
+    refreshListenable: refreshListenable,
     initialLocation: '/',
     redirect: (context, state) {
-      // Route guard: Auth kontrolu
-      final container = ProviderScope.containerOf(context);
-      final authState = container.read(authStateProvider);
+      final authState = ref.read(authStateProvider);
+      final loc = state.matchedLocation;
 
-      final isAuthenticated = authState.isAuthenticated;
       final isAuthRoute =
-          state.matchedLocation == '/login' ||
-          state.matchedLocation == '/register' ||
-          state.matchedLocation == '/join' ||
-          state.matchedLocation == '/';
+          loc == '/login' ||
+          loc == '/register' ||
+          loc == '/join' ||
+          loc == '/';
 
-      if (!isAuthenticated && !isAuthRoute) {
+      if (!authState.isAuthenticated && !isAuthRoute) {
         return '/login';
       }
 
-      if (isAuthenticated && isAuthRoute && state.matchedLocation != '/') {
-        return null;
+      // Oturum açıkken login/register/join’de kalma — ana ekrana yönlendir
+      if (authState.isAuthenticated &&
+          authState.user != null &&
+          isAuthRoute &&
+          loc != '/') {
+        return authState.user!.role == UserRole.manager
+            ? '/manager-dashboard'
+            : '/resident-dashboard';
       }
 
       return null;
@@ -97,4 +111,4 @@ class AppRouter {
       ),
     ],
   );
-}
+});

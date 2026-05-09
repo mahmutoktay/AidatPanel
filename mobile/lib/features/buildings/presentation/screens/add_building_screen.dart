@@ -423,6 +423,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       apartmentsPerFloor: apartmentsPerFloor,
     );
 
+    if (!mounted) return;
     ref
         .read(toastProvider.notifier)
         .show(context.t.common.buildingAddedSuccess, type: ToastType.success);

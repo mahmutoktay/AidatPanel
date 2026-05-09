@@ -59,22 +59,24 @@ class _ResidentDashboardScreenState
       });
     }
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
         final now = DateTime.now();
         final shouldExit = _lastBackPressAt != null &&
             now.difference(_lastBackPressAt!) < const Duration(seconds: 2);
         if (shouldExit) {
           await SystemNavigator.pop();
-          return true;
+          return;
         }
         _lastBackPressAt = now;
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
             SnackBar(content: Text(context.t.common.pressBackAgainToExit)),
           );
-        return false;
       },
       child: Scaffold(
         appBar: AppBar(
