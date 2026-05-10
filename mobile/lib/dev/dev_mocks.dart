@@ -548,14 +548,32 @@ class MockDuesRepository implements DuesRepository {
     ];
   }
 
+  /// Tur 5 §10/3 — server-side filtre simulasyonu. Backend
+  /// `dueController.getDuesByBuildingController` aynı parametreleri
+  /// uyguladığı için mock da burada client-side filtre yapar.
   @override
-  Future<List<DueEntity>> getBuildingDues(String buildingId) async {
+  Future<List<DueEntity>> getBuildingDues(
+    String buildingId, {
+    int? month,
+    int? year,
+    DueStatus? status,
+  }) async {
     await Future.delayed(_delay);
-    return List.unmodifiable(_byBuilding[buildingId] ?? const []);
+    final source = _byBuilding[buildingId] ?? const <DueEntity>[];
+    return List.unmodifiable(source.where((d) {
+      if (month != null && d.month != month) return false;
+      if (year != null && d.year != year) return false;
+      if (status != null && d.status != status) return false;
+      return true;
+    }));
   }
 
   @override
-  Future<List<DueEntity>> getMyDues() async {
+  Future<List<DueEntity>> getMyDues({
+    int? month,
+    int? year,
+    DueStatus? status,
+  }) async {
     // Dev preview otomatik manager girişi yapıyor; sakin akışı test
     // edilmeyeceği için boş döner.
     await Future.delayed(_delay);

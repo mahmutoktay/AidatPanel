@@ -3,8 +3,24 @@ import '../../../../core/network/dio_client.dart';
 import '../models/due_model.dart';
 
 abstract class DuesRemoteDataSource {
-  Future<List<DueModel>> getBuildingDues(String buildingId);
-  Future<List<DueModel>> getMyDues();
+  /// Tur 5 / §10/3 — backend `dueController.getDuesByBuildingController`
+  /// `month`, `year`, `status` query parametrelerini destekler. Tüm
+  /// filtreler opsiyonel ve null gelirse sunucu tüm dues'u döner.
+  Future<List<DueModel>> getBuildingDues(
+    String buildingId, {
+    int? month,
+    int? year,
+    String? status,
+  });
+
+  /// Belge §7: `GET /me/dues?month=&year=&status=` — sakin tarafında
+  /// aynı filtre setini kabul eder.
+  Future<List<DueModel>> getMyDues({
+    int? month,
+    int? year,
+    String? status,
+  });
+
   Future<DueModel> updateDueStatus({
     required String buildingId,
     required String dueId,
@@ -25,9 +41,33 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
   DuesRemoteDataSourceImpl({required DioClient dioClient})
       : _dioClient = dioClient;
 
+  Map<String, dynamic>? _buildDuesQuery({
+    int? month,
+    int? year,
+    String? status,
+  }) {
+    final query = <String, dynamic>{};
+    if (month != null) query['month'] = month;
+    if (year != null) query['year'] = year;
+    if (status != null) query['status'] = status;
+    return query.isEmpty ? null : query;
+  }
+
   @override
-  Future<List<DueModel>> getBuildingDues(String buildingId) async {
-    final response = await _dioClient.get(ApiConstants.buildingDues(buildingId));
+  Future<List<DueModel>> getBuildingDues(
+    String buildingId, {
+    int? month,
+    int? year,
+    String? status,
+  }) async {
+    final response = await _dioClient.get(
+      ApiConstants.buildingDues(buildingId),
+      queryParameters: _buildDuesQuery(
+        month: month,
+        year: year,
+        status: status,
+      ),
+    );
     final data = response.data['data'] as List;
     return data
         .map((json) => DueModel.fromJson(json as Map<String, dynamic>))
@@ -35,8 +75,19 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
   }
 
   @override
-  Future<List<DueModel>> getMyDues() async {
-    final response = await _dioClient.get(ApiConstants.myDues);
+  Future<List<DueModel>> getMyDues({
+    int? month,
+    int? year,
+    String? status,
+  }) async {
+    final response = await _dioClient.get(
+      ApiConstants.myDues,
+      queryParameters: _buildDuesQuery(
+        month: month,
+        year: year,
+        status: status,
+      ),
+    );
     final data = response.data['data'] as List;
     return data
         .map((json) => DueModel.fromJson(json as Map<String, dynamic>))

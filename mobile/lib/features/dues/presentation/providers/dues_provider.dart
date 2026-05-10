@@ -53,22 +53,50 @@ class DuesNotifier extends StateNotifier<DuesState> {
   bool _isUpdatingStatus = false;
   bool _isUpdatingDueAmount = false;
 
+  /// `updateBuildingDueAmount` sonrası `affectCurrent=true` ise listeyi
+  /// tazelemek için son sorgu filtrelerini saklarız (kullanıcının seçili
+  /// ay/yıl/status filtresi kaybolmasın diye aynı setle reload).
+  int? _lastMonth;
+  int? _lastYear;
+  DueStatus? _lastStatus;
+
   DuesNotifier(this._repository) : super(const DuesState());
 
-  Future<void> loadBuildingDues(String buildingId) async {
+  Future<void> loadBuildingDues(
+    String buildingId, {
+    int? month,
+    int? year,
+    DueStatus? status,
+  }) async {
+    _lastMonth = month;
+    _lastYear = year;
+    _lastStatus = status;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final dues = await _repository.getBuildingDues(buildingId);
+      final dues = await _repository.getBuildingDues(
+        buildingId,
+        month: month,
+        year: year,
+        status: status,
+      );
       state = state.copyWith(isLoading: false, dues: dues);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: 'Aidatlar yüklenemedi');
     }
   }
 
-  Future<void> loadMyDues() async {
+  Future<void> loadMyDues({
+    int? month,
+    int? year,
+    DueStatus? status,
+  }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final dues = await _repository.getMyDues();
+      final dues = await _repository.getMyDues(
+        month: month,
+        year: year,
+        status: status,
+      );
       state = state.copyWith(isLoading: false, dues: dues);
     } catch (e) {
       state =
@@ -122,9 +150,16 @@ class DuesNotifier extends StateNotifier<DuesState> {
         currency: currency,
         affectCurrent: affectCurrent,
       );
-      // affectCurrent true ise mevcut PENDING tutarları değişti; listeyi tazele.
+      // affectCurrent true ise mevcut PENDING tutarları değişti; listeyi
+      // aynı server-side filtre setiyle tazele (kullanıcının seçili ay/yıl/
+      // status filtresi kayboluyormuş gibi olmasın).
       if (affectCurrent) {
-        final dues = await _repository.getBuildingDues(buildingId);
+        final dues = await _repository.getBuildingDues(
+          buildingId,
+          month: _lastMonth,
+          year: _lastYear,
+          status: _lastStatus,
+        );
         state = state.copyWith(isLoading: false, dues: dues);
       } else {
         state = state.copyWith(isLoading: false);
