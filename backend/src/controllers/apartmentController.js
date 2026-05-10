@@ -3,6 +3,7 @@ import {
   createApartmentService,
   deleteApartmentService,
   updateApartmentService,
+  removeResidentFromApartmentService,
 } from "../services/apartmentService.js";
 
 // GET /api/v1/buildings/:buildingId/apartments
@@ -61,6 +62,43 @@ export const createApartment = async (req, res, next) => {
       success: true,
       message: "Daire başarıyla oluşturuldu.",
       data: apartment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// DELETE /api/v1/buildings/:buildingId/apartments/:id/resident
+export const removeResidentFromApartment = async (req, res, next) => {
+  try {
+    const { buildingId, id } = req.params;
+    const managerId = req.user.id;
+
+    const result = await removeResidentFromApartmentService(id, buildingId, managerId);
+
+    if (result.forbidden) {
+      return res.status(403).json({
+        success: false,
+        message: "Bu işlem için yetkiniz yok.",
+      });
+    }
+    if (result.notFound) {
+      return res.status(404).json({
+        success: false,
+        message: "Daire bulunamadı.",
+      });
+    }
+    if (result.noResident) {
+      return res.status(404).json({
+        success: false,
+        message: "Bu dairede kayıtlı sakin yok.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Sakin daireden ayrıldı.",
+      data: result.apartment,
     });
   } catch (error) {
     next(error);

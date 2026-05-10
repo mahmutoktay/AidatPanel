@@ -43,6 +43,9 @@ build/
 *.tmp
 temp/
 
+# Docker E2E (test.py reset kodu; host ile container paylaşılır)
+e2e-data/
+
 # Python
 __pycache__/
 *.pyc

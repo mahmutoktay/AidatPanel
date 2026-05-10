@@ -33,7 +33,8 @@ app.use(helmet());
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  // PATCH: aidat durumu / due-amount (Faz 1); Flutter web ön uç testi için gerekli
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 // Rate Limiting - Tüm API'ler için 15 dakikada 100 istek

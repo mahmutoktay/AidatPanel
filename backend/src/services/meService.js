@@ -2,7 +2,8 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
 
-const userPublicSelect = {
+/** API yanıtlarında kullanıcı için güvenli alanlar (`passwordHash`, `refreshTokenVersion` yok). */
+export const userPublicSelect = {
   id: true,
   email: true,
   name: true,

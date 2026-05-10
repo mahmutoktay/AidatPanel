@@ -1,0 +1,23 @@
+---
+description: Kullanıcı 'raporla ve push et' dediğinde CHANGELOG + git push iş akışı
+alwaysApply: true
+---
+
+# Raporla ve push et
+
+Kullanıcı açıkça **«raporla ve push et»** (veya aynı anlamda) talimat verdiğinde:
+
+1. **CHANGELOG.md** dosyasını güncelle (yoksa kökte oluştur). Girişte şunlar **zorunlu**:
+   - **Tarih ve saat** (kullanıcı ortamı / `TZ` uygun; kullanıcı bilgisindeki tarih yılı otorite)
+   - **Commit id** — `git rev-parse HEAD` ile tam hash (kısaltılmış değil, tercihen tam)
+   - **Tag** — tarih ve saat içeren anlamlı etiket adı (örn. `release-2026-05-10-1430` veya `v0.1.0-20260510-143045`); kullanıcı farklı bir tag şeması istemediyse tutarlı tek format kullan
+   - **Yapılan değişiklikler** — bu oturumda (veya talimatın kapsadığı dönemde) projede yapılan düzenlemelerin madde madde özeti; teknik ve net
+
+2. **Git işlemleri** (kullanıcı izin verdiyse):
+   - CHANGELOG ve diğer değişiklikleri stage et, anlamlı commit mesajı ile commit et (CHANGELOG henüz commit dışındaysa commit’e dahil et)
+   - Gerekirse tag’i oluştur: `git tag -a <tag> -m "..."` 
+   - **`git push`** ve tag push: `git push` ve `git push origin <tag>` (veya `git push --tags` — depo politikasına uygun olanı seç)
+
+3. Kullanıcıya özet: hangi commit, hangi tag, CHANGELOG’a ne yazıldığı.
+
+**Not:** Sadece CHANGELOG yazıp push etmemesi istenirse kullanıcı bunu ayrı belirtir; varsayılan bu kuralda ikisi birden.

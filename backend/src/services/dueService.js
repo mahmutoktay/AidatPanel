@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { userPublicSelect } from "./meService.js";
 
 /**
  * Binadaki tüm aidatları listele (yönetici için)
@@ -31,9 +32,7 @@ export const getDuesByBuildingService = async (buildingId, managerId, filters = 
           id: true,
           number: true,
           floor: true,
-          resident: {
-            select: { id: true, name: true, email: true, phone: true },
-          },
+          resident: { select: userPublicSelect },
         },
       },
     },

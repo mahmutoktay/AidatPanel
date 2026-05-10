@@ -1,8 +1,12 @@
-# AidatPanel — Flutter ↔ Backend (Faz 1) API rehberi
+# AidatPanel — API sözleşmesi, backend planı ve mobil yol haritası
 
-Bu belge **yalnızca** canlı backend sözleşmesini tanımlar: `AidatPanel/backend`, Express 5, Prisma, önek **`/api/v1`**. Flutter ekibi (ör. Furkan) ve yapay zekâ asistanı için **istek gövdesi**, **query**, **başarılı JSON yanıtı** ve **ortak veri modelleri** burada netleştirilir.
+Bu belge **`AidatPanel/backend`** (Express, Prisma) için **`/api/v1`** altındaki **canlı sözleşmeyi** tanımlar; ayrıca backend ekibinin sıradaki işlerini ve **henüz mobilde bağlanmamış / backend’i bekleyen** adımları listeler.
 
-> **Tek kaynak:** Davranış her zaman **repo kodu**dur (`backend/src/...`). `AIDATPANEL.md` veya eski mobil sabitler bu belgeyle çelişirse **bu belge + kod** esas alınır.
+> **Tek kaynak (davranış):** `backend/src/...` ve bu dosyadaki tablolar. Eski `AIDATPANEL.md` veya sabitler çelişirse **kod + bu belge** esas alınır.
+
+> **Mobil (`mobile/app`):** Faz 1 kapsamındaki istemci uygulaması bu sözleşmeyle uyumlu kabul edilir; bu belgede **Faz 1 için Flutter dosya eşlemesi ve tamamlanmış kontrol listesi tutulmaz** — aşağıda yalnızca **kalan** mobil adımlar özetlenir.
+
+**Çapraz referans — mobil talep raporu:** [`resources/MOBILE-TO-BACKEND.md`](resources/MOBILE-TO-BACKEND.md) — mobil taraftan backend’e uyum beyanı, varsayımlar, eksik uç talepleri ve E2E kontrol listesi. Bu belgedeki **§9 Backend planı** öncelikleri o raporla hizalanır.
 
 ---
 
@@ -11,13 +15,13 @@ Bu belge **yalnızca** canlı backend sözleşmesini tanımlar: `AidatPanel/back
 | Konu | Değer |
 |------|--------|
 | Kök URL | `{BASE}/api/v1` — örn. `https://api.aidatpanel.com/api/v1` |
-| `baseUrl` (Flutter) | Host + `/api/v1` birleştirilir; path’te **çift** `/api/v1` oluşmaz |
+| İstemci `baseUrl` | Host + `/api/v1` birleştirilir; path’te **çift** `/api/v1` oluşmaz |
 | Header | `Content-Type: application/json` |
 | Yetki | Korumalı uçlar: `Authorization: Bearer <accessToken>` |
 | Başarı | `{ "success": true, "data": ... }` ve/veya `"message"` |
 | Hata | `{ "success": false, "message": "..." }`; validasyonda `"errors": [{ "field", "message" }]` (HTTP **400**) |
 | Sayı (JSON) | Bina oluşturma / aidat bedeli gibi gövdelerde **number** gönderilir (tırnaklı string değil) |
-| `Decimal` (Prisma) | Yanıtta çoğu alan **string** (örn. `"600.00"`); Flutter’da güvenli parse |
+| `Decimal` (Prisma) | Yanıtta çoğu alan **string** (örn. `"600.00"`); istemci güvenli parse etmeli |
 | Tarih | ISO 8601 string |
 
 ### Roller
@@ -32,7 +36,7 @@ Bu belge **yalnızca** canlı backend sözleşmesini tanımlar: `AidatPanel/back
 - **Access JWT:** `id`, `role` — süre `JWT_EXPIRES_IN` (örn. `15m`).
 - **Refresh JWT:** `id`, `role`, `rv` (`refreshTokenVersion`).
 - **`POST /auth/logout`** (Bearer access): `refreshTokenVersion` artar; aynı refresh ile **`POST /auth/refresh`** → **401**.
-- Çıkışta: **`POST /auth/logout`** zorunlu; ardından yerel token sil.
+- Çıkışta: **`POST /auth/logout`** zorunlu; ardından istemci yerel oturumu siler.
 
 ### Rate limit
 
@@ -49,7 +53,7 @@ Alanlar: `id` (uuid), `email`, `name`, `role` (`MANAGER` \| `RESIDENT`), `phone`
 
 ### 2.2 `RegisterData` (`POST /auth/register` → `data`)
 
-`user`: **string** (kullanıcı uuid’si; Flutter’da genelde `id` alanına map edilir). Diğer alanlar `User` ile aynı (`token` yok).
+`user`: **string** (kullanıcı uuid’si). Diğer alanlar `User` ile aynı (`token` yok).
 
 ### 2.3 `Building` (Prisma)
 
@@ -57,7 +61,7 @@ Alanlar: `id` (uuid), `email`, `name`, `role` (`MANAGER` \| `RESIDENT`), `phone`
 
 ### 2.4 `Apartment`
 
-`id`, `buildingId`, `number`, `floor` (int \| null), `createdAt`. Liste (`GET .../apartments`): **`resident`** = ilişkili `User` kaydı veya **null** (daire boşsa). İstemci yalnızca `id`, `name`, `email`, `phone`, `role`, `language` vb. kullanmalı; **`passwordHash` veya `refreshTokenVersion` gibi alanlar kullanılmamalı** (idealde backend yanıtta `select` ile budanır).
+`id`, `buildingId`, `number`, `floor` (int \| null), `createdAt`. Liste (`GET .../apartments`): **`resident`** = ilişkili `User` kaydı veya **null** (daire boşsa). İstemci yalnızca `id`, `name`, `email`, `phone`, `role`, `language` vb. kullanmalı; **`passwordHash` veya `refreshTokenVersion` gibi alanlar yanıtta dönmemeli** — backend bu liste (ve `DELETE .../resident` yanıtı) için `resident` alanında güvenli `select` kullanır.
 
 ### 2.5 `InviteCode` (`POST .../invite-code` → `data`)
 
@@ -284,6 +288,15 @@ Tüm auth uçları **Bearer gerektirmez** (logout hariç aşağıda).
 | **Body** | `number?`, `floor?` |
 | **200 `data`** | Güncel `Apartment` |
 
+### `DELETE .../:id/resident`
+
+| | |
+|--|--|
+| **Body** | Yok |
+| **200 `data`** | Güncel `Apartment` — `resident` **null** (sakin hesabı silinmez; yalnızca `User.apartmentId` kaldırılır; geçmiş aidat kayıtları kalır) |
+| **403** | Bina bu yöneticiye ait değil |
+| **404** | Daire yok **veya** dairede atanmış sakin yok |
+
 ### `DELETE .../:id`
 
 | **200** | `{ success, message }` |
@@ -308,28 +321,96 @@ Tüm auth uçları **Bearer gerektirmez** (logout hariç aşağıda).
 | `POST /buildings/:id/dues/bulk` | Yok |
 | `POST /buildings/:id/invite-code` | `POST /apartments/:apartmentId/invite-code` |
 
+### Faz 1 — Backend ⟷ mobil (`mobile/app`) uyum özeti
+
+Bu tablo, **§1–§7** kapsamındaki uçların `mobile/app` dalındaki `ApiConstants` + ilgili `RemoteDataSource` çağrılarıyla **bire bir** eşleştiğini doğrulamak içindir. Davranışın tek kaynağı yine `backend/src/...` kodudur.
+
+| Alan | Durum |
+|------|--------|
+| Auth: `identifier` login, register `user` string, join, refresh, logout | Eşleşir |
+| `/me`: GET/PUT/DELETE, password, language | Eşleşir (`fcm-token` Faz 1 mobilde çağrılmıyor; uç mevcut) |
+| Binalar: CRUD, `GET/ PATCH .../dues`, `PATCH .../due-amount` | Eşleşir |
+| Daireler: CRUD, `GET` içinde `resident` güvenli alanlar | Eşleşir (P0 sonrası backend) |
+| Davet: `POST /apartments/:apartmentId/invite-code` | Eşleşir |
+| Sakin aidat: `GET /me/dues` | Eşleşir |
+
+**Backend yapılandırması**
+
+- **`ALLOWED_ORIGINS`:** Flutter web veya başka bir ön uçtan `fetch` ile test edeceksen, `backend/.env` içinde bu origin’leri virgülle ekleyin (`backend/index.js` CORS).
+- **CORS `PATCH`:** Aidat uçları için gerekli; yerel backend güncel `index.js` ile `PATCH` içerir.
+
+**Mobil davranış (bilinçli fark)**
+
+- `DioClient`, access token yerelde “süresi dolmuş” sayılırsa isteği **sunucuya göndermeden** reddedebilir; otomatik yenileme ise çoğunlukla sunucunun **401** dönmesiyle tetiklenir. Native istemcide clock/JWT uyumu ve oturum süresi test edilirken buna dikkat edin.
+
+**Tam güvence için:** Staging API + gerçek cihaz veya emülatör ile Auth → Bina → Daire → Davet → Aidat akışının uçtan uca denenmesi önerilir ([`resources/MOBILE-TO-BACKEND.md`](resources/MOBILE-TO-BACKEND.md) §6).
+
 ---
 
-## 9) Flutter — dosya eşlemesi (tipik)
+## 9) Backend — yapılacaklar planı
 
-| Konu | Örnek konum |
-|------|-------------|
-| Path sabitleri | `core/constants/api_constants.dart` |
-| Dio + 401/refresh | `core/network/dio_client.dart` |
-| Auth + forgot/reset | `features/auth/data/...` |
-| Profil / me | `features/auth` veya `features/profile/...` |
-| Bina / daire / davet / aidat | ilgili `features/*/data/...` |
+Aşağıdaki sıra, [`resources/MOBILE-TO-BACKEND.md`](resources/MOBILE-TO-BACKEND.md) (§3–§7) ile uyumlu öncelik önerisidir. Ayrıntılı gerekçe ve mobil test notları için o dosyaya bakın. Her madde için: route + controller + service + `validate.js` şeması + Prisma işlemi; gerekirse migration.
+
+### P0 — Operasyonel / sözleşme boşluğu
+
+| # | İş | Durum |
+|---|-----|--------|
+| B1 | **Sakini daireden ayırma** — `DELETE /buildings/:buildingId/apartments/:id/resident` | ✅ (2026-05-10) |
+| B2 | **`GET .../apartments` içinde `resident` budama** (`userPublicSelect`) | ✅ (2026-05-10) |
+
+### P1 — Faz 2 (mobil bildirim / gider öncesi)
+
+| # | İş | Notlar |
+|---|-----|--------|
+| B3 | **Bildirimler** | MVP: `GET /notifications` (query: `unreadOnly`), `PATCH /notifications/:id/read`, isteğe bağlı `PATCH /notifications/read-all`. Şema `Notification` ile hizala. |
+| B4 | **`PUT /me/fcm-token` doğrulama** | Uç var; push entegrasyonunda rate limit ve token uzunluğu gözden geçirilir. |
+| B5 | **Giderler (Expenses)** | `GET/POST /buildings/:id/expenses`, `DELETE .../expenses/:expenseId`; makbuz: `POST /expenses/:id/proof` (multipart), `GET .../proof`. Kategori enum’unu Prisma `ExpenseCategory` ile tekilleştir. |
+
+### P2 — Faz 3
+
+| # | İş | Notlar |
+|---|-----|--------|
+| B6 | **Talepler (Tickets)** | Yönetici: `GET /buildings/:id/tickets`; sakin: `GET /me/tickets`; `GET /tickets/:id`, `POST /buildings/:id/tickets`, `POST /tickets/:id/updates`, `PATCH /tickets/:id/status`. |
+| B7 | **Raporlar** | `GET /buildings/:id/reports/monthly?year=&month=`; PDF: `GET .../reports/monthly.pdf` veya ayrı export ucu — MIME ve yetki netleştirilir. |
+
+### P3 — Abonelik
+
+| # | İş | Notlar |
+|---|-----|--------|
+| B8 | **RevenueCat** | Webhook path’i tek kaynakta sabitle (örn. `/api/v1/webhooks/revenuecat` **veya** `/api/v1/subscription/webhook/revenuecat`); istemci sabitleriyle aynı hizada tutulur. `GET /me/subscription` yanıt şekli buraya eklenir. |
+| B9 | **`GET /health` (opsiyonel)** | LB / uptime için; auth gerektirmez. |
+
+### Ortam ve kalite
+
+| # | İş |
+|---|-----|
+| B10 | Staging + örnek manager/sakin hesapları; mobil E2E için base URL. |
+| B11 | OpenAPI 3.0 veya Postman collection — sözleşmenin makine tarafından doğrulanması. |
 
 ---
 
-## 10) Yapay zekâ / geliştirici kontrol listesi
+## 10) Mobil (`mobile/app`) — kalan adımlar (referans)
 
-1. Tüm path’ler **Bölüm 3–7** ile aynı mı? Eski path’ler kaldırıldı mı?
-2. `login` gövdesi `identifier` + `password` mı?
-3. Register yanıtında `user` string → uygulama içi `id` map’i yapıldı mı?
-4. Logout sunucuya `POST /auth/logout` gidiyor mu?
-5. Aidat durum güncellemede `buildingId` route parametresi kullanılıyor mu?
-6. `Due` modellerinde `apartmentNumber` ve (`/me/dues` için) `building` parse ediliyor mu?
+Flutter kaynak kodu bu repoda bu görev kapsamında **değiştirilmez**; aşağıdakiler entegrasyon sırası için check-list’tir. Uzun checklist ve sprint notları için [`resources/MOBILE-TO-BACKEND.md`](resources/MOBILE-TO-BACKEND.md) §1–§8 kullanılabilir.
+
+### Faz 2
+
+- **FCM:** Uygulama içi token alındığında **`PUT /api/v1/me/fcm-token`** çağrısı (`{ "fcmToken": "..." }`).
+- **Bildirim UI:** Backend B3 tamamlandıktan sonra liste + okundu; sabit path’ler backend ile eşlenir.
+- **Gider UI:** Backend B5 tamamlandıktan sonra liste/ekle/sil + makbuz akışı.
+
+### Faz 3–4
+
+- **Ticket ekranları** (B6), **rapor / PDF** (B7).
+- **Abonelik** (B8): SDK + sunucu webhook sonrası `GET /me/subscription` ile durum gösterme.
+
+### Backend P0 sonrası
+
+- **Sakin çıkarma UI:** B1 ucu canlıya alındığında daire kartı menüsüne bağlanır (mobil tarafta ayrı PR).
+
+### İsteğe bağlı iyileştirme
+
+- **`POST /buildings` sonrası daire seed:** Backend zaten transaction içinde daire üretir (bkz. `buildingService.js`). İstemci tarafında “liste boşsa toplu `POST .../apartments`” yedek mantığı varsa, staging doğrulamasından sonra **kaldırılabilir** (tekrarlayan daire riskine karşı).
 
 ---
 
@@ -339,15 +420,14 @@ Tüm auth uçları **Bearer gerektirmez** (logout hariç aşağıda).
 
 ---
 
-## 12) Faz 1 dışı (backend’de uç yok)
-
-RevenueCat webhook, gider, ticket, bildirim listesi, PDF rapor, `GET /health` — mobilde sabit varsa Faz 2’ye ertelenmeli veya kaldırılmalı.
-
----
-
-## 13) Geçmiş
+## 12) Geçmiş
 
 | Tarih | Not |
 |-------|-----|
 | 2026-05-10 | Faz 1 uçları tamam; profil, forgot/reset, soft delete, 6 haneli reset kodu. |
 | 2026-05-10 | Belge: tüm endpoint istek/yanıt modelleri netleştirildi. |
+| 2026-05-10 | Belge: Faz 1 mobil tamam varsayımıyla §9–§10 kaldırıldı; backend planı (§9) ve kalan mobil adımlar (§10) eklendi; API sözleşmesi §1–§8 korundu. |
+| 2026-05-10 | `resources/MOBILE-TO-BACKEND.md` ile çapraz referans (giriş, §9, §10, geçmiş). |
+| 2026-05-10 | P0: `DELETE .../apartments/:id/resident`; daire listesinde `resident` alanı güvenli `select`. |
+| 2026-05-10 | Faz 1 uyum: CORS’a `PATCH` eklendi; §8 altında backend⟷mobil özet tablosu. |
+| 2026-05-10 | Docker: `backend/docker-compose.yml` (db+api), `backend/scripts/docker-test.sh`, `test.py` genişletildi (P0 resident, CORS preflight, resident güvenlik). |

@@ -307,6 +307,13 @@ export const apartmentSchemas = {
     }),
   },
 
+  removeResident: {
+    params: z.object({
+      buildingId: z.string().uuid("Geçerli bir bina ID'si giriniz"),
+      id: z.string().uuid("Geçerli bir daire ID'si giriniz"),
+    }),
+  },
+
   update: {
     params: z.object({
       buildingId: z.string().uuid("Geçerli bir bina ID'si giriniz"),

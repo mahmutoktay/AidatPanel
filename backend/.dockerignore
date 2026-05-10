@@ -1,0 +1,10 @@
+node_modules
+.env
+.env.*
+e2e-data
+.git
+*.md
+__pycache__
+*.pyc
+test.py
+scripts

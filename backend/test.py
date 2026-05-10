@@ -23,6 +23,13 @@ Kullanım (otomatik mod):
   export AIDATPANEL_API_BASE=http://127.0.0.1:4200/api/v1
   export AIDATPANEL_E2E_RESET_LOG=/tmp/aidatpanel-reset-e2e.jsonl   # isteğe bağlı
   python3 test.py
+
+Docker (Postgres + API + migrate + test.py):
+  cd backend
+  chmod +x scripts/docker-test.sh   # bir kez
+  ./scripts/docker-test.sh
+  → ./e2e-data/reset.jsonl host’ta oluşur (AIDATPANEL_E2E_RESET_LOG ile hizalı).
+  Durdurma: docker compose down
 """
 
 from __future__ import annotations
@@ -179,6 +186,25 @@ def assert_iso_or_present(ctx: str, value, *, allow_none: bool = False) -> bool:
         return True
     fail(ctx, f"Tarih/ISO beklenir, gelen: {type(value).__name__}={value!r}")
     return False
+
+
+RESIDENT_FORBIDDEN_JSON_KEYS = frozenset(
+    ("passwordHash", "refreshTokenVersion", "password", "fcmToken", "deletedAt")
+)
+
+
+def resident_public_safe(ctx: str, resident: dict | None) -> bool:
+    """Flutter §2.4: yanıtta hassas User alanları olmamalı."""
+    if resident is None:
+        return True
+    if not isinstance(resident, dict):
+        fail(ctx, f"resident dict değil: {type(resident).__name__}")
+        return False
+    bad = RESIDENT_FORBIDDEN_JSON_KEYS.intersection(resident.keys())
+    if bad:
+        fail(ctx, f"yasak alanlar: {sorted(bad)}")
+        return False
+    return True
 
 
 def assert_amount_parseable(ctx: str, amount) -> bool:
@@ -454,6 +480,27 @@ def main() -> int:
     if apts:
         invite_apartment_id = apts[0]["id"]
 
+    # CORS: PATCH preflight (Flutter web — aidat uçları)
+    ro = requests.options(
+        f"{BASE}/buildings/{building_id}/due-amount",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "PATCH",
+            "Access-Control-Request-Headers": "authorization, content-type",
+        },
+        timeout=15,
+    )
+    if ro.status_code in (200, 204):
+        acm = ro.headers.get("Access-Control-Allow-Methods", "")
+        if "PATCH" in acm.upper():
+            ok("CORS preflight PATCH (/buildings/:id/due-amount)")
+        else:
+            fail("CORS preflight PATCH", f"Access-Control-Allow-Methods={acm!r}")
+            return 1
+    else:
+        fail("CORS preflight", f"HTTP {ro.status_code}")
+        return 1
+
     r = req("GET", "/buildings", token=manager_access)
     b = expect_ok("GET /buildings", r)
     if not b:
@@ -562,13 +609,15 @@ def main() -> int:
     r = req("GET", f"/buildings/{building_id}/apartments", token=manager_access)
     b = expect_ok("GET /buildings/:id/apartments", r)
     if b and isinstance(b.get("data"), list) and b["data"]:
-        apt0 = b["data"][0]
-        if "resident" not in apt0:
-            fail("Flutter Apartment (resident alanı)", "resident anahtarı yok")
-            return 1
+        for idx, apt0 in enumerate(b["data"]):
+            if "resident" not in apt0:
+                fail("Flutter Apartment (resident alanı)", f"[{idx}] resident anahtarı yok")
+                return 1
+            if not resident_public_safe(f"GET /apartments [daire {idx}] resident", apt0.get("resident")):
+                return 1
         if not invite_apartment_id:
-            invite_apartment_id = apt0.get("id")
-        ok("Flutter Apartment JSON (resident anahtarı)")
+            invite_apartment_id = b["data"][0].get("id")
+        ok("Flutter Apartment JSON (resident anahtarı + güvenli alanlar)")
 
     r = req(
         "POST",
@@ -650,6 +699,34 @@ def main() -> int:
         fail("Flutter JoinResponse.user.role", res_user.get("role"))
         return 1
 
+    r = req("GET", f"/buildings/{building_id}/apartments", token=manager_access)
+    b = expect_ok("GET /apartments (join sonrası — resident eşleşmesi)", r)
+    if b and isinstance(b.get("data"), list):
+        matched = False
+        for apt in b["data"]:
+            if apt.get("id") != invite_apartment_id:
+                continue
+            matched = True
+            res = apt.get("resident")
+            if not isinstance(res, dict) or res.get("id") != res_user.get("id"):
+                fail("join sonrası apartment.resident", f"beklenen user id {res_user.get('id')}, gelen: {res}")
+                return 1
+            if not resident_public_safe("join sonrası resident", res):
+                return 1
+            break
+        if not matched:
+            fail("GET /apartments join sonrası", "invite_apartment_id listede yok")
+            return 1
+        ok("GET /apartments (join sonrası resident.id + güvenlik)")
+
+    r = req("GET", f"/buildings/{building_id}/dues", token=manager_access)
+    b = expect_ok("GET /buildings/:id/dues (join sonrası)", r)
+    if b and isinstance(b.get("data"), list):
+        for row in b["data"]:
+            if not resident_public_safe("GET /buildings/:id/dues resident", row.get("resident")):
+                return 1
+        ok("GET /buildings/:id/dues (join sonrası — resident güvenli)")
+
     # --- Rol: sakin yönetici uçları ---
     r = req("GET", "/buildings", token=resident_access)
     expect_status("GET /buildings (RESIDENT → 403)", r, {403}, success_field=False)
@@ -727,6 +804,59 @@ def main() -> int:
 
     r = req("GET", "/me/dues", token=manager_access)
     expect_status("GET /me/dues (MANAGER → 403)", r, {403}, success_field=False)
+
+    # --- P0: Sakini daireden ayırma (DELETE .../apartments/:id/resident) ---
+    r = req(
+        "DELETE",
+        f"/buildings/{building_id}/apartments/{invite_apartment_id}/resident",
+        token=manager_access,
+    )
+    b = expect_ok("DELETE /buildings/:id/apartments/:id/resident", r)
+    if not b or "data" not in b:
+        return 1
+    detached = b["data"]
+    if detached.get("id") != invite_apartment_id:
+        fail("DELETE resident yanıtı apartment id", detached.get("id"))
+        return 1
+    if detached.get("resident") is not None:
+        fail("DELETE resident yanıtı", f"resident null olmalıydı: {detached.get('resident')}")
+        return 1
+
+    r = req(
+        "DELETE",
+        f"/buildings/{building_id}/apartments/{invite_apartment_id}/resident",
+        token=manager_access,
+    )
+    expect_status(
+        "DELETE /buildings/:id/apartments/:id/resident (ikinci — 404)",
+        r,
+        {404},
+        success_field=False,
+    )
+
+    r = req("GET", f"/buildings/{building_id}/apartments", token=manager_access)
+    b = expect_ok("GET /apartments (sakin çıkarıldı)", r)
+    if b and isinstance(b.get("data"), list):
+        for apt in b["data"]:
+            if apt.get("id") == invite_apartment_id and apt.get("resident") is not None:
+                fail("GET /apartments (çıkış sonrası)", "resident hâlâ dolu")
+                return 1
+        ok("GET /apartments (invite daire resident=null)")
+
+    r = req("GET", "/me", token=resident_access)
+    b = expect_ok("GET /me (sakin — daireden çıkarıldı)", r)
+    if b and (b.get("data") or {}).get("apartmentId") is not None:
+        fail("GET /me apartmentId (çıkış sonrası)", "null olmalıydı")
+        return 1
+
+    r = req("GET", "/me/dues", token=resident_access)
+    b = expect_ok("GET /me/dues (dairesiz sakin — boş liste)", r)
+    if not b or not isinstance(b.get("data"), list):
+        return 1
+    if len(b["data"]) != 0:
+        fail("GET /me/dues dairesiz", f"boş liste beklenir, len={len(b['data'])}")
+        return 1
+    ok("GET /me/dues (apartmentId null → [])")
 
     # --- Yönetici şifre değiştir + yeniden giriş ---
     r = req(

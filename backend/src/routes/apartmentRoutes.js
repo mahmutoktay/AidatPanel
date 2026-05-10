@@ -4,6 +4,7 @@ import {
   createApartment,
   deleteApartment,
   updateApartment,
+  removeResidentFromApartment,
 } from "../controllers/apartmentController.js";
 
 import { authMiddleware } from "../middlewares/authMiddleware.js";
@@ -17,6 +18,11 @@ router.use(requireRoles("MANAGER"));
 
 router.get("/", validate(apartmentSchemas.getByBuilding), getApartments);
 router.post("/", validate(apartmentSchemas.create), createApartment);
+router.delete(
+  "/:id/resident",
+  validate(apartmentSchemas.removeResident),
+  removeResidentFromApartment
+);
 router.put("/:id", validate(apartmentSchemas.update), updateApartment);
 router.delete("/:id", validate(apartmentSchemas.delete), deleteApartment);
 
