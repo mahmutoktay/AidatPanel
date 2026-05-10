@@ -7,7 +7,7 @@
 | **Tarih / saat** | 2026-05-10 16:47:34 +03 |
 | **Git etiketi (tag)** | `aidatpanel-20260510-164734` |
 | **Commit (ana özellik seti)** | `8cc21526dafb2037a2a0a6f05a255104889082a3` |
-| **Not** | Bu CHANGELOG girişi ayrı bir “docs” commit’i ile eklenir; **etiketin işaret ettiği tam commit** için: `git rev-parse refs/tags/aidatpanel-20260510-164734^{commit}` |
+| **Etiketin hedefi** | `aidatpanel-20260510-164734` etiketi, CHANGELOG dahil **son push edilen** `backend/yedek` commit’ine basılır; tam hash: `git rev-parse refs/tags/aidatpanel-20260510-164734^{commit}` |
 
 ### Yapılan değişiklikler
 
