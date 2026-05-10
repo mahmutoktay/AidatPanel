@@ -137,35 +137,50 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     final collectionRate = globalCollectionRate(allDues);
     final overdueCount = globalOverdueCount(allDues);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _HeroSummaryCard(
-            userName: userName,
-            totalApartments: totalApartments,
-            collectionRate: collectionRate,
-            overdueCount: overdueCount,
-          ),
-          const SizedBox(height: AppSizes.spacingL),
-          Text(
-            context.t.common.managedBuildings,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+    return RefreshIndicator(
+      onRefresh: _refreshHomeTab,
+      color: AppColors.primary,
+      // Boş bina listesinde de pull-to-refresh çalışsın diye
+      // physics: AlwaysScrollableScrollPhysics
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(AppSizes.spacingL),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _HeroSummaryCard(
+              userName: userName,
+              totalApartments: totalApartments,
+              collectionRate: collectionRate,
+              overdueCount: overdueCount,
             ),
-          ),
-          const SizedBox(height: AppSizes.spacingM),
-          _BuildingsAsyncSection(
-            buildingsAsync: buildingsAsync,
-            onRetry: _onRetryBuildings,
-            buildList: _buildBuildingCards,
-          ),
-        ],
+            const SizedBox(height: AppSizes.spacingL),
+            Text(
+              context.t.common.managedBuildings,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: AppSizes.spacingM),
+            _BuildingsAsyncSection(
+              buildingsAsync: buildingsAsync,
+              onRetry: _onRetryBuildings,
+              buildList: _buildBuildingCards,
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  /// Pull-to-refresh: bina listesi + tüm binaların dues'u birlikte yenilenir.
+  /// Hero card collectionRate / overdueCount allBuildingsDuesProvider'ı
+  /// dinlediği için invalidate sonrası otomatik güncellenir.
+  Future<void> _refreshHomeTab() async {
+    ref.invalidate(allBuildingsDuesProvider);
+    await ref.read(buildingsStoreProvider.notifier).loadBuildings();
   }
 
   Widget _buildBuildingsTab(AsyncValue<List<BuildingEntity>> buildingsAsync) {

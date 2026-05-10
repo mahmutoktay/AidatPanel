@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 560 (280 per locale)
+/// Strings: 572 (286 per locale)
 ///
-/// Built on 2026-05-10 at 13:00 UTC
+/// Built on 2026-05-10 at 13:18 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -281,6 +281,9 @@ class _StringsCommonEn {
 	String get residents => 'Residents';
 	String get apartmentsBadge => 'Apartments';
 	String get emptyApartmentText => 'Empty Apartment';
+	String get vacantBadge => 'Vacant';
+	String get phoneNotShared => 'Phone not shared';
+	String get noResidentAssigned => 'No resident assigned';
 	String get noApartmentsYet => 'No apartments added yet';
 	String get paidStatus => 'Paid';
 	String get pendingStatus => 'Pending';
@@ -454,6 +457,9 @@ class _StringsFeaturesAuthEn {
 	String get loginSuccess => 'Signed in successfully. Welcome.';
 	String get appTitle => 'AidatPanel';
 	String get appSubtitle => 'Apartment Management System';
+	String get splashConnectionError => 'Could not connect to server';
+	String get splashConnectionHint => 'Check your connection and try again.';
+	String get skipToLogin => 'Go to login';
 	String get phone => 'Phone';
 	String get email => 'Email';
 	String get phoneHint => '5XX XXX XX XX';
@@ -657,6 +663,9 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get residents => 'Sakinler';
 	@override String get apartmentsBadge => 'Daire';
 	@override String get emptyApartmentText => 'Boş Daire';
+	@override String get vacantBadge => 'Boş';
+	@override String get phoneNotShared => 'Telefon paylaşılmadı';
+	@override String get noResidentAssigned => 'Sakin atanmamış';
 	@override String get noApartmentsYet => 'Henüz daire eklenmemiş';
 	@override String get paidStatus => 'Ödendi';
 	@override String get pendingStatus => 'Bekliyor';
@@ -830,6 +839,9 @@ class _StringsFeaturesAuthTr implements _StringsFeaturesAuthEn {
 	@override String get loginSuccess => 'Giriş başarılı. Hoş geldiniz.';
 	@override String get appTitle => 'AidatPanel';
 	@override String get appSubtitle => 'Apartman Yönetim Sistemi';
+	@override String get splashConnectionError => 'Sunucuya bağlanılamadı';
+	@override String get splashConnectionHint => 'İnternet bağlantını kontrol edip tekrar dene.';
+	@override String get skipToLogin => 'Giriş ekranına git';
 	@override String get phone => 'Telefon';
 	@override String get email => 'Email';
 	@override String get phoneHint => '5XX XXX XX XX';
@@ -1002,6 +1014,9 @@ extension on Translations {
 			case 'common.residents': return 'Residents';
 			case 'common.apartmentsBadge': return 'Apartments';
 			case 'common.emptyApartmentText': return 'Empty Apartment';
+			case 'common.vacantBadge': return 'Vacant';
+			case 'common.phoneNotShared': return 'Phone not shared';
+			case 'common.noResidentAssigned': return 'No resident assigned';
 			case 'common.noApartmentsYet': return 'No apartments added yet';
 			case 'common.paidStatus': return 'Paid';
 			case 'common.pendingStatus': return 'Pending';
@@ -1122,6 +1137,9 @@ extension on Translations {
 			case 'features.auth.loginSuccess': return 'Signed in successfully. Welcome.';
 			case 'features.auth.appTitle': return 'AidatPanel';
 			case 'features.auth.appSubtitle': return 'Apartment Management System';
+			case 'features.auth.splashConnectionError': return 'Could not connect to server';
+			case 'features.auth.splashConnectionHint': return 'Check your connection and try again.';
+			case 'features.auth.skipToLogin': return 'Go to login';
 			case 'features.auth.phone': return 'Phone';
 			case 'features.auth.email': return 'Email';
 			case 'features.auth.phoneHint': return '5XX XXX XX XX';
@@ -1290,6 +1308,9 @@ extension on _StringsTr {
 			case 'common.residents': return 'Sakinler';
 			case 'common.apartmentsBadge': return 'Daire';
 			case 'common.emptyApartmentText': return 'Boş Daire';
+			case 'common.vacantBadge': return 'Boş';
+			case 'common.phoneNotShared': return 'Telefon paylaşılmadı';
+			case 'common.noResidentAssigned': return 'Sakin atanmamış';
 			case 'common.noApartmentsYet': return 'Henüz daire eklenmemiş';
 			case 'common.paidStatus': return 'Ödendi';
 			case 'common.pendingStatus': return 'Bekliyor';
@@ -1410,6 +1431,9 @@ extension on _StringsTr {
 			case 'features.auth.loginSuccess': return 'Giriş başarılı. Hoş geldiniz.';
 			case 'features.auth.appTitle': return 'AidatPanel';
 			case 'features.auth.appSubtitle': return 'Apartman Yönetim Sistemi';
+			case 'features.auth.splashConnectionError': return 'Sunucuya bağlanılamadı';
+			case 'features.auth.splashConnectionHint': return 'İnternet bağlantını kontrol edip tekrar dene.';
+			case 'features.auth.skipToLogin': return 'Giriş ekranına git';
 			case 'features.auth.phone': return 'Telefon';
 			case 'features.auth.email': return 'Email';
 			case 'features.auth.phoneHint': return '5XX XXX XX XX';

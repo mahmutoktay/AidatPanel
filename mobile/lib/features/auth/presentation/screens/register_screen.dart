@@ -31,7 +31,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   late TextEditingController _phoneController;
   late TextEditingController _passwordController;
   late TextEditingController _confirmPasswordController;
+  // Klavye "next" zinciri için her alan için bir FocusNode.
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _phoneFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
+  final FocusNode _confirmPasswordFocusNode = FocusNode();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   String? _emailError;
@@ -64,7 +68,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _emailFocusNode.dispose();
+    _phoneFocusNode.dispose();
     _passwordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
     super.dispose();
   }
 
@@ -255,6 +262,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                         child: SingleChildScrollView(
                           padding: const EdgeInsets.all(AppSizes.spacingL),
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -268,6 +277,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               TextField(
                                 controller: _nameController,
                                 enabled: !authState.isLoading,
+                                textInputAction: TextInputAction.next,
+                                onSubmitted: (_) =>
+                                    _emailFocusNode.requestFocus(),
+                                autofillHints: const [AutofillHints.name],
+                                textCapitalization: TextCapitalization.words,
                                 style: AppTypography.body1,
                                 decoration: InputDecoration(
                                   labelText: context.t.features.auth.name,
@@ -292,8 +306,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ),
                               TextField(
                                 controller: _emailController,
+                                focusNode: _emailFocusNode,
                                 enabled: !authState.isLoading,
                                 keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.next,
+                                onSubmitted: (_) =>
+                                    _phoneFocusNode.requestFocus(),
+                                autofillHints: const [
+                                  AutofillHints.newUsername,
+                                  AutofillHints.email,
+                                ],
                                 style: AppTypography.body1,
                                 decoration: InputDecoration(
                                   labelText: context.t.features.auth.email,
@@ -332,9 +354,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ),
                               TextField(
                                 controller: _phoneController,
+                                focusNode: _phoneFocusNode,
                                 enabled: !authState.isLoading,
                                 keyboardType: TextInputType.number,
                                 maxLength: 10,
+                                textInputAction: TextInputAction.next,
+                                onSubmitted: (_) =>
+                                    _passwordFocusNode.requestFocus(),
+                                autofillHints: const [
+                                  AutofillHints.telephoneNumberNational,
+                                ],
                                 style: AppTypography.body1,
                                 decoration: InputDecoration(
                                   labelText:
@@ -385,6 +414,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   );
                                 },
                                 enabled: !authState.isLoading,
+                                textInputAction: TextInputAction.next,
+                                onSubmitted: (_) =>
+                                    _confirmPasswordFocusNode.requestFocus(),
+                                autofillHints: const [
+                                  AutofillHints.newPassword,
+                                ],
                                 onChanged: (value) {
                                   setState(() {
                                     _hasMinLength = value.length >= 6;
@@ -462,6 +497,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   );
                                 },
                                 enabled: !authState.isLoading,
+                                focusNode: _confirmPasswordFocusNode,
+                                textInputAction: TextInputAction.done,
+                                onSubmitted: (_) => _handleRegister(context),
+                                autofillHints: const [
+                                  AutofillHints.newPassword,
+                                ],
                                 onChanged: (value) {
                                   setState(() {
                                     _passwordsMatch =

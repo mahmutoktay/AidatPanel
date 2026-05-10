@@ -33,7 +33,12 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
   late TextEditingController _phoneController;
   late TextEditingController _passwordController;
   late TextEditingController _confirmPasswordController;
+  // Klavye "next" zinciri için her alanın FocusNode'u.
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _nameFocusNode = FocusNode();
+  final FocusNode _phoneFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
+  final FocusNode _confirmPasswordFocusNode = FocusNode();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   String? _inviteCodeError;
@@ -68,7 +73,11 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _emailFocusNode.dispose();
+    _nameFocusNode.dispose();
+    _phoneFocusNode.dispose();
     _passwordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
     super.dispose();
   }
 
@@ -275,6 +284,8 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                         ),
                         child: SingleChildScrollView(
                           padding: const EdgeInsets.all(AppSizes.spacingL),
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -283,6 +294,9 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                                 enabled: !authState.isLoading,
                                 textCapitalization:
                                     TextCapitalization.characters,
+                                textInputAction: TextInputAction.next,
+                                onSubmitted: (_) =>
+                                    _emailFocusNode.requestFocus(),
                                 style: AppTypography.body1,
                                 decoration: InputDecoration(
                                   labelText: context.t.features.auth.inviteCode,
@@ -325,8 +339,16 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                               ),
                               TextField(
                                 controller: _emailController,
+                                focusNode: _emailFocusNode,
                                 enabled: !authState.isLoading,
                                 keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.next,
+                                onSubmitted: (_) =>
+                                    _nameFocusNode.requestFocus(),
+                                autofillHints: const [
+                                  AutofillHints.newUsername,
+                                  AutofillHints.email,
+                                ],
                                 style: AppTypography.body1,
                                 decoration: InputDecoration(
                                   labelText: context.t.features.auth.email,
@@ -351,7 +373,13 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                               ),
                               TextField(
                                 controller: _nameController,
+                                focusNode: _nameFocusNode,
                                 enabled: !authState.isLoading,
+                                textInputAction: TextInputAction.next,
+                                onSubmitted: (_) =>
+                                    _phoneFocusNode.requestFocus(),
+                                autofillHints: const [AutofillHints.name],
+                                textCapitalization: TextCapitalization.words,
                                 style: AppTypography.body1,
                                 decoration: InputDecoration(
                                   labelText: context.t.features.auth.name,
@@ -376,9 +404,16 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                               ),
                               TextField(
                                 controller: _phoneController,
+                                focusNode: _phoneFocusNode,
                                 enabled: !authState.isLoading,
                                 keyboardType: TextInputType.number,
                                 maxLength: 10,
+                                textInputAction: TextInputAction.next,
+                                onSubmitted: (_) =>
+                                    _passwordFocusNode.requestFocus(),
+                                autofillHints: const [
+                                  AutofillHints.telephoneNumberNational,
+                                ],
                                 style: AppTypography.body1,
                                 decoration: InputDecoration(
                                   labelText:
@@ -434,6 +469,12 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                                   );
                                 },
                                 enabled: !authState.isLoading,
+                                textInputAction: TextInputAction.next,
+                                onSubmitted: (_) =>
+                                    _confirmPasswordFocusNode.requestFocus(),
+                                autofillHints: const [
+                                  AutofillHints.newPassword,
+                                ],
                                 onChanged: (value) {
                                   setState(() {
                                     _hasMinLength = value.length >= 6;
@@ -511,6 +552,12 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                                   );
                                 },
                                 enabled: !authState.isLoading,
+                                focusNode: _confirmPasswordFocusNode,
+                                textInputAction: TextInputAction.done,
+                                onSubmitted: (_) => _handleJoin(context),
+                                autofillHints: const [
+                                  AutofillHints.newPassword,
+                                ],
                                 onChanged: (value) {
                                   setState(() {
                                     _passwordsMatch =

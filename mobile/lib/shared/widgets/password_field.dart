@@ -14,6 +14,12 @@ class PasswordField extends StatelessWidget {
   final Widget? passwordCriteria;
   final String? helperText;
   final Color? borderColor;
+  // Klavye davranışı için ek parametreler — mobil cihazda kullanıcı
+  // klavye sağ alt köşesinden bir sonraki alana geçebilsin / submit
+  // edebilsin.
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onSubmitted;
+  final Iterable<String>? autofillHints;
 
   const PasswordField({
     super.key,
@@ -28,6 +34,9 @@ class PasswordField extends StatelessWidget {
     this.passwordCriteria,
     this.helperText,
     this.borderColor,
+    this.textInputAction,
+    this.onSubmitted,
+    this.autofillHints,
   });
 
   @override
@@ -41,6 +50,9 @@ class PasswordField extends StatelessWidget {
           obscureText: obscureText,
           onChanged: onChanged,
           focusNode: focusNode,
+          textInputAction: textInputAction,
+          onSubmitted: onSubmitted,
+          autofillHints: autofillHints,
           decoration: InputDecoration(
             labelText: labelText ?? 'Şifre',
             hintText: hintText ?? '••••••••',

@@ -24,6 +24,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   late TextEditingController _identifierController;
   late TextEditingController _passwordController;
   late FocusNode _identifierFocusNode;
+  // Identifier "next" tuşundan sonra şifreye odaklanmak için.
+  late FocusNode _passwordFocusNode;
   bool _obscurePassword = true;
   bool _usePhoneLogin = false;
 
@@ -33,6 +35,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _identifierController = TextEditingController();
     _passwordController = TextEditingController();
     _identifierFocusNode = FocusNode();
+    _passwordFocusNode = FocusNode();
   }
 
   @override
@@ -40,6 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _identifierController.dispose();
     _passwordController.dispose();
     _identifierFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -201,6 +205,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(AppSizes.spacingL),
+                    // Kullanıcı listeyi sürüklerse klavye otomatik kapansın.
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -223,6 +230,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           inputFormatters: _usePhoneLogin
                               ? [FilteringTextInputFormatter.digitsOnly]
                               : null,
+                          textInputAction: TextInputAction.next,
+                          // Identifier alanı dolduktan sonra "next" ile
+                          // şifre alanına otomatik odaklan.
+                          onSubmitted: (_) =>
+                              _passwordFocusNode.requestFocus(),
+                          autofillHints: _usePhoneLogin
+                              ? const [AutofillHints.telephoneNumberNational]
+                              : const [AutofillHints.username,
+                                  AutofillHints.email],
                           style: AppTypography.body1,
                           decoration: InputDecoration(
                             labelText: _usePhoneLogin
@@ -253,8 +269,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(height: AppSizes.spacingFieldSpacing),
                         TextField(
                           controller: _passwordController,
+                          focusNode: _passwordFocusNode,
                           enabled: !authState.isLoading,
                           obscureText: _obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          // Şifre tamamlandığında klavyeden direkt giriş.
+                          onSubmitted: (_) => _handleLogin(context),
+                          autofillHints: const [AutofillHints.password],
                           style: AppTypography.body1,
                           decoration: InputDecoration(
                             labelText: context.t.features.auth.password,

@@ -164,12 +164,22 @@ class BuildingResidentsScreen extends ConsumerWidget {
     final isOccupied = apt.isOccupied;
     final statusInfo = _getStatusInfo(context, apt.paymentStatus);
 
+    // Boş daire kartı için soluk bir görünüm: yönetici tarafında "burada
+    // henüz sakin yok" mesajının ilk bakışta okunabilmesi için arka plan
+    // ve kenarlık tonu hafifçe değiştiriliyor.
+    final cardColor = isOccupied
+        ? AppColors.surface
+        : AppColors.background.withValues(alpha: 0.6);
+    final borderColor = isOccupied
+        ? AppColors.borderColor
+        : AppColors.borderColor.withValues(alpha: 0.5);
+
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: cardColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderColor),
+        border: Border.all(color: borderColor),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.spacingM),
@@ -182,17 +192,25 @@ class BuildingResidentsScreen extends ConsumerWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryLight.withValues(alpha: 0.15),
+                    color: isOccupied
+                        ? AppColors.primaryLight.withValues(alpha: 0.15)
+                        : AppColors.borderColor.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
-                  child: Text(
-                    '$index',
-                    style: AppTypography.body1.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  child: isOccupied
+                      ? Text(
+                          '$index',
+                          style: AppTypography.body1.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        )
+                      : Icon(
+                          Icons.person_off_outlined,
+                          size: 22,
+                          color: AppColors.textSecondary,
+                        ),
                 ),
                 const SizedBox(width: AppSizes.spacingM),
                 Expanded(
@@ -239,35 +257,83 @@ class BuildingResidentsScreen extends ConsumerWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.borderColor.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      context.t.common.vacantBadge,
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 _buildApartmentActionsMenu(context, apt),
               ],
             ),
-            if (isOccupied && apt.phone != null) ...[
-              const SizedBox(height: AppSizes.spacingM),
-              Container(height: 1, color: AppColors.borderColor),
-              const SizedBox(height: AppSizes.spacingM),
-              Row(
-                children: [
+            // Alt satır:
+            //  - Dolu + telefon var  -> telefon ikonu + numara
+            //  - Dolu + telefon yok  -> "Telefon paylaşılmadı" rozeti
+            //  - Boş                 -> sadece aylık aidat (planlanmış)
+            const SizedBox(height: AppSizes.spacingM),
+            Container(height: 1, color: borderColor),
+            const SizedBox(height: AppSizes.spacingM),
+            Row(
+              children: [
+                if (isOccupied && apt.phone != null) ...[
                   Icon(Icons.phone_outlined,
                       size: 18, color: AppColors.primary),
                   const SizedBox(width: 8),
-                  Text(
-                    _formatPhone(apt.phone!),
-                    style: AppTypography.body2.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
+                  Flexible(
+                    child: Text(
+                      _formatPhone(apt.phone!),
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  const Spacer(),
-                  Text(
-                    '₺${apt.monthlyDues.toStringAsFixed(0)}${context.t.common.perMonth}',
-                    style: AppTypography.body2
-                        .copyWith(color: AppColors.textSecondary),
+                ] else if (isOccupied && apt.phone == null) ...[
+                  Icon(Icons.phone_disabled_outlined,
+                      size: 18, color: AppColors.textSecondary),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      context.t.common.phoneNotShared,
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.textSecondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  Icon(Icons.event_busy_outlined,
+                      size: 18, color: AppColors.textSecondary),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      context.t.common.noResidentAssigned,
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.textSecondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
                   ),
                 ],
-              ),
-            ],
+                const Spacer(),
+                Text(
+                  '₺${apt.monthlyDues.toStringAsFixed(0)}${context.t.common.perMonth}',
+                  style: AppTypography.body2
+                      .copyWith(color: AppColors.textSecondary),
+                ),
+              ],
+            ),
           ],
         ),
       ),
