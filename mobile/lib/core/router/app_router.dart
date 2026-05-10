@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/domain/entities/user_entity.dart' show UserRole;
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/join_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/dashboard/presentation/screens/manager_dashboard_screen.dart';
 import '../../features/dashboard/presentation/screens/resident_dashboard_screen.dart';
@@ -33,6 +35,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           loc == '/login' ||
           loc == '/register' ||
           loc == '/join' ||
+          loc == '/forgot-password' ||
+          loc == '/reset-password' ||
           loc == '/';
 
       if (!authState.isAuthenticated && !isAuthRoute) {
@@ -93,6 +97,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'join',
         builder: (context, state) {
           return const JoinScreen();
+        },
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        name: 'forgot_password',
+        builder: (context, state) {
+          return const ForgotPasswordScreen();
+        },
+      ),
+      GoRoute(
+        path: '/reset-password',
+        name: 'reset_password',
+        builder: (context, state) {
+          // `extra` üzerinden forgot ekranından gelen email taşınır.
+          final email = state.extra is String ? state.extra as String : null;
+          return ResetPasswordScreen(prefilledEmail: email);
         },
       ),
       GoRoute(
