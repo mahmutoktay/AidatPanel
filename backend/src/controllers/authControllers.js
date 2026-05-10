@@ -2,24 +2,27 @@ import { prisma } from "../config/db.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateTokens.js";
-import { validateInviteCode } from "../services/authService.js";
+import { validateInviteCode } from "../services/inviteCodeService.js";
+import {
+  requestPasswordResetService,
+  resetPasswordWithTokenService,
+} from "../services/passwordResetService.js";
+import { HttpError } from "../utils/httpError.js";
 
 const register = async (req, res, next) => {
   try {
     const { name, email, phone, password } = req.body;
 
-    // Email kontrolü
-    const mevcutKullanici = await prisma.user.findUnique({
-      where: { email: email },
+    const mevcutKullanici = await prisma.user.findFirst({
+      where: { email, deletedAt: null },
     });
     if (mevcutKullanici) {
       return res.status(409).json({ success: false, message: "Bu email adresi zaten kullanılıyor." });
     }
 
-    // Telefon numarası kontrolü (eğer verildiyse)
     if (phone) {
-      const mevcutTelefon = await prisma.user.findUnique({
-        where: { phone: phone },
+      const mevcutTelefon = await prisma.user.findFirst({
+        where: { phone, deletedAt: null },
       });
       if (mevcutTelefon) {
         return res.status(409).json({ success: false, message: "Bu telefon numarası zaten kullanılıyor." });
@@ -45,9 +48,11 @@ const register = async (req, res, next) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        language: user.language,
+        apartmentId: user.apartmentId,
         createdAt: user.createdAt,
-        updatedAt: user.updatedAt
-      }
+        updatedAt: user.updatedAt,
+      },
     });
   } catch (error) {
     next(error);
@@ -62,10 +67,14 @@ const login = async (req, res, next) => {
     const isEmail = identifier.includes('@');
 
     const user = isEmail
-      ? await prisma.user.findUnique({ where: { email: identifier } })
-      : await prisma.user.findUnique({ where: { phone: identifier } });
+      ? await prisma.user.findFirst({
+          where: { email: identifier, deletedAt: null },
+        })
+      : await prisma.user.findFirst({
+          where: { phone: identifier, deletedAt: null },
+        });
 
-    if (!user) {
+    if (!user || user.deletedAt) {
       return res.status(401).json({
         success: false,
         message: "Email/telefon veya şifre hatalı."
@@ -86,7 +95,17 @@ const login = async (req, res, next) => {
       data: {
         accessToken,
         refreshToken,
-        user: { id: user.id, email: user.email, name: user.name, role: user.role, phone: user.phone, createdAt: user.createdAt, updatedAt: user.updatedAt }
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          phone: user.phone,
+          language: user.language,
+          apartmentId: user.apartmentId,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
       }
     });
   } catch (error) {
@@ -104,11 +123,20 @@ const refreshToken = async (req, res, next) => {
       });
     }
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+    const tokenRv = decoded.rv ?? 0;
+    const user = await prisma.user.findFirst({
+      where: { id: decoded.id, deletedAt: null },
+    });
     if (!user) {
       return res.status(401).json({
         success: false,
         message: "Kullanıcı bulunamadı."
+      });
+    }
+    if ((user.refreshTokenVersion ?? 0) !== tokenRv) {
+      return res.status(401).json({
+        success: false,
+        message: "Oturum sonlandırıldı. Lütfen tekrar giriş yapın.",
       });
     }
     const newAccessToken = generateAccessToken(user);
@@ -128,9 +156,8 @@ const join = async (req, res, next) => {
     // Davet kodunu doğrula
     const inviteCodeData = await validateInviteCode(inviteCode);
 
-    // Email zaten kullanılıyor mu kontrol et
-    const mevcutKullanici = await prisma.user.findUnique({
-      where: { email: email },
+    const mevcutKullanici = await prisma.user.findFirst({
+      where: { email, deletedAt: null },
     });
     if (mevcutKullanici) {
       return res.status(409).json({
@@ -139,10 +166,9 @@ const join = async (req, res, next) => {
       });
     }
 
-    // Telefon numarası kontrolü (eğer verildiyse)
     if (phone) {
-      const mevcutTelefon = await prisma.user.findUnique({
-        where: { phone: phone },
+      const mevcutTelefon = await prisma.user.findFirst({
+        where: { phone, deletedAt: null },
       });
       if (mevcutTelefon) {
         return res.status(409).json({
@@ -196,10 +222,11 @@ const join = async (req, res, next) => {
           name: result.name,
           phone: result.phone,
           role: result.role,
+          language: result.language,
           apartmentId: result.apartmentId,
           createdAt: result.createdAt,
           updatedAt: result.updatedAt,
-        }
+        },
       }
     });
   } catch (error) {
@@ -213,14 +240,52 @@ const join = async (req, res, next) => {
   }
 };
 
-const logout = async (req, res) => {
-  // Client-side token silme islemi
-  // Not: Stateless JWT'da server tarafinda token invalidation icin
-  // blacklist/whitelist sistemi gerekir (Redis vb.)
-  res.status(200).json({
-    success: true,
-    message: "Çıkış başarılı."
-  });
+const logout = async (req, res, next) => {
+  try {
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { refreshTokenVersion: { increment: 1 } },
+    });
+    res.status(200).json({
+      success: true,
+      message: "Çıkış başarılı.",
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-export { register, login, refreshToken, join, logout };
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    await requestPasswordResetService(email);
+    res.status(200).json({
+      success: true,
+      message:
+        "E-posta adresi sistemde kayıtlıysa şifre sıfırlama talimatları gönderildi.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+    await resetPasswordWithTokenService(token, password);
+    res.status(200).json({
+      success: true,
+      message: "Şifreniz güncellendi. Yeni şifreyle giriş yapabilirsiniz.",
+    });
+  } catch (error) {
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+    next(error);
+  }
+};
+
+export { register, login, refreshToken, join, logout, forgotPassword, resetPassword };

@@ -7,11 +7,13 @@ import {
 } from "../controllers/apartmentController.js";
 
 import { authMiddleware } from "../middlewares/authMiddleware.js";
+import { requireRoles } from "../middlewares/roleMiddleware.js";
 import { validate, apartmentSchemas } from "../middlewares/validate.js";
 
 const router = express.Router({ mergeParams: true });
 
 router.use(authMiddleware);
+router.use(requireRoles("MANAGER"));
 
 router.get("/", validate(apartmentSchemas.getByBuilding), getApartments);
 router.post("/", validate(apartmentSchemas.create), createApartment);

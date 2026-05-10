@@ -20,6 +20,10 @@ model User {
   role         UserRole @default(RESIDENT)
   fcmToken     String?
   language     String   @default("tr")
+  /// Çıkışta artırılır; refresh JWT içindeki rv ile eşleşmezse oturum iptal sayılır (ek tablo yok).
+  refreshTokenVersion Int      @default(0)
+  /// KVKK hesap kapatma: doluysa oturum reddedilir; kayıt silinmez (PII maskelenir).
+  deletedAt    DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -34,8 +38,22 @@ model User {
   notifications Notification[]
   tickets       Ticket[]
   subscription  Subscription?
+  passwordResetTokens PasswordResetToken[]
 
   @@index([apartmentId])
+}
+
+/// Şifre sıfırlama: düz metin token yalnızca e-postada; DB'de SHA-256 özeti.
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 enum UserRole {

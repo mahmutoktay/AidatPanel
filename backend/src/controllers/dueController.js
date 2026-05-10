@@ -6,12 +6,12 @@ import {
 } from "../services/dueService.js";
 
 /**
- * GET /api/v1/buildings/:buildingId/dues
+ * GET /api/v1/buildings/:id/dues
  * Yönetici: Binadaki tüm aidatları listele
  */
 export const getDuesByBuilding = async (req, res, next) => {
   try {
-    const { buildingId } = req.params;
+    const { id: buildingId } = req.params;
     const { month, year, status } = req.query;
     const managerId = req.user.id;
 
@@ -34,16 +34,21 @@ export const getDuesByBuilding = async (req, res, next) => {
 };
 
 /**
- * PATCH /api/v1/dues/:dueId/status
+ * PATCH /api/v1/buildings/:id/dues/:dueId/status
  * Yönetici: Aidat durumunu güncelle
  */
 export const updateDueStatus = async (req, res, next) => {
   try {
-    const { dueId } = req.params;
+    const { id: buildingId, dueId } = req.params;
     const { status, paidAt, note } = req.body;
     const managerId = req.user.id;
 
-    const result = await updateDueStatusService(dueId, managerId, { status, paidAt, note });
+    const result = await updateDueStatusService(dueId, managerId, {
+      status,
+      paidAt,
+      note,
+      buildingId,
+    });
 
     if (result === null) {
       return res.status(404).json({
@@ -75,10 +80,10 @@ export const updateDueStatus = async (req, res, next) => {
  */
 export const getMyDues = async (req, res, next) => {
   try {
-    const { status, year } = req.query;
+    const { status, year, month } = req.query;
     const userId = req.user.id;
 
-    const dues = await getMyDuesService(userId, { status, year });
+    const dues = await getMyDuesService(userId, { status, year, month });
 
     res.json({
       success: true,
@@ -90,12 +95,12 @@ export const getMyDues = async (req, res, next) => {
 };
 
 /**
- * PATCH /api/v1/buildings/:buildingId/due-amount
+ * PATCH /api/v1/buildings/:id/due-amount
  * Yönetici: Aidat bedelini güncelle
  */
 export const updateBuildingDueAmount = async (req, res, next) => {
   try {
-    const { buildingId } = req.params;
+    const { id: buildingId } = req.params;
     const { dueAmount, dueDay, currency, affectCurrent } = req.body;
     const managerId = req.user.id;
 

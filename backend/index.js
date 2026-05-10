@@ -9,6 +9,7 @@ import authRouter from "./src/routes/authRoutes.js";
 import buildingRoutes from "./src/routes/buildingRoutes.js";
 import apartmentRoutes from "./src/routes/apartmentRoutes.js";
 import inviteCodeRoutes from "./src/routes/inviteCodeRoutes.js";
+import meRoutes from "./src/routes/meRoutes.js";
 import { apiLimiter } from "./src/middlewares/rateLimitMiddleware.js";
 import { errorHandler, notFoundHandler } from "./src/middlewares/errorHandler.js";
 
@@ -46,6 +47,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/buildings", buildingRoutes);
 app.use("/api/v1/buildings/:buildingId/apartments", apartmentRoutes);
 app.use("/api/v1/apartments/:apartmentId/invite-code", inviteCodeRoutes);
+app.use("/api/v1/me", meRoutes);
 
 // 404 Handler - Tanımlanmamış route'lar
 app.use(notFoundHandler);

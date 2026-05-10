@@ -37,10 +37,15 @@ Thumbs.db
 dist/
 build/
 
-# Prisma (generated files)
-prisma/migrations/
+# Prisma: migration geçmişi repoda tutulur (deploy: migrate deploy)
 
 # Temporary files
 *.tmp
 temp/
 
+# Python
+__pycache__/
+*.pyc
+
+
+/src/generated/prisma

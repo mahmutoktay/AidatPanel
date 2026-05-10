@@ -63,35 +63,16 @@ const generateInviteCode = async (req, res, next) => {
     res.status(201).json({
       success: true,
       data: {
+        id: inviteCode.id,
+        apartmentId: inviteCode.apartmentId,
         code: inviteCode.code,
-        expiresAt: inviteCode.expiresAt
-      }
+        expiresAt: inviteCode.expiresAt,
+        usedAt: inviteCode.usedAt,
+      },
     });
   } catch (error) {
     next(error);
   }
 };
 
-// Davet kodu doğrula (dahili kullanım için)
-const validateInviteCode = async (code) => {
-  const inviteCode = await prisma.inviteCode.findUnique({
-    where: { code },
-    include: { apartment: { include: { building: true } } }
-  });
-
-  if (!inviteCode) {
-    throw new Error("Geçersiz davet kodu.");
-  }
-
-  if (inviteCode.usedAt) {
-    throw new Error("Bu davet kodu zaten kullanılmış.");
-  }
-
-  if (inviteCode.expiresAt < new Date()) {
-    throw new Error("Davet kodunun süresi dolmuş.");
-  }
-
-  return inviteCode;
-};
-
-export { generateInviteCode, validateInviteCode };
+export { generateInviteCode };

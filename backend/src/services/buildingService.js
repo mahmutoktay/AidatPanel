@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { endOfDueDayIstanbul, getIstanbulYearMonth } from "../utils/trDueDate.js";
 
 /**
  * Bina oluştur (transaction: Building + Apartments + Dues)
@@ -16,57 +17,51 @@ export const createBuildingService = async ({
   currency = "TRY",
   managerId,
 }) => {
-  return await prisma.$transaction(async (tx) => {
-    // 1. Building oluştur
-    const building = await tx.building.create({
-      data: {
-        name,
-        address,
-        city,
-        totalFloors,
-        apartmentsPerFloor,
-        dueAmount,
-        dueDay,
-        currency,
-        managerId,
-      },
-    });
+  return await prisma.$transaction(
+    async (tx) => {
+      // 1. Building oluştur
+      const building = await tx.building.create({
+        data: {
+          name,
+          address,
+          city,
+          totalFloors,
+          apartmentsPerFloor,
+          dueAmount,
+          dueDay,
+          currency,
+          managerId,
+        },
+      });
 
-    // 2. Apartments oluştur (1A, 1B, 1C, 2A, 2B, 2C...)
-    const apartmentPromises = [];
-    const totalFloorsNum = totalFloors || 1;
-    const apartmentsPerFloorNum = apartmentsPerFloor || 2;
+      // 2. Apartments — sıralı INSERT (Promise.all deadlock riskini azaltır)
+      const apartments = [];
+      const totalFloorsNum = totalFloors || 1;
+      const apartmentsPerFloorNum = apartmentsPerFloor || 2;
 
-    for (let floor = 1; floor <= totalFloorsNum; floor++) {
-      for (let unit = 0; unit < apartmentsPerFloorNum; unit++) {
-        const letter = String.fromCharCode(65 + unit); // A, B, C...
-        const number = `${floor}${letter}`;
-        apartmentPromises.push(
-          tx.apartment.create({
+      for (let floor = 1; floor <= totalFloorsNum; floor++) {
+        for (let unit = 0; unit < apartmentsPerFloorNum; unit++) {
+          const letter = String.fromCharCode(65 + unit); // A, B, C...
+          const number = `${floor}${letter}`;
+          const apartment = await tx.apartment.create({
             data: {
               number,
               floor,
               buildingId: building.id,
             },
-          })
-        );
+          });
+          apartments.push(apartment);
+        }
       }
-    }
 
-    const apartments = await Promise.all(apartmentPromises);
+      // 3. Dues (bulunulan aydan yıl sonuna kadar) — sıralı INSERT
+      if (dueAmount) {
+        const { year: currentYear, month: currentMonth } = getIstanbulYearMonth();
 
-    // 3. Dues oluştur (bulunulan aydan yıl sonuna kadar)
-    if (dueAmount) {
-      const now = new Date();
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth() + 1; // 1-12
-
-      const duePromises = [];
-      for (const apartment of apartments) {
-        for (let month = currentMonth; month <= 12; month++) {
-          const dueDate = new Date(currentYear, month - 1, dueDay, 23, 59, 59);
-          duePromises.push(
-            tx.due.create({
+        for (const apartment of apartments) {
+          for (let month = currentMonth; month <= 12; month++) {
+            const dueDate = endOfDueDayIstanbul(currentYear, month, dueDay);
+            await tx.due.create({
               data: {
                 apartmentId: apartment.id,
                 amount: dueAmount,
@@ -76,24 +71,25 @@ export const createBuildingService = async ({
                 dueDate,
                 status: "PENDING",
               },
-            })
-          );
+            });
+          }
         }
       }
 
-      await Promise.all(duePromises);
-    }
-
-    // Building'i apartments ile birlikte döndür
-    return await tx.building.findUnique({
-      where: { id: building.id },
-      include: {
-        apartments: {
-          orderBy: { number: "asc" },
+      return await tx.building.findUnique({
+        where: { id: building.id },
+        include: {
+          apartments: {
+            orderBy: { number: "asc" },
+          },
         },
-      },
-    });
-  });
+      });
+    },
+    {
+      maxWait: 10_000,
+      timeout: 60_000,
+    }
+  );
 };
 
 export const getBuildingsService = async (managerId) => {

@@ -8,22 +8,33 @@ import { z } from "zod";
  * Kullanım:
  * router.post("/register", validate(registerSchema), register);
  */
+/**
+ * Express 5+: req.query / req.params çoğu durumda salt okunur; doğrudan atama TypeError verir.
+ * Örnek hata: "Cannot set property query of #<IncomingMessage> which has only a getter"
+ */
+const setReadonlyRequestProp = (req, key, value) => {
+  Object.defineProperty(req, key, {
+    value,
+    enumerable: true,
+    configurable: true,
+  });
+};
+
 export const validate = (schema) => {
   return (req, res, next) => {
     try {
-      // Body'yi validate et
       if (schema.body) {
         req.body = schema.body.parse(req.body);
       }
 
-      // Query parametrelerini validate et
       if (schema.query) {
-        req.query = schema.query.parse(req.query);
+        const parsed = schema.query.parse(req.query ?? {});
+        setReadonlyRequestProp(req, "query", parsed);
       }
 
-      // URL parametrelerini validate et
       if (schema.params) {
-        req.params = schema.params.parse(req.params);
+        const parsed = schema.params.parse(req.params ?? {});
+        setReadonlyRequestProp(req, "params", parsed);
       }
 
       next();
@@ -36,6 +47,15 @@ export const validate = (schema) => {
 /**
  * Auth endpoint'leri için validation schemaları
  */
+const optionalPhone = z.preprocess(
+  (v) => (v === "" || v === null || v === undefined ? undefined : v),
+  z
+    .string()
+    .min(10, "Telefon numarası en az 10 karakter olmalıdır")
+    .max(15, "Telefon numarası en fazla 15 karakter olabilir")
+    .optional()
+);
+
 export const authSchemas = {
   register: {
     body: z.object({
@@ -46,11 +66,7 @@ export const authSchemas = {
       email: z
         .string()
         .email("Geçerli bir email adresi giriniz"),
-      phone: z
-        .string()
-        .min(10, "Telefon numarası en az 10 karakter olmalıdır")
-        .max(15, "Telefon numarası en fazla 15 karakter olabilir")
-        .optional(),
+      phone: optionalPhone,
       password: z
         .string()
         .min(6, "Şifre en az 6 karakter olmalıdır")
@@ -86,6 +102,7 @@ export const authSchemas = {
       email: z
         .string()
         .email("Geçerli bir email adresi giriniz"),
+      phone: optionalPhone,
       password: z
         .string()
         .min(6, "Şifre en az 6 karakter olmalıdır")
@@ -94,6 +111,79 @@ export const authSchemas = {
         .string()
         .min(1, "Davet kodu gereklidir")
         .max(20, "Davet kodu en fazla 20 karakter olabilir"),
+    }),
+  },
+
+  forgotPassword: {
+    body: z.object({
+      email: z.string().email("Geçerli bir email adresi giriniz"),
+    }),
+  },
+
+  resetPassword: {
+    body: z.object({
+      token: z.preprocess(
+        (v) => (typeof v === "string" ? v.trim().toUpperCase().replace(/\s+/g, "") : v),
+        z
+          .string()
+          .length(6, "Kod tam 6 karakter olmalıdır")
+          .regex(
+            /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{6}$/,
+            "Geçersiz kod (6 karakter: rakam 2–9 ve büyük harf; 0, O, 1, I, L kullanılmaz)"
+          )
+      ),
+      password: z
+        .string()
+        .min(6, "Şifre en az 6 karakter olmalıdır")
+        .max(100, "Şifre en fazla 100 karakter olabilir"),
+    }),
+  },
+};
+
+/**
+ * GET/PUT /me, şifre, dil, FCM token
+ */
+export const meSchemas = {
+  updateProfile: {
+    body: z
+      .object({
+        name: z
+          .string()
+          .min(2, "İsim en az 2 karakter olmalıdır")
+          .max(50, "İsim en fazla 50 karakter olabilir")
+          .optional(),
+        phone: optionalPhone,
+        language: z.enum(["tr", "en"]).optional(),
+      })
+      .refine(
+        (d) =>
+          d.name !== undefined || d.phone !== undefined || d.language !== undefined,
+        { message: "En az bir alan gönderin (name, phone veya language)." }
+      ),
+  },
+
+  updatePassword: {
+    body: z.object({
+      currentPassword: z.string().min(1, "Mevcut şifre gereklidir"),
+      newPassword: z
+        .string()
+        .min(6, "Şifre en az 6 karakter olmalıdır")
+        .max(100, "Şifre en fazla 100 karakter olabilir"),
+    }),
+  },
+
+  updateLanguage: {
+    body: z.object({
+      language: z.enum(["tr", "en"]),
+    }),
+  },
+
+  updateFcmToken: {
+    body: z.object({
+      fcmToken: z
+        .string()
+        .min(10, "FCM token çok kısa")
+        .max(4096, "FCM token çok uzun"),
     }),
   },
 };
@@ -247,20 +337,28 @@ export const apartmentSchemas = {
 /**
  * Due (Aidat) endpoint'leri için validation schemaları
  */
+const duesListQuery = z.object({
+  month: z.string().optional(),
+  year: z.string().optional(),
+  status: z.enum(["PENDING", "PAID", "OVERDUE", "WAIVED"]).optional(),
+});
+
 export const dueSchemas = {
   getByBuilding: {
     params: z.object({
-      buildingId: z.string().uuid("Geçerli bir bina ID'si giriniz"),
+      id: z.string().uuid("Geçerli bir bina ID'si giriniz"),
     }),
-    query: z.object({
-      month: z.string().optional(),
-      year: z.string().optional(),
-      status: z.enum(["PENDING", "PAID", "OVERDUE", "WAIVED"]).optional(),
-    }).optional(),
+    query: duesListQuery,
+  },
+
+  /** GET /me/dues — sakin aidat listesi (yönetici listesi ile aynı filtreler) */
+  myDues: {
+    query: duesListQuery,
   },
 
   updateStatus: {
     params: z.object({
+      id: z.string().uuid("Geçerli bir bina ID'si giriniz"),
       dueId: z.string().uuid("Geçerli bir aidat ID'si giriniz"),
     }),
     body: z.object({
@@ -274,7 +372,7 @@ export const dueSchemas = {
 
   updateAmount: {
     params: z.object({
-      buildingId: z.string().uuid("Geçerli bir bina ID'si giriniz"),
+      id: z.string().uuid("Geçerli bir bina ID'si giriniz"),
     }),
     body: z.object({
       dueAmount: z

@@ -19,45 +19,46 @@ export const getDuesByBuildingService = async (buildingId, managerId, filters = 
     apartment: { buildingId },
   };
 
-  if (month) whereClause.month = parseInt(month);
-  if (year) whereClause.year = parseInt(year);
+  if (month) whereClause.month = parseInt(String(month), 10);
+  if (year) whereClause.year = parseInt(String(year), 10);
   if (status) whereClause.status = status;
 
   const dues = await prisma.due.findMany({
     where: whereClause,
     include: {
       apartment: {
-        select: { id: true, number: true, floor: true },
+        select: {
+          id: true,
+          number: true,
+          floor: true,
+          resident: {
+            select: { id: true, name: true, email: true, phone: true },
+          },
+        },
       },
     },
     orderBy: [{ year: "desc" }, { month: "desc" }, { apartment: { number: "asc" } }],
   });
 
-  // Her due'ya resident bilgisini ekle (apartment üzerinden)
-  const duesWithResident = await Promise.all(
-    dues.map(async (due) => {
-      const apartment = await prisma.apartment.findUnique({
-        where: { id: due.apartmentId },
-        include: {
-          resident: {
-            select: { id: true, name: true, email: true, phone: true },
-          },
-        },
-      });
-      return {
-        ...due,
-        resident: apartment?.resident || null,
-      };
-    })
-  );
-
-  return duesWithResident;
+  return dues.map((due) => {
+    const { apartment, ...rest } = due;
+    return {
+      ...rest,
+      apartmentNumber: apartment.number,
+      apartment: {
+        id: apartment.id,
+        number: apartment.number,
+        floor: apartment.floor,
+      },
+      resident: apartment.resident ?? null,
+    };
+  });
 };
 
 /**
  * Aidat durumunu güncelle (yönetici için)
  */
-export const updateDueStatusService = async (dueId, managerId, { status, paidAt, note }) => {
+export const updateDueStatusService = async (dueId, managerId, { status, paidAt, note, buildingId }) => {
   // Due'nun yöneticinin binasına ait olduğunu kontrol et
   const due = await prisma.due.findUnique({
     where: { id: dueId },
@@ -71,6 +72,10 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
   if (!due) return null;
 
   if (due.apartment.building.managerId !== managerId) {
+    return { forbidden: true };
+  }
+
+  if (buildingId && due.apartment.buildingId !== buildingId) {
     return { forbidden: true };
   }
 
@@ -96,7 +101,7 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
     updateData.note = note;
   }
 
-  return await prisma.due.update({
+  const updated = await prisma.due.update({
     where: { id: dueId },
     data: updateData,
     include: {
@@ -105,6 +110,11 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
       },
     },
   });
+
+  return {
+    ...updated,
+    apartmentNumber: updated.apartment?.number ?? null,
+  };
 };
 
 /**
@@ -121,14 +131,15 @@ export const getMyDuesService = async (userId, filters = {}) => {
     return [];
   }
 
-  const { status, year } = filters;
+  const { status, year, month } = filters;
 
   const whereClause = {
     apartmentId: user.apartment.id,
   };
 
   if (status) whereClause.status = status;
-  if (year) whereClause.year = parseInt(year);
+  if (year) whereClause.year = parseInt(String(year), 10);
+  if (month) whereClause.month = parseInt(String(month), 10);
 
   const dues = await prisma.due.findMany({
     where: whereClause,
@@ -143,7 +154,10 @@ export const getMyDuesService = async (userId, filters = {}) => {
 
   return dues.map((due) => ({
     ...due,
+    apartmentId: user.apartment.id,
+    apartmentNumber: user.apartment.number,
     apartment: {
+      id: user.apartment.id,
       number: user.apartment.number,
     },
     building,

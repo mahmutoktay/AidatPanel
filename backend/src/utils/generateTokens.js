@@ -7,9 +7,14 @@ const generateAccessToken = (user) => {
 };
 
 const generateRefreshToken = (user) => {
-  return jwt.sign({ id: user.id, role: user.role }, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: "30d",
-  });
+  const rv = user.refreshTokenVersion ?? 0;
+  return jwt.sign(
+    { id: user.id, role: user.role, rv },
+    process.env.REFRESH_TOKEN_SECRET,
+    {
+      expiresIn: "30d",
+    }
+  );
 };
 
 export { generateAccessToken, generateRefreshToken };

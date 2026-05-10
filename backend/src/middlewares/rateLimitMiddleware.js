@@ -21,16 +21,20 @@ export const apiLimiter = rateLimit({
  * Auth endpoint'leri için daha agresif rate limiter
  * Brute-force saldırılarına karşı koruma
  */
+const authMaxRequests =
+  Number(process.env.AUTH_RATE_LIMIT_MAX) ||
+  (process.env.NODE_ENV === "production" ? 5 : 50);
+
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 dakika
-  max: 5, // IP başına 5 istek (login denemesi)
+  max: authMaxRequests,
   message: {
     success: false,
     message: "Çok fazla giriş denemesi. Lütfen 15 dakika sonra tekrar deneyin.",
   },
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip successful logins
+  // Başarılı istekler sayılmaz; smoke testteki kasıtlı 4xx'ler için dev'de limit yüksek
   skipSuccessfulRequests: true,
 });
 

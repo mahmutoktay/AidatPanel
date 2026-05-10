@@ -670,14 +670,17 @@ npx prisma migrate deploy
 ## 🏗️ MVP Geliştirme Önceliği
 
 ### Faz 1 — Çekirdek (MVP)
-- [ ] Auth (register, login, JWT, davet kodu ile katılım)
-- [ ] Bina ve daire CRUD
-- [ ] Davet kodu sistemi
-- [ ] Aylık aidat oluşturma (toplu) ve durum güncelleme
-- [ ] Sakin: kendi aidat durumunu görme
-- [ ] FCM push notification altyapısı
-- [ ] RevenueCat abonelik entegrasyonu (iOS + Android)
-- [ ] Landing page (web)
+
+Backend (`/api/v1`) durumu — tam liste için `FLUTTER-BACKEND.md` ve `prisma/schema.prisma`:
+
+- [x] Auth (register, login, refresh/logout, JWT + `refreshTokenVersion`, davet kodu ile katılım, **profil `/me`**, **şifre değiştir**, **forgot/reset şifre** Resend ile opsiyonel)
+- [x] Bina ve daire CRUD
+- [x] Davet kodu sistemi
+- [x] Aylık aidat: bina oluşturma / `due-amount` ile üretim + **durum güncelleme** (`PATCH .../dues/:dueId/status`) — ayrı “toplu bulk” endpoint yok (bilinçli Faz 1 sözleşmesi)
+- [x] Sakin: kendi aidat durumunu görme (`GET /me/dues`)
+- [ ] FCM push notification altyapısı — **backend:** `PUT /me/fcm-token` ile token saklama hazır; **Admin SDK ile gönderim** henüz yok (Faz 1.1 / Faz 2)
+- [ ] RevenueCat abonelik entegrasyonu (iOS + Android) — backend webhook / doğrulama henüz
+- [ ] Landing page (web) — `web/` / dağıtım ayrı iş
 
 ### Faz 2 — Tamamlama
 - [ ] Gider kaydı ve kategorileme
