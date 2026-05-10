@@ -8,10 +8,17 @@
 ## MEVCUT AKTİF FAZ
 
 ```
-▶ FAZ 1 — Dues (Aidat) + Dashboard
-  Hedef: ~2026-05-22
-  Onay: BEKLİYOR
+⏸ FAZ 2 — Notifications + Expenses (BACKEND BAĞIMLI — BEKLEMEDE)
+  Hedef: ~2026-06-05
+  Engel: backend tarafında /notifications ve /expenses uçları yok
+  Aksiyon: backend ekibine resources/MOBILE-TO-BACKEND.md raporu iletildi
+  Devam koşulu: minimum FAZ 2 uçları staging'de canlıya alınınca
 ```
+
+> Mobile FAZ 1 tamamlandı (ONAY: Furkan ✅, 2026-05-10).
+> FAZ 2 görevlerinin %80'i backend uçlarına bağımlı; backend hazırlanana
+> kadar mobile tarafında dev preview ile UI iyileştirmeleri (collection
+> rate hesabı, dashboard polish) ve teknik borç (test coverage) yapılabilir.
 
 ---
 
@@ -65,11 +72,11 @@
 
 ---
 
-## FAZ 1 — Dues (Aidat) + Dashboard ▶ AKTİF
+## FAZ 1 — Dues (Aidat) + Dashboard ✅ TAMAMLANDI
 
-**Durum:** DEVAM EDİYOR  
-**Hedef:** ~2026-05-22  
-**ONAY:** BEKLİYOR — `ONAY: Furkan ✅` satırı Furkan tarafından yazılacak
+**Durum:** TAMAMLANDI ✅
+**Tamamlanma:** 2026-05-10
+**ONAY: Furkan ✅** (Tur 1 + Tur 2 + Tur 3 + Tur 4 dahil)
 
 ### Dues (features/dues/)
 - [x] DueEntity tanımı (features/dues/domain/entities/due_entity.dart)
@@ -154,14 +161,16 @@ Yukarıdaki tüm `[ ]` → `[x]` olmadan ve Furkan onayı olmadan Faz 2 başlama
 
 ---
 
-## 🔒 FAZ 2 — Notifications + Expenses
+## ⏸ FAZ 2 — Notifications + Expenses (BACKEND BEKLEMEDE)
 
-**Durum:** KİLİTLİ — Faz 1 tamamlanmadan açılamaz  
+**Durum:** BEKLEMEDE — backend uçları açılana kadar başlatılamıyor
 **Hedef:** ~2026-06-05
+**FAZ 1 onay:** ✅ alındı, ön koşul tamam
 
 > ⚠️ **BACKEND BAĞIMLILIK UYARISI** (FLUTTER-BACKEND.md §12)
 > Bu fazın çoğu görevi backend'in henüz açmadığı uçlara ihtiyaç duyar.
 > Faz 2'yi başlatmadan önce backend ekibinden açılan uçların listesi alınmalıdır.
+> **Talep dosyası:** `resources/MOBILE-TO-BACKEND.md` (mobile→backend rapor).
 
 ### Notifications (features/notifications/)
 | Görev | Backend Durumu |
