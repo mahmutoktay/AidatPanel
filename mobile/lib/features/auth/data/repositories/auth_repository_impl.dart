@@ -25,7 +25,8 @@ DateTime _parseJwtExpiry(String token) {
 }
 
 abstract class AuthRepository {
-  Future<UserEntity> login(String email, String password);
+  /// `identifier` email **veya** telefon olabilir (Belge §3).
+  Future<UserEntity> login(String identifier, String password);
   Future<void> register(
     String email,
     String password,
@@ -61,9 +62,10 @@ class AuthRepositoryImpl implements AuthRepository {
        _secureStorage = secureStorage;
 
   @override
-  Future<UserEntity> login(String email, String password) async {
+  Future<UserEntity> login(String identifier, String password) async {
     try {
-      final request = LoginRequest(email: email, password: password);
+      final request =
+          LoginRequest(identifier: identifier, password: password);
       final response = await _remoteDataSource.login(request);
 
       await _secureStorage.saveToken(response.accessToken);
@@ -134,6 +136,14 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> logout() async {
+    // Belge §3: çıkışta sunucuya POST /auth/logout zorunlu, ardından
+    // yerel token silinir. Sunucu hata verse bile (örn. network) kullanıcı
+    // yine "çıkmış" olmalı; yoksa donar. Bu yüzden hata yutulur.
+    try {
+      await _remoteDataSource.logout();
+    } catch (_) {
+      // Sunucuya ulaşılamasa bile yerel temizlik garantili.
+    }
     await _secureStorage.clearAuth();
   }
 

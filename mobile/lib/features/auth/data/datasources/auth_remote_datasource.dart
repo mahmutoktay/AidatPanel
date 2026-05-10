@@ -12,6 +12,11 @@ abstract class AuthRemoteDataSource {
   Future<RegisterResponse> register(RegisterRequest request);
   Future<JoinResponse> join(JoinRequest request);
   Future<String> refreshToken(String refreshToken);
+
+  /// Sunucuya `POST /auth/logout` (Bearer) atar.
+  /// Backend `refreshTokenVersion`'ı artırarak mevcut refresh token'ı geçersiz kılar.
+  /// Belge §3 ve "kontrol listesi" madde 4 zorunlu kılar.
+  Future<void> logout();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -57,5 +62,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         ? raw['data'] as Map<String, dynamic>
         : raw as Map<String, dynamic>;
     return payload['accessToken'] as String;
+  }
+
+  @override
+  Future<void> logout() async {
+    await _dioClient.post(ApiConstants.logout);
   }
 }

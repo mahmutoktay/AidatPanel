@@ -58,17 +58,6 @@ class DuesNotifier extends StateNotifier<DuesState> {
     }
   }
 
-  Future<void> loadApartmentDues(String apartmentId) async {
-    state = state.copyWith(isLoading: true, clearError: true);
-    try {
-      final dues = await _repository.getApartmentDues(apartmentId);
-      state = state.copyWith(isLoading: false, dues: dues);
-    } catch (e) {
-      state =
-          state.copyWith(isLoading: false, error: 'Daire aidatları yüklenemedi');
-    }
-  }
-
   Future<void> loadMyDues() async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
@@ -81,12 +70,14 @@ class DuesNotifier extends StateNotifier<DuesState> {
   }
 
   Future<void> updateStatus({
+    required String buildingId,
     required String dueId,
     required DueStatus status,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final updated = await _repository.updateDueStatus(
+        buildingId: buildingId,
         dueId: dueId,
         status: status,
       );
@@ -102,33 +93,36 @@ class DuesNotifier extends StateNotifier<DuesState> {
     }
   }
 
-  Future<void> createBulk({
+  Future<bool> updateBuildingDueAmount({
     required String buildingId,
-    required double amount,
-    required int month,
-    required int year,
-    String currency = 'TRY',
-    String? note,
+    required double dueAmount,
+    int? dueDay,
+    String? currency,
+    bool affectCurrent = false,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final created = await _repository.createBulkDues(
+      await _repository.updateBuildingDueAmount(
         buildingId: buildingId,
-        amount: amount,
-        month: month,
-        year: year,
+        dueAmount: dueAmount,
+        dueDay: dueDay,
         currency: currency,
-        note: note,
+        affectCurrent: affectCurrent,
       );
-      state = state.copyWith(
-        isLoading: false,
-        dues: [...state.dues, ...created],
-      );
+      // affectCurrent true ise mevcut PENDING tutarları değişti; listeyi tazele.
+      if (affectCurrent) {
+        final dues = await _repository.getBuildingDues(buildingId);
+        state = state.copyWith(isLoading: false, dues: dues);
+      } else {
+        state = state.copyWith(isLoading: false);
+      }
+      return true;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Toplu aidat oluşturulamadı',
+        error: 'Aidat tutarı güncellenemedi',
       );
+      return false;
     }
   }
 }

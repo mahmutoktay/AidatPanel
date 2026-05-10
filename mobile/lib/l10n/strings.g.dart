@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 492 (246 per locale)
+/// Strings: 504 (252 per locale)
 ///
-/// Built on 2026-05-10 at 00:53 UTC
+/// Built on 2026-05-10 at 11:20 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -303,14 +303,20 @@ class _StringsCommonEn {
 	String get monthDecember => 'December';
 	String get year => 'Year';
 	String get note => 'Note';
-	String get bulkCreate => 'Bulk Create';
-	String get createDues => 'Create Dues';
 	String get myDuesHistory => 'My Dues History';
 	String get buildingDues => 'Building Dues';
 	String get noDuesYet => 'No dues records yet';
 	String get duesUpdated => 'Dues status updated';
-	String get duesCreated => 'Dues created';
 	String get amount => 'Amount';
+	String get updateDueAmount => 'Update Due Amount';
+	String get dueAmountUpdated => 'Due amount updated';
+	String get dueAmountUpdateFailed => 'Could not update due amount';
+	String get dueDay => 'Due Day (1-28)';
+	String get affectCurrentDues => 'Apply to pending dues';
+	String get affectCurrentDuesHint => 'When enabled, current PENDING due amounts are updated to the new amount.';
+	String get update => 'Update';
+	String get overdueDays => 'days overdue';
+	String get dueDateLabel => 'Due date';
 	String get perMonth => '/ month';
 	String get floorLabel => 'FLOOR';
 	String get apartmentLabel => 'APT';
@@ -645,14 +651,20 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get monthDecember => 'Aralık';
 	@override String get year => 'Yıl';
 	@override String get note => 'Not';
-	@override String get bulkCreate => 'Toplu Oluştur';
-	@override String get createDues => 'Aidat Oluştur';
 	@override String get myDuesHistory => 'Aidat Geçmişim';
 	@override String get buildingDues => 'Bina Aidatları';
 	@override String get noDuesYet => 'Henüz aidat kaydı yok';
 	@override String get duesUpdated => 'Aidat durumu güncellendi';
-	@override String get duesCreated => 'Aidatlar oluşturuldu';
 	@override String get amount => 'Tutar';
+	@override String get updateDueAmount => 'Aidat Tutarını Güncelle';
+	@override String get dueAmountUpdated => 'Aidat tutarı güncellendi';
+	@override String get dueAmountUpdateFailed => 'Aidat tutarı güncellenemedi';
+	@override String get dueDay => 'Aidat Günü (1-28)';
+	@override String get affectCurrentDues => 'Bekleyen aidatlara da uygula';
+	@override String get affectCurrentDuesHint => 'Açık olduğunda mevcut bekleyen (PENDING) aidat tutarları da yeni tutara güncellenir.';
+	@override String get update => 'Güncelle';
+	@override String get overdueDays => 'gün gecikmiş';
+	@override String get dueDateLabel => 'Son ödeme';
 	@override String get perMonth => '/ ay';
 	@override String get floorLabel => 'KAT';
 	@override String get apartmentLabel => 'DAİRE';
@@ -956,14 +968,20 @@ extension on Translations {
 			case 'common.monthDecember': return 'December';
 			case 'common.year': return 'Year';
 			case 'common.note': return 'Note';
-			case 'common.bulkCreate': return 'Bulk Create';
-			case 'common.createDues': return 'Create Dues';
 			case 'common.myDuesHistory': return 'My Dues History';
 			case 'common.buildingDues': return 'Building Dues';
 			case 'common.noDuesYet': return 'No dues records yet';
 			case 'common.duesUpdated': return 'Dues status updated';
-			case 'common.duesCreated': return 'Dues created';
 			case 'common.amount': return 'Amount';
+			case 'common.updateDueAmount': return 'Update Due Amount';
+			case 'common.dueAmountUpdated': return 'Due amount updated';
+			case 'common.dueAmountUpdateFailed': return 'Could not update due amount';
+			case 'common.dueDay': return 'Due Day (1-28)';
+			case 'common.affectCurrentDues': return 'Apply to pending dues';
+			case 'common.affectCurrentDuesHint': return 'When enabled, current PENDING due amounts are updated to the new amount.';
+			case 'common.update': return 'Update';
+			case 'common.overdueDays': return 'days overdue';
+			case 'common.dueDateLabel': return 'Due date';
 			case 'common.perMonth': return '/ month';
 			case 'common.floorLabel': return 'FLOOR';
 			case 'common.apartmentLabel': return 'APT';
@@ -1210,14 +1228,20 @@ extension on _StringsTr {
 			case 'common.monthDecember': return 'Aralık';
 			case 'common.year': return 'Yıl';
 			case 'common.note': return 'Not';
-			case 'common.bulkCreate': return 'Toplu Oluştur';
-			case 'common.createDues': return 'Aidat Oluştur';
 			case 'common.myDuesHistory': return 'Aidat Geçmişim';
 			case 'common.buildingDues': return 'Bina Aidatları';
 			case 'common.noDuesYet': return 'Henüz aidat kaydı yok';
 			case 'common.duesUpdated': return 'Aidat durumu güncellendi';
-			case 'common.duesCreated': return 'Aidatlar oluşturuldu';
 			case 'common.amount': return 'Tutar';
+			case 'common.updateDueAmount': return 'Aidat Tutarını Güncelle';
+			case 'common.dueAmountUpdated': return 'Aidat tutarı güncellendi';
+			case 'common.dueAmountUpdateFailed': return 'Aidat tutarı güncellenemedi';
+			case 'common.dueDay': return 'Aidat Günü (1-28)';
+			case 'common.affectCurrentDues': return 'Bekleyen aidatlara da uygula';
+			case 'common.affectCurrentDuesHint': return 'Açık olduğunda mevcut bekleyen (PENDING) aidat tutarları da yeni tutara güncellenir.';
+			case 'common.update': return 'Güncelle';
+			case 'common.overdueDays': return 'gün gecikmiş';
+			case 'common.dueDateLabel': return 'Son ödeme';
 			case 'common.perMonth': return '/ ay';
 			case 'common.floorLabel': return 'KAT';
 			case 'common.apartmentLabel': return 'DAİRE';

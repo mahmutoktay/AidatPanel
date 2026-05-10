@@ -1,15 +1,18 @@
+/// Belge §3 `POST /auth/login`: body `identifier` (email **veya** telefon)
+/// + `password`. Field adı `identifier` çünkü backend her iki formatı kabul
+/// eder ve sunucu tarafında parse edilir.
 class LoginRequest {
-  final String email;
+  final String identifier;
   final String password;
 
   LoginRequest({
-    required this.email,
+    required this.identifier,
     required this.password,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'identifier': email,
+      'identifier': identifier,
       'password': password,
     };
   }

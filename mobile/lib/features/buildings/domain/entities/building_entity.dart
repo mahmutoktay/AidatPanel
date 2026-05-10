@@ -9,6 +9,16 @@ class BuildingEntity extends Equatable {
   final double totalMonthlyDues;
   final double collectedDues;
 
+  /// Backend'in bina bazlı sabit aylık aidat bedeli (Belge §2.3 / §5).
+  /// Bina kurulurken `dueAmount` verilmediyse null olabilir.
+  final double? dueAmount;
+
+  /// Aidat günü (1-28).
+  final int? dueDay;
+
+  /// 3 harf para birimi (`TRY`, `USD` vb.). Default: `TRY`.
+  final String currency;
+
   const BuildingEntity({
     required this.id,
     required this.name,
@@ -17,6 +27,9 @@ class BuildingEntity extends Equatable {
     required this.occupiedApartments,
     required this.totalMonthlyDues,
     required this.collectedDues,
+    this.dueAmount,
+    this.dueDay,
+    this.currency = 'TRY',
   });
 
   double get collectionRate {
@@ -24,8 +37,6 @@ class BuildingEntity extends Equatable {
     return (collectedDues / totalMonthlyDues) * 100;
   }
 
-  /// Immutable update için copyWith method
-  /// Optimized state management için gerekli
   BuildingEntity copyWith({
     String? id,
     String? name,
@@ -34,6 +45,9 @@ class BuildingEntity extends Equatable {
     int? occupiedApartments,
     double? totalMonthlyDues,
     double? collectedDues,
+    double? dueAmount,
+    int? dueDay,
+    String? currency,
   }) {
     return BuildingEntity(
       id: id ?? this.id,
@@ -43,17 +57,23 @@ class BuildingEntity extends Equatable {
       occupiedApartments: occupiedApartments ?? this.occupiedApartments,
       totalMonthlyDues: totalMonthlyDues ?? this.totalMonthlyDues,
       collectedDues: collectedDues ?? this.collectedDues,
+      dueAmount: dueAmount ?? this.dueAmount,
+      dueDay: dueDay ?? this.dueDay,
+      currency: currency ?? this.currency,
     );
   }
 
   @override
   List<Object?> get props => [
-    id,
-    name,
-    address,
-    totalApartments,
-    occupiedApartments,
-    totalMonthlyDues,
-    collectedDues,
-  ];
+        id,
+        name,
+        address,
+        totalApartments,
+        occupiedApartments,
+        totalMonthlyDues,
+        collectedDues,
+        dueAmount,
+        dueDay,
+        currency,
+      ];
 }

@@ -19,32 +19,26 @@ class ApiConstants {
       '$apiVersion/buildings/$buildingId/apartments';
   static String buildingDues(String buildingId) =>
       '$apiVersion/buildings/$buildingId/dues';
+  static String buildingDueStatus(String buildingId, String dueId) =>
+      '$apiVersion/buildings/$buildingId/dues/$dueId/status';
+  static String buildingDueAmount(String buildingId) =>
+      '$apiVersion/buildings/$buildingId/due-amount';
   static String buildingExpenses(String buildingId) =>
       '$apiVersion/buildings/$buildingId/expenses';
   static String buildingTickets(String buildingId) =>
       '$apiVersion/buildings/$buildingId/tickets';
   static String buildingReports(String buildingId) =>
       '$apiVersion/buildings/$buildingId/reports';
-  static String buildingInviteCode(String buildingId) =>
-      '$apiVersion/buildings/$buildingId/invite-code';
 
   // Apartments endpoints
-  static String apartment(String apartmentId) =>
-      '$apiVersion/apartments/$apartmentId';
-  static String apartmentResident(String apartmentId) =>
-      '$apiVersion/apartments/$apartmentId/resident';
-  static String apartmentDues(String apartmentId) =>
-      '$apiVersion/apartments/$apartmentId/dues';
+  // Belge §6: daire CRUD'u nested path altında (/buildings/:bId/apartments[/:id])
+  // ApartmentRemoteDataSource bu nested path'i kullanır; düz /apartments/:id
+  // ucu backend'de yoktur, bu yüzden burada sabit tanımlanmaz.
   static String apartmentInviteCode(String apartmentId) =>
       '$apiVersion/apartments/$apartmentId/invite-code';
-  static const String inviteCode = '$apiVersion/apartments';
 
   // Dues endpoints
-  static String due(String dueId) => '$apiVersion/dues/$dueId';
-  static String dueStatus(String dueId) => '$apiVersion/dues/$dueId/status';
   static const String myDues = '$apiVersion/me/dues';
-  static String bulkDues(String buildingId) =>
-      '$apiVersion/buildings/$buildingId/dues/bulk';
 
   // Expenses endpoints
   static String expense(String expenseId) => '$apiVersion/expenses/$expenseId';

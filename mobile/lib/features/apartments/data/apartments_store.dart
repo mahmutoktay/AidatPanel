@@ -84,7 +84,7 @@ final apartmentCountProvider = Provider.family<int, String>((ref, buildingId) {
 final occupiedCountProvider = Provider.family<int, String>((ref, buildingId) {
   final apartments =
       ref.watch(apartmentsStoreProvider(buildingId)).value ?? [];
-  return apartments.where((a) => a.residentName != 'Boş Daire').length;
+  return apartments.where((a) => a.isOccupied).length;
 });
 
 final paidCountProvider = Provider.family<int, String>((ref, buildingId) {

@@ -4,19 +4,18 @@ import '../models/due_model.dart';
 
 abstract class DuesRemoteDataSource {
   Future<List<DueModel>> getBuildingDues(String buildingId);
-  Future<List<DueModel>> getApartmentDues(String apartmentId);
   Future<List<DueModel>> getMyDues();
   Future<DueModel> updateDueStatus({
+    required String buildingId,
     required String dueId,
     required String status,
   });
-  Future<List<DueModel>> createBulkDues({
+  Future<void> updateBuildingDueAmount({
     required String buildingId,
-    required double amount,
-    required int month,
-    required int year,
-    String currency,
-    String? note,
+    required double dueAmount,
+    int? dueDay,
+    String? currency,
+    bool affectCurrent = false,
   });
 }
 
@@ -36,15 +35,6 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
   }
 
   @override
-  Future<List<DueModel>> getApartmentDues(String apartmentId) async {
-    final response = await _dioClient.get(ApiConstants.apartmentDues(apartmentId));
-    final data = response.data['data'] as List;
-    return data
-        .map((json) => DueModel.fromJson(json as Map<String, dynamic>))
-        .toList();
-  }
-
-  @override
   Future<List<DueModel>> getMyDues() async {
     final response = await _dioClient.get(ApiConstants.myDues);
     final data = response.data['data'] as List;
@@ -55,38 +45,33 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
 
   @override
   Future<DueModel> updateDueStatus({
+    required String buildingId,
     required String dueId,
     required String status,
   }) async {
     final response = await _dioClient.patch(
-      ApiConstants.dueStatus(dueId),
+      ApiConstants.buildingDueStatus(buildingId, dueId),
       data: {'status': status},
     );
     return DueModel.fromJson(response.data['data'] as Map<String, dynamic>);
   }
 
   @override
-  Future<List<DueModel>> createBulkDues({
+  Future<void> updateBuildingDueAmount({
     required String buildingId,
-    required double amount,
-    required int month,
-    required int year,
-    String currency = 'TRY',
-    String? note,
+    required double dueAmount,
+    int? dueDay,
+    String? currency,
+    bool affectCurrent = false,
   }) async {
-    final response = await _dioClient.post(
-      ApiConstants.bulkDues(buildingId),
+    await _dioClient.patch(
+      ApiConstants.buildingDueAmount(buildingId),
       data: {
-        'amount': amount,
-        'month': month,
-        'year': year,
-        'currency': currency,
-        if (note != null && note.isNotEmpty) 'note': note,
+        'dueAmount': dueAmount,
+        'dueDay': ?dueDay,
+        if (currency != null && currency.isNotEmpty) 'currency': currency,
+        'affectCurrent': affectCurrent,
       },
     );
-    final data = response.data['data'] as List;
-    return data
-        .map((json) => DueModel.fromJson(json as Map<String, dynamic>))
-        .toList();
   }
 }

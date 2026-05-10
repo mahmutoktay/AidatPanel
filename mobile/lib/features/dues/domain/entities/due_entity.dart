@@ -10,8 +10,10 @@ class DueEntity extends Equatable {
   final String currency;
   final int month;
   final int year;
+  final DateTime? dueDate;
   final DueStatus status;
   final DateTime? paidAt;
+  final int overdueDays;
   final String? note;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -24,8 +26,10 @@ class DueEntity extends Equatable {
     required this.currency,
     required this.month,
     required this.year,
+    this.dueDate,
     required this.status,
     this.paidAt,
+    this.overdueDays = 0,
     this.note,
     required this.createdAt,
     required this.updatedAt,
@@ -40,8 +44,10 @@ class DueEntity extends Equatable {
         currency,
         month,
         year,
+        dueDate,
         status,
         paidAt,
+        overdueDays,
         note,
         createdAt,
         updatedAt,

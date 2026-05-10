@@ -70,11 +70,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
   String _errorMessage(Object e) =>
       e is ApiException ? e.message : 'Bir hata oluştu';
 
-  Future<void> login(String email, String password, WidgetRef ref) async {
+  /// `identifier` email **veya** telefon (Belge §3).
+  Future<void> login(String identifier, String password, WidgetRef ref) async {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final user = await _authRepository.login(email, password);
+      final user = await _authRepository.login(identifier, password);
       // Reset tab index on successful login
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);

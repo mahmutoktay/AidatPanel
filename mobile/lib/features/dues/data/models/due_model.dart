@@ -8,8 +8,10 @@ class DueModel {
   final String currency;
   final int month;
   final int year;
+  final DateTime? dueDate;
   final String status;
   final DateTime? paidAt;
+  final int overdueDays;
   final String? note;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -22,24 +24,38 @@ class DueModel {
     required this.currency,
     required this.month,
     required this.year,
+    this.dueDate,
     required this.status,
     this.paidAt,
+    this.overdueDays = 0,
     this.note,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory DueModel.fromJson(Map<String, dynamic> json) {
+    // Yönetici listesinde apartmentNumber düz alan; PATCH yanıtında ise
+    // sadece apartment.number bulunur. İkisini de tolere et.
+    String resolveApartmentNumber() {
+      final flat = json['apartmentNumber'];
+      if (flat is String && flat.isNotEmpty) return flat;
+      final apt = json['apartment'];
+      if (apt is Map && apt['number'] is String) return apt['number'] as String;
+      return '';
+    }
+
     return DueModel(
       id: (json['id'] ?? '') as String,
       apartmentId: (json['apartmentId'] ?? '') as String,
-      apartmentNumber: (json['apartmentNumber'] ?? '') as String,
+      apartmentNumber: resolveApartmentNumber(),
       amount: _toDouble(json['amount']),
       currency: (json['currency'] ?? 'TRY') as String,
-      month: (json['month'] ?? 0) as int,
-      year: (json['year'] ?? 0) as int,
+      month: _toInt(json['month']),
+      year: _toInt(json['year']),
+      dueDate: _toDateTime(json['dueDate']),
       status: (json['status'] ?? 'PENDING') as String,
       paidAt: _toDateTime(json['paidAt']),
+      overdueDays: _toInt(json['overdueDays']),
       note: json['note'] as String?,
       createdAt: _toDateTime(json['createdAt']) ?? DateTime.now(),
       updatedAt: _toDateTime(json['updatedAt']) ?? DateTime.now(),
@@ -55,8 +71,10 @@ class DueModel {
       'currency': currency,
       'month': month,
       'year': year,
+      'dueDate': dueDate?.toIso8601String(),
       'status': status,
       'paidAt': paidAt?.toIso8601String(),
+      'overdueDays': overdueDays,
       'note': note,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
@@ -72,8 +90,10 @@ class DueModel {
       currency: currency,
       month: month,
       year: year,
+      dueDate: dueDate,
       status: _mapStatus(status),
       paidAt: paidAt,
+      overdueDays: overdueDays,
       note: note,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -99,6 +119,13 @@ class DueModel {
     if (value is String) {
       return double.tryParse(value) ?? 0;
     }
+    return 0;
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
     return 0;
   }
 

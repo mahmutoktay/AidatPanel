@@ -1,5 +1,8 @@
 import '../../domain/entities/building_entity.dart';
 
+/// Belge §2.3: Prisma `Building` alanları.
+/// `dueAmount` Decimal olduğu için JSON'da string gelir (örn. "600.00")
+/// — güvenli parse için `_toDouble` kullanılır.
 class BuildingModel {
   final String id;
   final String name;
@@ -8,6 +11,9 @@ class BuildingModel {
   final int? totalFloors;
   final int? apartmentsPerFloor;
   final String managerId;
+  final double? dueAmount;
+  final int? dueDay;
+  final String? currency;
 
   BuildingModel({
     required this.id,
@@ -17,6 +23,9 @@ class BuildingModel {
     this.totalFloors,
     this.apartmentsPerFloor,
     required this.managerId,
+    this.dueAmount,
+    this.dueDay,
+    this.currency,
   });
 
   factory BuildingModel.fromJson(Map<String, dynamic> json) {
@@ -28,19 +37,33 @@ class BuildingModel {
       totalFloors: json['totalFloors'] as int?,
       apartmentsPerFloor: json['apartmentsPerFloor'] as int?,
       managerId: json['managerId'] as String,
+      dueAmount: _toDouble(json['dueAmount']),
+      dueDay: json['dueDay'] as int?,
+      currency: json['currency'] as String?,
     );
   }
 
   BuildingEntity toEntity() {
     final total = (totalFloors ?? 0) * (apartmentsPerFloor ?? 0);
+    final monthly = (dueAmount ?? 0) * total;
     return BuildingEntity(
       id: id,
       name: name,
       address: city != null ? '$address, $city' : address,
       totalApartments: total,
       occupiedApartments: 0,
-      totalMonthlyDues: 0.0,
+      totalMonthlyDues: monthly,
       collectedDues: 0.0,
+      dueAmount: dueAmount,
+      dueDay: dueDay,
+      currency: currency ?? 'TRY',
     );
+  }
+
+  static double? _toDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
   }
 }

@@ -7,6 +7,7 @@ class UserData {
   final String? phone;
   final String role;
   final String language;
+  final String? apartmentId;
 
   UserData({
     required this.id,
@@ -15,6 +16,7 @@ class UserData {
     this.phone,
     required this.role,
     this.language = 'tr',
+    this.apartmentId,
   });
 
   factory UserData.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,7 @@ class UserData {
       phone: json['phone'] as String?,
       role: json['role'] as String,
       language: json['language'] as String? ?? 'tr',
+      apartmentId: json['apartmentId'] as String?,
     );
   }
 
@@ -36,6 +39,7 @@ class UserData {
       'phone': phone,
       'role': role,
       'language': language,
+      'apartmentId': apartmentId,
     };
   }
 
@@ -47,6 +51,7 @@ class UserData {
       phone: phone,
       role: role == 'MANAGER' ? UserRole.manager : UserRole.resident,
       language: language,
+      apartmentId: apartmentId,
     );
   }
 }

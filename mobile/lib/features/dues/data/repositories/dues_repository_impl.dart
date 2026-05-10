@@ -22,18 +22,6 @@ class DuesRepositoryImpl implements DuesRepository {
   }
 
   @override
-  Future<List<DueEntity>> getApartmentDues(String apartmentId) async {
-    try {
-      final models = await _remoteDataSource.getApartmentDues(apartmentId);
-      return models.map((model) => model.toEntity()).toList();
-    } on ApiException {
-      rethrow;
-    } catch (_) {
-      throw ApiException(message: 'Daire aidatları alınırken bir hata oluştu');
-    }
-  }
-
-  @override
   Future<List<DueEntity>> getMyDues() async {
     try {
       final models = await _remoteDataSource.getMyDues();
@@ -47,11 +35,13 @@ class DuesRepositoryImpl implements DuesRepository {
 
   @override
   Future<DueEntity> updateDueStatus({
+    required String buildingId,
     required String dueId,
     required DueStatus status,
   }) async {
     try {
       final model = await _remoteDataSource.updateDueStatus(
+        buildingId: buildingId,
         dueId: dueId,
         status: _toApiStatus(status),
       );
@@ -64,28 +54,25 @@ class DuesRepositoryImpl implements DuesRepository {
   }
 
   @override
-  Future<List<DueEntity>> createBulkDues({
+  Future<void> updateBuildingDueAmount({
     required String buildingId,
-    required double amount,
-    required int month,
-    required int year,
-    String currency = 'TRY',
-    String? note,
+    required double dueAmount,
+    int? dueDay,
+    String? currency,
+    bool affectCurrent = false,
   }) async {
     try {
-      final models = await _remoteDataSource.createBulkDues(
+      await _remoteDataSource.updateBuildingDueAmount(
         buildingId: buildingId,
-        amount: amount,
-        month: month,
-        year: year,
+        dueAmount: dueAmount,
+        dueDay: dueDay,
         currency: currency,
-        note: note,
+        affectCurrent: affectCurrent,
       );
-      return models.map((model) => model.toEntity()).toList();
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Toplu aidat oluşturulurken bir hata oluştu');
+      throw ApiException(message: 'Aidat tutarı güncellenirken bir hata oluştu');
     }
   }
 

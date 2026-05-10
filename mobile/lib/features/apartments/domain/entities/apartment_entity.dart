@@ -1,13 +1,15 @@
 import 'package:equatable/equatable.dart';
 
+import 'resident_info.dart';
+
 enum PaymentStatus { paid, pending, overdue }
 
 class ApartmentEntity extends Equatable {
   final String id;
   final String buildingId;
   final String apartmentNumber;
-  final String residentName;
-  final String? phone;
+  final int? floor;
+  final ResidentInfo? resident;
   final double monthlyDues;
   final PaymentStatus paymentStatus;
   final DateTime? lastPaymentDate;
@@ -17,22 +19,31 @@ class ApartmentEntity extends Equatable {
     required this.id,
     required this.buildingId,
     required this.apartmentNumber,
-    required this.residentName,
-    this.phone,
-    required this.monthlyDues,
-    required this.paymentStatus,
+    this.floor,
+    this.resident,
+    this.monthlyDues = 0.0,
+    this.paymentStatus = PaymentStatus.pending,
     this.lastPaymentDate,
-    required this.balance,
+    this.balance = 0.0,
   });
 
-  /// Immutable update için copyWith method
-  /// Optimized state management için gerekli
+  /// Geriye uyumluluk için: UI'da `apt.residentName` çağrıları
+  /// backend'den gelen sakin adına ya da boş daire metnine düşer.
+  String get residentName => resident?.name ?? 'Boş Daire';
+
+  /// Geriye uyumluluk için: UI'da `apt.phone` çağrıları sakinin
+  /// telefon numarasını döner; sakin yoksa veya telefon paylaşmamışsa null.
+  String? get phone => resident?.phone;
+
+  bool get isOccupied => resident != null;
+
   ApartmentEntity copyWith({
     String? id,
     String? buildingId,
     String? apartmentNumber,
-    String? residentName,
-    String? phone,
+    int? floor,
+    ResidentInfo? resident,
+    bool clearResident = false,
     double? monthlyDues,
     PaymentStatus? paymentStatus,
     DateTime? lastPaymentDate,
@@ -42,8 +53,8 @@ class ApartmentEntity extends Equatable {
       id: id ?? this.id,
       buildingId: buildingId ?? this.buildingId,
       apartmentNumber: apartmentNumber ?? this.apartmentNumber,
-      residentName: residentName ?? this.residentName,
-      phone: phone ?? this.phone,
+      floor: floor ?? this.floor,
+      resident: clearResident ? null : (resident ?? this.resident),
       monthlyDues: monthlyDues ?? this.monthlyDues,
       paymentStatus: paymentStatus ?? this.paymentStatus,
       lastPaymentDate: lastPaymentDate ?? this.lastPaymentDate,
@@ -53,14 +64,14 @@ class ApartmentEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    buildingId,
-    apartmentNumber,
-    residentName,
-    phone,
-    monthlyDues,
-    paymentStatus,
-    lastPaymentDate,
-    balance,
-  ];
+        id,
+        buildingId,
+        apartmentNumber,
+        floor,
+        resident,
+        monthlyDues,
+        paymentStatus,
+        lastPaymentDate,
+        balance,
+      ];
 }
