@@ -24,6 +24,10 @@ class ApartmentsNotifier
   final ApartmentRepository _repository;
   final String buildingId;
 
+  /// Aynı submit'in art arda tetiklenmesini engelleyen in-flight bayrağı.
+  /// UI butonu disable ediyor; bu defansif katman.
+  bool _isCreating = false;
+
   ApartmentsNotifier(this._repository, this.buildingId)
       : super(const AsyncValue.loading()) {
     loadApartments();
@@ -40,6 +44,8 @@ class ApartmentsNotifier
   }
 
   Future<void> addApartment({required String number, int? floor}) async {
+    if (_isCreating) return;
+    _isCreating = true;
     try {
       final apartment = await _repository.createApartment(
         buildingId: buildingId,
@@ -50,22 +56,47 @@ class ApartmentsNotifier
       state = AsyncValue.data([...current, apartment]);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    } finally {
+      _isCreating = false;
     }
   }
 
+  /// Hata varsa rethrow; state'i AsyncValue.error'a çevirmeyiz çünkü
+  /// kullanıcı tüm daire listesini kaybeder. UI snackbar gösterir.
   Future<void> removeApartment(String apartmentId) async {
-    try {
-      await _repository.deleteApartment(
-        buildingId: buildingId,
-        id: apartmentId,
-      );
-      final current = state.value ?? [];
-      state = AsyncValue.data(
-        current.where((a) => a.id != apartmentId).toList(),
-      );
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
+    await _repository.deleteApartment(
+      buildingId: buildingId,
+      id: apartmentId,
+    );
+    final current = state.value ?? [];
+    state = AsyncValue.data(
+      current.where((a) => a.id != apartmentId).toList(),
+    );
+  }
+
+  /// Belge §6: PUT /buildings/:bId/apartments/:id body `number?`, `floor?`.
+  /// Backend yanıtında `resident` dönmediği için mevcut sakini korumak
+  /// adına eski entity'nin resident'ini merge ediyoruz.
+  Future<void> editApartment({
+    required String apartmentId,
+    String? number,
+    int? floor,
+  }) async {
+    final updated = await _repository.updateApartment(
+      buildingId: buildingId,
+      id: apartmentId,
+      number: number,
+      floor: floor,
+    );
+    final current = state.value ?? [];
+    final existing = current.firstWhere(
+      (a) => a.id == apartmentId,
+      orElse: () => updated,
+    );
+    final merged = updated.copyWith(resident: existing.resident);
+    state = AsyncValue.data(
+      current.map((a) => a.id == apartmentId ? merged : a).toList(),
+    );
   }
 }
 

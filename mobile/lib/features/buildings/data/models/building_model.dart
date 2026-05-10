@@ -49,7 +49,8 @@ class BuildingModel {
     return BuildingEntity(
       id: id,
       name: name,
-      address: city != null ? '$address, $city' : address,
+      address: address,
+      city: city ?? '',
       totalApartments: total,
       occupiedApartments: 0,
       totalMonthlyDues: monthly,

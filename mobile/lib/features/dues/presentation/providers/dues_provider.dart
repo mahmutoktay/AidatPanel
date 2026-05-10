@@ -46,6 +46,12 @@ class DuesState {
 class DuesNotifier extends StateNotifier<DuesState> {
   final DuesRepository _repository;
 
+  /// Submit edilen async işlemlerin (status update / due-amount update) art
+  /// arda tetiklenmesini engelleyen bayraklar. UI da butonu disable ediyor;
+  /// bu defansif katman.
+  bool _isUpdatingStatus = false;
+  bool _isUpdatingDueAmount = false;
+
   DuesNotifier(this._repository) : super(const DuesState());
 
   Future<void> loadBuildingDues(String buildingId) async {
@@ -74,6 +80,8 @@ class DuesNotifier extends StateNotifier<DuesState> {
     required String dueId,
     required DueStatus status,
   }) async {
+    if (_isUpdatingStatus) return;
+    _isUpdatingStatus = true;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final updated = await _repository.updateDueStatus(
@@ -90,6 +98,8 @@ class DuesNotifier extends StateNotifier<DuesState> {
         isLoading: false,
         error: 'Aidat durumu güncellenemedi',
       );
+    } finally {
+      _isUpdatingStatus = false;
     }
   }
 
@@ -100,6 +110,8 @@ class DuesNotifier extends StateNotifier<DuesState> {
     String? currency,
     bool affectCurrent = false,
   }) async {
+    if (_isUpdatingDueAmount) return false;
+    _isUpdatingDueAmount = true;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       await _repository.updateBuildingDueAmount(
@@ -123,6 +135,8 @@ class DuesNotifier extends StateNotifier<DuesState> {
         error: 'Aidat tutarı güncellenemedi',
       );
       return false;
+    } finally {
+      _isUpdatingDueAmount = false;
     }
   }
 }

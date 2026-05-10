@@ -14,6 +14,8 @@ import '../../../buildings/domain/entities/building_entity.dart';
 import '../../../buildings/presentation/screens/add_building_screen.dart';
 import '../../../buildings/presentation/screens/building_residents_screen.dart';
 import '../../../buildings/presentation/screens/invite_code_screen.dart';
+import '../../../buildings/presentation/widgets/delete_building_dialog.dart';
+import '../../../buildings/presentation/widgets/edit_building_bottom_sheet.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../../dues/presentation/screens/manager_dues_tab.dart';
@@ -309,7 +311,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            building.address,
+                            building.displayAddress,
                             style: AppTypography.body2.copyWith(
                               color: AppColors.textSecondary,
                             ),
@@ -322,6 +324,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                   ],
                 ),
               ),
+              _buildBuildingActionsMenu(building),
             ],
           ),
         ),
@@ -360,8 +363,110 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
             ],
           ),
         ),
+        if (building.dueAmount != null && building.dueAmount! > 0)
+          Container(
+            margin: const EdgeInsets.fromLTRB(
+              AppSizes.spacingM,
+              0,
+              AppSizes.spacingM,
+              AppSizes.spacingM,
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.spacingM,
+              vertical: AppSizes.spacingS,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.accent.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.receipt_long_outlined,
+                  size: 18,
+                  color: AppColors.accent,
+                ),
+                const SizedBox(width: AppSizes.spacingS),
+                Text(
+                  context.t.common.monthlyDuesPerApartment,
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '₺${building.dueAmount!.toStringAsFixed(0)}',
+                  style: AppTypography.body2.copyWith(
+                    color: AppColors.accent,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
     );
+  }
+
+  /// Bina kartının sağ üstünde yer alan üç-nokta menüsü.
+  /// 50+ yaş kuralı: 48x48dp dokunma alanı için PopupMenuButton'ın
+  /// padding'ine ek olarak iconSize > 24 tutuyoruz.
+  Widget _buildBuildingActionsMenu(BuildingEntity building) {
+    return PopupMenuButton<_BuildingAction>(
+      tooltip: '',
+      icon: const Icon(
+        Icons.more_vert,
+        color: AppColors.textSecondary,
+        size: 28,
+      ),
+      padding: EdgeInsets.zero,
+      onSelected: (action) {
+        switch (action) {
+          case _BuildingAction.edit:
+            _onEditBuilding(building);
+            break;
+          case _BuildingAction.delete:
+            _onDeleteBuilding(building);
+            break;
+        }
+      },
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: _BuildingAction.edit,
+          child: Row(
+            children: [
+              const Icon(Icons.edit_outlined, size: 22, color: AppColors.primary),
+              const SizedBox(width: AppSizes.spacingS),
+              Text(
+                context.t.common.editBuilding,
+                style: AppTypography.body1.copyWith(color: AppColors.textPrimary),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: _BuildingAction.delete,
+          child: Row(
+            children: [
+              const Icon(Icons.delete_outline, size: 22, color: AppColors.error),
+              const SizedBox(width: AppSizes.spacingS),
+              Text(
+                context.t.common.deleteBuilding,
+                style: AppTypography.body1.copyWith(color: AppColors.error),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _onEditBuilding(BuildingEntity building) {
+    EditBuildingBottomSheet.show(context, building: building);
+  }
+
+  Future<void> _onDeleteBuilding(BuildingEntity building) async {
+    await DeleteBuildingDialog.show(context, building: building);
   }
 
   Widget _buildStatItem({
@@ -458,7 +563,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                           ),
                           const SizedBox(height: AppSizes.spacingXS),
                           Text(
-                            building.address,
+                            building.displayAddress,
                             style: AppTypography.body2.copyWith(
                               color: AppColors.textSecondary,
                             ),
@@ -744,6 +849,8 @@ class _HeroSummaryCard extends StatelessWidget {
     );
   }
 }
+
+enum _BuildingAction { edit, delete }
 
 class _MetricItem extends StatelessWidget {
   final IconData icon;

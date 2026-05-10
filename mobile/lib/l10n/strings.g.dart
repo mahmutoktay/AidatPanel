@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 504 (252 per locale)
+/// Strings: 556 (278 per locale)
 ///
-/// Built on 2026-05-10 at 11:20 UTC
+/// Built on 2026-05-10 at 11:51 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -325,6 +325,32 @@ class _StringsCommonEn {
 	String get stepBuilding => 'Building';
 	String get stepApartment => 'Apartment';
 	String get stepCode => 'Code';
+	String get editBuilding => 'Edit Building';
+	String get deleteBuilding => 'Delete Building';
+	String get buildingUpdated => 'Building updated';
+	String get buildingDeleted => 'Building deleted';
+	String get buildingUpdateFailed => 'Could not update building';
+	String get buildingDeleteFailed => 'Could not delete building';
+	String get buildingDeleteFailedFK => 'Cannot delete this building: apartments, residents, or dues records still exist. Clean up apartments/dues first.';
+	String get deleteBuildingHeader => 'This action cannot be undone.';
+	String get deleteBuildingTypeHint => 'To confirm, type the building name below exactly:';
+	String get deleteBuildingTypeFieldLabel => 'Building name';
+	String get buildingNameMismatch => 'What you typed does not match the building name.';
+	String get editApartment => 'Edit Apartment';
+	String get deleteApartment => 'Delete Apartment';
+	String get apartmentUpdated => 'Apartment updated';
+	String get apartmentDeleted => 'Apartment deleted';
+	String get apartmentUpdateFailed => 'Could not update apartment';
+	String get apartmentDeleteFailed => 'Could not delete apartment';
+	String get apartmentDeleteFailedFK => 'Cannot delete this apartment: resident or dues records exist. Wait for the resident to close their account and clean up dues.';
+	String get deleteApartmentConfirm => 'Are you sure you want to delete this apartment?';
+	String get apartmentNumberLabel => 'Apt No (e.g. 5A)';
+	String get floorLabel2 => 'Floor (optional)';
+	String get floorOptional => 'Floor (-5 to 200)';
+	String get buildingNameField => 'Building name';
+	String get buildingAddressField => 'Address';
+	String get buildingCityField => 'City';
+	String get monthlyDuesPerApartment => 'Monthly dues / apt';
 }
 
 // Path: validation
@@ -673,6 +699,32 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get stepBuilding => 'Bina';
 	@override String get stepApartment => 'Daire';
 	@override String get stepCode => 'Kod';
+	@override String get editBuilding => 'Binayı Düzenle';
+	@override String get deleteBuilding => 'Binayı Sil';
+	@override String get buildingUpdated => 'Bina güncellendi';
+	@override String get buildingDeleted => 'Bina silindi';
+	@override String get buildingUpdateFailed => 'Bina güncellenemedi';
+	@override String get buildingDeleteFailed => 'Bina silinemedi';
+	@override String get buildingDeleteFailedFK => 'Bu binayı silemezsiniz: hâlâ daire, sakin veya aidat kayıtları var. Önce daireleri/aidatları temizleyip tekrar deneyin.';
+	@override String get deleteBuildingHeader => 'Bu işlem geri alınamaz.';
+	@override String get deleteBuildingTypeHint => 'Onaylamak için aşağıya bina adını aynen yazın:';
+	@override String get deleteBuildingTypeFieldLabel => 'Bina adı';
+	@override String get buildingNameMismatch => 'Yazdığınız metin bina adıyla aynı değil.';
+	@override String get editApartment => 'Daireyi Düzenle';
+	@override String get deleteApartment => 'Daireyi Sil';
+	@override String get apartmentUpdated => 'Daire güncellendi';
+	@override String get apartmentDeleted => 'Daire silindi';
+	@override String get apartmentUpdateFailed => 'Daire güncellenemedi';
+	@override String get apartmentDeleteFailed => 'Daire silinemedi';
+	@override String get apartmentDeleteFailedFK => 'Bu daireyi silemezsiniz: sakin veya aidat kayıtları var. Önce sakinin hesap kapatmasını bekleyip aidatları temizleyin.';
+	@override String get deleteApartmentConfirm => 'Daireyi silmek istediğinize emin misiniz?';
+	@override String get apartmentNumberLabel => 'Daire No (örn. 5A)';
+	@override String get floorLabel2 => 'Kat (opsiyonel)';
+	@override String get floorOptional => 'Kat (-5 ile 200 arası)';
+	@override String get buildingNameField => 'Bina adı';
+	@override String get buildingAddressField => 'Adres';
+	@override String get buildingCityField => 'Şehir';
+	@override String get monthlyDuesPerApartment => 'Aylık aidat / daire';
 }
 
 // Path: validation
@@ -990,6 +1042,32 @@ extension on Translations {
 			case 'common.stepBuilding': return 'Building';
 			case 'common.stepApartment': return 'Apartment';
 			case 'common.stepCode': return 'Code';
+			case 'common.editBuilding': return 'Edit Building';
+			case 'common.deleteBuilding': return 'Delete Building';
+			case 'common.buildingUpdated': return 'Building updated';
+			case 'common.buildingDeleted': return 'Building deleted';
+			case 'common.buildingUpdateFailed': return 'Could not update building';
+			case 'common.buildingDeleteFailed': return 'Could not delete building';
+			case 'common.buildingDeleteFailedFK': return 'Cannot delete this building: apartments, residents, or dues records still exist. Clean up apartments/dues first.';
+			case 'common.deleteBuildingHeader': return 'This action cannot be undone.';
+			case 'common.deleteBuildingTypeHint': return 'To confirm, type the building name below exactly:';
+			case 'common.deleteBuildingTypeFieldLabel': return 'Building name';
+			case 'common.buildingNameMismatch': return 'What you typed does not match the building name.';
+			case 'common.editApartment': return 'Edit Apartment';
+			case 'common.deleteApartment': return 'Delete Apartment';
+			case 'common.apartmentUpdated': return 'Apartment updated';
+			case 'common.apartmentDeleted': return 'Apartment deleted';
+			case 'common.apartmentUpdateFailed': return 'Could not update apartment';
+			case 'common.apartmentDeleteFailed': return 'Could not delete apartment';
+			case 'common.apartmentDeleteFailedFK': return 'Cannot delete this apartment: resident or dues records exist. Wait for the resident to close their account and clean up dues.';
+			case 'common.deleteApartmentConfirm': return 'Are you sure you want to delete this apartment?';
+			case 'common.apartmentNumberLabel': return 'Apt No (e.g. 5A)';
+			case 'common.floorLabel2': return 'Floor (optional)';
+			case 'common.floorOptional': return 'Floor (-5 to 200)';
+			case 'common.buildingNameField': return 'Building name';
+			case 'common.buildingAddressField': return 'Address';
+			case 'common.buildingCityField': return 'City';
+			case 'common.monthlyDuesPerApartment': return 'Monthly dues / apt';
 			case 'validation.emailRequired': return 'Email address cannot be empty';
 			case 'validation.emailInvalid': return 'Please enter a valid email address';
 			case 'validation.emailTooLong': return 'Email address is too long';
@@ -1250,6 +1328,32 @@ extension on _StringsTr {
 			case 'common.stepBuilding': return 'Bina';
 			case 'common.stepApartment': return 'Daire';
 			case 'common.stepCode': return 'Kod';
+			case 'common.editBuilding': return 'Binayı Düzenle';
+			case 'common.deleteBuilding': return 'Binayı Sil';
+			case 'common.buildingUpdated': return 'Bina güncellendi';
+			case 'common.buildingDeleted': return 'Bina silindi';
+			case 'common.buildingUpdateFailed': return 'Bina güncellenemedi';
+			case 'common.buildingDeleteFailed': return 'Bina silinemedi';
+			case 'common.buildingDeleteFailedFK': return 'Bu binayı silemezsiniz: hâlâ daire, sakin veya aidat kayıtları var. Önce daireleri/aidatları temizleyip tekrar deneyin.';
+			case 'common.deleteBuildingHeader': return 'Bu işlem geri alınamaz.';
+			case 'common.deleteBuildingTypeHint': return 'Onaylamak için aşağıya bina adını aynen yazın:';
+			case 'common.deleteBuildingTypeFieldLabel': return 'Bina adı';
+			case 'common.buildingNameMismatch': return 'Yazdığınız metin bina adıyla aynı değil.';
+			case 'common.editApartment': return 'Daireyi Düzenle';
+			case 'common.deleteApartment': return 'Daireyi Sil';
+			case 'common.apartmentUpdated': return 'Daire güncellendi';
+			case 'common.apartmentDeleted': return 'Daire silindi';
+			case 'common.apartmentUpdateFailed': return 'Daire güncellenemedi';
+			case 'common.apartmentDeleteFailed': return 'Daire silinemedi';
+			case 'common.apartmentDeleteFailedFK': return 'Bu daireyi silemezsiniz: sakin veya aidat kayıtları var. Önce sakinin hesap kapatmasını bekleyip aidatları temizleyin.';
+			case 'common.deleteApartmentConfirm': return 'Daireyi silmek istediğinize emin misiniz?';
+			case 'common.apartmentNumberLabel': return 'Daire No (örn. 5A)';
+			case 'common.floorLabel2': return 'Kat (opsiyonel)';
+			case 'common.floorOptional': return 'Kat (-5 ile 200 arası)';
+			case 'common.buildingNameField': return 'Bina adı';
+			case 'common.buildingAddressField': return 'Adres';
+			case 'common.buildingCityField': return 'Şehir';
+			case 'common.monthlyDuesPerApartment': return 'Aylık aidat / daire';
 			case 'validation.emailRequired': return 'Email adresi boş bırakılamaz';
 			case 'validation.emailInvalid': return 'Geçerli bir email adresi giriniz';
 			case 'validation.emailTooLong': return 'Email adresi çok uzun';

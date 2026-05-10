@@ -6,6 +6,8 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../apartments/data/apartments_store.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
+import '../../../apartments/presentation/widgets/delete_apartment_dialog.dart';
+import '../../../apartments/presentation/widgets/edit_apartment_bottom_sheet.dart';
 import '../../domain/entities/building_entity.dart';
 
 class BuildingResidentsScreen extends ConsumerWidget {
@@ -143,7 +145,7 @@ class BuildingResidentsScreen extends ConsumerWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  building.address,
+                  building.displayAddress,
                   style: AppTypography.body2.copyWith(color: Colors.white.withValues(alpha: 0.7)),
                 ),
               ),
@@ -156,7 +158,10 @@ class BuildingResidentsScreen extends ConsumerWidget {
 
   Widget _buildResidentCard(
       BuildContext context, int index, ApartmentEntity apt) {
-    final isOccupied = apt.phone != null;
+    // ApartmentEntity.isOccupied: backend'den dönen `resident` objesinin
+    // null olup olmadığına bakar. Telefon paylaşmamış sakinler de "boş"
+    // görünmesin diye `apt.phone != null` yerine bunu kullanıyoruz.
+    final isOccupied = apt.isOccupied;
     final statusInfo = _getStatusInfo(context, apt.paymentStatus);
 
     return Container(
@@ -235,9 +240,10 @@ class BuildingResidentsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                _buildApartmentActionsMenu(context, apt),
               ],
             ),
-            if (isOccupied) ...[
+            if (isOccupied && apt.phone != null) ...[
               const SizedBox(height: AppSizes.spacingM),
               Container(height: 1, color: AppColors.borderColor),
               const SizedBox(height: AppSizes.spacingM),
@@ -265,6 +271,62 @@ class BuildingResidentsScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// Daire kartının sağ üst köşesinde "..." menu.
+  /// Düzenle → bottom sheet, Sil → onay dialog'u.
+  Widget _buildApartmentActionsMenu(
+      BuildContext context, ApartmentEntity apt) {
+    return PopupMenuButton<_ApartmentAction>(
+      tooltip: '',
+      icon: const Icon(
+        Icons.more_vert,
+        color: AppColors.textSecondary,
+        size: 24,
+      ),
+      padding: EdgeInsets.zero,
+      onSelected: (action) {
+        switch (action) {
+          case _ApartmentAction.edit:
+            EditApartmentBottomSheet.show(context, apartment: apt);
+            break;
+          case _ApartmentAction.delete:
+            DeleteApartmentDialog.show(context, apartment: apt);
+            break;
+        }
+      },
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: _ApartmentAction.edit,
+          child: Row(
+            children: [
+              const Icon(Icons.edit_outlined,
+                  size: 22, color: AppColors.primary),
+              const SizedBox(width: AppSizes.spacingS),
+              Text(
+                context.t.common.editApartment,
+                style:
+                    AppTypography.body1.copyWith(color: AppColors.textPrimary),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: _ApartmentAction.delete,
+          child: Row(
+            children: [
+              const Icon(Icons.delete_outline,
+                  size: 22, color: AppColors.error),
+              const SizedBox(width: AppSizes.spacingS),
+              Text(
+                context.t.common.deleteApartment,
+                style: AppTypography.body1.copyWith(color: AppColors.error),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -346,3 +408,5 @@ class _StatusInfo {
     required this.bgColor,
   });
 }
+
+enum _ApartmentAction { edit, delete }

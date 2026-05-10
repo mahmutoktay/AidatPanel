@@ -4,6 +4,12 @@ class BuildingEntity extends Equatable {
   final String id;
   final String name;
   final String address;
+
+  /// Şehir; backend'de ayrı bir alan (Belge §2.3). UI'da `displayAddress`
+  /// üzerinden adresle birleşik gösterilir, böylece düzenleme ekranı
+  /// `address` ve `city`'yi ayrı tutabilir.
+  final String city;
+
   final int totalApartments;
   final int occupiedApartments;
   final double totalMonthlyDues;
@@ -23,6 +29,7 @@ class BuildingEntity extends Equatable {
     required this.id,
     required this.name,
     required this.address,
+    this.city = '',
     required this.totalApartments,
     required this.occupiedApartments,
     required this.totalMonthlyDues,
@@ -31,6 +38,10 @@ class BuildingEntity extends Equatable {
     this.dueDay,
     this.currency = 'TRY',
   });
+
+  /// Liste/kart görünümünde gösterilecek tam adres ("Adres, Şehir").
+  String get displayAddress =>
+      city.trim().isEmpty ? address : '$address, $city';
 
   double get collectionRate {
     if (totalMonthlyDues == 0) return 0;
@@ -41,6 +52,7 @@ class BuildingEntity extends Equatable {
     String? id,
     String? name,
     String? address,
+    String? city,
     int? totalApartments,
     int? occupiedApartments,
     double? totalMonthlyDues,
@@ -53,6 +65,7 @@ class BuildingEntity extends Equatable {
       id: id ?? this.id,
       name: name ?? this.name,
       address: address ?? this.address,
+      city: city ?? this.city,
       totalApartments: totalApartments ?? this.totalApartments,
       occupiedApartments: occupiedApartments ?? this.occupiedApartments,
       totalMonthlyDues: totalMonthlyDues ?? this.totalMonthlyDues,
@@ -68,6 +81,7 @@ class BuildingEntity extends Equatable {
         id,
         name,
         address,
+        city,
         totalApartments,
         occupiedApartments,
         totalMonthlyDues,

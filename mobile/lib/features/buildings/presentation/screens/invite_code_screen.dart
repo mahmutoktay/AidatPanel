@@ -283,7 +283,7 @@ class _BuildingPickerStep extends StatelessWidget {
           icon: Icons.apartment,
           iconColor: AppColors.primary,
           title: b.name,
-          subtitle: b.address,
+          subtitle: b.displayAddress,
           onTap: () => onPick(b),
         );
       },

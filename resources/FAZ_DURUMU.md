@@ -123,6 +123,32 @@ Backend ekibinin yayımladığı API sözleşmesine göre yapılan zorunlu uyum 
 - [x] `apartment(apartmentId)` ve `apartmentResident(apartmentId)` ölü/yanlış sabitleri `api_constants.dart`'tan silindi (Belge §6: daire CRUD'u nested path altında, düz path yok). Açıklayıcı yorum bırakıldı.
 - [x] `LoginRequest.email` field'ı semantik doğru şekilde `identifier` olarak yeniden adlandırıldı (Belge §3 — body `identifier` email **veya** telefon). `AuthRepository.login(identifier, password)`, `AuthNotifier.login(identifier, password, ref)` imzaları güncellendi. `LoginScreen` zaten phone/email toggle (`_usePhoneLogin`, `+90$raw` prefix) ile çalıştığı için UI değişikliği gerekmedi.
 
+#### Tur 3 — Yönetim CRUD Tamamlama (bina + daire düzenleme/silme UI)
+Backend uçları FAZ 0'dan beri hazırdı (Belge §5, §6) ama UI yoktu. Yönetici binayı/daireyi sadece oluşturup listeleyebiliyordu — düzenleme/silme yapamıyordu. FAZ 2/3 backend bekliyor; bu eksiği FAZ 1 içinde kapatıyoruz.
+
+- [x] **🔴 BUG FIX**: `BuildingModel.toEntity()` `city`'yi `address` ile concat ediyordu ("Adres, Şehir") → düzenleme ekranında ayrı alan olarak gösterilemiyordu. `BuildingEntity`'ye ayrı `city` alanı eklendi; UI'da `displayAddress` getter'ı ile birleşik gösterim sağlanıyor (`building_residents_screen.dart`, `manager_dashboard_screen.dart`, `invite_code_screen.dart` güncellendi).
+- [x] **🔴 BUG FIX**: `BuildingResidentsScreen._buildResidentCard` `apt.phone != null` ile `isOccupied` belirliyordu → telefon paylaşmamış sakinler "BOŞ" görünüyordu. `apt.isOccupied` (resident != null) kullanımına geçildi; telefon satırı `apt.phone != null` kontrolüyle ayrıca koşullandı (null safety).
+- [x] `ApartmentsNotifier.editApartment()` eklendi (datasource + repository zaten vardı). Backend yanıtında `resident` dönmediği için merge ile mevcut sakini koruyor (`copyWith(resident: existing.resident)`).
+- [x] `BuildingsNotifier.updateBuilding()` ve `removeBuilding()` artık hata olduğunda `AsyncValue.error` set etmek yerine **rethrow** ediyor (state'i bozmuyor). Aynı düzeltme `ApartmentsNotifier.removeApartment()` ve `editApartment()` için de uygulandı. UI snackbar gösteriyor.
+- [x] `EditBuildingBottomSheet` widget'ı (name + address + city; sadece değişen alanlar PUT body'sine konur).
+- [x] `DeleteBuildingDialog` widget'ı (tip-to-confirm: bina adı yazılmadan sil butonu pasif; FK hatası "Bu binayı silemezsiniz: hâlâ daire/sakin/aidat var..." mesajına insanlaştırılıyor).
+- [x] `EditApartmentBottomSheet` widget'ı (number + floor; floor backend §6 §6 -5..200 aralığında doğrulanıyor).
+- [x] `DeleteApartmentDialog` widget'ı (basit AlertDialog; FK hatası "Önce sakin hesabını kapatmalı" mesajına insanlaştırılıyor).
+- [x] `ManagerDashboardScreen` "Binalarım" sekmesinde her bina kartının sağ üstüne `PopupMenuButton` (Düzenle / Sil) eklendi.
+- [x] `BuildingResidentsScreen` her daire kartına `PopupMenuButton` (Düzenle / Sil) eklendi.
+- [x] Bina kartına bina başına aylık aidat tutarı rozeti eklendi (`dueAmount` > 0 iken `monthlyDuesPerApartment` etiketiyle).
+- [x] i18n: `editBuilding`, `deleteBuilding`, `buildingUpdated`, `buildingDeleted`, `buildingUpdateFailed`, `buildingDeleteFailed`, `buildingDeleteFailedFK`, `deleteBuildingHeader`, `deleteBuildingTypeHint`, `deleteBuildingTypeFieldLabel`, `buildingNameMismatch`, `editApartment`, `deleteApartment`, `apartmentUpdated`, `apartmentDeleted`, `apartmentUpdateFailed`, `apartmentDeleteFailed`, `apartmentDeleteFailedFK`, `deleteApartmentConfirm`, `apartmentNumberLabel`, `floorLabel2`, `floorOptional`, `buildingNameField`, `buildingAddressField`, `buildingCityField`, `monthlyDuesPerApartment` anahtarları TR + EN eklendi (slang regenerate edildi).
+
+> **NOT — Sakin atamayı kaldırma:** Backend belgesinde (Belge §6) bir manager'ın sakini bir daireden çıkaracağı endpoint yok. `PUT /buildings/:bId/apartments/:id` body'si yalnızca `number` ve `floor` kabul ediyor. Bu özellik için backend ekibinden `DELETE /buildings/:bId/apartments/:id/resident` (veya `PATCH .../apartments/:id { resident: null }`) ucu açılması gerekir. Şimdilik daire silmek implicit olarak resident ilişkisini de kaldırır (FK hatası olmazsa); fakat aidat geçmişini de siler — kullanıcı önce sakinin `DELETE /me` (KVKK soft delete) ile hesabını kapatmasını beklemelidir. **Backend ekibine talep iletilmeli.**
+
+#### Tur 4 — Submit Guard (rapid-tap koruması) ve Dev Preview altyapısı
+Manuel test sırasında "Bina Oluştur" butonuna art arda basılınca aynı binanın 10+ kez oluştuğu fark edildi (her bina ayrıca N daire seed ettiği için 10×N daire). 50+ yaş kullanıcı kuralında dürtüklenme sık; kapsamlı çift katman koruma uygulandı.
+
+- [x] **🔴 BUG FIX (rapid-tap)**: `BuildingsNotifier.addBuilding`'e `_isCreating` in-flight bayrağı eklendi (defansif katman). `ApartmentsNotifier.addApartment`, `DuesNotifier.updateStatus` ve `DuesNotifier.updateBuildingDueAmount` aynı pattern'le korundu. Aynı submit boyunca ikinci çağrı sessizce yutulur (`return null` / `return false`).
+- [x] **AddBuildingScreen UI fix**: `_submitting` state eklendi. Submit boyunca: birincil buton disable + spinner + "Yükleniyor…" etiketi, "Vazgeç" butonu disable, AppBar geri ok disable, form alanları `AbsorbPointer` ile kilitli, sistem geri tuşu `PopScope(canPop: !_submitting)` ile bastırılıyor (yarım state oluşmasın: bina yaratıldı ama daireler seed edilmedi gibi).
+- [x] **Dev Preview altyapısı**: Sunucu yokken UI test etmek için `lib/dev/dev_mocks.dart` (in-memory `MockAuthRepository`, `MockBuildingRepository`, `MockApartmentRepository`, `MockDuesRepository`; bina silmede FK simülasyonu var) ve `lib/main_dev.dart` (ProviderScope.overrides ile mock'ları inject eder, sağ üstte turuncu `DEV` rozeti gösterir) eklendi. Çalıştırma: `flutter run -t lib/main_dev.dart`. Production main.dart bu dosyaları import etmediği için zarar yok.
+- [x] `authRepositoryProvider` `Provider<AuthRepository>` olarak interface tipinde (eskiden `Provider<AuthRepositoryImpl>` örtük tip — mock override edilemiyordu). Mock ProviderScope.override için gerekli.
+
 ### Çıkış Kapısı
 Yukarıdaki tüm `[ ]` → `[x]` olmadan ve Furkan onayı olmadan Faz 2 başlamaz.
 

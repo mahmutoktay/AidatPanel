@@ -4,7 +4,8 @@ import '../../../../core/network/dio_client.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
-import '../../data/repositories/auth_repository_impl.dart';
+import '../../data/repositories/auth_repository_impl.dart'
+    show AuthRepository, AuthRepositoryImpl;
 import '../../domain/entities/user_entity.dart';
 
 final secureStorageProvider = Provider((ref) => SecureStorage());
@@ -17,7 +18,7 @@ final authRemoteDataSourceProvider = Provider((ref) {
   return AuthRemoteDataSourceImpl(dioClient: ref.watch(dioClientProvider));
 });
 
-final authRepositoryProvider = Provider((ref) {
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepositoryImpl(
     remoteDataSource: ref.watch(authRemoteDataSourceProvider),
     secureStorage: ref.watch(secureStorageProvider),

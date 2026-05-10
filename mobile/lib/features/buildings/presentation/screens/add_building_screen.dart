@@ -30,6 +30,12 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   String? _selectedCity;
   String? _selectedDistrict;
 
+  /// Submit edildiğinde buton disable'lanır + loading gösterilir.
+  /// Aynı submit boyunca PopScope geri tuşunu da bastırır; aksi halde
+  /// 50+ kullanıcı kazara back basınca create yarıda kalıp yarım state
+  /// oluşur (bina yaratıldı ama daireler seed edilmedi gibi).
+  bool _submitting = false;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -42,28 +48,34 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(context.t.common.addBuildingNew),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+    return PopScope(
+      canPop: !_submitting,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          title: Text(context.t.common.addBuildingNew),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _submitting ? null : () => context.pop(),
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: Builder(
-            builder: (ctx) {
-              final items = _buildFormItems(ctx);
-              return ListView.builder(
-                padding: const EdgeInsets.all(AppSizes.spacingL),
-                itemCount: items.length,
-                itemBuilder: (_, i) => items[i],
-              );
-            },
+        body: SafeArea(
+          child: AbsorbPointer(
+            absorbing: _submitting,
+            child: Form(
+              key: _formKey,
+              child: Builder(
+                builder: (ctx) {
+                  final items = _buildFormItems(ctx);
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(AppSizes.spacingL),
+                    itemCount: items.length,
+                    itemBuilder: (_, i) => items[i],
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ),
@@ -140,17 +152,32 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
         SizedBox(
           height: AppSizes.buttonHeightPrimary,
           child: ElevatedButton.icon(
-            onPressed: _onSubmit,
+            onPressed: _submitting ? null : _onSubmit,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
+              disabledBackgroundColor:
+                  AppColors.primary.withValues(alpha: 0.6),
+              disabledForegroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            icon: const Icon(Icons.check_circle_outline),
+            icon: _submitting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Icon(Icons.check_circle_outline),
             label: Text(
-              context.t.common.createBuilding,
+              _submitting
+                  ? context.t.common.loading
+                  : context.t.common.createBuilding,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
             ),
           ),
@@ -159,7 +186,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
         SizedBox(
           height: AppSizes.buttonHeightSecondary,
           child: OutlinedButton(
-            onPressed: () => context.pop(),
+            onPressed: _submitting ? null : () => context.pop(),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.textPrimary,
               side: BorderSide(color: AppColors.borderColor, width: 1.5),
@@ -360,6 +387,11 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   }
 
   Future<void> _onSubmit() async {
+    // Hızlı dürtüklenme + yarı yarıya işlenmiş submit'e karşı koruma.
+    // Notifier seviyesinde de aynı guard var (BuildingsNotifier._isCreating);
+    // bu UI guard'ı kullanıcıya görsel feedback sağlar (buton disable + spinner).
+    if (_submitting) return;
+
     final formValid = _formKey.currentState?.validate() ?? false;
     if (!formValid) {
       ref
@@ -394,40 +426,45 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       return;
     }
 
-    final address =
-        '${_addressController.text.trim()}, $_selectedDistrict';
+    setState(() => _submitting = true);
+    try {
+      final address =
+          '${_addressController.text.trim()}, $_selectedDistrict';
 
-    final id = await ref.read(buildingsStoreProvider.notifier).addBuilding(
-          name: _nameController.text.trim(),
-          address: address,
-          city: _selectedCity!,
-          totalFloors: floors,
-          apartmentsPerFloor: apartmentsPerFloor,
-          dueAmount: dueAmount,
-          dueDay: 1,
-          currency: 'TRY',
-        );
-
-    if (!mounted) return;
-    if (id == null) {
-      ref.read(toastProvider.notifier).show(
-            'Bina eklenemedi. Lütfen tekrar deneyin.',
-            type: ToastType.error,
+      final id = await ref.read(buildingsStoreProvider.notifier).addBuilding(
+            name: _nameController.text.trim(),
+            address: address,
+            city: _selectedCity!,
+            totalFloors: floors,
+            apartmentsPerFloor: apartmentsPerFloor,
+            dueAmount: dueAmount,
+            dueDay: 1,
+            currency: 'TRY',
           );
-      return;
+
+      if (!mounted) return;
+      if (id == null) {
+        ref.read(toastProvider.notifier).show(
+              'Bina eklenemedi. Lütfen tekrar deneyin.',
+              type: ToastType.error,
+            );
+        return;
+      }
+
+      await _seedApartmentsIfNeeded(
+        buildingId: id,
+        floors: floors,
+        apartmentsPerFloor: apartmentsPerFloor,
+      );
+
+      if (!mounted) return;
+      ref
+          .read(toastProvider.notifier)
+          .show(context.t.common.buildingAddedSuccess, type: ToastType.success);
+      context.pop();
+    } finally {
+      if (mounted) setState(() => _submitting = false);
     }
-
-    await _seedApartmentsIfNeeded(
-      buildingId: id,
-      floors: floors,
-      apartmentsPerFloor: apartmentsPerFloor,
-    );
-
-    if (!mounted) return;
-    ref
-        .read(toastProvider.notifier)
-        .show(context.t.common.buildingAddedSuccess, type: ToastType.success);
-    context.pop();
   }
 
   Future<void> _seedApartmentsIfNeeded({
