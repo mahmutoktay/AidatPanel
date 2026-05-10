@@ -19,6 +19,14 @@ abstract class ApartmentRemoteDataSource {
     required String buildingId,
     required String id,
   });
+
+  /// Tur 5 / §3.1 — Manager bu daireden sakini çıkarır.
+  /// Sakin hesabı silinmez, sadece `User.apartmentId` ve
+  /// `Apartment.residentId` null'a çekilir; aidat geçmişi korunur.
+  Future<ApartmentModel> removeResident({
+    required String buildingId,
+    required String apartmentId,
+  });
 }
 
 class ApartmentRemoteDataSourceImpl implements ApartmentRemoteDataSource {
@@ -81,5 +89,16 @@ class ApartmentRemoteDataSourceImpl implements ApartmentRemoteDataSource {
   }) async {
     await _dioClient
         .delete('${ApiConstants.buildingApartments(buildingId)}/$id');
+  }
+
+  @override
+  Future<ApartmentModel> removeResident({
+    required String buildingId,
+    required String apartmentId,
+  }) async {
+    final response = await _dioClient
+        .delete(ApiConstants.apartmentResident(buildingId, apartmentId));
+    return ApartmentModel.fromJson(
+        response.data['data'] as Map<String, dynamic>);
   }
 }

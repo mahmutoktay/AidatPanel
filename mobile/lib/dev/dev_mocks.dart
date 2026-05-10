@@ -342,6 +342,35 @@ class MockApartmentRepository implements ApartmentRepository {
     }
     list.removeWhere((a) => a.id == id);
   }
+
+  /// Tur 5 / §3.1 — Sakini daireden çıkarır. Backend
+  /// `apartmentService.removeResidentFromApartmentService` davranışını
+  /// simüle eder: sakin yoksa 404, varsa `resident: null` set eder ve
+  /// güncel apartment'ı döner.
+  @override
+  Future<ApartmentEntity> removeResident({
+    required String buildingId,
+    required String apartmentId,
+  }) async {
+    await Future.delayed(_delay);
+    final list = _byBuilding[buildingId];
+    if (list == null) {
+      throw ApiException(message: 'Bina bulunamadı', statusCode: 404);
+    }
+    final idx = list.indexWhere((a) => a.id == apartmentId);
+    if (idx == -1) {
+      throw ApiException(message: 'Daire bulunamadı', statusCode: 404);
+    }
+    if (list[idx].resident == null) {
+      throw ApiException(
+        message: 'No resident assigned to this apartment',
+        statusCode: 404,
+      );
+    }
+    final updated = list[idx].copyWith(clearResident: true);
+    list[idx] = updated;
+    return updated;
+  }
 }
 
 /// Geçmiş 6 ay × bina dairelerinin senaryolu fake aidat üretici.

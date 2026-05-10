@@ -39,7 +39,7 @@
 
 | Modül | Backend | Mobile UI |
 |---|---|---|
-| **Resident remove** (§3.1 P0) | ✅ `DELETE /buildings/:bId/apartments/:id/resident` (commit `8cc2152`) | ⏳ UI yapılacak (Tur 5 §10/1) |
+| **Resident remove** (§3.1 P0) | ✅ `DELETE /buildings/:bId/apartments/:id/resident` (commit `8cc2152`) | ✅ UI tamam (Tur 5 §10/1) |
 | **Profile + Password + Language + FCM** (§3.3 P1) | ✅ `GET/PUT /me`, `PUT /me/password`, `PUT /me/language`, `PUT /me/fcm-token` | ⏳ Ayarlar tab UI (Tur 5 §10/4) |
 | **KVKK soft delete** (§3.4 P2) | ✅ `DELETE /me` — yöneticide bina varsa 409 | ⏳ Ayarlar tab "Hesabı Kapat" (Tur 5 §10/5) |
 | **Şifre sıfırlama** (§3.2 P1) | ✅ `POST /auth/forgot-password`, `POST /auth/reset-password` | ⏳ Login akışında "Şifremi unuttum" (Tur 5 §10/6) |
@@ -122,7 +122,7 @@ Authorization: Bearer <manager_token>
 - Yetki: sadece binanın yöneticisi
 - 403 (yetki yok) / 404 (daire / sakin yok) / 200 (başarı + güncel apartment) yanıtları net
 
-**Mobile durumu:** UI ⏳ — Tur 5 §10/1'de yapılacak. `BuildingResidentsScreen`'de daire kart menüsüne 3. seçenek olarak "Sakini Çıkar" + onay dialogu.
+**Mobile durumu:** ✅ UI tamam — `RemoveResidentDialog` widget'ı + `ApartmentsNotifier.removeResidentFromApartment`. `BuildingResidentsScreen` daire kart menüsünde dolu daireler için "Sakini Çıkar" seçeneği görünür; 403/404 mesajları insanlaştırıldı; dev mock da senaryoyu simüle ediyor.
 
 ---
 
@@ -363,7 +363,7 @@ Dev preview ile UI değişiklikleri staging beklenmeden test edilebilir. Backend
 
 | # | İş | Backend ucu | Tahmini süre | Durum |
 |---|-----|-------------|--------------|-------|
-| 1 | **Sakin çıkarma UI** — `BuildingResidentsScreen` daire kart menüsüne "Sakini Çıkar", AlertDialog onayı, `apartmentsStoreProvider` invalidate | `DELETE /apartments/:id/resident` ✅ | 1.5 saat | [ ] |
+| 1 | **Sakin çıkarma UI** — `BuildingResidentsScreen` daire kart menüsüne "Sakini Çıkar", AlertDialog onayı, `apartmentsStoreProvider` invalidate | `DELETE /apartments/:id/resident` ✅ | 1.5 saat | [x] |
 | 2 | **Bina formu uyumu** — `AddBuildingScreen`'de `totalFloors` + `apartmentsPerFloor` zorunlu, validation 1-200 / 1-50; `_seedApartmentsIfNeeded` fallback loop'u kaldır (backend zaten seed ediyor) | `POST /buildings` ✅ | 2 saat | [ ] |
 | 3 | **Server-side dues filter** — `manager_dues_tab.dart` ay/yıl filtresi değişince repo'ya `month`/`year` query gönder; client-side filtreleme kalksın (büyük listede performans) | `GET /buildings/:id/dues?month=&year=` ✅ | 1.5 saat | [ ] |
 | 4 | **Ayarlar tab** — Şifre değiştir formu (`PUT /me/password` → `refreshTokenVersion++` olduğu için otomatik logout) | `PUT /me/password` ✅ | 2 saat | [ ] |

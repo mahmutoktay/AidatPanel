@@ -37,6 +37,11 @@ class ApiConstants {
   static String apartmentInviteCode(String apartmentId) =>
       '$apiVersion/apartments/$apartmentId/invite-code';
 
+  /// Tur 5 / §3.1 — Manager bir daireden sakini çıkarır (hesap silinmez,
+  /// sadece bağlantı kopar). Backend `apartments/data/...` koleksiyonu döner.
+  static String apartmentResident(String buildingId, String apartmentId) =>
+      '$apiVersion/buildings/$buildingId/apartments/$apartmentId/resident';
+
   // Dues endpoints
   static const String myDues = '$apiVersion/me/dues';
 
