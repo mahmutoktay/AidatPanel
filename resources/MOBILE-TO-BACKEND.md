@@ -313,9 +313,18 @@ Dev preview ile UI değişiklikleri staging beklenmeden test edilebilir. Backend
 
 ## 9. İletişim
 
-- **Mobile rapor sahibi:** mobile/app branch (Flutter), `resources/FAZ_DURUMU.md` aktif faz takibi
-- **Backend rapor sahibi:** backend/yedek branch (Node + Express + Prisma), `FLUTTER-BACKEND.md` API sözleşmesi
-- **Senkronizasyon:** Bu dosya (MOBILE-TO-BACKEND.md) ve `FLUTTER-BACKEND.md` her sprint başında karşılıklı güncellenmeli; iki tarafın da onayı olmadan üretime alınma yapılmaz.
+| Taraf | Sorumlu | Branch | Sözleşme dosyası |
+|---|---|---|---|
+| **Mobile (Flutter)** | **Furkan** | `mobile/app` | `resources/MOBILE-TO-BACKEND.md` (bu dosya) — talepler + uyum beyanı |
+| **Backend (Node + Express + Prisma)** | **Abdullah** | `backend/yedek` | `FLUTTER-BACKEND.md` — API sözleşmesi |
+| **Faz takibi (her iki taraf)** | Furkan koordinasyon | `mobile/app` | `resources/FAZ_DURUMU.md` |
+
+**Senkronizasyon kuralı:** Bu dosya ve `FLUTTER-BACKEND.md` her sprint başında **karşılıklı** güncellenmeli; iki tarafın da onayı olmadan üretime alınma yapılmaz.
+
+**İletişim önceliği:**
+- Acil P0 (sakin çıkarma ucu, §3.1): Furkan → Abdullah doğrudan, GitHub issue veya direkt mesaj
+- P1-P2 talepler (§3.2-§3.5): sprint planlamasında karşılıklı görüşülür
+- §4'teki varsayım soruları: Abdullah `FLUTTER-BACKEND.md`'ye yorum/güncelleme olarak cevap verir, Furkan PR ile karşılıklı doğrulama yapar
 
 ---
 

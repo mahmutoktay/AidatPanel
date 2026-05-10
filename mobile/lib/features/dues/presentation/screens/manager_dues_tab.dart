@@ -23,6 +23,10 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
 
   String? _selectedBuildingId;
   DueStatus? _statusFilter;
+  // Ay/Yıl filtresi — null = "Tümü". Default: bu ay & bu yıl, böylece
+  // ekran ilk açıldığında kullanıcı sadece güncel dönemi görür.
+  int? _monthFilter = DateTime.now().month;
+  int? _yearFilter = DateTime.now().year;
   bool _affectCurrent = false;
   bool _initialized = false;
 
@@ -40,16 +44,19 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
 
     _tryInitialize(buildings);
 
-    final filtered = _statusFilter == null
-        ? duesState.dues
-        : duesState.dues.where((due) => due.status == _statusFilter).toList();
+    final filtered = duesState.dues.where((due) {
+      if (_statusFilter != null && due.status != _statusFilter) return false;
+      if (_monthFilter != null && due.month != _monthFilter) return false;
+      if (_yearFilter != null && due.year != _yearFilter) return false;
+      return true;
+    }).toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSizes.spacingL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildFilters(context, buildings, duesState.isLoading),
+          _buildFilters(context, buildings, duesState.dues, duesState.isLoading),
           const SizedBox(height: AppSizes.spacingM),
           _buildDueAmountCard(context, duesState.isLoading),
           const SizedBox(height: AppSizes.spacingL),
@@ -82,8 +89,14 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   Widget _buildFilters(
     BuildContext context,
     List<BuildingEntity> buildings,
+    List<DueEntity> dues,
     bool isLoading,
   ) {
+    // Yıl listesi: dues içindeki distinct year + bu yıl her zaman ekli
+    // (yeni binada ilk açılışta hâlâ "bu yıl" seçili kalsın diye).
+    final currentYear = DateTime.now().year;
+    final yearSet = <int>{currentYear, ...dues.map((d) => d.year)};
+    final years = yearSet.toList()..sort((a, b) => b.compareTo(a));
     return Container(
       padding: const EdgeInsets.all(AppSizes.cardPadding),
       decoration: BoxDecoration(
@@ -165,9 +178,105 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
               ),
             ),
           ),
+          const SizedBox(height: AppSizes.spacingM),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<int?>(
+                  key: ValueKey<String>('dues_month_${_monthFilter ?? 'all'}'),
+                  initialValue: _monthFilter,
+                  isExpanded: true,
+                  menuMaxHeight: 320,
+                  items: [
+                    DropdownMenuItem<int?>(
+                      value: null,
+                      child: Text(context.t.common.allMonths),
+                    ),
+                    for (var m = 1; m <= 12; m++)
+                      DropdownMenuItem<int?>(
+                        value: m,
+                        child: Text(_monthName(context, m)),
+                      ),
+                  ],
+                  onChanged: isLoading
+                      ? null
+                      : (value) => setState(() => _monthFilter = value),
+                  decoration: InputDecoration(
+                    labelText: context.t.common.month,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSizes.spacingM),
+              Expanded(
+                child: DropdownButtonFormField<int?>(
+                  key: ValueKey<String>('dues_year_${_yearFilter ?? 'all'}'),
+                  initialValue: _yearFilter,
+                  isExpanded: true,
+                  menuMaxHeight: 240,
+                  items: [
+                    DropdownMenuItem<int?>(
+                      value: null,
+                      child: Text(context.t.common.allYears),
+                    ),
+                    for (final y in years)
+                      DropdownMenuItem<int?>(
+                        value: y,
+                        child: Text('$y'),
+                      ),
+                  ],
+                  onChanged: isLoading
+                      ? null
+                      : (value) => setState(() => _yearFilter = value),
+                  decoration: InputDecoration(
+                    labelText: context.t.common.year,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
+  }
+
+  /// Locale-bağımsız ay adı: i18n monthJanuary…monthDecember anahtarlarını
+  /// kullanır. Sayısal index 1..12 arası beklenir.
+  String _monthName(BuildContext context, int month) {
+    final t = context.t.common;
+    switch (month) {
+      case 1:
+        return t.monthJanuary;
+      case 2:
+        return t.monthFebruary;
+      case 3:
+        return t.monthMarch;
+      case 4:
+        return t.monthApril;
+      case 5:
+        return t.monthMay;
+      case 6:
+        return t.monthJune;
+      case 7:
+        return t.monthJuly;
+      case 8:
+        return t.monthAugust;
+      case 9:
+        return t.monthSeptember;
+      case 10:
+        return t.monthOctober;
+      case 11:
+        return t.monthNovember;
+      case 12:
+        return t.monthDecember;
+      default:
+        return '$month';
+    }
   }
 
   Widget _buildDueAmountCard(BuildContext context, bool isLoading) {
@@ -299,7 +408,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           ),
           const SizedBox(height: AppSizes.spacingXS),
           Text(
-            '${context.t.common.month}: ${due.month} • ${context.t.common.year}: ${due.year}',
+            '${_monthName(context, due.month)} ${due.year}',
             style: AppTypography.body1.copyWith(color: AppColors.textSecondary),
           ),
           if (due.status == DueStatus.overdue && due.overdueDays > 0) ...[

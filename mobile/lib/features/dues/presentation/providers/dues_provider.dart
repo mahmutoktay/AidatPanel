@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../buildings/data/buildings_store.dart';
 import '../../data/datasources/dues_remote_datasource.dart';
 import '../../data/repositories/dues_repository_impl.dart';
 import '../../domain/entities/due_entity.dart';
@@ -144,3 +145,68 @@ class DuesNotifier extends StateNotifier<DuesState> {
 final duesNotifierProvider = StateNotifierProvider<DuesNotifier, DuesState>(
   (ref) => DuesNotifier(ref.watch(duesRepositoryProvider)),
 );
+
+/// Manager dashboard hero card için kullanılan tüm binaların dues toplamı.
+/// `Map<buildingId, List<DueEntity>>` döner; bina başına filtreleme için
+/// alttaki [buildingCollectionRate] / [buildingOverdueCount] helper'ları
+/// kullanılır.
+///
+/// Backend `Building` response'unda `collectedDues` döndürmediği için
+/// `BuildingEntity.collectionRate` getter'ı her zaman 0 verirdi. Bu
+/// provider gerçek hesaplama için dues listesinden faydalanır.
+///
+/// `buildingsStoreProvider` değişince otomatik yeniden hesaplanır
+/// (yeni bina eklenince ya da silinince provider tetiklenir).
+final allBuildingsDuesProvider =
+    FutureProvider<Map<String, List<DueEntity>>>((ref) async {
+  final buildingsAsync = ref.watch(buildingsStoreProvider);
+  final buildings = buildingsAsync.value ?? const [];
+  if (buildings.isEmpty) return const {};
+  final repo = ref.watch(duesRepositoryProvider);
+  // Paralel çek; bir bina yüklenmese bile diğerlerinin durmaması için
+  // her future'ı ayrı try/catch içinde sarıyoruz.
+  final results = await Future.wait(buildings.map((b) async {
+    try {
+      final dues = await repo.getBuildingDues(b.id);
+      return MapEntry(b.id, dues);
+    } catch (_) {
+      return MapEntry(b.id, const <DueEntity>[]);
+    }
+  }));
+  return Map.fromEntries(results);
+});
+
+/// Tüm binalardaki ödeme oranı: `PAID dues / total dues × 100`.
+/// dues boşsa 0 döner. Hero card'daki "%" rozetinde kullanılır.
+double globalCollectionRate(Map<String, List<DueEntity>> map) {
+  final all = map.values.expand((l) => l).toList(growable: false);
+  if (all.isEmpty) return 0;
+  final paid = all.where((d) => d.status == DueStatus.paid).length;
+  return (paid / all.length) * 100;
+}
+
+/// Tüm binalardaki gecikmiş aidat sayısı.
+int globalOverdueCount(Map<String, List<DueEntity>> map) {
+  return map.values
+      .expand((l) => l)
+      .where((d) => d.status == DueStatus.overdue)
+      .length;
+}
+
+/// Tek bir binanın ödeme oranı. Bina kartlarında "Tahsilat" sütununda
+/// kullanılır. Bina için dues yoksa 0 döner.
+double buildingCollectionRate(
+    Map<String, List<DueEntity>> map, String buildingId) {
+  final dues = map[buildingId] ?? const [];
+  if (dues.isEmpty) return 0;
+  final paid = dues.where((d) => d.status == DueStatus.paid).length;
+  return (paid / dues.length) * 100;
+}
+
+/// Tek bir binanın gecikmiş aidat sayısı.
+int buildingOverdueCount(
+    Map<String, List<DueEntity>> map, String buildingId) {
+  return (map[buildingId] ?? const [])
+      .where((d) => d.status == DueStatus.overdue)
+      .length;
+}

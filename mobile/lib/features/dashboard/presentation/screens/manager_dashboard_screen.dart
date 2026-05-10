@@ -123,19 +123,19 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
   Widget _buildHomeTab(AsyncValue<List<BuildingEntity>> buildingsAsync) {
     final authState = ref.watch(authStateProvider);
     final userName = authState.user?.name ?? context.t.common.user;
-    final dues = ref.watch(duesNotifierProvider).dues;
     final buildings = buildingsAsync.value ?? const <BuildingEntity>[];
+    // Tüm binaların dues'unu paralel çeken provider — collectionRate ve
+    // overdueCount'u backend `collectedDues` döndürmediği için buradan
+    // hesaplıyoruz (DuesNotifier sadece tek seçili binayı tutuyor).
+    final allDuesAsync = ref.watch(allBuildingsDuesProvider);
+    final allDues = allDuesAsync.value ?? const <String, List<DueEntity>>{};
 
     int totalApartments = 0;
     for (final b in buildings) {
       totalApartments += b.totalApartments;
     }
-    final collectionRate = buildings.isEmpty
-        ? 0.0
-        : buildings.map((b) => b.collectionRate).reduce((a, b) => a + b) /
-            buildings.length;
-    final overdueCount =
-        dues.where((due) => due.status == DueStatus.overdue).length;
+    final collectionRate = globalCollectionRate(allDues);
+    final overdueCount = globalOverdueCount(allDues);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSizes.spacingL),
@@ -344,11 +344,18 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
               ),
               Container(width: 1, height: 40, color: AppColors.borderColor),
               Expanded(
-                child: _buildStatItem(
-                  icon: Icons.trending_up,
-                  label: context.t.common.collection,
-                  value: '%${building.collectionRate.toStringAsFixed(0)}',
-                  color: AppColors.success,
+                child: Builder(
+                  builder: (_) {
+                    final allDues =
+                        ref.watch(allBuildingsDuesProvider).value ?? const {};
+                    final rate = buildingCollectionRate(allDues, building.id);
+                    return _buildStatItem(
+                      icon: Icons.trending_up,
+                      label: context.t.common.collection,
+                      value: '%${rate.toStringAsFixed(0)}',
+                      color: AppColors.success,
+                    );
+                  },
                 ),
               ),
               Container(width: 1, height: 40, color: AppColors.borderColor),
@@ -588,9 +595,18 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                       value:
                           '${building.occupiedApartments}/${building.totalApartments}',
                     ),
-                    _buildBuildingInfo(
-                      label: context.t.common.duesCollection,
-                      value: '${building.collectionRate.toStringAsFixed(1)}%',
+                    Builder(
+                      builder: (_) {
+                        final allDues =
+                            ref.watch(allBuildingsDuesProvider).value ??
+                                const {};
+                        final rate =
+                            buildingCollectionRate(allDues, building.id);
+                        return _buildBuildingInfo(
+                          label: context.t.common.duesCollection,
+                          value: '${rate.toStringAsFixed(1)}%',
+                        );
+                      },
                     ),
                     _buildBuildingInfo(
                       label: context.t.common.totalDues,

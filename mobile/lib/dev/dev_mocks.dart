@@ -344,15 +344,149 @@ class MockApartmentRepository implements ApartmentRepository {
   }
 }
 
+/// Geçmiş 6 ay × bina dairelerinin senaryolu fake aidat üretici.
+/// Dashboard `collectionRate`, ay/yıl filtresi, overdue rozeti gibi UI
+/// öğelerini gerçekten test edebilmek için karışık statü dağılımı içerir.
 class MockDuesRepository implements DuesRepository {
+  /// Bina başına in-memory dues listesi. Update senaryolarında bu listede
+  /// status değiştirebilmek için final var olarak tutuyoruz.
+  late final Map<String, List<DueEntity>> _byBuilding;
+
+  MockDuesRepository() {
+    _byBuilding = {
+      'b1': _generateB1Dues(),
+      'b2': _generateB2Dues(),
+    };
+  }
+
+  /// Aylık aidat üretici — verilen dairenin son `monthsBack` ay için
+  /// statü kalıbına göre due üretir. Statü kalıbı bir liste olarak
+  /// gelir; index 0 en yeni ay.
+  List<DueEntity> _generateForApartment({
+    required String buildingId,
+    required String apartmentId,
+    required String apartmentNumber,
+    required double amount,
+    required List<DueStatus> pattern, // index 0 = bu ay (en yeni)
+  }) {
+    final now = DateTime.now();
+    final list = <DueEntity>[];
+    for (var i = 0; i < pattern.length; i++) {
+      final dt = DateTime(now.year, now.month - i, 1);
+      final status = pattern[i];
+      // Backend tipik olarak ayın 5'ini due day yapıyor (b1) veya 1'i (b2)
+      final dueDay = buildingId == 'b1' ? 5 : 1;
+      final dueDate = DateTime(dt.year, dt.month, dueDay);
+      final overdueDays =
+          status == DueStatus.overdue ? now.difference(dueDate).inDays : 0;
+      final paidAt = status == DueStatus.paid
+          ? DateTime(dt.year, dt.month, dueDay + 2)
+          : null;
+      list.add(DueEntity(
+        id: '${apartmentId}_${dt.year}_${dt.month}',
+        apartmentId: apartmentId,
+        apartmentNumber: apartmentNumber,
+        amount: amount,
+        currency: 'TRY',
+        month: dt.month,
+        year: dt.year,
+        dueDate: dueDate,
+        status: status,
+        paidAt: paidAt,
+        overdueDays: overdueDays > 0 ? overdueDays : 0,
+        createdAt: DateTime(dt.year, dt.month, 1),
+        updatedAt: paidAt ?? DateTime(dt.year, dt.month, 1),
+      ));
+    }
+    return list;
+  }
+
+  /// b1 — Çamlık Apartmanı (4 daire, ₺600/ay)
+  /// - 1A (Ayşe — sakinli, düzenli ödeyici): hep PAID
+  /// - 1B (Mehmet — sakinli, son 2 ay PENDING): 4 PAID + 2 PENDING
+  /// - 2A (boş): hep PENDING
+  /// - 2B (boş): hep PENDING
+  /// Toplam: 24 due, 10 PAID, 14 PENDING → collection rate ~%41.6
+  List<DueEntity> _generateB1Dues() {
+    return [
+      ..._generateForApartment(
+        buildingId: 'b1',
+        apartmentId: 'a1_1',
+        apartmentNumber: '1A',
+        amount: 600,
+        pattern: List.filled(6, DueStatus.paid),
+      ),
+      ..._generateForApartment(
+        buildingId: 'b1',
+        apartmentId: 'a1_2',
+        apartmentNumber: '1B',
+        amount: 600,
+        pattern: const [
+          DueStatus.pending, // bu ay
+          DueStatus.pending, // 1 ay önce
+          DueStatus.paid,
+          DueStatus.paid,
+          DueStatus.paid,
+          DueStatus.paid,
+        ],
+      ),
+      ..._generateForApartment(
+        buildingId: 'b1',
+        apartmentId: 'a1_3',
+        apartmentNumber: '2A',
+        amount: 600,
+        pattern: List.filled(6, DueStatus.pending),
+      ),
+      ..._generateForApartment(
+        buildingId: 'b1',
+        apartmentId: 'a1_4',
+        apartmentNumber: '2B',
+        amount: 600,
+        pattern: List.filled(6, DueStatus.pending),
+      ),
+    ];
+  }
+
+  /// b2 — Yıldız Sitesi A Blok (2 daire, ₺750/ay)
+  /// - 1 (Zeynep — sakinli, son 2 ay OVERDUE): 4 PAID + 2 OVERDUE
+  /// - 2 (boş): hep PENDING
+  /// Toplam: 12 due, 4 PAID, 2 OVERDUE, 6 PENDING → collection rate ~%33.3
+  List<DueEntity> _generateB2Dues() {
+    return [
+      ..._generateForApartment(
+        buildingId: 'b2',
+        apartmentId: 'a2_1',
+        apartmentNumber: '1',
+        amount: 750,
+        pattern: const [
+          DueStatus.overdue, // bu ay
+          DueStatus.overdue, // 1 ay önce
+          DueStatus.paid,
+          DueStatus.paid,
+          DueStatus.paid,
+          DueStatus.paid,
+        ],
+      ),
+      ..._generateForApartment(
+        buildingId: 'b2',
+        apartmentId: 'a2_2',
+        apartmentNumber: '2',
+        amount: 750,
+        pattern: List.filled(6, DueStatus.pending),
+      ),
+    ];
+  }
+
   @override
   Future<List<DueEntity>> getBuildingDues(String buildingId) async {
     await Future.delayed(_delay);
-    return const [];
+    return List.unmodifiable(_byBuilding[buildingId] ?? const []);
   }
 
   @override
   Future<List<DueEntity>> getMyDues() async {
+    // Dev preview otomatik manager girişi yapıyor; sakin akışı test
+    // edilmeyeceği için boş döner.
     await Future.delayed(_delay);
     return const [];
   }
@@ -364,7 +498,34 @@ class MockDuesRepository implements DuesRepository {
     required DueStatus status,
   }) async {
     await Future.delayed(_delay);
-    throw ApiException(message: 'Mock: not implemented');
+    final list = _byBuilding[buildingId];
+    if (list == null) {
+      throw ApiException(message: 'Bina bulunamadı', statusCode: 404);
+    }
+    final idx = list.indexWhere((d) => d.id == dueId);
+    if (idx == -1) {
+      throw ApiException(message: 'Aidat bulunamadı', statusCode: 404);
+    }
+    final old = list[idx];
+    final now = DateTime.now();
+    final updated = DueEntity(
+      id: old.id,
+      apartmentId: old.apartmentId,
+      apartmentNumber: old.apartmentNumber,
+      amount: old.amount,
+      currency: old.currency,
+      month: old.month,
+      year: old.year,
+      dueDate: old.dueDate,
+      status: status,
+      paidAt: status == DueStatus.paid ? now : null,
+      overdueDays: status == DueStatus.overdue ? old.overdueDays : 0,
+      note: old.note,
+      createdAt: old.createdAt,
+      updatedAt: now,
+    );
+    list[idx] = updated;
+    return updated;
   }
 
   @override
@@ -376,5 +537,32 @@ class MockDuesRepository implements DuesRepository {
     bool affectCurrent = false,
   }) async {
     await Future.delayed(_delay);
+    if (!affectCurrent) return;
+    // Mock: affectCurrent=true iken sadece PENDING aidatların amount'unu
+    // güncelle (PAID olanlar dokunulmaz — backend §7'deki davranışı
+    // simüle ediyoruz).
+    final list = _byBuilding[buildingId];
+    if (list == null) return;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].status == DueStatus.pending) {
+        final old = list[i];
+        list[i] = DueEntity(
+          id: old.id,
+          apartmentId: old.apartmentId,
+          apartmentNumber: old.apartmentNumber,
+          amount: dueAmount,
+          currency: currency ?? old.currency,
+          month: old.month,
+          year: old.year,
+          dueDate: old.dueDate,
+          status: old.status,
+          paidAt: old.paidAt,
+          overdueDays: old.overdueDays,
+          note: old.note,
+          createdAt: old.createdAt,
+          updatedAt: DateTime.now(),
+        );
+      }
+    }
   }
 }

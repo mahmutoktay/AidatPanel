@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 556 (278 per locale)
+/// Strings: 560 (280 per locale)
 ///
-/// Built on 2026-05-10 at 11:51 UTC
+/// Built on 2026-05-10 at 13:00 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -301,7 +301,9 @@ class _StringsCommonEn {
 	String get monthOctober => 'October';
 	String get monthNovember => 'November';
 	String get monthDecember => 'December';
+	String get allMonths => 'All months';
 	String get year => 'Year';
+	String get allYears => 'All years';
 	String get note => 'Note';
 	String get myDuesHistory => 'My Dues History';
 	String get buildingDues => 'Building Dues';
@@ -675,7 +677,9 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get monthOctober => 'Ekim';
 	@override String get monthNovember => 'Kasım';
 	@override String get monthDecember => 'Aralık';
+	@override String get allMonths => 'Tüm aylar';
 	@override String get year => 'Yıl';
+	@override String get allYears => 'Tüm yıllar';
 	@override String get note => 'Not';
 	@override String get myDuesHistory => 'Aidat Geçmişim';
 	@override String get buildingDues => 'Bina Aidatları';
@@ -1018,7 +1022,9 @@ extension on Translations {
 			case 'common.monthOctober': return 'October';
 			case 'common.monthNovember': return 'November';
 			case 'common.monthDecember': return 'December';
+			case 'common.allMonths': return 'All months';
 			case 'common.year': return 'Year';
+			case 'common.allYears': return 'All years';
 			case 'common.note': return 'Note';
 			case 'common.myDuesHistory': return 'My Dues History';
 			case 'common.buildingDues': return 'Building Dues';
@@ -1304,7 +1310,9 @@ extension on _StringsTr {
 			case 'common.monthOctober': return 'Ekim';
 			case 'common.monthNovember': return 'Kasım';
 			case 'common.monthDecember': return 'Aralık';
+			case 'common.allMonths': return 'Tüm aylar';
 			case 'common.year': return 'Yıl';
+			case 'common.allYears': return 'Tüm yıllar';
 			case 'common.note': return 'Not';
 			case 'common.myDuesHistory': return 'Aidat Geçmişim';
 			case 'common.buildingDues': return 'Bina Aidatları';
