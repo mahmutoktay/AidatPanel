@@ -44,19 +44,16 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
 
     _tryInitialize(buildings);
 
-    final filtered = duesState.dues.where((due) {
-      if (_statusFilter != null && due.status != _statusFilter) return false;
-      if (_monthFilter != null && due.month != _monthFilter) return false;
-      if (_yearFilter != null && due.year != _yearFilter) return false;
-      return true;
-    }).toList();
+    // Tur 5 §10/3 — filtreleme artık server-side. `state.dues` zaten
+    // sunucudan filtrelenmiş geldiği için ek client-side filtreleme yok.
+    final dues = duesState.dues;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSizes.spacingL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildFilters(context, buildings, duesState.dues, duesState.isLoading),
+          _buildFilters(context, buildings, dues, duesState.isLoading),
           const SizedBox(height: AppSizes.spacingM),
           _buildDueAmountCard(context, duesState.isLoading),
           const SizedBox(height: AppSizes.spacingL),
@@ -67,10 +64,10 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           const SizedBox(height: AppSizes.spacingM),
           if (duesState.isLoading)
             const Center(child: CircularProgressIndicator())
-          else if (filtered.isEmpty)
+          else if (dues.isEmpty)
             _buildEmptyState(context)
           else
-            ...filtered.map((due) => _buildDueCard(context, due)),
+            ...dues.map((due) => _buildDueCard(context, due)),
         ],
       ),
     );
@@ -82,8 +79,22 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     _selectedBuildingId = buildings.first.id;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _selectedBuildingId == null) return;
-      ref.read(duesNotifierProvider.notifier).loadBuildingDues(_selectedBuildingId!);
+      _reloadDues();
     });
+  }
+
+  /// Tur 5 §10/3 — Filtreler değişince veya bina seçimi değişince çağrılır.
+  /// Notifier'a aktif filtreleri pas eder; sunucu zaten filtrelenmiş liste
+  /// döner.
+  void _reloadDues() {
+    final buildingId = _selectedBuildingId;
+    if (buildingId == null) return;
+    ref.read(duesNotifierProvider.notifier).loadBuildingDues(
+          buildingId,
+          month: _monthFilter,
+          year: _yearFilter,
+          status: _statusFilter,
+        );
   }
 
   Widget _buildFilters(
@@ -92,10 +103,16 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     List<DueEntity> dues,
     bool isLoading,
   ) {
-    // Yıl listesi: dues içindeki distinct year + bu yıl her zaman ekli
-    // (yeni binada ilk açılışta hâlâ "bu yıl" seçili kalsın diye).
+    // Yıl listesi: bu yıl + son 4 yıl (her zaman 5 yıl gösterilir) +
+    // dues içindeki distinct year (filtre uygulanmamışken eski yılları da
+    // görebilelim diye). Server-side filtreleme olduğu için sunucudan
+    // gelen küçük sete dayanmıyoruz; aksi halde "geçen yıl" filtresi
+    // seçilmişken dropdown'da sadece o yıl görünüp kullanıcı geri dönemez.
     final currentYear = DateTime.now().year;
-    final yearSet = <int>{currentYear, ...dues.map((d) => d.year)};
+    final yearSet = <int>{
+      for (var i = 0; i < 5; i++) currentYear - i,
+      ...dues.map((d) => d.year),
+    };
     final years = yearSet.toList()..sort((a, b) => b.compareTo(a));
     return Container(
       padding: const EdgeInsets.all(AppSizes.cardPadding),
@@ -133,7 +150,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                 : (value) {
                     if (value == null) return;
                     setState(() => _selectedBuildingId = value);
-                    ref.read(duesNotifierProvider.notifier).loadBuildingDues(value);
+                    _reloadDues();
                   },
             decoration: InputDecoration(
               labelText: context.t.common.buildings,
@@ -170,7 +187,12 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                 child: Text(context.t.common.waivedStatus),
               ),
             ],
-            onChanged: isLoading ? null : (value) => setState(() => _statusFilter = value),
+            onChanged: isLoading
+                ? null
+                : (value) {
+                    setState(() => _statusFilter = value);
+                    _reloadDues();
+                  },
             decoration: InputDecoration(
               labelText: context.t.common.status,
               border: OutlineInputBorder(
@@ -200,7 +222,10 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                   ],
                   onChanged: isLoading
                       ? null
-                      : (value) => setState(() => _monthFilter = value),
+                      : (value) {
+                          setState(() => _monthFilter = value);
+                          _reloadDues();
+                        },
                   decoration: InputDecoration(
                     labelText: context.t.common.month,
                     border: OutlineInputBorder(
@@ -229,7 +254,10 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                   ],
                   onChanged: isLoading
                       ? null
-                      : (value) => setState(() => _yearFilter = value),
+                      : (value) {
+                          setState(() => _yearFilter = value);
+                          _reloadDues();
+                        },
                   decoration: InputDecoration(
                     labelText: context.t.common.year,
                     border: OutlineInputBorder(

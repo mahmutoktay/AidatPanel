@@ -10,9 +10,19 @@ class DuesRepositoryImpl implements DuesRepository {
       : _remoteDataSource = remoteDataSource;
 
   @override
-  Future<List<DueEntity>> getBuildingDues(String buildingId) async {
+  Future<List<DueEntity>> getBuildingDues(
+    String buildingId, {
+    int? month,
+    int? year,
+    DueStatus? status,
+  }) async {
     try {
-      final models = await _remoteDataSource.getBuildingDues(buildingId);
+      final models = await _remoteDataSource.getBuildingDues(
+        buildingId,
+        month: month,
+        year: year,
+        status: status != null ? _toApiStatus(status) : null,
+      );
       return models.map((model) => model.toEntity()).toList();
     } on ApiException {
       rethrow;
@@ -22,9 +32,17 @@ class DuesRepositoryImpl implements DuesRepository {
   }
 
   @override
-  Future<List<DueEntity>> getMyDues() async {
+  Future<List<DueEntity>> getMyDues({
+    int? month,
+    int? year,
+    DueStatus? status,
+  }) async {
     try {
-      final models = await _remoteDataSource.getMyDues();
+      final models = await _remoteDataSource.getMyDues(
+        month: month,
+        year: year,
+        status: status != null ? _toApiStatus(status) : null,
+      );
       return models.map((model) => model.toEntity()).toList();
     } on ApiException {
       rethrow;

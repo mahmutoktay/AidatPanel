@@ -1,8 +1,21 @@
 import '../entities/due_entity.dart';
 
 abstract class DuesRepository {
-  Future<List<DueEntity>> getBuildingDues(String buildingId);
-  Future<List<DueEntity>> getMyDues();
+  /// Tur 5 / §10/3 — server-side filtreleme.
+  /// Tüm parametreler opsiyonel; null geçilirse sunucu tüm dues'u döner.
+  Future<List<DueEntity>> getBuildingDues(
+    String buildingId, {
+    int? month,
+    int? year,
+    DueStatus? status,
+  });
+
+  Future<List<DueEntity>> getMyDues({
+    int? month,
+    int? year,
+    DueStatus? status,
+  });
+
   Future<DueEntity> updateDueStatus({
     required String buildingId,
     required String dueId,
