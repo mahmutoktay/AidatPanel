@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/platform/system_navigator_bridge.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -27,7 +27,6 @@ class _ResidentDashboardScreenState
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _requestedInitialDues = false;
-  DateTime? _lastBackPressAt;
 
   @override
   void initState() {
@@ -63,20 +62,7 @@ class _ResidentDashboardScreenState
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        final now = DateTime.now();
-        final shouldExit = _lastBackPressAt != null &&
-            now.difference(_lastBackPressAt!) < const Duration(seconds: 2);
-        if (shouldExit) {
-          await SystemNavigator.pop();
-          return;
-        }
-        _lastBackPressAt = now;
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(content: Text(context.t.common.pressBackAgainToExit)),
-          );
+        await SystemNavigatorBridge.moveAppToBackground();
       },
       child: Scaffold(
         appBar: AppBar(

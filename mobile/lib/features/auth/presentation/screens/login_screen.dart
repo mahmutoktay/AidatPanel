@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/platform/system_navigator_bridge.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -25,7 +26,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   late FocusNode _identifierFocusNode;
   bool _obscurePassword = true;
   bool _usePhoneLogin = false;
-  DateTime? _lastBackPressAt;
 
   @override
   void initState() {
@@ -139,20 +139,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           nav.pop();
           return;
         }
-        final now = DateTime.now();
-        final shouldExit = _lastBackPressAt != null &&
-            now.difference(_lastBackPressAt!) < const Duration(seconds: 2);
-        if (shouldExit) {
-          await SystemNavigator.pop();
-          return;
-        }
-        _lastBackPressAt = now;
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(content: Text(context.t.common.pressBackAgainToExit)),
-          );
+        await SystemNavigatorBridge.moveAppToBackground();
       },
       child: Scaffold(
         body: Container(

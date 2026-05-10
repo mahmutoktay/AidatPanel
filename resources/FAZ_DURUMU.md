@@ -97,6 +97,13 @@
 - [x] ListView.children → ListView.builder (add_building_screen.dart:56)
 - [x] ListView.children → ListView.builder (invite_code_result_view.dart:38)
 
+### Faz 2 Öncesi Kritik Düzeltmeler
+- [x] Oturum kalıcılığı: app cold start'ta SecureStorage'daki token okunup kullanıcı otomatik giriş yapmış sayılır (AuthNotifier.restoreSession + AuthRepository.restoreSession + AuthRemoteDataSource.refreshToken)
+- [x] Splash, sabit 2 sn gecikme yerine restoreSession'ı bekler (min 800 ms branding süresi korunur)
+- [x] Token süresi dolduysa /auth/refresh ile sessizce yenilenir; ağ hatasında stale token korunup ilk istekte interceptor'ın yenilemesi beklenir
+- [x] Geri tuşu uygulamayı kapatmaz, arka plana atar (Android `moveTaskToBack(true)` köprüsü: MainActivity.kt + core/platform/system_navigator_bridge.dart). Process yaşamaya devam eder, kullanıcı tekrar açtığında splash gözükmeden aynı state'te uyanır.
+- [x] Navigasyon sıfırlama: sekme indeksi diske yazılmaz; yalnızca process yaşarken bellekte tutulur. Yeni process (recents'tan kapatma, RAM öldürmesi, cold start) → splash'te manager/resident tab 0 ile temiz başlangıç; oturum (token) yine restoreSession ile korunur.
+
 ### Çıkış Kapısı
 Yukarıdaki tüm `[ ]` → `[x]` olmadan ve Furkan onayı olmadan Faz 2 başlamaz.
 

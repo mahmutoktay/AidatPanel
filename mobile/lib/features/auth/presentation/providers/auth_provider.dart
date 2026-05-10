@@ -141,6 +141,26 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Uygulama açılışında SecureStorage'daki oturumu geri yükler.
+  /// Splash bu future'ı bekleyip ardından yönlendirme yapar.
+  Future<void> restoreSession() async {
+    if (state.isAuthenticated) return;
+    try {
+      final user = await _authRepository.restoreSession();
+      if (user != null) {
+        state = state.copyWith(
+          user: user,
+          isAuthenticated: true,
+          clearError: true,
+        );
+      } else {
+        state = AuthState();
+      }
+    } catch (_) {
+      state = AuthState();
+    }
+  }
+
   Future<void> logout(WidgetRef ref) async {
     state = state.copyWith(isLoading: true, error: null);
     try {

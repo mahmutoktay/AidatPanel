@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/platform/system_navigator_bridge.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -30,7 +30,6 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _initialDuesRequested = false;
-  DateTime? _lastBackPressAt;
 
   @override
   void initState() {
@@ -54,7 +53,8 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    final buildings = ref.watch(buildingsStoreProvider).value ?? [];
+    final buildingsAsync = ref.watch(buildingsStoreProvider);
+    final buildings = buildingsAsync.value ?? const <BuildingEntity>[];
     if (!_initialDuesRequested && buildings.isNotEmpty) {
       _initialDuesRequested = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -67,20 +67,9 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        final now = DateTime.now();
-        final shouldExit = _lastBackPressAt != null &&
-            now.difference(_lastBackPressAt!) < const Duration(seconds: 2);
-        if (shouldExit) {
-          await SystemNavigator.pop();
-          return;
-        }
-        _lastBackPressAt = now;
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(content: Text(context.t.common.pressBackAgainToExit)),
-          );
+        // Tek geri basışta uygulamayı arka plana at; process yaşamaya devam
+        // eder, kullanıcı tekrar açtığında aynı tab'da uyanır.
+        await SystemNavigatorBridge.moveAppToBackground();
       },
       child: Scaffold(
         appBar: AppBar(
@@ -90,8 +79,8 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
         body: TabBarView(
           controller: _tabController,
           children: [
-            _buildHomeTab(buildings),
-            _buildBuildingsTab(),
+            _buildHomeTab(buildingsAsync),
+            _buildBuildingsTab(buildingsAsync),
             _buildDuesTab(),
             _buildSettingsTab(),
           ],
@@ -129,10 +118,11 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     );
   }
 
-  Widget _buildHomeTab(List<BuildingEntity> buildings) {
+  Widget _buildHomeTab(AsyncValue<List<BuildingEntity>> buildingsAsync) {
     final authState = ref.watch(authStateProvider);
     final userName = authState.user?.name ?? context.t.common.user;
     final dues = ref.watch(duesNotifierProvider).dues;
+    final buildings = buildingsAsync.value ?? const <BuildingEntity>[];
 
     int totalApartments = 0;
     for (final b in buildings) {
@@ -166,15 +156,17 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
             ),
           ),
           const SizedBox(height: AppSizes.spacingM),
-          ..._buildBuildingCards(buildings),
+          _BuildingsAsyncSection(
+            buildingsAsync: buildingsAsync,
+            onRetry: _onRetryBuildings,
+            buildList: _buildBuildingCards,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildBuildingsTab() {
-    final buildings = ref.watch(buildingsStoreProvider).value ?? [];
-
+  Widget _buildBuildingsTab(AsyncValue<List<BuildingEntity>> buildingsAsync) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSizes.spacingL),
       child: Column(
@@ -229,10 +221,20 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
             ),
           ),
           const SizedBox(height: AppSizes.spacingM),
-          ...buildings.map((building) => _buildDetailedBuildingCard(building)),
+          _BuildingsAsyncSection(
+            buildingsAsync: buildingsAsync,
+            onRetry: _onRetryBuildings,
+            buildList: (list) => list
+                .map((b) => _buildDetailedBuildingCard(b))
+                .toList(growable: false),
+          ),
         ],
       ),
     );
+  }
+
+  void _onRetryBuildings() {
+    ref.read(buildingsStoreProvider.notifier).loadBuildings();
   }
 
   Widget _buildDetailedBuildingCard(BuildingEntity building) {
@@ -509,6 +511,151 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
           style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
         ),
       ],
+    );
+  }
+}
+
+class _BuildingsAsyncSection extends StatelessWidget {
+  final AsyncValue<List<BuildingEntity>> buildingsAsync;
+  final VoidCallback onRetry;
+  final List<Widget> Function(List<BuildingEntity>) buildList;
+
+  const _BuildingsAsyncSection({
+    required this.buildingsAsync,
+    required this.onRetry,
+    required this.buildList,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return buildingsAsync.when(
+      data: (list) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: buildList(list),
+      ),
+      // Veri varken arka planda yenileniyor (refresh) → eski listeyi göster.
+      // Sadece ilk yüklemede (data null iken) loader çıkar.
+      loading: () {
+        final cached = buildingsAsync.value;
+        if (cached != null && cached.isNotEmpty) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: buildList(cached),
+          );
+        }
+        return const _BuildingsLoadingPlaceholder();
+      },
+      error: (err, _) => _BuildingsErrorPlaceholder(
+        message: err is Exception ? err.toString() : '$err',
+        onRetry: onRetry,
+      ),
+    );
+  }
+}
+
+class _BuildingsLoadingPlaceholder extends StatelessWidget {
+  const _BuildingsLoadingPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = AppTypography.body2.copyWith(
+      color: AppColors.textSecondary,
+      fontWeight: FontWeight.w500,
+    );
+    // Spinner, yazının x-height'ine yakın küçük ve aynı renkte; yan yana
+    // ortalanmış, telefon ekranının ortasında nefes aldıracak boşlukla.
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingXL),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: 16,
+            width: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColors.textSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSizes.spacingS),
+          Text(context.t.common.loadingBuildings, style: textStyle),
+        ],
+      ),
+    );
+  }
+}
+
+class _BuildingsErrorPlaceholder extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _BuildingsErrorPlaceholder({
+    required this.message,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.spacingL),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        border: Border.all(color: AppColors.borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.error_outline,
+                color: AppColors.error,
+                size: 28,
+              ),
+              const SizedBox(width: AppSizes.spacingM),
+              Expanded(
+                child: Text(
+                  context.t.common.loadFailed,
+                  style: AppTypography.h4.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.spacingS),
+          Text(
+            message,
+            style: AppTypography.body2.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          SizedBox(
+            height: AppSizes.buttonHeightSecondary,
+            child: ElevatedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh, size: 20),
+              label: Text(context.t.common.tryAgain),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    AppSizes.buttonRadius,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

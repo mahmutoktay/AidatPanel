@@ -41,6 +41,13 @@ abstract class AuthRepository {
   );
   Future<void> logout();
   Future<UserEntity?> getStoredUser();
+
+  /// Uygulama açılışında çağrılır. SecureStorage'daki kullanıcıyı geri yükler.
+  /// - Token geçerliyse direkt user döner.
+  /// - Token süresi dolmuşsa refresh dener; başarılıysa user döner.
+  /// - Refresh 401/403 alırsa storage temizlenir, null döner.
+  /// - Ağ hatasında stale token'la user döndürür (interceptor sonra yeniler).
+  Future<UserEntity?> restoreSession();
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -141,6 +148,46 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (_) {
       await _secureStorage.clearAll();
       return null;
+    }
+  }
+
+  @override
+  Future<UserEntity?> restoreSession() async {
+    final user = await getStoredUser();
+    if (user == null) return null;
+
+    final accessToken = await _secureStorage.getToken();
+    if (accessToken == null) {
+      await _secureStorage.clearAuth();
+      return null;
+    }
+
+    final isExpired = await _secureStorage.isTokenExpired();
+    if (!isExpired) return user;
+
+    final refreshToken = await _secureStorage.getRefreshToken();
+    if (refreshToken == null) {
+      await _secureStorage.clearAuth();
+      return null;
+    }
+
+    try {
+      final newAccessToken =
+          await _remoteDataSource.refreshToken(refreshToken);
+      await _secureStorage.saveToken(newAccessToken);
+      await _secureStorage.saveTokenExpiry(_parseJwtExpiry(newAccessToken));
+      return user;
+    } on ApiException catch (e) {
+      // Refresh token gerçekten geçersiz olduğunda oturumu kapat.
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        await _secureStorage.clearAuth();
+        return null;
+      }
+      // Ağ/timeout/sunucu hatası: kullanıcıyı oturumda tut, ilk istek
+      // sırasında interceptor tekrar refresh deneyecek.
+      return user;
+    } catch (_) {
+      return user;
     }
   }
 }

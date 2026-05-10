@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/platform/system_navigator_bridge.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/providers/navigation_provider.dart';
+import '../../../buildings/data/buildings_store.dart';
 import '../../presentation/providers/auth_provider.dart';
 import '../../domain/entities/user_entity.dart' show UserRole;
 
@@ -19,11 +24,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
+  // Branding için minimum görünme süresi.
+  // Oturum kurtarma daha hızlı bitse bile splash bu süreden önce kaybolmaz.
+  static const Duration _minSplashDuration = Duration(milliseconds: 800);
+
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
@@ -33,11 +42,51 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     _animationController.forward();
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        _navigateBasedOnAuth();
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _bootstrap();
     });
+  }
+
+  Future<void> _bootstrap() async {
+    // Splash yalnızca yeni process (cold start) veya çıkış sonrası go('/') ile
+    // girilir. Sekme / alt navigasyon sadece process yaşarken bellekte tutulur;
+    // arka plandan tamamen kapatılınca veya RAM öldürünce temiz başlangıç.
+    _resetNavigationForFreshEntry();
+
+    final restoreFuture =
+        ref.read(authStateProvider.notifier).restoreSession();
+    final minDelayFuture = Future<void>.delayed(_minSplashDuration);
+
+    // restoreSession (token tazeleme) biter bitmez ilgili dashboard verilerini
+    // pre-warm et. minDelayFuture geri kalan süre boyunca ağ isteği paralel
+    // çalışır ve kullanıcı dashboard'a vardığında veri büyük ihtimalle hazır
+    // olur. Pre-warm fire-and-forget; ağ hatasını dashboard kendi UI'ında
+    // gösterir.
+    unawaited(
+      restoreFuture.then((_) {
+        if (!mounted) return;
+        _prewarmDataForRole();
+      }),
+    );
+
+    await Future.wait<void>([restoreFuture, minDelayFuture]);
+
+    if (!mounted) return;
+    _navigateBasedOnAuth();
+  }
+
+  void _prewarmDataForRole() {
+    final auth = ref.read(authStateProvider);
+    if (!auth.isAuthenticated || auth.user == null) return;
+    if (auth.user!.role == UserRole.manager) {
+      // Notifier'ı `read` etmek constructor'ındaki `loadBuildings()`'i tetikler.
+      ref.read(buildingsStoreProvider);
+    }
+  }
+
+  void _resetNavigationForFreshEntry() {
+    ref.read(managerTabIndexProvider.notifier).state = 0;
+    ref.read(residentTabIndexProvider.notifier).state = 0;
   }
 
   void _navigateBasedOnAuth() {
@@ -49,7 +98,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         context.go('/resident-dashboard');
       }
     } else {
-      // Not authenticated → login
       context.go('/login');
     }
   }
@@ -62,48 +110,55 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.primary, AppColors.primaryLight],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        await SystemNavigatorBridge.moveAppToBackground();
+      },
+      child: Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.primary, AppColors.primaryLight],
+            ),
           ),
-        ),
-        child: Center(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+          child: Center(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Icon(
+                      Icons.apartment,
+                      size: 60,
+                      color: AppColors.primary,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.apartment,
-                    size: 60,
-                    color: AppColors.primary,
+                  const SizedBox(height: 32),
+                  Text(
+                    context.t.features.auth.appTitle,
+                    style: AppTypography.h1.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  context.t.features.auth.appTitle,
-                  style: AppTypography.h1.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
+                  const SizedBox(height: 12),
+                  Text(
+                    context.t.features.auth.appSubtitle,
+                    style: AppTypography.body1.copyWith(color: Colors.white70),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  context.t.features.auth.appSubtitle,
-                  style: AppTypography.body1.copyWith(color: Colors.white70),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

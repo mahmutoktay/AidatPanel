@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 484 (242 per locale)
+/// Strings: 492 (246 per locale)
 ///
-/// Built on 2026-05-08 at 22:10 UTC
+/// Built on 2026-05-10 at 00:53 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -196,6 +196,10 @@ class _StringsCommonEn {
 	String get tokenExpired => 'Token EXPIRED! Redirecting to login screen.';
 	String get tokenActive => 'Token active! Remaining time';
 	String get pressBackAgainToExit => 'Press back again to exit';
+	String get loading => 'Loading…';
+	String get loadingBuildings => 'Loading buildings…';
+	String get loadFailed => 'Failed to load';
+	String get tryAgain => 'Try Again';
 	String get home => 'Home';
 	String get buildings => 'Buildings';
 	String get dues => 'Dues';
@@ -534,6 +538,10 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get tokenExpired => 'Token süresi DOLMUŞ! Login ekranına atılıyorsunuz.';
 	@override String get tokenActive => 'Token aktif! Kalan süre';
 	@override String get pressBackAgainToExit => 'Çıkmak için geri tuşuna tekrar basın';
+	@override String get loading => 'Yükleniyor…';
+	@override String get loadingBuildings => 'Binalar yükleniyor…';
+	@override String get loadFailed => 'Yüklenemedi';
+	@override String get tryAgain => 'Tekrar Dene';
 	@override String get home => 'Ana Sayfa';
 	@override String get buildings => 'Binalar';
 	@override String get dues => 'Aidatlar';
@@ -841,6 +849,10 @@ extension on Translations {
 			case 'common.tokenExpired': return 'Token EXPIRED! Redirecting to login screen.';
 			case 'common.tokenActive': return 'Token active! Remaining time';
 			case 'common.pressBackAgainToExit': return 'Press back again to exit';
+			case 'common.loading': return 'Loading…';
+			case 'common.loadingBuildings': return 'Loading buildings…';
+			case 'common.loadFailed': return 'Failed to load';
+			case 'common.tryAgain': return 'Try Again';
 			case 'common.home': return 'Home';
 			case 'common.buildings': return 'Buildings';
 			case 'common.dues': return 'Dues';
@@ -1091,6 +1103,10 @@ extension on _StringsTr {
 			case 'common.tokenExpired': return 'Token süresi DOLMUŞ! Login ekranına atılıyorsunuz.';
 			case 'common.tokenActive': return 'Token aktif! Kalan süre';
 			case 'common.pressBackAgainToExit': return 'Çıkmak için geri tuşuna tekrar basın';
+			case 'common.loading': return 'Yükleniyor…';
+			case 'common.loadingBuildings': return 'Binalar yükleniyor…';
+			case 'common.loadFailed': return 'Yüklenemedi';
+			case 'common.tryAgain': return 'Tekrar Dene';
 			case 'common.home': return 'Ana Sayfa';
 			case 'common.buildings': return 'Binalar';
 			case 'common.dues': return 'Aidatlar';
