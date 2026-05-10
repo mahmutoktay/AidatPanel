@@ -8,9 +8,18 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
-import '../../../apartments/data/apartments_store.dart';
 import '../../data/buildings_store.dart';
 import '../../data/cities_data.dart';
+
+/// Backend `buildingService.createBuildingService` Zod aralıkları (Tur 5 §10/2):
+///  - totalFloors: 1..200
+///  - apartmentsPerFloor: 1..50
+/// Backend bu aralıklar dışında 400 döner; mobile aynı kontrolü öne çekerek
+/// kullanıcıya sunucu round-trip beklemeden form içi hata gösterir.
+const int _kFloorsMin = 1;
+const int _kFloorsMax = 200;
+const int _kApartmentsPerFloorMin = 1;
+const int _kApartmentsPerFloorMax = 50;
 
 class AddBuildingScreen extends ConsumerStatefulWidget {
   const AddBuildingScreen({super.key});
@@ -122,6 +131,12 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
                 required: true,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: (v) => _validateRange(
+                  v,
+                  min: _kFloorsMin,
+                  max: _kFloorsMax,
+                  rangeError: context.t.common.floorRangeError,
+                ),
               ),
             ),
             const SizedBox(width: AppSizes.spacingM),
@@ -134,6 +149,12 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
                 required: true,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: (v) => _validateRange(
+                  v,
+                  min: _kApartmentsPerFloorMin,
+                  max: _kApartmentsPerFloorMax,
+                  rangeError: context.t.common.apartmentsPerFloorRangeError,
+                ),
               ),
             ),
           ],
@@ -227,6 +248,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
     int maxLines = 1,
     TextInputType? keyboardType,
     List<TextInputFormatter>? inputFormatters,
+    String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
@@ -261,12 +283,30 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
           borderSide: BorderSide(color: AppColors.error, width: 2),
         ),
       ),
-      validator: required
-          ? (v) => (v == null || v.trim().isEmpty)
-                ? context.t.common.fieldRequired
-                : null
-          : null,
+      validator: validator ??
+          (required
+              ? (v) => (v == null || v.trim().isEmpty)
+                  ? context.t.common.fieldRequired
+                  : null
+              : null),
     );
+  }
+
+  /// Sayısal alan için zorunlu + aralık kontrolü.
+  /// Boş ise [fieldRequired], parse edilemez veya aralık dışıysa [rangeError]
+  /// döndürür. Backend Zod kuralları ile birebir uyumlu olsun diye
+  /// kullanılır.
+  String? _validateRange(
+    String? value, {
+    required int min,
+    required int max,
+    required String rangeError,
+  }) {
+    final raw = value?.trim() ?? '';
+    if (raw.isEmpty) return context.t.common.fieldRequired;
+    final n = int.tryParse(raw);
+    if (n == null || n < min || n > max) return rangeError;
+    return null;
   }
 
   Widget _buildCityPicker() {
@@ -406,19 +446,16 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       return;
     }
 
+    // Form validator zaten range + parse kontrolü yaptığı için burada
+    // tryParse'lar güvenli (null gelmez). Yine de defansif fallback'le
+    // okuyup runtime patlamasını önlüyoruz.
     final floors = int.tryParse(_floorsController.text.trim()) ?? 0;
     final apartmentsPerFloor =
         int.tryParse(_apartmentsPerFloorController.text.trim()) ?? 0;
-    final dueAmount = double.tryParse(_monthlyDuesController.text.trim());
+    final dueAmount =
+        double.tryParse(_monthlyDuesController.text.trim()) ?? 0;
 
-    if (floors <= 0 || apartmentsPerFloor <= 0) {
-      ref.read(toastProvider.notifier).show(
-            context.t.common.floorApartmentMustBePositive,
-            type: ToastType.error,
-          );
-      return;
-    }
-    if (dueAmount == null || dueAmount <= 0) {
+    if (dueAmount <= 0) {
       ref.read(toastProvider.notifier).show(
             context.t.common.fillRequiredFields,
             type: ToastType.error,
@@ -431,6 +468,14 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       final address =
           '${_addressController.text.trim()}, $_selectedDistrict';
 
+      // Backend `buildingService.createBuildingService` (commit 8cc2152)
+      // tek transaction içinde:
+      //   1. Building kaydı oluşturur
+      //   2. totalFloors × apartmentsPerFloor adet daire (1A, 1B, 2A …) seed eder
+      //   3. dueAmount > 0 ise her daire için içinde bulunulan aydan yıl
+      //      sonuna kadar PENDING due üretir
+      // Bu yüzden mobile artık ekstra "fallback seed loop" çalıştırmaz —
+      // eski Tur 1-3 sürümünde yapılan _seedApartmentsIfNeeded kaldırıldı.
       final id = await ref.read(buildingsStoreProvider.notifier).addBuilding(
             name: _nameController.text.trim(),
             address: address,
@@ -445,53 +490,18 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       if (!mounted) return;
       if (id == null) {
         ref.read(toastProvider.notifier).show(
-              'Bina eklenemedi. Lütfen tekrar deneyin.',
+              context.t.common.buildingAddFailed,
               type: ToastType.error,
             );
         return;
       }
 
-      await _seedApartmentsIfNeeded(
-        buildingId: id,
-        floors: floors,
-        apartmentsPerFloor: apartmentsPerFloor,
-      );
-
-      if (!mounted) return;
       ref
           .read(toastProvider.notifier)
           .show(context.t.common.buildingAddedSuccess, type: ToastType.success);
       context.pop();
     } finally {
       if (mounted) setState(() => _submitting = false);
-    }
-  }
-
-  Future<void> _seedApartmentsIfNeeded({
-    required String buildingId,
-    required int floors,
-    required int apartmentsPerFloor,
-  }) async {
-    // TEMP COMPATIBILITY FALLBACK:
-    // Some backend deployments create only the building record and do not seed apartments
-    // during createBuilding. In that case, we seed apartments from mobile once.
-    // Remove this fallback after backend createBuilding consistently auto-creates apartments.
-    final apartmentRepository = ref.read(apartmentRepositoryProvider);
-    final existing = await apartmentRepository.fetchApartments(buildingId);
-    if (existing.isNotEmpty) {
-      return;
-    }
-
-    for (var floor = 1; floor <= floors; floor++) {
-      for (var unit = 0; unit < apartmentsPerFloor; unit++) {
-        final letter = String.fromCharCode(65 + unit);
-        final number = '$floor$letter';
-        await apartmentRepository.createApartment(
-          buildingId: buildingId,
-          number: number,
-          floor: floor,
-        );
-      }
     }
   }
 }

@@ -122,6 +122,10 @@ class MockBuildingRepository implements BuildingRepository {
     return List.unmodifiable(_buildings);
   }
 
+  /// Backend `buildingService.createBuildingService` davranışını simüle
+  /// eder: tek "transaction" içinde bina + (totalFloors × apartmentsPerFloor)
+  /// daire (1A, 1B, 2A, 2B …) seed eder. Mobile artık ayrı bir fallback
+  /// seed loop'u çalıştırmıyor (Tur 5 §10/2).
   @override
   Future<BuildingEntity> createBuilding({
     required String name,
@@ -134,9 +138,12 @@ class MockBuildingRepository implements BuildingRepository {
     String? currency,
   }) async {
     await Future.delayed(_delay);
-    final total = (totalFloors ?? 0) * (apartmentsPerFloor ?? 0);
+    final floors = totalFloors ?? 0;
+    final perFloor = apartmentsPerFloor ?? 0;
+    final total = floors * perFloor;
+    final id = MockState.nextId('b');
     final building = BuildingEntity(
-      id: MockState.nextId('b'),
+      id: id,
       name: name,
       address: address,
       city: city,
@@ -149,6 +156,12 @@ class MockBuildingRepository implements BuildingRepository {
       currency: currency ?? 'TRY',
     );
     _buildings.add(building);
+    apartments._seedForBuilding(
+      buildingId: id,
+      totalFloors: floors,
+      apartmentsPerFloor: perFloor,
+      monthlyDues: dueAmount ?? 0,
+    );
     return building;
   }
 
@@ -265,6 +278,35 @@ class MockApartmentRepository implements ApartmentRepository {
       ),
     ],
   };
+
+  /// Backend tarafında `createBuildingService` daireleri tek transaction
+  /// içinde seed ediyor. Dev preview'de bunu MockBuildingRepository
+  /// tetikler — apartmentsPerFloor 26'yı geçerse harf sarsa rolu ile
+  /// (A..Z, AA..AZ) backend ile birebir aynı şemayı kullanırız.
+  void _seedForBuilding({
+    required String buildingId,
+    required int totalFloors,
+    required int apartmentsPerFloor,
+    required double monthlyDues,
+  }) {
+    if (totalFloors <= 0 || apartmentsPerFloor <= 0) return;
+    final list = <ApartmentEntity>[];
+    for (var floor = 1; floor <= totalFloors; floor++) {
+      for (var unit = 0; unit < apartmentsPerFloor; unit++) {
+        final letter = unit < 26
+            ? String.fromCharCode(65 + unit)
+            : '${String.fromCharCode(65 + (unit ~/ 26) - 1)}${String.fromCharCode(65 + unit % 26)}';
+        list.add(ApartmentEntity(
+          id: MockState.nextId('a'),
+          buildingId: buildingId,
+          apartmentNumber: '$floor$letter',
+          floor: floor,
+          monthlyDues: monthlyDues,
+        ));
+      }
+    }
+    _byBuilding[buildingId] = list;
+  }
 
   @override
   Future<List<ApartmentEntity>> fetchApartments(String buildingId) async {

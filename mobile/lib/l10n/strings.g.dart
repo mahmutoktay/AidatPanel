@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 588 (294 per locale)
+/// Strings: 594 (297 per locale)
 ///
-/// Built on 2026-05-10 at 16:06 UTC
+/// Built on 2026-05-10 at 16:16 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -241,9 +241,12 @@ class _StringsCommonEn {
 	String get streetAddressHint => 'Ex: Bağdat Cad. No: 123';
 	String get details => 'Details';
 	String get floorCount => 'Floor Count';
-	String get floorCountHint => 'Ex: 4';
+	String get floorCountHint => 'Between 1 and 200';
 	String get apartmentsPerFloor => 'Apartments Per Floor';
-	String get apartmentsPerFloorHint => 'Ex: 2';
+	String get apartmentsPerFloorHint => 'Between 1 and 50';
+	String get floorRangeError => 'Floor count must be between 1 and 200';
+	String get apartmentsPerFloorRangeError => 'Apartments per floor must be between 1 and 50';
+	String get buildingAddFailed => 'Could not add building. Please try again.';
 	String get monthlyDuesLabel => 'Monthly Dues (₺)';
 	String get monthlyDuesHint => 'Ex: 1000';
 	String get createBuilding => 'Create Building';
@@ -630,9 +633,12 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get streetAddressHint => 'Örn: Bağdat Cad. No: 123';
 	@override String get details => 'Detaylar';
 	@override String get floorCount => 'Kat Sayısı';
-	@override String get floorCountHint => 'Örn: 4';
+	@override String get floorCountHint => '1 ile 200 arası';
 	@override String get apartmentsPerFloor => 'Kattaki Daire';
-	@override String get apartmentsPerFloorHint => 'Örn: 2';
+	@override String get apartmentsPerFloorHint => '1 ile 50 arası';
+	@override String get floorRangeError => 'Kat sayısı 1 ile 200 arasında olmalı';
+	@override String get apartmentsPerFloorRangeError => 'Kat başına daire 1 ile 50 arasında olmalı';
+	@override String get buildingAddFailed => 'Bina eklenemedi. Lütfen tekrar deneyin.';
 	@override String get monthlyDues => 'Aylık Aidat';
 	@override String get monthlyDuesLabel => 'Aylık Aidat (₺)';
 	@override String get monthlyDuesHint => 'Örn: 1000';
@@ -990,9 +996,12 @@ extension on Translations {
 			case 'common.streetAddressHint': return 'Ex: Bağdat Cad. No: 123';
 			case 'common.details': return 'Details';
 			case 'common.floorCount': return 'Floor Count';
-			case 'common.floorCountHint': return 'Ex: 4';
+			case 'common.floorCountHint': return 'Between 1 and 200';
 			case 'common.apartmentsPerFloor': return 'Apartments Per Floor';
-			case 'common.apartmentsPerFloorHint': return 'Ex: 2';
+			case 'common.apartmentsPerFloorHint': return 'Between 1 and 50';
+			case 'common.floorRangeError': return 'Floor count must be between 1 and 200';
+			case 'common.apartmentsPerFloorRangeError': return 'Apartments per floor must be between 1 and 50';
+			case 'common.buildingAddFailed': return 'Could not add building. Please try again.';
 			case 'common.monthlyDuesLabel': return 'Monthly Dues (₺)';
 			case 'common.monthlyDuesHint': return 'Ex: 1000';
 			case 'common.createBuilding': return 'Create Building';
@@ -1291,9 +1300,12 @@ extension on _StringsTr {
 			case 'common.streetAddressHint': return 'Örn: Bağdat Cad. No: 123';
 			case 'common.details': return 'Detaylar';
 			case 'common.floorCount': return 'Kat Sayısı';
-			case 'common.floorCountHint': return 'Örn: 4';
+			case 'common.floorCountHint': return '1 ile 200 arası';
 			case 'common.apartmentsPerFloor': return 'Kattaki Daire';
-			case 'common.apartmentsPerFloorHint': return 'Örn: 2';
+			case 'common.apartmentsPerFloorHint': return '1 ile 50 arası';
+			case 'common.floorRangeError': return 'Kat sayısı 1 ile 200 arasında olmalı';
+			case 'common.apartmentsPerFloorRangeError': return 'Kat başına daire 1 ile 50 arasında olmalı';
+			case 'common.buildingAddFailed': return 'Bina eklenemedi. Lütfen tekrar deneyin.';
 			case 'common.monthlyDues': return 'Aylık Aidat';
 			case 'common.monthlyDuesLabel': return 'Aylık Aidat (₺)';
 			case 'common.monthlyDuesHint': return 'Örn: 1000';
