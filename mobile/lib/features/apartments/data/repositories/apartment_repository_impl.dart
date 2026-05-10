@@ -76,4 +76,22 @@ class ApartmentRepositoryImpl implements ApartmentRepository {
       throw ApiException(message: 'Daire silinirken hata oluştu: $e');
     }
   }
+
+  @override
+  Future<ApartmentEntity> removeResident({
+    required String buildingId,
+    required String apartmentId,
+  }) async {
+    try {
+      final model = await _remoteDataSource.removeResident(
+        buildingId: buildingId,
+        apartmentId: apartmentId,
+      );
+      return model.toEntity();
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(message: 'Sakin çıkarılırken hata oluştu: $e');
+    }
+  }
 }

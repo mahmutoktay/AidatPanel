@@ -163,7 +163,7 @@ Manuel test sırasında "Bina Oluştur" butonuna art arda basılınca aynı bina
 #### Tur 5 — Backend uyum aksiyon listesi (▶ AKTİF)
 Abdullah'ın `backend/yedek` branch'i (commit `8cc2152`) ile mobile §3 talepleri **5/5** karşılandı (sakin çıkar, profil, KVKK, şifre sıfırlama, sakin aidat). Mobile bu uçları sırasıyla UI'ya bağlıyor. Detay + tahminler: `resources/MOBILE-TO-BACKEND.md` §10.
 
-- [ ] **1 — Sakin çıkarma UI** (`DELETE /apartments/:id/resident`): `BuildingResidentsScreen` daire kart menüsüne "Sakini Çıkar" + AlertDialog onayı + apartments invalidate. Backend 403/404 mesajları insanlaştırılacak. (~1.5 sa)
+- [x] **1 — Sakin çıkarma UI** (`DELETE /apartments/:id/resident`): `BuildingResidentsScreen` daire kart menüsüne "Sakini Çıkar" + AlertDialog onayı + apartments invalidate. Backend 403/404 mesajları insanlaştırıldı. **TAMAMLANDI** — `RemoveResidentDialog` widget'ı + `ApartmentsNotifier.removeResidentFromApartment` + dev mock. ~1.5 sa
 - [ ] **2 — Bina formu uyumu** (`POST /buildings`): `AddBuildingScreen`'de `totalFloors` (1-200) + `apartmentsPerFloor` (1-50) zorunlu hale gel; `_seedApartmentsIfNeeded` fallback loop'u sil (backend transaction içinde otomatik seed ediyor — `buildingService.createBuildingService` doğrulandı). (~2 sa)
 - [ ] **3 — Server-side dues filter** (`GET /buildings/:id/dues?month=&year=&status=`): `manager_dues_tab.dart` ay/yıl filtresi değişince repo çağrısına query param ekle; client-side filtreleme kalksın (büyük listede performans). `getMyDues` aynı şekilde sakin tarafında da. (~1.5 sa)
 - [ ] **4 — Şifre değiştir UI** (`PUT /me/password`): Ayarlar tab'ında yeni ekran. Başarı sonrası backend `refreshTokenVersion++` yaptığı için **otomatik logout + login**. (~2 sa)

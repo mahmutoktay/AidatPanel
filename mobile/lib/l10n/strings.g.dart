@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 572 (286 per locale)
+/// Strings: 588 (294 per locale)
 ///
-/// Built on 2026-05-10 at 13:18 UTC
+/// Built on 2026-05-10 at 16:06 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -356,6 +356,14 @@ class _StringsCommonEn {
 	String get buildingAddressField => 'Address';
 	String get buildingCityField => 'City';
 	String get monthlyDuesPerApartment => 'Monthly dues / apt';
+	String get remove => 'Remove';
+	String get removeResident => 'Remove Resident';
+	String get removeResidentConfirm => 'Are you sure you want to remove this resident from the apartment?';
+	String get removeResidentNote => 'The resident\'s account will not be deleted; only their link to this apartment is removed. Past dues records are kept. The resident can join another apartment later using an invite code.';
+	String get residentRemoved => 'Resident removed from apartment';
+	String get residentRemoveFailed => 'Could not remove resident';
+	String get residentRemoveForbidden => 'You are not allowed to perform this action. Only the building manager can remove residents.';
+	String get residentRemoveNotFound => 'No resident to remove from this apartment.';
 }
 
 // Path: validation
@@ -738,6 +746,14 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get buildingAddressField => 'Adres';
 	@override String get buildingCityField => 'Şehir';
 	@override String get monthlyDuesPerApartment => 'Aylık aidat / daire';
+	@override String get remove => 'Çıkar';
+	@override String get removeResident => 'Sakini Çıkar';
+	@override String get removeResidentConfirm => 'Bu sakini daireden çıkarmak istediğinize emin misiniz?';
+	@override String get removeResidentNote => 'Sakinin hesabı silinmez, sadece bu daireden bağlantısı kopar. Geçmiş aidat kayıtları korunur. Sakin başka bir daireye davet kodu ile tekrar katılabilir.';
+	@override String get residentRemoved => 'Sakin daireden çıkarıldı';
+	@override String get residentRemoveFailed => 'Sakin çıkarılamadı';
+	@override String get residentRemoveForbidden => 'Bu işlem için yetkiniz yok. Yalnızca binanın yöneticisi sakin çıkarabilir.';
+	@override String get residentRemoveNotFound => 'Bu dairede çıkarılacak sakin bulunamadı.';
 }
 
 // Path: validation
@@ -1089,6 +1105,14 @@ extension on Translations {
 			case 'common.buildingAddressField': return 'Address';
 			case 'common.buildingCityField': return 'City';
 			case 'common.monthlyDuesPerApartment': return 'Monthly dues / apt';
+			case 'common.remove': return 'Remove';
+			case 'common.removeResident': return 'Remove Resident';
+			case 'common.removeResidentConfirm': return 'Are you sure you want to remove this resident from the apartment?';
+			case 'common.removeResidentNote': return 'The resident\'s account will not be deleted; only their link to this apartment is removed. Past dues records are kept. The resident can join another apartment later using an invite code.';
+			case 'common.residentRemoved': return 'Resident removed from apartment';
+			case 'common.residentRemoveFailed': return 'Could not remove resident';
+			case 'common.residentRemoveForbidden': return 'You are not allowed to perform this action. Only the building manager can remove residents.';
+			case 'common.residentRemoveNotFound': return 'No resident to remove from this apartment.';
 			case 'validation.emailRequired': return 'Email address cannot be empty';
 			case 'validation.emailInvalid': return 'Please enter a valid email address';
 			case 'validation.emailTooLong': return 'Email address is too long';
@@ -1383,6 +1407,14 @@ extension on _StringsTr {
 			case 'common.buildingAddressField': return 'Adres';
 			case 'common.buildingCityField': return 'Şehir';
 			case 'common.monthlyDuesPerApartment': return 'Aylık aidat / daire';
+			case 'common.remove': return 'Çıkar';
+			case 'common.removeResident': return 'Sakini Çıkar';
+			case 'common.removeResidentConfirm': return 'Bu sakini daireden çıkarmak istediğinize emin misiniz?';
+			case 'common.removeResidentNote': return 'Sakinin hesabı silinmez, sadece bu daireden bağlantısı kopar. Geçmiş aidat kayıtları korunur. Sakin başka bir daireye davet kodu ile tekrar katılabilir.';
+			case 'common.residentRemoved': return 'Sakin daireden çıkarıldı';
+			case 'common.residentRemoveFailed': return 'Sakin çıkarılamadı';
+			case 'common.residentRemoveForbidden': return 'Bu işlem için yetkiniz yok. Yalnızca binanın yöneticisi sakin çıkarabilir.';
+			case 'common.residentRemoveNotFound': return 'Bu dairede çıkarılacak sakin bulunamadı.';
 			case 'validation.emailRequired': return 'Email adresi boş bırakılamaz';
 			case 'validation.emailInvalid': return 'Geçerli bir email adresi giriniz';
 			case 'validation.emailTooLong': return 'Email adresi çok uzun';

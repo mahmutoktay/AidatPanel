@@ -17,4 +17,11 @@ abstract class ApartmentRepository {
     required String buildingId,
     required String id,
   });
+
+  /// Tur 5 / §3.1 — Daireden sakini çıkar (hesap silinmez).
+  /// Backend güncel apartment'ı (resident: null) döner.
+  Future<ApartmentEntity> removeResident({
+    required String buildingId,
+    required String apartmentId,
+  });
 }

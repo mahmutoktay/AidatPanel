@@ -195,7 +195,15 @@
     "buildingNameField": "Bina adı",
     "buildingAddressField": "Adres",
     "buildingCityField": "Şehir",
-    "monthlyDuesPerApartment": "Aylık aidat / daire"
+    "monthlyDuesPerApartment": "Aylık aidat / daire",
+    "remove": "Çıkar",
+    "removeResident": "Sakini Çıkar",
+    "removeResidentConfirm": "Bu sakini daireden çıkarmak istediğinize emin misiniz?",
+    "removeResidentNote": "Sakinin hesabı silinmez, sadece bu daireden bağlantısı kopar. Geçmiş aidat kayıtları korunur. Sakin başka bir daireye davet kodu ile tekrar katılabilir.",
+    "residentRemoved": "Sakin daireden çıkarıldı",
+    "residentRemoveFailed": "Sakin çıkarılamadı",
+    "residentRemoveForbidden": "Bu işlem için yetkiniz yok. Yalnızca binanın yöneticisi sakin çıkarabilir.",
+    "residentRemoveNotFound": "Bu dairede çıkarılacak sakin bulunamadı."
   },
   "validation": {
     "emailRequired": "Email adresi boş bırakılamaz",

@@ -195,7 +195,15 @@
     "buildingNameField": "Building name",
     "buildingAddressField": "Address",
     "buildingCityField": "City",
-    "monthlyDuesPerApartment": "Monthly dues / apt"
+    "monthlyDuesPerApartment": "Monthly dues / apt",
+    "remove": "Remove",
+    "removeResident": "Remove Resident",
+    "removeResidentConfirm": "Are you sure you want to remove this resident from the apartment?",
+    "removeResidentNote": "The resident's account will not be deleted; only their link to this apartment is removed. Past dues records are kept. The resident can join another apartment later using an invite code.",
+    "residentRemoved": "Resident removed from apartment",
+    "residentRemoveFailed": "Could not remove resident",
+    "residentRemoveForbidden": "You are not allowed to perform this action. Only the building manager can remove residents.",
+    "residentRemoveNotFound": "No resident to remove from this apartment."
   },
   "validation": {
     "emailRequired": "Email address cannot be empty",

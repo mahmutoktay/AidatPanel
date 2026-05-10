@@ -98,6 +98,20 @@ class ApartmentsNotifier
       current.map((a) => a.id == apartmentId ? merged : a).toList(),
     );
   }
+
+  /// Tur 5 / §3.1 — Daireden sakini çıkarır. Hesap silinmez, sadece
+  /// `resident` ilişkisi kopar; aidat geçmişi korunur. Hata olursa
+  /// rethrow — UI snackbar gösterir, liste state'i bozulmaz.
+  Future<void> removeResidentFromApartment(String apartmentId) async {
+    final updated = await _repository.removeResident(
+      buildingId: buildingId,
+      apartmentId: apartmentId,
+    );
+    final current = state.value ?? [];
+    state = AsyncValue.data(
+      current.map((a) => a.id == apartmentId ? updated : a).toList(),
+    );
+  }
 }
 
 final apartmentsStoreProvider = StateNotifierProvider.family<ApartmentsNotifier,

@@ -8,6 +8,7 @@ import '../../../apartments/data/apartments_store.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
 import '../../../apartments/presentation/widgets/delete_apartment_dialog.dart';
 import '../../../apartments/presentation/widgets/edit_apartment_bottom_sheet.dart';
+import '../../../apartments/presentation/widgets/remove_resident_dialog.dart';
 import '../../domain/entities/building_entity.dart';
 
 class BuildingResidentsScreen extends ConsumerWidget {
@@ -341,7 +342,8 @@ class BuildingResidentsScreen extends ConsumerWidget {
   }
 
   /// Daire kartının sağ üst köşesinde "..." menu.
-  /// Düzenle → bottom sheet, Sil → onay dialog'u.
+  /// Düzenle → bottom sheet, Sakini Çıkar (yalnız dolu daireler için) →
+  /// onay dialog'u, Sil → onay dialog'u.
   Widget _buildApartmentActionsMenu(
       BuildContext context, ApartmentEntity apt) {
     return PopupMenuButton<_ApartmentAction>(
@@ -356,6 +358,9 @@ class BuildingResidentsScreen extends ConsumerWidget {
         switch (action) {
           case _ApartmentAction.edit:
             EditApartmentBottomSheet.show(context, apartment: apt);
+            break;
+          case _ApartmentAction.removeResident:
+            RemoveResidentDialog.show(context, apartment: apt);
             break;
           case _ApartmentAction.delete:
             DeleteApartmentDialog.show(context, apartment: apt);
@@ -378,6 +383,22 @@ class BuildingResidentsScreen extends ConsumerWidget {
             ],
           ),
         ),
+        if (apt.isOccupied)
+          PopupMenuItem(
+            value: _ApartmentAction.removeResident,
+            child: Row(
+              children: [
+                const Icon(Icons.person_remove_outlined,
+                    size: 22, color: AppColors.warning),
+                const SizedBox(width: AppSizes.spacingS),
+                Text(
+                  context.t.common.removeResident,
+                  style: AppTypography.body1
+                      .copyWith(color: AppColors.textPrimary),
+                ),
+              ],
+            ),
+          ),
         PopupMenuItem(
           value: _ApartmentAction.delete,
           child: Row(
@@ -475,4 +496,4 @@ class _StatusInfo {
   });
 }
 
-enum _ApartmentAction { edit, delete }
+enum _ApartmentAction { edit, removeResident, delete }
