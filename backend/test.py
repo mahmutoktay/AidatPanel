@@ -42,7 +42,7 @@ import uuid
 
 import requests
 
-BASE = os.environ.get("AIDATPANEL_API_BASE", "http://127.0.0.1:4200/api/v1").rstrip("/")
+BASE = os.environ.get("AIDATPANEL_API_BASE", "httpS://api.aidatpanel.com/api/v1").rstrip("/")
 PASSWORD = "123456"
 PASSWORD2 = "AbCd12"  # PUT /me/password ve benzeri
 PASSWORD3 = "XyZ999"  # reset-password sonrası giriş (otomatik E2E)

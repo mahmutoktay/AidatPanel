@@ -47,6 +47,7 @@ aidatpanel/
 ## 🖥️ Backend
 
 ### Stack
+
 - **Runtime:** Node.js 20+
 - **Framework:** Express.js
 - **ORM:** Prisma
@@ -279,6 +280,7 @@ enum NotificationType {
 ## 🔌 API Endpoint'leri
 
 ### Auth
+
 ```
 POST   /api/auth/register          # Yönetici kaydı
 POST   /api/auth/login             # Giriş
@@ -290,6 +292,7 @@ POST   /api/auth/reset-password    # Yeni şifre set
 ```
 
 ### Buildings (Yönetici only)
+
 ```
 GET    /api/buildings              # Yöneticinin tüm apartmanları
 POST   /api/buildings              # Yeni apartman ekle
@@ -299,6 +302,7 @@ DELETE /api/buildings/:id          # Sil
 ```
 
 ### Apartments (Yönetici only)
+
 ```
 GET    /api/buildings/:id/apartments          # Apartmandaki daireler
 POST   /api/buildings/:id/apartments          # Daire ekle
@@ -308,6 +312,7 @@ POST   /api/apartments/:id/invite-code        # Davet kodu üret
 ```
 
 ### Dues (Aidat)
+
 ```
 GET    /api/buildings/:id/dues               # Tüm aidat listesi (Yönetici)
 POST   /api/buildings/:id/dues/bulk          # Toplu aidat oluştur (Yönetici)
@@ -316,6 +321,7 @@ GET    /api/me/dues                          # Kendi aidat geçmişim (Sakin)
 ```
 
 ### Expenses (Gider)
+
 ```
 GET    /api/buildings/:id/expenses           # Gider listesi (Yönetici)
 POST   /api/buildings/:id/expenses           # Gider ekle (Yönetici)
@@ -325,6 +331,7 @@ GET    /api/buildings/:id/expenses/summary   # Aylık özet (Yönetici)
 ```
 
 ### Tickets (Arıza/Talep)
+
 ```
 GET    /api/buildings/:id/tickets            # Tüm talepler (Yönetici)
 GET    /api/tickets/:id                      # Talep detayı
@@ -335,6 +342,7 @@ GET    /api/me/tickets                       # Kendi taleplerim (Sakin)
 ```
 
 ### Notifications
+
 ```
 GET    /api/notifications                    # Bildirimlerim
 PATCH  /api/notifications/:id/read           # Okundu işaretle
@@ -343,18 +351,21 @@ PUT    /api/me/fcm-token                     # FCM token güncelle
 ```
 
 ### Reports (Yönetici only)
+
 ```
 GET    /api/buildings/:id/reports/monthly    # Aylık rapor (PDF)
 GET    /api/buildings/:id/reports/summary    # Özet istatistik
 ```
 
 ### Subscription
+
 ```
 POST   /api/subscription/webhook/revenuecat  # RevenueCat webhook (ödeme olayları)
 GET    /api/me/subscription                  # Abonelik durumum
 ```
 
 ### Profile
+
 ```
 GET    /api/me                               # Profil bilgisi
 PUT    /api/me                               # Güncelle
@@ -372,34 +383,34 @@ PUT    /api/me/language                      # Dil değiştir
 dependencies:
   flutter:
     sdk: flutter
-  
+
   # State Management
   flutter_riverpod: ^2.5.0
   riverpod_annotation: ^2.3.0
-  
+
   # Navigation
   go_router: ^13.0.0
-  
+
   # Network
   dio: ^5.4.0
   flutter_secure_storage: ^9.0.0
-  
+
   # i18n
   flutter_localizations:
     sdk: flutter
   intl: ^0.19.0
-  
+
   # Firebase
   firebase_core: ^3.0.0
   firebase_messaging: ^15.0.0
-  
+
   # In-App Purchase (RevenueCat)
   purchases_flutter: ^7.0.0
-  
+
   # UI
   cached_network_image: ^3.3.0
   shimmer: ^3.0.0
-  
+
   # Utils
   equatable: ^2.0.5
   json_annotation: ^4.8.1
@@ -479,6 +490,7 @@ mobile/lib/
 ### MANAGER (Yönetici)
 
 **Abonelik aktifken:**
+
 - Birden fazla apartman oluşturma ve yönetme
 - Daire ekleme/düzenleme/silme
 - Her daire için davet kodu üretme (tek kullanımlık, 7 gün geçerli)
@@ -490,16 +502,18 @@ mobile/lib/
 - FCM push bildirimi gönderme (tüm sakinlere duyuru)
 
 **Abonelik dolduğunda (kilitlenen özellikler):**
+
 - Yeni apartman/daire ekleme
 - Yeni aidat oluşturma
 - PDF rapor alma
 - Toplu bildirim gönderme
 
-*(Mevcut veriler okunabilir, sakinler etkilenmez)*
+_(Mevcut veriler okunabilir, sakinler etkilenmez)_
 
 ### RESIDENT (Sakin)
 
 **Her zaman erişebilir (abonelikten bağımsız):**
+
 - Kendi aylık aidat durumu (PENDING/PAID/OVERDUE)
 - Aidat geçmişi (tüm aylar)
 - Arıza/talep oluşturma ve takip etme
@@ -530,6 +544,7 @@ mobile/lib/
 ### Firebase FCM (Push Notification)
 
 Kullanım senaryoları:
+
 - Aylık aidat hatırlatıcısı (yönetici tetikler veya otomatik)
 - Arıza talebi güncellemesi (yönetici not eklediğinde)
 - Duyurular (yöneticiden tüm sakine)
@@ -542,8 +557,8 @@ const sendPushNotification = async (fcmToken, title, body, data = {}) => {
     token: fcmToken,
     notification: { title, body },
     data,
-    android: { priority: 'high' },
-    apns: { payload: { aps: { sound: 'default' } } }
+    android: { priority: "high" },
+    apns: { payload: { aps: { sound: "default" } } },
   };
   await admin.messaging().send(message);
 };
@@ -552,6 +567,7 @@ const sendPushNotification = async (fcmToken, title, body, data = {}) => {
 ### WhatsApp (Twilio)
 
 Kullanım senaryoları:
+
 - Aidat hatırlatma mesajı (yönetici "Hatırlat" butonuna bastığında)
 - Sakin telefon numarası varsa gönderilir
 
@@ -569,27 +585,28 @@ WhatsApp mesajı iletilemezse SMS olarak düşer.
 ## 💳 Abonelik Sistemi (RevenueCat)
 
 ### Neden RevenueCat?
+
 - App Store (iOS) ve Google Play (Android) aboneliklerini tek API'dan yönetir
 - Receipt validation backend'i üstlenir
 - Webhook ile anlık abonelik olayları alınır
 
 ### Abonelik Planları (App Store Connect + Play Console'da tanımlanacak)
 
-| Plan | ID | Fiyat (önerilen) |
-|------|-------|---------|
-| Aylık | `aidatpanel_monthly` | ₺99/ay |
-| Yıllık | `aidatpanel_annual` | ₺799/yıl |
+| Plan   | ID                   | Fiyat (önerilen) |
+| ------ | -------------------- | ---------------- |
+| Aylık  | `aidatpanel_monthly` | ₺99/ay           |
+| Yıllık | `aidatpanel_annual`  | ₺799/yıl         |
 
 ### Webhook Olayları (RevenueCat → Backend)
 
 ```javascript
 // POST /api/subscription/webhook/revenuecat
 const events = {
-  'INITIAL_PURCHASE': () => activateSubscription(),
-  'RENEWAL': () => extendSubscription(),
-  'CANCELLATION': () => markCancelled(),
-  'EXPIRATION': () => expireSubscription(),
-  'BILLING_ISSUE': () => notifyBillingIssue(),
+  INITIAL_PURCHASE: () => activateSubscription(),
+  RENEWAL: () => extendSubscription(),
+  CANCELLATION: () => markCancelled(),
+  EXPIRATION: () => expireSubscription(),
+  BILLING_ISSUE: () => notifyBillingIssue(),
 };
 ```
 
@@ -614,6 +631,7 @@ await Purchases.configure(configuration);
 **Amaç:** Sadece tanıtım. Uygulama indirmeye yönlendirme.
 
 **İçerik:**
+
 - Hero: Uygulama adı, tagline, App Store + Google Play butonları
 - Özellikler bölümü (3-4 madde)
 - Ekran görüntüleri (mockup)
@@ -649,9 +667,9 @@ module.exports = {
 
 ### Subdomain Yapısı
 
-| Subdomain | Hedef |
-|-----------|-------|
-| `aidatpanel.com` | Web landing page |
+| Subdomain            | Hedef                       |
+| -------------------- | --------------------------- |
+| `aidatpanel.com`     | Web landing page            |
 | `api.aidatpanel.com` | Node.js backend (port 4200) |
 
 ### Veritabanı
@@ -678,20 +696,32 @@ Backend (`/api/v1`) durumu — tam liste için `FLUTTER-BACKEND.md` ve `prisma/s
 - [x] Davet kodu sistemi
 - [x] Aylık aidat: bina oluşturma / `due-amount` ile üretim + **durum güncelleme** (`PATCH .../dues/:dueId/status`) — ayrı “toplu bulk” endpoint yok (bilinçli Faz 1 sözleşmesi)
 - [x] Sakin: kendi aidat durumunu görme (`GET /me/dues`)
-- [ ] FCM push notification altyapısı — **backend:** `PUT /me/fcm-token` ile token saklama hazır; **Admin SDK ile gönderim** henüz yok (Faz 1.1 / Faz 2)
-- [ ] RevenueCat abonelik entegrasyonu (iOS + Android) — backend webhook / doğrulama henüz
-- [ ] Landing page (web) — `web/` / dağıtım ayrı iş
+- [-] FCM push notification altyapısı — **backend:** `PUT /me/fcm-token` ile token saklama hazır; **Admin SDK ile gönderim** henüz yok (Faz 1.1 / Faz 2)
+- [ ] RevenueCat abonelik entegrasyonu (iOS + Android) — backend webhook / doğrulama henüz yok
+- [x] Landing page (web) — `web/` / dağıtım ayrı iş
 
 ### Faz 2 — Tamamlama
+
+- [ ] Dekont yükleyerek ödeme durumunu kontrol/değiştirme (OCR)
+- [ ] 10 banka (Ziraat, Halk, Vakıf, İş, Garanti, Finans, Kuveyt, Şeker, Yapıkredi, QNB, Akbank)
+- [ ] Alıcı, gönderen, tarih, tutar, banka, sorgu no, IBAN (opsiyonel)
+
+---
+
 - [ ] Gider kaydı ve kategorileme
 - [ ] Arıza/talep sistemi (Ticket)
 - [ ] Yönetici → Sakin bildirim gönderme
+
+---
+
 - [ ] WhatsApp aidat hatırlatma
 - [ ] PDF rapor (aylık özet)
-- [ ] i18n (TR/EN)
+- [x] i18n (TR/EN)
 
 ### Faz 3 — Büyüme
-- [ ] Online ödeme entegrasyonu (İyzico/PayTR)
+
+- [ ] SMS API konuşulacak
+- [ ] Online ödeme işlemleri (Fahrettin hoca)
 - [ ] Çoklu yönetici (personel atama)
 - [ ] Aidat geçmişi grafiği / istatistik dashboard
 - [ ] Belge paylaşımı (yönetim kararları, toplantı tutanakları)
@@ -700,15 +730,15 @@ Backend (`/api/v1`) durumu — tam liste için `FLUTTER-BACKEND.md` ve `prisma/s
 
 ## ⚙️ Teknik Kararlar ve Gerekçeleri
 
-| Karar | Seçim | Gerekçe |
-|-------|-------|---------|
-| State management | Riverpod | OkulOptik'te zaten biliniyor |
-| Navigation | GoRouter | Flutter best practice, deep link desteği |
-| ORM | Prisma | Type-safe, migration yönetimi kolay |
-| Abonelik | RevenueCat | iOS + Android tek entegrasyon |
-| Push | Firebase FCM | Cross-platform standart |
-| WhatsApp | Twilio | Sandbox ile hızlı test, Türkiye desteği var |
-| i18n | Flutter ARB | Flutter native çözüm |
+| Karar            | Seçim        | Gerekçe                                     |
+| ---------------- | ------------ | ------------------------------------------- |
+| State management | Riverpod     | OkulOptik'te zaten biliniyor                |
+| Navigation       | GoRouter     | Flutter best practice, deep link desteği    |
+| ORM              | Prisma       | Type-safe, migration yönetimi kolay         |
+| Abonelik         | RevenueCat   | iOS + Android tek entegrasyon               |
+| Push             | Firebase FCM | Cross-platform standart                     |
+| WhatsApp         | Twilio       | Sandbox ile hızlı test, Türkiye desteği var |
+| i18n             | Flutter ARB  | Flutter native çözüm                        |
 
 ---
 

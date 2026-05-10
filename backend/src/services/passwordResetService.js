@@ -152,7 +152,7 @@ export async function requestPasswordResetService(email) {
   `;
 
   await sendResendEmail({
-    to: "abdullahaslan061212@gmail.com", // Resend domain doğrulama yapana kadar böyle kalacak.
+    to: user.email, // Resend domain doğrulama yapana kadar böyle kalacak.
     subject: "AidatPanel — şifre sıfırlama",
     html,
   });
