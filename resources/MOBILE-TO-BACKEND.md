@@ -222,7 +222,7 @@ Authorization: Bearer <manager_token>
 - `dueAmount` da verilmişse, bulunulan aydan **yıl sonuna kadar** her daire için `PENDING` due üretilir (Europe/Istanbul tabanlı `dueDate`)
 - Transaction `maxWait: 10s, timeout: 60s`
 
-**Mobile aksiyon:** `AddBuildingScreen._seedApartmentsIfNeeded` fallback loop'u **gereksiz** — silinecek (Tur 5 §10/2). Form `totalFloors`+`apartmentsPerFloor` zorunlu hale gelecek.
+**Mobile aksiyon:** ✅ Tur 5 §10/2'de tamamlandı. `_seedApartmentsIfNeeded` fallback loop'u kaldırıldı; form `totalFloors`+`apartmentsPerFloor` artık zorunlu (1-200 / 1-50 range validator); `MockBuildingRepository.createBuilding` backend davranışını birebir simüle ediyor (tek "transaction"da apartments seed).
 
 ### 4.2 Logout sırasında sunucu hatası tolere ediliyor — ✅ KABUL EDİLDİ
 
@@ -364,7 +364,7 @@ Dev preview ile UI değişiklikleri staging beklenmeden test edilebilir. Backend
 | # | İş | Backend ucu | Tahmini süre | Durum |
 |---|-----|-------------|--------------|-------|
 | 1 | **Sakin çıkarma UI** — `BuildingResidentsScreen` daire kart menüsüne "Sakini Çıkar", AlertDialog onayı, `apartmentsStoreProvider` invalidate | `DELETE /apartments/:id/resident` ✅ | 1.5 saat | [x] |
-| 2 | **Bina formu uyumu** — `AddBuildingScreen`'de `totalFloors` + `apartmentsPerFloor` zorunlu, validation 1-200 / 1-50; `_seedApartmentsIfNeeded` fallback loop'u kaldır (backend zaten seed ediyor) | `POST /buildings` ✅ | 2 saat | [ ] |
+| 2 | **Bina formu uyumu** — `AddBuildingScreen`'de `totalFloors` + `apartmentsPerFloor` zorunlu, validation 1-200 / 1-50; `_seedApartmentsIfNeeded` fallback loop'u kaldır (backend zaten seed ediyor) | `POST /buildings` ✅ | 2 saat | [x] |
 | 3 | **Server-side dues filter** — `manager_dues_tab.dart` ay/yıl filtresi değişince repo'ya `month`/`year` query gönder; client-side filtreleme kalksın (büyük listede performans) | `GET /buildings/:id/dues?month=&year=` ✅ | 1.5 saat | [ ] |
 | 4 | **Ayarlar tab** — Şifre değiştir formu (`PUT /me/password` → `refreshTokenVersion++` olduğu için otomatik logout) | `PUT /me/password` ✅ | 2 saat | [ ] |
 | 5 | **Hesabı kapat UI** — Ayarlar tab'da tip-to-confirm; **409 yöneticide bina var** mesajını insanlaştır ("Önce binaları sil/devret") | `DELETE /me` ✅ | 1 saat | [ ] |
