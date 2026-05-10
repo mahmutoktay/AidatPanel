@@ -324,7 +324,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 )
                               : Text(context.t.features.auth.login),
                         ),
-                        const SizedBox(height: AppSizes.spacingS),
+                        const SizedBox(height: AppSizes.spacingXS),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: authState.isLoading
+                                ? null
+                                : () => context.push('/forgot-password'),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSizes.spacingS,
+                                vertical: 4,
+                              ),
+                              minimumSize: const Size(48, 36),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              context.t.common.forgotPassword,
+                              style: AppTypography.body2.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSizes.spacingXS),
                         OutlinedButton.icon(
                           onPressed: authState.isLoading
                               ? null

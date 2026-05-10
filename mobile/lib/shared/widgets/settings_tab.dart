@@ -9,6 +9,8 @@ import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
+import '../../features/profile/presentation/widgets/change_password_bottom_sheet.dart';
+import '../../features/profile/presentation/widgets/delete_account_dialog.dart';
 import '../../l10n/strings.g.dart';
 import 'toast_overlay.dart';
 
@@ -36,7 +38,7 @@ class SettingsTab extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.lock_outline,
                 title: context.t.common.changePassword,
-                onTap: () => _showComingSoon(context, ref),
+                onTap: () => ChangePasswordBottomSheet.show(context),
               ),
               const _Divider(),
               _SettingsTile(
@@ -82,6 +84,21 @@ class SettingsTab extends ConsumerWidget {
                 title: context.t.common.about,
                 trailing: 'v${AppConstants.appVersion}',
                 onTap: () => _showAboutDialog(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.spacingL),
+
+          _SectionHeader(title: context.t.common.dangerZone),
+          const SizedBox(height: AppSizes.spacingS),
+          _SettingsCard(
+            children: [
+              _SettingsTile(
+                icon: Icons.delete_forever_outlined,
+                title: context.t.common.deleteAccount,
+                iconColor: AppColors.error,
+                titleColor: AppColors.error,
+                onTap: () => DeleteAccountDialog.show(context),
               ),
             ],
           ),
@@ -400,12 +417,16 @@ class _SettingsTile extends StatelessWidget {
   final String title;
   final String? trailing;
   final VoidCallback onTap;
+  final Color? iconColor;
+  final Color? titleColor;
 
   const _SettingsTile({
     required this.icon,
     required this.title,
     required this.onTap,
     this.trailing,
+    this.iconColor,
+    this.titleColor,
   });
 
   @override
@@ -420,13 +441,14 @@ class _SettingsTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: AppSizes.iconSize, color: AppColors.primary),
+            Icon(icon,
+                size: AppSizes.iconSize, color: iconColor ?? AppColors.primary),
             const SizedBox(width: AppSizes.spacingM),
             Expanded(
               child: Text(
                 title,
                 style: AppTypography.body1.copyWith(
-                  color: AppColors.textPrimary,
+                  color: titleColor ?? AppColors.textPrimary,
                 ),
               ),
             ),

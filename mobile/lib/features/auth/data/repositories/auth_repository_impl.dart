@@ -41,6 +41,15 @@ abstract class AuthRepository {
     String? phone,
   );
   Future<void> logout();
+
+  /// Tur 5 / §10/6 — Şifremi unuttum akışı.
+  /// Backend her zaman 200 döner; UI kullanıcıya "kod gönderildi" mesajı
+  /// gösterip reset ekranına geçirir (enumeration leak korumalı).
+  Future<void> forgotPassword(String email);
+
+  /// 6 karakter token + yeni şifre. Geçersiz/expired token → ApiException.
+  Future<void> resetPassword(String token, String password);
+
   Future<UserEntity?> getStoredUser();
 
   /// Uygulama açılışında çağrılır. SecureStorage'daki kullanıcıyı geri yükler.
@@ -145,6 +154,31 @@ class AuthRepositoryImpl implements AuthRepository {
       // Sunucuya ulaşılamasa bile yerel temizlik garantili.
     }
     await _secureStorage.clearAuth();
+  }
+
+  @override
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _remoteDataSource.forgotPassword(email: email);
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'İstek gönderilemedi, lütfen tekrar deneyin');
+    }
+  }
+
+  @override
+  Future<void> resetPassword(String token, String password) async {
+    try {
+      await _remoteDataSource.resetPassword(
+        token: token,
+        password: password,
+      );
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'Şifre sıfırlanamadı, lütfen tekrar deneyin');
+    }
   }
 
   @override

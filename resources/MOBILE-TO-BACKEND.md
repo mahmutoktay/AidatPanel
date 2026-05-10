@@ -16,7 +16,8 @@
 | Backend'den istenen uçlar | ✅ **5/7 açıldı** (P0 sakin çıkarma + P1 profil + KVKK soft delete + sakin aidatları + şifre sıfırlama) | Mobile UI'ları sırayla bağlayacak |
 | Eksik uçlar | ⏳ Notifications (P1), Expenses (P1), Tickets (P2), Reports (P2), RevenueCat (P3) — FAZ 2+ | Sprint planına |
 | Sunucu E2E akışları | ⚠️ §6'da liste — staging URL ile koşulacak | Abdullah staging URL paylaşacak |
-| **Mobile sıradaki iş** | 🔵 Sakin çıkarma UI (P0 — backend hazır) → Bina formu uyumu → Ayarlar (şifre/KVKK) → Server-side dues filter → Şifremi unuttum | bkz. §10 |
+| **Mobile Tur 5 (backend uyum)** | ✅ Tamamlandı — sakin çıkarma + bina formu + server-side filter + şifre değiştir + hesap kapat + şifremi unuttum | bkz. §10 |
+| **Mobile sıradaki iş** | 🔵 Staging E2E testi (Abdullah'tan staging URL bekleniyor) → FAZ 2 (Notifications + Expenses, backend açıldığında) | — |
 
 **Karar:** Mobile artık **dev preview mock'larıyla değil, backend ile gerçek E2E** koşmaya hazır. Abdullah staging URL paylaştıktan sonra mobile `app_constants.dart` güncellenir; §6'daki E2E maddeleri tek tek işaretlenir.
 
@@ -40,9 +41,10 @@
 | Modül | Backend | Mobile UI |
 |---|---|---|
 | **Resident remove** (§3.1 P0) | ✅ `DELETE /buildings/:bId/apartments/:id/resident` (commit `8cc2152`) | ✅ UI tamam (Tur 5 §10/1) |
-| **Profile + Password + Language + FCM** (§3.3 P1) | ✅ `GET/PUT /me`, `PUT /me/password`, `PUT /me/language`, `PUT /me/fcm-token` | ⏳ Ayarlar tab UI (Tur 5 §10/4) |
-| **KVKK soft delete** (§3.4 P2) | ✅ `DELETE /me` — yöneticide bina varsa 409 | ⏳ Ayarlar tab "Hesabı Kapat" (Tur 5 §10/5) |
-| **Şifre sıfırlama** (§3.2 P1) | ✅ `POST /auth/forgot-password`, `POST /auth/reset-password` | ⏳ Login akışında "Şifremi unuttum" (Tur 5 §10/6) |
+| **Şifre değiştir** (§3.3 P1) | ✅ `PUT /me/password` — `refreshTokenVersion++` | ✅ UI tamam — Settings → Şifre Değiştir bottom sheet (Tur 5 §10/4) |
+| **KVKK soft delete** (§3.4 P2) | ✅ `DELETE /me` — yöneticide bina varsa 409 | ✅ UI tamam — Settings → Tehlikeli Bölge → Hesabımı Kapat (Tur 5 §10/5) |
+| **Şifre sıfırlama** (§3.2 P1) | ✅ `POST /auth/forgot-password`, `POST /auth/reset-password` | ✅ UI tamam — Login → Şifremi Unuttum + 2 ekran (Tur 5 §10/6) |
+| **Profile + Language + FCM** (§3.3 P1) | ✅ `GET/PUT /me`, `PUT /me/language`, `PUT /me/fcm-token` | ⏳ FAZ 2'ye (FCM bildirim bağlandığında) |
 | **Sakin aidat listesi** (§3.5 P2) | ✅ `GET /me/dues?status=&year=&month=` | ✅ Çağrılıyor; ek filtre UI'ı eklenecek |
 
 ### 1.3 Backend'i hâlâ bekleyen modüller (FAZ 2+)
@@ -368,9 +370,9 @@ Dev preview ile UI değişiklikleri staging beklenmeden test edilebilir. Backend
 | 1 | **Sakin çıkarma UI** — `BuildingResidentsScreen` daire kart menüsüne "Sakini Çıkar", AlertDialog onayı, `apartmentsStoreProvider` invalidate | `DELETE /apartments/:id/resident` ✅ | 1.5 saat | [x] |
 | 2 | **Bina formu uyumu** — `AddBuildingScreen`'de `totalFloors` + `apartmentsPerFloor` zorunlu, validation 1-200 / 1-50; `_seedApartmentsIfNeeded` fallback loop'u kaldır (backend zaten seed ediyor) | `POST /buildings` ✅ | 2 saat | [x] |
 | 3 | **Server-side dues filter** — `manager_dues_tab.dart` ay/yıl filtresi değişince repo'ya `month`/`year` query gönder; client-side filtreleme kalksın (büyük listede performans) | `GET /buildings/:id/dues?month=&year=` ✅ | 1.5 saat | [x] |
-| 4 | **Ayarlar tab** — Şifre değiştir formu (`PUT /me/password` → `refreshTokenVersion++` olduğu için otomatik logout) | `PUT /me/password` ✅ | 2 saat | [ ] |
-| 5 | **Hesabı kapat UI** — Ayarlar tab'da tip-to-confirm; **409 yöneticide bina var** mesajını insanlaştır ("Önce binaları sil/devret") | `DELETE /me` ✅ | 1 saat | [ ] |
-| 6 | **Şifremi unuttum** — Login ekranında link + 2 ekran (email gir → 6 karakter kod + yeni şifre) | `POST /auth/forgot-password` + `POST /auth/reset-password` ✅ | 3 saat | [ ] |
+| 4 | **Ayarlar tab** — Şifre değiştir formu (`PUT /me/password` → `refreshTokenVersion++` olduğu için otomatik logout) | `PUT /me/password` ✅ | 2 saat | [x] |
+| 5 | **Hesabı kapat UI** — Ayarlar tab'da tip-to-confirm; **409 yöneticide bina var** mesajını insanlaştır ("Önce binaları sil/devret") | `DELETE /me` ✅ | 1 saat | [x] |
+| 6 | **Şifremi unuttum** — Login ekranında link + 2 ekran (email gir → 6 karakter kod + yeni şifre) | `POST /auth/forgot-password` + `POST /auth/reset-password` ✅ | 3 saat | [x] |
 
 **Toplam tahmin:** ~11 saat — sıra tamamlandığında mobile FAZ 1'in **tüm backend ucu** karşılanmış olur. FAZ 2 (Notifications + Expenses) backend kalanını bekleyecek.
 

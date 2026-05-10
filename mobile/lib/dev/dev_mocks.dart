@@ -24,6 +24,7 @@ import '../features/buildings/data/repositories/building_repository.dart';
 import '../features/buildings/domain/entities/building_entity.dart';
 import '../features/dues/domain/entities/due_entity.dart';
 import '../features/dues/domain/repositories/dues_repository.dart';
+import '../features/profile/data/repositories/profile_repository.dart';
 
 /// Tek bir tetikleyici noktada her mock'u sıfırlamak için.
 class MockState {
@@ -76,8 +77,65 @@ class MockAuthRepository implements AuthRepository {
     await Future.delayed(_delay);
   }
 
+  /// Tur 5 §10/6 — Backend her zaman 200 döner; mock da aynı davranışı
+  /// gösterir, hiçbir kontrol yapmaz.
+  @override
+  Future<void> forgotPassword(String email) async {
+    await Future.delayed(_delay);
+  }
+
+  /// Mock kabul kodu: `ABCDEF` (her şey büyük). Diğer 6 karakter kodlar
+  /// 400 ile reddedilir (UI insanlaştırması test edilebilsin diye).
+  @override
+  Future<void> resetPassword(String token, String password) async {
+    await Future.delayed(_delay);
+    if (token.toUpperCase() != 'ABCDEF') {
+      throw ApiException(
+        message: 'Invalid or expired token',
+        statusCode: 400,
+      );
+    }
+  }
+
   @override
   Future<UserEntity?> getStoredUser() async => _devManager;
+}
+
+/// Tur 5 §10/4-5 — `PUT /me/password` ve `DELETE /me` mock implementasyonu.
+class MockProfileRepository implements ProfileRepository {
+  /// Dev mock şifresi: `Eski123.` Bunun dışında ne girilirse 401 döner.
+  String _currentPassword = 'Eski123.';
+
+  /// Hesabı kapatma 1. denemede başarılı. Manager 409 davranışını test
+  /// etmek isterseniz `forceManagerConflict` true yapın.
+  bool forceManagerConflict = false;
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await Future.delayed(_delay);
+    if (currentPassword != _currentPassword) {
+      throw ApiException(
+        message: 'Current password is incorrect',
+        statusCode: 401,
+      );
+    }
+    _currentPassword = newPassword;
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    await Future.delayed(_delay);
+    if (forceManagerConflict) {
+      throw ApiException(
+        message:
+            'You still manage one or more buildings. Delete or transfer them first.',
+        statusCode: 409,
+      );
+    }
+  }
 }
 
 class MockBuildingRepository implements BuildingRepository {

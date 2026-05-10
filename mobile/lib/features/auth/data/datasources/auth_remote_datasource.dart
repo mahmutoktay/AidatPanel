@@ -17,6 +17,19 @@ abstract class AuthRemoteDataSource {
   /// Backend `refreshTokenVersion`'ı artırarak mevcut refresh token'ı geçersiz kılar.
   /// Belge §3 ve "kontrol listesi" madde 4 zorunlu kılar.
   Future<void> logout();
+
+  /// Tur 5 / §10/6 — `POST /auth/forgot-password` body `{ email }`.
+  /// Backend her zaman 200 döner (enumeration leak yok); kod sadece kayıtlı
+  /// e-postalara Resend ile gönderilir.
+  Future<void> forgotPassword({required String email});
+
+  /// `POST /auth/reset-password` body `{ token, password }`.
+  /// Token 6 karakter alfabesi `23456789ABCDEFGHJKLMNPQRSTUVWXYZ` (sunucu
+  /// trim + büyük harfe çevirir). Geçersiz/expired token → 400.
+  Future<void> resetPassword({
+    required String token,
+    required String password,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -67,5 +80,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> logout() async {
     await _dioClient.post(ApiConstants.logout);
+  }
+
+  @override
+  Future<void> forgotPassword({required String email}) async {
+    await _dioClient.post(
+      ApiConstants.forgotPassword,
+      data: {'email': email},
+    );
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String token,
+    required String password,
+  }) async {
+    await _dioClient.post(
+      ApiConstants.resetPassword,
+      data: {'token': token, 'password': password},
+    );
   }
 }

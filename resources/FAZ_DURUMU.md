@@ -8,21 +8,19 @@
 ## MEVCUT AKTİF FAZ
 
 ```
-▶ FAZ 1 — Tur 5: Backend uyum aksiyon listesi
-  Hedef: ~2026-05-15
-  Durum: AKTİF — backend P0/P1/P2 tamam, mobile UI sırası başladı
-  Aksiyon: aşağıdaki §FAZ 1 / Tur 5 görev listesi
-  Devam koşulu: 6 madde de [x] olunca Furkan onayı + FAZ 2'ye geçiş
+▶ FAZ 1 — Tur 5: Backend uyum aksiyon listesi ✅ TAMAMLANDI
+  Hedef: ~2026-05-15  ✅ Erken bitti
+  Durum: 6/6 [x] — Furkan onayı bekleniyor → FAZ 2'ye geçiş
+  Sonraki: Furkan onayı sonrası ⏸ FAZ 2 (Notifications + Expenses) — backend bekliyor
 ```
 
 > Mobile FAZ 1 koru (Tur 1-4) tamamlandı (ONAY: Furkan ✅, 2026-05-10).
 > Backend `backend/yedek` (commit `8cc2152`) ile mobile'ın §3 P0–P2
 > taleplerinin tümü karşılandı. Tur 5'te bu uçların mobile UI bağlamasını
-> yapıyoruz. Detaylar `resources/MOBILE-TO-BACKEND.md` §10'da; her madde
-> tamamlandıkça hem buraya hem oraya `[x]` işareti gelir.
+> tamamladık (6/6 madde [x]). Detaylar `resources/MOBILE-TO-BACKEND.md` §10'da.
 >
-> FAZ 2 (Notifications + Expenses) hâlâ backend bekliyor; Tur 5 bittikten
-> sonra geçilebilir.
+> FAZ 2 (Notifications + Expenses) hâlâ backend bekliyor; Furkan Tur 5'i
+> onayladıktan sonra FAZ 2'ye geçilebilir (backend uçları açıldığında).
 
 ---
 
@@ -160,17 +158,17 @@ Manuel test sırasında "Bina Oluştur" butonuna art arda basılınca aynı bina
 - [x] **Dev Preview altyapısı**: Sunucu yokken UI test etmek için `lib/dev/dev_mocks.dart` (in-memory `MockAuthRepository`, `MockBuildingRepository`, `MockApartmentRepository`, `MockDuesRepository`; bina silmede FK simülasyonu var) ve `lib/main_dev.dart` (ProviderScope.overrides ile mock'ları inject eder, sağ üstte turuncu `DEV` rozeti gösterir) eklendi. Çalıştırma: `flutter run -t lib/main_dev.dart`. Production main.dart bu dosyaları import etmediği için zarar yok.
 - [x] `authRepositoryProvider` `Provider<AuthRepository>` olarak interface tipinde (eskiden `Provider<AuthRepositoryImpl>` örtük tip — mock override edilemiyordu). Mock ProviderScope.override için gerekli.
 
-#### Tur 5 — Backend uyum aksiyon listesi (▶ AKTİF)
-Abdullah'ın `backend/yedek` branch'i (commit `8cc2152`) ile mobile §3 talepleri **5/5** karşılandı (sakin çıkar, profil, KVKK, şifre sıfırlama, sakin aidat). Mobile bu uçları sırasıyla UI'ya bağlıyor. Detay + tahminler: `resources/MOBILE-TO-BACKEND.md` §10.
+#### Tur 5 — Backend uyum aksiyon listesi ✅ TAMAMLANDI (Furkan onayı bekleniyor)
+Abdullah'ın `backend/yedek` branch'i (commit `8cc2152`) ile mobile §3 talepleri **5/5** karşılandı (sakin çıkar, profil, KVKK, şifre sıfırlama, sakin aidat). Mobile bu uçları sırasıyla UI'ya bağladı. Detay + tahminler: `resources/MOBILE-TO-BACKEND.md` §10.
 
 - [x] **1 — Sakin çıkarma UI** (`DELETE /apartments/:id/resident`): `BuildingResidentsScreen` daire kart menüsüne "Sakini Çıkar" + AlertDialog onayı + apartments invalidate. Backend 403/404 mesajları insanlaştırıldı. **TAMAMLANDI** — `RemoveResidentDialog` widget'ı + `ApartmentsNotifier.removeResidentFromApartment` + dev mock. ~1.5 sa
 - [x] **2 — Bina formu uyumu** (`POST /buildings`): `AddBuildingScreen`'de `totalFloors` (1-200) + `apartmentsPerFloor` (1-50) form-içi range validator + range hint; `_seedApartmentsIfNeeded` fallback loop'u kaldırıldı; `MockBuildingRepository.createBuilding` artık backend gibi tek transaction'da apartments seed ediyor. **TAMAMLANDI** ~2 sa
 - [x] **3 — Server-side dues filter** (`GET /buildings/:id/dues?month=&year=&status=`): DataSource → Repository → Notifier zincirine `month?/year?/status?` opsiyonel parametreleri eklendi; `manager_dues_tab.dart` filtre değişince `_reloadDues()` ile sunucuya yeni query atar (client-side `where(...)` kalktı). Yıl listesi son 5 yıl + dues distinct ile sabit (filtre aktifken kullanıcı geri dönebilsin). `MockDuesRepository` filtreleri uygular. Sakin UI'a filtre eklemedik (notifier imzası geriye uyumlu). **TAMAMLANDI** ~1.5 sa
-- [ ] **4 — Şifre değiştir UI** (`PUT /me/password`): Ayarlar tab'ında yeni ekran. Başarı sonrası backend `refreshTokenVersion++` yaptığı için **otomatik logout + login**. (~2 sa)
-- [ ] **5 — Hesabı kapat UI** (`DELETE /me`): Ayarlar tab'ında "Hesabı Kapat" + tip-to-confirm. **409 yöneticide bina var** mesajı insanlaştırılacak ("Önce binaları silin veya başka yöneticiye devredin"). (~1 sa)
-- [ ] **6 — Şifremi unuttum akışı** (`POST /auth/forgot-password` + `POST /auth/reset-password`): Login'e link + 2 ekran (email gir → 6 char kod + yeni şifre). Backend her zaman 200 döner (enumeration leak yok), kod alfabesi `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`. (~3 sa)
+- [x] **4 — Şifre değiştir UI** (`PUT /me/password`): Ayarlar → "Şifre Değiştir" tile artık `ChangePasswordBottomSheet` açıyor (mevcut + yeni + onay). Başarı sonrası `successMsg` toast → `authNotifier.logout()` → `/login`. 401 mesajı "mevcut şifre hatalı" olarak insanlaştırıldı. `MockProfileRepository` `Eski123.` şifresini bekler. **TAMAMLANDI** ~2 sa
+- [x] **5 — Hesabı kapat UI** (`DELETE /me`): Ayarlar → "Tehlikeli Bölge" → "Hesabımı Kapat" tile (kırmızı). `DeleteAccountDialog` tip-to-confirm ("HESABIMI KAPAT" yazılır). 409 mesajı "Önce binaları silin veya başka yöneticiye devredin" olarak insanlaştırıldı. Mock'ta `forceManagerConflict` flag'i 409 davranışını test etmek için. **TAMAMLANDI** ~1 sa
+- [x] **6 — Şifremi unuttum akışı** (`POST /auth/forgot-password` + `POST /auth/reset-password`): Login'de "Şifremi Unuttum" linki → `ForgotPasswordScreen` (email) → `ResetPasswordScreen` (6 char kod + yeni şifre). `inputFormatters` + RegExp ile sadece backend alfabesi (`23456789ABCDEFGHJKLMNPQRSTUVWXYZ`) kabul ediliyor. Backend 400 hatası ("Invalid or expired token") "Kod hatalı veya süresi dolmuş" olarak insanlaştırıldı. Mock kabul kodu: `ABCDEF`. **TAMAMLANDI** ~3 sa
 
-> **Toplam tahmin:** ~11 saat. Tur 5 bittiğinde mobile FAZ 1'in tüm backend ucu karşılanmış olur; FAZ 2'ye geçilebilir.
+> **Toplam tahmin:** ~11 saat. Tur 5 **TAMAMLANDI** — mobile FAZ 1'in tüm backend ucu karşılandı; FAZ 2'ye geçilebilir (Furkan onayı bekleniyor).
 >
 > **Backend'den küçük P3 talep:** `GET /buildings` yanıtına `_count.apartments` (mobile dashboard kart doğruluğu için). Tur 5 boyunca paralel — bloklayıcı değil.
 

@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 594 (297 per locale)
+/// Strings: 668 (334 per locale)
 ///
-/// Built on 2026-05-10 at 16:16 UTC
+/// Built on 2026-05-10 at 16:45 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -367,6 +367,43 @@ class _StringsCommonEn {
 	String get residentRemoveFailed => 'Could not remove resident';
 	String get residentRemoveForbidden => 'You are not allowed to perform this action. Only the building manager can remove residents.';
 	String get residentRemoveNotFound => 'No resident to remove from this apartment.';
+	String get currentPassword => 'Current Password';
+	String get newPassword => 'New Password';
+	String get newPasswordConfirm => 'New Password (Repeat)';
+	String get currentPasswordRequired => 'Enter your current password';
+	String get passwordsMustDiffer => 'New password cannot be the same as the old one';
+	String get changePasswordTitle => 'Change Password';
+	String get changePasswordSubtitle => 'Update your password regularly to keep your account secure.';
+	String get changePasswordSuccess => 'Your password has been changed. Please sign in again with your new password.';
+	String get changePasswordFailed => 'Could not change password. Please try again.';
+	String get changePasswordWrongCurrent => 'Current password is incorrect.';
+	String get deleteAccount => 'Close My Account';
+	String get deleteAccountTitle => 'Do you want to close your account?';
+	String get deleteAccountWarning => 'This action cannot be undone. Your personal data will be removed, but for legal reasons some records (such as dues history) are kept anonymously.';
+	String get deleteAccountTypeHint => 'To confirm, type "CLOSE MY ACCOUNT" below:';
+	String get deleteAccountTypePhrase => 'CLOSE MY ACCOUNT';
+	String get deleteAccountTypeMismatch => 'What you typed does not match.';
+	String get deleteAccountConfirmButton => 'Close My Account';
+	String get deleteAccountSuccess => 'Your account has been closed. Thank you for using AidatPanel.';
+	String get deleteAccountFailed => 'Could not close account. Please try again.';
+	String get deleteAccountFailedManager => 'You first need to delete the buildings you manage or transfer them to another manager.';
+	String get dangerZone => 'Danger Zone';
+	String get forgotPassword => 'Forgot Password';
+	String get forgotPasswordTitle => 'Forgot Password';
+	String get forgotPasswordSubtitle => 'Enter your registered email and we\'ll send you a reset code.';
+	String get forgotPasswordSuccess => 'If this email is registered, a reset code has been sent. Please check your inbox.';
+	String get sendResetCode => 'Send Code';
+	String get iHaveACode => 'I already have a code';
+	String get resetPasswordTitle => 'Set New Password';
+	String get resetPasswordSubtitle => 'Enter the 6-character code from your email and a new password.';
+	String get resetCode => 'Reset Code';
+	String get resetCodeHint => 'ABC123';
+	String get resetCodeRequired => 'Reset code required';
+	String get resetCodeInvalid => 'Code must be 6 characters';
+	String get resetPasswordSuccess => 'Your password has been reset. You can sign in with your new password.';
+	String get resetPasswordFailed => 'Could not reset password. The code may be invalid or expired.';
+	String get resetPasswordSubmit => 'Reset Password';
+	String get backToLogin => 'Back to login';
 }
 
 // Path: validation
@@ -760,6 +797,43 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get residentRemoveFailed => 'Sakin çıkarılamadı';
 	@override String get residentRemoveForbidden => 'Bu işlem için yetkiniz yok. Yalnızca binanın yöneticisi sakin çıkarabilir.';
 	@override String get residentRemoveNotFound => 'Bu dairede çıkarılacak sakin bulunamadı.';
+	@override String get currentPassword => 'Mevcut Şifre';
+	@override String get newPassword => 'Yeni Şifre';
+	@override String get newPasswordConfirm => 'Yeni Şifre (Tekrar)';
+	@override String get currentPasswordRequired => 'Mevcut şifrenizi girin';
+	@override String get passwordsMustDiffer => 'Yeni şifre eski şifre ile aynı olamaz';
+	@override String get changePasswordTitle => 'Şifre Değiştir';
+	@override String get changePasswordSubtitle => 'Güvenliğiniz için şifrenizi düzenli olarak değiştirin.';
+	@override String get changePasswordSuccess => 'Şifreniz değiştirildi. Lütfen yeni şifrenizle tekrar giriş yapın.';
+	@override String get changePasswordFailed => 'Şifre değiştirilemedi. Lütfen tekrar deneyin.';
+	@override String get changePasswordWrongCurrent => 'Mevcut şifre hatalı.';
+	@override String get deleteAccount => 'Hesabımı Kapat';
+	@override String get deleteAccountTitle => 'Hesabınızı kapatmak istiyor musunuz?';
+	@override String get deleteAccountWarning => 'Bu işlem geri alınamaz. Kişisel bilgileriniz silinir, ancak yasal nedenlerle bazı kayıtlar (aidat geçmişi gibi) anonim olarak saklanır.';
+	@override String get deleteAccountTypeHint => 'Onaylamak için aşağıya "HESABIMI KAPAT" yazın:';
+	@override String get deleteAccountTypePhrase => 'HESABIMI KAPAT';
+	@override String get deleteAccountTypeMismatch => 'Yazdığınız metin eşleşmiyor.';
+	@override String get deleteAccountConfirmButton => 'Hesabımı Kapat';
+	@override String get deleteAccountSuccess => 'Hesabınız kapatıldı. Bizi tercih ettiğiniz için teşekkürler.';
+	@override String get deleteAccountFailed => 'Hesap kapatılamadı. Lütfen tekrar deneyin.';
+	@override String get deleteAccountFailedManager => 'Önce yönettiğiniz binaları silmeniz veya başka bir yöneticiye devretmeniz gerekiyor.';
+	@override String get dangerZone => 'Tehlikeli Bölge';
+	@override String get forgotPassword => 'Şifremi Unuttum';
+	@override String get forgotPasswordTitle => 'Şifremi Unuttum';
+	@override String get forgotPasswordSubtitle => 'Kayıtlı e-posta adresinizi girin, size bir sıfırlama kodu gönderelim.';
+	@override String get forgotPasswordSuccess => 'Eğer bu e-posta sistemimizde kayıtlıysa, sıfırlama kodu gönderildi. Lütfen e-postanızı kontrol edin.';
+	@override String get sendResetCode => 'Kodu Gönder';
+	@override String get iHaveACode => 'Zaten kodum var';
+	@override String get resetPasswordTitle => 'Yeni Şifre Belirle';
+	@override String get resetPasswordSubtitle => 'E-postanıza gelen 6 haneli kodu ve yeni şifrenizi girin.';
+	@override String get resetCode => 'Sıfırlama Kodu';
+	@override String get resetCodeHint => 'ABC123';
+	@override String get resetCodeRequired => 'Sıfırlama kodu gerekli';
+	@override String get resetCodeInvalid => 'Kod 6 karakter olmalı';
+	@override String get resetPasswordSuccess => 'Şifreniz sıfırlandı. Yeni şifrenizle giriş yapabilirsiniz.';
+	@override String get resetPasswordFailed => 'Şifre sıfırlanamadı. Kod hatalı veya süresi dolmuş olabilir.';
+	@override String get resetPasswordSubmit => 'Şifreyi Sıfırla';
+	@override String get backToLogin => 'Giriş ekranına dön';
 }
 
 // Path: validation
@@ -1122,6 +1196,43 @@ extension on Translations {
 			case 'common.residentRemoveFailed': return 'Could not remove resident';
 			case 'common.residentRemoveForbidden': return 'You are not allowed to perform this action. Only the building manager can remove residents.';
 			case 'common.residentRemoveNotFound': return 'No resident to remove from this apartment.';
+			case 'common.currentPassword': return 'Current Password';
+			case 'common.newPassword': return 'New Password';
+			case 'common.newPasswordConfirm': return 'New Password (Repeat)';
+			case 'common.currentPasswordRequired': return 'Enter your current password';
+			case 'common.passwordsMustDiffer': return 'New password cannot be the same as the old one';
+			case 'common.changePasswordTitle': return 'Change Password';
+			case 'common.changePasswordSubtitle': return 'Update your password regularly to keep your account secure.';
+			case 'common.changePasswordSuccess': return 'Your password has been changed. Please sign in again with your new password.';
+			case 'common.changePasswordFailed': return 'Could not change password. Please try again.';
+			case 'common.changePasswordWrongCurrent': return 'Current password is incorrect.';
+			case 'common.deleteAccount': return 'Close My Account';
+			case 'common.deleteAccountTitle': return 'Do you want to close your account?';
+			case 'common.deleteAccountWarning': return 'This action cannot be undone. Your personal data will be removed, but for legal reasons some records (such as dues history) are kept anonymously.';
+			case 'common.deleteAccountTypeHint': return 'To confirm, type "CLOSE MY ACCOUNT" below:';
+			case 'common.deleteAccountTypePhrase': return 'CLOSE MY ACCOUNT';
+			case 'common.deleteAccountTypeMismatch': return 'What you typed does not match.';
+			case 'common.deleteAccountConfirmButton': return 'Close My Account';
+			case 'common.deleteAccountSuccess': return 'Your account has been closed. Thank you for using AidatPanel.';
+			case 'common.deleteAccountFailed': return 'Could not close account. Please try again.';
+			case 'common.deleteAccountFailedManager': return 'You first need to delete the buildings you manage or transfer them to another manager.';
+			case 'common.dangerZone': return 'Danger Zone';
+			case 'common.forgotPassword': return 'Forgot Password';
+			case 'common.forgotPasswordTitle': return 'Forgot Password';
+			case 'common.forgotPasswordSubtitle': return 'Enter your registered email and we\'ll send you a reset code.';
+			case 'common.forgotPasswordSuccess': return 'If this email is registered, a reset code has been sent. Please check your inbox.';
+			case 'common.sendResetCode': return 'Send Code';
+			case 'common.iHaveACode': return 'I already have a code';
+			case 'common.resetPasswordTitle': return 'Set New Password';
+			case 'common.resetPasswordSubtitle': return 'Enter the 6-character code from your email and a new password.';
+			case 'common.resetCode': return 'Reset Code';
+			case 'common.resetCodeHint': return 'ABC123';
+			case 'common.resetCodeRequired': return 'Reset code required';
+			case 'common.resetCodeInvalid': return 'Code must be 6 characters';
+			case 'common.resetPasswordSuccess': return 'Your password has been reset. You can sign in with your new password.';
+			case 'common.resetPasswordFailed': return 'Could not reset password. The code may be invalid or expired.';
+			case 'common.resetPasswordSubmit': return 'Reset Password';
+			case 'common.backToLogin': return 'Back to login';
 			case 'validation.emailRequired': return 'Email address cannot be empty';
 			case 'validation.emailInvalid': return 'Please enter a valid email address';
 			case 'validation.emailTooLong': return 'Email address is too long';
@@ -1427,6 +1538,43 @@ extension on _StringsTr {
 			case 'common.residentRemoveFailed': return 'Sakin çıkarılamadı';
 			case 'common.residentRemoveForbidden': return 'Bu işlem için yetkiniz yok. Yalnızca binanın yöneticisi sakin çıkarabilir.';
 			case 'common.residentRemoveNotFound': return 'Bu dairede çıkarılacak sakin bulunamadı.';
+			case 'common.currentPassword': return 'Mevcut Şifre';
+			case 'common.newPassword': return 'Yeni Şifre';
+			case 'common.newPasswordConfirm': return 'Yeni Şifre (Tekrar)';
+			case 'common.currentPasswordRequired': return 'Mevcut şifrenizi girin';
+			case 'common.passwordsMustDiffer': return 'Yeni şifre eski şifre ile aynı olamaz';
+			case 'common.changePasswordTitle': return 'Şifre Değiştir';
+			case 'common.changePasswordSubtitle': return 'Güvenliğiniz için şifrenizi düzenli olarak değiştirin.';
+			case 'common.changePasswordSuccess': return 'Şifreniz değiştirildi. Lütfen yeni şifrenizle tekrar giriş yapın.';
+			case 'common.changePasswordFailed': return 'Şifre değiştirilemedi. Lütfen tekrar deneyin.';
+			case 'common.changePasswordWrongCurrent': return 'Mevcut şifre hatalı.';
+			case 'common.deleteAccount': return 'Hesabımı Kapat';
+			case 'common.deleteAccountTitle': return 'Hesabınızı kapatmak istiyor musunuz?';
+			case 'common.deleteAccountWarning': return 'Bu işlem geri alınamaz. Kişisel bilgileriniz silinir, ancak yasal nedenlerle bazı kayıtlar (aidat geçmişi gibi) anonim olarak saklanır.';
+			case 'common.deleteAccountTypeHint': return 'Onaylamak için aşağıya "HESABIMI KAPAT" yazın:';
+			case 'common.deleteAccountTypePhrase': return 'HESABIMI KAPAT';
+			case 'common.deleteAccountTypeMismatch': return 'Yazdığınız metin eşleşmiyor.';
+			case 'common.deleteAccountConfirmButton': return 'Hesabımı Kapat';
+			case 'common.deleteAccountSuccess': return 'Hesabınız kapatıldı. Bizi tercih ettiğiniz için teşekkürler.';
+			case 'common.deleteAccountFailed': return 'Hesap kapatılamadı. Lütfen tekrar deneyin.';
+			case 'common.deleteAccountFailedManager': return 'Önce yönettiğiniz binaları silmeniz veya başka bir yöneticiye devretmeniz gerekiyor.';
+			case 'common.dangerZone': return 'Tehlikeli Bölge';
+			case 'common.forgotPassword': return 'Şifremi Unuttum';
+			case 'common.forgotPasswordTitle': return 'Şifremi Unuttum';
+			case 'common.forgotPasswordSubtitle': return 'Kayıtlı e-posta adresinizi girin, size bir sıfırlama kodu gönderelim.';
+			case 'common.forgotPasswordSuccess': return 'Eğer bu e-posta sistemimizde kayıtlıysa, sıfırlama kodu gönderildi. Lütfen e-postanızı kontrol edin.';
+			case 'common.sendResetCode': return 'Kodu Gönder';
+			case 'common.iHaveACode': return 'Zaten kodum var';
+			case 'common.resetPasswordTitle': return 'Yeni Şifre Belirle';
+			case 'common.resetPasswordSubtitle': return 'E-postanıza gelen 6 haneli kodu ve yeni şifrenizi girin.';
+			case 'common.resetCode': return 'Sıfırlama Kodu';
+			case 'common.resetCodeHint': return 'ABC123';
+			case 'common.resetCodeRequired': return 'Sıfırlama kodu gerekli';
+			case 'common.resetCodeInvalid': return 'Kod 6 karakter olmalı';
+			case 'common.resetPasswordSuccess': return 'Şifreniz sıfırlandı. Yeni şifrenizle giriş yapabilirsiniz.';
+			case 'common.resetPasswordFailed': return 'Şifre sıfırlanamadı. Kod hatalı veya süresi dolmuş olabilir.';
+			case 'common.resetPasswordSubmit': return 'Şifreyi Sıfırla';
+			case 'common.backToLogin': return 'Giriş ekranına dön';
 			case 'validation.emailRequired': return 'Email adresi boş bırakılamaz';
 			case 'validation.emailInvalid': return 'Geçerli bir email adresi giriniz';
 			case 'validation.emailTooLong': return 'Email adresi çok uzun';

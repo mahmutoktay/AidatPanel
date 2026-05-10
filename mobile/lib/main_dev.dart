@@ -9,6 +9,7 @@
 ///   - buildingRepositoryProvider   → MockBuildingRepository (2 hazır bina)
 ///   - apartmentRepositoryProvider  → MockApartmentRepository (her binada birkaç daire)
 ///   - duesRepositoryProvider       → MockDuesRepository (boş, sadece UI gezmesi için)
+///   - profileRepositoryProvider    → MockProfileRepository (şifre Eski123. , reset kodu ABCDEF)
 ///
 /// Splash → restoreSession sahte manager kullanıcı döner → router otomatik
 /// olarak `/manager-dashboard` rotasına yönlendirir. Login/register ekranlarına
@@ -30,6 +31,7 @@ import 'features/apartments/data/apartments_store.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/buildings/data/buildings_store.dart';
 import 'features/dues/presentation/providers/dues_provider.dart';
+import 'features/profile/presentation/providers/profile_provider.dart';
 import 'shared/widgets/friendly_error_screen.dart';
 import 'shared/widgets/toast_overlay.dart';
 import 'l10n/strings.g.dart';
@@ -47,6 +49,7 @@ void main() async {
   final mockBuildings = MockBuildingRepository(mockApartments);
   final mockAuth = MockAuthRepository();
   final mockDues = MockDuesRepository();
+  final mockProfile = MockProfileRepository();
 
   runApp(
     ProviderScope(
@@ -55,6 +58,7 @@ void main() async {
         buildingRepositoryProvider.overrideWithValue(mockBuildings),
         apartmentRepositoryProvider.overrideWithValue(mockApartments),
         duesRepositoryProvider.overrideWithValue(mockDues),
+        profileRepositoryProvider.overrideWithValue(mockProfile),
       ],
       child: const _DevBanner(child: _DevApp()),
     ),
