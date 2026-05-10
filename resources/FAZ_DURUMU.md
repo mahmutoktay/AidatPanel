@@ -8,17 +8,21 @@
 ## MEVCUT AKTİF FAZ
 
 ```
-⏸ FAZ 2 — Notifications + Expenses (BACKEND BAĞIMLI — BEKLEMEDE)
-  Hedef: ~2026-06-05
-  Engel: backend tarafında /notifications ve /expenses uçları yok
-  Aksiyon: backend ekibine resources/MOBILE-TO-BACKEND.md raporu iletildi
-  Devam koşulu: minimum FAZ 2 uçları staging'de canlıya alınınca
+▶ FAZ 1 — Tur 5: Backend uyum aksiyon listesi
+  Hedef: ~2026-05-15
+  Durum: AKTİF — backend P0/P1/P2 tamam, mobile UI sırası başladı
+  Aksiyon: aşağıdaki §FAZ 1 / Tur 5 görev listesi
+  Devam koşulu: 6 madde de [x] olunca Furkan onayı + FAZ 2'ye geçiş
 ```
 
-> Mobile FAZ 1 tamamlandı (ONAY: Furkan ✅, 2026-05-10).
-> FAZ 2 görevlerinin %80'i backend uçlarına bağımlı; backend hazırlanana
-> kadar mobile tarafında dev preview ile UI iyileştirmeleri (collection
-> rate hesabı, dashboard polish) ve teknik borç (test coverage) yapılabilir.
+> Mobile FAZ 1 koru (Tur 1-4) tamamlandı (ONAY: Furkan ✅, 2026-05-10).
+> Backend `backend/yedek` (commit `8cc2152`) ile mobile'ın §3 P0–P2
+> taleplerinin tümü karşılandı. Tur 5'te bu uçların mobile UI bağlamasını
+> yapıyoruz. Detaylar `resources/MOBILE-TO-BACKEND.md` §10'da; her madde
+> tamamlandıkça hem buraya hem oraya `[x]` işareti gelir.
+>
+> FAZ 2 (Notifications + Expenses) hâlâ backend bekliyor; Tur 5 bittikten
+> sonra geçilebilir.
 
 ---
 
@@ -156,6 +160,20 @@ Manuel test sırasında "Bina Oluştur" butonuna art arda basılınca aynı bina
 - [x] **Dev Preview altyapısı**: Sunucu yokken UI test etmek için `lib/dev/dev_mocks.dart` (in-memory `MockAuthRepository`, `MockBuildingRepository`, `MockApartmentRepository`, `MockDuesRepository`; bina silmede FK simülasyonu var) ve `lib/main_dev.dart` (ProviderScope.overrides ile mock'ları inject eder, sağ üstte turuncu `DEV` rozeti gösterir) eklendi. Çalıştırma: `flutter run -t lib/main_dev.dart`. Production main.dart bu dosyaları import etmediği için zarar yok.
 - [x] `authRepositoryProvider` `Provider<AuthRepository>` olarak interface tipinde (eskiden `Provider<AuthRepositoryImpl>` örtük tip — mock override edilemiyordu). Mock ProviderScope.override için gerekli.
 
+#### Tur 5 — Backend uyum aksiyon listesi (▶ AKTİF)
+Abdullah'ın `backend/yedek` branch'i (commit `8cc2152`) ile mobile §3 talepleri **5/5** karşılandı (sakin çıkar, profil, KVKK, şifre sıfırlama, sakin aidat). Mobile bu uçları sırasıyla UI'ya bağlıyor. Detay + tahminler: `resources/MOBILE-TO-BACKEND.md` §10.
+
+- [ ] **1 — Sakin çıkarma UI** (`DELETE /apartments/:id/resident`): `BuildingResidentsScreen` daire kart menüsüne "Sakini Çıkar" + AlertDialog onayı + apartments invalidate. Backend 403/404 mesajları insanlaştırılacak. (~1.5 sa)
+- [ ] **2 — Bina formu uyumu** (`POST /buildings`): `AddBuildingScreen`'de `totalFloors` (1-200) + `apartmentsPerFloor` (1-50) zorunlu hale gel; `_seedApartmentsIfNeeded` fallback loop'u sil (backend transaction içinde otomatik seed ediyor — `buildingService.createBuildingService` doğrulandı). (~2 sa)
+- [ ] **3 — Server-side dues filter** (`GET /buildings/:id/dues?month=&year=&status=`): `manager_dues_tab.dart` ay/yıl filtresi değişince repo çağrısına query param ekle; client-side filtreleme kalksın (büyük listede performans). `getMyDues` aynı şekilde sakin tarafında da. (~1.5 sa)
+- [ ] **4 — Şifre değiştir UI** (`PUT /me/password`): Ayarlar tab'ında yeni ekran. Başarı sonrası backend `refreshTokenVersion++` yaptığı için **otomatik logout + login**. (~2 sa)
+- [ ] **5 — Hesabı kapat UI** (`DELETE /me`): Ayarlar tab'ında "Hesabı Kapat" + tip-to-confirm. **409 yöneticide bina var** mesajı insanlaştırılacak ("Önce binaları silin veya başka yöneticiye devredin"). (~1 sa)
+- [ ] **6 — Şifremi unuttum akışı** (`POST /auth/forgot-password` + `POST /auth/reset-password`): Login'e link + 2 ekran (email gir → 6 char kod + yeni şifre). Backend her zaman 200 döner (enumeration leak yok), kod alfabesi `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`. (~3 sa)
+
+> **Toplam tahmin:** ~11 saat. Tur 5 bittiğinde mobile FAZ 1'in tüm backend ucu karşılanmış olur; FAZ 2'ye geçilebilir.
+>
+> **Backend'den küçük P3 talep:** `GET /buildings` yanıtına `_count.apartments` (mobile dashboard kart doğruluğu için). Tur 5 boyunca paralel — bloklayıcı değil.
+
 ### Çıkış Kapısı
 Yukarıdaki tüm `[ ]` → `[x]` olmadan ve Furkan onayı olmadan Faz 2 başlamaz.
 
@@ -238,19 +256,15 @@ Yukarıdaki tüm `[ ]` → `[x]` olmadan ve Furkan onayı olmadan Faz 2 başlama
 > Sadece RevenueCat webhook backend'de henüz yok — onun için satın alma akışı yine eklenebilir, webhook ileride tamamlanır.
 
 ### Profil (features/profile/)
-| Görev | Backend Durumu |
-|-------|----------------|
-| `GET /me`, `PUT /me`, `DELETE /me` (KVKK soft delete) | ✅ canlı |
-| `PUT /me/password` (NOT POST — belge `PUT` diyor) | ✅ canlı |
-| `PUT /me/language` (NOT POST — belge `PUT` diyor) | ✅ canlı |
-| `POST /auth/forgot-password`, `POST /auth/reset-password` | ✅ canlı (6 haneli kod, Resend ile e-posta) |
 
-- [ ] Profil bilgileri ekranı: `GET /me` ile yeniden yükle, `PUT /me` ile name/phone/language güncelle
-- [ ] Şifre değiştirme ekranı: `PUT /me/password` (`currentPassword`, `newPassword`); başarıdan sonra `refreshTokenVersion` arttığı için sessiz logout + login akışı
-- [ ] Dil değiştirme: `PUT /me/language` (UI zaten lokalde dil değiştirebiliyor, sunucuya da yansıt)
-- [ ] **🆕** KVKK Hesap Kapatma ekranı: `DELETE /me` (yönetici hesabıysa 409 → "Önce binalarınızı silmelisiniz" hata mesajı)
-- [ ] **🆕** Şifremi Unuttum akışı: LoginScreen'e link → `POST /auth/forgot-password` (her zaman 200 döner — enumeration yok); ardından kod giriş ekranı → `POST /auth/reset-password` (6 karakter alfabesi `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`, sunucu trim + büyük harf)
-- [ ] Logout ekranı/butonu (FAZ 1 Tur 2'de sunucu çağrısı eklendi; FAZ 4'te ek olarak "Tüm cihazlardan çıkış yap" çağrısı için backend ek uç gerekirse not düşülecek)
+> **NOT:** Şifre değiştirme + KVKK hesap kapatma + Şifremi unuttum akışları
+> FAZ 1 / Tur 5'e **erkene çekildi** (backend bu uçları öne aldı). Aşağıda
+> kalan maddeler ileri seviye iyileştirmeler ve sunucuya dil tercihi
+> yazımı; "Tüm cihazlardan çıkış" gibi opsiyonel ekler.
+
+- [ ] Profil bilgileri ekranı: `GET /me` ile yeniden yükle, `PUT /me` ile name/phone güncelle (Tur 5 §10/4 ile birlikte gelen şifre değiştir UI'sının yanına eklenebilir)
+- [ ] `PUT /me/language` — UI zaten lokalde dil değiştiriyor; sunucuya yansıtmak (bildirim e-postaları için lazım, FAZ 2'ye kadar düşük öncelik)
+- [ ] "Tüm cihazlardan çıkış yap" — backend `refreshTokenVersion++` ile aslında zaten tek noktadan çıkış yapıyor; kullanıcıya görünür kontrol gerekirse not düşülür
 
 ### Subscription (features/subscription/)
 | Görev | Backend Durumu |
