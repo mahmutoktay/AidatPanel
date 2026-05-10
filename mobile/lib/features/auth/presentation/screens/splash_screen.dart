@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +6,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
-import '../../../buildings/data/buildings_store.dart';
 import '../../presentation/providers/auth_provider.dart';
 import '../../domain/entities/user_entity.dart' show UserRole;
 
@@ -57,31 +54,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         ref.read(authStateProvider.notifier).restoreSession();
     final minDelayFuture = Future<void>.delayed(_minSplashDuration);
 
-    // restoreSession (token tazeleme) biter bitmez ilgili dashboard verilerini
-    // pre-warm et. minDelayFuture geri kalan süre boyunca ağ isteği paralel
-    // çalışır ve kullanıcı dashboard'a vardığında veri büyük ihtimalle hazır
-    // olur. Pre-warm fire-and-forget; ağ hatasını dashboard kendi UI'ında
-    // gösterir.
-    unawaited(
-      restoreFuture.then((_) {
-        if (!mounted) return;
-        _prewarmDataForRole();
-      }),
-    );
-
+    // restoreSession bitince yönlendir; pre-warm'ı dashboard mount olduktan
+    // sonra ConsumerStatefulWidget'in initState'i kendisi tetikler. Splash
+    // sırasında pre-warm denemesi UI thread'i bloklayıp ANR'a yol açıyordu.
     await Future.wait<void>([restoreFuture, minDelayFuture]);
 
     if (!mounted) return;
     _navigateBasedOnAuth();
-  }
-
-  void _prewarmDataForRole() {
-    final auth = ref.read(authStateProvider);
-    if (!auth.isAuthenticated || auth.user == null) return;
-    if (auth.user!.role == UserRole.manager) {
-      // Notifier'ı `read` etmek constructor'ındaki `loadBuildings()`'i tetikler.
-      ref.read(buildingsStoreProvider);
-    }
   }
 
   void _resetNavigationForFreshEntry() {

@@ -562,27 +562,31 @@ class _BuildingsLoadingPlaceholder extends StatelessWidget {
       color: AppColors.textSecondary,
       fontWeight: FontWeight.w500,
     );
-    // Spinner, yazının x-height'ine yakın küçük ve aynı renkte; yan yana
-    // ortalanmış, telefon ekranının ortasında nefes aldıracak boşlukla.
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingXL),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: 16,
-            width: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                AppColors.textSecondary,
+    // Tam genişlikte bir alan açıp spinner + yazıyı hem yatay hem dikey
+    // olarak Center ile ortalıyoruz. Yükseklik ekrana göre dinamik:
+    // hero card ve başlığın altında kalan boşluğun ortasına denk gelsin.
+    final placeholderHeight = MediaQuery.of(context).size.height * 0.32;
+    return SizedBox(
+      width: double.infinity,
+      height: placeholderHeight,
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 16,
+              width: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppColors.textSecondary,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: AppSizes.spacingS),
-          Text(context.t.common.loadingBuildings, style: textStyle),
-        ],
+            const SizedBox(width: AppSizes.spacingS),
+            Text(context.t.common.loadingBuildings, style: textStyle),
+          ],
+        ),
       ),
     );
   }

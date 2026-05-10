@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -6,14 +7,44 @@ import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/secure_storage.dart';
+import 'shared/widgets/friendly_error_screen.dart';
 import 'shared/widgets/toast_overlay.dart';
 import 'l10n/strings.g.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _installGlobalErrorHandlers();
   await initAppInfo();
   await initLocale();
   runApp(const ProviderScope(child: MyApp()));
+}
+
+/// - `ErrorWidget.builder`: build sırasında bir widget exception fırlatırsa
+///   Flutter'ın varsayılan kıpkırmızı ekranı yerine kibarca kullanıcıya bildir.
+/// - `FlutterError.onError`: framework içinde yakalanan hataları (build, layout
+///   vb.) konsola düzgün bas; release'de Crashlytics'e bağlanabilir.
+/// - `PlatformDispatcher.instance.onError`: zone dışı async uncaught error'ları
+///   yakala (örn. bir Future error'ı kimse await etmediyse). `true` döndürmek
+///   "ben hallettim, framework'e crash bildirme" demektir.
+void _installGlobalErrorHandlers() {
+  final originalOnError = FlutterError.onError;
+  FlutterError.onError = (FlutterErrorDetails details) {
+    if (kDebugMode) {
+      FlutterError.dumpErrorToConsole(details);
+    }
+    originalOnError?.call(details);
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (kDebugMode) {
+      debugPrint('[PlatformDispatcher] Uncaught: $error\n$stack');
+    }
+    return true;
+  };
+
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return FriendlyErrorScreen(details: details);
+  };
 }
 
 Future<void> initAppInfo() async {
