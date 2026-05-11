@@ -1,6 +1,6 @@
 # MOBILE ↔ BACKEND — Sözleşme Uyum + Talep Raporu
 
-> **Sürüm:** 2026-05-10 — Tur 2 (Backend §3 P0–P2 tamamlandı, mobile UI uyum sırası başlıyor)
+> **Sürüm:** 2026-05-11 — Mobile Tur 5 tamamlandı, **production APK canlı backend ile çalışıyor ✅**
 > **Hedef:** Mobile ↔ Backend (Furkan ↔ Abdullah) için **tek karşılıklı** sözleşme dosyası.
 > Mobil tarafın **mevcut durumunu**, **varsayımlarını**, **istediği uçları**, **E2E test edilemediği senaryoları** ve **backend'in karşılayıp karşılamadığını** tek dosyada raporlar.
 > **Kural:** Bu dosya **evergreen** — yeni rapor üretilmez, ✅/⏳ işaretleri bu dosya üzerinde güncellenir.
@@ -11,15 +11,56 @@
 
 | Konu | Durum | Eylem |
 |---|---|---|
-| Mobile FAZ 1 kodu (Auth + Buildings + Apartments + Dues + Dashboard) | ✅ tamam, dev preview'de manuel test edildi | Staging E2E doğrulama |
-| Sözleşmeye tam uyum (`FLUTTER-BACKEND.md` §1-§6) | ✅ uyumlu | §6'daki E2E ile karşılıklı doğrulanır |
-| Backend'den istenen uçlar | ✅ **5/7 açıldı** (P0 sakin çıkarma + P1 profil + KVKK soft delete + sakin aidatları + şifre sıfırlama) | Mobile UI'ları sırayla bağlayacak |
-| Eksik uçlar | ⏳ Notifications (P1), Expenses (P1), Tickets (P2), Reports (P2), RevenueCat (P3) — FAZ 2+ | Sprint planına |
-| Sunucu E2E akışları | ⚠️ §6'da liste — staging URL ile koşulacak | Abdullah staging URL paylaşacak |
+| Mobile FAZ 1 kodu (Auth + Buildings + Apartments + Dues + Dashboard) | ✅ tamam | — |
+| Sözleşmeye tam uyum (`FLUTTER-BACKEND.md` §1-§6) | ✅ uyumlu | — |
+| Backend'den istenen uçlar (P0-P2) | ✅ **7/7 açıldı** (sakin çıkar + profil + şifre değiştir + KVKK + şifre sıfırlama + sakin aidat + FCM) | — |
+| Eksik uçlar | ⏳ Notifications listesi (P1), Expenses (P1), Tickets (P2), Reports (P2), RevenueCat (P3) — FAZ 2+ | Sprint planına |
+| Production APK | ✅ **Canlı backend ile çalışıyor** (2026-05-11) | Furkan FAZ 1 onayı verecek |
 | **Mobile Tur 5 (backend uyum)** | ✅ Tamamlandı — sakin çıkarma + bina formu + server-side filter + şifre değiştir + hesap kapat + şifremi unuttum | bkz. §10 |
-| **Mobile sıradaki iş** | 🔵 Staging E2E testi (Abdullah'tan staging URL bekleniyor) → FAZ 2 (Notifications + Expenses, backend açıldığında) | — |
+| **Mobile sıradaki iş** | ⏸ FAZ 2 backend bekliyor (Notifications + Expenses uçları açılınca başlar) | bkz. §0.1 |
 
-**Karar:** Mobile artık **dev preview mock'larıyla değil, backend ile gerçek E2E** koşmaya hazır. Abdullah staging URL paylaştıktan sonra mobile `app_constants.dart` güncellenir; §6'daki E2E maddeleri tek tek işaretlenir.
+**Karar:** Mobile FAZ 1 kodu **production'da canlı**. FAZ 2'ye geçiş için sadece backend Notifications + Expenses uçlarını açmayı bekliyor.
+
+---
+
+## 0.1 🔔 Abdullah'tan açık talepler — şu an aktif
+
+> Furkan, Tur 5 sonrası ve production deploy çalıştıktan sonra **bu blok güncel** —
+> tamamlanan/eskimiş talepler `§7` altına çekildi; aşağıda **sadece açık olanlar**.
+
+### 🟠 Hemen (dakikalar / saatler)
+
+| # | İş | Detay | Etki |
+|---|----|-------|------|
+| 1 | **`GET /buildings` yanıtına `_count.apartments` ekle** (§3.8) | Prisma `include: { _count: { select: { apartments: true } } }` — 1-2 satır | Mobile dashboard kartlarında doğru daire sayısı (şu an placeholder) |
+| 2 | **`FLUTTER-BACKEND.md`'yi güncelle** | Tur 2'de açtığın uçların imzaları henüz yok: `DELETE /buildings/:bId/apartments/:id/resident`, `GET/PUT/DELETE /me`, `PUT /me/password`, `PUT /me/language`, `PUT /me/fcm-token`, `POST /auth/forgot-password`, `POST /auth/reset-password` | Sözleşme dosyası mobile ile senkron olur |
+| 3 | **Test hesapları + örnek davet kodu paylaş** (opsiyonel) | 1 manager (2 bina, her birinde 4-6 daire, karışık aidat statüleri) + 2-3 sakin + 1 davet kodu | Demo / regresyon testi için faydalı, bloklayıcı değil |
+
+### 🟡 FAZ 2 başlamadan önce (orta vade — mobile bunu bekliyor)
+
+| # | İş | Detay |
+|---|----|-------|
+| 4 | **Notifications MVP uçları** | `GET /notifications?unreadOnly=` + `PATCH /notifications/:id/read` + `PATCH /notifications/read-all`. Prisma şeması **zaten hazır**, sadece controller + route lazım. (§3.2) |
+| 5 | **Expenses MVP uçları** | `GET/POST /buildings/:id/expenses` + `DELETE /buildings/:id/expenses/:expenseId` + makbuz fotoğrafı upload/download. Prisma şeması **zaten hazır**. (§3.3) |
+| 6 | **FCM push payload formatı netleşsin** | `data` alanları + deep-link parametreleri (örn. `{type:"DUE_REMINDER", apartmentId:"..."}` → mobile hangi ekrana açar) |
+
+### 🟢 Sonraki fazlar (uzun vade)
+
+| # | İş | Faz |
+|---|----|-----|
+| 7 | Tickets (§3.4) — arıza/şikayet talepleri | FAZ 3 |
+| 8 | Reports (§3.5) — aylık özet + PDF export | FAZ 3 |
+| 9 | RevenueCat webhook (§3.6) — abonelik | FAZ 4 |
+
+### ❓ E2E doğrulama soruları (Tur 5 sonrası açık)
+
+Aşağıdakileri kod okuyup ya da bana mesajla teyit edersen `§6` E2E listesini bitirebilirim:
+
+1. `DELETE /buildings/:id` FK ihlali geldiğinde **gerçek hata mesajı ne?** Mobile şu an `foreign|p2003|still|apartment|resident|due` kelimelerini tarayıp insanlaştırıyor — özel Türkçe mesaj döndürürsen regex'imiz kaçırabilir.
+2. `PUT /buildings/:bId/apartments/:id` yanıtında `resident` alanı **dönüyor mu**? (Mobile şu an defansif olarak eski resident'i merge ediyor — backend her zaman döndürüyorsa merge kaldırılabilir)
+3. `overdueDays` **server-side mi hesaplanıyor** yoksa mobile mı `today - dueDate` yapsın?
+4. `dueDate` **UTC mi local mi**? (Timezone netleşmesi)
+5. `PUT /me/language` — sunucuda dil tercihi **kalıcı mı** (relogin'de doğru dil geliyor mu)?
 
 ---
 
@@ -309,26 +350,30 @@ Aşağıdaki akışlar mobile dev preview'inde mock'larla çalışıyor; gerçek
 
 ---
 
-## 7. Backend Ekibinden İstenen Aksiyonlar (Tur 2 güncel)
+## 7. Backend Ekibinden İstenen Aksiyonlar — Tarihsel kayıt
 
-### Kısa vade (Mobile bunlar gelene kadar §10'daki UI işlerine devam edebilir)
-1. **Staging URL paylaş** — mobile `app_constants.dart`'a yazılacak (Android emülatör için `http://10.0.2.2:4200/api/v1` gibi)
-2. **`ALLOWED_ORIGINS`** mobile production / staging için güncellensin
-3. **Test kullanıcı hesapları** oluştur:
-   - 1 manager hesabı (en az 2 binası, her birinde 4-6 daire)
-   - 2-3 sakin hesabı (farklı dairelerde)
-   - Davet kodu örneği
-4. **`GET /buildings` yanıtına `_count.apartments`** ekle (§3.8 — küçük P3, dakikalık iş)
-5. **`FLUTTER-BACKEND.md` güncelleme** — eklenen P0/P1/P2 uçlarının (resident remove, /me, forgot/reset) imzaları eklensin
+> **Güncel açık talepler için bkz. §0.1.** Bu bölüm tarihsel — Tur 1-5 boyunca
+> backend'den istenen maddelerin tamamlanma durumunu izlemek için tutuluyor.
 
-### Orta vade (FAZ 2 başlamadan önce)
-6. **Notifications uçları** (§3.2) MVP — minimum `GET /notifications` ve `PATCH /notifications/:id/read`. Schema zaten Prisma'da hazır
-7. **Expenses uçları** (§3.3) MVP — `GET/POST /buildings/:id/expenses`. Schema zaten Prisma'da hazır
-8. **FCM push payload formatı** netleştir (data alanları, deep-link parametreleri)
+### Tur 1-2 (mobile FAZ 1 öncesi/sırasında istenenler)
+1. ✅ ~~**Staging URL paylaş**~~ — production deploy edildi (2026-05-11), gerek kalmadı
+2. ✅ ~~**`ALLOWED_ORIGINS`** mobile production / staging için güncellensin~~ — production APK çalıştığına göre tamam
+3. ⏳ **Test kullanıcı hesapları** (§0.1 / madde 3'e taşındı)
+4. ⏳ **`GET /buildings` yanıtına `_count.apartments`** ekle (§3.8 — §0.1 / madde 1'e taşındı)
+5. ⏳ **`FLUTTER-BACKEND.md` güncelleme** — eklenen P0/P1/P2 uçlarının imzaları (§0.1 / madde 2'ye taşındı)
+
+### Tur 2 sonrası backend'in mobile talebi olmadan açtığı uçlar
+✅ Resident remove, profil, şifre değiştir, KVKK, şifre sıfırlama, FCM token, sakin aidat
+(Detay: §3.7 + §1.2)
+
+### FAZ 2 öncesi orta vade
+6. ⏳ **Notifications uçları** (§3.2) — §0.1 / madde 4
+7. ⏳ **Expenses uçları** (§3.3) — §0.1 / madde 5
+8. ⏳ **FCM push payload formatı** netleştir — §0.1 / madde 6
 
 ### Uzun vade (FAZ 3-4 için, daha sonra)
-9. **Tickets** (§3.4), **Reports** (§3.5)
-10. **RevenueCat webhook** (§3.6) — sözleşme + güvenlik (HMAC imza)
+9. **Tickets** (§3.4), **Reports** (§3.5) — §0.1 / madde 7-8
+10. **RevenueCat webhook** (§3.6) — sözleşme + güvenlik (HMAC imza) — §0.1 / madde 9
 11. Plan §11–13: otomatik test suite (Vitest + supertest), `AIDATPANEL.md` doc senkronu, deploy checklist
 
 ---
@@ -378,4 +423,4 @@ Dev preview ile UI değişiklikleri staging beklenmeden test edilebilir. Backend
 
 ---
 
-> **Bir sonraki güncelleme:** §10 sırası tamamlandıkça `[x]` işaretle. Backend §3.2 (notifications) açıldığında §1.3 → §1.2'ye taşı + §10'a yeni satır ekle.
+> **Bir sonraki güncelleme:** Backend §0.1'deki maddeler tamamlandıkça oradan kaldırılır, §1.2'ye geçer ve §10'a karşılık gelen mobile UI satırı eklenir. FAZ 2 başlama tetikçisi: §0.1 / madde 4 (Notifications) **veya** madde 5 (Expenses) açılması.
