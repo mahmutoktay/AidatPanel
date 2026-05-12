@@ -1,17 +1,31 @@
-# mobile
+# AidatPanel Mobile
 
-A new Flutter project.
+Apartman ve site yönetiminde en çok zamanı yiyen işlerden biri aidat takibi: kim ödedi, kim gecikti, hangi daire boş? **AidatPanel**, yöneticilere ve sakinlere aynı uygulama içinde net bir tablo sunar — telefonla daire dağıtmak, davet koduyla sakin eklemek, aidat durumunu güncellemek ve pano özetine bakmak tek akışta toplanır.
 
-## Getting Started
+Bu klasör, Flutter ile yazılmış resmi mobil istemcidir. Mimari **Clean Architecture** (domain → data → presentation), durum yönetimi **Riverpod**, yönlendirme **GoRouter**; ağ katmanı **Dio** ve JWT ile çalışır. Metinler **Slang** ile Türkçe ve İngilizce sunulur.
 
-This project is a starting point for a Flutter application.
+## Hızlı başlangıç
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+cd mobile
+flutter pub get
+flutter run
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Sunucu olmadan arayüz denemek için (mock veri, ekranda **DEV** rozeti):
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter run -t lib/main_dev.dart
+```
+
+## Çeviri ve görevler
+
+Çeviri anahtarları `lib/l10n/` altındaki JSON dosyalarında; üretilen kod `strings.g.dart`. Üst klasördeki VS Code / Cursor görevleri: Slang watch/generate, i18n tarama (`dart run tool/i18n_scan.dart`, `dart run tool/check_translations.dart`). Toplu çeviri için DeepL API anahtarı `tool/.deepl_key` dosyasına konur (dosya `.gitignore`’dadır, repoya girmez). Tek anahtar eklemek: `dart run tool/add_translation.dart <anahtar> "Türkçe" ["English"]`.
+
+## Proje belgeleri
+
+API sözleşmesi, fazlar ve mobil–backend eşlemesi repoda `resources/` altında (ör. `AIDATPANEL.md`, `FAZ_DURUMU.md`, `MOBILE-TO-BACKEND.md`). Bu README yalnızca mobil pakete giriş içindir; ayrıntılı kurallar ve checklist orada güncellenir.
+
+---
+
+*AidatPanel — aidat ve site işlerini telefonda toparlayan yardımcınız.*
