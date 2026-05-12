@@ -1,6 +1,6 @@
 # MOBILE ↔ BACKEND — Sözleşme Uyum + Talep Raporu
 
-> **Sürüm:** 2026-05-11 — Mobile Tur 5 tamamlandı, **production APK canlı backend ile çalışıyor ✅**
+> **Sürüm:** 2026-05-12 — Tur 5 + backend hotfix uyumu (`backend/yedek`: `_count`, davet/join, `FLUTTER-BACKEND.md`); **production APK canlı backend ile çalışıyor ✅**
 > **Hedef:** Mobile ↔ Backend (Furkan ↔ Abdullah) için **tek karşılıklı** sözleşme dosyası.
 > Mobil tarafın **mevcut durumunu**, **varsayımlarını**, **istediği uçları**, **E2E test edilemediği senaryoları** ve **backend'in karşılayıp karşılamadığını** tek dosyada raporlar.
 > **Kural:** Bu dosya **evergreen** — yeni rapor üretilmez, ✅/⏳ işaretleri bu dosya üzerinde güncellenir.
@@ -23,18 +23,25 @@
 
 ---
 
-## 0.1 🔔 Abdullah'tan açık talepler — şu an aktif
+## 0.1 🔔 Abdullah tarafı talepler — güncel durum
 
-> Furkan, Tur 5 sonrası ve production deploy çalıştıktan sonra **bu blok güncel** —
-> tamamlanan/eskimiş talepler `§7` altına çekildi; aşağıda **sadece açık olanlar**.
+> **Kaynak branch:** `origin/backend/yedek` — son kontrol **2026-05-12** (`ece0aab`; hotfix özeti `a896d18`: `GET /buildings` için Prisma `_count.apartments`, davet kodu hex biçimi + join normalizasyonu, `FLUTTER-BACKEND.md` genişlemesi). Tamamlanan kalemler `§7` tarihçede ✅ işaretli.
 
-### 🟠 Hemen (dakikalar / saatler)
+### ✅ Tamamlanan (§0.1 eski 🟠 1–2 + davet/join uyumu)
 
-| # | İş | Detay | Etki |
-|---|----|-------|------|
-| 1 | **`GET /buildings` yanıtına `_count.apartments` ekle** (§3.8) | Prisma `include: { _count: { select: { apartments: true } } }` — 1-2 satır | Mobile dashboard kartlarında doğru daire sayısı (şu an placeholder) |
-| 2 | **`FLUTTER-BACKEND.md`'yi güncelle** | Tur 2'de açtığın uçların imzaları henüz yok: `DELETE /buildings/:bId/apartments/:id/resident`, `GET/PUT/DELETE /me`, `PUT /me/password`, `PUT /me/language`, `PUT /me/fcm-token`, `POST /auth/forgot-password`, `POST /auth/reset-password` | Sözleşme dosyası mobile ile senkron olur |
-| 3 | **Test hesapları + örnek davet kodu paylaş** (opsiyonel) | 1 manager (2 bina, her birinde 4-6 daire, karışık aidat statüleri) + 2-3 sakin + 1 davet kodu | Demo / regresyon testi için faydalı, bloklayıcı değil |
+| # | İş | Durum |
+|---|-----|--------|
+| 1 | **`GET /buildings` → `_count.apartments`** | ✅ **Backend:** `backend/src/services/buildingService.js` → `getBuildingsService` içinde `_count: { select: { apartments: true } }`. ✅ **Mobile:** `BuildingModel.apartmentCountFromApi` → `BuildingEntity.totalApartments` (liste yanıtında gerçek daire sayısı). **Not:** Dolu daire için bina listesi ucu yok; `occupiedApartments` şimdilik 0 → kartta `0/N` görünebilir. |
+| 2 | **`FLUTTER-BACKEND.md`** | ✅ **Backend repo kökü** (`backend/yedek`): `/me`, şifre, dil, FCM, forgot/reset, Building `_count`, InviteCode formatı ve join tolere kuralları dokümante. |
+| — | **Davet kodu + join** | ✅ Backend üretim + normalize; ✅ Mobile `AuthValidators` + `JoinScreen` (`mobile/app` `8f4bb2e` ile hizalı). |
+
+### ⏳ Hâlâ açık
+
+#### 🟠 Opsiyonel
+
+| # | İş | Detay |
+|---|-----|--------|
+| 3 | **Test hesapları + örnek davet kodu** | Demo / regresyon — bloklayıcı değil |
 
 ### 🟡 FAZ 2 başlamadan önce (orta vade — mobile bunu bekliyor)
 
@@ -119,6 +126,7 @@ Aşağıdaki tablo, FLUTTER-BACKEND.md §1-§6'da belirtilen sözleşmeye **mobi
 | Sözleşme | Mobile'da nasıl |
 |---|---|
 | `GET /buildings` → manager'ın yönettiği binalar | `BuildingsNotifier.loadBuildings` |
+| `GET /buildings` → `_count.apartments` (Prisma) | `BuildingModel.apartmentCountFromApi` → `BuildingEntity.totalApartments`; yoksa kat×daire tahmini |
 | `POST /buildings` body: `name`, `address`, `city`, `totalFloors?`, `apartmentsPerFloor?`, `dueAmount?`, `dueDay?`, `currency?` | `AddBuildingScreen` tüm alanları gönderiyor; submit guard ile rapid-tap engellendi |
 | `PUT /buildings/:id` body: `name?`, `address?`, `city?` (kısmi update) | `EditBuildingBottomSheet` sadece değişen alanları body'e koyuyor |
 | `DELETE /buildings/:id` → FK varsa 400 | `DeleteBuildingDialog` 400'ü "Bu binayı silemezsiniz: hâlâ daire/sakin/aidat var. Önce daireleri/aidatları temizleyin." mesajına çeviriyor |
@@ -358,9 +366,9 @@ Aşağıdaki akışlar mobile dev preview'inde mock'larla çalışıyor; gerçek
 ### Tur 1-2 (mobile FAZ 1 öncesi/sırasında istenenler)
 1. ✅ ~~**Staging URL paylaş**~~ — production deploy edildi (2026-05-11), gerek kalmadı
 2. ✅ ~~**`ALLOWED_ORIGINS`** mobile production / staging için güncellensin~~ — production APK çalıştığına göre tamam
-3. ⏳ **Test kullanıcı hesapları** (§0.1 / madde 3'e taşındı)
-4. ⏳ **`GET /buildings` yanıtına `_count.apartments`** ekle (§3.8 — §0.1 / madde 1'e taşındı)
-5. ⏳ **`FLUTTER-BACKEND.md` güncelleme** — eklenen P0/P1/P2 uçlarının imzaları (§0.1 / madde 2'ye taşındı)
+3. ⏳ **Test kullanıcı hesapları** — §0.1 madde 3 (opsiyonel)
+4. ✅ ~~**`GET /buildings` → `_count.apartments`**~~ — backend `buildingService.js`; mobile `BuildingModel` parse (2026-05-12)
+5. ✅ ~~**`FLUTTER-BACKEND.md` güncelleme**~~ — `backend/yedek` kökü güncel (`ece0aab` / hotfix `a896d18`)
 
 ### Tur 2 sonrası backend'in mobile talebi olmadan açtığı uçlar
 ✅ Resident remove, profil, şifre değiştir, KVKK, şifre sıfırlama, FCM token, sakin aidat
@@ -394,14 +402,14 @@ Dev preview ile UI değişiklikleri staging beklenmeden test edilebilir. Backend
 | Taraf | Sorumlu | Branch | Sözleşme dosyası |
 |---|---|---|---|
 | **Mobile (Flutter)** | **Furkan** | `mobile/app` | `resources/MOBILE-TO-BACKEND.md` (bu dosya) — talepler + uyum beyanı |
-| **Backend (Node + Express + Prisma)** | **Abdullah** | `backend/yedek` | `FLUTTER-BACKEND.md` — API sözleşmesi |
+| **Backend (Node + Express + Prisma)** | **Abdullah** | `backend/yedek` | **Backend repo kökü** `FLUTTER-BACKEND.md` — API sözleşmesi (`mobile/app` içinde kopya tutulmaz; karşılaştırma için branch checkout) |
 | **Faz takibi (her iki taraf)** | Furkan koordinasyon | `mobile/app` | `resources/FAZ_DURUMU.md` |
 
 **Senkronizasyon kuralı:** Bu dosya ve `FLUTTER-BACKEND.md` her sprint başında **karşılıklı** güncellenmeli; iki tarafın da onayı olmadan üretime alınma yapılmaz.
 
 **İletişim önceliği:**
 - Mobile UI için backend hazır olan tüm uçlar — Furkan §10 sırasıyla tek tek bağlar; Abdullah'ı bloklamaz
-- Backend'den istenen küçük iyileştirme (§3.8 `_count.apartments`): GitHub issue veya direkt mesaj
+- ~~Backend'den istenen küçük iyileştirme (§3.8 `_count.apartments`)~~ — ✅ karşılandı (bkz. §0.1)
 - §6'daki E2E koşumu staging URL alındıktan sonra; sonuçlar bu dosyada §11 olarak işaretlenir
 
 ---
@@ -418,6 +426,8 @@ Dev preview ile UI değişiklikleri staging beklenmeden test edilebilir. Backend
 | 4 | **Ayarlar tab** — Şifre değiştir formu (`PUT /me/password` → `refreshTokenVersion++` olduğu için otomatik logout) | `PUT /me/password` ✅ | 2 saat | [x] |
 | 5 | **Hesabı kapat UI** — Ayarlar tab'da tip-to-confirm; **409 yöneticide bina var** mesajını insanlaştır ("Önce binaları sil/devret") | `DELETE /me` ✅ | 1 saat | [x] |
 | 6 | **Şifremi unuttum** — Login ekranında link + 2 ekran (email gir → 6 karakter kod + yeni şifre) | `POST /auth/forgot-password` + `POST /auth/reset-password` ✅ | 3 saat | [x] |
+
+**Tur 5 sonrası backend hotfix uyumu (2026-05-12):** `GET /buildings` yanıtındaki `_count.apartments` mobilde `BuildingModel` ile okunuyor; özet kartlarında toplam daire sayısı sunucu ile uyumlu. **Dolu daire sayısı** için bina listesi API'sinde alan yok → `occupiedApartments` şimdilik 0.
 
 **Toplam tahmin:** ~11 saat — sıra tamamlandığında mobile FAZ 1'in **tüm backend ucu** karşılanmış olur. FAZ 2 (Notifications + Expenses) backend kalanını bekleyecek.
 

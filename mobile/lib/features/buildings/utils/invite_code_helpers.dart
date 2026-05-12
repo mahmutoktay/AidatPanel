@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import '../../apartments/domain/entities/apartment_entity.dart';
 import '../domain/entities/building_entity.dart';
 
@@ -38,25 +36,6 @@ class InviteCodeHelpers {
       return mins > 0 ? '${d.inHours} saat $mins dk' : '${d.inHours} saat';
     }
     return '${d.inMinutes} dk';
-  }
-
-  /// Davet kodu artık yalnızca backend tarafından üretilir
-  /// (`POST /api/v1/apartments/:apartmentId/invite-code`); canlı akışta
-  /// **bu fonksiyon çağrılmamalıdır** (çift kaynak olmasın).
-  ///
-  /// Yalnızca offline test / mock senaryoları için bırakılmıştır. Üretilen
-  /// kod `AuthValidators.isValidInviteCode` regex'i ile birebir uyumludur:
-  /// `AP` + 1 hex + `-` + 3 hex + `-` + 4 hex (örn. `AP3-B12-A9F0`).
-  @Deprecated(
-    'Davet kodu backend tarafından üretilir; yalnızca test/mock için kullanın.',
-  )
-  static String generateCode(BuildingEntity b, ApartmentEntity a) {
-    const hex = '0123456789ABCDEF';
-    final rnd = Random.secure();
-    String pick(int n) =>
-        List.generate(n, (_) => hex[rnd.nextInt(hex.length)]).join();
-
-    return 'AP${pick(1)}-${pick(3)}-${pick(4)}';
   }
 
   /// Paylaşılacak mesajı oluşturur.
