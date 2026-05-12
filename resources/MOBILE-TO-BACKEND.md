@@ -1,6 +1,6 @@
 # MOBILE ↔ BACKEND — Sözleşme Uyum + Talep Raporu
 
-> **Sürüm:** 2026-05-12 — Tur 5 + backend hotfix uyumu (`backend/yedek`: `_count`, davet/join, `FLUTTER-BACKEND.md`); **production APK canlı backend ile çalışıyor ✅**
+> **Sürüm:** 2026-05-12 — Tur 5 onaylı (**ONAY: Furkan ✅**), backend hotfix uyumu (`backend/yedek`: `_count`, davet/join, `FLUTTER-BACKEND.md`); **production APK canlı backend ile çalışıyor ✅**
 > **Hedef:** Mobile ↔ Backend (Furkan ↔ Abdullah) için **tek karşılıklı** sözleşme dosyası.
 > Mobil tarafın **mevcut durumunu**, **varsayımlarını**, **istediği uçları**, **E2E test edilemediği senaryoları** ve **backend'in karşılayıp karşılamadığını** tek dosyada raporlar.
 > **Kural:** Bu dosya **evergreen** — yeni rapor üretilmez, ✅/⏳ işaretleri bu dosya üzerinde güncellenir.
@@ -15,7 +15,7 @@
 | Sözleşmeye tam uyum (`FLUTTER-BACKEND.md` §1-§6) | ✅ uyumlu | — |
 | Backend'den istenen uçlar (P0-P2) | ✅ **7/7 açıldı** (sakin çıkar + profil + şifre değiştir + KVKK + şifre sıfırlama + sakin aidat + FCM) | — |
 | Eksik uçlar | ⏳ Notifications listesi (P1), Expenses (P1), Tickets (P2), Reports (P2), RevenueCat (P3) — FAZ 2+ | Sprint planına |
-| Production APK | ✅ **Canlı backend ile çalışıyor** (2026-05-11) | Furkan FAZ 1 onayı verecek |
+| Production APK | ✅ **Canlı backend ile çalışıyor** (2026-05-11) | FAZ 1 kapatıldı (**ONAY: Furkan ✅**, 2026-05-12) |
 | **Mobile Tur 5 (backend uyum)** | ✅ Tamamlandı — sakin çıkarma + bina formu + server-side filter + şifre değiştir + hesap kapat + şifremi unuttum | bkz. §10 |
 | **Mobile sıradaki iş** | ⏸ FAZ 2 backend bekliyor (Notifications + Expenses uçları açılınca başlar) | bkz. §0.1 |
 
@@ -78,7 +78,7 @@ Aşağıdakileri kod okuyup ya da bana mesajla teyit edersen `§6` E2E listesini
 | Modül | Mobile Durumu | Backend Sözleşmesi |
 |---|---|---|
 | **Auth** — login (email/phone), register, join (invite code), logout, JWT refresh, restoreSession | ✅ tamam | `POST /auth/login` (`identifier`), `/register`, `/join`, `/logout`, `/refresh` |
-| **Buildings** — list, create, edit (name/address/city), delete (FK kontrolü), invite code | ✅ tamam (Tur 3'te edit/delete UI eklendi) | `GET/POST /buildings`, `PUT/DELETE /buildings/:id`, `POST /buildings/:id/invite-codes` |
+| **Buildings** — list, create, edit (name/address/city), delete (FK kontrolü), invite code | ✅ tamam (Tur 3'te edit/delete UI eklendi) | `GET/POST /buildings`, `PUT/DELETE /buildings/:id`, liste `_count.apartments`, `POST /apartments/:apartmentId/invite-code` |
 | **Apartments** — list, create, edit (number/floor), delete | ✅ tamam (Tur 3'te edit/delete UI eklendi) | `GET/POST /buildings/:bId/apartments`, `PUT/DELETE /buildings/:bId/apartments/:id` |
 | **Dues** — yönetici listesi, sakin geçmişi, durum güncelleme, aidat tutarı güncelleme | ✅ tamam | `GET /buildings/:id/dues`, `GET /me/dues`, `PATCH /buildings/:bId/dues/:dueId/status`, `PATCH /buildings/:id/due-amount` |
 | **Dashboard** — manager + resident özet kartları | ✅ tamam | (özet hesaplamaları client-side) |
@@ -410,13 +410,13 @@ Dev preview ile UI değişiklikleri staging beklenmeden test edilebilir. Backend
 **İletişim önceliği:**
 - Mobile UI için backend hazır olan tüm uçlar — Furkan §10 sırasıyla tek tek bağlar; Abdullah'ı bloklamaz
 - ~~Backend'den istenen küçük iyileştirme (§3.8 `_count.apartments`)~~ — ✅ karşılandı (bkz. §0.1)
-- §6'daki E2E koşumu staging URL alındıktan sonra; sonuçlar bu dosyada §11 olarak işaretlenir
+- §6'daki E2E koşumu **production / staging** ile; sonuçlar bu dosyada güncellenir (liste §6)
 
 ---
 
-## 10. Mobile aksiyon listesi (Tur 5 — Backend uyum)
+## 10. Mobile aksiyon listesi (Tur 5 — Backend uyum) ✅
 
-> Backend §3 P0–P2 hazır. Mobile sırayla şu UI'ları bağlayacak. Liste evergreen — tamamlananlar `[x]` işaretlenir.
+> Tur 5 tamamlandı (**ONAY: Furkan ✅**). Backend §3 P0–P2 ilgili uçlar mobilde bağlandı. Liste arşiv — tüm satırlar `[x]`.
 
 | # | İş | Backend ucu | Tahmini süre | Durum |
 |---|-----|-------------|--------------|-------|
@@ -429,7 +429,7 @@ Dev preview ile UI değişiklikleri staging beklenmeden test edilebilir. Backend
 
 **Tur 5 sonrası backend hotfix uyumu (2026-05-12):** `GET /buildings` yanıtındaki `_count.apartments` mobilde `BuildingModel` ile okunuyor; özet kartlarında toplam daire sayısı sunucu ile uyumlu. **Dolu daire sayısı** için bina listesi API'sinde alan yok → `occupiedApartments` şimdilik 0.
 
-**Toplam tahmin:** ~11 saat — sıra tamamlandığında mobile FAZ 1'in **tüm backend ucu** karşılanmış olur. FAZ 2 (Notifications + Expenses) backend kalanını bekleyecek.
+**Özet:** Tur 5 süresi tahmini ~11 saat; madde 1–6 tamam. **FAZ 2** (Notifications + Expenses) için backend HTTP uçları bekleniyor (`§0.1`).
 
 ---
 
