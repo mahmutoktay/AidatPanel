@@ -15,6 +15,10 @@ class BuildingModel {
   final int? dueDay;
   final String? currency;
 
+  /// `GET /buildings` yanıtında Prisma `_count.apartments` (§2.3).
+  /// Yoksa (ör. `POST /buildings` yanıtı) `toEntity` kat × daire tahminini kullanır.
+  final int? apartmentCountFromApi;
+
   BuildingModel({
     required this.id,
     required this.name,
@@ -26,9 +30,16 @@ class BuildingModel {
     this.dueAmount,
     this.dueDay,
     this.currency,
+    this.apartmentCountFromApi,
   });
 
   factory BuildingModel.fromJson(Map<String, dynamic> json) {
+    int? apartmentCountFromApi;
+    final rawCount = json['_count'];
+    if (rawCount is Map<String, dynamic>) {
+      final n = rawCount['apartments'];
+      if (n is int) apartmentCountFromApi = n;
+    }
     return BuildingModel(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -40,11 +51,13 @@ class BuildingModel {
       dueAmount: _toDouble(json['dueAmount']),
       dueDay: json['dueDay'] as int?,
       currency: json['currency'] as String?,
+      apartmentCountFromApi: apartmentCountFromApi,
     );
   }
 
   BuildingEntity toEntity() {
-    final total = (totalFloors ?? 0) * (apartmentsPerFloor ?? 0);
+    final total = apartmentCountFromApi ??
+        ((totalFloors ?? 0) * (apartmentsPerFloor ?? 0));
     final monthly = (dueAmount ?? 0) * total;
     return BuildingEntity(
       id: id,
