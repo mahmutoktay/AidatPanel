@@ -5,22 +5,22 @@
 
 ---
 
-## MEVCUT AKTİF FAZ
+## MEVCUT DURUM
 
 ```
-▶ FAZ 1 — Tur 5: Backend uyum aksiyon listesi ✅ TAMAMLANDI
+▶ FAZ 1 — Tur 5: Backend uyum ✅ TAMAMLANDI
   Hedef: ~2026-05-15  ✅ Erken bitti
-  Durum: 6/6 [x] — Furkan onayı bekleniyor → FAZ 2'ye geçiş
-  Sonraki: Furkan onayı sonrası ⏸ FAZ 2 (Notifications + Expenses) — backend bekliyor
+  Checklist: 6/6 [x] — ONAY: Furkan ✅ (2026-05-12)
+▶ Sıradaki: FAZ 2 — Notifications + Expenses
+  Durum: ⏸ BAŞLATILMADI — backend HTTP uçları yok (`MOBILE-TO-BACKEND.md` §0.1)
 ```
+
+**AI / geliştirici notu:** FAZ 1 kapalı. `features/notifications` ve `features/expenses` üzerinde iş — **FAZ 2 resmen başlatılıp** backend karşılığı hazır olduğunda (veya proje kuralında Furkan’ın açıkça izin verdiği hazırlık). Şu an blokaj: Notifications + Expenses API.
 
 > Mobile FAZ 1 koru (Tur 1-4) tamamlandı (ONAY: Furkan ✅, 2026-05-10).
-> Backend `backend/yedek` (commit `8cc2152`) ile mobile'ın §3 P0–P2
-> taleplerinin tümü karşılandı. Tur 5'te bu uçların mobile UI bağlamasını
-> tamamladık (6/6 madde [x]). Detaylar `resources/MOBILE-TO-BACKEND.md` §10'da.
+> Backend `backend/yedek` ile §3 P0–P2 talepleri karşılandı; Tur 5’te UI bağlandı (**6/6**, **ONAY: Furkan ✅**, 2026-05-12). Detay: `resources/MOBILE-TO-BACKEND.md` §10.
 >
-> FAZ 2 (Notifications + Expenses) hâlâ backend bekliyor; Furkan Tur 5'i
-> onayladıktan sonra FAZ 2'ye geçilebilir (backend uçları açıldığında).
+> **FAZ 2** (Notifications + Expenses): backend HTTP uçları henüz yok — mobil işler bu uçlar açılınca başlar (`MOBILE-TO-BACKEND.md` §0.1).
 
 ---
 
@@ -158,8 +158,8 @@ Manuel test sırasında "Bina Oluştur" butonuna art arda basılınca aynı bina
 - [x] **Dev Preview altyapısı**: Sunucu yokken UI test etmek için `lib/dev/dev_mocks.dart` (in-memory `MockAuthRepository`, `MockBuildingRepository`, `MockApartmentRepository`, `MockDuesRepository`; bina silmede FK simülasyonu var) ve `lib/main_dev.dart` (ProviderScope.overrides ile mock'ları inject eder, sağ üstte turuncu `DEV` rozeti gösterir) eklendi. Çalıştırma: `flutter run -t lib/main_dev.dart`. Production main.dart bu dosyaları import etmediği için zarar yok.
 - [x] `authRepositoryProvider` `Provider<AuthRepository>` olarak interface tipinde (eskiden `Provider<AuthRepositoryImpl>` örtük tip — mock override edilemiyordu). Mock ProviderScope.override için gerekli.
 
-#### Tur 5 — Backend uyum aksiyon listesi ✅ TAMAMLANDI (Furkan onayı bekleniyor)
-Abdullah'ın `backend/yedek` branch'i (commit `8cc2152`) ile mobile §3 talepleri **5/5** karşılandı (sakin çıkar, profil, KVKK, şifre sıfırlama, sakin aidat). Mobile bu uçları sırasıyla UI'ya bağladı. Detay + tahminler: `resources/MOBILE-TO-BACKEND.md` §10.
+#### Tur 5 — Backend uyum aksiyon listesi ✅ TAMAMLANDI (ONAY: Furkan ✅)
+Backend `backend/yedek` (referans `8cc2152`) ile §3 P0–P2 uçları hazır; mobile **6/6** Tur 5 maddesini UI’ya bağladı (sakin çıkar, bina formu, dues filtre, şifre, hesap kapat, şifremi unuttum). Detay: `resources/MOBILE-TO-BACKEND.md` §10.
 
 - [x] **1 — Sakin çıkarma UI** (`DELETE /apartments/:id/resident`): `BuildingResidentsScreen` daire kart menüsüne "Sakini Çıkar" + AlertDialog onayı + apartments invalidate. Backend 403/404 mesajları insanlaştırıldı. **TAMAMLANDI** — `RemoveResidentDialog` widget'ı + `ApartmentsNotifier.removeResidentFromApartment` + dev mock. ~1.5 sa
 - [x] **2 — Bina formu uyumu** (`POST /buildings`): `AddBuildingScreen`'de `totalFloors` (1-200) + `apartmentsPerFloor` (1-50) form-içi range validator + range hint; `_seedApartmentsIfNeeded` fallback loop'u kaldırıldı; `MockBuildingRepository.createBuilding` artık backend gibi tek transaction'da apartments seed ediyor. **TAMAMLANDI** ~2 sa
@@ -168,12 +168,12 @@ Abdullah'ın `backend/yedek` branch'i (commit `8cc2152`) ile mobile §3 talepler
 - [x] **5 — Hesabı kapat UI** (`DELETE /me`): Ayarlar → "Tehlikeli Bölge" → "Hesabımı Kapat" tile (kırmızı). `DeleteAccountDialog` tip-to-confirm ("HESABIMI KAPAT" yazılır). 409 mesajı "Önce binaları silin veya başka yöneticiye devredin" olarak insanlaştırıldı. Mock'ta `forceManagerConflict` flag'i 409 davranışını test etmek için. **TAMAMLANDI** ~1 sa
 - [x] **6 — Şifremi unuttum akışı** (`POST /auth/forgot-password` + `POST /auth/reset-password`): Login'de "Şifremi Unuttum" linki → `ForgotPasswordScreen` (email) → `ResetPasswordScreen` (6 char kod + yeni şifre). `inputFormatters` + RegExp ile sadece backend alfabesi (`23456789ABCDEFGHJKLMNPQRSTUVWXYZ`) kabul ediliyor. Backend 400 hatası ("Invalid or expired token") "Kod hatalı veya süresi dolmuş" olarak insanlaştırıldı. Mock kabul kodu: `ABCDEF`. **TAMAMLANDI** ~3 sa
 
-> **Toplam tahmin:** ~11 saat. Tur 5 **TAMAMLANDI** — mobile FAZ 1'in tüm backend ucu karşılandı; FAZ 2'ye geçilebilir (Furkan onayı bekleniyor).
+> **Toplam tahmin:** ~11 saat. Tur 5 **TAMAMLANDI** — mobile FAZ 1'in ilgili backend uçları UI'da (ONAY: Furkan ✅).
 >
-> **Backend'den küçük P3 talep:** `GET /buildings` yanıtına `_count.apartments` (mobile dashboard kart doğruluğu için). Tur 5 boyunca paralel — bloklayıcı değil.
+> **`GET /buildings` → `_count.apartments`:** ✅ Backend hotfix (`backend/yedek`, örn. `a896d18`) + ✅ mobile `BuildingModel.apartmentCountFromApi` (2026-05-12). Dolu daire sayısı için ayrı liste alanı yok → kartta `0/N` olabilir.
 
 ### Çıkış Kapısı
-Yukarıdaki tüm `[ ]` → `[x]` olmadan ve Furkan onayı olmadan Faz 2 başlamaz.
+Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başlamaz.
 
 ---
 
@@ -308,8 +308,8 @@ Yukarıdaki tüm `[ ]` → `[x]` olmadan ve Furkan onayı olmadan Faz 2 başlama
 
 ## Nasıl Kullanılır
 
-1. **AI asistan** her oturumda bu dosyayı okur, hangi fazın aktif olduğunu görür.
-2. **Sadece aktif fazın** görevlerini yapar; kilitli fazlara dokunmaz.
-3. Aktif fazın tüm `[ ]` öğeleri `[x]` olunca AI, Furkan'a "Faz X tamamlandı, onaylar mısın?" diye sorar.
-4. **Furkan** bu dosyayı açar, onay satırını yazar: `ONAY: Furkan ✅`
-5. AI bir sonraki oturumda bu satırı görür ve bir sonraki fazı AKTİF olarak işler.
+1. **AI asistan** her oturumda bu dosyayı okur; **MEVCUT DURUM** kutusuna ve ilgili faz başlığına bakar.
+2. **Sadece izin verilen fazın** görevlerini yapar; **kilitli** fazlara dokunmaz (`CLAUDE.md` faz kapısı).
+3. Bir fazın tüm checklist `[x]` olunca **Furkan** onay yazar: `ONAY: Furkan ✅`
+4. **Ara durum:** Sonraki faz (ör. FAZ 2) **backend veya başka ön koşul** yüzünden başlatılamıyorsa, üst kutuda **⏸** ile gösterilir; AI yeni feature klasörlerine **proje kuralına göre** dokunmaz.
+5. Ön koşullar sağlanınca Furkan sıradaki fazı iş akışında başlatır; AI yeni aktif faz checklist’ine göre çalışır.
