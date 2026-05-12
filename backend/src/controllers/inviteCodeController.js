@@ -6,9 +6,9 @@ import crypto from "crypto";
  */
 const generateUniqueCode = async (maxRetries = 3) => {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    // 12 karakterlik rastgele kod üret: APXX-XXXX-XXXX
-    const code = crypto.randomBytes(4).toString('hex').toUpperCase();
-    const formattedCode = `AP${code.slice(0, 2)}-${code.slice(2, 6)}-${code.slice(6, 10)}`;
+    // 8 hex → AP + 1 | 3 | 4 = AP3-B12-X7K9 (3+3+4; mobil / sözleşme ile uyumlu)
+    const raw = crypto.randomBytes(4).toString("hex").toUpperCase();
+    const formattedCode = `AP${raw.slice(0, 1)}-${raw.slice(1, 4)}-${raw.slice(4, 8)}`;
 
     // Kodun benzersiz olduğunu kontrol et
     const existing = await prisma.inviteCode.findUnique({

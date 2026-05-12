@@ -1,11 +1,17 @@
 import { prisma } from "../config/db.js";
 
 /**
+ * Davet kodunu DB ile eşleştirmek için normalize et (trim, büyük harf, iç boşlukları kaldır).
+ */
+export const normalizeInviteCode = (code) =>
+  typeof code === "string" ? code.trim().toUpperCase().replace(/\s+/g, "") : "";
+
+/**
  * Davet kodunu doğrular. Hata durumunda anlamlı mesajlı `Error` fırlatır.
  */
-export const validateInviteCode = async (code) => {
+export const validateInviteCode = async (code) => {  const normalized = normalizeInviteCode(code);
   const inviteCode = await prisma.inviteCode.findUnique({
-    where: { code },
+    where: { code: normalized },
     include: { apartment: { include: { building: true } } },
   });
 

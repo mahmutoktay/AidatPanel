@@ -107,10 +107,13 @@ export const authSchemas = {
         .string()
         .min(6, "Şifre en az 6 karakter olmalıdır")
         .max(100, "Şifre en fazla 100 karakter olabilir"),
-      inviteCode: z
-        .string()
-        .min(1, "Davet kodu gereklidir")
-        .max(20, "Davet kodu en fazla 20 karakter olabilir"),
+      inviteCode: z.preprocess(
+        (v) => (typeof v === "string" ? v.trim().toUpperCase().replace(/\s+/g, "") : v),
+        z
+          .string()
+          .min(1, "Davet kodu gereklidir")
+          .max(20, "Davet kodu en fazla 20 karakter olabilir")
+      ),
     }),
   },
 

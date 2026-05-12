@@ -1,23 +1,42 @@
 ---
-description: Kullanıcı 'raporla ve push et' dediğinde CHANGELOG + git push iş akışı
+description: 'raporla ve push et' veya 'push et' → CHANGELOG + git push (hotfix kısa veya tam rapor)
 alwaysApply: true
 ---
 
-# Raporla ve push et
+# Raporla ve push et / Push et
 
-Kullanıcı açıkça **«raporla ve push et»** (veya aynı anlamda) talimat verdiğinde:
+## Tetikleyiciler
 
-1. **CHANGELOG.md** dosyasını güncelle (yoksa kökte oluştur). Girişte şunlar **zorunlu**:
-   - **Tarih ve saat** (kullanıcı ortamı / `TZ` uygun; kullanıcı bilgisindeki tarih yılı otorite)
-   - **Commit id** — `git rev-parse HEAD` ile tam hash (kısaltılmış değil, tercihen tam)
-   - **Tag** — tarih ve saat içeren anlamlı etiket adı (örn. `release-2026-05-10-1430` veya `v0.1.0-20260510-143045`); kullanıcı farklı bir tag şeması istemediyse tutarlı tek format kullan
-   - **Yapılan değişiklikler** — bu oturumda (veya talimatın kapsadığı dönemde) projede yapılan düzenlemelerin madde madde özeti; teknik ve net
+- **«raporla ve push et»** (veya aynı anlamda): Tam rapor + aşağıdaki iş akışı.
+- **«push et»**: Aynı iş akışı; **hotfix / kısa sürüm** mantığı (aşağıda).
 
-2. **Git işlemleri** (kullanıcı izin verdiyse):
-   - CHANGELOG ve diğer değişiklikleri stage et, anlamlı commit mesajı ile commit et (CHANGELOG henüz commit dışındaysa commit’e dahil et)
-   - Gerekirse tag’i oluştur: `git tag -a <tag> -m "..."` 
-   - **`git push`** ve tag push: `git push` ve `git push origin <tag>` (veya `git push --tags` — depo politikasına uygun olanı seç)
+## Ortak zorunluluklar (CHANGELOG.md)
 
-3. Kullanıcıya özet: hangi commit, hangi tag, CHANGELOG’a ne yazıldığı.
+Dosyayı güncelle (yoksa kökte oluştur). Her girişte şunlar **zorunlu**:
+
+- **Tarih ve saat** (kullanıcı ortamı / `TZ` uygun; kullanıcı bilgisindeki tarih yılı otorite)
+- **Commit id** — `git rev-parse HEAD` ile tam hash (kısaltılmış değil, tercihen tam)
+- **Tag** — tarih ve saat içeren anlamlı etiket adı
+- **Yapılan değişiklikler** — madde madde, teknik ve net
+
+## «raporla ve push et» — stil
+
+- CHANGELOG başlığı / madde metni: normal detay seviyesi; gerekirse alt başlıklar.
+
+## «push et» — hotfix stili
+
+- **CHANGELOG:** Üst başlık veya ilk satırda **hotfix** vurgusu yeterli (örn. `## Hotfix — 2026-05-12 15:30` veya madde önü `hotfix:`). **Tarih-saat, commit tam hash, tag** yine **eksiksiz** yazılır; sadece açıklama maddeleri **kısa ve öz** (1–3 madde, gereksiz tekrar yok).
+- **Tag önerisi:** `hotfix-YYYY-MM-DD-HHmm` veya mevcut depo şemasına uyumlu `release-...` / `v...` — kullanıcı farklı şema istemediyse `hotfix-...` ile tutarlı kal.
+- **Commit mesajı:** Kısa, imperatif (örn. `hotfix: davet kodu join normalize`).
+
+## Git işlemleri (kullanıcı izin verdiyse)
+
+1. CHANGELOG ve diğer değişiklikleri stage et; anlamlı commit mesajı ile commit et (CHANGELOG commit dışındaysa commit’e dahil et).
+2. Tag oluştur: `git tag -a <tag> -m "..."`.
+3. **`git push`** ve tag push: `git push` ve `git push origin <tag>` (veya `git push --tags` — depo politikasına uygun olanı seç).
+
+## Kullanıcıya özet
+
+Hangi commit, hangi tag, CHANGELOG’a ne yazıldığı (push et modunda da kısa tutulabilir).
 
 **Not:** Sadece CHANGELOG yazıp push etmemesi istenirse kullanıcı bunu ayrı belirtir; varsayılan bu kuralda ikisi birden.

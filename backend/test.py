@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import time
 import uuid
@@ -505,6 +506,23 @@ def main() -> int:
     b = expect_ok("GET /buildings", r)
     if not b:
         return 1
+    lst = b.get("data")
+    if isinstance(lst, list):
+        mine = next((x for x in lst if x.get("id") == building_id), None)
+        if mine is None:
+            fail("GET /buildings", "yeni oluşturulan bina listede yok")
+            return 1
+        cnt = mine.get("_count")
+        if not isinstance(cnt, dict) or not isinstance(cnt.get("apartments"), int):
+            fail("GET /buildings _count.apartments", f"_count={cnt!r}")
+            return 1
+        if cnt["apartments"] != len(apts):
+            fail(
+                "GET /buildings _count.apartments",
+                f"beklenen {len(apts)}, gelen {cnt['apartments']}",
+            )
+            return 1
+        ok("GET /buildings (_count.apartments)")
 
     r = req("GET", f"/buildings/{building_id}", token=manager_access)
     b = expect_ok("GET /buildings/:id", r)
@@ -660,6 +678,9 @@ def main() -> int:
     if not assert_iso_or_present("InviteCodeModel.expiresAt", inv.get("expiresAt")):
         return 1
     invite_code = inv["code"]
+    if not re.fullmatch(r"^AP[0-9A-F]-[0-9A-F]{3}-[0-9A-F]{4}$", invite_code):
+        fail("Davet kodu formatı (APX-XXX-XXXX)", repr(invite_code))
+        return 1
     ok("Flutter InviteCodeModel alanları")
 
     # --- Join ---

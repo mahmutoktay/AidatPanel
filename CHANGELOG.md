@@ -1,5 +1,19 @@
 # AidatPanel — Değişiklik günlüğü
 
+## Hotfix — 2026-05-12 09:52:18
+
+| Alan | Değer |
+|------|--------|
+| **Tarih / saat** | 2026-05-12 09:52:18 (yerel) |
+| **Git etiketi (tag)** | `hotfix-2026-05-12-0952` |
+
+### Yapılan değişiklikler
+
+- **`GET /buildings`:** `_count.apartments` (Prisma); `FLUTTER-BACKEND.md` §2.3 / §5 / §8.
+- **Davet kodu:** Üretim `APX-XXX-XXXX` (3+3+4); `join` + `validateInviteCode` normalizasyonu; `test.py` format doğrulaması.
+- **Belgeler:** `resources/MOBILE-TO-BACKEND.md` güncellemeleri.
+- **Cursor:** `push et` + hotfix CHANGELOG kuralı (`.cursor/rules/changelog-ve-push.mdc`).
+
 ## [aidatpanel-20260510-164734] — 2026-05-10 16:47:34 +03
 
 | Alan | Değer |

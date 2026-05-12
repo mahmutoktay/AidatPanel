@@ -96,6 +96,11 @@ export const getBuildingsService = async (managerId) => {
   return await prisma.building.findMany({
     where: { managerId },
     orderBy: { createdAt: "desc" },
+    include: {
+      _count: {
+        select: { apartments: true },
+      },
+    },
   });
 };
 
