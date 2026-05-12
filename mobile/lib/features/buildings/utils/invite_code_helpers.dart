@@ -40,25 +40,23 @@ class InviteCodeHelpers {
     return '${d.inMinutes} dk';
   }
 
-  /// Yeni davet kodu üretir.
-  /// Format: "AP{binaKodu}-{daireNo}-{rastgele4}"  (örn: "AP425-1A-X7K9")
-  /// - AP: Sabit "Apartman" prefix (plan'a uygun)
-  /// - binaKodu: Bina ID'sinden türetilmiş 3 haneli stabil numara
-  /// - daireNo: Daire numarası (1A, 2B, vb.)
-  /// - rastgele4: Güvenlik için 4 karakter alfanumerik
+  /// Davet kodu artık yalnızca backend tarafından üretilir
+  /// (`POST /api/v1/apartments/:apartmentId/invite-code`); canlı akışta
+  /// **bu fonksiyon çağrılmamalıdır** (çift kaynak olmasın).
+  ///
+  /// Yalnızca offline test / mock senaryoları için bırakılmıştır. Üretilen
+  /// kod `AuthValidators.isValidInviteCode` regex'i ile birebir uyumludur:
+  /// `AP` + 1 hex + `-` + 3 hex + `-` + 4 hex (örn. `AP3-B12-A9F0`).
+  @Deprecated(
+    'Davet kodu backend tarafından üretilir; yalnızca test/mock için kullanın.',
+  )
   static String generateCode(BuildingEntity b, ApartmentEntity a) {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const hex = '0123456789ABCDEF';
     final rnd = Random.secure();
     String pick(int n) =>
-        List.generate(n, (_) => chars[rnd.nextInt(chars.length)]).join();
+        List.generate(n, (_) => hex[rnd.nextInt(hex.length)]).join();
 
-    // Bina ID'sinden stabil 3 haneli numara (0-999 arası)
-    final shortBuildingId = (b.id.hashCode.abs() % 1000).toString().padLeft(
-      3,
-      '0',
-    );
-
-    return 'AP$shortBuildingId-${a.apartmentNumber.toUpperCase()}-${pick(4)}';
+    return 'AP${pick(1)}-${pick(3)}-${pick(4)}';
   }
 
   /// Paylaşılacak mesajı oluşturur.

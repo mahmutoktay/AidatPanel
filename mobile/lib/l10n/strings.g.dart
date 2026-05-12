@@ -536,8 +536,8 @@ class _StringsFeaturesAuthEn {
 	String get hasAccount => 'Already have an account? Login';
 	String get joinApartment => 'Join Apartment';
 	String get inviteCode => 'Invite Code';
-	String get inviteCodeHint => 'AP3-B12-X7K9';
-	String get invalidInviteCodeFormat => 'Invalid invite code format (Ex: AP3-B12-X7K9)';
+	String get inviteCodeHint => 'AP3-B12-A9F0';
+	String get invalidInviteCodeFormat => 'Invalid invite code format (Ex: AP3-B12-A9F0)';
 	String get invalidPhoneFormat => 'Enter a valid phone number (5XX XXX XX XX)';
 	String get inviteCodeAndPasswordRequired => 'Invite code, name and password cannot be empty';
 	String get invalidPhoneNumber => 'Enter a valid phone number';
@@ -966,8 +966,8 @@ class _StringsFeaturesAuthTr implements _StringsFeaturesAuthEn {
 	@override String get hasAccount => 'Zaten hesabınız var mı? Giriş yapın';
 	@override String get joinApartment => 'Apartmana Katıl';
 	@override String get inviteCode => 'Davet Kodu';
-	@override String get inviteCodeHint => 'AP3-B12-X7K9';
-	@override String get invalidInviteCodeFormat => 'Geçersiz davet kodu formatı (Örn: AP3-B12-X7K9)';
+	@override String get inviteCodeHint => 'AP3-B12-A9F0';
+	@override String get invalidInviteCodeFormat => 'Geçersiz davet kodu formatı (Örn: AP3-B12-A9F0)';
 	@override String get invalidPhoneFormat => 'Geçerli bir telefon numarası giriniz (5XX XXX XX XX)';
 	@override String get inviteCodeAndPasswordRequired => 'Davet kodu, ad ve şifre boş bırakılamaz';
 	@override String get invalidPhoneNumber => 'Geçerli bir telefon numarası giriniz';
@@ -1312,8 +1312,8 @@ extension on Translations {
 			case 'features.auth.hasAccount': return 'Already have an account? Login';
 			case 'features.auth.joinApartment': return 'Join Apartment';
 			case 'features.auth.inviteCode': return 'Invite Code';
-			case 'features.auth.inviteCodeHint': return 'AP3-B12-X7K9';
-			case 'features.auth.invalidInviteCodeFormat': return 'Invalid invite code format (Ex: AP3-B12-X7K9)';
+			case 'features.auth.inviteCodeHint': return 'AP3-B12-A9F0';
+			case 'features.auth.invalidInviteCodeFormat': return 'Invalid invite code format (Ex: AP3-B12-A9F0)';
 			case 'features.auth.invalidPhoneFormat': return 'Enter a valid phone number (5XX XXX XX XX)';
 			case 'features.auth.inviteCodeAndPasswordRequired': return 'Invite code, name and password cannot be empty';
 			case 'features.auth.invalidPhoneNumber': return 'Enter a valid phone number';
@@ -1654,8 +1654,8 @@ extension on _StringsTr {
 			case 'features.auth.hasAccount': return 'Zaten hesabınız var mı? Giriş yapın';
 			case 'features.auth.joinApartment': return 'Apartmana Katıl';
 			case 'features.auth.inviteCode': return 'Davet Kodu';
-			case 'features.auth.inviteCodeHint': return 'AP3-B12-X7K9';
-			case 'features.auth.invalidInviteCodeFormat': return 'Geçersiz davet kodu formatı (Örn: AP3-B12-X7K9)';
+			case 'features.auth.inviteCodeHint': return 'AP3-B12-A9F0';
+			case 'features.auth.invalidInviteCodeFormat': return 'Geçersiz davet kodu formatı (Örn: AP3-B12-A9F0)';
 			case 'features.auth.invalidPhoneFormat': return 'Geçerli bir telefon numarası giriniz (5XX XXX XX XX)';
 			case 'features.auth.inviteCodeAndPasswordRequired': return 'Davet kodu, ad ve şifre boş bırakılamaz';
 			case 'features.auth.invalidPhoneNumber': return 'Geçerli bir telefon numarası giriniz';
