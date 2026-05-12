@@ -1,11 +1,11 @@
-package com.aidatpanel.mobile
+package com.aidatpanel.app
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val systemChannel = "com.aidatpanel.mobile/system"
+    private val systemChannel = "com.aidatpanel.app/system"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

@@ -13,8 +13,7 @@
       "group": "build",
       "presentation": {
         "reveal": "always",
-        "panel": "dedicated",
-        "label": "Slang Watch"
+        "panel": "dedicated"
       }
     },
     {

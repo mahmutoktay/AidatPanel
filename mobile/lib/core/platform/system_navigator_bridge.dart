@@ -17,7 +17,7 @@ class SystemNavigatorBridge {
   SystemNavigatorBridge._();
 
   static const MethodChannel _channel =
-      MethodChannel('com.aidatpanel.mobile/system');
+      MethodChannel('com.aidatpanel.app/system');
 
   static Future<void> moveAppToBackground() async {
     if (kIsWeb) {
