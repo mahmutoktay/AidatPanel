@@ -82,7 +82,12 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
   }
 
   void _handleJoin(BuildContext context) {
-    final inviteCode = _inviteCodeController.text.trim();
+    // Backend join ucu `inviteCode` için trim + uppercase + iç boşluk silme
+    // uyguluyor; client de aynı normalizasyonu yapsın ki kullanıcı küçük harf
+    // veya "ap3- b12 -a9f0" girse bile gönderim ve doğrulama doğru çalışsın.
+    final inviteCode = AuthValidators.normalizeInviteCode(
+      _inviteCodeController.text,
+    );
     final email = _emailController.text.trim();
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
@@ -318,10 +323,12 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                                   ),
                                 ),
                                 onChanged: (value) {
+                                  final normalized = AuthValidators
+                                      .normalizeInviteCode(value);
                                   setState(() {
-                                    if (value.isNotEmpty &&
+                                    if (normalized.isNotEmpty &&
                                         !AuthValidators.isValidInviteCode(
-                                          value,
+                                          normalized,
                                         )) {
                                       _inviteCodeError = context
                                           .t
