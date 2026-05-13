@@ -325,30 +325,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               : Text(context.t.features.auth.login),
                         ),
                         const SizedBox(height: AppSizes.spacingXS),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: authState.isLoading
-                                ? null
-                                : () => context.push('/forgot-password'),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSizes.spacingS,
-                                vertical: 4,
-                              ),
-                              minimumSize: const Size(48, 36),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: Text(
-                              context.t.common.forgotPassword,
-                              style: AppTypography.body2.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: AppSizes.spacingXS),
                         OutlinedButton.icon(
                           onPressed: authState.isLoading
                               ? null
@@ -378,6 +354,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             textStyle: AppTypography.body1.copyWith(
                               fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSizes.spacingXS),
+                        Center(
+                          child: Semantics(
+                            button: true,
+                            label: context.t.common.forgotPassword,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: authState.isLoading
+                                  ? null
+                                  : () => context.push('/forgot-password'),
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minWidth: AppSizes.minTouchTarget,
+                                  minHeight: AppSizes.minTouchTarget,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    context.t.common.forgotPassword,
+                                    textAlign: TextAlign.center,
+                                    style: AppTypography.body2.copyWith(
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),

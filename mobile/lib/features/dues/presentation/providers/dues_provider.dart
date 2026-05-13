@@ -59,6 +59,7 @@ class DuesNotifier extends StateNotifier<DuesState> {
   int? _lastMonth;
   int? _lastYear;
   DueStatus? _lastStatus;
+  String? _loadedBuildingId;
 
   DuesNotifier(this._repository) : super(const DuesState());
 
@@ -68,10 +69,20 @@ class DuesNotifier extends StateNotifier<DuesState> {
     int? year,
     DueStatus? status,
   }) async {
+    final buildingChanged =
+        _loadedBuildingId != null && _loadedBuildingId != buildingId;
+    _loadedBuildingId = buildingId;
     _lastMonth = month;
     _lastYear = year;
     _lastStatus = status;
-    state = state.copyWith(isLoading: true, clearError: true);
+    // Aynı bina + filtre yenilemede önceki listeyi tutup üstte ince yükleme
+    // göstermek için veriyi silmiyoruz; bina değişince yanlış veri
+    // göstermemek için listeyi temizleriz.
+    state = state.copyWith(
+      isLoading: true,
+      clearError: true,
+      dues: buildingChanged ? const [] : state.dues,
+    );
     try {
       final dues = await _repository.getBuildingDues(
         buildingId,
@@ -111,22 +122,22 @@ class DuesNotifier extends StateNotifier<DuesState> {
   }) async {
     if (_isUpdatingStatus) return;
     _isUpdatingStatus = true;
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(clearError: true);
     try {
-      final updated = await _repository.updateDueStatus(
+      await _repository.updateDueStatus(
         buildingId: buildingId,
         dueId: dueId,
         status: status,
       );
-      final next = state.dues
-          .map((item) => item.id == dueId ? updated : item)
-          .toList(growable: false);
-      state = state.copyWith(isLoading: false, dues: next);
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Aidat durumu güncellenemedi',
+      final dues = await _repository.getBuildingDues(
+        buildingId,
+        month: _lastMonth,
+        year: _lastYear,
+        status: _lastStatus,
       );
+      state = state.copyWith(dues: dues);
+    } catch (e) {
+      state = state.copyWith(error: 'Aidat durumu güncellenemedi');
     } finally {
       _isUpdatingStatus = false;
     }
@@ -150,20 +161,15 @@ class DuesNotifier extends StateNotifier<DuesState> {
         currency: currency,
         affectCurrent: affectCurrent,
       );
-      // affectCurrent true ise mevcut PENDING tutarları değişti; listeyi
-      // aynı server-side filtre setiyle tazele (kullanıcının seçili ay/yıl/
-      // status filtresi kayboluyormuş gibi olmasın).
-      if (affectCurrent) {
-        final dues = await _repository.getBuildingDues(
-          buildingId,
-          month: _lastMonth,
-          year: _lastYear,
-          status: _lastStatus,
-        );
-        state = state.copyWith(isLoading: false, dues: dues);
-      } else {
-        state = state.copyWith(isLoading: false);
-      }
+      // affectCurrent false olsa bile sunucu tutar / gün günceller; liste
+      // her zaman aynı filtreyle yenilenir (UI bayat kalmasın).
+      final dues = await _repository.getBuildingDues(
+        buildingId,
+        month: _lastMonth,
+        year: _lastYear,
+        status: _lastStatus,
+      );
+      state = state.copyWith(isLoading: false, dues: dues);
       return true;
     } catch (e) {
       state = state.copyWith(

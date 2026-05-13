@@ -291,10 +291,27 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                       : Text(t.common.resetPasswordSubmit),
                 ),
                 const SizedBox(height: AppSizes.spacingM),
-                TextButton(
-                  onPressed:
-                      _submitting ? null : () => context.go('/login'),
-                  child: Text(t.common.backToLogin),
+                SizedBox(
+                  width: double.infinity,
+                  height: AppSizes.buttonHeightSecondary,
+                  child: OutlinedButton(
+                    onPressed:
+                        _submitting ? null : () => context.go('/login'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textPrimary,
+                      side: const BorderSide(
+                        color: AppColors.borderColor,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      t.common.backToLogin,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
                 ),
               ],
             ),

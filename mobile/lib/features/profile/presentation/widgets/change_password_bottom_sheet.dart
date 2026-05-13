@@ -294,7 +294,20 @@ class _ChangePasswordBottomSheetState
                             onPressed: _submitting
                                 ? null
                                 : () => Navigator.of(context).pop(),
-                            child: Text(t.common.cancel),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.textPrimary,
+                              side: const BorderSide(
+                                color: AppColors.borderColor,
+                                width: 1.5,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text(
+                              t.common.cancelBtn,
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
                           ),
                         ),
                       ),

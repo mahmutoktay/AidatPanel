@@ -146,99 +146,151 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
           ),
         ],
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            t.common.deleteAccountWarning,
-            style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppSizes.spacingM),
-          Text(
-            t.common.deleteAccountTypeHint,
-            style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppSizes.spacingS),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.spacingM,
-              vertical: AppSizes.spacingS,
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              t.common.deleteAccountWarning,
+              style:
+                  AppTypography.body2.copyWith(color: AppColors.textSecondary),
             ),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-              border: Border.all(color: AppColors.borderColor),
+            const SizedBox(height: AppSizes.spacingM),
+            Text(
+              t.common.deleteAccountTypeHint,
+              style:
+                  AppTypography.body2.copyWith(color: AppColors.textSecondary),
             ),
-            child: SelectableText(
-              confirmPhrase,
-              style: AppTypography.body1.copyWith(
-                color: AppColors.error,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.2,
+            const SizedBox(height: AppSizes.spacingS),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.spacingM,
+                vertical: AppSizes.spacingS,
               ),
-            ),
-          ),
-          const SizedBox(height: AppSizes.spacingM),
-          TextField(
-            controller: _controller,
-            autofocus: true,
-            textCapitalization: TextCapitalization.characters,
-            onChanged: (_) => setState(() {}),
-            style: AppTypography.body1.copyWith(color: AppColors.textPrimary),
-            decoration: InputDecoration(
-              labelText: confirmPhrase,
-              border: OutlineInputBorder(
+              decoration: BoxDecoration(
+                color: AppColors.background,
                 borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                border: Border.all(color: AppColors.borderColor),
               ),
-              errorText: _attempted && !_matches(confirmPhrase)
-                  ? t.common.deleteAccountTypeMismatch
-                  : null,
+              child: SelectableText(
+                confirmPhrase,
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                ),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: AppSizes.spacingM),
+            TextField(
+              controller: _controller,
+              autofocus: true,
+              textCapitalization: TextCapitalization.characters,
+              onChanged: (_) => setState(() {}),
+              style: AppTypography.body1.copyWith(color: AppColors.textPrimary),
+              decoration: InputDecoration(
+                isDense: true,
+                labelText: confirmPhrase,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                ),
+                errorText: _attempted && !_matches(confirmPhrase)
+                    ? t.common.deleteAccountTypeMismatch
+                    : null,
+              ),
+            ),
+          ],
+        ),
       ),
       actionsPadding: const EdgeInsets.fromLTRB(
         AppSizes.spacingL,
-        0,
-        AppSizes.spacingL,
         AppSizes.spacingM,
+        AppSizes.spacingL,
+        AppSizes.spacingL,
       ),
       actions: [
-        TextButton(
-          onPressed: _deleting ? null : () => Navigator.of(context).pop(false),
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.textSecondary,
-            minimumSize: const Size(48, 48),
-          ),
-          child: Text(t.common.cancel),
-        ),
-        ElevatedButton.icon(
-          onPressed: (_deleting || !_matches(confirmPhrase))
-              ? null
-              : () => _delete(confirmPhrase),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.error,
-            foregroundColor: Colors.white,
-            disabledBackgroundColor: AppColors.error.withValues(alpha: 0.35),
-            disabledForegroundColor: Colors.white,
-            minimumSize: const Size(48, 48),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.spacingL,
-              vertical: AppSizes.spacingS,
-            ),
-          ),
-          icon: _deleting
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        SizedBox(
+          width: double.infinity,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: AppSizes.buttonHeightSecondary,
+                child: OutlinedButton(
+                  onPressed: _deleting
+                      ? null
+                      : () => Navigator.of(context).pop(false),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.textPrimary,
+                    side: const BorderSide(
+                      color: AppColors.borderColor,
+                      width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.buttonRadius,
+                      ),
+                    ),
                   ),
-                )
-              : const Icon(Icons.delete_forever, size: 20),
-          label: Text(t.common.deleteAccountConfirmButton),
+                  child: Text(
+                    t.common.cancelBtn,
+                    style: AppTypography.button.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSizes.spacingM),
+              SizedBox(
+                height: AppSizes.buttonHeightSecondary,
+                child: ElevatedButton.icon(
+                  onPressed: (_deleting || !_matches(confirmPhrase))
+                      ? null
+                      : () => _delete(confirmPhrase),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor:
+                        AppColors.error.withValues(alpha: 0.35),
+                    disabledForegroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.spacingM,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.buttonRadius,
+                      ),
+                    ),
+                  ),
+                  icon: _deleting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Icon(Icons.delete_forever, size: 22),
+                  label: Text(
+                    t.common.deleteAccountConfirmButton,
+                    style: AppTypography.button.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

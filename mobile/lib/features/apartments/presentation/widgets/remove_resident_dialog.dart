@@ -208,13 +208,23 @@ class _RemoveResidentDialogState extends ConsumerState<RemoveResidentDialog> {
         ],
       ),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: _removing ? null : () => Navigator.of(context).pop(false),
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.textSecondary,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.textPrimary,
+            side: const BorderSide(color: AppColors.borderColor, width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
             minimumSize: const Size(48, 48),
           ),
-          child: Text(context.t.common.cancel),
+          child: Text(
+            context.t.common.cancelBtn,
+            style: AppTypography.button.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
         ElevatedButton.icon(
           onPressed: _removing ? null : _remove,

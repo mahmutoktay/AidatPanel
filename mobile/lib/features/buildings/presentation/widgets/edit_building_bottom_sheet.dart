@@ -197,7 +197,20 @@ class _EditBuildingBottomSheetState extends ConsumerState<EditBuildingBottomShee
                           child: OutlinedButton(
                             onPressed:
                                 _saving ? null : () => Navigator.of(context).pop(),
-                            child: Text(context.t.common.cancel),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.textPrimary,
+                              side: const BorderSide(
+                                color: AppColors.borderColor,
+                                width: 1.5,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text(
+                              context.t.common.cancelBtn,
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
                           ),
                         ),
                       ),
