@@ -31,7 +31,6 @@ class ManagerDashboardScreen extends ConsumerStatefulWidget {
 class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _initialDuesRequested = false;
 
   @override
   void initState() {
@@ -56,14 +55,6 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
   @override
   Widget build(BuildContext context) {
     final buildingsAsync = ref.watch(buildingsStoreProvider);
-    final buildings = buildingsAsync.value ?? const <BuildingEntity>[];
-    if (!_initialDuesRequested && buildings.isNotEmpty) {
-      _initialDuesRequested = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        ref.read(duesNotifierProvider.notifier).loadBuildingDues(buildings.first.id);
-      });
-    }
 
     return PopScope(
       canPop: false,
@@ -155,13 +146,37 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
               overdueCount: overdueCount,
             ),
             const SizedBox(height: AppSizes.spacingL),
-            Text(
-              context.t.common.managedBuildings,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  context.t.common.managedBuildings,
+                  style: AppTypography.h3.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.spacingS,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.18),
+                    ),
+                  ),
+                  child: Text(
+                    buildings.length.toString(),
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: AppSizes.spacingM),
             _BuildingsAsyncSection(
@@ -231,10 +246,9 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
           const SizedBox(height: AppSizes.spacingL),
           Text(
             context.t.common.myBuildings,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+            style: AppTypography.h3.copyWith(
               color: AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: AppSizes.spacingM),
@@ -259,20 +273,15 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.18),
+        ),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
           onTap: () => _onBuildingTapped(building),
           child: _buildBuildingCardContent(building),
         ),
@@ -293,13 +302,24 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLight,
-                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.primary.withValues(alpha: 0.18),
+                      AppColors.primaryLight.withValues(alpha: 0.12),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.18),
+                  ),
                 ),
+                alignment: Alignment.center,
                 child: const Icon(
-                  Icons.apartment,
-                  color: Colors.white,
-                  size: 28,
+                  Icons.apartment_rounded,
+                  color: AppColors.primary,
+                  size: 26,
                 ),
               ),
               const SizedBox(width: AppSizes.spacingM),
@@ -315,26 +335,26 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                       ),
                     ),
                     const SizedBox(height: AppSizes.spacingXS),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          size: 16,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            building.displayAddress,
-                            style: AppTypography.body2.copyWith(
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Icon(
+                              Icons.location_on_outlined,
+                              size: 16,
                               color: AppColors.textSecondary,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                          const WidgetSpan(child: SizedBox(width: 4)),
+                          TextSpan(text: building.displayAddress),
+                        ],
+                      ),
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -343,7 +363,10 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
             ],
           ),
         ),
-        Container(height: 1, color: AppColors.borderColor),
+        Container(
+          height: 1,
+          color: AppColors.primary.withValues(alpha: 0.14),
+        ),
         Padding(
           padding: const EdgeInsets.all(AppSizes.spacingM),
           child: Row(
@@ -357,7 +380,11 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                   color: AppColors.primary,
                 ),
               ),
-              Container(width: 1, height: 40, color: AppColors.borderColor),
+              Container(
+                width: 1,
+                height: 40,
+                color: AppColors.primary.withValues(alpha: 0.14),
+              ),
               Expanded(
                 child: Builder(
                   builder: (_) {
@@ -373,7 +400,11 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                   },
                 ),
               ),
-              Container(width: 1, height: 40, color: AppColors.borderColor),
+              Container(
+                width: 1,
+                height: 40,
+                color: AppColors.primary.withValues(alpha: 0.14),
+              ),
               Expanded(
                 child: _buildStatItem(
                   icon: Icons.payments_outlined,
@@ -561,93 +592,101 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
         .map(
           (building) => Container(
             margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
-            padding: const EdgeInsets.all(AppSizes.spacingM),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.borderColor),
+              borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.18),
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            building.name,
-                            style: AppTypography.h3.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+                onTap: () => _onBuildingTapped(building),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSizes.spacingM),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.primary.withValues(alpha: 0.18),
+                              AppColors.primaryLight.withValues(alpha: 0.12),
+                            ],
                           ),
-                          const SizedBox(height: AppSizes.spacingXS),
-                          Text(
-                            building.displayAddress,
-                            style: AppTypography.body2.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.18),
                           ),
-                        ],
+                        ),
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.apartment_rounded,
+                          color: AppColors.primary,
+                          size: 24,
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.arrow_forward_ios),
-                      onPressed: () {},
-                    ),
-                  ],
+                      const SizedBox(width: AppSizes.spacingM),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              building.name,
+                              style: AppTypography.h4.copyWith(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.w800,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: Icon(
+                                      Icons.location_on_outlined,
+                                      size: 14,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                  const WidgetSpan(child: SizedBox(width: 4)),
+                                  TextSpan(text: building.displayAddress),
+                                ],
+                              ),
+                              style: AppTypography.body2.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: AppSizes.spacingS),
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppColors.textSecondary,
+                        size: 22,
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: AppSizes.spacingM),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildBuildingInfo(
-                      label: context.t.common.apartments,
-                      value:
-                          '${building.occupiedApartments}/${building.totalApartments}',
-                    ),
-                    Builder(
-                      builder: (_) {
-                        final allDues =
-                            ref.watch(allBuildingsDuesProvider).value ??
-                                const {};
-                        final rate =
-                            buildingCollectionRate(allDues, building.id);
-                        return _buildBuildingInfo(
-                          label: context.t.common.duesCollection,
-                          value: '${rate.toStringAsFixed(1)}%',
-                        );
-                      },
-                    ),
-                    _buildBuildingInfo(
-                      label: context.t.common.totalDues,
-                      value: '₺${building.totalMonthlyDues.toStringAsFixed(0)}',
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
         )
         .toList();
-  }
-
-  Widget _buildBuildingInfo({required String label, required String value}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(value, style: AppTypography.h4.copyWith(color: AppColors.primary)),
-        const SizedBox(height: AppSizes.spacingXS),
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-        ),
-      ],
-    );
   }
 }
 
@@ -815,68 +854,99 @@ class _HeroSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${context.t.common.welcome}, $userName',
-            style: AppTypography.h3.copyWith(color: Colors.white),
-          ),
-          const SizedBox(height: AppSizes.spacingXS),
-          Text(
-            context.t.common.managedBuildings,
-            style: AppTypography.body1.copyWith(
-              color: Colors.white.withValues(alpha: 0.8),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(AppSizes.spacingM),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.primaryLight],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
           ),
-          const SizedBox(height: AppSizes.spacingL),
-          Row(
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.20),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.waving_hand_outlined,
+                  color: Colors.white,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: AppSizes.spacingM),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.t.common.welcome,
+                      style: AppTypography.caption.copyWith(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      userName,
+                      style: AppTypography.h3.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSizes.spacingM),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 child: _MetricItem(
                   icon: Icons.apartment_outlined,
                   value: totalApartments.toString(),
                   label: context.t.common.totalApartments,
+                  tint: AppColors.primary,
                 ),
               ),
-              Container(
-                width: 1,
-                height: 40,
-                color: Colors.white.withValues(alpha: 0.3),
-              ),
+              const SizedBox(width: AppSizes.spacingS),
               Expanded(
                 child: _MetricItem(
                   icon: Icons.trending_up,
                   value: '%${collectionRate.toStringAsFixed(0)}',
                   label: context.t.common.collection,
+                  tint: AppColors.success,
                 ),
               ),
-              Container(
-                width: 1,
-                height: 40,
-                color: Colors.white.withValues(alpha: 0.3),
-              ),
+              const SizedBox(width: AppSizes.spacingS),
               Expanded(
                 child: _MetricItem(
                   icon: Icons.warning_amber_rounded,
                   value: overdueCount.toString(),
                   label: context.t.common.overdueStatus,
+                  tint: overdueCount > 0
+                      ? AppColors.error
+                      : AppColors.textSecondary,
                 ),
               ),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -887,29 +957,68 @@ class _MetricItem extends StatelessWidget {
   final IconData icon;
   final String value;
   final String label;
+  final Color tint;
 
   const _MetricItem({
     required this.icon,
     required this.value,
     required this.label,
+    required this.tint,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.white, size: 22),
-        const SizedBox(height: 4),
-        Text(value, style: AppTypography.h3.copyWith(color: Colors.white)),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: Colors.white.withValues(alpha: 0.8),
-          ),
-          textAlign: TextAlign.center,
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.spacingS),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            tint.withValues(alpha: 0.14),
+            tint.withValues(alpha: 0.06),
+          ],
         ),
-      ],
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        border: Border.all(color: tint.withValues(alpha: 0.22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: tint.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: tint.withValues(alpha: 0.22)),
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, color: tint, size: 16),
+          ),
+          const SizedBox(height: AppSizes.spacingS),
+          Text(
+            value,
+            style: AppTypography.h3.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }

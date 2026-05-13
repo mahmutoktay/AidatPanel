@@ -160,7 +160,7 @@ class _DialogActionRow extends StatelessWidget {
                 ),
               ),
               child: Text(
-                context.t.common.cancel,
+                context.t.common.cancelBtn,
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),

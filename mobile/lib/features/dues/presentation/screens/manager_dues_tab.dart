@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
 import '../../domain/entities/due_entity.dart';
@@ -44,30 +46,78 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
 
     _tryInitialize(buildings);
 
-    // Tur 5 §10/3 — filtreleme artık server-side. `state.dues` zaten
-    // sunucudan filtrelenmiş geldiği için ek client-side filtreleme yok.
     final dues = duesState.dues;
+    final isLoading = duesState.isLoading;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildFilters(context, buildings, dues, duesState.isLoading),
-          const SizedBox(height: AppSizes.spacingM),
-          _buildDueAmountCard(context, duesState.isLoading),
-          const SizedBox(height: AppSizes.spacingL),
-          Text(
-            context.t.common.buildingDues,
-            style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+    return RefreshIndicator(
+      onRefresh: _reloadDues,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.spacingL,
+              AppSizes.spacingL,
+              AppSizes.spacingL,
+              0,
+            ),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _buildFilters(context, buildings, dues, isLoading),
+                const SizedBox(height: AppSizes.spacingM),
+                _buildDueAmountCard(context, buildings, isLoading),
+                const SizedBox(height: AppSizes.spacingL),
+                Text(
+                  context.t.common.buildingDues,
+                  style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+                if (isLoading && dues.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: const LinearProgressIndicator(minHeight: 3),
+                    ),
+                  ),
+              ]),
+            ),
           ),
-          const SizedBox(height: AppSizes.spacingM),
-          if (duesState.isLoading)
-            const Center(child: CircularProgressIndicator())
+          if (isLoading && dues.isEmpty)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: CircularProgressIndicator()),
+            )
           else if (dues.isEmpty)
-            _buildEmptyState(context)
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSizes.spacingL,
+                0,
+                AppSizes.spacingL,
+                AppSizes.spacingL,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: _buildEmptyState(context),
+              ),
+            )
           else
-            ...dues.map((due) => _buildDueCard(context, due)),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSizes.spacingL,
+                0,
+                AppSizes.spacingL,
+                AppSizes.spacingL,
+              ),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => KeyedSubtree(
+                    key: ValueKey<String>(dues[index].id),
+                    child: _buildDueCard(context, dues[index]),
+                  ),
+                  childCount: dues.length,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -86,15 +136,19 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   /// Tur 5 §10/3 — Filtreler değişince veya bina seçimi değişince çağrılır.
   /// Notifier'a aktif filtreleri pas eder; sunucu zaten filtrelenmiş liste
   /// döner.
-  void _reloadDues() {
+  Future<void> _reloadDues() async {
     final buildingId = _selectedBuildingId;
     if (buildingId == null) return;
-    ref.read(duesNotifierProvider.notifier).loadBuildingDues(
+    await ref.read(duesNotifierProvider.notifier).loadBuildingDues(
           buildingId,
           month: _monthFilter,
           year: _yearFilter,
           status: _statusFilter,
         );
+  }
+
+  void _invalidateDashboardDuesHero() {
+    ref.invalidate(allBuildingsDuesProvider);
   }
 
   Widget _buildFilters(
@@ -307,7 +361,11 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     }
   }
 
-  Widget _buildDueAmountCard(BuildContext context, bool isLoading) {
+  Widget _buildDueAmountCard(
+    BuildContext context,
+    List<BuildingEntity> buildings,
+    bool isLoading,
+  ) {
     final currencySymbol = _currencySymbol();
     return Container(
       padding: const EdgeInsets.all(AppSizes.cardPadding),
@@ -322,6 +380,11 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           Text(
             context.t.common.updateDueAmount,
             style: AppTypography.h4.copyWith(color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: AppSizes.spacingXS),
+          Text(
+            context.t.common.dueUpdateNeedAmountOrDay,
+            style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSizes.spacingM),
           TextField(
@@ -339,6 +402,11 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           TextField(
             controller: _dueDayController,
             keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(2),
+              const _DueDayInputFormatter(),
+            ],
             decoration: InputDecoration(
               labelText: context.t.common.dueDay,
               border: OutlineInputBorder(
@@ -365,7 +433,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           SizedBox(
             height: AppSizes.buttonHeightSecondary,
             child: ElevatedButton(
-              onPressed: isLoading ? null : _updateDueAmount,
+              onPressed: isLoading ? null : () => _updateDueAmount(buildings),
               child: Text(context.t.common.update),
             ),
           ),
@@ -463,45 +531,89 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     );
   }
 
-  Future<void> _updateDueAmount() async {
+  Future<void> _updateDueAmount(List<BuildingEntity> buildings) async {
     final buildingId = _selectedBuildingId;
     if (buildingId == null) return;
-    final amount = double.tryParse(_amountController.text.trim());
-    if (amount == null || amount <= 0) return;
 
+    final toast = ref.read(toastProvider.notifier);
+    void validationToast(String msg) {
+      toast.show(msg, type: ToastType.info);
+    }
+
+    final amountText =
+        _amountController.text.trim().replaceAll(',', '.').replaceAll(' ', '');
     final dueDayText = _dueDayController.text.trim();
+
+    double? parsedAmount;
+    if (amountText.isNotEmpty) {
+      parsedAmount = double.tryParse(amountText);
+      if (parsedAmount == null || parsedAmount <= 0) {
+        validationToast(context.t.common.dueAmountInvalidPositive);
+        return;
+      }
+    }
+
     int? dueDay;
     if (dueDayText.isNotEmpty) {
       final parsed = int.tryParse(dueDayText);
-      if (parsed == null || parsed < 1 || parsed > 28) return;
+      if (parsed == null || parsed < 1 || parsed > 28) {
+        validationToast(context.t.common.dueDayOutOfRange);
+        return;
+      }
       dueDay = parsed;
+    }
+
+    final hasAmount = parsedAmount != null && parsedAmount > 0;
+    final hasDueDay = dueDay != null;
+    if (!hasAmount && !hasDueDay) {
+      validationToast(context.t.common.dueUpdateNeedAmountOrDay);
+      return;
+    }
+
+    final building = _buildingFor(buildingId, buildings);
+    late final double resolvedAmount;
+    if (hasAmount) {
+      resolvedAmount = parsedAmount;
+    } else {
+      final stored = building?.dueAmount;
+      if (stored == null || stored <= 0) {
+        validationToast(context.t.common.dueUpdateNeedStoredAmount);
+        return;
+      }
+      resolvedAmount = stored;
     }
 
     final ok =
         await ref.read(duesNotifierProvider.notifier).updateBuildingDueAmount(
               buildingId: buildingId,
-              dueAmount: amount,
+              dueAmount: resolvedAmount,
               dueDay: dueDay,
               currency: _currencyCode(),
               affectCurrent: _affectCurrent,
             );
 
     if (!mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          ok
-              ? context.t.common.dueAmountUpdated
-              : context.t.common.dueAmountUpdateFailed,
-        ),
-      ),
+    toast.show(
+      ok
+          ? context.t.common.dueAmountUpdated
+          : context.t.common.dueAmountUpdateFailed,
+      type: ok ? ToastType.success : ToastType.error,
     );
     if (ok) {
       _amountController.clear();
       _dueDayController.clear();
       setState(() => _affectCurrent = false);
+      await ref.read(buildingsStoreProvider.notifier).refreshBuildings();
+      if (!mounted) return;
+      _invalidateDashboardDuesHero();
     }
+  }
+
+  BuildingEntity? _buildingFor(String buildingId, List<BuildingEntity> list) {
+    for (final b in list) {
+      if (b.id == buildingId) return b;
+    }
+    return null;
   }
 
   Future<void> _updateStatus(String dueId, DueStatus status) async {
@@ -513,9 +625,11 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           status: status,
         );
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.t.common.duesUpdated)),
-    );
+    _invalidateDashboardDuesHero();
+    ref.read(toastProvider.notifier).show(
+          context.t.common.duesUpdated,
+          type: ToastType.success,
+        );
   }
 
   String _currencyCode() {
@@ -524,6 +638,23 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
 
   String _currencySymbol() {
     return LocaleSettings.currentLocale == AppLocale.tr ? '₺' : r'$';
+  }
+}
+
+class _DueDayInputFormatter extends TextInputFormatter {
+  const _DueDayInputFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final t = newValue.text;
+    if (t.isEmpty) return newValue;
+    if (!RegExp(r'^\d{1,2}$').hasMatch(t)) return oldValue;
+    final n = int.parse(t);
+    if (n < 1 || n > 28) return oldValue;
+    return newValue;
   }
 }
 

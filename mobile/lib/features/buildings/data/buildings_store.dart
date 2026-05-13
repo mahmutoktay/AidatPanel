@@ -41,6 +41,18 @@ class BuildingsNotifier
     }
   }
 
+  /// PATCH aidat tutarı / gün sonrası vb.: `AsyncValue.loading` atlamadan
+  /// bina listesini sunucudan yeniler. Böylece Binalar sekmesindeki
+  /// `dueAmount` rozeti bayat kalmaz.
+  Future<void> refreshBuildings() async {
+    try {
+      final buildings = await _repository.fetchBuildings();
+      state = AsyncValue.data(buildings);
+    } catch (_) {
+      // Mevcut listeyi koru; aidat ekranında işlem zaten tamamlandı.
+    }
+  }
+
   Future<String?> addBuilding({
     required String name,
     required String address,

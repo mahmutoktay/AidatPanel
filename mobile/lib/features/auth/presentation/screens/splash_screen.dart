@@ -148,17 +148,30 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             ),
           ),
           const SizedBox(height: AppSizes.spacingS),
-          TextButton(
-            onPressed: () {
-              if (!mounted) return;
-              context.go('/login');
-            },
-            child: Text(
-              context.t.features.auth.skipToLogin,
-              style: AppTypography.body2.copyWith(
-                color: Colors.white.withValues(alpha: 0.9),
-                decoration: TextDecoration.underline,
-                decorationColor: Colors.white.withValues(alpha: 0.9),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: OutlinedButton(
+              onPressed: () {
+                if (!mounted) return;
+                context.go('/login');
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  width: 1.5,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+                ),
+              ),
+              child: Text(
+                context.t.features.auth.skipToLogin,
+                style: AppTypography.body2.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),

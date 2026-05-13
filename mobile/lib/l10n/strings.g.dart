@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 668 (334 per locale)
+/// Strings: 704 (352 per locale)
 ///
-/// Built on 2026-05-10 at 16:45 UTC
+/// Built on 2026-05-13 at 20:25 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -286,6 +286,9 @@ class _StringsCommonEn {
 	String get emptyApartmentText => 'Empty Apartment';
 	String get vacantBadge => 'Vacant';
 	String get phoneNotShared => 'Phone not shared';
+	String get residentDetailsLink => 'Details..';
+	String get residentDetailsSheetTitle => 'Resident information';
+	String get apartmentDetailsSheetTitle => 'Apartment information';
 	String get noResidentAssigned => 'No resident assigned';
 	String get noApartmentsYet => 'No apartments added yet';
 	String get paidStatus => 'Paid';
@@ -322,6 +325,10 @@ class _StringsCommonEn {
 	String get dueDay => 'Due Day (1-28)';
 	String get affectCurrentDues => 'Apply to pending dues';
 	String get affectCurrentDuesHint => 'When enabled, current PENDING due amounts are updated to the new amount.';
+	String get dueUpdateNeedAmountOrDay => 'Enter an amount or a due day (or both) to update.';
+	String get dueUpdateNeedStoredAmount => 'This building has no saved amount yet. Enter an amount before updating the due day only.';
+	String get dueAmountInvalidPositive => 'Enter a valid amount.';
+	String get dueDayOutOfRange => 'Due day must be between 1 and 28.';
 	String get update => 'Update';
 	String get overdueDays => 'days overdue';
 	String get dueDateLabel => 'Due date';
@@ -367,6 +374,17 @@ class _StringsCommonEn {
 	String get residentRemoveFailed => 'Could not remove resident';
 	String get residentRemoveForbidden => 'You are not allowed to perform this action. Only the building manager can remove residents.';
 	String get residentRemoveNotFound => 'No resident to remove from this apartment.';
+	String get multiSelectResidents => 'Select multiple';
+	String get multiSelectTapHint => 'Tap the card to select or clear';
+	String get removeSelectedResidents => 'Remove selected';
+	String get removeSelectedResidentsTitle => 'Remove selected residents';
+	String get removeSelectedResidentsMessage => 'Residents in the apartments listed below will be unlinked from their apartments. Accounts are not deleted—only the connection to this building is removed. Past dues records are kept.';
+	String get removeSelectedResidentsAffectedListTitle => 'Apartments affected';
+	String get removeSelectedResidentsListUnavailable => 'The apartment list could not be loaded. The count is shown below. If you confirm, removals will still proceed.';
+	String get pickResidentsFirst => 'Select at least one occupied apartment from the list first';
+	String get removeSelectedProgress => 'Working…';
+	String get removeSelectedSuccess => 'Selected residents were removed from their apartments';
+	String get removeSelectedFailed => 'Could not finish removing the selected residents';
 	String get currentPassword => 'Current Password';
 	String get newPassword => 'New Password';
 	String get newPasswordConfirm => 'New Password (Repeat)';
@@ -716,6 +734,9 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get emptyApartmentText => 'Boş Daire';
 	@override String get vacantBadge => 'Boş';
 	@override String get phoneNotShared => 'Telefon paylaşılmadı';
+	@override String get residentDetailsLink => 'Detaylar..';
+	@override String get residentDetailsSheetTitle => 'Sakin bilgileri';
+	@override String get apartmentDetailsSheetTitle => 'Daire bilgileri';
 	@override String get noResidentAssigned => 'Sakin atanmamış';
 	@override String get noApartmentsYet => 'Henüz daire eklenmemiş';
 	@override String get paidStatus => 'Ödendi';
@@ -752,6 +773,10 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get dueDay => 'Aidat Günü (1-28)';
 	@override String get affectCurrentDues => 'Bekleyen aidatlara da uygula';
 	@override String get affectCurrentDuesHint => 'Açık olduğunda mevcut bekleyen (PENDING) aidat tutarları da yeni tutara güncellenir.';
+	@override String get dueUpdateNeedAmountOrDay => 'Güncellemek için tutar veya aidat gününden en az birini yazın.';
+	@override String get dueUpdateNeedStoredAmount => 'Bu bina için kayıtlı tutar yok. Aidat gününü güncellemek için önce tutar yazın.';
+	@override String get dueAmountInvalidPositive => 'Geçerli bir tutar yazın.';
+	@override String get dueDayOutOfRange => 'Aidat günü 1 ile 28 arasında olmalıdır.';
 	@override String get update => 'Güncelle';
 	@override String get overdueDays => 'gün gecikmiş';
 	@override String get dueDateLabel => 'Son ödeme';
@@ -797,6 +822,17 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get residentRemoveFailed => 'Sakin çıkarılamadı';
 	@override String get residentRemoveForbidden => 'Bu işlem için yetkiniz yok. Yalnızca binanın yöneticisi sakin çıkarabilir.';
 	@override String get residentRemoveNotFound => 'Bu dairede çıkarılacak sakin bulunamadı.';
+	@override String get multiSelectResidents => 'Çoklu seç';
+	@override String get multiSelectTapHint => 'Seçmek için karta dokunun';
+	@override String get removeSelectedResidents => 'Seçilenleri çıkar';
+	@override String get removeSelectedResidentsTitle => 'Seçilen sakinleri çıkar';
+	@override String get removeSelectedResidentsMessage => 'Aşağıda listelenen dairelerde oturan sakinler daireden çıkarılır. Hesapları silinmez; yalnızca bu binadaki bağlantıları kalkar. Geçmiş aidat kayıtları korunur.';
+	@override String get removeSelectedResidentsAffectedListTitle => 'Etkilenecek daireler';
+	@override String get removeSelectedResidentsListUnavailable => 'Daire listesi şu an gösterilemiyor. Seçilen daire sayısı aşağıda; onaylarsanız işlem yine de uygulanır.';
+	@override String get pickResidentsFirst => 'Önce listeden en az bir dolu daire seçin';
+	@override String get removeSelectedProgress => 'İşlem yapılıyor…';
+	@override String get removeSelectedSuccess => 'Seçilen sakinler dairelerden çıkarıldı';
+	@override String get removeSelectedFailed => 'Seçilenleri çıkarma tamamlanamadı';
 	@override String get currentPassword => 'Mevcut Şifre';
 	@override String get newPassword => 'Yeni Şifre';
 	@override String get newPasswordConfirm => 'Yeni Şifre (Tekrar)';
@@ -1115,6 +1151,9 @@ extension on Translations {
 			case 'common.emptyApartmentText': return 'Empty Apartment';
 			case 'common.vacantBadge': return 'Vacant';
 			case 'common.phoneNotShared': return 'Phone not shared';
+			case 'common.residentDetailsLink': return 'Details..';
+			case 'common.residentDetailsSheetTitle': return 'Resident information';
+			case 'common.apartmentDetailsSheetTitle': return 'Apartment information';
 			case 'common.noResidentAssigned': return 'No resident assigned';
 			case 'common.noApartmentsYet': return 'No apartments added yet';
 			case 'common.paidStatus': return 'Paid';
@@ -1151,6 +1190,10 @@ extension on Translations {
 			case 'common.dueDay': return 'Due Day (1-28)';
 			case 'common.affectCurrentDues': return 'Apply to pending dues';
 			case 'common.affectCurrentDuesHint': return 'When enabled, current PENDING due amounts are updated to the new amount.';
+			case 'common.dueUpdateNeedAmountOrDay': return 'Enter an amount or a due day (or both) to update.';
+			case 'common.dueUpdateNeedStoredAmount': return 'This building has no saved amount yet. Enter an amount before updating the due day only.';
+			case 'common.dueAmountInvalidPositive': return 'Enter a valid amount.';
+			case 'common.dueDayOutOfRange': return 'Due day must be between 1 and 28.';
 			case 'common.update': return 'Update';
 			case 'common.overdueDays': return 'days overdue';
 			case 'common.dueDateLabel': return 'Due date';
@@ -1196,6 +1239,17 @@ extension on Translations {
 			case 'common.residentRemoveFailed': return 'Could not remove resident';
 			case 'common.residentRemoveForbidden': return 'You are not allowed to perform this action. Only the building manager can remove residents.';
 			case 'common.residentRemoveNotFound': return 'No resident to remove from this apartment.';
+			case 'common.multiSelectResidents': return 'Select multiple';
+			case 'common.multiSelectTapHint': return 'Tap the card to select or clear';
+			case 'common.removeSelectedResidents': return 'Remove selected';
+			case 'common.removeSelectedResidentsTitle': return 'Remove selected residents';
+			case 'common.removeSelectedResidentsMessage': return 'Residents in the apartments listed below will be unlinked from their apartments. Accounts are not deleted—only the connection to this building is removed. Past dues records are kept.';
+			case 'common.removeSelectedResidentsAffectedListTitle': return 'Apartments affected';
+			case 'common.removeSelectedResidentsListUnavailable': return 'The apartment list could not be loaded. The count is shown below. If you confirm, removals will still proceed.';
+			case 'common.pickResidentsFirst': return 'Select at least one occupied apartment from the list first';
+			case 'common.removeSelectedProgress': return 'Working…';
+			case 'common.removeSelectedSuccess': return 'Selected residents were removed from their apartments';
+			case 'common.removeSelectedFailed': return 'Could not finish removing the selected residents';
 			case 'common.currentPassword': return 'Current Password';
 			case 'common.newPassword': return 'New Password';
 			case 'common.newPasswordConfirm': return 'New Password (Repeat)';
@@ -1457,6 +1511,9 @@ extension on _StringsTr {
 			case 'common.emptyApartmentText': return 'Boş Daire';
 			case 'common.vacantBadge': return 'Boş';
 			case 'common.phoneNotShared': return 'Telefon paylaşılmadı';
+			case 'common.residentDetailsLink': return 'Detaylar..';
+			case 'common.residentDetailsSheetTitle': return 'Sakin bilgileri';
+			case 'common.apartmentDetailsSheetTitle': return 'Daire bilgileri';
 			case 'common.noResidentAssigned': return 'Sakin atanmamış';
 			case 'common.noApartmentsYet': return 'Henüz daire eklenmemiş';
 			case 'common.paidStatus': return 'Ödendi';
@@ -1493,6 +1550,10 @@ extension on _StringsTr {
 			case 'common.dueDay': return 'Aidat Günü (1-28)';
 			case 'common.affectCurrentDues': return 'Bekleyen aidatlara da uygula';
 			case 'common.affectCurrentDuesHint': return 'Açık olduğunda mevcut bekleyen (PENDING) aidat tutarları da yeni tutara güncellenir.';
+			case 'common.dueUpdateNeedAmountOrDay': return 'Güncellemek için tutar veya aidat gününden en az birini yazın.';
+			case 'common.dueUpdateNeedStoredAmount': return 'Bu bina için kayıtlı tutar yok. Aidat gününü güncellemek için önce tutar yazın.';
+			case 'common.dueAmountInvalidPositive': return 'Geçerli bir tutar yazın.';
+			case 'common.dueDayOutOfRange': return 'Aidat günü 1 ile 28 arasında olmalıdır.';
 			case 'common.update': return 'Güncelle';
 			case 'common.overdueDays': return 'gün gecikmiş';
 			case 'common.dueDateLabel': return 'Son ödeme';
@@ -1538,6 +1599,17 @@ extension on _StringsTr {
 			case 'common.residentRemoveFailed': return 'Sakin çıkarılamadı';
 			case 'common.residentRemoveForbidden': return 'Bu işlem için yetkiniz yok. Yalnızca binanın yöneticisi sakin çıkarabilir.';
 			case 'common.residentRemoveNotFound': return 'Bu dairede çıkarılacak sakin bulunamadı.';
+			case 'common.multiSelectResidents': return 'Çoklu seç';
+			case 'common.multiSelectTapHint': return 'Seçmek için karta dokunun';
+			case 'common.removeSelectedResidents': return 'Seçilenleri çıkar';
+			case 'common.removeSelectedResidentsTitle': return 'Seçilen sakinleri çıkar';
+			case 'common.removeSelectedResidentsMessage': return 'Aşağıda listelenen dairelerde oturan sakinler daireden çıkarılır. Hesapları silinmez; yalnızca bu binadaki bağlantıları kalkar. Geçmiş aidat kayıtları korunur.';
+			case 'common.removeSelectedResidentsAffectedListTitle': return 'Etkilenecek daireler';
+			case 'common.removeSelectedResidentsListUnavailable': return 'Daire listesi şu an gösterilemiyor. Seçilen daire sayısı aşağıda; onaylarsanız işlem yine de uygulanır.';
+			case 'common.pickResidentsFirst': return 'Önce listeden en az bir dolu daire seçin';
+			case 'common.removeSelectedProgress': return 'İşlem yapılıyor…';
+			case 'common.removeSelectedSuccess': return 'Seçilen sakinler dairelerden çıkarıldı';
+			case 'common.removeSelectedFailed': return 'Seçilenleri çıkarma tamamlanamadı';
 			case 'common.currentPassword': return 'Mevcut Şifre';
 			case 'common.newPassword': return 'Yeni Şifre';
 			case 'common.newPasswordConfirm': return 'Yeni Şifre (Tekrar)';

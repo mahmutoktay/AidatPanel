@@ -576,7 +576,7 @@ class _LogoutButton extends ConsumerWidget {
                         ),
                       ),
                       child: Text(
-                        context.t.common.cancel,
+                        context.t.common.cancelBtn,
                         style: AppTypography.button.copyWith(
                           color: AppColors.textPrimary,
                         ),
