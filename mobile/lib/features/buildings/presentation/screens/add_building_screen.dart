@@ -78,7 +78,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
                 builder: (ctx) {
                   final items = _buildFormItems(ctx);
                   return ListView.builder(
-                    padding: const EdgeInsets.all(AppSizes.spacingL),
+                    padding: AppSizes.screenBodyScrollPadding,
                     itemCount: items.length,
                     itemBuilder: (_, i) => items[i],
                   );
@@ -552,7 +552,7 @@ class _SearchablePickerState extends State<_SearchablePicker> {
           // Title
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.spacingL,
+              horizontal: AppSizes.dashboardScreenPaddingHorizontal,
               vertical: AppSizes.spacingS,
             ),
             child: Text(
@@ -566,7 +566,7 @@ class _SearchablePickerState extends State<_SearchablePicker> {
           // Search
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.spacingL,
+              horizontal: AppSizes.dashboardScreenPaddingHorizontal,
               vertical: AppSizes.spacingS,
             ),
             child: TextField(

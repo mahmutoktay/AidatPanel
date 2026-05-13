@@ -20,7 +20,7 @@ class InviteStepIndicator extends StatelessWidget {
     ];
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.spacingL,
+        horizontal: AppSizes.dashboardScreenPaddingHorizontal,
         vertical: AppSizes.spacingM,
       ),
       color: Colors.white,

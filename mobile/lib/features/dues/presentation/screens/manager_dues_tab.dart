@@ -56,9 +56,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
         slivers: [
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
+              AppSizes.dashboardScreenPaddingHorizontal,
               AppSizes.spacingL,
-              AppSizes.spacingL,
-              AppSizes.spacingL,
+              AppSizes.dashboardScreenPaddingHorizontal,
               0,
             ),
             sliver: SliverList(
@@ -91,9 +91,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           else if (dues.isEmpty)
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(
-                AppSizes.spacingL,
+                AppSizes.dashboardScreenPaddingHorizontal,
                 0,
-                AppSizes.spacingL,
+                AppSizes.dashboardScreenPaddingHorizontal,
                 AppSizes.spacingL,
               ),
               sliver: SliverToBoxAdapter(
@@ -103,9 +103,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           else
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(
-                AppSizes.spacingL,
+                AppSizes.dashboardScreenPaddingHorizontal,
                 0,
-                AppSizes.spacingL,
+                AppSizes.dashboardScreenPaddingHorizontal,
                 AppSizes.spacingL,
               ),
               sliver: SliverList(

@@ -204,7 +204,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppSizes.spacingL),
+                    padding: AppSizes.screenBodyScrollPadding,
                     // Kullanıcı listeyi sürüklerse klavye otomatik kapansın.
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,

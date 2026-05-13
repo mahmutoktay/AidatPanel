@@ -55,7 +55,7 @@ class FriendlyErrorScreen extends StatelessWidget {
       color: AppColors.background,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(AppSizes.spacingL),
+          padding: AppSizes.screenBodyScrollPadding,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,

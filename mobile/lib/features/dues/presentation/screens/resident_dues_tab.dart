@@ -33,7 +33,7 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
     return RefreshIndicator(
       onRefresh: () => ref.read(duesNotifierProvider.notifier).loadMyDues(),
       child: ListView.builder(
-        padding: const EdgeInsets.all(AppSizes.spacingL),
+        padding: AppSizes.screenBodyScrollPadding,
         itemCount: duesState.isLoading
             ? 1
             : duesState.dues.isEmpty

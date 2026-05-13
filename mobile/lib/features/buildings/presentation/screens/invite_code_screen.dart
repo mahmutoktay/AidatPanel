@@ -266,7 +266,7 @@ class _BuildingPickerStep extends StatelessWidget {
     // OPTIMIZATION: ListView.builder kullanılıyor (lazy loading)
     // Büyük bina listelerinde memory efficient, scroll performance artar
     return ListView.builder(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
+      padding: AppSizes.screenBodyScrollPadding,
       itemCount: buildings.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) {
@@ -325,7 +325,7 @@ class _ApartmentPickerStep extends StatelessWidget {
         _buildEmptyState(context),
       ];
       return ListView.builder(
-        padding: const EdgeInsets.all(AppSizes.spacingL),
+        padding: AppSizes.screenBodyScrollPadding,
         itemCount: emptyItems.length,
         itemBuilder: (_, i) => emptyItems[i],
       );
@@ -335,7 +335,7 @@ class _ApartmentPickerStep extends StatelessWidget {
     // Items: apartments
     const headerCount = 3;
     return ListView.builder(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
+      padding: AppSizes.screenBodyScrollPadding,
       itemCount: apartments.length + headerCount,
       itemBuilder: (context, index) {
         if (index == 0) {

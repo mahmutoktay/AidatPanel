@@ -125,7 +125,7 @@ class _EditBuildingBottomSheetState extends ConsumerState<EditBuildingBottomShee
         child: SafeArea(
           top: false,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSizes.spacingL),
+            padding: AppSizes.screenBodyScrollPadding,
             child: Form(
               key: _formKey,
               child: Column(

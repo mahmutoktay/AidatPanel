@@ -261,7 +261,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ),
                         ),
                         child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(AppSizes.spacingL),
+                          padding: AppSizes.screenBodyScrollPadding,
                           keyboardDismissBehavior:
                               ScrollViewKeyboardDismissBehavior.onDrag,
                           child: Column(

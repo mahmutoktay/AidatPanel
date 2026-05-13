@@ -135,7 +135,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
       // physics: AlwaysScrollableScrollPhysics
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(AppSizes.spacingL),
+        padding: AppSizes.screenBodyScrollPadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -200,7 +200,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
 
   Widget _buildBuildingsTab(AsyncValue<List<BuildingEntity>> buildingsAsync) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
+      padding: AppSizes.screenBodyScrollPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -779,7 +779,12 @@ class _BuildingsErrorPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
+      padding: const EdgeInsets.fromLTRB(
+        AppSizes.spacingM,
+        AppSizes.spacingL,
+        AppSizes.spacingM,
+        AppSizes.spacingL,
+      ),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),

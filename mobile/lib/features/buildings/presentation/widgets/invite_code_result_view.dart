@@ -51,7 +51,7 @@ class InviteCodeResultView extends StatelessWidget {
     ];
     return ListView.builder(
       key: const ValueKey('step-2'),
-      padding: const EdgeInsets.all(AppSizes.spacingL),
+      padding: AppSizes.screenBodyScrollPadding,
       itemCount: items.length,
       itemBuilder: (_, i) => items[i],
     );
@@ -59,7 +59,10 @@ class InviteCodeResultView extends StatelessWidget {
 
   Widget _buildSuccessBanner(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingM,
+        vertical: AppSizes.spacingL,
+      ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [AppColors.success, AppColors.successLight],
@@ -104,7 +107,10 @@ class InviteCodeResultView extends StatelessWidget {
 
   Widget _buildCodeCard(BuildContext context, Duration remaining) {
     return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingM,
+        vertical: AppSizes.spacingL,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),

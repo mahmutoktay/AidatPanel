@@ -120,7 +120,7 @@ class _ResidentDashboardScreenState
     final paidCount = dues.where((d) => d.status == DueStatus.paid).length;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
+      padding: AppSizes.screenBodyScrollPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -309,7 +309,10 @@ class _ResidentWelcomeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingM,
+        vertical: AppSizes.spacingL,
+      ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [AppColors.primary, AppColors.primaryLight],
