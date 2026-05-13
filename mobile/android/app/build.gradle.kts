@@ -42,9 +42,14 @@ android {
     signingConfigs {
         if (keystorePropertiesFile.exists()) {
             create("release") {
+                val storePath = keystoreProperties.getProperty("storeFile")!!
+                val keystoreFile = rootProject.file(storePath)
+                storeFile = keystoreFile
+                require(keystoreFile.exists()) {
+                    "Keystore bulunamadı: ${keystoreFile.absolutePath}. android/key.properties içindeki storeFile yolunu kontrol edin."
+                }
                 keyAlias = keystoreProperties.getProperty("keyAlias")!!
                 keyPassword = keystoreProperties.getProperty("keyPassword")!!
-                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile")!!)
                 storePassword = keystoreProperties.getProperty("storePassword")!!
             }
         }

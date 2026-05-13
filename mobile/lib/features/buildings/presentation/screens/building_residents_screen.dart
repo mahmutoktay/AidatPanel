@@ -354,7 +354,7 @@ class _BuildingResidentsScreenState
           ),
         ),
         data: (residents) => SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSizes.spacingL),
+          padding: AppSizes.screenBodyScrollPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

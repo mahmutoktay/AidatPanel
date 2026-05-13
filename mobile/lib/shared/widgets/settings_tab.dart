@@ -24,7 +24,7 @@ class SettingsTab extends ConsumerWidget {
     final currentLocale = ref.watch(localeProvider);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
+      padding: AppSizes.screenBodyScrollPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -214,7 +214,10 @@ class _ProfileCard extends StatelessWidget {
         : context.t.common.resident;
 
     return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingL),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingM,
+        vertical: AppSizes.spacingL,
+      ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [AppColors.primary, AppColors.primaryLight],

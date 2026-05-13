@@ -1,3 +1,5 @@
+import 'package:flutter/painting.dart';
+
 class AppSizes {
   // Buton yükseklikleri - 50+ yaş için optimize edildi
   static const double buttonHeightPrimary = 64.0; // +8
@@ -45,6 +47,17 @@ class AppSizes {
 
   // Padding ve margin
   static const double screenPadding = 24.0; // Ekran kenar boşluğu
+
+  /// Tab / tam ekran gövde yatay kenarı — dikeyde `spacingL`.
+  static const double dashboardScreenPaddingHorizontal = 16.0;
+
+  /// [ListView] / [SingleChildScrollView] ana içerik padding'i (yatay dar).
+  static const EdgeInsets screenBodyScrollPadding = EdgeInsets.fromLTRB(
+    dashboardScreenPaddingHorizontal,
+    spacingL,
+    dashboardScreenPaddingHorizontal,
+    spacingL,
+  );
   static const double cardPadding = 20.0; // Kart iç boşluğu
   static const double sectionSpacing = 32.0; // Bölüm arası boşluk
 }

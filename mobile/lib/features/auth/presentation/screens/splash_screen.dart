@@ -101,7 +101,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   /// uygulamanın derinine yönlendirilmez.
   Widget _buildRetrySection(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.dashboardScreenPaddingHorizontal,
+      ),
       child: Column(
         children: [
           Icon(
