@@ -274,9 +274,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.18),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -363,10 +361,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
             ],
           ),
         ),
-        Container(
-          height: 1,
-          color: AppColors.primary.withValues(alpha: 0.14),
-        ),
+        Container(height: 1, color: AppColors.primary.withValues(alpha: 0.14)),
         Padding(
           padding: const EdgeInsets.all(AppSizes.spacingM),
           child: Row(
@@ -488,11 +483,17 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
           value: _BuildingAction.edit,
           child: Row(
             children: [
-              const Icon(Icons.edit_outlined, size: 22, color: AppColors.primary),
+              const Icon(
+                Icons.edit_outlined,
+                size: 22,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: AppSizes.spacingS),
               Text(
                 context.t.common.editBuilding,
-                style: AppTypography.body1.copyWith(color: AppColors.textPrimary),
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ],
           ),
@@ -501,7 +502,11 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
           value: _BuildingAction.delete,
           child: Row(
             children: [
-              const Icon(Icons.delete_outline, size: 22, color: AppColors.error),
+              const Icon(
+                Icons.delete_outline,
+                size: 22,
+                color: AppColors.error,
+              ),
               const SizedBox(width: AppSizes.spacingS),
               Text(
                 context.t.common.deleteBuilding,
@@ -795,11 +800,7 @@ class _BuildingsErrorPlaceholder extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.error_outline,
-                color: AppColors.error,
-                size: 28,
-              ),
+              const Icon(Icons.error_outline, color: AppColors.error, size: 28),
               const SizedBox(width: AppSizes.spacingM),
               Expanded(
                 child: Text(
@@ -814,9 +815,7 @@ class _BuildingsErrorPlaceholder extends StatelessWidget {
           const SizedBox(height: AppSizes.spacingS),
           Text(
             message,
-            style: AppTypography.body2.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -831,9 +830,7 @@ class _BuildingsErrorPlaceholder extends StatelessWidget {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    AppSizes.buttonRadius,
-                  ),
+                  borderRadius: BorderRadius.circular(AppSizes.buttonRadius),
                 ),
               ),
             ),
@@ -979,10 +976,7 @@ class _MetricItem extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            tint.withValues(alpha: 0.14),
-            tint.withValues(alpha: 0.06),
-          ],
+          colors: [tint.withValues(alpha: 0.14), tint.withValues(alpha: 0.06)],
         ),
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
         border: Border.all(color: tint.withValues(alpha: 0.22)),
