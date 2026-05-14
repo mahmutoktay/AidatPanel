@@ -55,6 +55,7 @@ dev_dependencies:
   riverpod_generator: ^2.3.0
   freezed: ^2.4.0
   json_serializable: ^6.7.0
+  flutter_launcher_icons: ^0.14.4
 
 # Dependency overrides for compatibility
 dependency_overrides:
@@ -102,3 +103,14 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  assets:
+    - assets/brand/app_logo.png
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/brand/app_logo.png
+  adaptive_icon_background: "#1B3A6B"
+  adaptive_icon_foreground: assets/brand/app_logo.png
+  remove_alpha_ios: true
