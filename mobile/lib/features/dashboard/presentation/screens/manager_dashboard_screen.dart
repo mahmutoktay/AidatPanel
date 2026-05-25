@@ -940,9 +940,7 @@ class _HeroSummaryCard extends StatelessWidget {
                   icon: Icons.warning_amber_rounded,
                   value: overdueCount.toString(),
                   label: context.t.common.overdueStatus,
-                  tint: overdueCount > 0
-                      ? AppColors.error
-                      : AppColors.textSecondary,
+                  tint: AppColors.error,
                 ),
               ),
             ],

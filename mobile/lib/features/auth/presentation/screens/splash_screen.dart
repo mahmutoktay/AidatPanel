@@ -108,7 +108,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         children: [
           Icon(
             Icons.cloud_off_outlined,
-            color: Colors.white.withValues(alpha: 0.85),
+            color: AppColors.error,
             size: 32,
           ),
           const SizedBox(height: AppSizes.spacingM),
@@ -116,7 +116,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             context.t.features.auth.splashConnectionError,
             textAlign: TextAlign.center,
             style: AppTypography.body1.copyWith(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -124,8 +124,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           Text(
             context.t.features.auth.splashConnectionHint,
             textAlign: TextAlign.center,
-            style: AppTypography.body2
-                .copyWith(color: Colors.white.withValues(alpha: 0.85)),
+            style: AppTypography.body2.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSizes.spacingL),
           SizedBox(
@@ -159,9 +160,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 context.go('/login');
               },
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
-                side: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.85),
+                foregroundColor: AppColors.primary,
+                side: const BorderSide(
+                  color: AppColors.primary,
                   width: 1.5,
                 ),
                 shape: RoundedRectangleBorder(
@@ -171,7 +172,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               child: Text(
                 context.t.features.auth.skipToLogin,
                 style: AppTypography.body2.copyWith(
-                  color: Colors.white,
+                  color: AppColors.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -210,56 +211,47 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         await SystemNavigatorBridge.moveAppToBackground();
       },
       child: Scaffold(
+        backgroundColor: AppColors.surface,
         body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primary, AppColors.primaryLight],
-            ),
-          ),
+          color: AppColors.surface,
           child: Center(
             child: FadeTransition(
               opacity: _fadeAnimation,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(
-                      Icons.apartment,
-                      size: 60,
-                      color: AppColors.primary,
-                    ),
+                  Image.asset(
+                    'assets/brand/app_logo.png',
+                    width: 140,
+                    height: 140,
+                    fit: BoxFit.contain,
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSizes.spacingL),
                   Text(
                     context.t.features.auth.appTitle,
                     style: AppTypography.h1.copyWith(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSizes.spacingS),
                   Text(
                     context.t.features.auth.appSubtitle,
-                    style: AppTypography.body1.copyWith(color: Colors.white70),
+                    style: AppTypography.body1.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: AppSizes.spacingXL),
                   if (_hasBootError)
                     _buildRetrySection(context)
                   else
                     const SizedBox(
-                      width: 28,
-                      height: 28,
+                      width: 32,
+                      height: 32,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        valueColor: AlwaysStoppedAnimation(Colors.white70),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(AppColors.primary),
                       ),
                     ),
                 ],

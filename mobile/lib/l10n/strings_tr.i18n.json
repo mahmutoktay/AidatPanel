@@ -70,6 +70,7 @@
     "makePayment": "Ödeme Yap",
     "bills": "Faturalar",
     "support": "Destek",
+    "quickActions": "Hızlı işlemler",
     "residentName": "Sakin Adı",
     "addBuildingNew": "Yeni Bina Ekle",
     "basicInfo": "Temel Bilgiler",
@@ -279,7 +280,7 @@
   },
   "features": {
     "buildings": {
-      "managerPanel": "Yönetici Paneli",
+      "managerPanel": "Yönetici",
       "buildingDetail": "Bina Detayı",
       "addBuilding": "Bina Ekle",
       "newBuilding": "Yeni Bina Ekle",
@@ -356,7 +357,7 @@
       "areYouManager": "Yönetici misiniz? Kaydolun"
     },
     "apartments": {
-      "residentPanel": "Sakin Paneli"
+      "residentPanel": "Sakin"
     }
   },
   "db_context": {

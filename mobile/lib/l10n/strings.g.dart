@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 704 (352 per locale)
+/// Strings: 706 (353 per locale)
 ///
-/// Built on 2026-05-13 at 20:25 UTC
+/// Built on 2026-05-14 at 12:00 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -231,6 +231,7 @@ class _StringsCommonEn {
 	String get makePayment => 'Make Payment';
 	String get bills => 'Bills';
 	String get support => 'Support';
+	String get quickActions => 'Quick actions';
 	String get residentName => 'Resident Name';
 	String get addBuildingNew => 'Add New Building';
 	String get basicInfo => 'Basic Info';
@@ -478,7 +479,7 @@ class _StringsFeaturesBuildingsEn {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	String get managerPanel => 'Manager Panel';
+	String get managerPanel => 'Manager';
 	String get buildingDetail => 'Building Detail';
 	String get addBuilding => 'Add Building';
 	String get newBuilding => 'Add New Building';
@@ -569,7 +570,7 @@ class _StringsFeaturesApartmentsEn {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	String get residentPanel => 'Resident Panel';
+	String get residentPanel => 'Resident';
 }
 
 // Path: <root>
@@ -678,6 +679,7 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get makePayment => 'Ödeme Yap';
 	@override String get bills => 'Faturalar';
 	@override String get support => 'Destek';
+	@override String get quickActions => 'Hızlı işlemler';
 	@override String get residentName => 'Sakin Adı';
 	@override String get addBuildingNew => 'Yeni Bina Ekle';
 	@override String get basicInfo => 'Temel Bilgiler';
@@ -926,7 +928,7 @@ class _StringsFeaturesBuildingsTr implements _StringsFeaturesBuildingsEn {
 	@override final _StringsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String get managerPanel => 'Yönetici Paneli';
+	@override String get managerPanel => 'Yönetici';
 	@override String get buildingDetail => 'Bina Detayı';
 	@override String get addBuilding => 'Bina Ekle';
 	@override String get newBuilding => 'Yeni Bina Ekle';
@@ -1017,7 +1019,7 @@ class _StringsFeaturesApartmentsTr implements _StringsFeaturesApartmentsEn {
 	@override final _StringsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String get residentPanel => 'Sakin Paneli';
+	@override String get residentPanel => 'Sakin';
 }
 
 /// Flat map(s) containing all translations.
@@ -1096,6 +1098,7 @@ extension on Translations {
 			case 'common.makePayment': return 'Make Payment';
 			case 'common.bills': return 'Bills';
 			case 'common.support': return 'Support';
+			case 'common.quickActions': return 'Quick actions';
 			case 'common.residentName': return 'Resident Name';
 			case 'common.addBuildingNew': return 'Add New Building';
 			case 'common.basicInfo': return 'Basic Info';
@@ -1299,7 +1302,7 @@ extension on Translations {
 			case 'validation.passwordLowercaseRequired': return 'Password must contain at least 1 lowercase letter';
 			case 'validation.passwordNumberRequired': return 'Password must contain at least 1 number';
 			case 'validation.passwordSpecialCharRequired': return 'Password must contain at least 1 special character';
-			case 'features.buildings.managerPanel': return 'Manager Panel';
+			case 'features.buildings.managerPanel': return 'Manager';
 			case 'features.buildings.buildingDetail': return 'Building Detail';
 			case 'features.buildings.addBuilding': return 'Add Building';
 			case 'features.buildings.newBuilding': return 'Add New Building';
@@ -1372,7 +1375,7 @@ extension on Translations {
 			case 'features.auth.inviteCodeAndPasswordRequired': return 'Invite code, name and password cannot be empty';
 			case 'features.auth.invalidPhoneNumber': return 'Enter a valid phone number';
 			case 'features.auth.areYouManager': return 'Are you a manager? Register';
-			case 'features.apartments.residentPanel': return 'Resident Panel';
+			case 'features.apartments.residentPanel': return 'Resident';
 			case 'db_context.user_entry': return 'Record: {value}';
 			case 'db_context.building_name': return 'Building: {value}';
 			case 'db_context.apartment_label': return 'Apartment: {value}';
@@ -1455,6 +1458,7 @@ extension on _StringsTr {
 			case 'common.makePayment': return 'Ödeme Yap';
 			case 'common.bills': return 'Faturalar';
 			case 'common.support': return 'Destek';
+			case 'common.quickActions': return 'Hızlı işlemler';
 			case 'common.residentName': return 'Sakin Adı';
 			case 'common.addBuildingNew': return 'Yeni Bina Ekle';
 			case 'common.basicInfo': return 'Temel Bilgiler';
@@ -1659,7 +1663,7 @@ extension on _StringsTr {
 			case 'validation.passwordLowercaseRequired': return 'Şifrede en az 1 küçük harf olmalıdır';
 			case 'validation.passwordNumberRequired': return 'Şifrede en az 1 rakam olmalıdır';
 			case 'validation.passwordSpecialCharRequired': return 'Şifrede en az 1 özel karakter olmalıdır';
-			case 'features.buildings.managerPanel': return 'Yönetici Paneli';
+			case 'features.buildings.managerPanel': return 'Yönetici';
 			case 'features.buildings.buildingDetail': return 'Bina Detayı';
 			case 'features.buildings.addBuilding': return 'Bina Ekle';
 			case 'features.buildings.newBuilding': return 'Yeni Bina Ekle';
@@ -1732,7 +1736,7 @@ extension on _StringsTr {
 			case 'features.auth.inviteCodeAndPasswordRequired': return 'Davet kodu, ad ve şifre boş bırakılamaz';
 			case 'features.auth.invalidPhoneNumber': return 'Geçerli bir telefon numarası giriniz';
 			case 'features.auth.areYouManager': return 'Yönetici misiniz? Kaydolun';
-			case 'features.apartments.residentPanel': return 'Sakin Paneli';
+			case 'features.apartments.residentPanel': return 'Sakin';
 			case 'db_context.user_entry': return 'Kayıt: {value}';
 			case 'db_context.building_name': return 'Bina: {value}';
 			case 'db_context.apartment_label': return 'Daire: {value}';

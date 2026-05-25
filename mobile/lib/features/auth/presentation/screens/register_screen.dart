@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -216,22 +215,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 bottom: false,
                 child: Column(
                   children: [
-                    SizedBox(
-                      height: 160,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            width: 60,
-                            height: 60,
+                            width: 72,
+                            height: 72,
+                            padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.apartment_rounded,
                               color: Colors.white,
-                              size: 32,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.12),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.asset(
+                                'assets/brand/app_logo.png',
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
                           const SizedBox(height: AppSizes.spacingM),
@@ -262,6 +272,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                         child: SingleChildScrollView(
                           padding: AppSizes.screenBodyScrollPadding,
+                          physics: MediaQuery.of(context).viewInsets.bottom > 0
+                              ? const ClampingScrollPhysics()
+                              : const NeverScrollableScrollPhysics(),
                           keyboardDismissBehavior:
                               ScrollViewKeyboardDismissBehavior.onDrag,
                           child: Column(
@@ -545,14 +558,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     ? null
                                     : () => context.go('/login'),
                                 isEnabled: !authState.isLoading,
-                              ),
-                              const SizedBox(height: AppSizes.spacingL),
-                              Text(
-                                '${context.t.features.auth.copyright} v${AppConstants.appVersion}',
-                                textAlign: TextAlign.center,
-                                style: AppTypography.caption.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
                               ),
                             ],
                           ),

@@ -119,29 +119,49 @@ class _ResidentDashboardScreenState
     final overdueCount = dues.where((d) => d.status == DueStatus.overdue).length;
     final paidCount = dues.where((d) => d.status == DueStatus.paid).length;
 
-    return SingleChildScrollView(
-      padding: AppSizes.screenBodyScrollPadding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _ResidentWelcomeCard(
-            userName: userName,
-            pendingCount: pendingCount,
-            overdueCount: overdueCount,
-            paidCount: paidCount,
-          ),
-          const SizedBox(height: AppSizes.spacingL),
-          _buildQuickActionsRow(),
-          const SizedBox(height: AppSizes.spacingL),
-          Text(
-            context.t.common.recentTransactions,
-            style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: AppSizes.spacingM),
-          _buildTransactionHistory(),
-        ],
+    return RefreshIndicator(
+      onRefresh: _refreshHomeTab,
+      color: AppColors.primary,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: AppSizes.screenBodyScrollPadding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _ResidentHeroSummaryCard(
+              userName: userName,
+              pendingCount: pendingCount,
+              overdueCount: overdueCount,
+              paidCount: paidCount,
+            ),
+            const SizedBox(height: AppSizes.spacingL),
+            Text(
+              context.t.common.quickActions,
+              style: AppTypography.h3.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: AppSizes.spacingM),
+            _buildQuickActionsRow(),
+            const SizedBox(height: AppSizes.spacingL),
+            Text(
+              context.t.common.recentTransactions,
+              style: AppTypography.h3.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: AppSizes.spacingM),
+            _buildTransactionHistory(),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _refreshHomeTab() async {
+    await ref.read(duesNotifierProvider.notifier).loadMyDues();
   }
 
   Widget _buildDuesTab() {
@@ -163,63 +183,32 @@ class _ResidentDashboardScreenState
 
   Widget _buildQuickActionsRow() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: _buildActionButton(
+          child: _ResidentQuickActionTile(
             icon: Icons.payment_outlined,
             label: context.t.common.makePayment,
             onTap: () {},
           ),
         ),
-        const SizedBox(width: AppSizes.spacingM),
+        const SizedBox(width: AppSizes.spacingS),
         Expanded(
-          child: _buildActionButton(
+          child: _ResidentQuickActionTile(
             icon: Icons.receipt_outlined,
             label: context.t.common.bills,
             onTap: () {},
           ),
         ),
-        const SizedBox(width: AppSizes.spacingM),
+        const SizedBox(width: AppSizes.spacingS),
         Expanded(
-          child: _buildActionButton(
+          child: _ResidentQuickActionTile(
             icon: Icons.help_outline,
             label: context.t.common.support,
             onTap: () {},
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppSizes.spacingM),
-        decoration: BoxDecoration(
-          color: AppColors.primaryLight.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: AppColors.primary, size: 28),
-            const SizedBox(height: AppSizes.spacingS),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.caption.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -242,8 +231,10 @@ class _ResidentDashboardScreenState
               padding: const EdgeInsets.all(AppSizes.spacingM),
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.borderColor),
+                borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.18),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -293,13 +284,14 @@ class _ResidentDashboardScreenState
   }
 }
 
-class _ResidentWelcomeCard extends StatelessWidget {
+/// Yönetici ana sayfadaki `_HeroSummaryCard` + `_MetricItem` ile aynı görsel dil.
+class _ResidentHeroSummaryCard extends StatelessWidget {
   final String userName;
   final int pendingCount;
   final int overdueCount;
   final int paidCount;
 
-  const _ResidentWelcomeCard({
+  const _ResidentHeroSummaryCard({
     required this.userName,
     required this.pendingCount,
     required this.overdueCount,
@@ -308,71 +300,162 @@ class _ResidentWelcomeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(AppSizes.spacingM),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.primaryLight],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.20),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.waving_hand_outlined,
+                  color: Colors.white,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: AppSizes.spacingM),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.t.common.welcome,
+                      style: AppTypography.caption.copyWith(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      userName,
+                      style: AppTypography.h3.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSizes.spacingM),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _ResidentMetricItem(
+                  icon: Icons.pending_outlined,
+                  value: pendingCount.toString(),
+                  label: context.t.common.pendingStatus,
+                  tint: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: AppSizes.spacingS),
+              Expanded(
+                child: _ResidentMetricItem(
+                  icon: Icons.warning_amber_rounded,
+                  value: overdueCount.toString(),
+                  label: context.t.common.overdueStatus,
+                  tint: AppColors.error,
+                ),
+              ),
+              const SizedBox(width: AppSizes.spacingS),
+              Expanded(
+                child: _ResidentMetricItem(
+                  icon: Icons.check_circle_outline,
+                  value: paidCount.toString(),
+                  label: context.t.common.paidStatus,
+                  tint: AppColors.success,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ResidentMetricItem extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+  final Color tint;
+
+  const _ResidentMetricItem({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.tint,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.spacingM,
-        vertical: AppSizes.spacingL,
-      ),
+      padding: const EdgeInsets.all(AppSizes.spacingS),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
+          colors: [tint.withValues(alpha: 0.14), tint.withValues(alpha: 0.06)],
         ),
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        border: Border.all(color: tint.withValues(alpha: 0.22)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: tint.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: tint.withValues(alpha: 0.22)),
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, color: tint, size: 16),
+          ),
+          const SizedBox(height: AppSizes.spacingS),
           Text(
-            '${context.t.common.welcome}, $userName',
+            value,
             style: AppTypography.h3.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: AppSizes.spacingXS),
+          const SizedBox(height: 2),
           Text(
-            context.t.features.apartments.residentPanel,
-            style: AppTypography.body2.copyWith(
-              color: Colors.white.withValues(alpha: 0.85),
+            label,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
             ),
-          ),
-          const SizedBox(height: AppSizes.spacingL),
-          Row(
-            children: [
-              _WelcomeMetric(
-                icon: Icons.pending_outlined,
-                value: pendingCount.toString(),
-                label: context.t.common.pendingStatus,
-              ),
-              Container(
-                width: 1,
-                height: 32,
-                margin: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.spacingL,
-                ),
-                color: Colors.white.withValues(alpha: 0.3),
-              ),
-              _WelcomeMetric(
-                icon: Icons.warning_amber_rounded,
-                value: overdueCount.toString(),
-                label: context.t.common.overdueStatus,
-              ),
-              Container(
-                width: 1,
-                height: 32,
-                margin: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.spacingL,
-                ),
-                color: Colors.white.withValues(alpha: 0.3),
-              ),
-              _WelcomeMetric(
-                icon: Icons.check_circle_outline,
-                value: paidCount.toString(),
-                label: context.t.common.paidStatus,
-              ),
-            ],
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -380,38 +463,77 @@ class _ResidentWelcomeCard extends StatelessWidget {
   }
 }
 
-class _WelcomeMetric extends StatelessWidget {
+class _ResidentQuickActionTile extends StatelessWidget {
   final IconData icon;
-  final String value;
   final String label;
+  final VoidCallback onTap;
 
-  const _WelcomeMetric({
+  const _ResidentQuickActionTile({
     required this.icon,
-    required this.value,
     required this.label,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 18),
-        const SizedBox(height: AppSizes.spacingXS),
-        Text(
-          value,
-          style: AppTypography.h3.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
+    const tint = AppColors.primary;
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [tint.withValues(alpha: 0.14), tint.withValues(alpha: 0.06)],
+        ),
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        border: Border.all(color: tint.withValues(alpha: 0.22)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppSizes.minTouchTarget,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.spacingS,
+                vertical: AppSizes.spacingS,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: tint.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: tint.withValues(alpha: 0.22)),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(icon, color: tint, size: 14),
+                  ),
+                  const SizedBox(height: AppSizes.spacingXS),
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: Colors.white.withValues(alpha: 0.75),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

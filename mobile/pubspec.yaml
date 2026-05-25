@@ -5,7 +5,7 @@ publish_to: 'none'
 # --- Google Play (sürüm kodu = + işaretinden sonraki sayı) ---
 # Ezberleme: Her yeni .aab öncesi bu sayıyı 1 artır. Play’deki en büyük sürüm
 # kodundan küçük veya eşit olursa yükleme reddedilir.
-version: 0.1.2+1778674159
+version: 0.1.2+1778674160
 
 environment:
   sdk: ^3.11.5
@@ -111,6 +111,7 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: assets/brand/app_logo.png
-  adaptive_icon_background: "#1B3A6B"
+  # Marka: beyaz zemin + logo (adaptive arka plan mavi olursa logo bozulur).
+  adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: assets/brand/app_logo.png
   remove_alpha_ios: true

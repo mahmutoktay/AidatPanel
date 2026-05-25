@@ -71,6 +71,7 @@
     "makePayment": "Make Payment",
     "bills": "Bills",
     "support": "Support",
+    "quickActions": "Quick actions",
     "residentName": "Resident Name",
     "addBuildingNew": "Add New Building",
     "basicInfo": "Basic Info",
@@ -279,7 +280,7 @@
   },
   "features": {
     "buildings": {
-      "managerPanel": "Manager Panel",
+      "managerPanel": "Manager",
       "buildingDetail": "Building Detail",
       "addBuilding": "Add Building",
       "newBuilding": "Add New Building",
@@ -356,7 +357,7 @@
       "areYouManager": "Are you a manager? Register"
     },
     "apartments": {
-      "residentPanel": "Resident Panel"
+      "residentPanel": "Resident"
     }
   },
   "db_context": {
