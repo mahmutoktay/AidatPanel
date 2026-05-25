@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/notifications/fcm_sync.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -187,6 +188,11 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     final authState = ref.watch(authStateProvider);
 
     ref.listen(authStateProvider, (previous, next) {
+      if (next.isAuthenticated &&
+          next.user != null &&
+          !(previous?.isAuthenticated ?? false)) {
+        syncFcmAfterAuth(ref);
+      }
       if (next.error != null && next.error != previous?.error) {
         ref
             .read(toastProvider.notifier)

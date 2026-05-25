@@ -8,11 +8,13 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
+import '../../../../shared/widgets/notification_icon_button.dart';
 import '../../../../shared/widgets/settings_tab.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../../dues/presentation/screens/resident_dues_tab.dart';
+import '../../../tickets/presentation/screens/resident_tickets_tab.dart';
 
 class ResidentDashboardScreen extends ConsumerStatefulWidget {
   const ResidentDashboardScreen({super.key});
@@ -39,6 +41,10 @@ class _ResidentDashboardScreenState
     );
     _tabController.addListener(() {
       ref.read(residentTabIndexProvider.notifier).state = _tabController.index;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      prefetchNotifications(ref);
     });
   }
 
@@ -68,6 +74,7 @@ class _ResidentDashboardScreenState
         appBar: AppBar(
           title: Text(context.t.features.apartments.residentPanel),
           centerTitle: true,
+          actions: const [NotificationIconButton()],
         ),
         body: TabBarView(
           controller: _tabController,
@@ -169,12 +176,7 @@ class _ResidentDashboardScreenState
   }
 
   Widget _buildIssuesTab() {
-    return Center(
-      child: Text(
-        context.t.common.issuesTab,
-        style: AppTypography.h2.copyWith(color: AppColors.textPrimary),
-      ),
-    );
+    return const ResidentTicketsTab();
   }
 
   Widget _buildSettingsTab() {
@@ -205,7 +207,10 @@ class _ResidentDashboardScreenState
           child: _ResidentQuickActionTile(
             icon: Icons.help_outline,
             label: context.t.common.support,
-            onTap: () {},
+            onTap: () {
+              ref.read(residentTabIndexProvider.notifier).state = 2;
+              _tabController.animateTo(2);
+            },
           ),
         ),
       ],
