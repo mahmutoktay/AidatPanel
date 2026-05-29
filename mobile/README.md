@@ -26,13 +26,13 @@ flutter run -t lib/main_dev.dart
 
 1. `android/upload-keystore.jks` dosyan `android/` klasöründe olsun (veya `key.properties` içindeki `storeFile` yolunu ona göre düzenle).
 2. `android/key.properties.example` dosyasını `android/key.properties` olarak kopyala; şifreleri ve `storeFile` yolunu doldur. Bu dosya `.gitignore`’dadır.
-3. `flutter build appbundle --release` → `build/app/outputs/bundle/release/app-release.aab` dosyasını Play Console’a yükle.
+3. `flutter build appbundle --release` → `build/app/outputs/bundle/release/app-release.aab` → Play Console’a yükle. **Her AAB öncesi** `pubspec.yaml` içinde `+` sonrası sürüm kodunu 1 artır (Play reddeder aksi halde).
 
 `key.properties` yoksa release derlemesi geçici olarak debug anahtarıyla imzalanır; mağazaya **yalnızca** `key.properties` + keystore ile üretilen AAB gönder.
 
 ## Proje belgeleri
 
-API sözleşmesi, fazlar ve mobil–backend eşlemesi repoda `resources/` altında (ör. `AIDATPANEL.md`, `FAZ_DURUMU.md`, `MOBILE-TO-BACKEND.md`). Bu README yalnızca mobil pakete giriş içindir; ayrıntılı kurallar ve checklist orada güncellenir.
+API sözleşmesi ve fazlar: `resources/AIDATPANEL.md`, `resources/yol-haritası/FAZ_DURUMU.md`. Backend API: `origin/backend/yedek` → `API/FLUTTER-BACKEND.md`. Bu README yalnızca mobil pakete giriş içindir.
 
 ---
 

@@ -4,7 +4,7 @@
 > **Şimdiki görev:** Bugüne kadar yapılan mobil uygulama için **performans testi**, **güvenlik taraması** ve **iyileştirme**.  
 > Bu dosya **isteğe bağlıdır** — sprint bitince veya gerekmeyince **silinebilir**.
 
-**Referans:** `resources/FAZ_DURUMU.md` (MEVCUT DURUM), `resources/MOBILE-TO-BACKEND.md`, `CLAUDE.md`.
+**Referans:** `resources/yol-haritası/FAZ_DURUMU.md` (MEVCUT DURUM), `CLAUDE.md`, `origin/backend/yedek` → `API/FLUTTER-BACKEND.md`.
 
 ---
 

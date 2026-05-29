@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -50,7 +51,7 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
     final t = context.t.features.tickets;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
         title: Text(t.detailTitle),
         centerTitle: true,
@@ -64,7 +65,7 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  e is ApiException ? e.message : t.loadError,
+                  userFacingError(e),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSizes.spacingM),
@@ -153,7 +154,7 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
     } catch (e) {
       if (mounted) {
         ref.read(toastProvider.notifier).show(
-              e.toString(),
+              userFacingError(e),
               type: ToastType.error,
             );
       }
@@ -186,7 +187,7 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
     } catch (e) {
       if (mounted) {
         ref.read(toastProvider.notifier).show(
-              e.toString(),
+              userFacingError(e),
               type: ToastType.error,
             );
       }
@@ -496,7 +497,7 @@ class _ManagerActions extends StatelessWidget {
             decoration: InputDecoration(
               hintText: noteEnabled ? t.managerNote : t.noteDisabledClosed,
               filled: true,
-              fillColor: AppColors.background,
+              fillColor: AppColors.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
               ),

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/ticket_remote_datasource.dart';
 import '../../data/repositories/ticket_repository_impl.dart';
@@ -59,7 +59,7 @@ class TicketsNotifier extends StateNotifier<TicketsState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: e is ApiException ? e.message : e.toString(),
+        error: userFacingError(e),
       );
     }
   }
@@ -73,7 +73,7 @@ class TicketsNotifier extends StateNotifier<TicketsState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: e is ApiException ? e.message : e.toString(),
+        error: userFacingError(e),
       );
     }
   }
@@ -100,7 +100,7 @@ class TicketsNotifier extends StateNotifier<TicketsState> {
       return true;
     } catch (e) {
       state = state.copyWith(
-        error: e is ApiException ? e.message : e.toString(),
+        error: userFacingError(e),
       );
       return false;
     } finally {

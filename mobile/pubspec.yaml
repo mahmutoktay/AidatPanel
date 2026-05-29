@@ -2,10 +2,8 @@ name: aidatpanel
 description: "AidatPanel - Türk apartman ve site yöneticileri için mobil aidat yönetim platformu."
 publish_to: 'none'
 
-# --- Google Play (sürüm kodu = + işaretinden sonraki sayı) ---
-# Ezberleme: Her yeni .aab öncesi bu sayıyı 1 artır. Play’deki en büyük sürüm
-# kodundan küçük veya eşit olursa yükleme reddedilir.
-version: 0.1.2+1778674160
+# --- Google Play (sürüm kodu = + sonrası; her AAB öncesi +1 — CLAUDE.md) ---
+version: 0.1.3+1778674162
 
 environment:
   sdk: ^3.11.5
@@ -45,6 +43,7 @@ dependencies:
   freezed_annotation: ^2.4.0
   share_plus: ^12.0.2
   package_info_plus: ^8.0.0
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

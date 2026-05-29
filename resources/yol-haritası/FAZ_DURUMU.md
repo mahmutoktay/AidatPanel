@@ -1,26 +1,38 @@
-# AidatPanel — Canlı Faz Durumu
+# AidatPanel — Yol Haritası ve Faz Durumu
 
-**Bu dosya, faz geçişlerinin tek yetkili kaynağıdır.**  
-**AI asistanlar bu dosyayı her oturumun başında okur ve yalnızca AKTİF fazda çalışır.**
+**Tek kaynak:** Tüm fazlar, checklist, onaylar, eksikler ve mimari özeti bu dosyada.  
+**Güncelleme:** 2026-05-29 · **Branch:** `mobile/app` · **Mobil:** Furkan
+
+**AI asistanlar** her oturumda bu dosyayı okur; yalnızca **AKTİF** fazda kod yazar (`CLAUDE.md` faz kapısı).
 
 ---
 
-## MEVCUT DURUM
+## MEVCUT DURUM (özet)
+
+| Faz | Konu | Durum | Hedef | ONAY |
+|-----|------|-------|-------|------|
+| 0 | Foundation | ✅ Tamam | — | ✅ |
+| 1 | Aidat + Dashboard + Tur 5 | ✅ Tamam | 2026-05-15 | ✅ 2026-05-10 |
+| 2 | Bildirimler + Giderler | ✅ Tamam | 2026-06-05 | ✅ 2026-05-29 |
+| 3 | Talepler (Tickets) | ✅ Tamam | — | ✅ 2026-05-29 |
+| 3 | Reports (PDF) | ⏳ Backend yok | 2026-06-19 | — |
+| — | **Dekont / IBAN** (ayrı paket) | ⏳ Mobil yok | — | — |
+| 4 | Profil + Abonelik | 🔒 Kilitli | 2026-07-03 | — |
+| 5 | Test + sertleştirme | 🔒 Kilitli | 2026-07-10 | — |
+| 6 | v1.0.0 Lansman | 🔒 Kilitli | 2026-07-14 | — |
 
 ```
-▶ FAZ 1 — Tur 5: Backend uyum ✅ TAMAMLANDI
-  Hedef: ~2026-05-15  ✅ Erken bitti
-  Checklist: 6/6 [x] — ONAY: Furkan ✅ (2026-05-12)
-▶ Sıradaki: FAZ 2 — Notifications + Expenses
-  Durum: ⏸ BAŞLATILMADI — backend HTTP uçları yok (`MOBILE-TO-BACKEND.md` §0.1)
+▶ AKTİF ÇALIŞMA: FAZ 3 Reports veya Dekont/IBAN (ürün kararı)
+▶ FAZ 0–2 + FAZ 3 Tickets: kapalı
 ```
 
-**AI / geliştirici notu:** FAZ 1 kapalı. `features/notifications` ve `features/expenses` üzerinde iş — **FAZ 2 resmen başlatılıp** backend karşılığı hazır olduğunda (veya proje kuralında Furkan’ın açıkça izin verdiği hazırlık). Şu an blokaj: Notifications + Expenses API.
+**Sıradaki işler (checklist `[ ]`):**
+- [ ] Reports API + mobil ekran + PDF
+- [ ] Dekont/IBAN mobil (`backend/yedek` + `API/FLUTTER-DEKONT-IMPLEMENTATION.md`)
+- [ ] Gider makbuz **dosya** upload (`POST /expenses/{id}/proof`) — backend yok; link testi sonraya
+- [ ] FAZ 4–6 (profil, abonelik, test, store)
 
-> Mobile FAZ 1 koru (Tur 1-4) tamamlandı (ONAY: Furkan ✅, 2026-05-10).
-> Backend `backend/yedek` ile §3 P0–P2 talepleri karşılandı; Tur 5’te UI bağlandı (**6/6**, **ONAY: Furkan ✅**, 2026-05-12). Detay: `resources/MOBILE-TO-BACKEND.md` §10.
->
-> **FAZ 2** (Notifications + Expenses): backend HTTP uçları henüz yok — mobil işler bu uçlar açılınca başlar (`MOBILE-TO-BACKEND.md` §0.1).
+**Referanslar:** API → `origin/backend/yedek` · `API/FLUTTER-BACKEND.md` · Dev → `flutter run -t lib/main_dev.dart`
 
 ---
 
@@ -31,8 +43,10 @@
 
 ### Auth
 - [x] Login (email + şifre, JWT token alma)
-- [x] Register (yönetici kaydı)
-- [x] Join (davet koduyla sakin kaydı)
+- [x] SignUp — birleşik kayıt (`sign_up_screen.dart`: yönetici + sakin davet kodu; `/sign-up`, `/register`, `/join`)
+- [x] Register (yönetici kaydı) — SignUp ile birleşik
+- [x] Join (davet koduyla sakin kaydı) — SignUp ile birleşik
+- [x] Şifremi unuttum + sıfırlama (`forgot_password_screen`, `reset_password_screen`)
 - [x] Token refresh (otomatik, 401'de devreye girer)
 - [x] Logout (token temizleme)
 - [x] Splash screen (role-based routing: manager / resident)
@@ -71,6 +85,7 @@
 - [x] GoRouter 13 (auth guard, role-based redirect)
 - [x] DioClient (JWT interceptor, refresh logic)
 - [x] 76+ API endpoint tanımlı (api_constants.dart)
+- [x] API Base URL: `https://api.aidatpanel.com/api/v1` (dart-define ile override)
 
 ---
 
@@ -159,7 +174,7 @@ Manuel test sırasında "Bina Oluştur" butonuna art arda basılınca aynı bina
 - [x] `authRepositoryProvider` `Provider<AuthRepository>` olarak interface tipinde (eskiden `Provider<AuthRepositoryImpl>` örtük tip — mock override edilemiyordu). Mock ProviderScope.override için gerekli.
 
 #### Tur 5 — Backend uyum aksiyon listesi ✅ TAMAMLANDI (ONAY: Furkan ✅)
-Backend `backend/yedek` (referans `8cc2152`) ile §3 P0–P2 uçları hazır; mobile **6/6** Tur 5 maddesini UI’ya bağladı (sakin çıkar, bina formu, dues filtre, şifre, hesap kapat, şifremi unuttum). Detay: `resources/MOBILE-TO-BACKEND.md` §10.
+Backend `backend/yedek` (referans `8cc2152`) ile §3 P0–P2 uçları hazır; mobile **6/6** Tur 5 maddesini UI’ya bağladı (sakin çıkar, bina formu, dues filtre, şifre, hesap kapat, şifremi unuttum).
 
 - [x] **1 — Sakin çıkarma UI** (`DELETE /apartments/:id/resident`): `BuildingResidentsScreen` daire kart menüsüne "Sakini Çıkar" + AlertDialog onayı + apartments invalidate. Backend 403/404 mesajları insanlaştırıldı. **TAMAMLANDI** — `RemoveResidentDialog` widget'ı + `ApartmentsNotifier.removeResidentFromApartment` + dev mock. ~1.5 sa
 - [x] **2 — Bina formu uyumu** (`POST /buildings`): `AddBuildingScreen`'de `totalFloors` (1-200) + `apartmentsPerFloor` (1-50) form-içi range validator + range hint; `_seedApartmentsIfNeeded` fallback loop'u kaldırıldı; `MockBuildingRepository.createBuilding` artık backend gibi tek transaction'da apartments seed ediyor. **TAMAMLANDI** ~2 sa
@@ -177,62 +192,77 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 
 ---
 
-## ⏸ FAZ 2 — Notifications + Expenses (BACKEND BEKLEMEDE)
+## ✅ FAZ 2 — Notifications + Expenses (TAMAMLANDI)
 
-**Durum:** BEKLEMEDE — backend uçları açılana kadar başlatılamıyor
-**Hedef:** ~2026-06-05
-**FAZ 1 onay:** ✅ alındı, ön koşul tamam
+**Durum:** TAMAMLANDI ✅ — bildirimler + gider CRUD + özet + `receiptUrl` (E2E 2026-05-29)  
+**Tamamlanma:** 2026-05-29  
+**Hedef:** ~2026-06-05  
+**FAZ 1 onay:** ✅ alındı
 
-> ⚠️ **BACKEND BAĞIMLILIK UYARISI** (FLUTTER-BACKEND.md §12)
-> Bu fazın çoğu görevi backend'in henüz açmadığı uçlara ihtiyaç duyar.
-> Faz 2'yi başlatmadan önce backend ekibinden açılan uçların listesi alınmalıdır.
-> **Talep dosyası:** `resources/MOBILE-TO-BACKEND.md` (mobile→backend rapor).
+> **Dev test:** `flutter run -t lib/main_dev.dart` (turuncu DEV banner, mock veri)  
+> **API sözleşmesi:** `origin/backend/yedek` → `API/FLUTTER-BACKEND.md`
 
-### Notifications (features/notifications/)
-| Görev | Backend Durumu |
-|-------|----------------|
-| `PUT /me/fcm-token` (FCM token kayıt) | ✅ canlı (Belge §4) |
-| `GET /notifications` (bildirim listesi) | ❌ **YOK** — backend açacak |
-| `PATCH /notifications/{id}/read` (okundu işaretleme) | ❌ **YOK** — backend açacak |
+### Backend bağımlılık
 
-- [ ] **🟢 backend hazır** — NotificationEntity tanımı (FCM payload'a göre)
-- [ ] **🟢 backend hazır** — `PUT /me/fcm-token` datasource + provider; Firebase Messaging onTokenRefresh'i bağla
-- [ ] **🟢 backend hazır** — Push notification handler (foreground + background) ve deep-link routing
-- [ ] **⚠️ backend bekliyor** — NotificationsRemoteDataSource (GET /notifications, PATCH /notifications/{id}/read)
-- [ ] **⚠️ backend bekliyor** — Bildirim listesi ekranı
+| Uç | Durum |
+|----|--------|
+| `PUT /me/fcm-token` | ✅ canlı |
+| `GET /notifications`, `PATCH read`, `read-all` | ✅ canlı E2E (2026-05-29) |
+| Gider CRUD + `receiptUrl` (HTTPS) | ✅ canlı E2E (2026-05-29) |
+| `POST /expenses/{id}/proof` (dosya) | ⏳ backend yok — mobil 404’te uyarı; `main_dev` mock upload |
 
-### Expenses (features/expenses/)
-| Görev | Backend Durumu |
-|-------|----------------|
-| Tüm Expense uçları (`GET/POST /buildings/{id}/expenses`, `POST /expenses/{id}/proof`) | ❌ **YOK** — backend açacak |
+### Notifications (`features/notifications/`)
 
-- [ ] **⚠️ backend bekliyor** — ExpenseEntity tanımı
-- [ ] **⚠️ backend bekliyor** — ExpensesRemoteDataSource
-- [ ] **⚠️ backend bekliyor** — Gider listesi ekranı
-- [ ] **⚠️ backend bekliyor** — Gider ekleme formu (kategori + tutar + açıklama)
-- [ ] **⚠️ backend bekliyor** — Makbuz fotoğrafı yükleme (multipart)
+- [x] NotificationEntity, model, datasource, **repository**, notifier
+- [x] Bildirim listesi, detail sheet, duyuru sheet
+- [x] FCM + `notification_payload` deep-link
+- [x] Dev mock
+- [x] **Backend API** — `GET/PATCH /notifications` (`origin/backend/yedek`, `notificationRoutes.js`)
+- [x] **Canlı E2E** — `main.dart` + gerçek API (2026-05-29)
+- [x] **FCM** — Push / deep-link (canlı test, 2026-05-29)
+
+### Expenses (`features/expenses/`)
+
+- [x] ExpenseEntity, model, datasource, **repository**, notifier
+- [x] Gider listesi + form (kategori, tutar, tarih, not)
+- [x] Makbuz UI + multipart **upload altyapısı** (API açılınca bağlı)
+- [x] Dev mock (`uploadReceipt`)
+- [x] **Canlı E2E** — Gider listesi, ekle, düzenle, sil, ay/yıl filtresi + özet (2026-05-29)
+- [x] **Makbuz `receiptUrl`** — HTTPS URL ile create/update (backend sözleşmesi)
+- [x] **Makbuz fotoğrafı** — `main_dev` mock upload; canlıda 404 → kullanıcıya bilgi toast’ı
+
+### FAZ 2 çıkış kapısı
+
+- [x] Bildirimler — canlı backend E2E
+- [x] Giderler — canlı CRUD + receiptUrl E2E
+- [x] `ONAY: Furkan ✅` (2026-05-29)
 
 ---
 
-## 🔒 FAZ 3 — Tickets + Reports
+## 🛠 FAZ 3 — Tickets + Reports
 
-**Durum:** KİLİTLİ — Faz 2 tamamlanmadan açılamaz  
-**Hedef:** ~2026-06-19
+**Durum:** Talepler (Tickets) ✅ tamam (E2E 2026-05-29) | Reports ⏳ backend bekliyor  
+**ONAY (Tickets):** Furkan ✅ (2026-05-29)
 
-> ⚠️ **TAM BACKEND BAĞIMLILIĞI** (FLUTTER-BACKEND.md §12)
-> Bu fazın **TAMAMI** backend'in henüz açmadığı uçlara dayanır.
-> Backend tickets/reports modüllerini canlıya almadan Faz 3 AKTİF edilemez.
+> **Tickets:** `origin/backend/yedek` (`ticketRoutes`, `me/tickets`, `buildings/:id/tickets`) + mobil `features/tickets/` — canlı E2E tamam.  
+> **Reports:** `GET /buildings/:id/reports` + PDF henüz yok.
 
 ### Tickets (features/tickets/)
 | Görev | Backend Durumu |
 |-------|----------------|
-| Tüm Ticket uçları | ❌ **YOK** — backend açacak |
+| Tüm Ticket uçları | ✅ `backend/yedek` + canlı E2E (2026-05-29) |
 
-- [ ] **⚠️ backend bekliyor** — TicketEntity + TicketUpdateEntity tanımları
-- [ ] **⚠️ backend bekliyor** — TicketsRemoteDataSource
-- [ ] **⚠️ backend bekliyor** — Ticket listesi ekranı (yönetici + sakin)
-- [ ] **⚠️ backend bekliyor** — Ticket detay + güncelleme ekranı
-- [ ] **⚠️ backend bekliyor** — Ticket oluşturma formu
+- [x] TicketEntity + TicketUpdateEntity tanımları
+- [x] TicketsRemoteDataSource + repository
+- [x] Ticket listesi ekranı (yönetici + sakin)
+- [x] Ticket detay + güncelleme ekranı
+- [x] Ticket oluşturma formu
+- [x] Canlı E2E (2026-05-29)
+
+### FAZ 3 (Tickets) çıkış kapısı
+
+- [x] Talep modülü canlı E2E
+- [x] `ONAY: Furkan ✅` (2026-05-29)
 
 ### Reports (features/reports/)
 | Görev | Backend Durumu |
@@ -306,10 +336,71 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 
 ---
 
+## Teknik borç ve bilinen eksikler (backlog)
+
+| # | Konu | Durum | Not |
+|---|------|-------|-----|
+| 1 | `ListView.children` → `builder` | ✅ | FAZ 1 |
+| 2 | Certificate pinning | ⏳ | FAZ 5 — `dio_client.dart` altyapı |
+| 3 | Build flavors (dev/staging/prod) | ⏳ | FAZ 5 |
+| 4 | Test coverage %30+ | ⏳ | FAZ 5 — smoke + birim testler başladı |
+| 5 | Pagination (büyük listeler) | ⏳ | FAZ 5 |
+| 6 | Bina kartı dolu daire `0/N` | ⏳ | API’de `occupiedApartments` yok |
+| 7 | Sakin aidat filtre UI | ⏳ | API var, UI yok |
+| 8 | `PUT /me/language` sunucuya yazma | ⏳ | FAZ 4 |
+| 9 | Profil `GET/PUT /me` ekranı | ⏳ | FAZ 4 |
+| 10 | Gider makbuz dosya `/proof` | ⏳ | Backend yok; `receiptUrl` HTTPS var |
+| 11 | Dekont + tahsilat IBAN mobil | ⏳ | Backend `backend/yedek` hazır |
+
+---
+
+## Tasarım kısıtları (ZORUNLU — 50+ yaş)
+
+- Minimum font: **16sp** (`AppTypography`)
+- Minimum dokunma: **48×48dp**
+- **Bottom Navigation** (hamburger yasak)
+- Hata mesajları: sade Türkçe, teknik terim yok
+- Loading: her async işte görünür gösterge
+- Animasyon: max **200ms**, `Curves.easeInOut`
+
+Detay: `resources/tasarım/TASARIM_KILAVUZU.md`
+
+---
+
+## Mimari özeti (features)
+
+```
+mobile/lib/features/
+├── auth/           ✅
+├── buildings/      ✅
+├── apartments/     ✅
+├── dues/           ✅
+├── dashboard/      ✅
+├── notifications/  ✅
+├── expenses/       ✅
+├── tickets/        ✅
+├── reports/        ⏳ (boş / backend bekliyor)
+├── profile/        🔶 (şifre/KVKK FAZ 1’de; tam profil FAZ 4)
+└── subscription/   ⏳ FAZ 4
+```
+
+Clean Architecture: `domain` → `data` → `presentation` · Riverpod StateNotifier · GoRouter
+
+---
+
+## Çalıştırma modları
+
+| Mod | Komut |
+|-----|--------|
+| Canlı API | `flutter run` (`main.dart`) |
+| Dev mock | `flutter run -t lib/main_dev.dart` (turuncu **DEV** banner) |
+
+---
+
 ## Nasıl Kullanılır
 
-1. **AI asistan** her oturumda bu dosyayı okur; **MEVCUT DURUM** kutusuna ve ilgili faz başlığına bakar.
-2. **Sadece izin verilen fazın** görevlerini yapar; **kilitli** fazlara dokunmaz (`CLAUDE.md` faz kapısı).
-3. Bir fazın tüm checklist `[x]` olunca **Furkan** onay yazar: `ONAY: Furkan ✅`
-4. **Ara durum:** Sonraki faz (ör. FAZ 2) **backend veya başka ön koşul** yüzünden başlatılamıyorsa, üst kutuda **⏸** ile gösterilir; AI yeni feature klasörlerine **proje kuralına göre** dokunmaz.
-5. Ön koşullar sağlanınca Furkan sıradaki fazı iş akışında başlatır; AI yeni aktif faz checklist’ine göre çalışır.
+1. **AI asistan** her oturumda bu dosyayı okur; **MEVCUT DURUM** tablosuna ve **sıradaki işler** listesine bakar.
+2. **Sadece izin verilen / aktif** fazın görevlerini yapar; **kilitli** fazlara dokunmaz (`CLAUDE.md`).
+3. Bir fazın tüm checklist `[x]` olunca onay: `ONAY: Furkan ✅` (tarih ile).
+4. Görev bitince bu dosyada ilgili `[ ]` → `[x]` güncelle; üst tabloyu senkron tut.
+5. API sözleşmesi: `origin/backend/yedek` → `API/FLUTTER-BACKEND.md` (backend kaynağı).

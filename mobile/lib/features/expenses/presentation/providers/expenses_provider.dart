@@ -1,14 +1,26 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/expense_remote_datasource.dart';
-import '../../data/models/expense_model.dart';
+import '../../data/repositories/expense_repository_impl.dart';
 import '../../domain/entities/expense_entity.dart';
+import '../../domain/repositories/expense_repository.dart';
 
-final expenseDataSourceProvider = Provider<ExpenseDataSource>((ref) {
+final expenseRemoteDataSourceProvider = Provider<ExpenseDataSource>((ref) {
   return ExpenseRemoteDataSource(dioClient: ref.watch(dioClientProvider));
 });
+
+final expenseRepositoryProvider = Provider<ExpenseRepository>((ref) {
+  return ExpenseRepositoryImpl(
+    remote: ref.watch(expenseRemoteDataSourceProvider),
+  );
+});
+
+/// Geriye uyumluluk — dev mock override bu provider üzerinden çalışır.
+@Deprecated('Use expenseRemoteDataSourceProvider')
+final expenseDataSourceProvider = expenseRemoteDataSourceProvider;
 
 class ExpensesState {
   final bool isLoading;
@@ -53,11 +65,9 @@ class ExpensesState {
 }
 
 class ExpensesNotifier extends StateNotifier<ExpensesState> {
-  final ExpenseDataSource _remote;
+  final ExpenseRepository _repository;
 
-  ExpensesNotifier(this._remote) : super(const ExpensesState());
-
-  String _err(Object e) => e is ApiException ? e.message : e.toString();
+  ExpensesNotifier(this._repository) : super(const ExpensesState());
 
   Future<void> load(
     String buildingId, {
@@ -72,20 +82,18 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
       year: year,
     );
     try {
-      final models = await _remote.getBuildingExpenses(
+      final expenses = await _repository.getBuildingExpenses(
         buildingId,
         month: month,
         year: year,
       );
-      final expenses = models.map((m) => m.toEntity()).toList();
       ExpenseSummaryEntity? summary;
       if (month != null && year != null) {
-        final raw = await _remote.getSummary(
+        summary = await _repository.getSummary(
           buildingId,
           month: month,
           year: year,
         );
-        summary = _parseSummary(raw);
       }
       state = state.copyWith(
         isLoading: false,
@@ -93,7 +101,10 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
         summary: summary,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: _err(e));
+      state = state.copyWith(
+        isLoading: false,
+        error: userFacingError(e),
+      );
     }
   }
 
@@ -103,7 +114,8 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
     await load(id, month: state.month, year: state.year);
   }
 
-  Future<bool> create({
+  Future<({bool success, String? receiptWarning, bool receiptUploadDeferred})>
+      create({
     required String buildingId,
     required String title,
     required double amount,
@@ -111,26 +123,36 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
     required DateTime date,
     String? note,
     String? receiptUrl,
+    String? receiptFilePath,
   }) async {
     try {
-      await _remote.createExpense(
+      final entity = await _repository.createExpense(
         buildingId,
         title: title,
         amount: amount,
-        category: ExpenseModel.categoryToApi(category),
+        category: category,
         date: date,
         note: note,
         receiptUrl: receiptUrl,
       );
+      final upload = await _tryUploadReceipt(
+        entity.id,
+        receiptFilePath,
+      );
       await load(buildingId, month: state.month, year: state.year);
-      return true;
+      return (
+        success: true,
+        receiptWarning: upload.warning,
+        receiptUploadDeferred: upload.deferred,
+      );
     } catch (e) {
-      state = state.copyWith(error: _err(e));
-      return false;
+      state = state.copyWith(error: userFacingError(e));
+      return (success: false, receiptWarning: null, receiptUploadDeferred: false);
     }
   }
 
-  Future<bool> update({
+  Future<({bool success, String? receiptWarning, bool receiptUploadDeferred})>
+      update({
     required String expenseId,
     String? title,
     double? amount,
@@ -138,62 +160,68 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
     DateTime? date,
     String? note,
     String? receiptUrl,
+    String? receiptFilePath,
   }) async {
     try {
-      await _remote.updateExpense(
+      await _repository.updateExpense(
         expenseId,
         title: title,
         amount: amount,
-        category:
-            category != null ? ExpenseModel.categoryToApi(category) : null,
+        category: category,
         date: date,
         note: note,
         receiptUrl: receiptUrl,
       );
+      final upload = await _tryUploadReceipt(
+        expenseId,
+        receiptFilePath,
+      );
       await reload();
-      return true;
+      return (
+        success: true,
+        receiptWarning: upload.warning,
+        receiptUploadDeferred: upload.deferred,
+      );
     } catch (e) {
-      state = state.copyWith(error: _err(e));
-      return false;
+      state = state.copyWith(error: userFacingError(e));
+      return (success: false, receiptWarning: null, receiptUploadDeferred: false);
+    }
+  }
+
+  /// Makbuz dosyası: canlı API'de `/proof` yoksa gider kaydı kalır, `deferred` döner.
+  Future<({String? warning, bool deferred})> _tryUploadReceipt(
+    String expenseId,
+    String? receiptFilePath,
+  ) async {
+    if (receiptFilePath == null || receiptFilePath.isEmpty) {
+      return (warning: null, deferred: false);
+    }
+    try {
+      await _repository.uploadReceipt(expenseId, receiptFilePath);
+      return (warning: null, deferred: false);
+    } on ApiException catch (e) {
+      if (e.statusCode == 404 || e.statusCode == 405) {
+        return (warning: null, deferred: true);
+      }
+      return (warning: userFacingError(e), deferred: false);
+    } catch (e) {
+      return (warning: userFacingError(e), deferred: false);
     }
   }
 
   Future<bool> delete(String expenseId) async {
     try {
-      await _remote.deleteExpense(expenseId);
+      await _repository.deleteExpense(expenseId);
       await reload();
       return true;
     } catch (e) {
-      state = state.copyWith(error: _err(e));
+      state = state.copyWith(error: userFacingError(e));
       return false;
     }
-  }
-
-  ExpenseSummaryEntity _parseSummary(Map<String, dynamic> raw) {
-    final total = double.tryParse('${raw['totalAmount']}') ?? 0;
-    final byCat = <ExpenseCategorySummary>[];
-    final list = raw['byCategory'];
-    if (list is List) {
-      for (final item in list) {
-        if (item is! Map) continue;
-        byCat.add(ExpenseCategorySummary(
-          category: ExpenseModel.parseCategoryApi('${item['category']}'),
-          amount: double.tryParse('${item['amount']}') ?? 0,
-          count: (item['count'] as num?)?.toInt() ?? 0,
-        ));
-      }
-    }
-    return ExpenseSummaryEntity(
-      month: (raw['month'] as num?)?.toInt() ?? DateTime.now().month,
-      year: (raw['year'] as num?)?.toInt() ?? DateTime.now().year,
-      totalAmount: total,
-      currency: (raw['currency'] as String?) ?? 'TRY',
-      byCategory: byCat,
-    );
   }
 }
 
 final expensesNotifierProvider =
     StateNotifierProvider<ExpensesNotifier, ExpensesState>((ref) {
-  return ExpensesNotifier(ref.watch(expenseDataSourceProvider));
+  return ExpensesNotifier(ref.watch(expenseRepositoryProvider));
 });

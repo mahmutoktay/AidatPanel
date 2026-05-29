@@ -60,7 +60,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
     return PopScope(
       canPop: !_submitting,
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.surface,
         appBar: AppBar(
           title: Text(context.t.common.addBuildingNew),
           centerTitle: true,
@@ -359,8 +359,8 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
             ),
             filled: true,
             fillColor: enabled
-                ? Colors.white
-                : AppColors.background.withValues(alpha: 0.5),
+                ? AppColors.surface
+                : AppColors.textDisabled.withValues(alpha: 0.12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: AppColors.borderColor),
@@ -575,7 +575,7 @@ class _SearchablePickerState extends State<_SearchablePicker> {
                 hintText: context.t.common.search,
                 prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
                 filled: true,
-                fillColor: AppColors.background,
+                fillColor: AppColors.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,

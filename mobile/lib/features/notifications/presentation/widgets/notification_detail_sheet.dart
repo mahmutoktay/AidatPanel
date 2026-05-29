@@ -160,7 +160,7 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSizes.spacingM),
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(AppSizes.cardRadius),
                   border: Border.all(color: AppColors.border),
                 ),

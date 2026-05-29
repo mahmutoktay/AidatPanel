@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
@@ -99,6 +100,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
         title: Text(t.title),
         centerTitle: true,
@@ -119,17 +121,13 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
                 AppSizes.spacingM,
                 0,
               ),
-              child: DropdownButtonFormField<String>(
-                initialValue: _buildingId,
-                decoration: InputDecoration(
-                  labelText: context.t.common.buildingName,
-                  border: const OutlineInputBorder(),
-                ),
-                items: buildings
-                    .map(
-                      (b) => DropdownMenuItem(value: b.id, child: Text(b.name)),
-                    )
-                    .toList(),
+              child: AppSelectField<String>(
+                label: context.t.common.buildingName,
+                value: _buildingId,
+                options: [
+                  for (final b in buildings)
+                    AppSelectOption(value: b.id, label: b.name),
+                ],
                 onChanged: (id) {
                   if (id == null) return;
                   setState(() => _buildingId = id);
@@ -142,19 +140,14 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: DropdownButtonFormField<int>(
-                    initialValue: _month,
-                    decoration: InputDecoration(
-                      labelText: t.fieldMonth,
-                      border: const OutlineInputBorder(),
-                    ),
-                    items: List.generate(
-                      12,
-                      (i) => DropdownMenuItem(
-                        value: i + 1,
-                        child: Text('${i + 1}'),
-                      ),
-                    ),
+                  child: AppSelectField<int>(
+                    label: t.fieldMonth,
+                    value: _month,
+                    displayText: (v) => v == null ? '' : '$v',
+                    options: [
+                      for (var i = 1; i <= 12; i++)
+                        AppSelectOption(value: i, label: '$i'),
+                    ],
                     onChanged: (m) {
                       if (m == null) return;
                       setState(() => _month = m);
@@ -164,17 +157,14 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
                 ),
                 const SizedBox(width: AppSizes.spacingM),
                 Expanded(
-                  child: DropdownButtonFormField<int>(
-                    initialValue: _year,
-                    decoration: InputDecoration(
-                      labelText: t.fieldYear,
-                      border: const OutlineInputBorder(),
-                    ),
-                    items: years
-                        .map(
-                          (y) => DropdownMenuItem(value: y, child: Text('$y')),
-                        )
-                        .toList(),
+                  child: AppSelectField<int>(
+                    label: t.fieldYear,
+                    value: _year,
+                    displayText: (v) => v == null ? '' : '$v',
+                    options: [
+                      for (final y in years)
+                        AppSelectOption(value: y, label: '$y'),
+                    ],
                     onChanged: (y) {
                       if (y == null) return;
                       setState(() => _year = y);

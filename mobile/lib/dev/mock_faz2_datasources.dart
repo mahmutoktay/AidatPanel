@@ -4,7 +4,6 @@ library;
 import '../features/expenses/data/datasources/expense_remote_datasource.dart';
 import '../features/expenses/data/models/expense_model.dart';
 import '../features/notifications/data/datasources/notification_remote_datasource.dart';
-import '../features/notifications/data/models/notification_model.dart';
 import '../features/notifications/domain/entities/notification_entity.dart';
 
 const _delay = Duration(milliseconds: 200);
@@ -173,6 +172,30 @@ class MockExpenseDataSource implements ExpenseDataSource {
     for (final list in _byBuilding.values) {
       list.removeWhere((e) => e.id == expenseId);
     }
+  }
+
+  @override
+  Future<String> uploadReceipt(String expenseId, String filePath) async {
+    await Future.delayed(_delay);
+    for (final list in _byBuilding.values) {
+      final idx = list.indexWhere((e) => e.id == expenseId);
+      if (idx < 0) continue;
+      final old = list[idx];
+      final url = 'mock://receipt/$expenseId';
+      list[idx] = ExpenseModel(
+        id: old.id,
+        buildingId: old.buildingId,
+        title: old.title,
+        amount: old.amount,
+        category: old.category,
+        date: old.date,
+        note: old.note,
+        receiptUrl: url,
+        createdAt: old.createdAt,
+      );
+      return url;
+    }
+    throw StateError('Expense not found: $expenseId');
   }
 }
 

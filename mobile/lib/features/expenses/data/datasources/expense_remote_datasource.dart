@@ -1,4 +1,7 @@
+import 'package:dio/dio.dart';
+
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/dio_client.dart';
 import '../models/expense_model.dart';
 
@@ -37,6 +40,9 @@ abstract class ExpenseDataSource {
   });
 
   Future<void> deleteExpense(String expenseId);
+
+  /// Makbuz fotoğrafı — `POST /expenses/{id}/proof` (multipart).
+  Future<String> uploadReceipt(String expenseId, String filePath);
 }
 
 class ExpenseRemoteDataSource implements ExpenseDataSource {
@@ -135,5 +141,25 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
   @override
   Future<void> deleteExpense(String expenseId) async {
     await _dioClient.delete(ApiConstants.expense(expenseId));
+  }
+
+  @override
+  Future<String> uploadReceipt(String expenseId, String filePath) async {
+    final segments = filePath.replaceAll('\\', '/').split('/');
+    final fileName = segments.isNotEmpty ? segments.last : 'receipt.jpg';
+    final form = FormData.fromMap({
+      'proof': await MultipartFile.fromFile(filePath, filename: fileName),
+    });
+    final response = await _dioClient.post(
+      ApiConstants.expenseProof(expenseId),
+      data: form,
+      options: Options(contentType: 'multipart/form-data'),
+    );
+    final data = response.data['data'];
+    if (data is Map<String, dynamic>) {
+      final url = data['receiptUrl'] ?? data['url'];
+      if (url is String && url.isNotEmpty) return url;
+    }
+    throw ApiException(message: 'Makbuz yanıtı işlenemedi');
   }
 }

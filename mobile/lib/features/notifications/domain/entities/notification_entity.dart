@@ -36,6 +36,18 @@ class NotificationEntity extends Equatable {
       [id, userId, title, body, type, isRead, data, createdAt];
 }
 
+class NotificationListResult {
+  final List<NotificationEntity> items;
+  final String? nextCursor;
+  final int unreadCount;
+
+  const NotificationListResult({
+    required this.items,
+    this.nextCursor,
+    required this.unreadCount,
+  });
+}
+
 class AnnouncementResultEntity extends Equatable {
   final int created;
   final int pushSent;

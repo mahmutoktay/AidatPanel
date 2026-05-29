@@ -82,7 +82,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final locale = Localizations.localeOf(context).toString();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
         title: Text(context.t.common.notifications),
         centerTitle: true,

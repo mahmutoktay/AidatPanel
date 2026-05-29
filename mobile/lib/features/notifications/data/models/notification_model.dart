@@ -78,14 +78,3 @@ class NotificationModel {
   }
 }
 
-class NotificationListResult {
-  final List<NotificationEntity> items;
-  final String? nextCursor;
-  final int unreadCount;
-
-  const NotificationListResult({
-    required this.items,
-    this.nextCursor,
-    required this.unreadCount,
-  });
-}

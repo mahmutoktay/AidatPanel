@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/app_date_field.dart';
+import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../providers/expenses_provider.dart';
 import '../utils/expense_labels.dart';
+import 'expense_receipt_section.dart';
 
 /// Gider ekleme / düzenleme formu (B4).
 class ExpenseFormSheet extends ConsumerStatefulWidget {
@@ -46,9 +50,11 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   late final TextEditingController _titleController;
   late final TextEditingController _amountController;
   late final TextEditingController _noteController;
+  late final TextEditingController _receiptUrlController;
   late ExpenseCategory _category;
   late DateTime _date;
   bool _submitting = false;
+  XFile? _receiptFile;
 
   bool get _isEdit => widget.expense != null;
 
@@ -61,6 +67,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
       text: e != null ? e.amount.toStringAsFixed(2) : '',
     );
     _noteController = TextEditingController(text: e?.note ?? '');
+    _receiptUrlController = TextEditingController(text: e?.receiptUrl ?? '');
     _category = e?.category ?? ExpenseCategory.other;
     _date = e?.date ?? DateTime.now();
   }
@@ -70,6 +77,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     _titleController.dispose();
     _amountController.dispose();
     _noteController.dispose();
+    _receiptUrlController.dispose();
     super.dispose();
   }
 
@@ -139,29 +147,23 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                     },
                   ),
                   const SizedBox(height: AppSizes.spacingM),
-                  DropdownButtonFormField<ExpenseCategory>(
-                    initialValue: _category,
-                    decoration: InputDecoration(labelText: t.fieldCategory),
-                    items: ExpenseCategory.values
-                        .map(
-                          (c) => DropdownMenuItem(
-                            value: c,
-                            child: Text(c.label(context)),
-                          ),
-                        )
-                        .toList(),
+                  AppSelectField<ExpenseCategory>(
+                    label: t.fieldCategory,
+                    value: _category,
+                    displayText: (v) => v?.label(context) ?? '',
+                    options: [
+                      for (final c in ExpenseCategory.values)
+                        AppSelectOption(value: c, label: c.label(context)),
+                    ],
                     onChanged: (v) {
                       if (v != null) setState(() => _category = v);
                     },
                   ),
                   const SizedBox(height: AppSizes.spacingM),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(t.fieldDate),
-                    subtitle: Text(
-                      '${_date.day}.${_date.month}.${_date.year}',
-                    ),
-                    trailing: const Icon(Icons.calendar_today_outlined),
+                  AppDateField(
+                    label: t.fieldDate,
+                    value: _date,
+                    enabled: !_submitting,
                     onTap: _pickDate,
                   ),
                   const SizedBox(height: AppSizes.spacingM),
@@ -170,14 +172,46 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                     maxLines: 2,
                     decoration: InputDecoration(labelText: t.fieldNote),
                   ),
+                  const SizedBox(height: AppSizes.spacingM),
+                  TextFormField(
+                    controller: _receiptUrlController,
+                    keyboardType: TextInputType.url,
+                    decoration: InputDecoration(
+                      labelText: t.receiptUrlLabel,
+                      hintText: t.receiptUrlHint,
+                    ),
+                    validator: (v) {
+                      final raw = v?.trim() ?? '';
+                      if (raw.isEmpty) return null;
+                      if (!raw.toLowerCase().startsWith('https://')) {
+                        return t.receiptUrlInvalid;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: AppSizes.spacingL),
+                  ExpenseReceiptSection(
+                    pickedFile: _receiptFile,
+                    existingReceiptUrl: widget.expense?.receiptUrl,
+                    enabled: !_submitting,
+                    onChanged: (file) => setState(() => _receiptFile = file),
+                    onPickFailed: () {
+                      ref.read(toastProvider.notifier).show(
+                            t.receiptPickFailed,
+                            type: ToastType.error,
+                          );
+                    },
+                  ),
                   const SizedBox(height: AppSizes.spacingXL),
-                  FilledButton(
+                  ElevatedButton(
                     onPressed: _submitting ? null : _submit,
                     child: _submitting
                         ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
                           )
                         : Text(t.submit),
                   ),
@@ -208,7 +242,11 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     );
     final note = _noteController.text.trim();
     final notifier = ref.read(expensesNotifierProvider.notifier);
-    final ok = _isEdit
+    final receiptPath = _receiptFile?.path;
+    final receiptUrlRaw = _receiptUrlController.text.trim();
+    final receiptUrl =
+        receiptUrlRaw.isEmpty ? null : receiptUrlRaw;
+    final result = _isEdit
         ? await notifier.update(
             expenseId: widget.expense!.id,
             title: _titleController.text.trim(),
@@ -216,6 +254,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             category: _category,
             date: _date,
             note: note.isEmpty ? '' : note,
+            receiptUrl: receiptUrl,
+            receiptFilePath: receiptPath,
           )
         : await notifier.create(
             buildingId: widget.buildingId,
@@ -224,17 +264,26 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             category: _category,
             date: _date,
             note: note.isEmpty ? null : note,
+            receiptUrl: receiptUrl,
+            receiptFilePath: receiptPath,
           );
     if (!mounted) return;
     setState(() => _submitting = false);
-    if (ok) {
-      ref.read(toastProvider.notifier).show(
-            _isEdit
-                ? context.t.features.expenses.updateSuccess
-                : context.t.features.expenses.createSuccess,
-            type: ToastType.success,
-          );
-      Navigator.of(context).pop(true);
+    if (!result.success) return;
+
+    final toast = ref.read(toastProvider.notifier);
+    final expensesT = context.t.features.expenses;
+    if (result.receiptUploadDeferred) {
+      toast.show(expensesT.receiptPendingBackend, type: ToastType.warning);
+    } else if (result.receiptWarning != null) {
+      toast.show(result.receiptWarning!, type: ToastType.warning);
     }
+    toast.show(
+      _isEdit
+          ? context.t.features.expenses.updateSuccess
+          : context.t.features.expenses.createSuccess,
+      type: ToastType.success,
+    );
+    Navigator.of(context).pop(true);
   }
 }

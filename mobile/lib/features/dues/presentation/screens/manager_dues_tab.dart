@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
@@ -21,9 +21,9 @@ class ManagerDuesTab extends ConsumerStatefulWidget {
 
 class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   final TextEditingController _amountController = TextEditingController();
-  final TextEditingController _dueDayController = TextEditingController();
 
   String? _selectedBuildingId;
+  int? _selectedDueDay;
   DueStatus? _statusFilter;
   // Ay/Yıl filtresi — null = "Tümü". Default: bu ay & bu yıl, böylece
   // ekran ilk açıldığında kullanıcı sadece güncel dönemi görür.
@@ -35,7 +35,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   @override
   void dispose() {
     _amountController.dispose();
-    _dueDayController.dispose();
     super.dispose();
   }
 
@@ -183,62 +182,50 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
             style: AppTypography.h4.copyWith(color: AppColors.textPrimary),
           ),
           const SizedBox(height: AppSizes.spacingM),
-          DropdownButtonFormField<String>(
+          AppSelectField<String>(
             key: ValueKey<String?>('dues_building_${_selectedBuildingId ?? 'none'}'),
-            initialValue: _selectedBuildingId,
-            isExpanded: true,
-            menuMaxHeight: 240,
-            items: buildings
-                .map(
-                  (building) => DropdownMenuItem<String>(
-                    value: building.id,
-                    child: Text(
-                      building.name,
-                      style: AppTypography.body1.copyWith(color: AppColors.textPrimary),
-                    ),
-                  ),
-                )
-                .toList(),
+            label: context.t.common.buildings,
+            value: _selectedBuildingId,
+            enabled: !isLoading,
+            options: [
+              for (final building in buildings)
+                AppSelectOption(value: building.id, label: building.name),
+            ],
             onChanged: isLoading
                 ? null
                 : (value) {
                     if (value == null) return;
-                    setState(() => _selectedBuildingId = value);
+                    setState(() {
+                      _selectedBuildingId = value;
+                      _selectedDueDay = null;
+                    });
                     _reloadDues();
                   },
-            decoration: InputDecoration(
-              labelText: context.t.common.buildings,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-              ),
-            ),
           ),
           const SizedBox(height: AppSizes.spacingM),
-          DropdownButtonFormField<DueStatus?>(
+          AppSelectField<DueStatus?>(
             key: ValueKey<String>('dues_status_${_statusFilter?.name ?? 'all'}'),
-            initialValue: _statusFilter,
-            isExpanded: true,
-            menuMaxHeight: 240,
-            items: [
-              DropdownMenuItem<DueStatus?>(
-                value: null,
-                child: Text(context.t.common.all),
-              ),
-              DropdownMenuItem<DueStatus?>(
+            label: context.t.common.status,
+            value: _statusFilter,
+            enabled: !isLoading,
+            displayText: (v) => _statusLabel(context, v),
+            options: [
+              AppSelectOption(value: null, label: context.t.common.all),
+              AppSelectOption(
                 value: DueStatus.pending,
-                child: Text(context.t.common.pendingStatus),
+                label: context.t.common.pendingStatus,
               ),
-              DropdownMenuItem<DueStatus?>(
+              AppSelectOption(
                 value: DueStatus.paid,
-                child: Text(context.t.common.paidStatus),
+                label: context.t.common.paidStatus,
               ),
-              DropdownMenuItem<DueStatus?>(
+              AppSelectOption(
                 value: DueStatus.overdue,
-                child: Text(context.t.common.overdueStatus),
+                label: context.t.common.overdueStatus,
               ),
-              DropdownMenuItem<DueStatus?>(
+              AppSelectOption(
                 value: DueStatus.waived,
-                child: Text(context.t.common.waivedStatus),
+                label: context.t.common.waivedStatus,
               ),
             ],
             onChanged: isLoading
@@ -247,31 +234,24 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                     setState(() => _statusFilter = value);
                     _reloadDues();
                   },
-            decoration: InputDecoration(
-              labelText: context.t.common.status,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-              ),
-            ),
           ),
           const SizedBox(height: AppSizes.spacingM),
           Row(
             children: [
               Expanded(
-                child: DropdownButtonFormField<int?>(
+                child: AppSelectField<int?>(
                   key: ValueKey<String>('dues_month_${_monthFilter ?? 'all'}'),
-                  initialValue: _monthFilter,
-                  isExpanded: true,
-                  menuMaxHeight: 320,
-                  items: [
-                    DropdownMenuItem<int?>(
-                      value: null,
-                      child: Text(context.t.common.allMonths),
-                    ),
+                  label: context.t.common.month,
+                  value: _monthFilter,
+                  enabled: !isLoading,
+                  displayText: (v) =>
+                      v == null ? context.t.common.allMonths : _monthName(context, v),
+                  options: [
+                    AppSelectOption(value: null, label: context.t.common.allMonths),
                     for (var m = 1; m <= 12; m++)
-                      DropdownMenuItem<int?>(
+                      AppSelectOption(
                         value: m,
-                        child: Text(_monthName(context, m)),
+                        label: _monthName(context, m),
                       ),
                   ],
                   onChanged: isLoading
@@ -280,31 +260,21 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                           setState(() => _monthFilter = value);
                           _reloadDues();
                         },
-                  decoration: InputDecoration(
-                    labelText: context.t.common.month,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                    ),
-                  ),
                 ),
               ),
               const SizedBox(width: AppSizes.spacingM),
               Expanded(
-                child: DropdownButtonFormField<int?>(
+                child: AppSelectField<int?>(
                   key: ValueKey<String>('dues_year_${_yearFilter ?? 'all'}'),
-                  initialValue: _yearFilter,
-                  isExpanded: true,
-                  menuMaxHeight: 240,
-                  items: [
-                    DropdownMenuItem<int?>(
-                      value: null,
-                      child: Text(context.t.common.allYears),
-                    ),
+                  label: context.t.common.year,
+                  value: _yearFilter,
+                  enabled: !isLoading,
+                  displayText: (v) =>
+                      v == null ? context.t.common.allYears : '$v',
+                  options: [
+                    AppSelectOption(value: null, label: context.t.common.allYears),
                     for (final y in years)
-                      DropdownMenuItem<int?>(
-                        value: y,
-                        child: Text('$y'),
-                      ),
+                      AppSelectOption(value: y, label: '$y'),
                   ],
                   onChanged: isLoading
                       ? null
@@ -312,12 +282,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                           setState(() => _yearFilter = value);
                           _reloadDues();
                         },
-                  decoration: InputDecoration(
-                    labelText: context.t.common.year,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                    ),
-                  ),
                 ),
               ),
             ],
@@ -325,6 +289,21 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
         ],
       ),
     );
+  }
+
+  String _statusLabel(BuildContext context, DueStatus? status) {
+    final t = context.t.common;
+    if (status == null) return t.all;
+    switch (status) {
+      case DueStatus.pending:
+        return t.pendingStatus;
+      case DueStatus.paid:
+        return t.paidStatus;
+      case DueStatus.overdue:
+        return t.overdueStatus;
+      case DueStatus.waived:
+        return t.waivedStatus;
+    }
   }
 
   /// Locale-bağımsız ay adı: i18n monthJanuary…monthDecember anahtarlarını
@@ -399,20 +378,20 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
             ),
           ),
           const SizedBox(height: AppSizes.spacingS),
-          TextField(
-            controller: _dueDayController,
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(2),
-              const _DueDayInputFormatter(),
+          AppSelectField<int?>(
+            label: context.t.common.dueDay,
+            value: _selectedDueDay,
+            enabled: !isLoading,
+            displayText: (v) =>
+                v == null ? context.t.common.selectDueDay : '$v',
+            options: [
+              AppSelectOption(value: null, label: context.t.common.selectDueDay),
+              for (var day = 1; day <= 28; day++)
+                AppSelectOption(value: day, label: '$day'),
             ],
-            decoration: InputDecoration(
-              labelText: context.t.common.dueDay,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-              ),
-            ),
+            onChanged: isLoading
+                ? null
+                : (value) => setState(() => _selectedDueDay = value),
           ),
           const SizedBox(height: AppSizes.spacingS),
           SwitchListTile.adaptive(
@@ -542,7 +521,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
 
     final amountText =
         _amountController.text.trim().replaceAll(',', '.').replaceAll(' ', '');
-    final dueDayText = _dueDayController.text.trim();
+    final dueDay = _selectedDueDay;
 
     double? parsedAmount;
     if (amountText.isNotEmpty) {
@@ -551,16 +530,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
         validationToast(context.t.common.dueAmountInvalidPositive);
         return;
       }
-    }
-
-    int? dueDay;
-    if (dueDayText.isNotEmpty) {
-      final parsed = int.tryParse(dueDayText);
-      if (parsed == null || parsed < 1 || parsed > 28) {
-        validationToast(context.t.common.dueDayOutOfRange);
-        return;
-      }
-      dueDay = parsed;
     }
 
     final hasAmount = parsedAmount != null && parsedAmount > 0;
@@ -601,8 +570,10 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     );
     if (ok) {
       _amountController.clear();
-      _dueDayController.clear();
-      setState(() => _affectCurrent = false);
+      setState(() {
+        _selectedDueDay = null;
+        _affectCurrent = false;
+      });
       await ref.read(buildingsStoreProvider.notifier).refreshBuildings();
       if (!mounted) return;
       _invalidateDashboardDuesHero();
@@ -638,23 +609,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
 
   String _currencySymbol() {
     return LocaleSettings.currentLocale == AppLocale.tr ? '₺' : r'$';
-  }
-}
-
-class _DueDayInputFormatter extends TextInputFormatter {
-  const _DueDayInputFormatter();
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final t = newValue.text;
-    if (t.isEmpty) return newValue;
-    if (!RegExp(r'^\d{1,2}$').hasMatch(t)) return oldValue;
-    final n = int.parse(t);
-    if (n < 1 || n > 28) return oldValue;
-    return newValue;
   }
 }
 

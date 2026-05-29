@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/user_error_message.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
 import '../domain/entities/apartment_entity.dart';
 import 'datasources/apartment_remote_datasource.dart';
@@ -39,7 +40,7 @@ class ApartmentsNotifier
       final apartments = await _repository.fetchApartments(buildingId);
       state = AsyncValue.data(apartments);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      state = AsyncValue.error(wrapAsyncStateError(e), st);
     }
   }
 
@@ -55,7 +56,7 @@ class ApartmentsNotifier
       final current = state.value ?? [];
       state = AsyncValue.data([...current, apartment]);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      state = AsyncValue.error(wrapAsyncStateError(e), st);
     } finally {
       _isCreating = false;
     }
@@ -121,21 +122,3 @@ final apartmentsStoreProvider = StateNotifierProvider.family<ApartmentsNotifier,
     buildingId,
   ),
 );
-
-final apartmentCountProvider = Provider.family<int, String>((ref, buildingId) {
-  return ref.watch(apartmentsStoreProvider(buildingId)).value?.length ?? 0;
-});
-
-final occupiedCountProvider = Provider.family<int, String>((ref, buildingId) {
-  final apartments =
-      ref.watch(apartmentsStoreProvider(buildingId)).value ?? [];
-  return apartments.where((a) => a.isOccupied).length;
-});
-
-final paidCountProvider = Provider.family<int, String>((ref, buildingId) {
-  final apartments =
-      ref.watch(apartmentsStoreProvider(buildingId)).value ?? [];
-  return apartments
-      .where((a) => a.paymentStatus == PaymentStatus.paid)
-      .length;
-});

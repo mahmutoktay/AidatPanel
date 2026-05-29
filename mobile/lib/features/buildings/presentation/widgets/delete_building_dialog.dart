@@ -161,7 +161,7 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
               vertical: AppSizes.spacingS,
             ),
             decoration: BoxDecoration(
-              color: AppColors.background,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppSizes.inputRadius),
               border: Border.all(color: AppColors.borderColor),
             ),

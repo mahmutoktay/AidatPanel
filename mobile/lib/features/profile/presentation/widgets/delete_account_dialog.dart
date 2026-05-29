@@ -169,7 +169,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                 vertical: AppSizes.spacingS,
               ),
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppSizes.inputRadius),
                 border: Border.all(color: AppColors.borderColor),
               ),

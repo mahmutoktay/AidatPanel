@@ -27,10 +27,18 @@ lib/
 │       │   └── providers/
 │       │       └── auth_provider.dart
 │       └── presentation/
-│           ├── login_screen.dart
-│           └── register_screen.dart
+│           ├── screens/
+│           │   ├── login_screen.dart
+│           │   ├── sign_up_screen.dart   # Birleşik kayıt (sakin + yönetici)
+│           │   ├── splash_screen.dart
+│           │   ├── forgot_password_screen.dart
+│           │   └── reset_password_screen.dart
+│           └── widgets/
+│               └── sign_up_role_toggle.dart
 └── main.dart
 ```
+
+> **Not (2026-05-25):** Eski `register_screen.dart` ve `join_screen.dart` kaldırıldı. Router alias: `/register` ve `/join` → `SignUpScreen`.
 
 **Önemli:** JWT kodlarını `core/` katmanına koy, `features/auth/` sadece business logic içersin.
 
@@ -544,11 +552,12 @@ dependencies:
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../features/auth/domain/providers/auth_provider.dart';
-import '../../features/auth/presentation/login_screen.dart';
-import '../../features/auth/presentation/register_screen.dart';
-import '../../features/dashboard/presentation/manager_dashboard.dart';
-import '../../features/dashboard/presentation/resident_dashboard.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/sign_up_screen.dart';
+import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/dashboard/presentation/screens/manager_dashboard_screen.dart';
+import '../../features/dashboard/presentation/screens/resident_dashboard_screen.dart';
 
 /// Router provider
 final routerProvider = Provider<GoRouter>((ref) {
@@ -562,8 +571,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isUnauthenticated = authState.status == AuthStatus.unauthenticated;
       final isLoading = authState.status == AuthStatus.loading;
       
-      final isLoginRoute = state.matchedLocation == '/login';
-      final isRegisterRoute = state.matchedLocation == '/register';
+      final isAuthRoute = state.matchedLocation == '/login' ||
+          state.matchedLocation == '/sign-up' ||
+          state.matchedLocation == '/register' ||
+          state.matchedLocation == '/join' ||
+          state.matchedLocation == '/forgot-password' ||
+          state.matchedLocation == '/reset-password';
       final isSplashRoute = state.matchedLocation == '/';
       
       // Loading durumunda hiçbir yere gitme (Splash göster)
@@ -571,19 +584,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/';
       }
       
-      // Kimliği doğrulanmamış kullanıcı sadece login/register görebilir
+      // Kimliği doğrulanmamış kullanıcı sadece auth route'ları görebilir
       if (isUnauthenticated) {
-        if (isLoginRoute || isRegisterRoute || isSplashRoute) {
-          return null;  // Gitmek istediği yere gitmesine izin ver
+        if (isAuthRoute || isSplashRoute) {
+          return null;
         }
-        return '/login';  // Diğer sayfalara gitmeye çalışırsa login'e yönlendir
+        return '/login';
       }
       
-      // Kimliği doğrulanmış kullanıcı login/register sayfalarına gitmeye çalışırsa
-      if (isAuthenticated && (isLoginRoute || isRegisterRoute || isSplashRoute)) {
-        // Role göre dashboard'a yönlendir
-        final isManager = authState.user?.role == 'MANAGER';
-        return isManager ? '/manager' : '/resident';
+      // Kimliği doğrulanmış kullanıcı auth sayfalarına gitmeye çalışırsa dashboard'a
+      if (isAuthenticated && (isAuthRoute || isSplashRoute) && !isSplashRoute) {
+        final isManager = authState.user?.role == UserRole.manager;
+        return isManager ? '/manager-dashboard' : '/resident-dashboard';
       }
       
       return null;  // Normal akışa devam et
@@ -601,20 +613,25 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
+        path: '/sign-up',
+        builder: (context, state) => const SignUpScreen(),
+      ),
+      GoRoute(
         path: '/register',
-        builder: (context, state) => const RegisterScreen(),
+        builder: (context, state) => const SignUpScreen(initialIsManager: true),
+      ),
+      GoRoute(
+        path: '/join',
+        builder: (context, state) => const SignUpScreen(),
       ),
       
-      // Manager Dashboard
       GoRoute(
-        path: '/manager',
-        builder: (context, state) => const ManagerDashboard(),
+        path: '/manager-dashboard',
+        builder: (context, state) => const ManagerDashboardScreen(),
       ),
-      
-      // Resident Dashboard
       GoRoute(
-        path: '/resident',
-        builder: (context, state) => const ResidentDashboard(),
+        path: '/resident-dashboard',
+        builder: (context, state) => const ResidentDashboardScreen(),
       ),
     ],
   );
@@ -722,17 +739,17 @@ context.pop();
 │  Her API    │                      │
 │  isteğinde  │                      │
 │  otomatik   │                      │
-│  Authorization: Bearer <token>    │
+│  Authorization: Bearer <token>     │
 │  header'ı ekle                     │
 └─────────────┘                      │
      │                               │
      │ 401 hatası                    │
-     │ (Token süresi doldu)         │
+     │ (Token süresi doldu)          │
      ▼                               │
-┌─────────────┐      /refresh      │
+┌─────────────┐      /refresh        │
 │  Refresh    │ ───────────────────> │
 │  Token ile  │                      │
-│  yeni       │ <────────────────── │
+│  yeni       │ <─────────────────── │
 │  Access     │  {accessToken}       │
 │  Token al   │                      │
 └─────────────┘                      │

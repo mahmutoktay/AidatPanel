@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/notification_icon_button.dart';
 import '../providers/manager_open_tickets_count_provider.dart';
@@ -52,6 +54,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
         title: Text(t.managerTitle),
         centerTitle: true,
@@ -62,17 +65,13 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
           if (buildings.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(AppSizes.spacingM),
-              child: DropdownButtonFormField<String>(
-                initialValue: _buildingId,
-                decoration: InputDecoration(
-                  labelText: context.t.common.buildingName,
-                  border: const OutlineInputBorder(),
-                ),
-                items: buildings
-                    .map(
-                      (b) => DropdownMenuItem(value: b.id, child: Text(b.name)),
-                    )
-                    .toList(),
+              child: AppSelectField<String>(
+                label: context.t.common.buildingName,
+                value: _buildingId,
+                options: [
+                  for (final b in buildings)
+                    AppSelectOption(value: b.id, label: b.name),
+                ],
                 onChanged: (id) {
                   if (id == null) return;
                   setState(() => _buildingId = id);

@@ -199,7 +199,9 @@ ElevatedButton(
 
 ## 5. Ekran Layout Pattern'ı
 
-### Auth Ekranları (Login / Register / Join)
+### Auth Ekranları (Login / SignUp)
+
+Kayıt akışı tek ekranda birleşti: `SignUpScreen` (sakin / yönetici `SignUpRoleToggle` ile). Deep link alias: `/sign-up`, `/register` (yönetici), `/join` (sakin). Login’den ana giriş: `context.push('/sign-up')`.
 
 Tüm auth ekranları aynı temel yapıyı paylaşır:
 
@@ -227,8 +229,8 @@ Scaffold
 
 **Hero yüksekliği:**
 - Login: `200dp` (form daha kısa)
-- Register: `160dp` (form daha uzun)
-- Join: `140dp` (form en uzun — scrollable)
+- SignUp (yönetici modu): `160dp` (form daha uzun)
+- SignUp (sakin / davet kodu): `140dp` (form en uzun — scrollable)
 
 ### Hero Alanı Kodu
 
@@ -318,21 +320,23 @@ Scaffold(
 
 ## 6. Shared Widget Kataloğu
 
-### AltActionButton
+### SignUpRoleToggle
 
-**Dosya:** `mobile/lib/shared/widgets/alt_action_button.dart`  
-**Amaç:** İkincil aksiyon butonu — kart görünümlü, ikon + başlık + ok oku.
+**Dosya:** `mobile/lib/features/auth/presentation/widgets/sign_up_role_toggle.dart`  
+**Amaç:** Üye ol ekranında sakin ↔ yönetici anlık geçişi (segmented tab).
 
 ```dart
-AltActionButton(
-  icon: Icons.person_add_outlined,
-  title: context.t.features.auth.noAccount,
-  onTap: authState.isLoading ? null : () => context.push('/register'),
-  isEnabled: !authState.isLoading,
+SignUpRoleToggle(
+  isManager: _isManager,
+  residentLabel: context.t.features.auth.residentSignUp,
+  managerLabel: context.t.features.auth.managerSignUp,
+  onResidentTap: () => setState(() => _isManager = false),
+  onManagerTap: () => setState(() => _isManager = true),
+  enabled: !authState.isLoading,
 )
 ```
 
-**Görünüm:** Beyaz (`AppColors.surface`) arka plan, `AppColors.primary` kenarlık (0.3 alfa), yuvarlak köşe (cardRadius), ikon solda, ok sağda.
+**Login ikincil aksiyon:** Kart buton yerine `GestureDetector` + `AppTypography.body2` (primary renk), min `48×48dp` dokunma alanı → `context.push('/sign-up')`.
 
 ---
 
@@ -374,7 +378,7 @@ PasswordCriterion(
 - `isMet: true` → `Icons.check_circle` + `AppColors.success`
 - `isMet: false` → `Icons.cancel` + `AppColors.error`
 
-**Register/Join şifre kriterleri:**
+**SignUp şifre kriterleri (sakin + yönetici):**
 1. En az 6 karakter
 2. Büyük harf
 3. Küçük harf
@@ -676,21 +680,30 @@ mobile/lib/
 │       └── input_validators.dart ← Email, şifre, telefon validasyonu
 ├── shared/
 │   ├── widgets/
-│   │   ├── alt_action_button.dart    ← Kart-style ikincil buton
-│   │   ├── password_field.dart       ← Şifre input alanı
-│   │   ├── password_criterion.dart   ← Şifre kural göstergesi
-│   │   ├── empty_state_widget.dart   ← Boş liste göstergesi
-│   │   └── toast_overlay.dart        ← Bildirim sistemi
+│   │   ├── password_field.dart         ← Şifre input alanı
+│   │   ├── password_criterion.dart     ← Şifre kural göstergesi
+│   │   ├── empty_state_widget.dart     ← Boş liste göstergesi
+│   │   ├── friendly_error_screen.dart  ← Ağ / genel hata ekranı
+│   │   ├── tint_dashboard_tile.dart    ← Dashboard özet kutusu
+│   │   ├── app_select_field.dart       ← Erişilebilir seçim alanı
+│   │   ├── settings_tab.dart           ← Ayarlar sekmesi (profil, dil, çıkış)
+│   │   ├── notification_icon_button.dart
+│   │   └── toast_overlay.dart          ← Bildirim sistemi
 │   └── utils/
-│       └── auth_validators.dart      ← Davet kodu, telefon format
+│       └── auth_validators.dart        ← Davet kodu, telefon format
 └── features/
-    ├── auth/presentation/screens/
-    │   ├── login_screen.dart         ← Gradient hero, email/telefon login
-    │   ├── register_screen.dart      ← Gradient hero, kayıt formu
-    │   └── join_screen.dart          ← Gradient hero, davet koduyla katıl
-    ├── apartments/presentation/screens/
+    ├── auth/presentation/
+    │   ├── screens/
+    │   │   ├── login_screen.dart
+    │   │   ├── sign_up_screen.dart     ← Birleşik kayıt (sakin + yönetici)
+    │   │   ├── splash_screen.dart
+    │   │   ├── forgot_password_screen.dart
+    │   │   └── reset_password_screen.dart
+    │   └── widgets/
+    │       └── sign_up_role_toggle.dart
+    ├── dashboard/presentation/screens/
+    │   ├── manager_dashboard_screen.dart
     │   └── resident_dashboard_screen.dart
     └── buildings/presentation/screens/
-        ├── manager_dashboard_screen.dart
         └── building_residents_screen.dart
 ```

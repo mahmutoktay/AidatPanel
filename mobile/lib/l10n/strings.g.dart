@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 912 (456 per locale)
+/// Strings: 956 (478 per locale)
 ///
-/// Built on 2026-05-25 at 19:18 UTC
+/// Built on 2026-05-29 at 13:11 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -199,6 +199,7 @@ class _StringsCommonEn {
 	String get loading => 'Loading…';
 	String get loadingBuildings => 'Loading buildings…';
 	String get loadFailed => 'Failed to load';
+	String get unexpectedError => 'Something went wrong. Please try again.';
 	String get tryAgain => 'Try Again';
 	String get home => 'Home';
 	String get buildings => 'Buildings';
@@ -324,9 +325,10 @@ class _StringsCommonEn {
 	String get dueAmountUpdated => 'Due amount updated';
 	String get dueAmountUpdateFailed => 'Could not update due amount';
 	String get dueDay => 'Due Day (1-28)';
+	String get selectDueDay => 'Select day';
 	String get affectCurrentDues => 'Apply to pending dues';
 	String get affectCurrentDuesHint => 'When enabled, current PENDING due amounts are updated to the new amount.';
-	String get dueUpdateNeedAmountOrDay => 'Enter an amount or a due day (or both) to update.';
+	String get dueUpdateNeedAmountOrDay => 'Enter an amount or select a due day to update.';
 	String get dueUpdateNeedStoredAmount => 'This building has no saved amount yet. Enter an amount before updating the due day only.';
 	String get dueAmountInvalidPositive => 'Enter a valid amount.';
 	String get dueDayOutOfRange => 'Due day must be between 1 and 28.';
@@ -542,6 +544,13 @@ class _StringsFeaturesAuthEn {
 	String get or => 'or';
 	String get noAccount => 'Don\'t have an account? Register';
 	String get joinWithCode => 'Join with Invite Code';
+	String get signUp => 'Sign up';
+	String get signUpTitle => 'Sign Up';
+	String get signUpSubtitle => 'How would you like to join?';
+	String get beManager => 'Become a manager';
+	String get beManagerHint => 'Create a building and open a manager account';
+	String get joinWithInvite => 'Join with invite code';
+	String get joinWithInviteHint => 'Join as a resident with your manager\'s code';
 	String get copyright => '© Vefa Yazılım';
 	String get createAccount => 'Create New Account';
 	String get name => 'Full Name';
@@ -598,6 +607,8 @@ class _StringsFeaturesTicketsEn {
 	String get categoryOther => 'Other';
 	String get submit => 'Submit';
 	String get createSuccess => 'Your request has been submitted';
+	String get createFailed => 'Could not save your request. Please try again.';
+	String get createServiceUnavailable => 'The request service is not available right now. Please try again later.';
 	String get emptyTitle => 'No requests yet';
 	String get emptySubtitle => 'Report an issue or request from here';
 	String get titleTooShort => 'Title must be at least 3 characters';
@@ -669,6 +680,17 @@ class _StringsFeaturesExpensesEn {
 	String get loadError => 'Could not load expenses';
 	String get emptyTitle => 'No expenses this period';
 	String get emptySubtitle => 'Add a new expense from the top-right button';
+	String get receiptUrlLabel => 'Receipt link (HTTPS)';
+	String get receiptUrlHint => 'Optional — public URL to the receipt file';
+	String get receiptUrlInvalid => 'URL must start with https://';
+	String get receiptTitle => 'Receipt photo';
+	String get receiptHint => 'Optional — gallery (file upload not on live API yet)';
+	String get receiptAdd => 'Add photo';
+	String get receiptChange => 'Change photo';
+	String get receiptRemove => 'Remove photo';
+	String get receiptPendingBackend => 'Expense saved. Receipt will upload when the API is live.';
+	String get receiptUploadFailed => 'Receipt upload failed. The expense was saved.';
+	String get receiptPickFailed => 'Could not pick a photo';
 }
 
 // Path: features.notifications
@@ -791,6 +813,7 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get loading => 'Yükleniyor…';
 	@override String get loadingBuildings => 'Binalar yükleniyor…';
 	@override String get loadFailed => 'Yüklenemedi';
+	@override String get unexpectedError => 'İşlem tamamlanamadı. Lütfen tekrar deneyin.';
 	@override String get tryAgain => 'Tekrar Dene';
 	@override String get home => 'Ana Sayfa';
 	@override String get buildings => 'Binalar';
@@ -916,9 +939,10 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get dueAmountUpdated => 'Aidat tutarı güncellendi';
 	@override String get dueAmountUpdateFailed => 'Aidat tutarı güncellenemedi';
 	@override String get dueDay => 'Aidat Günü (1-28)';
+	@override String get selectDueDay => 'Gün seçin';
 	@override String get affectCurrentDues => 'Bekleyen aidatlara da uygula';
 	@override String get affectCurrentDuesHint => 'Açık olduğunda mevcut bekleyen (PENDING) aidat tutarları da yeni tutara güncellenir.';
-	@override String get dueUpdateNeedAmountOrDay => 'Güncellemek için tutar veya aidat gününden en az birini yazın.';
+	@override String get dueUpdateNeedAmountOrDay => 'Güncellemek için tutar girin veya aidat günü seçin.';
 	@override String get dueUpdateNeedStoredAmount => 'Bu bina için kayıtlı tutar yok. Aidat gününü güncellemek için önce tutar yazın.';
 	@override String get dueAmountInvalidPositive => 'Geçerli bir tutar yazın.';
 	@override String get dueDayOutOfRange => 'Aidat günü 1 ile 28 arasında olmalıdır.';
@@ -1134,6 +1158,13 @@ class _StringsFeaturesAuthTr implements _StringsFeaturesAuthEn {
 	@override String get or => 'veya';
 	@override String get noAccount => 'Hesabınız yok mu? Kaydolun';
 	@override String get joinWithCode => 'Davet kodu ile katılın';
+	@override String get signUp => 'Üye ol';
+	@override String get signUpTitle => 'Üye Ol';
+	@override String get signUpSubtitle => 'Nasıl katılmak istiyorsunuz?';
+	@override String get beManager => 'Yönetici ol';
+	@override String get beManagerHint => 'Bina oluşturup yönetici hesabı açın';
+	@override String get joinWithInvite => 'Davet koduyla katıl';
+	@override String get joinWithInviteHint => 'Yöneticinizin verdiği kod ile sakin olun';
 	@override String get copyright => '© Vefa Yazılım';
 	@override String get createAccount => 'Yeni Hesap Oluştur';
 	@override String get name => 'Ad Soyad';
@@ -1190,6 +1221,8 @@ class _StringsFeaturesTicketsTr implements _StringsFeaturesTicketsEn {
 	@override String get categoryOther => 'Diğer';
 	@override String get submit => 'Gönder';
 	@override String get createSuccess => 'Talebiniz alındı';
+	@override String get createFailed => 'Talep kaydedilemedi. Lütfen tekrar deneyin.';
+	@override String get createServiceUnavailable => 'Talep servisi şu an hazır değil. Lütfen daha sonra tekrar deneyin.';
 	@override String get emptyTitle => 'Henüz talep yok';
 	@override String get emptySubtitle => 'Arıza veya talebinizi buradan bildirebilirsiniz';
 	@override String get titleTooShort => 'Başlık en az 3 karakter olmalı';
@@ -1261,6 +1294,17 @@ class _StringsFeaturesExpensesTr implements _StringsFeaturesExpensesEn {
 	@override String get loadError => 'Giderler yüklenemedi';
 	@override String get emptyTitle => 'Bu dönemde gider yok';
 	@override String get emptySubtitle => 'Sağ üstten yeni gider ekleyebilirsiniz';
+	@override String get receiptUrlLabel => 'Makbuz bağlantısı (HTTPS)';
+	@override String get receiptUrlHint => 'Opsiyonel — internetteki makbuz dosyası adresi';
+	@override String get receiptUrlInvalid => 'Adres https:// ile başlamalıdır';
+	@override String get receiptTitle => 'Makbuz fotoğrafı';
+	@override String get receiptHint => 'Opsiyonel — galeriden seçin (canlı sunucuda dosya yükleme henüz yok)';
+	@override String get receiptAdd => 'Fotoğraf ekle';
+	@override String get receiptChange => 'Fotoğrafı değiştir';
+	@override String get receiptRemove => 'Fotoğrafı kaldır';
+	@override String get receiptPendingBackend => 'Gider kaydedildi. Makbuz sunucuya yüklenecek (API hazır olunca).';
+	@override String get receiptUploadFailed => 'Makbuz yüklenemedi. Gider kaydı oluşturuldu.';
+	@override String get receiptPickFailed => 'Fotoğraf seçilemedi';
 }
 
 // Path: features.notifications
@@ -1352,6 +1396,7 @@ extension on Translations {
 			case 'common.loading': return 'Loading…';
 			case 'common.loadingBuildings': return 'Loading buildings…';
 			case 'common.loadFailed': return 'Failed to load';
+			case 'common.unexpectedError': return 'Something went wrong. Please try again.';
 			case 'common.tryAgain': return 'Try Again';
 			case 'common.home': return 'Home';
 			case 'common.buildings': return 'Buildings';
@@ -1477,9 +1522,10 @@ extension on Translations {
 			case 'common.dueAmountUpdated': return 'Due amount updated';
 			case 'common.dueAmountUpdateFailed': return 'Could not update due amount';
 			case 'common.dueDay': return 'Due Day (1-28)';
+			case 'common.selectDueDay': return 'Select day';
 			case 'common.affectCurrentDues': return 'Apply to pending dues';
 			case 'common.affectCurrentDuesHint': return 'When enabled, current PENDING due amounts are updated to the new amount.';
-			case 'common.dueUpdateNeedAmountOrDay': return 'Enter an amount or a due day (or both) to update.';
+			case 'common.dueUpdateNeedAmountOrDay': return 'Enter an amount or select a due day to update.';
 			case 'common.dueUpdateNeedStoredAmount': return 'This building has no saved amount yet. Enter an amount before updating the due day only.';
 			case 'common.dueAmountInvalidPositive': return 'Enter a valid amount.';
 			case 'common.dueDayOutOfRange': return 'Due day must be between 1 and 28.';
@@ -1638,6 +1684,13 @@ extension on Translations {
 			case 'features.auth.or': return 'or';
 			case 'features.auth.noAccount': return 'Don\'t have an account? Register';
 			case 'features.auth.joinWithCode': return 'Join with Invite Code';
+			case 'features.auth.signUp': return 'Sign up';
+			case 'features.auth.signUpTitle': return 'Sign Up';
+			case 'features.auth.signUpSubtitle': return 'How would you like to join?';
+			case 'features.auth.beManager': return 'Become a manager';
+			case 'features.auth.beManagerHint': return 'Create a building and open a manager account';
+			case 'features.auth.joinWithInvite': return 'Join with invite code';
+			case 'features.auth.joinWithInviteHint': return 'Join as a resident with your manager\'s code';
 			case 'features.auth.copyright': return '© Vefa Yazılım';
 			case 'features.auth.createAccount': return 'Create New Account';
 			case 'features.auth.name': return 'Full Name';
@@ -1676,6 +1729,8 @@ extension on Translations {
 			case 'features.tickets.categoryOther': return 'Other';
 			case 'features.tickets.submit': return 'Submit';
 			case 'features.tickets.createSuccess': return 'Your request has been submitted';
+			case 'features.tickets.createFailed': return 'Could not save your request. Please try again.';
+			case 'features.tickets.createServiceUnavailable': return 'The request service is not available right now. Please try again later.';
 			case 'features.tickets.emptyTitle': return 'No requests yet';
 			case 'features.tickets.emptySubtitle': return 'Report an issue or request from here';
 			case 'features.tickets.titleTooShort': return 'Title must be at least 3 characters';
@@ -1738,6 +1793,17 @@ extension on Translations {
 			case 'features.expenses.loadError': return 'Could not load expenses';
 			case 'features.expenses.emptyTitle': return 'No expenses this period';
 			case 'features.expenses.emptySubtitle': return 'Add a new expense from the top-right button';
+			case 'features.expenses.receiptUrlLabel': return 'Receipt link (HTTPS)';
+			case 'features.expenses.receiptUrlHint': return 'Optional — public URL to the receipt file';
+			case 'features.expenses.receiptUrlInvalid': return 'URL must start with https://';
+			case 'features.expenses.receiptTitle': return 'Receipt photo';
+			case 'features.expenses.receiptHint': return 'Optional — gallery (file upload not on live API yet)';
+			case 'features.expenses.receiptAdd': return 'Add photo';
+			case 'features.expenses.receiptChange': return 'Change photo';
+			case 'features.expenses.receiptRemove': return 'Remove photo';
+			case 'features.expenses.receiptPendingBackend': return 'Expense saved. Receipt will upload when the API is live.';
+			case 'features.expenses.receiptUploadFailed': return 'Receipt upload failed. The expense was saved.';
+			case 'features.expenses.receiptPickFailed': return 'Could not pick a photo';
 			case 'features.notifications.markAllRead': return 'Mark all read';
 			case 'features.notifications.viewRelated': return 'Open related item';
 			case 'features.notifications.unreadBadge': return 'New';
@@ -1816,6 +1882,7 @@ extension on _StringsTr {
 			case 'common.loading': return 'Yükleniyor…';
 			case 'common.loadingBuildings': return 'Binalar yükleniyor…';
 			case 'common.loadFailed': return 'Yüklenemedi';
+			case 'common.unexpectedError': return 'İşlem tamamlanamadı. Lütfen tekrar deneyin.';
 			case 'common.tryAgain': return 'Tekrar Dene';
 			case 'common.home': return 'Ana Sayfa';
 			case 'common.buildings': return 'Binalar';
@@ -1941,9 +2008,10 @@ extension on _StringsTr {
 			case 'common.dueAmountUpdated': return 'Aidat tutarı güncellendi';
 			case 'common.dueAmountUpdateFailed': return 'Aidat tutarı güncellenemedi';
 			case 'common.dueDay': return 'Aidat Günü (1-28)';
+			case 'common.selectDueDay': return 'Gün seçin';
 			case 'common.affectCurrentDues': return 'Bekleyen aidatlara da uygula';
 			case 'common.affectCurrentDuesHint': return 'Açık olduğunda mevcut bekleyen (PENDING) aidat tutarları da yeni tutara güncellenir.';
-			case 'common.dueUpdateNeedAmountOrDay': return 'Güncellemek için tutar veya aidat gününden en az birini yazın.';
+			case 'common.dueUpdateNeedAmountOrDay': return 'Güncellemek için tutar girin veya aidat günü seçin.';
 			case 'common.dueUpdateNeedStoredAmount': return 'Bu bina için kayıtlı tutar yok. Aidat gününü güncellemek için önce tutar yazın.';
 			case 'common.dueAmountInvalidPositive': return 'Geçerli bir tutar yazın.';
 			case 'common.dueDayOutOfRange': return 'Aidat günü 1 ile 28 arasında olmalıdır.';
@@ -2102,6 +2170,13 @@ extension on _StringsTr {
 			case 'features.auth.or': return 'veya';
 			case 'features.auth.noAccount': return 'Hesabınız yok mu? Kaydolun';
 			case 'features.auth.joinWithCode': return 'Davet kodu ile katılın';
+			case 'features.auth.signUp': return 'Üye ol';
+			case 'features.auth.signUpTitle': return 'Üye Ol';
+			case 'features.auth.signUpSubtitle': return 'Nasıl katılmak istiyorsunuz?';
+			case 'features.auth.beManager': return 'Yönetici ol';
+			case 'features.auth.beManagerHint': return 'Bina oluşturup yönetici hesabı açın';
+			case 'features.auth.joinWithInvite': return 'Davet koduyla katıl';
+			case 'features.auth.joinWithInviteHint': return 'Yöneticinizin verdiği kod ile sakin olun';
 			case 'features.auth.copyright': return '© Vefa Yazılım';
 			case 'features.auth.createAccount': return 'Yeni Hesap Oluştur';
 			case 'features.auth.name': return 'Ad Soyad';
@@ -2140,6 +2215,8 @@ extension on _StringsTr {
 			case 'features.tickets.categoryOther': return 'Diğer';
 			case 'features.tickets.submit': return 'Gönder';
 			case 'features.tickets.createSuccess': return 'Talebiniz alındı';
+			case 'features.tickets.createFailed': return 'Talep kaydedilemedi. Lütfen tekrar deneyin.';
+			case 'features.tickets.createServiceUnavailable': return 'Talep servisi şu an hazır değil. Lütfen daha sonra tekrar deneyin.';
 			case 'features.tickets.emptyTitle': return 'Henüz talep yok';
 			case 'features.tickets.emptySubtitle': return 'Arıza veya talebinizi buradan bildirebilirsiniz';
 			case 'features.tickets.titleTooShort': return 'Başlık en az 3 karakter olmalı';
@@ -2202,6 +2279,17 @@ extension on _StringsTr {
 			case 'features.expenses.loadError': return 'Giderler yüklenemedi';
 			case 'features.expenses.emptyTitle': return 'Bu dönemde gider yok';
 			case 'features.expenses.emptySubtitle': return 'Sağ üstten yeni gider ekleyebilirsiniz';
+			case 'features.expenses.receiptUrlLabel': return 'Makbuz bağlantısı (HTTPS)';
+			case 'features.expenses.receiptUrlHint': return 'Opsiyonel — internetteki makbuz dosyası adresi';
+			case 'features.expenses.receiptUrlInvalid': return 'Adres https:// ile başlamalıdır';
+			case 'features.expenses.receiptTitle': return 'Makbuz fotoğrafı';
+			case 'features.expenses.receiptHint': return 'Opsiyonel — galeriden seçin (canlı sunucuda dosya yükleme henüz yok)';
+			case 'features.expenses.receiptAdd': return 'Fotoğraf ekle';
+			case 'features.expenses.receiptChange': return 'Fotoğrafı değiştir';
+			case 'features.expenses.receiptRemove': return 'Fotoğrafı kaldır';
+			case 'features.expenses.receiptPendingBackend': return 'Gider kaydedildi. Makbuz sunucuya yüklenecek (API hazır olunca).';
+			case 'features.expenses.receiptUploadFailed': return 'Makbuz yüklenemedi. Gider kaydı oluşturuldu.';
+			case 'features.expenses.receiptPickFailed': return 'Fotoğraf seçilemedi';
 			case 'features.notifications.markAllRead': return 'Tümünü oku';
 			case 'features.notifications.viewRelated': return 'İlgili kayda git';
 			case 'features.notifications.unreadBadge': return 'Yeni';

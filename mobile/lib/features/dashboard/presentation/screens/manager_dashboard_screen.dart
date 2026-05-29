@@ -3,15 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/platform/system_navigator_bridge.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
-import '../../../../shared/widgets/count_badge.dart';
 import '../../../../shared/widgets/notification_icon_button.dart';
 import '../../../../shared/widgets/settings_tab.dart';
+import '../../../../shared/widgets/tint_dashboard_tile.dart';
 import '../../../notifications/presentation/widgets/announcement_form_sheet.dart';
+import '../providers/manager_home_counts_provider.dart';
 import '../../../tickets/presentation/providers/manager_open_tickets_count_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../buildings/data/buildings_store.dart';
@@ -53,6 +55,8 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
       if (!mounted) return;
       prefetchNotifications(ref);
       ref.invalidate(managerOpenTicketsCountProvider);
+      ref.invalidate(managerMonthExpensesCountProvider);
+      ref.invalidate(managerMonthAnnouncementsCountProvider);
     });
   }
 
@@ -75,6 +79,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
         await SystemNavigatorBridge.moveAppToBackground();
       },
       child: Scaffold(
+        backgroundColor: AppColors.surface,
         appBar: AppBar(
           title: Text(context.t.features.buildings.managerPanel),
           centerTitle: true,
@@ -124,7 +129,12 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
 
   Widget _buildHomeTab(AsyncValue<List<BuildingEntity>> buildingsAsync) {
     final openTicketsAsync = ref.watch(managerOpenTicketsCountProvider);
+    final monthExpensesAsync = ref.watch(managerMonthExpensesCountProvider);
+    final monthAnnouncementsAsync =
+        ref.watch(managerMonthAnnouncementsCountProvider);
     final openTicketCount = openTicketsAsync.value ?? 0;
+    final monthExpenseCount = monthExpensesAsync.value ?? 0;
+    final monthAnnouncementCount = monthAnnouncementsAsync.value ?? 0;
     final authState = ref.watch(authStateProvider);
     final userName = authState.user?.name ?? context.t.common.user;
     final buildings = buildingsAsync.value ?? const <BuildingEntity>[];
@@ -158,20 +168,28 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
               collectionRate: collectionRate,
               overdueCount: overdueCount,
             ),
-            const SizedBox(height: AppSizes.spacingL),
-            Text(
-              context.t.features.faz2.sectionTitle,
-              style: AppTypography.h3.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
             const SizedBox(height: AppSizes.spacingM),
-            _Faz2QuickActions(
-              ticketBadgeCount: openTicketCount,
-              onTickets: () => context.push('/manager/tickets'),
-              onExpenses: () => context.push('/manager/expenses'),
-              onAnnouncement: () => AnnouncementFormSheet.show(context),
+            _ManagerQuickActionsRow(
+              openTicketCount: openTicketCount,
+              monthExpenseCount: monthExpenseCount,
+              monthAnnouncementCount: monthAnnouncementCount,
+              onTickets: () async {
+                await context.push('/manager/tickets');
+                if (!mounted) return;
+                ref.invalidate(managerOpenTicketsCountProvider);
+              },
+              onExpenses: () async {
+                await context.push('/manager/expenses');
+                if (!mounted) return;
+                ref.invalidate(managerMonthExpensesCountProvider);
+              },
+              onAnnouncement: () async {
+                final sent = await AnnouncementFormSheet.show(context);
+                if (!mounted) return;
+                if (sent == true) {
+                  ref.invalidate(managerMonthAnnouncementsCountProvider);
+                }
+              },
             ),
             const SizedBox(height: AppSizes.spacingL),
             Row(
@@ -224,6 +242,8 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
   Future<void> _refreshHomeTab() async {
     ref.invalidate(allBuildingsDuesProvider);
     ref.invalidate(managerOpenTicketsCountProvider);
+    ref.invalidate(managerMonthExpensesCountProvider);
+    ref.invalidate(managerMonthAnnouncementsCountProvider);
     prefetchNotifications(ref);
     await ref.read(buildingsStoreProvider.notifier).loadBuildings();
   }
@@ -756,7 +776,7 @@ class _BuildingsAsyncSection extends StatelessWidget {
         return const _BuildingsLoadingPlaceholder();
       },
       error: (err, _) => _BuildingsErrorPlaceholder(
-        message: err is Exception ? err.toString() : '$err',
+        message: userFacingError(err),
         onRetry: onRetry,
       ),
     );
@@ -889,58 +909,27 @@ class _HeroSummaryCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.all(AppSizes.spacingM),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.primary, AppColors.primaryLight],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-          ),
-          child: Row(
+        Text.rich(
+          TextSpan(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.20),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.waving_hand_outlined,
-                  color: Colors.white,
-                  size: 22,
+              TextSpan(
+                text: '${context.t.common.welcome}, ',
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(width: AppSizes.spacingM),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.t.common.welcome,
-                      style: AppTypography.caption.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      userName,
-                      style: AppTypography.h3.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+              TextSpan(
+                text: userName,
+                style: AppTypography.h4.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: AppSizes.spacingM),
         IntrinsicHeight(
@@ -948,7 +937,7 @@ class _HeroSummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: _MetricItem(
+                child: TintDashboardTile(
                   icon: Icons.apartment_outlined,
                   value: totalApartments.toString(),
                   label: context.t.common.totalApartments,
@@ -957,7 +946,7 @@ class _HeroSummaryCard extends StatelessWidget {
               ),
               const SizedBox(width: AppSizes.spacingS),
               Expanded(
-                child: _MetricItem(
+                child: TintDashboardTile(
                   icon: Icons.trending_up,
                   value: '%${collectionRate.toStringAsFixed(0)}',
                   label: context.t.common.collection,
@@ -966,7 +955,7 @@ class _HeroSummaryCard extends StatelessWidget {
               ),
               const SizedBox(width: AppSizes.spacingS),
               Expanded(
-                child: _MetricItem(
+                child: TintDashboardTile(
                   icon: Icons.warning_amber_rounded,
                   value: overdueCount.toString(),
                   label: context.t.common.overdueStatus,
@@ -983,81 +972,18 @@ class _HeroSummaryCard extends StatelessWidget {
 
 enum _BuildingAction { edit, delete }
 
-class _MetricItem extends StatelessWidget {
-  final IconData icon;
-  final String value;
-  final String label;
-  final Color tint;
-
-  const _MetricItem({
-    required this.icon,
-    required this.value,
-    required this.label,
-    required this.tint,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingS),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [tint.withValues(alpha: 0.14), tint.withValues(alpha: 0.06)],
-        ),
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: tint.withValues(alpha: 0.22)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: tint.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: tint.withValues(alpha: 0.22)),
-            ),
-            alignment: Alignment.center,
-            child: Icon(icon, color: tint, size: 16),
-          ),
-          const SizedBox(height: AppSizes.spacingS),
-          Text(
-            value,
-            style: AppTypography.h3.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w800,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: AppTypography.caption.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Faz2QuickActions extends StatelessWidget {
-  final int ticketBadgeCount;
+class _ManagerQuickActionsRow extends StatelessWidget {
+  final int openTicketCount;
+  final int monthExpenseCount;
+  final int monthAnnouncementCount;
   final VoidCallback onTickets;
   final VoidCallback onExpenses;
   final VoidCallback onAnnouncement;
 
-  const _Faz2QuickActions({
-    required this.ticketBadgeCount,
+  const _ManagerQuickActionsRow({
+    required this.openTicketCount,
+    required this.monthExpenseCount,
+    required this.monthAnnouncementCount,
     required this.onTickets,
     required this.onExpenses,
     required this.onAnnouncement,
@@ -1066,123 +992,40 @@ class _Faz2QuickActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.faz2;
-    return Row(
-      children: [
-        Expanded(
-          child: _Faz2Tile(
-            icon: Icons.support_agent_outlined,
-            label: t.tickets,
-            badgeCount: ticketBadgeCount,
-            accentColor: AppColors.primary,
-            onTap: onTickets,
-          ),
-        ),
-        const SizedBox(width: AppSizes.spacingS),
-        Expanded(
-          child: _Faz2Tile(
-            icon: Icons.receipt_long_outlined,
-            label: t.expenses,
-            accentColor: AppColors.success,
-            onTap: onExpenses,
-          ),
-        ),
-        const SizedBox(width: AppSizes.spacingS),
-        Expanded(
-          child: _Faz2Tile(
-            icon: Icons.campaign_outlined,
-            label: t.announcement,
-            accentColor: AppColors.accent,
-            onTap: onAnnouncement,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Faz2Tile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final int badgeCount;
-  final Color accentColor;
-
-  const _Faz2Tile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.badgeCount = 0,
-    this.accentColor = AppColors.primary,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      elevation: 0,
-      shadowColor: Colors.transparent,
-      borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-            border: Border.all(color: accentColor.withValues(alpha: 0.18)),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                accentColor.withValues(alpha: 0.06),
-                AppColors.surface,
-              ],
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: TintDashboardTile(
+              icon: Icons.support_agent_outlined,
+              value: openTicketCount.toString(),
+              label: t.tickets,
+              tint: AppColors.primary,
+              onTap: onTickets,
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppSizes.spacingM,
-              horizontal: AppSizes.spacingS,
-            ),
-            child: Column(
-              children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: accentColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(icon, color: accentColor, size: 24),
-                    ),
-                    if (badgeCount > 0)
-                      Positioned(
-                        right: -6,
-                        top: -6,
-                        child: CountBadge(
-                          count: badgeCount,
-                          backgroundColor: AppColors.error,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.spacingS),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.caption.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
+          const SizedBox(width: AppSizes.spacingS),
+          Expanded(
+            child: TintDashboardTile(
+              icon: Icons.receipt_long_outlined,
+              value: monthExpenseCount.toString(),
+              label: t.expenses,
+              tint: AppColors.accent,
+              onTap: onExpenses,
             ),
           ),
-        ),
+          const SizedBox(width: AppSizes.spacingS),
+          Expanded(
+            child: TintDashboardTile(
+              icon: Icons.campaign_outlined,
+              value: monthAnnouncementCount.toString(),
+              label: t.announcement,
+              tint: AppColors.primaryLight,
+              onTap: onAnnouncement,
+            ),
+          ),
+        ],
       ),
     );
   }

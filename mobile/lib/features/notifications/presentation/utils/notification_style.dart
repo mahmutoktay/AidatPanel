@@ -49,10 +49,10 @@ NotificationVisual notificationVisual(NotificationType type) {
         background: Color(0xFFDBEAFE),
       );
     case NotificationType.other:
-      return const NotificationVisual(
+      return NotificationVisual(
         icon: Icons.notifications_rounded,
         color: AppColors.textSecondary,
-        background: AppColors.background,
+        background: AppColors.primary.withValues(alpha: 0.08),
       );
   }
 }

@@ -34,7 +34,7 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.surface,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openCreate(context),
         backgroundColor: AppColors.primary,
@@ -100,7 +100,7 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
   }
 
   Future<void> _openCreate(BuildContext context) async {
-    final created = await context.push<bool>('/tickets/new');
+    final created = await context.push<bool>('/tickets/create');
     if (created == true && mounted) {
       await ref.read(ticketsNotifierProvider.notifier).loadMyTickets();
     }

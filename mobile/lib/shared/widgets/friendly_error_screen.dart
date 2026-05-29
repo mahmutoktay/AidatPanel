@@ -52,7 +52,7 @@ class FriendlyErrorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final copy = _copy();
     return Material(
-      color: AppColors.background,
+      color: AppColors.surface,
       child: SafeArea(
         child: Padding(
           padding: AppSizes.screenBodyScrollPadding,

@@ -175,7 +175,7 @@ class _StepColumn extends StatelessWidget {
   }
 
   Color get _circleColor {
-    if (_state == _StepVisualState.pending) return AppColors.background;
+    if (_state == _StepVisualState.pending) return AppColors.surface;
     if (_state == _StepVisualState.active) {
       if (stepIndex >= 2) return AppColors.success;
       return AppColors.accent;

@@ -34,7 +34,7 @@ class ToastNotifier extends StateNotifier<List<ToastMessage>> {
 
   static const int maxVisible = 3;
   static const Duration displayDuration = Duration(seconds: 3);
-  static const Duration fadeDuration = Duration(milliseconds: 300);
+  static const Duration fadeDuration = Duration(milliseconds: 200);
 
   int _idCounter = 0;
 

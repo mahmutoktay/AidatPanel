@@ -2,17 +2,29 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/notification_remote_datasource.dart';
+import '../../data/repositories/notification_repository_impl.dart';
 import '../../domain/entities/notification_entity.dart';
+import '../../domain/repositories/notification_repository.dart';
 
-final notificationDataSourceProvider =
+final notificationRemoteDataSourceProvider =
     Provider<NotificationDataSource>((ref) {
   return NotificationRemoteDataSource(
     dioClient: ref.watch(dioClientProvider),
   );
 });
+
+final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
+  return NotificationRepositoryImpl(
+    remote: ref.watch(notificationRemoteDataSourceProvider),
+  );
+});
+
+/// Geriye uyumluluk — dev mock override.
+@Deprecated('Use notificationRemoteDataSourceProvider')
+final notificationDataSourceProvider = notificationRemoteDataSourceProvider;
 
 class NotificationsState {
   final bool isLoading;
@@ -56,10 +68,10 @@ class NotificationsState {
 }
 
 class NotificationsNotifier extends StateNotifier<NotificationsState> {
-  final NotificationDataSource _remote;
+  final NotificationRepository _repository;
   Timer? _badgeSyncDebounce;
 
-  NotificationsNotifier(this._remote) : super(const NotificationsState());
+  NotificationsNotifier(this._repository) : super(const NotificationsState());
 
   @override
   void dispose() {
@@ -67,12 +79,10 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     super.dispose();
   }
 
-  String _err(Object e) => e is ApiException ? e.message : e.toString();
-
   /// Rozeti API ile senkronize eder (liste ekranını etkilemez).
   Future<void> syncUnreadBadge() async {
     try {
-      final result = await _remote.list(limit: 1);
+      final result = await _repository.list(limit: 1);
       state = state.copyWith(unreadCount: result.unreadCount);
     } catch (_) {
       // Ağ hatasında mevcut (optimistic) sayı korunur.
@@ -84,7 +94,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     state = state.copyWith(unreadCount: state.unreadCount + 1);
 
     _badgeSyncDebounce?.cancel();
-    _badgeSyncDebounce = Timer(const Duration(milliseconds: 400), () {
+    _badgeSyncDebounce = Timer(const Duration(milliseconds: 200), () {
       unawaited(syncUnreadBadge());
     });
 
@@ -102,7 +112,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       clearError: true,
     );
     try {
-      final result = await _remote.list(
+      final result = await _repository.list(
         cursor: refresh ? null : state.nextCursor,
       );
       final merged = refresh
@@ -119,7 +129,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       state = state.copyWith(
         isLoading: false,
         isLoadingMore: false,
-        error: _err(e),
+        error: userFacingError(e),
       );
     }
   }
@@ -127,7 +137,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   Future<void> loadMore() => load(refresh: false);
 
   Future<void> markRead(String id) async {
-    await _remote.markRead(id);
+    await _repository.markRead(id);
     final items = [
       for (final n in state.items)
         if (n.id == id)
@@ -151,7 +161,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   }
 
   Future<void> markAllRead() async {
-    await _remote.markAllRead();
+    await _repository.markAllRead();
     final items = [
       for (final n in state.items)
         NotificationEntity(
@@ -174,13 +184,13 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     required String body,
   }) async {
     try {
-      return await _remote.sendAnnouncement(
+      return await _repository.sendAnnouncement(
         buildingId,
         title: title,
         body: body,
       );
     } catch (e) {
-      state = state.copyWith(error: _err(e));
+      state = state.copyWith(error: userFacingError(e));
       return null;
     }
   }
@@ -188,5 +198,5 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
 
 final notificationsNotifierProvider =
     StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
-  return NotificationsNotifier(ref.watch(notificationDataSourceProvider));
+  return NotificationsNotifier(ref.watch(notificationRepositoryProvider));
 });

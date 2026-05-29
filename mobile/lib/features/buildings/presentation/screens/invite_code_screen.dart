@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -42,7 +43,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
         title: Text(context.t.common.createInviteCode),
         centerTitle: true,
@@ -81,7 +82,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
               const Center(key: ValueKey('step-1-loading'), child: CircularProgressIndicator()),
           error: (e, _) => Center(
             key: const ValueKey('step-1-error'),
-            child: Text(e.toString()),
+            child: Text(userFacingError(e)),
           ),
           data: (apartments) => _ApartmentPickerStep(
             key: const ValueKey('step-1'),

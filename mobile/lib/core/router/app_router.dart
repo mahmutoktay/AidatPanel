@@ -5,19 +5,16 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/domain/entities/user_entity.dart' show UserRole;
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
-import '../../features/auth/presentation/screens/join_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
-import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
+import '../../features/auth/presentation/screens/sign_up_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/dashboard/presentation/screens/manager_dashboard_screen.dart';
 import '../../features/dashboard/presentation/screens/resident_dashboard_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
-import '../../features/notifications/presentation/screens/send_announcement_screen.dart';
 import '../../features/tickets/presentation/screens/create_ticket_screen.dart';
 import '../../features/tickets/presentation/screens/manager_tickets_screen.dart';
 import '../../features/tickets/presentation/screens/ticket_detail_screen.dart';
-import '../../features/expenses/presentation/screens/create_expense_screen.dart';
 import '../../features/expenses/presentation/screens/manager_expenses_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -40,6 +37,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       final isAuthRoute =
           loc == '/login' ||
+          loc == '/sign-up' ||
           loc == '/register' ||
           loc == '/join' ||
           loc == '/forgot-password' ||
@@ -60,8 +58,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             : '/resident-dashboard';
       }
 
+      if (loc == '/tickets/new') {
+        return '/tickets/create';
+      }
+
       if (authState.isAuthenticated &&
-          loc == '/tickets/new' &&
+          loc == '/tickets/create' &&
           authState.user?.role == UserRole.manager) {
         return '/manager-dashboard';
       }
@@ -76,7 +78,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return CustomTransitionPage<void>(
             key: state.pageKey,
             child: const SplashScreen(),
-            transitionDuration: const Duration(milliseconds: 400),
+            transitionDuration: const Duration(milliseconds: 200),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
                   final tween = Tween<Offset>(
@@ -99,17 +101,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/sign-up',
+        name: 'sign_up',
+        builder: (context, state) {
+          final role = state.uri.queryParameters['role'];
+          return SignUpScreen(initialIsManager: role == 'manager');
+        },
+      ),
+      GoRoute(
         path: '/register',
         name: 'register',
         builder: (context, state) {
-          return const RegisterScreen();
+          return const SignUpScreen(initialIsManager: true);
         },
       ),
       GoRoute(
         path: '/join',
         name: 'join',
         builder: (context, state) {
-          return const JoinScreen();
+          return const SignUpScreen();
         },
       ),
       GoRoute(
@@ -148,13 +158,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const NotificationsScreen(),
       ),
       GoRoute(
-        path: '/tickets/new',
+        path: '/tickets/create',
         name: 'create_ticket',
         builder: (context, state) => const CreateTicketScreen(),
       ),
       GoRoute(
         path: '/tickets/:ticketId',
         name: 'ticket_detail',
+        redirect: (context, state) {
+          final id = state.pathParameters['ticketId'];
+          if (id == 'new' || id == 'create') return '/tickets/create';
+          return null;
+        },
         builder: (context, state) {
           final id = state.pathParameters['ticketId']!;
           return TicketDetailScreen(ticketId: id);
@@ -169,19 +184,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/manager/expenses',
         name: 'manager_expenses',
         builder: (context, state) => const ManagerExpensesScreen(),
-      ),
-      GoRoute(
-        path: '/expenses/new',
-        name: 'create_expense',
-        builder: (context, state) {
-          final buildingId = state.extra as String? ?? '';
-          return CreateExpenseScreen(buildingId: buildingId);
-        },
-      ),
-      GoRoute(
-        path: '/manager/announcement',
-        name: 'send_announcement',
-        builder: (context, state) => const SendAnnouncementScreen(),
       ),
     ],
   );

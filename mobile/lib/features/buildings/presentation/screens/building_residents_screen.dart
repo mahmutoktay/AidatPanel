@@ -3,6 +3,7 @@ import 'dart:math' show max, min;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -323,7 +324,7 @@ class _BuildingResidentsScreenState
     );
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
         title: Text(context.t.common.buildingDetail),
         centerTitle: true,
@@ -337,7 +338,7 @@ class _BuildingResidentsScreenState
               Icon(Icons.error_outline, size: 48, color: AppColors.error),
               const SizedBox(height: AppSizes.spacingM),
               Text(
-                e.toString(),
+                userFacingError(e),
                 style: AppTypography.body1.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -596,9 +597,7 @@ class _BuildingResidentsScreenState
     // Boş daire kartı için soluk bir görünüm: yönetici tarafında "burada
     // henüz sakin yok" mesajının ilk bakışta okunabilmesi için arka plan
     // ve kenarlık tonu hafifçe değiştiriliyor.
-    final cardColor = isOccupied
-        ? AppColors.surface
-        : AppColors.background.withValues(alpha: 0.6);
+    final cardColor = AppColors.surface;
     final borderColor = isOccupied
         ? AppColors.borderColor
         : AppColors.borderColor.withValues(alpha: 0.5);
@@ -929,7 +928,7 @@ class _BuildingResidentsScreenState
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
-                            color: AppColors.background,
+                            color: AppColors.surface,
                             shape: BoxShape.circle,
                           ),
                           alignment: Alignment.center,

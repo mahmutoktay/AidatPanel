@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../data/datasources/dues_remote_datasource.dart';
@@ -92,7 +93,10 @@ class DuesNotifier extends StateNotifier<DuesState> {
       );
       state = state.copyWith(isLoading: false, dues: dues);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: 'Aidatlar yüklenemedi');
+      state = state.copyWith(
+        isLoading: false,
+        error: userFacingError(e),
+      );
     }
   }
 
@@ -110,8 +114,10 @@ class DuesNotifier extends StateNotifier<DuesState> {
       );
       state = state.copyWith(isLoading: false, dues: dues);
     } catch (e) {
-      state =
-          state.copyWith(isLoading: false, error: 'Aidat geçmişi yüklenemedi');
+      state = state.copyWith(
+        isLoading: false,
+        error: userFacingError(e),
+      );
     }
   }
 
@@ -137,7 +143,7 @@ class DuesNotifier extends StateNotifier<DuesState> {
       );
       state = state.copyWith(dues: dues);
     } catch (e) {
-      state = state.copyWith(error: 'Aidat durumu güncellenemedi');
+      state = state.copyWith(error: userFacingError(e));
     } finally {
       _isUpdatingStatus = false;
     }
@@ -174,7 +180,7 @@ class DuesNotifier extends StateNotifier<DuesState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Aidat tutarı güncellenemedi',
+        error: userFacingError(e),
       );
       return false;
     } finally {

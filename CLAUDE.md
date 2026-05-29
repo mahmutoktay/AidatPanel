@@ -5,7 +5,7 @@
 Her oturumda mutlaka okunacaklar:
 
 1. Bu dosya (CLAUDE.md) — kurallar ve faz kapısı
-2. `resources/FAZ_DURUMU.md` — aktif faz ve görev listesi
+2. `resources/yol-haritası/FAZ_DURUMU.md` — aktif faz ve görev listesi
 
 Göreve göre ek okuma:
 
@@ -21,7 +21,7 @@ Göreve göre ek okuma:
 Her oturumun başında, herhangi bir Flutter dosyasına dokunmadan önce:
 
 ```
-resources/FAZ_DURUMU.md dosyasını oku.
+resources/yol-haritası/FAZ_DURUMU.md dosyasını oku.
 ```
 
 Bu adım atlanamaz. Dosyayı okumadan kod yazamazsın.
@@ -32,13 +32,13 @@ Bu adım atlanamaz. Dosyayı okumadan kod yazamazsın.
 
 ### Aktif Faz Dışına Çıkma Yasağı
 
-- Yalnızca `FAZ_DURUMU.md`'de **AKTİF** olarak işaretlenmiş fazın görevlerini yapabilirsin.
+- Yalnızca `resources/yol-haritası/FAZ_DURUMU.md` içinde **AKTİF** olarak işaretlenmiş fazın görevlerini yapabilirsin.
 - Sonraki fazların `features/` klasörlerine dokunamazsın (okuma dahil kod üretme, refactor, yorum).
 - Gelecek faz için "hazırlık" veya "altyapı" adı altında bile olsa kural geçerlidir.
 
 ### Faz Tamamlanma Koşulları (İKİSİ BİRDEN ZORUNLU)
 
-Bir fazı tamamlanmış sayabilmek için `FAZ_DURUMU.md` içinde şunlar olmalı:
+Bir fazı tamamlanmış sayabilmek için `resources/yol-haritası/FAZ_DURUMU.md` içinde şunlar olmalı:
 
 1. O faza ait tüm checklist öğeleri `[x]` işaretli olmalı
 2. `ONAY: Furkan ✅` satırı mevcut olmalı
@@ -49,9 +49,9 @@ Bir fazı tamamlanmış sayabilmek için `FAZ_DURUMU.md` içinde şunlar olmalı
 
 | Yapabilir | Yapamaz |
 |-----------|---------|
-| Mevcut faz görevlerini tamamla | `FAZ_DURUMU.md`'deki ONAY satırını kendisi yaz |
+| Mevcut faz görevlerini tamamla | `resources/yol-haritası/FAZ_DURUMU.md` içindeki ONAY satırını kendisi yaz |
 | Görev bitince Furkan'dan onay iste | Sonraki fazın dosyalarına doku |
-| `FAZ_DURUMU.md`'deki checklist'i `[x]` yap | Faz geçişini Furkan onaysız ilan et |
+| `resources/yol-haritası/FAZ_DURUMU.md` içindeki checklist'i `[x]` yap | Faz geçişini Furkan onaysız ilan et |
 | Mimari ve teknik borç sorularını yanıtla | Faz atlayarak ilerideki feature'ı kur |
 
 ---
@@ -175,14 +175,23 @@ Yeni endpoint → `mobile/lib/core/constants/api_constants.dart`'a ekle, datasou
 - 401 hataları DioClient interceptor'ı halleder — elle yakalama
 - `response.data['data']` → liste parse edilirken bu katmana in
 
+### Google Play AAB (asistan kuralı)
+
+Kullanıcı **Google Play çıktısı / .aab** istediğinde (ek script veya araç eklemeden):
+
+1. `mobile/pubspec.yaml` içindeki `version:` satırında **`+` sonrası sürüm kodunu 1 artır** (ör. `0.1.3+1778674161` → `0.1.3+1778674162`). Sürüm adı (`0.1.x`) yalnızca kullanıcı açıkça isterse değişir.
+2. Ardından `cd mobile` → `flutter build appbundle --release` (`lib/main.dart`, `main_dev` değil).
+3. Çıktı yolunu bildir: `mobile/build/app/outputs/bundle/release/app-release.aab`.
+
+Play’deki mevcut en büyük sürüm kodundan küçük/eşit kod yükleme reddedilir; bu yüzden adım 1 atlanmaz.
+
 ---
 
 ## REFERANS DOSYALAR
 
 | Amaç | Dosya |
 |------|-------|
-| Canlı faz durumu | `resources/FAZ_DURUMU.md` |
-| Tam yol haritası | `resources/yol-haritası/YOL_HARITASI.md` |
+| Yol haritası + faz durumu (tek kaynak) | `resources/yol-haritası/FAZ_DURUMU.md` |
 | API şeması, backend, kullanıcı rolleri | `resources/AIDATPANEL.md` |
 | Ekran layout, widget'lar, renkler | `resources/tasarım/TASARIM_KILAVUZU.md` |
 | Tam feature örneği | `mobile/lib/features/auth/` |

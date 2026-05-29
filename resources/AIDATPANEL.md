@@ -437,20 +437,21 @@ mobile/lib/
 │       ├── date_utils.dart
 │       └── currency_utils.dart
 ├── l10n/
-│   ├── app_tr.arb                  # Türkçe metinler
-│   └── app_en.arb                  # İngilizce metinler
+│   ├── strings_tr.i18n.json        # Türkçe (Slang)
+│   └── strings_en.i18n.json        # İngilizce
 ├── features/
-│   ├── auth/
-│   │   ├── data/
-│   │   ├── domain/
-│   │   └── presentation/
+│   ├── auth/                       # Referans Clean Architecture implementasyonu
+│   │   ├── data/ | domain/ | presentation/
+│   │   └── presentation/screens/
 │   │       ├── login_screen.dart
-│   │       ├── register_screen.dart
-│   │       └── join_screen.dart    # Sakin davet kodu girişi
+│   │       ├── sign_up_screen.dart # Birleşik kayıt (sakin davet kodu + yönetici)
+│   │       ├── splash_screen.dart
+│   │       ├── forgot_password_screen.dart
+│   │       └── reset_password_screen.dart
 │   ├── dashboard/
-│   │   └── presentation/
-│   │       ├── manager_dashboard.dart
-│   │       └── resident_dashboard.dart
+│   │   └── presentation/screens/
+│   │       ├── manager_dashboard_screen.dart
+│   │       └── resident_dashboard_screen.dart
 │   ├── buildings/
 │   │   ├── data/
 │   │   ├── domain/
@@ -465,12 +466,16 @@ mobile/lib/
 │       └── presentation/
 │           └── paywall_screen.dart  # RevenueCat paywall
 └── shared/
-    ├── widgets/
-    │   ├── loading_widget.dart
-    │   ├── error_widget.dart
-    │   └── empty_state_widget.dart
-    └── models/
+    └── widgets/
+        ├── password_field.dart
+        ├── empty_state_widget.dart
+        ├── friendly_error_screen.dart
+        ├── tint_dashboard_tile.dart
+        ├── toast_overlay.dart
+        └── settings_tab.dart
 ```
+
+**GoRouter (özet):** `/login`, `/sign-up`, `/register` ve `/join` → `SignUpScreen` (alias); `/manager-dashboard`, `/resident-dashboard`; `/notifications`; `/manager/tickets`, `/manager/expenses`; `/tickets/create`, `/tickets/:id`. Gider ve duyuru formları **bottom sheet** (`ExpenseFormSheet`, `AnnouncementFormSheet`) — ayrı tam ekran route yok.
 
 ---
 

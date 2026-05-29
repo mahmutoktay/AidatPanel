@@ -10,10 +10,13 @@ import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/notification_icon_button.dart';
 import '../../../../shared/widgets/settings_tab.dart';
+import '../../../../shared/widgets/tint_dashboard_tile.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../../dues/presentation/screens/resident_dues_tab.dart';
+import '../../../tickets/domain/entities/ticket_entity.dart';
+import '../../../tickets/presentation/providers/tickets_provider.dart';
 import '../../../tickets/presentation/screens/resident_tickets_tab.dart';
 
 class ResidentDashboardScreen extends ConsumerStatefulWidget {
@@ -29,6 +32,7 @@ class _ResidentDashboardScreenState
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _requestedInitialDues = false;
+  bool _requestedInitialTickets = false;
 
   @override
   void initState() {
@@ -63,6 +67,13 @@ class _ResidentDashboardScreenState
         ref.read(duesNotifierProvider.notifier).loadMyDues();
       });
     }
+    if (!_requestedInitialTickets) {
+      _requestedInitialTickets = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(ticketsNotifierProvider.notifier).loadMyTickets();
+      });
+    }
 
     return PopScope(
       canPop: false,
@@ -71,6 +82,7 @@ class _ResidentDashboardScreenState
         await SystemNavigatorBridge.moveAppToBackground();
       },
       child: Scaffold(
+        backgroundColor: AppColors.surface,
         appBar: AppBar(
           title: Text(context.t.features.apartments.residentPanel),
           centerTitle: true,
@@ -121,10 +133,22 @@ class _ResidentDashboardScreenState
   Widget _buildHomeTab() {
     final authState = ref.watch(authStateProvider);
     final dues = ref.watch(duesNotifierProvider).dues;
+    final tickets = ref.watch(ticketsNotifierProvider).tickets;
     final userName = authState.user?.name ?? context.t.common.user;
-    final pendingCount = dues.where((d) => d.status == DueStatus.pending).length;
-    final overdueCount = dues.where((d) => d.status == DueStatus.overdue).length;
+    final pendingCount = dues
+        .where((d) => d.status == DueStatus.pending)
+        .length;
+    final overdueCount = dues
+        .where((d) => d.status == DueStatus.overdue)
+        .length;
     final paidCount = dues.where((d) => d.status == DueStatus.paid).length;
+    final openTicketCount = tickets
+        .where(
+          (t) =>
+              t.status == TicketStatus.open ||
+              t.status == TicketStatus.inProgress,
+        )
+        .length;
 
     return RefreshIndicator(
       onRefresh: _refreshHomeTab,
@@ -141,16 +165,15 @@ class _ResidentDashboardScreenState
               overdueCount: overdueCount,
               paidCount: paidCount,
             ),
-            const SizedBox(height: AppSizes.spacingL),
-            Text(
-              context.t.common.quickActions,
-              style: AppTypography.h3.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
             const SizedBox(height: AppSizes.spacingM),
-            _buildQuickActionsRow(),
+            _ResidentQuickActionsRow(
+              pendingCount: pendingCount,
+              billsCount: dues.length,
+              openTicketCount: openTicketCount,
+              onDues: _goToDuesTab,
+              onBills: _goToDuesTab,
+              onSupport: _goToIssuesTab,
+            ),
             const SizedBox(height: AppSizes.spacingL),
             Text(
               context.t.common.recentTransactions,
@@ -167,8 +190,21 @@ class _ResidentDashboardScreenState
     );
   }
 
+  void _goToDuesTab() {
+    ref.read(residentTabIndexProvider.notifier).state = 1;
+    _tabController.animateTo(1);
+  }
+
+  void _goToIssuesTab() {
+    ref.read(residentTabIndexProvider.notifier).state = 2;
+    _tabController.animateTo(2);
+  }
+
   Future<void> _refreshHomeTab() async {
-    await ref.read(duesNotifierProvider.notifier).loadMyDues();
+    await Future.wait([
+      ref.read(duesNotifierProvider.notifier).loadMyDues(),
+      ref.read(ticketsNotifierProvider.notifier).loadMyTickets(),
+    ]);
   }
 
   Widget _buildDuesTab() {
@@ -181,40 +217,6 @@ class _ResidentDashboardScreenState
 
   Widget _buildSettingsTab() {
     return const SettingsTab();
-  }
-
-  Widget _buildQuickActionsRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: _ResidentQuickActionTile(
-            icon: Icons.payment_outlined,
-            label: context.t.common.makePayment,
-            onTap: () {},
-          ),
-        ),
-        const SizedBox(width: AppSizes.spacingS),
-        Expanded(
-          child: _ResidentQuickActionTile(
-            icon: Icons.receipt_outlined,
-            label: context.t.common.bills,
-            onTap: () {},
-          ),
-        ),
-        const SizedBox(width: AppSizes.spacingS),
-        Expanded(
-          child: _ResidentQuickActionTile(
-            icon: Icons.help_outline,
-            label: context.t.common.support,
-            onTap: () {
-              ref.read(residentTabIndexProvider.notifier).state = 2;
-              _tabController.animateTo(2);
-            },
-          ),
-        ),
-      ],
-    );
   }
 
   Widget _buildTransactionHistory() {
@@ -289,7 +291,7 @@ class _ResidentDashboardScreenState
   }
 }
 
-/// Yönetici ana sayfadaki `_HeroSummaryCard` + `_MetricItem` ile aynı görsel dil.
+/// Yönetici ana sayfadaki `_HeroSummaryCard` ile aynı düzen.
 class _ResidentHeroSummaryCard extends StatelessWidget {
   final String userName;
   final int pendingCount;
@@ -308,59 +310,27 @@ class _ResidentHeroSummaryCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.all(AppSizes.spacingM),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.primary, AppColors.primaryLight],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        Text.rich(
+          TextSpan(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.20),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.waving_hand_outlined,
-                  color: Colors.white,
-                  size: 22,
+              TextSpan(
+                text: '${context.t.common.welcome}, ',
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(width: AppSizes.spacingM),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.t.common.welcome,
-                      style: AppTypography.caption.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      userName,
-                      style: AppTypography.h3.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+              TextSpan(
+                text: userName,
+                style: AppTypography.h4.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: AppSizes.spacingM),
         IntrinsicHeight(
@@ -368,7 +338,7 @@ class _ResidentHeroSummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: _ResidentMetricItem(
+                child: TintDashboardTile(
                   icon: Icons.pending_outlined,
                   value: pendingCount.toString(),
                   label: context.t.common.pendingStatus,
@@ -377,7 +347,7 @@ class _ResidentHeroSummaryCard extends StatelessWidget {
               ),
               const SizedBox(width: AppSizes.spacingS),
               Expanded(
-                child: _ResidentMetricItem(
+                child: TintDashboardTile(
                   icon: Icons.warning_amber_rounded,
                   value: overdueCount.toString(),
                   label: context.t.common.overdueStatus,
@@ -386,7 +356,7 @@ class _ResidentHeroSummaryCard extends StatelessWidget {
               ),
               const SizedBox(width: AppSizes.spacingS),
               Expanded(
-                child: _ResidentMetricItem(
+                child: TintDashboardTile(
                   icon: Icons.check_circle_outline,
                   value: paidCount.toString(),
                   label: context.t.common.paidStatus,
@@ -401,143 +371,61 @@ class _ResidentHeroSummaryCard extends StatelessWidget {
   }
 }
 
-class _ResidentMetricItem extends StatelessWidget {
-  final IconData icon;
-  final String value;
-  final String label;
-  final Color tint;
+/// Yönetici `_ManagerQuickActionsRow` ile aynı kutu stili ve düzen.
+class _ResidentQuickActionsRow extends StatelessWidget {
+  final int pendingCount;
+  final int billsCount;
+  final int openTicketCount;
+  final VoidCallback onDues;
+  final VoidCallback onBills;
+  final VoidCallback onSupport;
 
-  const _ResidentMetricItem({
-    required this.icon,
-    required this.value,
-    required this.label,
-    required this.tint,
+  const _ResidentQuickActionsRow({
+    required this.pendingCount,
+    required this.billsCount,
+    required this.openTicketCount,
+    required this.onDues,
+    required this.onBills,
+    required this.onSupport,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingS),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [tint.withValues(alpha: 0.14), tint.withValues(alpha: 0.06)],
-        ),
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: tint.withValues(alpha: 0.22)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+    final t = context.t.common;
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: tint.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: tint.withValues(alpha: 0.22)),
+          Expanded(
+            child: TintDashboardTile(
+              icon: Icons.payment_outlined,
+              value: pendingCount.toString(),
+              label: t.makePayment,
+              tint: AppColors.primary,
+              onTap: onDues,
             ),
-            alignment: Alignment.center,
-            child: Icon(icon, color: tint, size: 16),
           ),
-          const SizedBox(height: AppSizes.spacingS),
-          Text(
-            value,
-            style: AppTypography.h3.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w800,
+          const SizedBox(width: AppSizes.spacingS),
+          Expanded(
+            child: TintDashboardTile(
+              icon: Icons.receipt_outlined,
+              value: billsCount.toString(),
+              label: t.bills,
+              tint: AppColors.accent,
+              onTap: onBills,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: AppTypography.caption.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
+          const SizedBox(width: AppSizes.spacingS),
+          Expanded(
+            child: TintDashboardTile(
+              icon: Icons.support_agent_outlined,
+              value: openTicketCount.toString(),
+              label: t.support,
+              tint: AppColors.primaryLight,
+              onTap: onSupport,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ResidentQuickActionTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _ResidentQuickActionTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    const tint = AppColors.primary;
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [tint.withValues(alpha: 0.14), tint.withValues(alpha: 0.06)],
-        ),
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: tint.withValues(alpha: 0.22)),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: AppSizes.minTouchTarget,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSizes.spacingS,
-                vertical: AppSizes.spacingS,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: tint.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: tint.withValues(alpha: 0.22)),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(icon, color: tint, size: 14),
-                  ),
-                  const SizedBox(height: AppSizes.spacingXS),
-                  Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

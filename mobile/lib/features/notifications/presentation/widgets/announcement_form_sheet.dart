@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../providers/notifications_provider.dart';
@@ -101,23 +102,14 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
                       ),
                     )
                   else ...[
-                    DropdownButtonFormField<String>(
-                      initialValue: _buildingId,
-                      decoration: InputDecoration(
-                        labelText: context.t.common.buildingName,
-                        border: const OutlineInputBorder(),
-                      ),
-                      items: buildings
-                          .map(
-                            (b) => DropdownMenuItem(
-                              value: b.id,
-                              child: Text(b.name),
-                            ),
-                          )
-                          .toList(),
+                    AppSelectField<String>(
+                      label: context.t.common.buildingName,
+                      value: _buildingId,
+                      options: [
+                        for (final b in buildings)
+                          AppSelectOption(value: b.id, label: b.name),
+                      ],
                       onChanged: (id) => setState(() => _buildingId = id),
-                      validator: (v) =>
-                          v == null || v.isEmpty ? t.fieldRequired : null,
                     ),
                     const SizedBox(height: AppSizes.spacingM),
                     TextFormField(
@@ -145,13 +137,15 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
                       },
                     ),
                     const SizedBox(height: AppSizes.spacingXL),
-                    FilledButton(
+                    ElevatedButton(
                       onPressed: _submitting ? null : _submit,
                       child: _submitting
                           ? const SizedBox(
-                              height: 22,
-                              width: 22,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
                             )
                           : Text(t.sendButton),
                     ),

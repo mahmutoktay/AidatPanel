@@ -138,7 +138,7 @@ class _RemoveResidentDialogState extends ConsumerState<RemoveResidentDialog> {
               vertical: AppSizes.spacingS,
             ),
             decoration: BoxDecoration(
-              color: AppColors.background,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppSizes.inputRadius),
               border: Border.all(color: AppColors.borderColor),
             ),

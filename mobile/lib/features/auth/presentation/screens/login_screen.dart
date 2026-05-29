@@ -10,7 +10,6 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/widgets/alt_action_button.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../providers/auth_provider.dart';
 
@@ -210,7 +209,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
-                    color: AppColors.background,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(28),
                     ),
@@ -389,7 +388,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     context.t.common.forgotPassword,
                                     textAlign: TextAlign.center,
                                     style: AppTypography.body2.copyWith(
-                                      color: AppColors.primary,
+                                      color: authState.isLoading
+                                          ? AppColors.textDisabled
+                                          : AppColors.primary,
                                     ),
                                   ),
                                 ),
@@ -397,51 +398,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: AppSizes.spacingFieldSpacing),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Divider(
-                                color: AppColors.border,
-                                thickness: 1,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSizes.spacingM,
-                              ),
-                              child: Text(
-                                context.t.features.auth.or,
-                                style: AppTypography.caption.copyWith(
-                                  color: AppColors.textSecondary,
+                        const SizedBox(height: AppSizes.spacingXS),
+                        Center(
+                          child: Semantics(
+                            button: true,
+                            label: context.t.features.auth.signUp,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: authState.isLoading
+                                  ? null
+                                  : () => context.push('/sign-up'),
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minWidth: AppSizes.minTouchTarget,
+                                  minHeight: AppSizes.minTouchTarget,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    context.t.features.auth.signUp,
+                                    textAlign: TextAlign.center,
+                                    style: AppTypography.body2.copyWith(
+                                      color: authState.isLoading
+                                          ? AppColors.textDisabled
+                                          : AppColors.primary,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                            Expanded(
-                              child: Divider(
-                                color: AppColors.border,
-                                thickness: 1,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSizes.spacingFieldSpacing),
-                        AltActionButton(
-                          icon: Icons.person_add_outlined,
-                          title: context.t.features.auth.noAccount,
-                          onTap: authState.isLoading
-                              ? null
-                              : () => context.push('/register'),
-                          isEnabled: !authState.isLoading,
-                        ),
-                        const SizedBox(height: AppSizes.spacingFieldSpacing),
-                        AltActionButton(
-                          icon: Icons.vpn_key_outlined,
-                          title: context.t.features.auth.joinWithCode,
-                          onTap: authState.isLoading
-                              ? null
-                              : () => context.push('/join'),
-                          isEnabled: !authState.isLoading,
+                          ),
                         ),
                         const SizedBox(height: AppSizes.spacingL),
                         Text(

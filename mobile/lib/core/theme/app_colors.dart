@@ -13,8 +13,8 @@ class AppColors {
   static const Color warning = Color(0xFFF59E0B);
   static const Color info = Color(0xFF2563EB);
 
-  // Nötr renkler
-  static const Color background = Color(0xFFF8FAFC);
+  // Nötr renkler — sayfa / sheet / dialog gövdesi beyaz (50+ yaş: sade arayüz)
+  static const Color background = Color(0xFFFFFFFF);
   static const Color surface = Color(0xFFFFFFFF);
   static const Color border = Color(0xFFE2E8F0);
   static const Color borderColor = Color(0xFFE2E8F0);

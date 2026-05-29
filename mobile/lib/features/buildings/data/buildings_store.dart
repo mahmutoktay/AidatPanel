@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/user_error_message.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
 import '../domain/entities/building_entity.dart';
 import 'datasources/building_remote_datasource.dart';
@@ -37,7 +38,7 @@ class BuildingsNotifier
       final buildings = await _repository.fetchBuildings();
       state = AsyncValue.data(buildings);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      state = AsyncValue.error(wrapAsyncStateError(e), st);
     }
   }
 
@@ -80,7 +81,7 @@ class BuildingsNotifier
       state = AsyncValue.data([...current, building]);
       return building.id;
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      state = AsyncValue.error(wrapAsyncStateError(e), st);
       return null;
     } finally {
       _isCreating = false;
@@ -123,12 +124,3 @@ final buildingsStoreProvider = StateNotifierProvider<BuildingsNotifier,
     AsyncValue<List<BuildingEntity>>>(
   (ref) => BuildingsNotifier(ref.watch(buildingRepositoryProvider)),
 );
-
-final buildingsCountProvider = Provider<int>((ref) {
-  return ref.watch(buildingsStoreProvider).value?.length ?? 0;
-});
-
-final totalBuildingsDuesProvider = Provider<double>((ref) {
-  final buildings = ref.watch(buildingsStoreProvider).value ?? [];
-  return buildings.fold<double>(0, (sum, b) => sum + b.collectedDues);
-});
