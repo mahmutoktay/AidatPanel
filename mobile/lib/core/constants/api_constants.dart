@@ -13,8 +13,14 @@ class ApiConstants {
 
   // Buildings endpoints
   static const String buildings = '$apiVersion/buildings';
+  static const String buildingsCollectionPresets =
+      '$apiVersion/buildings/collection-presets';
+  static String buildingCollectionPreset(String normalizedIban) =>
+      '$buildingsCollectionPresets/${Uri.encodeComponent(normalizedIban)}';
   static String buildingDetail(String buildingId) =>
       '$apiVersion/buildings/$buildingId';
+  static String buildingCollection(String buildingId) =>
+      '$apiVersion/buildings/$buildingId/collection';
   static String buildingApartments(String buildingId) =>
       '$apiVersion/buildings/$buildingId/apartments';
   static String buildingDues(String buildingId) =>
@@ -52,6 +58,19 @@ class ApiConstants {
 
   // Dues endpoints
   static const String myDues = '$apiVersion/me/dues';
+
+  // Dekont endpoints
+  static const String myPaymentCollection =
+      '$apiVersion/me/payment-collection';
+  static const String myDekonts = '$apiVersion/me/dekonts';
+  static const String dekontUpload = '$apiVersion/dekonts/upload';
+  static String dekont(String dekontId) => '$apiVersion/dekonts/$dekontId';
+  static String dekontReview(String dekontId) =>
+      '$apiVersion/dekonts/$dekontId/review';
+  static String dekontFile(String dekontId) =>
+      '$apiVersion/dekonts/$dekontId/file';
+  static String buildingDekonts(String buildingId) =>
+      '$apiVersion/buildings/$buildingId/dekonts';
 
   // Expenses endpoints
   static String expense(String expenseId) => '$apiVersion/expenses/$expenseId';

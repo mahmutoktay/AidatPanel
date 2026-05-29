@@ -18,6 +18,14 @@ extension NotificationTypeLabels on NotificationType {
         return t.typeTicketUpdate;
       case NotificationType.announcement:
         return t.typeAnnouncement;
+      case NotificationType.dekontReceived:
+        return t.typeDekontReceived;
+      case NotificationType.dekontNeedsReview:
+        return t.typeDekontNeedsReview;
+      case NotificationType.dekontMatched:
+        return t.typeDekontMatched;
+      case NotificationType.dekontPaymentApplied:
+        return t.typeDekontPaymentApplied;
       case NotificationType.system:
         return t.typeSystem;
       case NotificationType.other:
@@ -38,6 +46,14 @@ extension NotificationTypeLabels on NotificationType {
         return 'TICKET_UPDATE';
       case NotificationType.announcement:
         return 'ANNOUNCEMENT';
+      case NotificationType.dekontReceived:
+        return 'DEKONT_RECEIVED';
+      case NotificationType.dekontNeedsReview:
+        return 'DEKONT_NEEDS_REVIEW';
+      case NotificationType.dekontMatched:
+        return 'DEKONT_MATCHED';
+      case NotificationType.dekontPaymentApplied:
+        return 'DEKONT_PAYMENT_APPLIED';
       case NotificationType.system:
         return 'SYSTEM';
       case NotificationType.other:
@@ -58,6 +74,7 @@ extension NotificationEntityNavigation on NotificationEntity {
       type: type.toApiType(),
       notificationId: id,
       ticketId: str(data?['ticketId']),
+      dekontId: str(data?['dekontId']),
       buildingId: str(data?['buildingId']),
       status: str(data?['status']),
       route: str(data?['route']),

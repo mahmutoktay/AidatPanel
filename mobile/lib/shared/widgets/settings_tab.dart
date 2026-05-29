@@ -9,6 +9,7 @@ import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
+import '../../features/buildings/presentation/screens/saved_ibans_screen.dart';
 import '../../features/profile/presentation/widgets/change_password_bottom_sheet.dart';
 import '../../features/profile/presentation/widgets/delete_account_dialog.dart';
 import '../../l10n/strings.g.dart';
@@ -35,6 +36,20 @@ class SettingsTab extends ConsumerWidget {
           const SizedBox(height: AppSizes.spacingS),
           _SettingsCard(
             children: [
+              if (user?.role == UserRole.manager) ...[
+                _SettingsTile(
+                  icon: Icons.account_balance_wallet_outlined,
+                  title: context.t.features.buildings.collection.savedIbansTitle,
+                  onTap: () {
+                    Navigator.of(context, rootNavigator: true).push<void>(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const SavedIbansScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const _Divider(),
+              ],
               _SettingsTile(
                 icon: Icons.lock_outline,
                 title: context.t.common.changePassword,

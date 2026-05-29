@@ -70,6 +70,14 @@ class NotificationModel {
         return NotificationType.dueReminder;
       case 'DUE_PAID':
         return NotificationType.duePaid;
+      case 'DEKONT_RECEIVED':
+        return NotificationType.dekontReceived;
+      case 'DEKONT_NEEDS_REVIEW':
+        return NotificationType.dekontNeedsReview;
+      case 'DEKONT_MATCHED':
+        return NotificationType.dekontMatched;
+      case 'DEKONT_PAYMENT_APPLIED':
+        return NotificationType.dekontPaymentApplied;
       case 'SYSTEM':
         return NotificationType.system;
       default:

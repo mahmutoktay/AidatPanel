@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -60,12 +61,42 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
           }
 
           if (index == 0) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
-              child: Text(
-                context.t.common.myDuesHistory,
-                style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
-              ),
+            final t = context.t.features.dekont;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  context.t.common.myDuesHistory,
+                  style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: AppSizes.buttonHeightSecondary,
+                        child: ElevatedButton.icon(
+                          onPressed: () => context.push('/payment'),
+                          icon: const Icon(Icons.payment_outlined),
+                          label: Text(t.makePaymentTitle),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSizes.spacingS),
+                    Expanded(
+                      child: SizedBox(
+                        height: AppSizes.buttonHeightSecondary,
+                        child: OutlinedButton.icon(
+                          onPressed: () => context.push('/dekonts'),
+                          icon: const Icon(Icons.receipt_long_outlined),
+                          label: Text(t.myDekontsTitle),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+              ],
             );
           }
 

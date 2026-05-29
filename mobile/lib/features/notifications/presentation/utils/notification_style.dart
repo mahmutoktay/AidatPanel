@@ -42,6 +42,20 @@ NotificationVisual notificationVisual(NotificationType type) {
         color: AppColors.accent,
         background: AppColors.warningBg,
       );
+    case NotificationType.dekontReceived:
+    case NotificationType.dekontNeedsReview:
+    case NotificationType.dekontMatched:
+      return const NotificationVisual(
+        icon: Icons.receipt_long_rounded,
+        color: AppColors.primary,
+        background: Color(0xFFE8EEF8),
+      );
+    case NotificationType.dekontPaymentApplied:
+      return const NotificationVisual(
+        icon: Icons.check_circle_rounded,
+        color: AppColors.success,
+        background: AppColors.successBg,
+      );
     case NotificationType.system:
       return const NotificationVisual(
         icon: Icons.info_rounded,

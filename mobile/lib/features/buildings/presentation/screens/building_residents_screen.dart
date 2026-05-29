@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/selection_mode_widgets.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../apartments/data/apartments_store.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
@@ -219,7 +220,10 @@ class _BuildingResidentsScreenState
               onPressed: () => Navigator.of(dialogContext).pop(false),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.borderColor, width: 1.5),
+                side: const BorderSide(
+                  color: AppColors.borderColor,
+                  width: 1.5,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -322,183 +326,165 @@ class _BuildingResidentsScreenState
     final asyncApartments = ref.watch(
       apartmentsStoreProvider(widget.building.id),
     );
+    final selectedCount = _selectedApartmentIds.length;
+    final hasOccupied =
+        asyncApartments.value?.any((a) => a.isOccupied) ?? false;
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: Text(context.t.common.buildingDetail),
-        centerTitle: true,
-      ),
-      body: asyncApartments.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.error_outline, size: 48, color: AppColors.error),
-              const SizedBox(height: AppSizes.spacingM),
-              Text(
-                userFacingError(e),
-                style: AppTypography.body1.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSizes.spacingM),
-              ElevatedButton(
-                onPressed: () => ref
-                    .read(apartmentsStoreProvider(widget.building.id).notifier)
-                    .loadApartments(),
-                child: Text(context.t.features.buildings.tekrarDene),
-              ),
-            ],
+    return PopScope(
+      canPop: !_selectionMode,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _exitSelectionMode();
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.surface,
+        appBar: AppBar(
+          centerTitle: true,
+          leading: _selectionMode
+              ? IconButton(
+                  tooltip: context.t.common.cancelBtn,
+                  icon: const Icon(Icons.close_rounded),
+                  onPressed: _exitSelectionMode,
+                )
+              : null,
+          title: Text(
+            _selectionMode
+                ? '$selectedCount ${context.t.common.selectedCountLabel}'
+                : context.t.common.buildingDetail,
           ),
         ),
-        data: (residents) => SingleChildScrollView(
-          padding: AppSizes.screenBodyScrollPadding,
-          child: Column(
+        floatingActionButtonLocation: selectionActionFabLocation,
+        floatingActionButton: _selectionMode && selectedCount > 0
+            ? SelectionActionFab(
+                onPressed: _confirmAndRemoveSelected,
+                backgroundColor: AppColors.warning,
+                icon: Icons.person_remove_outlined,
+                label: '${context.t.common.remove} ($selectedCount)',
+              )
+            : null,
+        body: asyncApartments.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                const SizedBox(height: AppSizes.spacingM),
+                Text(
+                  userFacingError(e),
+                  style: AppTypography.body1.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+                ElevatedButton(
+                  onPressed: () => ref
+                      .read(
+                        apartmentsStoreProvider(widget.building.id).notifier,
+                      )
+                      .loadApartments(),
+                  child: Text(context.t.features.buildings.tekrarDene),
+                ),
+              ],
+            ),
+          ),
+          data: (residents) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildHeader(widget.building),
-              const SizedBox(height: AppSizes.spacingL),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    context.t.common.residents,
-                    style: AppTypography.h3.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.spacingS,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.18),
-                      ),
-                    ),
-                    child: Text(
-                      '${residents.length} ${context.t.common.apartmentsBadge}',
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              if (residents.any((a) => a.isOccupied)) ...[
-                const SizedBox(height: AppSizes.spacingS),
-                if (!_selectionMode)
-                  SizedBox(
-                    width: double.infinity,
-                    height: AppSizes.minTouchTarget,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => setState(() {
-                          _selectionMode = true;
-                          _selectedApartmentIds.clear();
-                        }),
-                        borderRadius: BorderRadius.circular(
-                          AppSizes.buttonRadius,
-                        ),
-                        child: Ink(
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(
-                              AppSizes.buttonRadius,
-                            ),
-                            border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.22),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.checklist_rtl,
-                                size: 22,
-                                color: AppColors.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                context.t.common.multiSelectResidents,
-                                style: AppTypography.body1.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                else ...[
-                  Row(
+              if (_selectionMode)
+                SelectionHintBanner(
+                  message: context.t.common.selectionRemoveHint,
+                ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: _selectionMode
+                      ? const EdgeInsets.fromLTRB(
+                          AppSizes.dashboardScreenPaddingHorizontal,
+                          AppSizes.spacingL,
+                          AppSizes.dashboardScreenPaddingHorizontal,
+                          96, // FAB.extended yüksekliği + boşluk
+                        )
+                      : AppSizes.screenBodyScrollPadding,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: AppSizes.minTouchTarget,
-                          child: OutlinedButton(
-                            onPressed: _exitSelectionMode,
-                            child: Text(context.t.common.cancelBtn),
+                      _buildHeader(widget.building),
+                      const SizedBox(height: AppSizes.spacingL),
+                      _buildResidentsSectionHeader(
+                        context,
+                        residentsCount: residents.length,
+                        showSelectTrigger: !_selectionMode && hasOccupied,
+                      ),
+                      const SizedBox(height: AppSizes.spacingM),
+                      if (residents.isEmpty)
+                        _buildEmptyState(context)
+                      else
+                        ...residents.asMap().entries.map(
+                          (entry) => _buildResidentCard(
+                            context,
+                            entry.key + 1,
+                            entry.value,
                           ),
                         ),
-                      ),
-                      const SizedBox(width: AppSizes.spacingM),
-                      Expanded(
-                        flex: 2,
-                        child: SizedBox(
-                          height: AppSizes.minTouchTarget,
-                          child: FilledButton(
-                            onPressed: _selectedApartmentIds.isEmpty
-                                ? null
-                                : _confirmAndRemoveSelected,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: AppColors.error,
-                              foregroundColor: Colors.white,
-                              disabledBackgroundColor: AppColors.error
-                                  .withValues(alpha: 0.38),
-                              disabledForegroundColor: Colors.white
-                                  .withValues(alpha: 0.62),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            child: Text(
-                              '${context.t.common.removeSelectedResidents}'
-                              '${_selectedApartmentIds.isEmpty ? '' : ' (${_selectedApartmentIds.length})'}',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
-                ],
-              ],
-              const SizedBox(height: AppSizes.spacingM),
-              if (residents.isEmpty)
-                _buildEmptyState(context)
-              else
-                ...residents.asMap().entries.map(
-                  (entry) =>
-                      _buildResidentCard(context, entry.key + 1, entry.value),
                 ),
+              ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  /// "Sakinler · N Daire" başlığı + sağında kompakt "Seç" tetikleyici.
+  Widget _buildResidentsSectionHeader(
+    BuildContext context, {
+    required int residentsCount,
+    required bool showSelectTrigger,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          context.t.common.residents,
+          style: AppTypography.h3.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(width: AppSizes.spacingS),
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.spacingS,
+            vertical: 6,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.18),
+            ),
+          ),
+          child: Text(
+            '$residentsCount ${context.t.common.apartmentsBadge}',
+            style: AppTypography.caption.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        const Spacer(),
+        if (showSelectTrigger)
+          SelectionTriggerButton(
+            label: context.t.common.selectTriggerShort,
+            onTap: () => setState(() {
+              _selectionMode = true;
+              _selectedApartmentIds.clear();
+            }),
+          ),
+      ],
     );
   }
 
@@ -731,113 +717,129 @@ class _BuildingResidentsScreenState
               ],
             ),
             // Alt satır: "Detaylar.." → daire / sakin bilgisi ve işlemler alt sayfası.
-            const SizedBox(height: AppSizes.spacingM),
-            Container(height: 1, color: borderColor),
-            const SizedBox(height: AppSizes.spacingM),
-            if (showSelection)
+            // Çoklu seçim modunda detay/işlem footer'ı gizleniyor: kart yalnızca
+            // başlık + durum rozetiyle sade ve hızlı seçilebilir kalır.
+            if (showSelection) ...[
+              const SizedBox(height: AppSizes.spacingS),
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Expanded(
-                    child: Text(
-                      context.t.common.multiSelectTapHint,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.body2.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
                   Text(
-                    '₺${apt.monthlyDues.toStringAsFixed(0)}${context.t.common.perMonth}',
-                    style: AppTypography.body2.copyWith(
+                    '₺${apt.monthlyDues.toStringAsFixed(0)}'
+                    '${context.t.common.perMonth}',
+                    style: AppTypography.caption.copyWith(
                       color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ),
-                ],
-              )
-            else
-              Row(
-                children: [
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: isOccupied
-                          ? () =>
-                              _showApartmentDetailsBottomSheet(context, apt)
-                          : null,
-                      borderRadius: BorderRadius.circular(
-                        AppSizes.buttonRadius,
-                      ),
-                      child: Ink(
-                        decoration: BoxDecoration(
-                          color: isOccupied
-                              ? AppColors.surface
-                              : AppColors.borderColor.withValues(alpha: 0.25),
-                          borderRadius: BorderRadius.circular(
-                            AppSizes.buttonRadius,
-                          ),
-                          border: Border.all(
-                            color: isOccupied
-                                ? AppColors.primary.withValues(alpha: 0.22)
-                                : AppColors.borderColor.withValues(alpha: 0.6),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSizes.spacingM,
-                            vertical: AppSizes.spacingS,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.info_outline_rounded,
-                                size: 18,
-                                color: isOccupied
-                                    ? AppColors.primary
-                                    : AppColors.textSecondary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                context.t.common.residentDetailsLink,
-                                style: AppTypography.body1.copyWith(
-                                  color: isOccupied
-                                      ? AppColors.primary
-                                      : AppColors.textSecondary,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '₺${apt.monthlyDues.toStringAsFixed(0)}',
-                        style: AppTypography.body1.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      Text(
-                        context.t.common.perMonth
-                            .trim()
-                            .replaceAll('/', '')
-                            .trim(),
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
+            ] else ...[
+              const SizedBox(height: AppSizes.spacingM),
+              Container(height: 1, color: borderColor),
+              const SizedBox(height: AppSizes.spacingM),
+              if (isOccupied)
+                Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '₺${apt.monthlyDues.toStringAsFixed(0)}',
+                          style: AppTypography.body1.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        Text(
+                          context.t.common.perMonth
+                              .trim()
+                              .replaceAll('/', '')
+                              .trim(),
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () =>
+                            _showApartmentDetailsBottomSheet(context, apt),
+                        borderRadius: BorderRadius.circular(
+                          AppSizes.buttonRadius,
+                        ),
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(
+                              AppSizes.buttonRadius,
+                            ),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.22),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSizes.spacingM,
+                              vertical: AppSizes.spacingS,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.info_outline_rounded,
+                                  size: 18,
+                                  color: AppColors.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  context.t.common.residentDetailsLink,
+                                  style: AppTypography.body1.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '₺${apt.monthlyDues.toStringAsFixed(0)}',
+                          style: AppTypography.body1.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        Text(
+                          context.t.common.perMonth
+                              .trim()
+                              .replaceAll('/', '')
+                              .trim(),
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+            ],
           ],
         ),
       ),

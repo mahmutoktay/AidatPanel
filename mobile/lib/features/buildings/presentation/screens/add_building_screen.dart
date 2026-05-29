@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -10,6 +11,7 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../data/cities_data.dart';
+import '../widgets/building_collection_fields.dart';
 
 /// Backend `buildingService.createBuildingService` Zod aralıkları (Tur 5 §10/2):
 ///  - totalFloors: 1..200
@@ -35,6 +37,9 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   final _floorsController = TextEditingController();
   final _apartmentsPerFloorController = TextEditingController();
   final _monthlyDuesController = TextEditingController();
+  final _collectionIbanController = TextEditingController();
+  final _collectionAccountTitleController = TextEditingController();
+  final _collectionReferenceTemplateController = TextEditingController();
 
   String? _selectedCity;
   String? _selectedDistrict;
@@ -52,6 +57,9 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
     _floorsController.dispose();
     _apartmentsPerFloorController.dispose();
     _monthlyDuesController.dispose();
+    _collectionIbanController.dispose();
+    _collectionAccountTitleController.dispose();
+    _collectionReferenceTemplateController.dispose();
     super.dispose();
   }
 
@@ -169,6 +177,17 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         ),
+        const SizedBox(height: AppSizes.spacingL),
+        _buildSectionTitle(
+          context.t.features.buildings.collection.sectionTitle,
+          Icons.account_balance_wallet_outlined,
+        ),
+        const SizedBox(height: AppSizes.spacingM),
+        BuildingCollectionFields(
+          ibanController: _collectionIbanController,
+          accountTitleController: _collectionAccountTitleController,
+          referenceTemplateController: _collectionReferenceTemplateController,
+        ),
         const SizedBox(height: AppSizes.spacingXL),
         SizedBox(
           height: AppSizes.buttonHeightPrimary,
@@ -180,9 +199,8 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
               disabledBackgroundColor:
                   AppColors.primary.withValues(alpha: 0.6),
               disabledForegroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              elevation: 0,
+              shape: AppButtonStyles.shape,
             ),
             icon: _submitting
                 ? const SizedBox(
@@ -208,13 +226,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
           height: AppSizes.buttonHeightSecondary,
           child: OutlinedButton(
             onPressed: _submitting ? null : () => context.pop(),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.textPrimary,
-              side: BorderSide(color: AppColors.borderColor, width: 1.5),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+            style: AppButtonStyles.outlinedNeutral(),
             child: Text(
               context.t.common.cancelBtn,
               style: const TextStyle(fontWeight: FontWeight.w600),
@@ -389,9 +401,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      shape: AppButtonStyles.sheetTop,
       builder: (ctx) => _SearchablePicker(
         title: context.t.common.selectCityTitle,
         items: sortedCityNames,
@@ -412,9 +422,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      shape: AppButtonStyles.sheetTop,
       builder: (ctx) => _SearchablePicker(
         title: context.t.common.selectDistrictTitle,
         items: districts,
@@ -476,6 +484,12 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       //      sonuna kadar PENDING due üretir
       // Bu yüzden mobile artık ekstra "fallback seed loop" çalıştırmaz —
       // eski Tur 1-3 sürümünde yapılan _seedApartmentsIfNeeded kaldırıldı.
+      final collection = BuildingCollectionInput.fromControllers(
+        iban: _collectionIbanController,
+        accountTitle: _collectionAccountTitleController,
+        referenceTemplate: _collectionReferenceTemplateController,
+      );
+
       final id = await ref.read(buildingsStoreProvider.notifier).addBuilding(
             name: _nameController.text.trim(),
             address: address,
@@ -485,6 +499,9 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
             dueAmount: dueAmount,
             dueDay: 1,
             currency: 'TRY',
+            collectionIban: collection?.collectionIban,
+            collectionAccountTitle: collection?.collectionAccountTitle,
+            paymentReferenceTemplate: collection?.paymentReferenceTemplate,
           );
 
       if (!mounted) return;

@@ -6,6 +6,10 @@ enum NotificationType {
   ticketCreated,
   ticketUpdate,
   announcement,
+  dekontReceived,
+  dekontNeedsReview,
+  dekontMatched,
+  dekontPaymentApplied,
   system,
   other,
 }

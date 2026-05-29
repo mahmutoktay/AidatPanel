@@ -15,24 +15,25 @@
 | 1 | Aidat + Dashboard + Tur 5 | ✅ Tamam | 2026-05-15 | ✅ 2026-05-10 |
 | 2 | Bildirimler + Giderler | ✅ Tamam | 2026-06-05 | ✅ 2026-05-29 |
 | 3 | Talepler (Tickets) | ✅ Tamam | — | ✅ 2026-05-29 |
-| 3 | Reports (PDF) | ⏳ Backend yok | 2026-06-19 | — |
-| — | **Dekont / IBAN** (ayrı paket) | ⏳ Mobil yok | — | — |
+| 3 | **Dekont + tahsilat IBAN** | ⏳ Mobil kod ✅ · Canlı E2E bekliyor | — | — |
+| 3 | Reports (PDF özet) | ⏳ Backend yok | 2026-06-19 | — |
 | 4 | Profil + Abonelik | 🔒 Kilitli | 2026-07-03 | — |
 | 5 | Test + sertleştirme | 🔒 Kilitli | 2026-07-10 | — |
 | 6 | v1.0.0 Lansman | 🔒 Kilitli | 2026-07-14 | — |
 
 ```
-▶ AKTİF ÇALIŞMA: FAZ 3 Reports veya Dekont/IBAN (ürün kararı)
-▶ FAZ 0–2 + FAZ 3 Tickets: kapalı
+▶ AKTİF ÇALIŞMA: FAZ 3 — Dekont + IBAN (mobil)
+▶ FAZ 3 Tickets: kapalı (ONAY ✅) · Reports: backend bekliyor
+▶ FAZ 0–2: kapalı
 ```
 
 **Sıradaki işler (checklist `[ ]`):**
-- [ ] Reports API + mobil ekran + PDF
-- [ ] Dekont/IBAN mobil (`backend/yedek` + `API/FLUTTER-DEKONT-IMPLEMENTATION.md`)
-- [ ] Gider makbuz **dosya** upload (`POST /expenses/{id}/proof`) — backend yok; link testi sonraya
-- [ ] FAZ 4–6 (profil, abonelik, test, store)
+- [ ] **FAZ 3 — Dekont + IBAN** (aşağıdaki alt checklist; rehber: `origin/backend/yedek` → `API/FLUTTER-DEKONT-IMPLEMENTATION.md`, sözleşme §12)
+- [ ] FAZ 3 — Reports API + mobil ekran + PDF (backend yok)
+- [ ] Gider makbuz **dosya** upload (`POST /expenses/{id}/proof`) — FAZ 2 kalıntısı; backend yok
+- [ ] FAZ 4–6 (profil, abonelik, test, store) — FAZ 3 tamamlanınca
 
-**Referanslar:** API → `origin/backend/yedek` · `API/FLUTTER-BACKEND.md` · Dev → `flutter run -t lib/main_dev.dart`
+**Referanslar:** API → `origin/backend/yedek` · `API/FLUTTER-BACKEND.md` §12 · Dekont rehberi → `API/FLUTTER-DEKONT-IMPLEMENTATION.md` · Dev → `flutter run -t lib/main_dev.dart`
 
 ---
 
@@ -239,13 +240,18 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 
 ---
 
-## 🛠 FAZ 3 — Tickets + Reports
+## 🛠 FAZ 3 — Tickets + Dekont/IBAN + Reports
 
-**Durum:** Talepler (Tickets) ✅ tamam (E2E 2026-05-29) | Reports ⏳ backend bekliyor  
-**ONAY (Tickets):** Furkan ✅ (2026-05-29)
+**Durum:** Tickets ✅ · Dekont/IBAN ✅ kod · canlı E2E bekliyor · Reports ⏳ backend yok  
+**ONAY (Tickets):** Furkan ✅ (2026-05-29)  
+**ONAY (Dekont/IBAN):** — (mobil E2E sonrası)  
+**ONAY (Reports):** — (backend + mobil sonrası)
 
-> **Tickets:** `origin/backend/yedek` (`ticketRoutes`, `me/tickets`, `buildings/:id/tickets`) + mobil `features/tickets/` — canlı E2E tamam.  
-> **Reports:** `GET /buildings/:id/reports` + PDF henüz yok.
+> **Tickets:** `origin/backend/yedek` + mobil `features/tickets/` — canlı E2E tamam (2026-05-29).  
+> **Dekont + IBAN:** Backend Faz 2 ✅ — mobil `features/dekont/` tamamlandı (2026-05-29). Canlı E2E + ONAY bekliyor.  
+> **Reports:** `GET /buildings/:id/reports` + PDF — backend repoda **yok** (yönetici aylık özet; **aidat dekontu değil**).
+
+**FAZ 3 kapanışı (üç parça):** Tickets ONAY ✅ + Dekont/IBAN mobil E2E + ONAY + Reports (backend hazır olunca) E2E + ONAY. Reports gelene kadar Dekont/IBAN ile FAZ 3’ün büyük kısmı kapatılabilir; FAZ 4 kilidi için ürün kararı: Reports zorunlu mu?
 
 ### Tickets (features/tickets/)
 | Görev | Backend Durumu |
@@ -264,7 +270,76 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 - [x] Talep modülü canlı E2E
 - [x] `ONAY: Furkan ✅` (2026-05-29)
 
-### Reports (features/reports/)
+---
+
+### Dekont + tahsilat IBAN (`features/dekont/` + `features/buildings/` tahsilat alanları)
+
+| Modül | Kim | Backend | Mobil |
+|-------|-----|---------|--------|
+| **M3** Tahsilat / IBAN tanımlama | Yönetici | ✅ `POST /buildings`, `GET /collection-presets`, `PATCH .../collection` | ✅ UI + kayıtlı IBAN · canlı E2E bekliyor |
+| **M4** Ödeme yap + dekont yükle | Sakin | ✅ `GET /me/payment-collection`, `POST /dekonts/upload` | ✅ |
+| **M5** Dekontlarım | Sakin | ✅ `GET /me/dekonts`, `GET /dekonts/:id`, `GET .../file` | ✅ |
+| **M6** Dekont inceleme | Yönetici | ✅ `GET /buildings/:id/dekonts`, `PATCH .../review` | ✅ |
+| **FCM** | İkisi | ✅ `DEKONT_*` push tipleri | ✅ deep link |
+
+**Not:** Gider makbuzu (`receiptUrl` / `POST /expenses/{id}/proof`) **FAZ 2 — Giderler** kapsamındadır; aidat dekontu değildir.
+
+#### M3 — Yönetici: IBAN tanımlama (bina formu)
+
+- [x] `BuildingModel` / entity: `collectionIban`, `collectionAccountTitle`, `paymentReferenceTemplate`, `isCollectionConfigured`
+- [x] `api_constants`: `collection-presets`, `buildingCollection(id)`
+- [x] `AddBuildingScreen`: tahsilat bloğu (IBAN, alıcı unvanı, havale açıklama şablonu)
+- [x] `GET /buildings/collection-presets` — focus’ta son kullanılan setler, tek tıkla doldurma
+- [x] `POST /buildings` body’de tahsilat alanları (opsiyonel; doluysa client IBAN doğrulama)
+- [x] Mevcut bina: `PATCH /buildings/:id/collection` (sheet + bina menüsü)
+- [x] IBAN tanımsız bina uyarısı (liste/detay, opsiyonel) — menü + bina kartı ikonu
+- [ ] **Canlı E2E** — bina oluştur + tahsilat PATCH (Furkan, `main.dart`)
+
+#### M4 — Sakin: Ödeme yap + PDF/resim dekont yükleme
+
+- [x] `features/dekont/` — datasource, repository, modeller (`Dekont`, `PaymentCollection`, `DekontStatus`)
+- [x] Sakin dashboard / aidat: **Ödeme yap** girişi
+- [x] `GET /me/payment-collection` — IBAN, unvan, `paymentReference` (şablon + daire no)
+- [x] `isCollectionConfigured == false` → bilgi banner (yükleme yine 201 olabilir)
+- [x] IBAN / unvan / açıklama **kopyala** (48dp dokunma)
+- [x] PENDING aidat seçimi + tutar gösterimi
+- [x] `file_picker`: PDF + JPEG/PNG
+- [x] `POST /dekonts/upload` multipart (+ opsiyonel `dueId`)
+- [x] Hata: 400, 409 (aynı hash), 429 (rate limit)
+- [x] Upload sonrası detay veya polling
+
+#### M5 — Sakin: Dekontlarım
+
+- [x] `GET /me/dekonts` liste + `?status=` filtre
+- [x] Detay ekranı + durum metinleri (`NEEDS_MANAGER_REVIEW`, `MATCHED`, `REJECTED`, …)
+- [x] `GET /dekonts/:id/file` önizleme / indirme
+- [x] `REJECTED` → yeniden yükle → ödeme ekranı
+- [x] Pull-to-refresh
+
+#### M6 — Yönetici: Dekont inceleme
+
+- [x] Bina seçici → `GET /buildings/:id/dekonts` (`?status=`, `?apartmentId=`)
+- [x] Liste: daire, yükleyen, tutar, durum rozeti
+- [x] Detay + dosya önizleme
+- [x] `PATCH /dekonts/:id/review` — `APPROVE` / `REJECT` (+ `note`, gerekirse `dueId`)
+- [x] Onay → aidat `PAID` + `DEKONT_PAYMENT_APPLIED` bildirimi (backend)
+
+#### FCM + bildirimler (dekont)
+
+- [x] `notification_payload`: `dekontId` alanı + `DEKONT_*` route çözümleme
+- [x] `notification_model`: dekont tipleri (UI etiketi)
+- [x] Tap → dekont detay / inceleme / ödeme ekranı
+
+#### FAZ 3 (Dekont/IBAN) çıkış kapısı
+
+- [ ] Yönetici: bina oluştururken/güncellerken IBAN E2E
+- [ ] Sakin: ödeme bilgisi + dekont PDF/resim upload E2E
+- [ ] Yönetici: inceleme onay/red E2E
+- [ ] `ONAY: Furkan ✅` (tarih)
+
+---
+
+### Reports (features/reports/) — yönetici aylık özet PDF (dekont değil)
 | Görev | Backend Durumu |
 |-------|----------------|
 | `GET /buildings/{id}/reports`, PDF export | ❌ **YOK** — backend açacak |
@@ -273,11 +348,16 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 - [ ] **⚠️ backend bekliyor** — Aylık özet rapor ekranı
 - [ ] **⚠️ backend bekliyor** — PDF export
 
+### FAZ 3 (Reports) çıkış kapısı
+
+- [ ] Rapor listesi + PDF export canlı E2E
+- [ ] `ONAY: Furkan ✅` (tarih)
+
 ---
 
 ## 🔒 FAZ 4 — Subscription + Profile
 
-**Durum:** KİLİTLİ — Faz 3 tamamlanmadan açılamaz  
+**Durum:** KİLİTLİ — FAZ 3 (Tickets + Dekont/IBAN + Reports) tamamlanmadan açılamaz  
 **Hedef:** ~2026-07-03
 
 > Backend ekibi profil ve şifre sıfırlama uçlarını **canlıya almış** (Belge §3, §4).
@@ -350,7 +430,7 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 | 8 | `PUT /me/language` sunucuya yazma | ⏳ | FAZ 4 |
 | 9 | Profil `GET/PUT /me` ekranı | ⏳ | FAZ 4 |
 | 10 | Gider makbuz dosya `/proof` | ⏳ | Backend yok; `receiptUrl` HTTPS var |
-| 11 | Dekont + tahsilat IBAN mobil | ⏳ | Backend `backend/yedek` hazır |
+| 11 | Dekont + tahsilat IBAN mobil | ⏳ | **FAZ 3** — kod ✅; canlı E2E + ONAY bekliyor |
 
 ---
 
@@ -372,14 +452,15 @@ Detay: `resources/tasarım/TASARIM_KILAVUZU.md`
 ```
 mobile/lib/features/
 ├── auth/           ✅
-├── buildings/      ✅
+├── buildings/      ✅ CRUD + tahsilat IBAN (M3)
 ├── apartments/     ✅
 ├── dues/           ✅
 ├── dashboard/      ✅
 ├── notifications/  ✅
 ├── expenses/       ✅
 ├── tickets/        ✅
-├── reports/        ⏳ (boş / backend bekliyor)
+├── dekont/         ✅ upload, inceleme, ödeme bilgisi (canlı E2E bekliyor)
+├── reports/        ⏳ FAZ 3 (boş / backend bekliyor)
 ├── profile/        🔶 (şifre/KVKK FAZ 1’de; tam profil FAZ 4)
 └── subscription/   ⏳ FAZ 4
 ```

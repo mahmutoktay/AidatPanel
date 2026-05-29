@@ -22,6 +22,9 @@ import '../features/auth/data/repositories/auth_repository_impl.dart'
 import '../features/auth/domain/entities/user_entity.dart';
 import '../features/buildings/data/repositories/building_repository.dart';
 import '../features/buildings/domain/entities/building_entity.dart';
+import '../features/buildings/domain/entities/collection_preset_entity.dart';
+import '../features/buildings/domain/entities/saved_iban_delete_result.dart';
+import '../core/utils/iban_utils.dart';
 import '../features/dues/domain/entities/due_entity.dart';
 import '../features/dues/domain/repositories/dues_repository.dart';
 import '../features/profile/data/repositories/profile_repository.dart';
@@ -187,6 +190,9 @@ class MockBuildingRepository implements BuildingRepository {
       dueAmount: 600,
       dueDay: 5,
       currency: 'TRY',
+      collectionIban: 'TR640001000009000021995841',
+      collectionAccountTitle: 'Çamlık Apartmanı',
+      paymentReferenceTemplate: '{{number}} nolu daire aidat',
     ),
     const BuildingEntity(
       id: 'b2',
@@ -200,6 +206,9 @@ class MockBuildingRepository implements BuildingRepository {
       dueAmount: 750,
       dueDay: 1,
       currency: 'TRY',
+      collectionIban: 'TR320001009000001234567890',
+      collectionAccountTitle: 'Yıldız Sitesi A Blok',
+      paymentReferenceTemplate: 'Aidat Daire {{number}}',
     ),
   ];
 
@@ -209,6 +218,123 @@ class MockBuildingRepository implements BuildingRepository {
   Future<List<BuildingEntity>> fetchBuildings() async {
     await Future.delayed(_delay);
     return List.unmodifiable(_buildings);
+  }
+
+  /// Bina atanmamış örnek setler (bina ekle formu + ayarlar düzenleme).
+  final List<CollectionPresetEntity> _extraPresets = [
+    const CollectionPresetEntity(
+      collectionIban: 'TR330006100519786457841326',
+      collectionAccountTitle: 'Güneş Sitesi Yönetimi',
+      paymentReferenceTemplate: 'Daire {{number}}',
+      buildingCount: 0,
+    ),
+    const CollectionPresetEntity(
+      collectionIban: 'TR760001500158007293093847',
+      collectionAccountTitle: 'Apartman Yönetimi',
+      paymentReferenceTemplate: 'Daire {{number}} Aidat',
+      buildingCount: 0,
+    ),
+    const CollectionPresetEntity(
+      collectionIban: 'TR560001100000000000012345',
+      collectionAccountTitle: 'Bahçeşehir Konutları Yönetim',
+      paymentReferenceTemplate: 'Daire {{number}} - AidatPanel',
+      buildingCount: 0,
+    ),
+    const CollectionPresetEntity(
+      collectionIban: 'TR070001500501000000000001',
+      collectionAccountTitle: 'Merkez Plaza Site Yönetimi',
+      paymentReferenceTemplate: 'Havale: Daire {{number}}',
+      buildingCount: 0,
+    ),
+    const CollectionPresetEntity(
+      collectionIban: 'TR120006200000000000000001',
+      collectionAccountTitle: 'Deniz Manzarası Sitesi',
+      paymentReferenceTemplate: '{{number}} / Aidat',
+      buildingCount: 0,
+    ),
+  ];
+
+  List<CollectionPresetEntity> _presetsFromBuildings() {
+    final counts = <String, int>{};
+    final sample = <String, BuildingEntity>{};
+    for (final b in _buildings) {
+      final iban = b.collectionIban;
+      if (iban == null || !IbanUtils.isValidTrIban(iban)) continue;
+      final key = IbanUtils.normalize(iban);
+      counts[key] = (counts[key] ?? 0) + 1;
+      sample.putIfAbsent(key, () => b);
+    }
+    final presets = counts.entries.map((e) {
+      final b = sample[e.key]!;
+      return CollectionPresetEntity(
+        collectionIban: e.key,
+        collectionAccountTitle: b.collectionAccountTitle,
+        paymentReferenceTemplate: b.paymentReferenceTemplate,
+        buildingCount: e.value,
+      );
+    }).toList();
+    presets.sort((a, b) => b.buildingCount.compareTo(a.buildingCount));
+    return presets;
+  }
+
+  List<CollectionPresetEntity> _mergedPresets() {
+    final fromBuildings = _presetsFromBuildings();
+    final keys = fromBuildings
+        .map((p) => IbanUtils.normalize(p.collectionIban))
+        .toSet();
+    final extras = _extraPresets
+        .where((p) => !keys.contains(IbanUtils.normalize(p.collectionIban)))
+        .toList();
+    return [...fromBuildings, ...extras];
+  }
+
+  bool _removeExtraPreset(String matchIban) {
+    final key = IbanUtils.normalize(matchIban);
+    final before = _extraPresets.length;
+    _extraPresets.removeWhere(
+      (p) => IbanUtils.normalize(p.collectionIban) == key,
+    );
+    return _extraPresets.length < before;
+  }
+
+  bool _hasPresetKey(String key) {
+    return _mergedPresets().any(
+      (p) => IbanUtils.normalize(p.collectionIban) == key,
+    );
+  }
+
+  bool _updateExtraPreset({
+    required String matchIban,
+    required String? collectionIban,
+    required String? collectionAccountTitle,
+    required String? paymentReferenceTemplate,
+  }) {
+    final key = IbanUtils.normalize(matchIban);
+    final idx = _extraPresets.indexWhere(
+      (p) => IbanUtils.normalize(p.collectionIban) == key,
+    );
+    if (idx == -1) return false;
+    final iban = collectionIban != null && collectionIban.isNotEmpty
+        ? IbanUtils.normalize(collectionIban)
+        : key;
+    _extraPresets[idx] = CollectionPresetEntity(
+      collectionIban: iban,
+      collectionAccountTitle: collectionAccountTitle?.trim().isEmpty ?? true
+          ? null
+          : collectionAccountTitle!.trim(),
+      paymentReferenceTemplate:
+          paymentReferenceTemplate?.trim().isEmpty ?? true
+              ? null
+              : paymentReferenceTemplate!.trim(),
+      buildingCount: 0,
+    );
+    return true;
+  }
+
+  @override
+  Future<List<CollectionPresetEntity>> fetchCollectionPresets() async {
+    await Future.delayed(_delay);
+    return List.unmodifiable(_mergedPresets());
   }
 
   /// Backend `buildingService.createBuildingService` davranışını simüle
@@ -225,12 +351,18 @@ class MockBuildingRepository implements BuildingRepository {
     double? dueAmount,
     int? dueDay,
     String? currency,
+    String? collectionIban,
+    String? collectionAccountTitle,
+    String? paymentReferenceTemplate,
   }) async {
     await Future.delayed(_delay);
     final floors = totalFloors ?? 0;
     final perFloor = apartmentsPerFloor ?? 0;
     final total = floors * perFloor;
     final id = MockState.nextId('b');
+    final iban = collectionIban != null && collectionIban.isNotEmpty
+        ? IbanUtils.normalize(collectionIban)
+        : null;
     final building = BuildingEntity(
       id: id,
       name: name,
@@ -243,6 +375,9 @@ class MockBuildingRepository implements BuildingRepository {
       dueAmount: dueAmount,
       dueDay: dueDay,
       currency: currency ?? 'TRY',
+      collectionIban: iban,
+      collectionAccountTitle: collectionAccountTitle,
+      paymentReferenceTemplate: paymentReferenceTemplate,
     );
     _buildings.add(building);
     apartments._seedForBuilding(
@@ -273,6 +408,167 @@ class MockBuildingRepository implements BuildingRepository {
     );
     _buildings[idx] = updated;
     return updated;
+  }
+
+  @override
+  Future<BuildingEntity> patchBuildingCollection({
+    required String id,
+    required String? collectionIban,
+    required String? collectionAccountTitle,
+    required String? paymentReferenceTemplate,
+  }) async {
+    await Future.delayed(_delay);
+    final idx = _buildings.indexWhere((b) => b.id == id);
+    if (idx == -1) {
+      throw ApiException(message: 'Bina bulunamadı', statusCode: 404);
+    }
+    final iban = collectionIban != null && collectionIban.isNotEmpty
+        ? IbanUtils.normalize(collectionIban)
+        : null;
+    final updated = _buildings[idx].copyWith(
+      collectionIban: iban,
+      collectionAccountTitle: collectionAccountTitle?.trim().isEmpty ?? true
+          ? null
+          : collectionAccountTitle!.trim(),
+      paymentReferenceTemplate:
+          paymentReferenceTemplate?.trim().isEmpty ?? true
+              ? null
+              : paymentReferenceTemplate!.trim(),
+    );
+    _buildings[idx] = updated;
+    return updated;
+  }
+
+  @override
+  Future<CollectionPresetEntity> addCollectionPreset({
+    required String collectionIban,
+    String? collectionAccountTitle,
+    String? paymentReferenceTemplate,
+  }) async {
+    await Future.delayed(_delay);
+    final key = IbanUtils.normalize(collectionIban);
+    if (!IbanUtils.isValidTrIban(key)) {
+      throw ApiException(message: 'Geçerli bir TR IBAN girin');
+    }
+    if (_hasPresetKey(key)) {
+      throw ApiException(message: 'Bu IBAN zaten kayıtlı');
+    }
+    final entity = CollectionPresetEntity(
+      collectionIban: key,
+      collectionAccountTitle: collectionAccountTitle?.trim().isEmpty ?? true
+          ? null
+          : collectionAccountTitle!.trim(),
+      paymentReferenceTemplate:
+          paymentReferenceTemplate?.trim().isEmpty ?? true
+              ? null
+              : paymentReferenceTemplate!.trim(),
+      buildingCount: 0,
+    );
+    _extraPresets.add(entity);
+    return entity;
+  }
+
+  @override
+  Future<SavedIbanDeleteResult> deleteCollectionPreset({
+    required String matchIban,
+  }) async {
+    await Future.delayed(_delay);
+    final key = IbanUtils.normalize(matchIban);
+    var buildingsCleared = 0;
+    for (var i = 0; i < _buildings.length; i++) {
+      if (IbanUtils.normalize(_buildings[i].collectionIban ?? '') != key) {
+        continue;
+      }
+      final updated = await patchBuildingCollection(
+        id: _buildings[i].id,
+        collectionIban: '',
+        collectionAccountTitle: '',
+        paymentReferenceTemplate: '',
+      );
+      _buildings[i] = updated;
+      buildingsCleared++;
+    }
+    final orphanPresetRemoved = _removeExtraPreset(key);
+    if (buildingsCleared == 0 && !orphanPresetRemoved) {
+      throw ApiException(
+        message: 'Silinecek IBAN kaydı bulunamadı',
+        statusCode: 404,
+      );
+    }
+    return SavedIbanDeleteResult(
+      buildingsCleared: buildingsCleared,
+      orphanPresetRemoved: orphanPresetRemoved,
+    );
+  }
+
+  @override
+  Future<SavedIbanBulkDeleteResult> deleteCollectionPresets({
+    required List<String> matchIbans,
+  }) async {
+    await Future.delayed(_delay);
+    var presetsRemoved = 0;
+    var buildingsCleared = 0;
+    ApiException? lastError;
+    for (final raw in matchIbans.toSet()) {
+      try {
+        final result = await deleteCollectionPreset(matchIban: raw);
+        if (result.hadEffect) presetsRemoved++;
+        buildingsCleared += result.buildingsCleared;
+      } on ApiException catch (e) {
+        lastError = e;
+      }
+    }
+    if (presetsRemoved == 0) {
+      throw lastError ??
+          ApiException(
+            message: 'Silinecek IBAN kaydı bulunamadı',
+            statusCode: 404,
+          );
+    }
+    return SavedIbanBulkDeleteResult(
+      presetsRemoved: presetsRemoved,
+      buildingsCleared: buildingsCleared,
+    );
+  }
+
+  @override
+  Future<int> patchBuildingsMatchingCollection({
+    required String matchIban,
+    required String? collectionIban,
+    required String? collectionAccountTitle,
+    required String? paymentReferenceTemplate,
+  }) async {
+    await Future.delayed(_delay);
+    final key = IbanUtils.normalize(matchIban);
+    var count = 0;
+    for (var i = 0; i < _buildings.length; i++) {
+      if (IbanUtils.normalize(_buildings[i].collectionIban ?? '') != key) {
+        continue;
+      }
+      final updated = await patchBuildingCollection(
+        id: _buildings[i].id,
+        collectionIban: collectionIban,
+        collectionAccountTitle: collectionAccountTitle,
+        paymentReferenceTemplate: paymentReferenceTemplate,
+      );
+      _buildings[i] = updated;
+      count++;
+    }
+    if (count > 0) return count;
+
+    if (_updateExtraPreset(
+      matchIban: matchIban,
+      collectionIban: collectionIban,
+      collectionAccountTitle: collectionAccountTitle,
+      paymentReferenceTemplate: paymentReferenceTemplate,
+    )) {
+      return 0;
+    }
+
+    throw ApiException(
+      message: 'Bu IBAN için güncellenecek kayıt bulunamadı',
+      statusCode: 404,
+    );
   }
 
   @override

@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/utils/iban_utils.dart';
+
 class BuildingEntity extends Equatable {
   final String id;
   final String name;
@@ -25,6 +27,15 @@ class BuildingEntity extends Equatable {
   /// 3 harf para birimi (`TRY`, `USD` vb.). Default: `TRY`.
   final String currency;
 
+  /// Tahsilat IBAN (TR + 24 rakam, boşluksuz saklanır).
+  final String? collectionIban;
+
+  /// Hesap sahibi / alıcı unvanı.
+  final String? collectionAccountTitle;
+
+  /// Havale açıklama şablonu; `{{number}}` → daire no.
+  final String? paymentReferenceTemplate;
+
   const BuildingEntity({
     required this.id,
     required this.name,
@@ -37,7 +48,13 @@ class BuildingEntity extends Equatable {
     this.dueAmount,
     this.dueDay,
     this.currency = 'TRY',
+    this.collectionIban,
+    this.collectionAccountTitle,
+    this.paymentReferenceTemplate,
   });
+
+  /// Geçerli TR IBAN tanımlı mı (`^TR\d{24}$`).
+  bool get isCollectionConfigured => IbanUtils.isValidTrIban(collectionIban);
 
   /// Liste/kart görünümünde gösterilecek tam adres ("Adres, Şehir").
   String get displayAddress =>
@@ -60,6 +77,9 @@ class BuildingEntity extends Equatable {
     double? dueAmount,
     int? dueDay,
     String? currency,
+    String? collectionIban,
+    String? collectionAccountTitle,
+    String? paymentReferenceTemplate,
   }) {
     return BuildingEntity(
       id: id ?? this.id,
@@ -73,6 +93,11 @@ class BuildingEntity extends Equatable {
       dueAmount: dueAmount ?? this.dueAmount,
       dueDay: dueDay ?? this.dueDay,
       currency: currency ?? this.currency,
+      collectionIban: collectionIban ?? this.collectionIban,
+      collectionAccountTitle:
+          collectionAccountTitle ?? this.collectionAccountTitle,
+      paymentReferenceTemplate:
+          paymentReferenceTemplate ?? this.paymentReferenceTemplate,
     );
   }
 
@@ -89,5 +114,8 @@ class BuildingEntity extends Equatable {
         dueAmount,
         dueDay,
         currency,
+        collectionIban,
+        collectionAccountTitle,
+        paymentReferenceTemplate,
       ];
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_button_styles.dart';
 import 'app_colors.dart';
 import 'app_sizes.dart';
 import 'app_typography.dart';
@@ -24,32 +25,28 @@ class AppTheme {
         titleTextStyle: AppTypography.h3.copyWith(color: Colors.white),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
+        style: AppButtonStyles.elevatedPrimary(fullWidth: true),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           minimumSize: const Size(
             double.infinity,
             AppSizes.buttonHeightSecondary,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
+          shape: AppButtonStyles.shape,
           textStyle: AppTypography.button,
           elevation: 0,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          minimumSize: const Size(
-            double.infinity,
-            AppSizes.buttonHeightSecondary,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          textStyle: AppTypography.button,
-          side: const BorderSide(color: AppColors.primary),
+        style: AppButtonStyles.outlinedPrimary(fullWidth: true),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          shape: WidgetStateProperty.all(AppButtonStyles.shape),
+          visualDensity: VisualDensity.standard,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -66,19 +63,19 @@ class AppTheme {
           vertical: 17,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSizes.inputRadius),
           borderSide: const BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSizes.inputRadius),
           borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSizes.inputRadius),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSizes.inputRadius),
           borderSide: const BorderSide(color: AppColors.error),
         ),
         hintStyle: AppTypography.body1.copyWith(color: AppColors.textDisabled),

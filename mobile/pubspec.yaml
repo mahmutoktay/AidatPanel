@@ -3,7 +3,7 @@ description: "AidatPanel - Türk apartman ve site yöneticileri için mobil aida
 publish_to: 'none'
 
 # --- Google Play (sürüm kodu = + sonrası; her AAB öncesi +1 — CLAUDE.md) ---
-version: 0.1.3+1778674162
+version: 0.1.3+1778674163
 
 environment:
   sdk: ^3.11.5
@@ -44,6 +44,7 @@ dependencies:
   share_plus: ^12.0.2
   package_info_plus: ^8.0.0
   image_picker: ^1.1.2
+  file_picker: ^8.1.7
 
 dev_dependencies:
   flutter_test:

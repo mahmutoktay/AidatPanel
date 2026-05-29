@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/user_error_message.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
 import '../domain/entities/building_entity.dart';
+import '../domain/entities/collection_preset_entity.dart';
 import 'datasources/building_remote_datasource.dart';
 import 'repositories/building_repository.dart';
 import 'repositories/building_repository_impl.dart';
@@ -17,6 +18,12 @@ final buildingRepositoryProvider = Provider<BuildingRepository>((ref) {
   return BuildingRepositoryImpl(
     remoteDataSource: ref.watch(buildingRemoteDataSourceProvider),
   );
+});
+
+/// Yeni bina formunda IBAN focus → son kullanılan tahsilat setleri.
+final collectionPresetsProvider =
+    FutureProvider.autoDispose<List<CollectionPresetEntity>>((ref) async {
+  return ref.watch(buildingRepositoryProvider).fetchCollectionPresets();
 });
 
 class BuildingsNotifier
@@ -63,6 +70,9 @@ class BuildingsNotifier
     double? dueAmount,
     int? dueDay,
     String? currency,
+    String? collectionIban,
+    String? collectionAccountTitle,
+    String? paymentReferenceTemplate,
   }) async {
     if (_isCreating) return null;
     _isCreating = true;
@@ -76,6 +86,9 @@ class BuildingsNotifier
         dueAmount: dueAmount,
         dueDay: dueDay,
         currency: currency,
+        collectionIban: collectionIban,
+        collectionAccountTitle: collectionAccountTitle,
+        paymentReferenceTemplate: paymentReferenceTemplate,
       );
       final current = state.value ?? [];
       state = AsyncValue.data([...current, building]);
@@ -112,6 +125,24 @@ class BuildingsNotifier
       name: name,
       address: address,
       city: city,
+    );
+    final current = state.value ?? [];
+    state = AsyncValue.data(
+      current.map((b) => b.id == id ? updated : b).toList(),
+    );
+  }
+
+  Future<void> patchBuildingCollection({
+    required String id,
+    required String? collectionIban,
+    required String? collectionAccountTitle,
+    required String? paymentReferenceTemplate,
+  }) async {
+    final updated = await _repository.patchBuildingCollection(
+      id: id,
+      collectionIban: collectionIban,
+      collectionAccountTitle: collectionAccountTitle,
+      paymentReferenceTemplate: paymentReferenceTemplate,
     );
     final current = state.value ?? [];
     state = AsyncValue.data(

@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 956 (478 per locale)
+/// Strings: 1192 (596 per locale)
 ///
-/// Built on 2026-05-29 at 13:11 UTC
+/// Built on 2026-05-29 at 16:42 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -379,6 +379,10 @@ class _StringsCommonEn {
 	String get residentRemoveNotFound => 'No resident to remove from this apartment.';
 	String get multiSelectResidents => 'Select multiple';
 	String get multiSelectTapHint => 'Tap the card to select or clear';
+	String get selectTriggerShort => 'Select';
+	String get selectedCountLabel => 'selected';
+	String get selectionRemoveHint => 'Pick the residents you want to remove';
+	String get selectionDeleteIbanHint => 'Pick the IBANs you want to delete';
 	String get removeSelectedResidents => 'Remove selected';
 	String get removeSelectedResidentsTitle => 'Remove selected residents';
 	String get removeSelectedResidentsMessage => 'Residents in the apartments listed below will be unlinked from their apartments. Accounts are not deleted—only the connection to this building is removed. Past dues records are kept.';
@@ -459,6 +463,7 @@ class _StringsFeaturesEn {
 	late final _StringsFeaturesAuthEn auth = _StringsFeaturesAuthEn._(_root);
 	late final _StringsFeaturesApartmentsEn apartments = _StringsFeaturesApartmentsEn._(_root);
 	late final _StringsFeaturesTicketsEn tickets = _StringsFeaturesTicketsEn._(_root);
+	late final _StringsFeaturesDekontEn dekont = _StringsFeaturesDekontEn._(_root);
 	late final _StringsFeaturesExpensesEn expenses = _StringsFeaturesExpensesEn._(_root);
 	late final _StringsFeaturesNotificationsEn notifications = _StringsFeaturesNotificationsEn._(_root);
 	late final _StringsFeaturesFaz2En faz2 = _StringsFeaturesFaz2En._(_root);
@@ -512,6 +517,7 @@ class _StringsFeaturesBuildingsEn {
 	String get activeCodeNote => 'While this code is active, you cannot generate a new code for the same apartment. You must revoke the current code first.';
 	String get backToMainMenu => 'Back to Main Menu';
 	String get tekrarDene => 'Try Again';
+	late final _StringsFeaturesBuildingsCollectionEn collection = _StringsFeaturesBuildingsCollectionEn._(_root);
 }
 
 // Path: features.auth
@@ -641,6 +647,72 @@ class _StringsFeaturesTicketsEn {
 	String get apartmentRequired => 'Apartment not linked. Please sign in again.';
 }
 
+// Path: features.dekont
+class _StringsFeaturesDekontEn {
+	_StringsFeaturesDekontEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get makePaymentTitle => 'Make Payment';
+	String get myDekontsTitle => 'My Receipts';
+	String get managerTitle => 'Receipt Review';
+	String get detailTitle => 'Receipt Detail';
+	String get paymentInfoTitle => 'Transfer details';
+	String get collectionNotConfigured => 'Your manager has not set up collection IBAN yet. You can still upload a receipt.';
+	String get ibanLabel => 'IBAN';
+	String get accountTitleLabel => 'Account title';
+	String get referenceLabel => 'Transfer reference';
+	String get copy => 'Copy';
+	String get copied => 'Copied to clipboard';
+	String get selectDue => 'Select due';
+	String get selectDueHint => 'Select the due you paid';
+	String get noPendingDues => 'No pending dues';
+	String get uploadSectionTitle => 'Upload receipt';
+	String get uploadHint => 'PDF or photo (JPEG, PNG)';
+	String get pickFile => 'Choose file';
+	String get upload => 'Upload receipt';
+	String get uploadSuccess => 'Receipt uploaded';
+	String get uploadFailed => 'Upload failed';
+	String get processing => 'Processing receipt…';
+	String get viewDekonts => 'My receipts';
+	String get emptyTitle => 'No receipts yet';
+	String get emptySubtitle => 'After paying, upload your bank receipt here';
+	String get filterAll => 'All';
+	String get filterPending => 'Under review';
+	String get filterApproved => 'Approved';
+	String get filterRejected => 'Rejected';
+	String get statusReceived => 'Received';
+	String get statusExtracting => 'Reading';
+	String get statusExtractFailed => 'Read failed';
+	String get statusParsed => 'Parsed';
+	String get statusParseLowConfidence => 'Low confidence';
+	String get statusMatching => 'Matching';
+	String get statusMatched => 'Matched';
+	String get statusMatchAmbiguous => 'Ambiguous match';
+	String get statusUnmatched => 'Unmatched';
+	String get statusPaymentApplied => 'Payment applied';
+	String get statusPaymentPartial => 'Partial payment';
+	String get statusRejected => 'Rejected';
+	String get statusRecipientMismatch => 'Recipient mismatch';
+	String get statusNeedsManagerReview => 'Manager review';
+	String get reupload => 'Upload again';
+	String get rejectionReason => 'Rejection reason';
+	String get parsedAmount => 'Parsed amount';
+	String get filePreview => 'File preview';
+	String get shareFile => 'Share file';
+	String get approve => 'Approve';
+	String get reject => 'Reject';
+	String get reviewNote => 'Note (optional)';
+	String get reviewSuccess => 'Review saved';
+	String get reviewFailed => 'Review failed';
+	String get selectDueForApprove => 'Select due to approve';
+	String get uploadedBy => 'Uploaded by';
+	String get apartment => 'Apartment';
+	String get amount => 'Amount';
+	String get loadError => 'Could not load receipts';
+}
+
 // Path: features.expenses
 class _StringsFeaturesExpensesEn {
 	_StringsFeaturesExpensesEn._(this._root);
@@ -711,6 +783,10 @@ class _StringsFeaturesNotificationsEn {
 	String get typeTicketCreated => 'New request';
 	String get typeTicketUpdate => 'Request updated';
 	String get typeAnnouncement => 'Announcement';
+	String get typeDekontReceived => 'New receipt';
+	String get typeDekontNeedsReview => 'Receipt review';
+	String get typeDekontMatched => 'Receipt matched';
+	String get typeDekontPaymentApplied => 'Receipt approved';
 	String get typeSystem => 'System';
 	String get typeOther => 'Notification';
 	String get sendTitle => 'Announcement to residents';
@@ -736,6 +812,68 @@ class _StringsFeaturesFaz2En {
 	String get tickets => 'Requests';
 	String get expenses => 'Expenses';
 	String get announcement => 'Announce';
+}
+
+// Path: features.buildings.collection
+class _StringsFeaturesBuildingsCollectionEn {
+	_StringsFeaturesBuildingsCollectionEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get sectionTitle => 'Collection details';
+	String get sectionHint => 'IBAN for resident bank transfers. Optional; you can add it later.';
+	String get modeSaved => 'Saved IBAN';
+	String get modeNew => 'New IBAN';
+	String get savedListTitle => 'Previously used';
+	String get pickSavedIban => 'Choose saved IBAN';
+	String get changeSavedIban => 'Tap to choose another IBAN';
+	String get searchSavedIban => 'Search IBAN or account name';
+	String get detailAccountHolder => 'Account holder';
+	String get detailReference => 'Payment reference';
+	String get detailReferenceAuto => 'Apartment number is added to the transfer reference automatically';
+	String get detailReferenceDaireOnly => 'Transfer reference: Apartment number';
+	String get detailReferenceDaireAidat => 'Transfer reference: Apt. no + dues';
+	String get detailReferenceAidat => 'Transfer reference: Dues (apt. no added automatically)';
+	String get detailReferenceHavale => 'Transfer reference: Apartment number on transfer';
+	String get detailUsedInBuildings => 'Used in {count} buildings';
+	String get ibanLabel => 'IBAN';
+	String get ibanHint => 'TR33 0006 1005 1978 6457 8413 26';
+	String get ibanInvalid => 'Enter a valid Turkish IBAN (TR + 24 digits)';
+	String get ibanRequiredIfOtherFilled => 'You entered account title or reference; enter a valid IBAN';
+	String get accountTitleLabel => 'Account holder name';
+	String get accountTitleHint => 'e.g. Building Management';
+	String get referenceTemplateLabel => 'Payment reference template';
+	String get referenceTemplateHint => 'e.g. Apt {{number}}';
+	String get presetsEmpty => 'No saved collection details yet';
+	String get presetsLoadFailed => 'Could not load suggestions';
+	String get presetBuildingCount => '{count} buildings';
+	String get menuEdit => 'Collection / IBAN';
+	String get editSheetTitle => 'Collection details';
+	String get saveSuccess => 'Collection details saved';
+	String get savedIbansTitle => 'My saved IBANs';
+	String get savedIbansEmpty => 'No saved IBAN yet. You can add collection details when creating a building.';
+	String get savedIbansNoBuildingMatch => 'No building linked to this set';
+	String get savedIbansBuildingNames => 'Buildings: {names}';
+	String get savedIbansUpdateSuccess => 'Collection updated for {count} building(s)';
+	String get savedIbansUpdateHint => 'Will update: {names}';
+	String get editSavedIbanTitle => 'Edit IBAN';
+	String get savedIbansOrphanHint => 'This set is not linked to a building yet. Changes are stored in your saved list only.';
+	String get savedIbansAddTitle => 'Add IBAN';
+	String get savedIbansAddHint => 'You can reuse these details when adding a building or editing collection settings.';
+	String get savedIbansAddSuccess => 'IBAN saved';
+	String get savedIbansSelectMode => 'Select multiple';
+	String get savedIbansSelectedLabel => 'selected';
+	String get savedIbansDeleteSelected => 'Delete selected';
+	String get savedIbansPickFirst => 'Select the IBANs you want to delete first';
+	String get savedIbansDeleteTitle => 'Delete this IBAN?';
+	String get savedIbansDeleteMessage => 'This saved IBAN will be removed from your list.';
+	String get savedIbansDeleteBulkTitle => 'Delete selected IBANs?';
+	String get savedIbansDeleteBulkMessage => '{count} saved IBAN(s) will be deleted.';
+	String get savedIbansDeleteBuildingWarning => 'Collection details will also be cleared on {count} building(s).';
+	String get savedIbansDeleteSuccess => 'IBAN deleted';
+	String get savedIbansDeleteBulkSuccess => '{count} IBAN(s) deleted';
+	String get ibanNotConfigured => 'Collection IBAN not configured';
 }
 
 // Path: <root>
@@ -993,6 +1131,10 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get residentRemoveNotFound => 'Bu dairede çıkarılacak sakin bulunamadı.';
 	@override String get multiSelectResidents => 'Çoklu seç';
 	@override String get multiSelectTapHint => 'Seçmek için karta dokunun';
+	@override String get selectTriggerShort => 'Seç';
+	@override String get selectedCountLabel => 'seçili';
+	@override String get selectionRemoveHint => 'Çıkarmak istediğiniz sakinleri seçin';
+	@override String get selectionDeleteIbanHint => 'Silmek istediğiniz IBAN\'ları seçin';
 	@override String get removeSelectedResidents => 'Seçilenleri çıkar';
 	@override String get removeSelectedResidentsTitle => 'Seçilen sakinleri çıkar';
 	@override String get removeSelectedResidentsMessage => 'Aşağıda listelenen dairelerde oturan sakinler daireden çıkarılır. Hesapları silinmez; yalnızca bu binadaki bağlantıları kalkar. Geçmiş aidat kayıtları korunur.';
@@ -1073,6 +1215,7 @@ class _StringsFeaturesTr implements _StringsFeaturesEn {
 	@override late final _StringsFeaturesAuthTr auth = _StringsFeaturesAuthTr._(_root);
 	@override late final _StringsFeaturesApartmentsTr apartments = _StringsFeaturesApartmentsTr._(_root);
 	@override late final _StringsFeaturesTicketsTr tickets = _StringsFeaturesTicketsTr._(_root);
+	@override late final _StringsFeaturesDekontTr dekont = _StringsFeaturesDekontTr._(_root);
 	@override late final _StringsFeaturesExpensesTr expenses = _StringsFeaturesExpensesTr._(_root);
 	@override late final _StringsFeaturesNotificationsTr notifications = _StringsFeaturesNotificationsTr._(_root);
 	@override late final _StringsFeaturesFaz2Tr faz2 = _StringsFeaturesFaz2Tr._(_root);
@@ -1126,6 +1269,7 @@ class _StringsFeaturesBuildingsTr implements _StringsFeaturesBuildingsEn {
 	@override String get activeCodeNote => 'Bu kod aktifken aynı daireye yeni kod üretilemez. Yeni kod için önce mevcut kodu iptal etmelisin.';
 	@override String get backToMainMenu => 'Ana Menüye Dön';
 	@override String get tekrarDene => 'Tekrar Dene';
+	@override late final _StringsFeaturesBuildingsCollectionTr collection = _StringsFeaturesBuildingsCollectionTr._(_root);
 }
 
 // Path: features.auth
@@ -1255,6 +1399,72 @@ class _StringsFeaturesTicketsTr implements _StringsFeaturesTicketsEn {
 	@override String get apartmentRequired => 'Daire bilgisi bulunamadı. Lütfen tekrar giriş yapın.';
 }
 
+// Path: features.dekont
+class _StringsFeaturesDekontTr implements _StringsFeaturesDekontEn {
+	_StringsFeaturesDekontTr._(this._root);
+
+	@override final _StringsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get makePaymentTitle => 'Ödeme Yap';
+	@override String get myDekontsTitle => 'Dekontlarım';
+	@override String get managerTitle => 'Dekont İnceleme';
+	@override String get detailTitle => 'Dekont Detayı';
+	@override String get paymentInfoTitle => 'Havale bilgileri';
+	@override String get collectionNotConfigured => 'Yöneticiniz henüz tahsilat IBAN bilgisini tanımlamadı. Yine de dekont yükleyebilirsiniz.';
+	@override String get ibanLabel => 'IBAN';
+	@override String get accountTitleLabel => 'Alıcı unvanı';
+	@override String get referenceLabel => 'Havale açıklaması';
+	@override String get copy => 'Kopyala';
+	@override String get copied => 'Panoya kopyalandı';
+	@override String get selectDue => 'Aidat seçin';
+	@override String get selectDueHint => 'Ödeme yaptığınız aidatı seçin';
+	@override String get noPendingDues => 'Bekleyen aidat bulunmuyor';
+	@override String get uploadSectionTitle => 'Dekont yükle';
+	@override String get uploadHint => 'PDF veya fotoğraf (JPEG, PNG)';
+	@override String get pickFile => 'Dosya seç';
+	@override String get upload => 'Dekontu yükle';
+	@override String get uploadSuccess => 'Dekont yüklendi';
+	@override String get uploadFailed => 'Dekont yüklenemedi';
+	@override String get processing => 'Dekont işleniyor…';
+	@override String get viewDekonts => 'Dekontlarım';
+	@override String get emptyTitle => 'Henüz dekont yok';
+	@override String get emptySubtitle => 'Ödeme yaptıktan sonra dekontunuzu buradan yükleyebilirsiniz';
+	@override String get filterAll => 'Tümü';
+	@override String get filterPending => 'İncelemede';
+	@override String get filterApproved => 'Onaylandı';
+	@override String get filterRejected => 'Reddedildi';
+	@override String get statusReceived => 'Alındı';
+	@override String get statusExtracting => 'Okunuyor';
+	@override String get statusExtractFailed => 'Okunamadı';
+	@override String get statusParsed => 'Okundu';
+	@override String get statusParseLowConfidence => 'Düşük güven';
+	@override String get statusMatching => 'Eşleştiriliyor';
+	@override String get statusMatched => 'Eşleşti';
+	@override String get statusMatchAmbiguous => 'Belirsiz eşleşme';
+	@override String get statusUnmatched => 'Eşleşmedi';
+	@override String get statusPaymentApplied => 'Ödeme uygulandı';
+	@override String get statusPaymentPartial => 'Kısmi ödeme';
+	@override String get statusRejected => 'Reddedildi';
+	@override String get statusRecipientMismatch => 'Alıcı uyuşmuyor';
+	@override String get statusNeedsManagerReview => 'Yönetici incelemesi';
+	@override String get reupload => 'Yeniden yükle';
+	@override String get rejectionReason => 'Red nedeni';
+	@override String get parsedAmount => 'Okunan tutar';
+	@override String get filePreview => 'Dosya önizleme';
+	@override String get shareFile => 'Dosyayı paylaş';
+	@override String get approve => 'Onayla';
+	@override String get reject => 'Reddet';
+	@override String get reviewNote => 'Not (opsiyonel)';
+	@override String get reviewSuccess => 'İnceleme kaydedildi';
+	@override String get reviewFailed => 'İnceleme kaydedilemedi';
+	@override String get selectDueForApprove => 'Onay için aidat seçin';
+	@override String get uploadedBy => 'Yükleyen';
+	@override String get apartment => 'Daire';
+	@override String get amount => 'Tutar';
+	@override String get loadError => 'Dekontlar yüklenemedi';
+}
+
 // Path: features.expenses
 class _StringsFeaturesExpensesTr implements _StringsFeaturesExpensesEn {
 	_StringsFeaturesExpensesTr._(this._root);
@@ -1325,6 +1535,10 @@ class _StringsFeaturesNotificationsTr implements _StringsFeaturesNotificationsEn
 	@override String get typeTicketCreated => 'Yeni talep';
 	@override String get typeTicketUpdate => 'Talep güncellendi';
 	@override String get typeAnnouncement => 'Duyuru';
+	@override String get typeDekontReceived => 'Yeni dekont';
+	@override String get typeDekontNeedsReview => 'Dekont inceleme';
+	@override String get typeDekontMatched => 'Dekont eşleşti';
+	@override String get typeDekontPaymentApplied => 'Dekont onaylandı';
 	@override String get typeSystem => 'Sistem';
 	@override String get typeOther => 'Bildirim';
 	@override String get sendTitle => 'Sakinlere Duyuru';
@@ -1350,6 +1564,68 @@ class _StringsFeaturesFaz2Tr implements _StringsFeaturesFaz2En {
 	@override String get tickets => 'Talepler';
 	@override String get expenses => 'Giderler';
 	@override String get announcement => 'Duyuru';
+}
+
+// Path: features.buildings.collection
+class _StringsFeaturesBuildingsCollectionTr implements _StringsFeaturesBuildingsCollectionEn {
+	_StringsFeaturesBuildingsCollectionTr._(this._root);
+
+	@override final _StringsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get sectionTitle => 'Tahsilat bilgileri';
+	@override String get sectionHint => 'Sakinlerin havale yapacağı IBAN. Boş bırakılabilir; sonradan da ekleyebilirsiniz.';
+	@override String get modeSaved => 'Kayıtlı IBAN';
+	@override String get modeNew => 'Yeni IBAN';
+	@override String get savedListTitle => 'Daha önce kullandıklarınız';
+	@override String get pickSavedIban => 'Kayıtlı IBAN seçin';
+	@override String get changeSavedIban => 'Başka IBAN seçmek için dokunun';
+	@override String get searchSavedIban => 'IBAN veya unvan ara';
+	@override String get detailAccountHolder => 'Hesap sahibi';
+	@override String get detailReference => 'Havale açıklaması';
+	@override String get detailReferenceAuto => 'Havale açıklamasına daire numarası otomatik eklenir';
+	@override String get detailReferenceDaireOnly => 'Havale açıklaması: Daire numarası';
+	@override String get detailReferenceDaireAidat => 'Havale açıklaması: Daire no + aidat';
+	@override String get detailReferenceAidat => 'Havale açıklaması: Aidat (daire no otomatik)';
+	@override String get detailReferenceHavale => 'Havale açıklaması: Daire numarası ile havale';
+	@override String get detailUsedInBuildings => '{count} binada kullanılıyor';
+	@override String get ibanLabel => 'IBAN';
+	@override String get ibanHint => 'TR33 0006 1005 1978 6457 8413 26';
+	@override String get ibanInvalid => 'Geçerli bir Türkiye IBAN girin (TR + 24 rakam)';
+	@override String get ibanRequiredIfOtherFilled => 'Alıcı veya açıklama girdiniz; geçerli IBAN girin';
+	@override String get accountTitleLabel => 'Hesap sahibi / alıcı unvanı';
+	@override String get accountTitleHint => 'Örn: Site Yönetimi';
+	@override String get referenceTemplateLabel => 'Havale açıklama şablonu';
+	@override String get referenceTemplateHint => 'Örn: Daire {{number}}';
+	@override String get presetsEmpty => 'Henüz kayıtlı tahsilat bilgisi yok';
+	@override String get presetsLoadFailed => 'Öneriler yüklenemedi';
+	@override String get presetBuildingCount => '{count} bina';
+	@override String get menuEdit => 'Tahsilat / IBAN';
+	@override String get editSheetTitle => 'Tahsilat bilgileri';
+	@override String get saveSuccess => 'Tahsilat bilgileri kaydedildi';
+	@override String get savedIbansTitle => 'Kayıtlı IBAN\'larım';
+	@override String get savedIbansEmpty => 'Henüz kayıtlı IBAN yok. Bina eklerken tahsilat bilgisi tanımlayabilirsiniz.';
+	@override String get savedIbansNoBuildingMatch => 'Bu sete bağlı bina bulunamadı';
+	@override String get savedIbansBuildingNames => 'Binalar: {names}';
+	@override String get savedIbansUpdateSuccess => '{count} bina için tahsilat bilgisi güncellendi';
+	@override String get savedIbansUpdateHint => 'Güncellenecek binalar: {names}';
+	@override String get editSavedIbanTitle => 'IBAN düzenle';
+	@override String get savedIbansOrphanHint => 'Henüz bir binaya atanmamış kayıtlı set. Değişiklik yalnızca bu listede saklanır.';
+	@override String get savedIbansAddTitle => 'Yeni IBAN ekle';
+	@override String get savedIbansAddHint => 'Bu bilgileri bina eklerken veya tahsilat ayarlarında kullanabilirsiniz.';
+	@override String get savedIbansAddSuccess => 'IBAN kaydedildi';
+	@override String get savedIbansSelectMode => 'Çoklu seç';
+	@override String get savedIbansSelectedLabel => 'seçili';
+	@override String get savedIbansDeleteSelected => 'Seçilenleri sil';
+	@override String get savedIbansPickFirst => 'Önce silmek istediğiniz IBAN\'ları seçin';
+	@override String get savedIbansDeleteTitle => 'IBAN silinsin mi?';
+	@override String get savedIbansDeleteMessage => 'Bu kayıtlı IBAN listeden kaldırılacak.';
+	@override String get savedIbansDeleteBulkTitle => 'Seçilen IBAN\'lar silinsin mi?';
+	@override String get savedIbansDeleteBulkMessage => '{count} kayıtlı IBAN silinecek.';
+	@override String get savedIbansDeleteBuildingWarning => '{count} binanın tahsilat bilgisi de temizlenecek.';
+	@override String get savedIbansDeleteSuccess => 'IBAN silindi';
+	@override String get savedIbansDeleteBulkSuccess => '{count} IBAN silindi';
+	@override String get ibanNotConfigured => 'Tahsilat IBAN tanımlı değil';
 }
 
 /// Flat map(s) containing all translations.
@@ -1576,6 +1852,10 @@ extension on Translations {
 			case 'common.residentRemoveNotFound': return 'No resident to remove from this apartment.';
 			case 'common.multiSelectResidents': return 'Select multiple';
 			case 'common.multiSelectTapHint': return 'Tap the card to select or clear';
+			case 'common.selectTriggerShort': return 'Select';
+			case 'common.selectedCountLabel': return 'selected';
+			case 'common.selectionRemoveHint': return 'Pick the residents you want to remove';
+			case 'common.selectionDeleteIbanHint': return 'Pick the IBANs you want to delete';
 			case 'common.removeSelectedResidents': return 'Remove selected';
 			case 'common.removeSelectedResidentsTitle': return 'Remove selected residents';
 			case 'common.removeSelectedResidentsMessage': return 'Residents in the apartments listed below will be unlinked from their apartments. Accounts are not deleted—only the connection to this building is removed. Past dues records are kept.';
@@ -1661,6 +1941,59 @@ extension on Translations {
 			case 'features.buildings.activeCodeNote': return 'While this code is active, you cannot generate a new code for the same apartment. You must revoke the current code first.';
 			case 'features.buildings.backToMainMenu': return 'Back to Main Menu';
 			case 'features.buildings.tekrarDene': return 'Try Again';
+			case 'features.buildings.collection.sectionTitle': return 'Collection details';
+			case 'features.buildings.collection.sectionHint': return 'IBAN for resident bank transfers. Optional; you can add it later.';
+			case 'features.buildings.collection.modeSaved': return 'Saved IBAN';
+			case 'features.buildings.collection.modeNew': return 'New IBAN';
+			case 'features.buildings.collection.savedListTitle': return 'Previously used';
+			case 'features.buildings.collection.pickSavedIban': return 'Choose saved IBAN';
+			case 'features.buildings.collection.changeSavedIban': return 'Tap to choose another IBAN';
+			case 'features.buildings.collection.searchSavedIban': return 'Search IBAN or account name';
+			case 'features.buildings.collection.detailAccountHolder': return 'Account holder';
+			case 'features.buildings.collection.detailReference': return 'Payment reference';
+			case 'features.buildings.collection.detailReferenceAuto': return 'Apartment number is added to the transfer reference automatically';
+			case 'features.buildings.collection.detailReferenceDaireOnly': return 'Transfer reference: Apartment number';
+			case 'features.buildings.collection.detailReferenceDaireAidat': return 'Transfer reference: Apt. no + dues';
+			case 'features.buildings.collection.detailReferenceAidat': return 'Transfer reference: Dues (apt. no added automatically)';
+			case 'features.buildings.collection.detailReferenceHavale': return 'Transfer reference: Apartment number on transfer';
+			case 'features.buildings.collection.detailUsedInBuildings': return 'Used in {count} buildings';
+			case 'features.buildings.collection.ibanLabel': return 'IBAN';
+			case 'features.buildings.collection.ibanHint': return 'TR33 0006 1005 1978 6457 8413 26';
+			case 'features.buildings.collection.ibanInvalid': return 'Enter a valid Turkish IBAN (TR + 24 digits)';
+			case 'features.buildings.collection.ibanRequiredIfOtherFilled': return 'You entered account title or reference; enter a valid IBAN';
+			case 'features.buildings.collection.accountTitleLabel': return 'Account holder name';
+			case 'features.buildings.collection.accountTitleHint': return 'e.g. Building Management';
+			case 'features.buildings.collection.referenceTemplateLabel': return 'Payment reference template';
+			case 'features.buildings.collection.referenceTemplateHint': return 'e.g. Apt {{number}}';
+			case 'features.buildings.collection.presetsEmpty': return 'No saved collection details yet';
+			case 'features.buildings.collection.presetsLoadFailed': return 'Could not load suggestions';
+			case 'features.buildings.collection.presetBuildingCount': return '{count} buildings';
+			case 'features.buildings.collection.menuEdit': return 'Collection / IBAN';
+			case 'features.buildings.collection.editSheetTitle': return 'Collection details';
+			case 'features.buildings.collection.saveSuccess': return 'Collection details saved';
+			case 'features.buildings.collection.savedIbansTitle': return 'My saved IBANs';
+			case 'features.buildings.collection.savedIbansEmpty': return 'No saved IBAN yet. You can add collection details when creating a building.';
+			case 'features.buildings.collection.savedIbansNoBuildingMatch': return 'No building linked to this set';
+			case 'features.buildings.collection.savedIbansBuildingNames': return 'Buildings: {names}';
+			case 'features.buildings.collection.savedIbansUpdateSuccess': return 'Collection updated for {count} building(s)';
+			case 'features.buildings.collection.savedIbansUpdateHint': return 'Will update: {names}';
+			case 'features.buildings.collection.editSavedIbanTitle': return 'Edit IBAN';
+			case 'features.buildings.collection.savedIbansOrphanHint': return 'This set is not linked to a building yet. Changes are stored in your saved list only.';
+			case 'features.buildings.collection.savedIbansAddTitle': return 'Add IBAN';
+			case 'features.buildings.collection.savedIbansAddHint': return 'You can reuse these details when adding a building or editing collection settings.';
+			case 'features.buildings.collection.savedIbansAddSuccess': return 'IBAN saved';
+			case 'features.buildings.collection.savedIbansSelectMode': return 'Select multiple';
+			case 'features.buildings.collection.savedIbansSelectedLabel': return 'selected';
+			case 'features.buildings.collection.savedIbansDeleteSelected': return 'Delete selected';
+			case 'features.buildings.collection.savedIbansPickFirst': return 'Select the IBANs you want to delete first';
+			case 'features.buildings.collection.savedIbansDeleteTitle': return 'Delete this IBAN?';
+			case 'features.buildings.collection.savedIbansDeleteMessage': return 'This saved IBAN will be removed from your list.';
+			case 'features.buildings.collection.savedIbansDeleteBulkTitle': return 'Delete selected IBANs?';
+			case 'features.buildings.collection.savedIbansDeleteBulkMessage': return '{count} saved IBAN(s) will be deleted.';
+			case 'features.buildings.collection.savedIbansDeleteBuildingWarning': return 'Collection details will also be cleared on {count} building(s).';
+			case 'features.buildings.collection.savedIbansDeleteSuccess': return 'IBAN deleted';
+			case 'features.buildings.collection.savedIbansDeleteBulkSuccess': return '{count} IBAN(s) deleted';
+			case 'features.buildings.collection.ibanNotConfigured': return 'Collection IBAN not configured';
 			case 'features.auth.register': return 'Register';
 			case 'features.auth.login': return 'Login';
 			case 'features.auth.join': return 'Join';
@@ -1761,6 +2094,63 @@ extension on Translations {
 			case 'features.tickets.noteDisabledClosed': return 'Cannot add notes to a closed request';
 			case 'features.tickets.statusClosedHint': return 'This request is closed; status cannot be changed.';
 			case 'features.tickets.apartmentRequired': return 'Apartment not linked. Please sign in again.';
+			case 'features.dekont.makePaymentTitle': return 'Make Payment';
+			case 'features.dekont.myDekontsTitle': return 'My Receipts';
+			case 'features.dekont.managerTitle': return 'Receipt Review';
+			case 'features.dekont.detailTitle': return 'Receipt Detail';
+			case 'features.dekont.paymentInfoTitle': return 'Transfer details';
+			case 'features.dekont.collectionNotConfigured': return 'Your manager has not set up collection IBAN yet. You can still upload a receipt.';
+			case 'features.dekont.ibanLabel': return 'IBAN';
+			case 'features.dekont.accountTitleLabel': return 'Account title';
+			case 'features.dekont.referenceLabel': return 'Transfer reference';
+			case 'features.dekont.copy': return 'Copy';
+			case 'features.dekont.copied': return 'Copied to clipboard';
+			case 'features.dekont.selectDue': return 'Select due';
+			case 'features.dekont.selectDueHint': return 'Select the due you paid';
+			case 'features.dekont.noPendingDues': return 'No pending dues';
+			case 'features.dekont.uploadSectionTitle': return 'Upload receipt';
+			case 'features.dekont.uploadHint': return 'PDF or photo (JPEG, PNG)';
+			case 'features.dekont.pickFile': return 'Choose file';
+			case 'features.dekont.upload': return 'Upload receipt';
+			case 'features.dekont.uploadSuccess': return 'Receipt uploaded';
+			case 'features.dekont.uploadFailed': return 'Upload failed';
+			case 'features.dekont.processing': return 'Processing receipt…';
+			case 'features.dekont.viewDekonts': return 'My receipts';
+			case 'features.dekont.emptyTitle': return 'No receipts yet';
+			case 'features.dekont.emptySubtitle': return 'After paying, upload your bank receipt here';
+			case 'features.dekont.filterAll': return 'All';
+			case 'features.dekont.filterPending': return 'Under review';
+			case 'features.dekont.filterApproved': return 'Approved';
+			case 'features.dekont.filterRejected': return 'Rejected';
+			case 'features.dekont.statusReceived': return 'Received';
+			case 'features.dekont.statusExtracting': return 'Reading';
+			case 'features.dekont.statusExtractFailed': return 'Read failed';
+			case 'features.dekont.statusParsed': return 'Parsed';
+			case 'features.dekont.statusParseLowConfidence': return 'Low confidence';
+			case 'features.dekont.statusMatching': return 'Matching';
+			case 'features.dekont.statusMatched': return 'Matched';
+			case 'features.dekont.statusMatchAmbiguous': return 'Ambiguous match';
+			case 'features.dekont.statusUnmatched': return 'Unmatched';
+			case 'features.dekont.statusPaymentApplied': return 'Payment applied';
+			case 'features.dekont.statusPaymentPartial': return 'Partial payment';
+			case 'features.dekont.statusRejected': return 'Rejected';
+			case 'features.dekont.statusRecipientMismatch': return 'Recipient mismatch';
+			case 'features.dekont.statusNeedsManagerReview': return 'Manager review';
+			case 'features.dekont.reupload': return 'Upload again';
+			case 'features.dekont.rejectionReason': return 'Rejection reason';
+			case 'features.dekont.parsedAmount': return 'Parsed amount';
+			case 'features.dekont.filePreview': return 'File preview';
+			case 'features.dekont.shareFile': return 'Share file';
+			case 'features.dekont.approve': return 'Approve';
+			case 'features.dekont.reject': return 'Reject';
+			case 'features.dekont.reviewNote': return 'Note (optional)';
+			case 'features.dekont.reviewSuccess': return 'Review saved';
+			case 'features.dekont.reviewFailed': return 'Review failed';
+			case 'features.dekont.selectDueForApprove': return 'Select due to approve';
+			case 'features.dekont.uploadedBy': return 'Uploaded by';
+			case 'features.dekont.apartment': return 'Apartment';
+			case 'features.dekont.amount': return 'Amount';
+			case 'features.dekont.loadError': return 'Could not load receipts';
 			case 'features.expenses.title': return 'Expenses';
 			case 'features.expenses.createTitle': return 'Add expense';
 			case 'features.expenses.fieldTitle': return 'Title';
@@ -1815,6 +2205,10 @@ extension on Translations {
 			case 'features.notifications.typeTicketCreated': return 'New request';
 			case 'features.notifications.typeTicketUpdate': return 'Request updated';
 			case 'features.notifications.typeAnnouncement': return 'Announcement';
+			case 'features.notifications.typeDekontReceived': return 'New receipt';
+			case 'features.notifications.typeDekontNeedsReview': return 'Receipt review';
+			case 'features.notifications.typeDekontMatched': return 'Receipt matched';
+			case 'features.notifications.typeDekontPaymentApplied': return 'Receipt approved';
 			case 'features.notifications.typeSystem': return 'System';
 			case 'features.notifications.typeOther': return 'Notification';
 			case 'features.notifications.sendTitle': return 'Announcement to residents';
@@ -2062,6 +2456,10 @@ extension on _StringsTr {
 			case 'common.residentRemoveNotFound': return 'Bu dairede çıkarılacak sakin bulunamadı.';
 			case 'common.multiSelectResidents': return 'Çoklu seç';
 			case 'common.multiSelectTapHint': return 'Seçmek için karta dokunun';
+			case 'common.selectTriggerShort': return 'Seç';
+			case 'common.selectedCountLabel': return 'seçili';
+			case 'common.selectionRemoveHint': return 'Çıkarmak istediğiniz sakinleri seçin';
+			case 'common.selectionDeleteIbanHint': return 'Silmek istediğiniz IBAN\'ları seçin';
 			case 'common.removeSelectedResidents': return 'Seçilenleri çıkar';
 			case 'common.removeSelectedResidentsTitle': return 'Seçilen sakinleri çıkar';
 			case 'common.removeSelectedResidentsMessage': return 'Aşağıda listelenen dairelerde oturan sakinler daireden çıkarılır. Hesapları silinmez; yalnızca bu binadaki bağlantıları kalkar. Geçmiş aidat kayıtları korunur.';
@@ -2147,6 +2545,59 @@ extension on _StringsTr {
 			case 'features.buildings.activeCodeNote': return 'Bu kod aktifken aynı daireye yeni kod üretilemez. Yeni kod için önce mevcut kodu iptal etmelisin.';
 			case 'features.buildings.backToMainMenu': return 'Ana Menüye Dön';
 			case 'features.buildings.tekrarDene': return 'Tekrar Dene';
+			case 'features.buildings.collection.sectionTitle': return 'Tahsilat bilgileri';
+			case 'features.buildings.collection.sectionHint': return 'Sakinlerin havale yapacağı IBAN. Boş bırakılabilir; sonradan da ekleyebilirsiniz.';
+			case 'features.buildings.collection.modeSaved': return 'Kayıtlı IBAN';
+			case 'features.buildings.collection.modeNew': return 'Yeni IBAN';
+			case 'features.buildings.collection.savedListTitle': return 'Daha önce kullandıklarınız';
+			case 'features.buildings.collection.pickSavedIban': return 'Kayıtlı IBAN seçin';
+			case 'features.buildings.collection.changeSavedIban': return 'Başka IBAN seçmek için dokunun';
+			case 'features.buildings.collection.searchSavedIban': return 'IBAN veya unvan ara';
+			case 'features.buildings.collection.detailAccountHolder': return 'Hesap sahibi';
+			case 'features.buildings.collection.detailReference': return 'Havale açıklaması';
+			case 'features.buildings.collection.detailReferenceAuto': return 'Havale açıklamasına daire numarası otomatik eklenir';
+			case 'features.buildings.collection.detailReferenceDaireOnly': return 'Havale açıklaması: Daire numarası';
+			case 'features.buildings.collection.detailReferenceDaireAidat': return 'Havale açıklaması: Daire no + aidat';
+			case 'features.buildings.collection.detailReferenceAidat': return 'Havale açıklaması: Aidat (daire no otomatik)';
+			case 'features.buildings.collection.detailReferenceHavale': return 'Havale açıklaması: Daire numarası ile havale';
+			case 'features.buildings.collection.detailUsedInBuildings': return '{count} binada kullanılıyor';
+			case 'features.buildings.collection.ibanLabel': return 'IBAN';
+			case 'features.buildings.collection.ibanHint': return 'TR33 0006 1005 1978 6457 8413 26';
+			case 'features.buildings.collection.ibanInvalid': return 'Geçerli bir Türkiye IBAN girin (TR + 24 rakam)';
+			case 'features.buildings.collection.ibanRequiredIfOtherFilled': return 'Alıcı veya açıklama girdiniz; geçerli IBAN girin';
+			case 'features.buildings.collection.accountTitleLabel': return 'Hesap sahibi / alıcı unvanı';
+			case 'features.buildings.collection.accountTitleHint': return 'Örn: Site Yönetimi';
+			case 'features.buildings.collection.referenceTemplateLabel': return 'Havale açıklama şablonu';
+			case 'features.buildings.collection.referenceTemplateHint': return 'Örn: Daire {{number}}';
+			case 'features.buildings.collection.presetsEmpty': return 'Henüz kayıtlı tahsilat bilgisi yok';
+			case 'features.buildings.collection.presetsLoadFailed': return 'Öneriler yüklenemedi';
+			case 'features.buildings.collection.presetBuildingCount': return '{count} bina';
+			case 'features.buildings.collection.menuEdit': return 'Tahsilat / IBAN';
+			case 'features.buildings.collection.editSheetTitle': return 'Tahsilat bilgileri';
+			case 'features.buildings.collection.saveSuccess': return 'Tahsilat bilgileri kaydedildi';
+			case 'features.buildings.collection.savedIbansTitle': return 'Kayıtlı IBAN\'larım';
+			case 'features.buildings.collection.savedIbansEmpty': return 'Henüz kayıtlı IBAN yok. Bina eklerken tahsilat bilgisi tanımlayabilirsiniz.';
+			case 'features.buildings.collection.savedIbansNoBuildingMatch': return 'Bu sete bağlı bina bulunamadı';
+			case 'features.buildings.collection.savedIbansBuildingNames': return 'Binalar: {names}';
+			case 'features.buildings.collection.savedIbansUpdateSuccess': return '{count} bina için tahsilat bilgisi güncellendi';
+			case 'features.buildings.collection.savedIbansUpdateHint': return 'Güncellenecek binalar: {names}';
+			case 'features.buildings.collection.editSavedIbanTitle': return 'IBAN düzenle';
+			case 'features.buildings.collection.savedIbansOrphanHint': return 'Henüz bir binaya atanmamış kayıtlı set. Değişiklik yalnızca bu listede saklanır.';
+			case 'features.buildings.collection.savedIbansAddTitle': return 'Yeni IBAN ekle';
+			case 'features.buildings.collection.savedIbansAddHint': return 'Bu bilgileri bina eklerken veya tahsilat ayarlarında kullanabilirsiniz.';
+			case 'features.buildings.collection.savedIbansAddSuccess': return 'IBAN kaydedildi';
+			case 'features.buildings.collection.savedIbansSelectMode': return 'Çoklu seç';
+			case 'features.buildings.collection.savedIbansSelectedLabel': return 'seçili';
+			case 'features.buildings.collection.savedIbansDeleteSelected': return 'Seçilenleri sil';
+			case 'features.buildings.collection.savedIbansPickFirst': return 'Önce silmek istediğiniz IBAN\'ları seçin';
+			case 'features.buildings.collection.savedIbansDeleteTitle': return 'IBAN silinsin mi?';
+			case 'features.buildings.collection.savedIbansDeleteMessage': return 'Bu kayıtlı IBAN listeden kaldırılacak.';
+			case 'features.buildings.collection.savedIbansDeleteBulkTitle': return 'Seçilen IBAN\'lar silinsin mi?';
+			case 'features.buildings.collection.savedIbansDeleteBulkMessage': return '{count} kayıtlı IBAN silinecek.';
+			case 'features.buildings.collection.savedIbansDeleteBuildingWarning': return '{count} binanın tahsilat bilgisi de temizlenecek.';
+			case 'features.buildings.collection.savedIbansDeleteSuccess': return 'IBAN silindi';
+			case 'features.buildings.collection.savedIbansDeleteBulkSuccess': return '{count} IBAN silindi';
+			case 'features.buildings.collection.ibanNotConfigured': return 'Tahsilat IBAN tanımlı değil';
 			case 'features.auth.register': return 'Kaydol';
 			case 'features.auth.login': return 'Giriş Yap';
 			case 'features.auth.join': return 'Katıl';
@@ -2247,6 +2698,63 @@ extension on _StringsTr {
 			case 'features.tickets.noteDisabledClosed': return 'Kapalı talebe not eklenemez';
 			case 'features.tickets.statusClosedHint': return 'Bu talep kapatıldı; durum değiştirilemez.';
 			case 'features.tickets.apartmentRequired': return 'Daire bilgisi bulunamadı. Lütfen tekrar giriş yapın.';
+			case 'features.dekont.makePaymentTitle': return 'Ödeme Yap';
+			case 'features.dekont.myDekontsTitle': return 'Dekontlarım';
+			case 'features.dekont.managerTitle': return 'Dekont İnceleme';
+			case 'features.dekont.detailTitle': return 'Dekont Detayı';
+			case 'features.dekont.paymentInfoTitle': return 'Havale bilgileri';
+			case 'features.dekont.collectionNotConfigured': return 'Yöneticiniz henüz tahsilat IBAN bilgisini tanımlamadı. Yine de dekont yükleyebilirsiniz.';
+			case 'features.dekont.ibanLabel': return 'IBAN';
+			case 'features.dekont.accountTitleLabel': return 'Alıcı unvanı';
+			case 'features.dekont.referenceLabel': return 'Havale açıklaması';
+			case 'features.dekont.copy': return 'Kopyala';
+			case 'features.dekont.copied': return 'Panoya kopyalandı';
+			case 'features.dekont.selectDue': return 'Aidat seçin';
+			case 'features.dekont.selectDueHint': return 'Ödeme yaptığınız aidatı seçin';
+			case 'features.dekont.noPendingDues': return 'Bekleyen aidat bulunmuyor';
+			case 'features.dekont.uploadSectionTitle': return 'Dekont yükle';
+			case 'features.dekont.uploadHint': return 'PDF veya fotoğraf (JPEG, PNG)';
+			case 'features.dekont.pickFile': return 'Dosya seç';
+			case 'features.dekont.upload': return 'Dekontu yükle';
+			case 'features.dekont.uploadSuccess': return 'Dekont yüklendi';
+			case 'features.dekont.uploadFailed': return 'Dekont yüklenemedi';
+			case 'features.dekont.processing': return 'Dekont işleniyor…';
+			case 'features.dekont.viewDekonts': return 'Dekontlarım';
+			case 'features.dekont.emptyTitle': return 'Henüz dekont yok';
+			case 'features.dekont.emptySubtitle': return 'Ödeme yaptıktan sonra dekontunuzu buradan yükleyebilirsiniz';
+			case 'features.dekont.filterAll': return 'Tümü';
+			case 'features.dekont.filterPending': return 'İncelemede';
+			case 'features.dekont.filterApproved': return 'Onaylandı';
+			case 'features.dekont.filterRejected': return 'Reddedildi';
+			case 'features.dekont.statusReceived': return 'Alındı';
+			case 'features.dekont.statusExtracting': return 'Okunuyor';
+			case 'features.dekont.statusExtractFailed': return 'Okunamadı';
+			case 'features.dekont.statusParsed': return 'Okundu';
+			case 'features.dekont.statusParseLowConfidence': return 'Düşük güven';
+			case 'features.dekont.statusMatching': return 'Eşleştiriliyor';
+			case 'features.dekont.statusMatched': return 'Eşleşti';
+			case 'features.dekont.statusMatchAmbiguous': return 'Belirsiz eşleşme';
+			case 'features.dekont.statusUnmatched': return 'Eşleşmedi';
+			case 'features.dekont.statusPaymentApplied': return 'Ödeme uygulandı';
+			case 'features.dekont.statusPaymentPartial': return 'Kısmi ödeme';
+			case 'features.dekont.statusRejected': return 'Reddedildi';
+			case 'features.dekont.statusRecipientMismatch': return 'Alıcı uyuşmuyor';
+			case 'features.dekont.statusNeedsManagerReview': return 'Yönetici incelemesi';
+			case 'features.dekont.reupload': return 'Yeniden yükle';
+			case 'features.dekont.rejectionReason': return 'Red nedeni';
+			case 'features.dekont.parsedAmount': return 'Okunan tutar';
+			case 'features.dekont.filePreview': return 'Dosya önizleme';
+			case 'features.dekont.shareFile': return 'Dosyayı paylaş';
+			case 'features.dekont.approve': return 'Onayla';
+			case 'features.dekont.reject': return 'Reddet';
+			case 'features.dekont.reviewNote': return 'Not (opsiyonel)';
+			case 'features.dekont.reviewSuccess': return 'İnceleme kaydedildi';
+			case 'features.dekont.reviewFailed': return 'İnceleme kaydedilemedi';
+			case 'features.dekont.selectDueForApprove': return 'Onay için aidat seçin';
+			case 'features.dekont.uploadedBy': return 'Yükleyen';
+			case 'features.dekont.apartment': return 'Daire';
+			case 'features.dekont.amount': return 'Tutar';
+			case 'features.dekont.loadError': return 'Dekontlar yüklenemedi';
 			case 'features.expenses.title': return 'Giderler';
 			case 'features.expenses.createTitle': return 'Gider Ekle';
 			case 'features.expenses.fieldTitle': return 'Başlık';
@@ -2301,6 +2809,10 @@ extension on _StringsTr {
 			case 'features.notifications.typeTicketCreated': return 'Yeni talep';
 			case 'features.notifications.typeTicketUpdate': return 'Talep güncellendi';
 			case 'features.notifications.typeAnnouncement': return 'Duyuru';
+			case 'features.notifications.typeDekontReceived': return 'Yeni dekont';
+			case 'features.notifications.typeDekontNeedsReview': return 'Dekont inceleme';
+			case 'features.notifications.typeDekontMatched': return 'Dekont eşleşti';
+			case 'features.notifications.typeDekontPaymentApplied': return 'Dekont onaylandı';
 			case 'features.notifications.typeSystem': return 'Sistem';
 			case 'features.notifications.typeOther': return 'Bildirim';
 			case 'features.notifications.sendTitle': return 'Sakinlere Duyuru';

@@ -5,6 +5,7 @@ class NotificationPayload {
   final String? type;
   final String? notificationId;
   final String? ticketId;
+  final String? dekontId;
   final String? buildingId;
   final String? status;
   final String? route;
@@ -13,6 +14,7 @@ class NotificationPayload {
     this.type,
     this.notificationId,
     this.ticketId,
+    this.dekontId,
     this.buildingId,
     this.status,
     this.route,
@@ -29,6 +31,7 @@ class NotificationPayload {
       type: str(data['type']),
       notificationId: str(data['notificationId']),
       ticketId: str(data['ticketId']),
+      dekontId: str(data['dekontId']),
       buildingId: str(data['buildingId']),
       status: str(data['status']),
       route: str(data['route']),
@@ -39,6 +42,7 @@ class NotificationPayload {
   String? resolveNavigationPath({UserRole? role}) {
     final normalized = type?.toUpperCase();
     final tid = ticketId;
+    final did = dekontId;
 
     switch (normalized) {
       case 'TICKET_CREATED':
@@ -49,12 +53,23 @@ class NotificationPayload {
       case 'TICKET_UPDATE':
         if (tid != null) return '/tickets/$tid';
         return route ?? '/resident-dashboard';
+      case 'DEKONT_PAYMENT_APPLIED':
+        if (did != null) return '/dekonts/$did';
+        return route ?? '/dekonts';
+      case 'DEKONT_RECEIVED':
+      case 'DEKONT_NEEDS_REVIEW':
+      case 'DEKONT_MATCHED':
+        if (did != null) return '/dekonts/$did';
+        return role == UserRole.manager ? '/manager/dekonts' : '/dekonts';
       case 'ANNOUNCEMENT':
         return route ?? '/notifications';
       case 'DUE_PAID':
       case 'DUE_REMINDER':
         return route ?? '/resident-dashboard';
       default:
+        if (normalized == 'SYSTEM' && did != null) {
+          return '/dekonts/$did';
+        }
         if (route != null && route!.isNotEmpty) return route;
         return '/notifications';
     }

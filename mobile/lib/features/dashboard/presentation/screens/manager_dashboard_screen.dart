@@ -23,6 +23,7 @@ import '../../../buildings/presentation/screens/building_residents_screen.dart';
 import '../../../buildings/presentation/screens/invite_code_screen.dart';
 import '../../../buildings/presentation/widgets/delete_building_dialog.dart';
 import '../../../buildings/presentation/widgets/edit_building_bottom_sheet.dart';
+import '../../../buildings/presentation/widgets/edit_building_collection_bottom_sheet.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../../dues/presentation/screens/manager_dues_tab.dart';
@@ -190,6 +191,16 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                   ref.invalidate(managerMonthAnnouncementsCountProvider);
                 }
               },
+            ),
+            const SizedBox(height: AppSizes.spacingM),
+            SizedBox(
+              width: double.infinity,
+              height: AppSizes.buttonHeightSecondary,
+              child: OutlinedButton.icon(
+                onPressed: () => context.push('/manager/dekonts'),
+                icon: const Icon(Icons.receipt_long_outlined),
+                label: Text(context.t.features.dekont.managerTitle),
+              ),
             ),
             const SizedBox(height: AppSizes.spacingL),
             Row(
@@ -375,12 +386,30 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      building.name,
-                      style: AppTypography.h4.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            building.name,
+                            style: AppTypography.h4.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        if (!building.isCollectionConfigured) ...[
+                          const SizedBox(width: AppSizes.spacingXS),
+                          Tooltip(
+                            message: context
+                                .t.features.buildings.collection.ibanNotConfigured,
+                            child: Icon(
+                              Icons.warning_amber_rounded,
+                              size: 20,
+                              color: AppColors.warning,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: AppSizes.spacingXS),
                     Text.rich(
@@ -523,6 +552,9 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
           case _BuildingAction.edit:
             _onEditBuilding(building);
             break;
+          case _BuildingAction.collection:
+            _onEditBuildingCollection(building);
+            break;
           case _BuildingAction.delete:
             _onDeleteBuilding(building);
             break;
@@ -541,6 +573,29 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
               const SizedBox(width: AppSizes.spacingS),
               Text(
                 context.t.common.editBuilding,
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: _BuildingAction.collection,
+          child: Row(
+            children: [
+              Icon(
+                building.isCollectionConfigured
+                    ? Icons.account_balance_wallet_outlined
+                    : Icons.warning_amber_outlined,
+                size: 22,
+                color: building.isCollectionConfigured
+                    ? AppColors.primary
+                    : AppColors.warning,
+              ),
+              const SizedBox(width: AppSizes.spacingS),
+              Text(
+                context.t.features.buildings.collection.menuEdit,
                 style: AppTypography.body1.copyWith(
                   color: AppColors.textPrimary,
                 ),
@@ -571,6 +626,10 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
 
   void _onEditBuilding(BuildingEntity building) {
     EditBuildingBottomSheet.show(context, building: building);
+  }
+
+  void _onEditBuildingCollection(BuildingEntity building) {
+    EditBuildingCollectionBottomSheet.show(context, building: building);
   }
 
   Future<void> _onDeleteBuilding(BuildingEntity building) async {
@@ -970,7 +1029,7 @@ class _HeroSummaryCard extends StatelessWidget {
   }
 }
 
-enum _BuildingAction { edit, delete }
+enum _BuildingAction { edit, collection, delete }
 
 class _ManagerQuickActionsRow extends StatelessWidget {
   final int openTicketCount;

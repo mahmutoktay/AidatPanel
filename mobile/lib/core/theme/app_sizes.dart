@@ -39,6 +39,11 @@ class AppSizes {
   static const double minTouchTarget = 48.0; // Apple/Google standard
   static const double minTouchTargetComfort = 56.0; // 50+ yaş konfor
 
+  /// Liste satırı yan ikonları — dar yuva; dokunma satırın tamamında.
+  static const double listRowIconWidth = 28.0;
+  static const double listRowIconSize = 24.0;
+  static const double listRowActionWidth = 36.0;
+
   // Özel boyutlar
   static const double fabSize = 64.0; // +8
   static const double avatarSize = 56.0; // +8

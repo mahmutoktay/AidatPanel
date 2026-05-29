@@ -16,6 +16,11 @@ import '../../features/tickets/presentation/screens/create_ticket_screen.dart';
 import '../../features/tickets/presentation/screens/manager_tickets_screen.dart';
 import '../../features/tickets/presentation/screens/ticket_detail_screen.dart';
 import '../../features/expenses/presentation/screens/manager_expenses_screen.dart';
+import '../../features/dekont/presentation/screens/dekont_detail_screen.dart';
+import '../../features/dekont/presentation/screens/make_payment_screen.dart';
+import '../../features/dekont/presentation/screens/manager_dekonts_screen.dart';
+import '../../features/dekont/presentation/screens/my_dekonts_screen.dart';
+import '../../features/buildings/presentation/screens/saved_ibans_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -66,6 +71,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           loc == '/tickets/create' &&
           authState.user?.role == UserRole.manager) {
         return '/manager-dashboard';
+      }
+
+      if (authState.isAuthenticated &&
+          authState.user?.role == UserRole.manager &&
+          (loc == '/payment' || loc == '/dekonts')) {
+        return '/manager-dashboard';
+      }
+
+      if (authState.isAuthenticated &&
+          authState.user?.role == UserRole.resident &&
+          loc == '/manager/dekonts') {
+        return '/resident-dashboard';
       }
 
       return null;
@@ -144,6 +161,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return const ManagerDashboardScreen();
         },
+        routes: [
+          GoRoute(
+            path: 'saved-ibans',
+            name: 'manager_saved_ibans',
+            builder: (context, state) => const SavedIbansScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/resident-dashboard',
@@ -184,6 +208,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/manager/expenses',
         name: 'manager_expenses',
         builder: (context, state) => const ManagerExpensesScreen(),
+      ),
+      GoRoute(
+        path: '/manager/dekonts',
+        name: 'manager_dekonts',
+        builder: (context, state) => const ManagerDekontsScreen(),
+      ),
+      GoRoute(
+        path: '/payment',
+        name: 'make_payment',
+        builder: (context, state) {
+          final dueId = state.uri.queryParameters['dueId'];
+          return MakePaymentScreen(preselectedDueId: dueId);
+        },
+      ),
+      GoRoute(
+        path: '/dekonts',
+        name: 'my_dekonts',
+        builder: (context, state) => const MyDekontsScreen(),
+      ),
+      GoRoute(
+        path: '/dekonts/:dekontId',
+        name: 'dekont_detail',
+        builder: (context, state) {
+          final id = state.pathParameters['dekontId']!;
+          return DekontDetailScreen(dekontId: id);
+        },
+      ),
+      // Eski deep link / bookmark uyumu
+      GoRoute(
+        path: '/manager/saved-ibans',
+        redirect: (context, state) => '/manager-dashboard/saved-ibans',
       ),
     ],
   );

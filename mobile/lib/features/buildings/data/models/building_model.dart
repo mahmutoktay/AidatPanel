@@ -18,6 +18,10 @@ class BuildingModel {
   /// `GET /buildings` yanıtında Prisma `_count.apartments` (§2.3).
   /// Yoksa (ör. `POST /buildings` yanıtı) `toEntity` kat × daire tahminini kullanır.
   final int? apartmentCountFromApi;
+  final String? collectionIban;
+  final String? collectionAccountTitle;
+  final String? paymentReferenceTemplate;
+  final bool? isCollectionConfiguredFromApi;
 
   BuildingModel({
     required this.id,
@@ -31,6 +35,10 @@ class BuildingModel {
     this.dueDay,
     this.currency,
     this.apartmentCountFromApi,
+    this.collectionIban,
+    this.collectionAccountTitle,
+    this.paymentReferenceTemplate,
+    this.isCollectionConfiguredFromApi,
   });
 
   factory BuildingModel.fromJson(Map<String, dynamic> json) {
@@ -52,6 +60,10 @@ class BuildingModel {
       dueDay: json['dueDay'] as int?,
       currency: json['currency'] as String?,
       apartmentCountFromApi: apartmentCountFromApi,
+      collectionIban: json['collectionIban'] as String?,
+      collectionAccountTitle: json['collectionAccountTitle'] as String?,
+      paymentReferenceTemplate: json['paymentReferenceTemplate'] as String?,
+      isCollectionConfiguredFromApi: json['isCollectionConfigured'] as bool?,
     );
   }
 
@@ -71,6 +83,9 @@ class BuildingModel {
       dueAmount: dueAmount,
       dueDay: dueDay,
       currency: currency ?? 'TRY',
+      collectionIban: collectionIban,
+      collectionAccountTitle: collectionAccountTitle,
+      paymentReferenceTemplate: paymentReferenceTemplate,
     );
   }
 

@@ -1,0 +1,74 @@
+enum DekontStatus {
+  received,
+  extracting,
+  extractFailed,
+  parsed,
+  parseLowConfidence,
+  matching,
+  matched,
+  matchAmbiguous,
+  unmatched,
+  paymentApplied,
+  paymentPartial,
+  rejected,
+  recipientMismatch,
+  needsManagerReview;
+
+  String get apiValue {
+    switch (this) {
+      case DekontStatus.received:
+        return 'RECEIVED';
+      case DekontStatus.extracting:
+        return 'EXTRACTING';
+      case DekontStatus.extractFailed:
+        return 'EXTRACT_FAILED';
+      case DekontStatus.parsed:
+        return 'PARSED';
+      case DekontStatus.parseLowConfidence:
+        return 'PARSE_LOW_CONFIDENCE';
+      case DekontStatus.matching:
+        return 'MATCHING';
+      case DekontStatus.matched:
+        return 'MATCHED';
+      case DekontStatus.matchAmbiguous:
+        return 'MATCH_AMBIGUOUS';
+      case DekontStatus.unmatched:
+        return 'UNMATCHED';
+      case DekontStatus.paymentApplied:
+        return 'PAYMENT_APPLIED';
+      case DekontStatus.paymentPartial:
+        return 'PAYMENT_PARTIAL';
+      case DekontStatus.rejected:
+        return 'REJECTED';
+      case DekontStatus.recipientMismatch:
+        return 'RECIPIENT_MISMATCH';
+      case DekontStatus.needsManagerReview:
+        return 'NEEDS_MANAGER_REVIEW';
+    }
+  }
+
+  static DekontStatus? fromApi(String? value) {
+    if (value == null || value.isEmpty) return null;
+    final upper = value.toUpperCase();
+    for (final s in DekontStatus.values) {
+      if (s.apiValue == upper) return s;
+    }
+    return null;
+  }
+
+  bool get isTerminal =>
+      this == DekontStatus.paymentApplied || this == DekontStatus.rejected;
+
+  bool get isProcessing =>
+      this == DekontStatus.received ||
+      this == DekontStatus.extracting ||
+      this == DekontStatus.matching;
+
+  bool get needsManagerAttention =>
+      this == DekontStatus.needsManagerReview ||
+      this == DekontStatus.parseLowConfidence ||
+      this == DekontStatus.unmatched ||
+      this == DekontStatus.recipientMismatch ||
+      this == DekontStatus.matchAmbiguous ||
+      this == DekontStatus.extractFailed;
+}
