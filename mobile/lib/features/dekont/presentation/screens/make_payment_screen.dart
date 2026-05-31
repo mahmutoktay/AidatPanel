@@ -190,13 +190,25 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
                         ),
                       )
                     else
-                      ...pendingDues.map((due) => _DueRadioTile(
-                            due: due,
-                            groupValue: paymentState.selectedDueId,
-                            onSelected: (id) => ref
+                      RadioGroup<String>(
+                        groupValue: paymentState.selectedDueId,
+                        onChanged: (id) {
+                          if (id != null) {
+                            ref
                                 .read(makePaymentNotifierProvider.notifier)
-                                .selectDue(id),
-                          )),
+                                .selectDue(id);
+                          }
+                        },
+                        child: Column(
+                          children: [
+                            for (final due in pendingDues)
+                              _DueRadioTile(
+                                due: due,
+                                selectedId: paymentState.selectedDueId,
+                              ),
+                          ],
+                        ),
+                      ),
                     const SizedBox(height: AppSizes.spacingL),
                     Text(
                       t.uploadSectionTitle,
@@ -272,13 +284,11 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
 
 class _DueRadioTile extends StatelessWidget {
   final DueEntity due;
-  final String? groupValue;
-  final ValueChanged<String> onSelected;
+  final String? selectedId;
 
   const _DueRadioTile({
     required this.due,
-    required this.groupValue,
-    required this.onSelected,
+    required this.selectedId,
   });
 
   @override
@@ -292,15 +302,13 @@ class _DueRadioTile extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
         border: Border.all(
-          color: groupValue == due.id
+          color: selectedId == due.id
               ? AppColors.primary
               : AppColors.primary.withValues(alpha: 0.14),
         ),
       ),
       child: RadioListTile<String>(
         value: due.id,
-        groupValue: groupValue,
-        onChanged: (_) => onSelected(due.id),
         title: Text(
           '$monthLabel ${due.year}',
           style: AppTypography.body1.copyWith(fontWeight: FontWeight.w600),

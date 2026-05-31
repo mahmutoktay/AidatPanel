@@ -62,7 +62,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
       mimeType: dekont.mimeType,
       name: '${dekont.id}.$ext',
     );
-    await Share.shareXFiles([file]);
+    await SharePlus.instance.share(ShareParams(files: [file]));
   }
 
   Future<void> _openReviewSheet(DekontEntity dekont) async {
@@ -433,13 +433,14 @@ class _BuildingDuesPicker extends ConsumerWidget {
 
     return duesAsync.when(
       loading: () => const LinearProgressIndicator(),
-      error: (_, __) => Text(t.selectDueForApprove),
+      error: (_, _) => Text(t.selectDueForApprove),
       data: (dues) {
         if (dues.isEmpty) {
           return Text(t.noPendingDues);
         }
         return DropdownButtonFormField<String>(
-          value: selectedDueId,
+          key: ValueKey(selectedDueId),
+          initialValue: selectedDueId,
           decoration: InputDecoration(labelText: t.selectDueForApprove),
           items: [
             for (final d in dues)

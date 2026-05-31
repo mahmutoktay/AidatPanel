@@ -60,8 +60,7 @@ class ApiConstants {
   static const String myDues = '$apiVersion/me/dues';
 
   // Dekont endpoints
-  static const String myPaymentCollection =
-      '$apiVersion/me/payment-collection';
+  static const String myPaymentCollection = '$apiVersion/me/payment-collection';
   static const String myDekonts = '$apiVersion/me/dekonts';
   static const String dekontUpload = '$apiVersion/dekonts/upload';
   static String dekont(String dekontId) => '$apiVersion/dekonts/$dekontId';

@@ -66,7 +66,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
     final fileName = segments.isNotEmpty ? segments.last : 'dekont.pdf';
     final form = FormData.fromMap({
       'file': await MultipartFile.fromFile(filePath, filename: fileName),
-      if (dueId != null) 'dueId': dueId,
+      'dueId': ?dueId,
     });
     final response = await _dioClient.post(
       ApiConstants.dekontUpload,
