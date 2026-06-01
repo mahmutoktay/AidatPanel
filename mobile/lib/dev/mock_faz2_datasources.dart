@@ -253,6 +253,12 @@ class MockNotificationDataSource implements NotificationDataSource {
   }
 
   @override
+  Future<int> fetchUnreadCount() async {
+    await Future.delayed(_delay);
+    return _items.where((n) => !n.isRead).length;
+  }
+
+  @override
   Future<NotificationListResult> list({
     bool unreadOnly = false,
     int limit = 20,

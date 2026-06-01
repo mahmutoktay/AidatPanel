@@ -27,6 +27,9 @@ class _FakeNotificationDs implements NotificationDataSource {
   final DateTime _now;
 
   @override
+  Future<int> fetchUnreadCount() async => 2;
+
+  @override
   Future<NotificationListResult> list({
     bool unreadOnly = false,
     int limit = 20,

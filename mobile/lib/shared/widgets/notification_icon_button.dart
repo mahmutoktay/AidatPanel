@@ -8,7 +8,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
-import '../../core/notifications/notification_toast.dart';
 import '../../features/notifications/presentation/providers/notifications_provider.dart';
 import '../../l10n/strings.g.dart';
 
@@ -153,7 +152,7 @@ class DashboardWelcomeLine extends StatelessWidget {
   }
 }
 
-/// Rozet + varsa yeni bildirim toast'u (sekme değişimi / yenileme).
+/// Rozet — `GET /notifications/unread-count` (45 sn throttle).
 void prefetchNotifications(WidgetRef ref) {
-  unawaited(pollAndShowNotificationToasts(ref));
+  ref.read(notificationsNotifierProvider.notifier).syncUnreadBadge();
 }

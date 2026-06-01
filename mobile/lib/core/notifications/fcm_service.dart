@@ -67,9 +67,9 @@ class FcmService {
     });
   }
 
-  Future<void> requestPermissions() async {
-    if (!isFcmSupported) return;
-    await requestNotificationPermissions(messaging: _messaging);
+  Future<bool> requestPermissions() async {
+    if (!isFcmSupported) return false;
+    return requestNotificationPermissions(messaging: _messaging);
   }
 
   /// Oturum açıkken token alır ve backend'e yükler.
@@ -84,7 +84,12 @@ class FcmService {
       return;
     }
 
-    await requestPermissions();
+    final permissionGranted = await requestPermissions();
+    if (!permissionGranted && kDebugMode) {
+      debugPrint(
+        '[FCM] Token alınabilir ama tray push için bildirim izni gerekli.',
+      );
+    }
 
     String? token;
     try {

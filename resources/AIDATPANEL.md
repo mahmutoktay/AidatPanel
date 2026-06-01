@@ -336,10 +336,11 @@ GET    /api/me/tickets                       # Kendi taleplerim (Sakin)
 
 ### Notifications
 ```
-GET    /api/notifications                    # Bildirimlerim
-PATCH  /api/notifications/:id/read           # Okundu işaretle
-PATCH  /api/notifications/read-all           # Tümünü oku
-PUT    /api/me/fcm-token                     # FCM token güncelle
+GET    /api/v1/notifications                 # Bildirimlerim (liste)
+GET    /api/v1/notifications/unread-count    # Rozet — okunmamış sayısı (hafif)
+PATCH  /api/v1/notifications/:id/read       # Okundu işaretle
+PATCH  /api/v1/notifications/read-all       # Tümünü oku
+PUT    /api/v1/me/fcm-token                  # FCM token güncelle
 ```
 
 ### Reports (Yönetici only)

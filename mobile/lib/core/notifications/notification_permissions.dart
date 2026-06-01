@@ -5,18 +5,25 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 /// Android 13+ (POST_NOTIFICATIONS) ve iOS bildirim izinleri.
-Future<void> requestNotificationPermissions({
+/// `false` → tray push gösterilmez (in-app liste yine çalışır).
+Future<bool> requestNotificationPermissions({
   required FirebaseMessaging messaging,
 }) async {
   if (Platform.isAndroid) {
-    final status = await Permission.notification.status;
+    var status = await Permission.notification.status;
     if (!status.isGranted) {
-      final result = await Permission.notification.request();
+      status = await Permission.notification.request();
       if (kDebugMode) {
-        debugPrint('[FCM] Android bildirim izni: $result');
+        debugPrint('[FCM] Android bildirim izni: $status');
       }
     }
-    return;
+    if (!status.isGranted && kDebugMode) {
+      debugPrint(
+        '[FCM] Bildirim izni yok — kapalıyken sistem tray push gelmez. '
+        'Ayarlar → Aidat Paneli → Bildirimler.',
+      );
+    }
+    return status.isGranted;
   }
 
   if (Platform.isIOS) {
@@ -28,5 +35,15 @@ Future<void> requestNotificationPermissions({
     if (kDebugMode) {
       debugPrint('[FCM] iOS izin durumu: ${settings.authorizationStatus}');
     }
+    final granted = settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional;
+    if (!granted && kDebugMode) {
+      debugPrint(
+        '[FCM] Bildirim izni yok — kapalıyken sistem tray push gelmez.',
+      );
+    }
+    return granted;
   }
+
+  return true;
 }

@@ -1,6 +1,8 @@
 import '../entities/notification_entity.dart';
 
 abstract class NotificationRepository {
+  Future<int> fetchUnreadCount();
+
   Future<NotificationListResult> list({
     bool unreadOnly = false,
     int limit = 20,

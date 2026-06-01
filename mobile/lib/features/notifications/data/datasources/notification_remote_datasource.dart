@@ -4,6 +4,9 @@ import '../../domain/entities/notification_entity.dart';
 import '../models/notification_model.dart';
 
 abstract class NotificationDataSource {
+  /// Hafif rozet senkronu — `GET /notifications/unread-count`.
+  Future<int> fetchUnreadCount();
+
   Future<NotificationListResult> list({
     bool unreadOnly = false,
     int limit = 20,
@@ -24,6 +27,13 @@ class NotificationRemoteDataSource implements NotificationDataSource {
 
   NotificationRemoteDataSource({required DioClient dioClient})
       : _dioClient = dioClient;
+
+  @override
+  Future<int> fetchUnreadCount() async {
+    final response = await _dioClient.get(ApiConstants.notificationsUnreadCount);
+    final data = response.data['data'] as Map<String, dynamic>;
+    return (data['unreadCount'] as num?)?.toInt() ?? 0;
+  }
 
   @override
   Future<NotificationListResult> list({

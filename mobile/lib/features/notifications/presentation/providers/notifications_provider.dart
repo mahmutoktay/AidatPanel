@@ -68,14 +68,25 @@ class NotificationsState {
 }
 
 class NotificationsNotifier extends StateNotifier<NotificationsState> {
+  NotificationsNotifier(this._repository) : super(const NotificationsState());
+
   final NotificationRepository _repository;
   Timer? _badgeSyncDebounce;
 
   final Set<String> _toastedNotificationIds = {};
   bool _toastBaselineReady = false;
   bool _pollInFlight = false;
+  int _lastPolledUnreadCount = 0;
+  String? _lastPolledTopId;
+  DateTime? _lastBadgeSyncAt;
 
-  NotificationsNotifier(this._repository) : super(const NotificationsState());
+  /// Rozet için minimum istek aralığı (sekme değişimi / prefetch).
+  static const _badgeSyncMinInterval = Duration(seconds: 45);
+
+  /// Arka plan poll — FCM yokken yedek; seyrek tutulur.
+  static const _pollMinInterval = Duration(seconds: 90);
+  static const _pollMinIntervalWhenUnread = Duration(seconds: 50);
+  DateTime? _lastPollAt;
 
   @override
   void dispose() {
@@ -87,6 +98,10 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   void resetToastTracking() {
     _toastedNotificationIds.clear();
     _toastBaselineReady = false;
+    _lastPolledUnreadCount = 0;
+    _lastPolledTopId = null;
+    _lastBadgeSyncAt = null;
+    _lastPollAt = null;
   }
 
   void markNotificationToasted(String id) {
@@ -95,28 +110,86 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     _toastedNotificationIds.add(id);
   }
 
-  /// Rozeti API ile senkronize eder (liste ekranını etkilemez).
-  Future<void> syncUnreadBadge() async {
+  bool _shouldThrottleBadgeSync({required bool force}) {
+    if (force) return false;
+    final last = _lastBadgeSyncAt;
+    if (last == null) return false;
+    return DateTime.now().difference(last) < _badgeSyncMinInterval;
+  }
+
+  bool _shouldThrottlePoll({required bool force}) {
+    if (force) return false;
+    final last = _lastPollAt;
+    if (last == null) return false;
+    final minInterval = state.unreadCount > 0
+        ? _pollMinIntervalWhenUnread
+        : _pollMinInterval;
+    return DateTime.now().difference(last) < minInterval;
+  }
+
+  /// Rozeti API ile senkronize eder (`GET /notifications/unread-count`).
+  Future<void> syncUnreadBadge({bool force = false}) async {
+    if (_shouldThrottleBadgeSync(force: force)) return;
+    _lastBadgeSyncAt = DateTime.now();
     try {
-      final result = await _repository.list(limit: 1);
-      state = state.copyWith(unreadCount: result.unreadCount);
+      final count = await _repository.fetchUnreadCount();
+      state = state.copyWith(unreadCount: count);
     } catch (_) {
       // Ağ hatasında mevcut (optimistic) sayı korunur.
     }
   }
 
-  /// Okunmamışları kontrol eder; daha önce gösterilmemiş olanları döner (toast için).
-  Future<List<NotificationEntity>> pollForNewNotifications() async {
+  /// Rozet + yeni toast: önce hafif sayaç, gerekirse okunmamış liste.
+  Future<List<NotificationEntity>> pollForNewNotifications({bool force = false}) async {
     if (_pollInFlight) return const [];
+    if (_shouldThrottlePoll(force: force)) return const [];
     _pollInFlight = true;
+    _lastPollAt = DateTime.now();
     try {
-      final result = await _repository.list(limit: 10, unreadOnly: true);
-      state = state.copyWith(unreadCount: result.unreadCount);
-      return _extractNewForToast(result.items);
+      final unreadCount = await _repository.fetchUnreadCount();
+      state = state.copyWith(unreadCount: unreadCount);
+
+      if (!_toastBaselineReady) {
+        await _establishToastBaseline(unreadCount);
+        return const [];
+      }
+
+      final countIncreased = unreadCount > _lastPolledUnreadCount;
+      _lastPolledUnreadCount = unreadCount;
+
+      if (!countIncreased) {
+        return const [];
+      }
+
+      final unread = await _repository.list(limit: 5, unreadOnly: true);
+      state = state.copyWith(unreadCount: unread.unreadCount);
+      _lastPolledUnreadCount = unread.unreadCount;
+      if (unread.items.isNotEmpty) {
+        final topId = unread.items.first.id;
+        if (topId == _lastPolledTopId) {
+          return const [];
+        }
+        _lastPolledTopId = topId;
+      }
+      return _extractNewForToast(unread.items);
     } catch (_) {
       return const [];
     } finally {
       _pollInFlight = false;
+    }
+  }
+
+  Future<void> _establishToastBaseline(int unreadCount) async {
+    _toastBaselineReady = true;
+    _lastPolledUnreadCount = unreadCount;
+    if (unreadCount > 0) {
+      final unread = await _repository.list(limit: 10, unreadOnly: true);
+      _toastedNotificationIds.addAll(unread.items.map((n) => n.id));
+      if (unread.items.isNotEmpty) {
+        _lastPolledTopId = unread.items.first.id;
+      }
+      state = state.copyWith(unreadCount: unread.unreadCount);
+      _lastPolledUnreadCount = unread.unreadCount;
     }
   }
 
@@ -133,20 +206,17 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       _toastedNotificationIds.add(n.id);
       fresh.add(n);
     }
-    // API en yeni önce — kuyruk eskiden yeniye işlesin.
     return fresh.reversed.toList();
   }
 
-  /// FCM push geldiğinde: önce anında +1, ardından sunucudan doğrula.
+  /// FCM push geldiğinde: optimistic +1, ardından hafif rozet senkronu.
   void onPushReceived() {
     state = state.copyWith(unreadCount: state.unreadCount + 1);
 
     _badgeSyncDebounce?.cancel();
-    _badgeSyncDebounce = Timer(const Duration(milliseconds: 200), () {
-      unawaited(syncUnreadBadge());
+    _badgeSyncDebounce = Timer(const Duration(milliseconds: 400), () {
+      unawaited(syncUnreadBadge(force: true));
     });
-
-    unawaited(load(refresh: true));
   }
 
   Future<void> load({bool refresh = true}) async {

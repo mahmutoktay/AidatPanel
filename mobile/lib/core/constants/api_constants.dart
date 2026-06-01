@@ -2,6 +2,19 @@ class ApiConstants {
   static const String baseUrl = 'https://api.aidatpanel.com';
   static const String apiVersion = '/api/v1';
 
+  /// `wss://api.aidatpanel.com/api/v1/realtime?token=...`
+  static Uri realtimeWebSocketUri(String accessToken) {
+    final https = Uri.parse(baseUrl);
+    final scheme = https.scheme == 'https' ? 'wss' : 'ws';
+    return Uri(
+      scheme: scheme,
+      host: https.host,
+      port: https.hasPort ? https.port : null,
+      path: '$apiVersion/realtime',
+      queryParameters: {'token': accessToken},
+    );
+  }
+
   // Auth endpoints
   static const String register = '$apiVersion/auth/register';
   static const String login = '$apiVersion/auth/login';
@@ -86,6 +99,8 @@ class ApiConstants {
 
   // Notifications endpoints
   static const String notifications = '$apiVersion/notifications';
+  static const String notificationsUnreadCount =
+      '$apiVersion/notifications/unread-count';
   static const String notificationsReadAll =
       '$apiVersion/notifications/read-all';
   static String notificationRead(String notificationId) =>

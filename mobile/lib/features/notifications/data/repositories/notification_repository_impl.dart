@@ -10,6 +10,21 @@ class NotificationRepositoryImpl implements NotificationRepository {
       : _remote = remote;
 
   @override
+  Future<int> fetchUnreadCount() async {
+    try {
+      return await _remote.fetchUnreadCount();
+    } on ApiException catch (e) {
+      if (e.statusCode == 404) {
+        final snapshot = await list(limit: 1);
+        return snapshot.unreadCount;
+      }
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'Bildirim sayısı alınırken bir hata oluştu');
+    }
+  }
+
+  @override
   Future<NotificationListResult> list({
     bool unreadOnly = false,
     int limit = 20,

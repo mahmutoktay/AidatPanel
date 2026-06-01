@@ -25,7 +25,7 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
     with WidgetsBindingObserver {
-  static const _pollInterval = Duration(seconds: 10);
+  static const _pollInterval = Duration(seconds: 60);
 
   final _scrollController = ScrollController();
   Timer? _pollTimer;
