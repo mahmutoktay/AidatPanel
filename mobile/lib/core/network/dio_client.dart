@@ -69,8 +69,13 @@ class DioClient {
       _publicPaths.any((p) => path.endsWith(p));
 
   Future<String?> _ensureValidAccessToken() async {
-    final token = await _secureStorage.getToken();
-    if (token == null) return null;
+    var token = await _secureStorage.getToken();
+
+    // Access yok ama refresh var → önce yenile (FCM upload iptal olmasın).
+    if (token == null || token.isEmpty) {
+      final refreshed = await _tokenRefresh.refreshAndPersist();
+      return refreshed?.accessToken;
+    }
 
     if (!await _secureStorage.needsTokenRefresh()) {
       return token;
@@ -89,17 +94,7 @@ class DioClient {
     }
 
     final token = await _ensureValidAccessToken();
-    if (token == null) {
-      final hasRefresh = await _secureStorage.getRefreshToken();
-      if (hasRefresh != null) {
-        return handler.reject(
-          DioException(
-            requestOptions: options,
-            error: 'Oturum süreniz doldu. Lütfen tekrar giriş yapın.',
-            type: DioExceptionType.cancel,
-          ),
-        );
-      }
+    if (token == null || token.isEmpty) {
       return handler.next(options);
     }
 

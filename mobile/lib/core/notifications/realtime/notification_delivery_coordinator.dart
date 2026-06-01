@@ -72,7 +72,7 @@ class NotificationDeliveryCoordinator {
     if (_ref == null) return;
     final notifier = _ref!.read(notificationsNotifierProvider.notifier);
     if (force) notifier.resetToastTracking();
-    await _fcmSource.onAuthenticated();
+    await _fcmSource.onAuthenticated(force: force);
     if (_webSocketSource != null) {
       await _webSocketSource.onAuthenticated();
     }

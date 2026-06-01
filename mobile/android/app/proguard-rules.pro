@@ -25,6 +25,9 @@
 -keep class com.google.firebase.** { *; }
 -dontwarn com.google.firebase.**
 
+# flutter_local_notifications (arka plan isolate / release)
+-keep class com.dexterous.flutterlocalnotifications.** { *; }
+
 # Secure Storage
 -keep class com.it_nomads.fluttersecurestorage.** { *; }
 

@@ -4,13 +4,39 @@ import '../../domain/entities/building_entity.dart';
 import '../../domain/entities/collection_preset_entity.dart';
 import '../../domain/entities/saved_iban_delete_result.dart';
 import '../datasources/building_remote_datasource.dart';
+import '../datasources/local_collection_presets_store.dart';
 import 'building_repository.dart';
 
 class BuildingRepositoryImpl implements BuildingRepository {
-  final BuildingRemoteDataSource _remoteDataSource;
+  BuildingRepositoryImpl({
+    required BuildingRemoteDataSource remoteDataSource,
+    required LocalCollectionPresetsStore localPresetsStore,
+  })  : _remoteDataSource = remoteDataSource,
+        _localPresetsStore = localPresetsStore;
 
-  BuildingRepositoryImpl({required BuildingRemoteDataSource remoteDataSource})
-      : _remoteDataSource = remoteDataSource;
+  final BuildingRemoteDataSource _remoteDataSource;
+  final LocalCollectionPresetsStore _localPresetsStore;
+
+  Future<List<CollectionPresetEntity>> _mergedPresets() async {
+    final server = await _remoteDataSource.fetchCollectionPresets();
+    final serverEntities = server.map((m) => m.toEntity()).toList();
+    final serverKeys = serverEntities
+        .map((p) => IbanUtils.normalize(p.collectionIban))
+        .toSet();
+    final local = await _localPresetsStore.load();
+    final merged = [...serverEntities];
+    for (final preset in local) {
+      if (!serverKeys.contains(IbanUtils.normalize(preset.collectionIban))) {
+        merged.add(preset);
+      }
+    }
+    return merged;
+  }
+
+  Future<void> _dropLocalPresetIfOnServer(String? iban) async {
+    if (iban == null || iban.isEmpty) return;
+    await _localPresetsStore.remove(IbanUtils.normalize(iban));
+  }
 
   @override
   Future<List<BuildingEntity>> fetchBuildings() async {
@@ -27,8 +53,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
   @override
   Future<List<CollectionPresetEntity>> fetchCollectionPresets() async {
     try {
-      final models = await _remoteDataSource.fetchCollectionPresets();
-      return models.map((m) => m.toEntity()).toList();
+      return _mergedPresets();
     } on ApiException {
       rethrow;
     } catch (e) {
@@ -66,6 +91,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
         collectionAccountTitle: collectionAccountTitle,
         paymentReferenceTemplate: paymentReferenceTemplate,
       );
+      await _dropLocalPresetIfOnServer(collectionIban);
       return model.toEntity();
     } on ApiException {
       rethrow;
@@ -110,6 +136,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
         collectionAccountTitle: collectionAccountTitle,
         paymentReferenceTemplate: paymentReferenceTemplate,
       );
+      await _dropLocalPresetIfOnServer(collectionIban);
       return model.toEntity();
     } on ApiException {
       rethrow;
@@ -135,12 +162,16 @@ class BuildingRepositoryImpl implements BuildingRepository {
             (b) => IbanUtils.normalize(b.collectionIban ?? '') == key,
           )
           .toList();
+
       if (matched.isEmpty) {
-        throw ApiException(
-          message: 'Bu IBAN için güncellenecek bina bulunamadı',
-          statusCode: 404,
+        return _updateLocalOrphanPreset(
+          matchIban: key,
+          collectionIban: collectionIban,
+          collectionAccountTitle: collectionAccountTitle,
+          paymentReferenceTemplate: paymentReferenceTemplate,
         );
       }
+
       for (final b in matched) {
         await patchBuildingCollection(
           id: b.id,
@@ -159,6 +190,51 @@ class BuildingRepositoryImpl implements BuildingRepository {
     }
   }
 
+  Future<int> _updateLocalOrphanPreset({
+    required String matchIban,
+    required String? collectionIban,
+    required String? collectionAccountTitle,
+    required String? paymentReferenceTemplate,
+  }) async {
+    final local = await _localPresetsStore.load();
+    final existing = local
+        .where((p) => IbanUtils.normalize(p.collectionIban) == matchIban)
+        .toList();
+    if (existing.isEmpty) {
+      throw ApiException(
+        message: 'Bu IBAN için güncellenecek kayıt bulunamadı',
+        statusCode: 404,
+      );
+    }
+
+    final iban = (collectionIban == null || collectionIban.isEmpty)
+        ? ''
+        : IbanUtils.normalize(collectionIban);
+    if (iban.isNotEmpty && !IbanUtils.isValidTrIban(iban)) {
+      throw ApiException(message: 'Geçerli bir TR IBAN girin');
+    }
+
+    await _localPresetsStore.remove(matchIban);
+    if (iban.isNotEmpty) {
+      await _localPresetsStore.upsert(
+        CollectionPresetEntity(
+          collectionIban: iban,
+          collectionAccountTitle:
+              (collectionAccountTitle?.trim().isEmpty ?? true)
+                  ? null
+                  : collectionAccountTitle!.trim(),
+          paymentReferenceTemplate:
+              (paymentReferenceTemplate?.trim().isEmpty ?? true)
+                  ? null
+                  : paymentReferenceTemplate!.trim(),
+          lastUsedAt: DateTime.now(),
+          buildingCount: 0,
+        ),
+      );
+    }
+    return 0;
+  }
+
   @override
   Future<CollectionPresetEntity> addCollectionPreset({
     required String collectionIban,
@@ -170,16 +246,25 @@ class BuildingRepositoryImpl implements BuildingRepository {
       if (!IbanUtils.isValidTrIban(key)) {
         throw ApiException(message: 'Geçerli bir TR IBAN girin');
       }
-      final presets = await fetchCollectionPresets();
+      final presets = await _mergedPresets();
       if (presets.any((p) => IbanUtils.normalize(p.collectionIban) == key)) {
         throw ApiException(message: 'Bu IBAN zaten kayıtlı');
       }
-      final model = await _remoteDataSource.createCollectionPreset(
+
+      final entity = CollectionPresetEntity(
         collectionIban: key,
-        collectionAccountTitle: collectionAccountTitle,
-        paymentReferenceTemplate: paymentReferenceTemplate,
+        collectionAccountTitle: (collectionAccountTitle?.trim().isEmpty ?? true)
+            ? null
+            : collectionAccountTitle!.trim(),
+        paymentReferenceTemplate:
+            (paymentReferenceTemplate?.trim().isEmpty ?? true)
+                ? null
+                : paymentReferenceTemplate!.trim(),
+        lastUsedAt: DateTime.now(),
+        buildingCount: 0,
       );
-      return model.toEntity();
+      await _localPresetsStore.upsert(entity);
+      return entity;
     } on ApiException {
       rethrow;
     } catch (e) {
@@ -206,18 +291,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
         buildingsCleared++;
       }
 
-      var orphanPresetRemoved = false;
-      if (buildingsCleared == 0) {
-        await _remoteDataSource.deleteCollectionPreset(key);
-        orphanPresetRemoved = true;
-      } else {
-        try {
-          await _remoteDataSource.deleteCollectionPreset(key);
-          orphanPresetRemoved = true;
-        } on ApiException catch (e) {
-          if (e.statusCode != 404) rethrow;
-        }
-      }
+      final orphanPresetRemoved = await _localPresetsStore.remove(key);
 
       if (buildingsCleared == 0 && !orphanPresetRemoved) {
         throw ApiException(

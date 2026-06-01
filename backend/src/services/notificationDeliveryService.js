@@ -83,20 +83,17 @@ export async function deliverCreatedNotifications(
   const pushSkipped = pushOutcomes.filter((o) => o === "skipped").length;
   const pushFailed = pushOutcomes.filter((o) => o === "failed").length;
 
-  if (pushSkipped > 0 || pushFailed > 0) {
-    console.warn(
-      "[notification] iletim özeti:",
-      "type=",
-      type,
-      "realtimeSubs=",
-      realtimePublished,
-      "pushSent=",
-      pushSent,
-      "pushSkipped=",
-      pushSkipped,
-      "pushFailed=",
-      pushFailed
-    );
+  const logLine = {
+    type,
+    realtimeSubs: realtimePublished,
+    pushSent,
+    pushSkipped,
+    pushFailed,
+  };
+  if (pushFailed > 0 || pushSkipped > 0) {
+    console.warn("[notification] iletim özeti:", logLine);
+  } else {
+    console.log("[notification] iletim özeti:", logLine);
   }
 
   return { realtimePublished, pushSent, pushSkipped, pushFailed };

@@ -5,6 +5,7 @@ import '../../../features/auth/presentation/providers/auth_provider.dart';
 import '../domain/entities/building_entity.dart';
 import '../domain/entities/collection_preset_entity.dart';
 import 'datasources/building_remote_datasource.dart';
+import 'datasources/local_collection_presets_store.dart';
 import 'repositories/building_repository.dart';
 import 'repositories/building_repository_impl.dart';
 
@@ -14,9 +15,15 @@ final buildingRemoteDataSourceProvider = Provider<BuildingRemoteDataSource>((ref
   );
 });
 
+final localCollectionPresetsStoreProvider =
+    Provider<LocalCollectionPresetsStore>((ref) {
+  return LocalCollectionPresetsStore(ref.watch(secureStorageProvider));
+});
+
 final buildingRepositoryProvider = Provider<BuildingRepository>((ref) {
   return BuildingRepositoryImpl(
     remoteDataSource: ref.watch(buildingRemoteDataSourceProvider),
+    localPresetsStore: ref.watch(localCollectionPresetsStoreProvider),
   );
 });
 

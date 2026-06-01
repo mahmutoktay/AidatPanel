@@ -12,8 +12,8 @@ abstract class NotificationRealtimeSource {
 
   Future<void> stop();
 
-  /// Giriş veya kullanıcı değişimi.
-  Future<void> onAuthenticated();
+  /// Giriş veya kullanıcı değişimi. [force] → FCM token sunucuya yeniden yüklenir.
+  Future<void> onAuthenticated({bool force = false});
 
   /// Uygulama ön plana geldi.
   Future<void> onForegroundResumed();

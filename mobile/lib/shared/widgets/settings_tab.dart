@@ -335,8 +335,6 @@ class _SettingsTile extends StatelessWidget {
   final String title;
   final String? trailing;
   final VoidCallback onTap;
-  final Color? iconColor;
-  final Color? titleColor;
   final bool showChevron;
 
   const _SettingsTile({
@@ -344,8 +342,6 @@ class _SettingsTile extends StatelessWidget {
     required this.title,
     required this.onTap,
     this.trailing,
-    this.iconColor,
-    this.titleColor,
     this.showChevron = true,
   });
 
@@ -364,15 +360,13 @@ class _SettingsTile extends StatelessWidget {
                 Icon(
                   icon,
                   size: ProfileSettingsUi.iconSize,
-                  color: iconColor ?? ProfileSettingsUi.ink,
+                  color: ProfileSettingsUi.ink,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
                     title,
-                    style: ProfileSettingsUi.rowTitle.copyWith(
-                      color: titleColor ?? ProfileSettingsUi.ink,
-                    ),
+                    style: ProfileSettingsUi.rowTitle,
                   ),
                 ),
                 if (trailing != null) ...[

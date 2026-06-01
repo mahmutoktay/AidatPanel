@@ -1,15 +1,19 @@
-import { prisma } from "../config/db.js";
-import { getMessaging, isFirebaseReady } from "../config/firebase.js";
+import {
+  getFirebaseProjectId,
+  getMessaging,
+  isFirebaseReady,
+} from "../config/firebase.js";
 import { clearFcmToken } from "../services/fcmTokenService.js";
 
 const INVALID_TOKEN_CODES = new Set([
   "messaging/invalid-registration-token",
   "messaging/registration-token-not-registered",
-  "messaging/invalid-argument",
 ]);
 
 /** Flutter AndroidManifest + LocalNotificationService ile aynı kanal. */
 const ANDROID_NOTIFICATION_CHANNEL_ID = "aidatpanel_high";
+
+const debugPush = process.env.DEBUG_PUSH === "1";
 
 /**
  * FCM data payload — tüm değerler string olmalı.
@@ -47,16 +51,38 @@ export async function sendToToken(fcmToken, { title, body, data = {} }) {
   });
 
   try {
+    // Android kapalı: notification + kanal → sistem tray (emülatörde en güvenilir).
+    // data → tap/deep-link + Flutter background yedek (data-only).
     await messaging.send({
       token: fcmToken,
       notification: { title, body },
       data: fcmData,
       android: {
         priority: "high",
-        notification: { channelId: ANDROID_NOTIFICATION_CHANNEL_ID },
+        notification: {
+          channelId: ANDROID_NOTIFICATION_CHANNEL_ID,
+          priority: "high",
+          defaultSound: true,
+        },
       },
-      apns: { payload: { aps: { sound: "default" } } },
+      apns: {
+        headers: { "apns-priority": "10" },
+        payload: {
+          aps: {
+            alert: { title: title ?? "", body: body ?? "" },
+            sound: "default",
+          },
+        },
+      },
     });
+    if (debugPush) {
+      console.log(
+        "[push] gönderildi type=",
+        fcmData.type ?? "?",
+        "token=",
+        fcmToken.slice(0, 12) + "…"
+      );
+    }
     return { sent: true };
   } catch (err) {
     const code = err.code ?? err.errorInfo?.code;
@@ -68,28 +94,30 @@ export async function sendToToken(fcmToken, { title, body, data = {} }) {
         "[push] Gönderim hatası:",
         code || err.message,
         "type=",
-        fcmData.type ?? "?"
+        fcmData.type ?? "?",
+        "tokenPrefix=",
+        fcmToken.slice(0, 20) + "…",
+        "adminProject=",
+        getFirebaseProjectId() ?? "?"
       );
+      if (code === "messaging/mismatched-credential") {
+        const detail = err.message ?? "";
+        if (detail.includes("cloudmessaging.messages.create")) {
+          console.warn(
+            "[push] FCM API / IAM izni eksik (proje aidatpanel). "
+              + "Google Cloud → Firebase Cloud Messaging API etkinleştir; "
+              + "service account'a Firebase Admin veya Cloud Messaging Admin rolü ver. "
+              + "Detay:",
+            detail
+          );
+        } else {
+          console.warn(
+            "[push] mismatched-credential: credential ile cihaz token farklı projeden olabilir. "
+              + "pm2 env | grep FIREBASE — eski deneme JSON silinsin."
+          );
+        }
+      }
     }
     return { sent: false, error: err.message, code };
   }
-}
-
-/**
- * Kullanıcının kayıtlı FCM token'ına push gönderir.
- * @param {string} userId
- * @param {{ title: string, body: string, data?: Record<string, unknown> }} payload
- */
-export async function sendToUser(userId, payload) {
-  const user = await prisma.user.findFirst({
-    where: { id: userId, deletedAt: null },
-    select: { fcmToken: true },
-  });
-
-  if (!user?.fcmToken) {
-    console.warn("[push] fcmToken yok — userId=", userId);
-    return { sent: false, skipped: true, reason: "no_token" };
-  }
-
-  return sendToToken(user.fcmToken, payload);
 }

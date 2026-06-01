@@ -33,12 +33,6 @@ abstract class BuildingRemoteDataSource {
     required String? paymentReferenceTemplate,
   });
   Future<void> deleteBuilding(String id);
-  Future<CollectionPresetModel> createCollectionPreset({
-    required String collectionIban,
-    String? collectionAccountTitle,
-    String? paymentReferenceTemplate,
-  });
-  Future<void> deleteCollectionPreset(String normalizedIban);
 }
 
 class BuildingRemoteDataSourceImpl implements BuildingRemoteDataSource {
@@ -174,39 +168,5 @@ class BuildingRemoteDataSourceImpl implements BuildingRemoteDataSource {
   @override
   Future<void> deleteBuilding(String id) async {
     await _dioClient.delete(ApiConstants.buildingDetail(id));
-  }
-
-  @override
-  Future<CollectionPresetModel> createCollectionPreset({
-    required String collectionIban,
-    String? collectionAccountTitle,
-    String? paymentReferenceTemplate,
-  }) async {
-    final body = <String, dynamic>{
-      'collectionIban': IbanUtils.normalize(collectionIban),
-      'collectionAccountTitle':
-          (collectionAccountTitle?.trim().isEmpty ?? true)
-              ? null
-              : collectionAccountTitle!.trim(),
-      'paymentReferenceTemplate':
-          (paymentReferenceTemplate?.trim().isEmpty ?? true)
-              ? null
-              : paymentReferenceTemplate!.trim(),
-    };
-
-    final response = await _dioClient.post(
-      ApiConstants.buildingsCollectionPresets,
-      data: body,
-    );
-    return CollectionPresetModel.fromJson(
-      response.data['data'] as Map<String, dynamic>,
-    );
-  }
-
-  @override
-  Future<void> deleteCollectionPreset(String normalizedIban) async {
-    await _dioClient.delete(
-      ApiConstants.buildingCollectionPreset(normalizedIban),
-    );
   }
 }

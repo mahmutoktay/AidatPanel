@@ -28,8 +28,6 @@ class ApiConstants {
   static const String buildings = '$apiVersion/buildings';
   static const String buildingsCollectionPresets =
       '$apiVersion/buildings/collection-presets';
-  static String buildingCollectionPreset(String normalizedIban) =>
-      '$buildingsCollectionPresets/${Uri.encodeComponent(normalizedIban)}';
   static String buildingDetail(String buildingId) =>
       '$apiVersion/buildings/$buildingId';
   static String buildingCollection(String buildingId) =>

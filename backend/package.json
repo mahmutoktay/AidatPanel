@@ -8,6 +8,9 @@
     "start": "node index.js",
     "postinstall": "prisma generate",
     "demo:notifications": "node src/scripts/notificationDemo.js",
+    "test:push": "node scripts/send-test-push.mjs",
+    "verify:firebase": "node scripts/diagnose-fcm.mjs",
+    "diagnose:fcm": "node scripts/diagnose-fcm.mjs",
     "test:dekont-regex": "node tools/parseDekontSamples.js"
   },
   "keywords": [],

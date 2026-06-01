@@ -7,8 +7,6 @@ import 'fcm_platform.dart';
 import 'fcm_token_remote_datasource.dart';
 import 'local_notification_service.dart';
 import 'notification_payload.dart';
-import 'notification_permissions.dart';
-
 typedef FcmNavigationHandler = void Function(NotificationPayload payload);
 
 /// FCM izin, token kaydı ve mesaj dinleyicileri.
@@ -18,6 +16,7 @@ class FcmService {
   final SecureStorage _secureStorage;
 
   bool _listenersAttached = false;
+  Future<void>? _syncInFlight;
 
   FcmService({
     required FirebaseMessaging messaging,
@@ -42,7 +41,7 @@ class FcmService {
       }
       await LocalNotificationService.instance.showFromRemoteMessage(
         message,
-        forceShow: true,
+        fromForeground: true,
       );
       onForegroundMessage?.call(message);
     });
@@ -67,13 +66,21 @@ class FcmService {
     });
   }
 
-  Future<bool> requestPermissions() async {
-    if (!isFcmSupported) return false;
-    return requestNotificationPermissions(messaging: _messaging);
+  /// Oturum açıkken token alır ve backend'e yükler.
+  /// [forceUpload] → token değişmese bile PUT (giriş / cold start).
+  Future<void> syncTokenToBackend({bool forceUpload = false}) async {
+    if (_syncInFlight != null) {
+      return _syncInFlight;
+    }
+    _syncInFlight = _syncTokenToBackendImpl(forceUpload: forceUpload);
+    try {
+      await _syncInFlight;
+    } finally {
+      _syncInFlight = null;
+    }
   }
 
-  /// Oturum açıkken token alır ve backend'e yükler.
-  Future<void> syncTokenToBackend() async {
+  Future<void> _syncTokenToBackendImpl({required bool forceUpload}) async {
     if (!isFcmSupported) {
       if (kDebugMode) {
         debugPrint(
@@ -82,13 +89,6 @@ class FcmService {
         );
       }
       return;
-    }
-
-    final permissionGranted = await requestPermissions();
-    if (!permissionGranted && kDebugMode) {
-      debugPrint(
-        '[FCM] Token alınabilir ama tray push için bildirim izni gerekli.',
-      );
     }
 
     String? token;
@@ -139,37 +139,53 @@ class FcmService {
 
     final stored = await _secureStorage.getFcmToken();
     await _secureStorage.saveFcmToken(token);
-    if (stored != token) {
+    if (forceUpload || stored != token) {
       await _uploadIfPossible(token);
-      return;
     }
-    await _uploadIfPossible(token);
   }
 
   Future<void> _uploadIfPossible(String token) async {
-    final access = await _secureStorage.getToken();
-    if (access == null || access.isEmpty) {
-      if (kDebugMode) {
-        debugPrint('[FCM] Upload atlandı: access token yok.');
+    const maxAttempts = 4;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      final access = await _secureStorage.getToken();
+      if (access == null || access.isEmpty) {
+        if (kDebugMode) {
+          debugPrint('[FCM] Upload atlandı: access token yok.');
+        }
+        return;
       }
-      return;
+
+      try {
+        await _tokenDataSource.uploadToken(token);
+        if (kDebugMode) {
+          debugPrint('[FCM] PUT /me/fcm-token başarılı.');
+        }
+        return;
+      } on ApiException catch (e) {
+        if (kDebugMode) {
+          debugPrint(
+            '[FCM] PUT /me/fcm-token başarısız (${e.statusCode}): ${e.message} '
+            '(deneme $attempt/$maxAttempts)',
+          );
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint(
+            '[FCM] PUT /me/fcm-token hata: $e (deneme $attempt/$maxAttempts)',
+          );
+        }
+      }
+
+      if (attempt < maxAttempts) {
+        await Future<void>.delayed(Duration(milliseconds: 400 * attempt));
+      }
     }
 
-    try {
-      await _tokenDataSource.uploadToken(token);
-      if (kDebugMode) {
-        debugPrint('[FCM] PUT /me/fcm-token başarılı.');
-      }
-    } on ApiException catch (e) {
-      if (kDebugMode) {
-        debugPrint(
-          '[FCM] PUT /me/fcm-token başarısız (${e.statusCode}): ${e.message}',
-        );
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('[FCM] PUT /me/fcm-token hata: $e');
-      }
+    if (kDebugMode) {
+      debugPrint(
+        '[FCM] Token sunucuya kaydedilemedi — push gelmez. '
+        'Uygulamayı açık tutup tekrar giriş yapın; logda başarılı PUT bekleyin.',
+      );
     }
   }
 }

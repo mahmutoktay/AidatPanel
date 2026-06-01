@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/notifications/fcm_sync.dart';
 import '../../../../core/navigation/auth_back_handler.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -119,7 +118,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (next.isAuthenticated &&
           next.user != null &&
           !(previous?.isAuthenticated ?? false)) {
-        syncFcmAfterAuth(ref);
         ref
             .read(toastProvider.notifier)
             .show(

@@ -32,7 +32,7 @@ abstract class BuildingRepository {
   });
 
   /// [matchIban] ile eşleşen tüm binaların tahsilat alanlarını günceller.
-  /// Dönen değer: güncellenen bina sayısı (0 = yalnızca mock öneri kaydı).
+  /// Bina yoksa yalnızca cihazdaki kayıtlı IBAN seti güncellenir (0 döner).
   Future<int> patchBuildingsMatchingCollection({
     required String matchIban,
     required String? collectionIban,

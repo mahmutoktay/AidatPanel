@@ -48,7 +48,7 @@ class WebSocketNotificationRealtimeSource implements NotificationRealtimeSource 
   }
 
   @override
-  Future<void> onAuthenticated() async {
+  Future<void> onAuthenticated({bool force = false}) async {
     await _reconnect();
   }
 

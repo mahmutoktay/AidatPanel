@@ -40,8 +40,10 @@ class FcmNotificationRealtimeSource implements NotificationRealtimeSource {
   }
 
   @override
-  Future<void> onAuthenticated() async {
-    await _fcmService.syncTokenToBackend();
+  Future<void> onAuthenticated({bool force = false}) async {
+    // Giriş sonrası JWT/refresh yarışını önlemek için kısa gecikme.
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    await _fcmService.syncTokenToBackend(forceUpload: force);
   }
 
   @override

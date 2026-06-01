@@ -77,12 +77,21 @@ class SecureStorage {
   Future<void> clearAuth() async {
     final language = await getLanguage();
     final profilePhotos = await getProfilePhotosMap();
+    final localPresets = await readRaw(AppConstants.localCollectionPresetsKey);
     await _storage.deleteAll();
     if (language != null) await saveLanguage(language);
     if (profilePhotos.isNotEmpty) {
       await saveProfilePhotosMap(profilePhotos);
     }
+    if (localPresets != null && localPresets.isNotEmpty) {
+      await writeRaw(AppConstants.localCollectionPresetsKey, localPresets);
+    }
   }
+
+  Future<String?> readRaw(String key) => _storage.read(key: key);
+
+  Future<void> writeRaw(String key, String value) =>
+      _storage.write(key: key, value: value);
 
   Future<void> clearAll() async {
     await _storage.deleteAll();

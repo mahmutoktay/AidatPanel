@@ -11,6 +11,8 @@ class AppConstants {
   static const String userKey = 'user';
   static const String languageKey = 'language';
   static const String fcmTokenKey = 'fcm_token';
+  /// Yönetici kayıtlı IBAN şablonları (backend yalnızca binalardan türetir; yetim setler cihazda).
+  static const String localCollectionPresetsKey = 'local_collection_presets_v1';
   /// userId → fotoğraf referansı (çıkışta silinmez; backend yokken yerel).
   static const String profilePhotosKey = 'profile_photos_v1';
 

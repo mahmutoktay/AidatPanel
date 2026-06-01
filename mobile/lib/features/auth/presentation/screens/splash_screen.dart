@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/notifications/fcm_sync.dart';
 import '../../../../core/platform/system_navigator_bridge.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -179,7 +178,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   void _navigateBasedOnAuth() {
     final authState = ref.read(authStateProvider);
     if (authState.isAuthenticated && authState.user != null) {
-      syncFcmAfterAuth(ref);
       if (authState.user!.role == UserRole.manager) {
         context.go('/manager-dashboard');
       } else {

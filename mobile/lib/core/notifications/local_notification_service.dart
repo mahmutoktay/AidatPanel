@@ -22,7 +22,8 @@ class LocalNotificationService {
   Future<void> initialize() async {
     if (_initialized) return;
 
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInit =
+        AndroidInitializationSettings('@drawable/ic_stat_notification');
     const darwinInit = DarwinInitializationSettings();
     const initSettings = InitializationSettings(
       android: androidInit,
@@ -51,11 +52,10 @@ class LocalNotificationService {
   /// Arka plan isolate'inde tekrar çağrılabilir.
   Future<void> ensureInitialized() => initialize();
 
-  /// `notification` bloğu yoksa (data-only) yerel bildirim gösterir.
-  /// Ön planda her zaman gösterilir (FCM tray'e düşmez).
+  /// Tray bildirimi. [fromForeground]: ön planda FCM tray göstermez, her zaman yerel.
   Future<void> showFromRemoteMessage(
     RemoteMessage message, {
-    required bool forceShow,
+    bool fromForeground = false,
   }) async {
     await ensureInitialized();
 
@@ -63,8 +63,8 @@ class LocalNotificationService {
     final body = _resolveBody(message);
     if (title == null || title.isEmpty) return;
 
-    // Arka planda FCM zaten `notification` ile tray'e düşürür — çift bildirim olmasın.
-    if (!forceShow && message.notification != null) return;
+    // Arka planda sistem notification payload ile zaten gösterdiyse çift olmasın.
+    if (!fromForeground && message.notification != null) return;
 
     final id = _notificationId(message);
 

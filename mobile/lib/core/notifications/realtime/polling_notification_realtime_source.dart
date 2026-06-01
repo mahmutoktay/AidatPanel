@@ -63,7 +63,7 @@ class PollingNotificationRealtimeSource implements NotificationRealtimeSource {
   }
 
   @override
-  Future<void> onAuthenticated() async {}
+  Future<void> onAuthenticated({bool force = false}) async {}
 
   @override
   Future<void> onForegroundResumed() async {}
