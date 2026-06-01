@@ -1,5 +1,6 @@
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/network/token_refresh_service.dart';
 import '../models/login_request.dart';
 import '../models/login_response.dart';
 import '../models/register_request.dart';
@@ -11,7 +12,7 @@ abstract class AuthRemoteDataSource {
   Future<LoginResponse> login(LoginRequest request);
   Future<RegisterResponse> register(RegisterRequest request);
   Future<JoinResponse> join(JoinRequest request);
-  Future<String> refreshToken(String refreshToken);
+  Future<TokenRefreshResult> refreshToken(String refreshToken);
 
   /// Sunucuya `POST /auth/logout` (Bearer) atar.
   /// Backend `refreshTokenVersion`'ı artırarak mevcut refresh token'ı geçersiz kılar.
@@ -65,7 +66,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<String> refreshToken(String refreshToken) async {
+  Future<TokenRefreshResult> refreshToken(String refreshToken) async {
     final response = await _dioClient.post(
       ApiConstants.refresh,
       data: {'refreshToken': refreshToken},
@@ -74,7 +75,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final Map<String, dynamic> payload = raw is Map && raw['data'] != null
         ? raw['data'] as Map<String, dynamic>
         : raw as Map<String, dynamic>;
-    return payload['accessToken'] as String;
+    return TokenRefreshResult(
+      accessToken: payload['accessToken'] as String,
+      refreshToken: payload['refreshToken'] as String?,
+    );
   }
 
   @override

@@ -181,7 +181,7 @@ class TicketListCard extends StatelessWidget {
       case TicketStatus.open:
         return AppColors.warning;
       case TicketStatus.inProgress:
-        return AppColors.primary;
+        return AppColors.info;
       case TicketStatus.resolved:
         return AppColors.success;
       case TicketStatus.closed:

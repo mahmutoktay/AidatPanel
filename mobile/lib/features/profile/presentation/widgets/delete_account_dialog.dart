@@ -171,7 +171,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                border: Border.all(color: AppColors.borderColor),
+                border: AppColors.cardBorder,
               ),
               child: SelectableText(
                 confirmPhrase,

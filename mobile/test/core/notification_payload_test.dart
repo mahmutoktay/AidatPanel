@@ -50,5 +50,28 @@ void main() {
       const p = NotificationPayload(type: 'ANNOUNCEMENT');
       expect(p.resolveNavigationPath(), '/notifications');
     });
+
+    test('DUE_PAID resident opens dues tab with dueId', () {
+      const p = NotificationPayload(
+        type: 'DUE_PAID',
+        dueId: 'due-42',
+      );
+      expect(
+        p.resolveNavigationPath(role: UserRole.resident),
+        '/resident-dashboard?tab=dues&dueId=due-42',
+      );
+    });
+
+    test('DUE_PAID manager opens manager dues tab', () {
+      const p = NotificationPayload(
+        type: 'DUE_PAID',
+        dueId: 'due-42',
+        buildingId: 'b1',
+      );
+      expect(
+        p.resolveNavigationPath(role: UserRole.manager),
+        '/manager-dashboard?tab=dues&dueId=due-42&buildingId=b1',
+      );
+    });
   });
 }

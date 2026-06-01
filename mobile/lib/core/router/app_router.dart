@@ -21,8 +21,79 @@ import '../../features/dekont/presentation/screens/make_payment_screen.dart';
 import '../../features/dekont/presentation/screens/manager_dekonts_screen.dart';
 import '../../features/dekont/presentation/screens/my_dekonts_screen.dart';
 import '../../features/buildings/presentation/screens/saved_ibans_screen.dart';
+import '../../features/profile/presentation/screens/profile_details_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
+
+/// Tam ekran alt sayfalar root navigator'da açılır (dashboard iç navigator'ına sıkışmaz).
+List<RouteBase> _managerDashboardChildRoutes() => [
+  GoRoute(
+    path: 'tickets',
+    name: 'manager_dashboard_tickets',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const ManagerTicketsScreen(),
+  ),
+  GoRoute(
+    path: 'expenses',
+    name: 'manager_dashboard_expenses',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const ManagerExpensesScreen(),
+  ),
+  GoRoute(
+    path: 'dekonts',
+    name: 'manager_dashboard_dekonts',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const ManagerDekontsScreen(),
+  ),
+  GoRoute(
+    path: 'notifications',
+    name: 'manager_dashboard_notifications',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const NotificationsScreen(),
+  ),
+  GoRoute(
+    path: 'saved-ibans',
+    name: 'manager_saved_ibans',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const SavedIbansScreen(),
+  ),
+  GoRoute(
+    path: 'profile',
+    name: 'manager_profile',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const ProfileDetailsScreen(),
+  ),
+];
+
+List<RouteBase> _residentDashboardChildRoutes() => [
+  GoRoute(
+    path: 'payment',
+    name: 'resident_dashboard_payment',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) {
+      final dueId = state.uri.queryParameters['dueId'];
+      return MakePaymentScreen(preselectedDueId: dueId);
+    },
+  ),
+  GoRoute(
+    path: 'dekonts',
+    name: 'resident_dashboard_dekonts',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const MyDekontsScreen(),
+  ),
+  GoRoute(
+    path: 'notifications',
+    name: 'resident_dashboard_notifications',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const NotificationsScreen(),
+  ),
+  GoRoute(
+    path: 'profile',
+    name: 'resident_profile',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const ProfileDetailsScreen(),
+  ),
+];
 
 /// Auth state değişince [GoRouter] redirect’inin yeniden çalışması için gerekli.
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -39,6 +110,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authStateProvider);
       final loc = state.matchedLocation;
+      final path = state.uri.path;
 
       final isAuthRoute =
           loc == '/login' ||
@@ -53,7 +125,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return '/login';
       }
 
-      // Oturum açıkken login/register/join’de kalma — ana ekrana yönlendir
       if (authState.isAuthenticated &&
           authState.user != null &&
           isAuthRoute &&
@@ -75,14 +146,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       if (authState.isAuthenticated &&
           authState.user?.role == UserRole.manager &&
-          (loc == '/payment' || loc == '/dekonts')) {
+          (path == '/payment' || path == '/dekonts')) {
         return '/manager-dashboard';
       }
 
       if (authState.isAuthenticated &&
           authState.user?.role == UserRole.resident &&
-          loc == '/manager/dekonts') {
+          path == '/manager/dekonts') {
         return '/resident-dashboard';
+      }
+
+      // Eski URL uyumu → dashboard alt route'ları (root navigator).
+      if (path == '/manager/tickets') return '/manager-dashboard/tickets';
+      if (path == '/manager/expenses') return '/manager-dashboard/expenses';
+      if (path == '/manager/dekonts') return '/manager-dashboard/dekonts';
+      if (path == '/notifications') {
+        if (authState.user?.role == UserRole.manager) {
+          return '/manager-dashboard/notifications';
+        }
+        if (authState.user?.role == UserRole.resident) {
+          return '/resident-dashboard/notifications';
+        }
+      }
+      if (path == '/payment') return '/resident-dashboard/payment';
+      if (path == '/dekonts' && authState.user?.role == UserRole.resident) {
+        return '/resident-dashboard/dekonts';
+      }
+      if (path == '/manager/saved-ibans') {
+        return '/manager-dashboard/saved-ibans';
       }
 
       return null;
@@ -150,7 +241,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/reset-password',
         name: 'reset_password',
         builder: (context, state) {
-          // `extra` üzerinden forgot ekranından gelen email taşınır.
           final email = state.extra is String ? state.extra as String : null;
           return ResetPasswordScreen(prefilledEmail: email);
         },
@@ -161,13 +251,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return const ManagerDashboardScreen();
         },
-        routes: [
-          GoRoute(
-            path: 'saved-ibans',
-            name: 'manager_saved_ibans',
-            builder: (context, state) => const SavedIbansScreen(),
-          ),
-        ],
+        routes: _managerDashboardChildRoutes(),
       ),
       GoRoute(
         path: '/resident-dashboard',
@@ -175,11 +259,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return const ResidentDashboardScreen();
         },
+        routes: _residentDashboardChildRoutes(),
       ),
       GoRoute(
         path: '/notifications',
-        name: 'notifications',
-        builder: (context, state) => const NotificationsScreen(),
+        redirect: (context, state) {
+          final auth = ref.read(authStateProvider);
+          if (auth.user?.role == UserRole.manager) {
+            return '/manager-dashboard/notifications';
+          }
+          if (auth.user?.role == UserRole.resident) {
+            return '/resident-dashboard/notifications';
+          }
+          return '/login';
+        },
       ),
       GoRoute(
         path: '/tickets/create',
@@ -201,31 +294,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/manager/tickets',
-        name: 'manager_tickets',
-        builder: (context, state) => const ManagerTicketsScreen(),
+        redirect: (context, state) => '/manager-dashboard/tickets',
       ),
       GoRoute(
         path: '/manager/expenses',
-        name: 'manager_expenses',
-        builder: (context, state) => const ManagerExpensesScreen(),
+        redirect: (context, state) => '/manager-dashboard/expenses',
       ),
       GoRoute(
         path: '/manager/dekonts',
-        name: 'manager_dekonts',
-        builder: (context, state) => const ManagerDekontsScreen(),
+        redirect: (context, state) => '/manager-dashboard/dekonts',
       ),
       GoRoute(
         path: '/payment',
-        name: 'make_payment',
-        builder: (context, state) {
-          final dueId = state.uri.queryParameters['dueId'];
-          return MakePaymentScreen(preselectedDueId: dueId);
+        redirect: (context, state) {
+          final auth = ref.read(authStateProvider);
+          if (auth.user?.role == UserRole.resident) {
+            final q = state.uri.query;
+            return '/resident-dashboard/payment${q.isEmpty ? '' : '?$q'}';
+          }
+          return '/manager-dashboard';
         },
       ),
       GoRoute(
         path: '/dekonts',
         name: 'my_dekonts',
-        builder: (context, state) => const MyDekontsScreen(),
+        redirect: (context, state) {
+          final auth = ref.read(authStateProvider);
+          if (auth.user?.role == UserRole.resident) {
+            return '/resident-dashboard/dekonts';
+          }
+          return '/manager-dashboard';
+        },
       ),
       GoRoute(
         path: '/dekonts/:dekontId',
@@ -235,7 +334,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return DekontDetailScreen(dekontId: id);
         },
       ),
-      // Eski deep link / bookmark uyumu
       GoRoute(
         path: '/manager/saved-ibans',
         redirect: (context, state) => '/manager-dashboard/saved-ibans',

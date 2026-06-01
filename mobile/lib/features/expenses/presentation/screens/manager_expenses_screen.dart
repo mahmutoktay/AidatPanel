@@ -271,7 +271,7 @@ class _SummaryCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-          border: Border.all(color: AppColors.borderColor),
+          border: AppColors.cardBorder,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,7 +321,7 @@ class _ExpenseCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.borderColor),
+        border: AppColors.cardBorder,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

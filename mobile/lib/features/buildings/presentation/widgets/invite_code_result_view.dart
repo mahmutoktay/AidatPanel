@@ -64,25 +64,23 @@ class InviteCodeResultView extends StatelessWidget {
         vertical: AppSizes.spacingL,
       ),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.success, AppColors.successLight],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.fill,
         borderRadius: BorderRadius.circular(14),
+        border: AppColors.cardBorder,
       ),
       child: Column(
         children: [
           Container(
             width: 60,
             height: 60,
-            decoration: const BoxDecoration(
-              color: Colors.white24,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
               shape: BoxShape.circle,
+              border: AppColors.cardBorder,
             ),
             child: const Icon(
               Icons.check_circle,
-              color: Colors.white,
+              color: AppColors.textPrimary,
               size: 36,
             ),
           ),
@@ -90,14 +88,14 @@ class InviteCodeResultView extends StatelessWidget {
           Text(
             context.t.features.buildings.codeReady,
             style: AppTypography.h3.copyWith(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             '${building.name} • ${InviteCodeHelpers.formatApartmentLabel(apartment.apartmentNumber)}',
-            style: AppTypography.body2.copyWith(color: Colors.white70),
+            style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -114,7 +112,7 @@ class InviteCodeResultView extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderColor),
+        border: AppColors.cardBorder,
       ),
       child: Column(
         children: [
@@ -263,7 +261,7 @@ class InviteCodeResultView extends StatelessWidget {
               onPressed: onPickAnother,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
-                side: BorderSide(color: AppColors.borderColor, width: 1.5),
+                side: AppColors.cardBorderSide,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

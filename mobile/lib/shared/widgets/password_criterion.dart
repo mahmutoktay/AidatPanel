@@ -11,10 +11,24 @@ class PasswordCriterion extends StatelessWidget {
     required this.isMet,
   });
 
-  static const _metIcon = Icon(Icons.check_circle, color: AppColors.success, size: 16);
-  static const _unmetIcon = Icon(Icons.cancel, color: AppColors.error, size: 16);
-  static const _metStyle = TextStyle(color: AppColors.success, fontSize: 12);
-  static const _unmetStyle = TextStyle(color: AppColors.error, fontSize: 12);
+  static const _metIcon = Icon(
+    Icons.check_circle,
+    color: AppColors.success,
+    size: 16,
+  );
+  static const _unmetIcon = Icon(
+    Icons.circle_outlined,
+    color: AppColors.textDisabled,
+    size: 16,
+  );
+  static const _metStyle = TextStyle(
+    color: AppColors.success,
+    fontSize: 12,
+  );
+  static const _unmetStyle = TextStyle(
+    color: AppColors.textDisabled,
+    fontSize: 12,
+  );
 
   @override
   Widget build(BuildContext context) {

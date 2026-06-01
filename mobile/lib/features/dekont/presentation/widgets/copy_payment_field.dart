@@ -33,7 +33,7 @@ class CopyPaymentField extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+        border: AppColors.cardBorder,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

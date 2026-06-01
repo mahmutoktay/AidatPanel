@@ -2,27 +2,13 @@ import 'dart:convert';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/storage/secure_storage.dart';
+import '../../../../core/utils/jwt_utils.dart';
 import '../../domain/entities/user_entity.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/login_request.dart';
 import '../models/register_request.dart';
 import '../models/join_request.dart';
 import '../models/user_data.dart';
-
-DateTime _parseJwtExpiry(String token) {
-  try {
-    final parts = token.split('.');
-    if (parts.length != 3) return DateTime.now().add(const Duration(minutes: 15));
-    final payload = base64Url.normalize(parts[1]);
-    final decoded = utf8.decode(base64Url.decode(payload));
-    final data = jsonDecode(decoded) as Map<String, dynamic>;
-    final exp = data['exp'] as int?;
-    if (exp == null) return DateTime.now().add(const Duration(minutes: 15));
-    return DateTime.fromMillisecondsSinceEpoch(exp * 1000);
-  } catch (_) {
-    return DateTime.now().add(const Duration(minutes: 15));
-  }
-}
 
 abstract class AuthRepository {
   /// `identifier` email **veya** telefon olabilir (Belge §3).
@@ -80,7 +66,9 @@ class AuthRepositoryImpl implements AuthRepository {
       await _secureStorage.saveToken(response.accessToken);
       await _secureStorage.saveRefreshToken(response.refreshToken);
       await _secureStorage.saveUser(jsonEncode(response.user.toJson()));
-      await _secureStorage.saveTokenExpiry(_parseJwtExpiry(response.accessToken));
+      await _secureStorage.saveTokenExpiry(
+        JwtUtils.parseExpiry(response.accessToken),
+      );
 
       return response.user.toEntity();
     } on ApiException {
@@ -133,7 +121,9 @@ class AuthRepositoryImpl implements AuthRepository {
       await _secureStorage.saveToken(response.accessToken);
       await _secureStorage.saveRefreshToken(response.refreshToken);
       await _secureStorage.saveUser(jsonEncode(response.user.toJson()));
-      await _secureStorage.saveTokenExpiry(_parseJwtExpiry(response.accessToken));
+      await _secureStorage.saveTokenExpiry(
+        JwtUtils.parseExpiry(response.accessToken),
+      );
 
       return response.user.toEntity();
     } on ApiException {
@@ -216,10 +206,14 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     try {
-      final newAccessToken =
-          await _remoteDataSource.refreshToken(refreshToken);
-      await _secureStorage.saveToken(newAccessToken);
-      await _secureStorage.saveTokenExpiry(_parseJwtExpiry(newAccessToken));
+      final result = await _remoteDataSource.refreshToken(refreshToken);
+      await _secureStorage.saveToken(result.accessToken);
+      await _secureStorage.saveTokenExpiry(
+        JwtUtils.parseExpiry(result.accessToken),
+      );
+      if (result.refreshToken != null && result.refreshToken!.isNotEmpty) {
+        await _secureStorage.saveRefreshToken(result.refreshToken!);
+      }
       return user;
     } on ApiException catch (e) {
       // Refresh token gerçekten geçersiz olduğunda oturumu kapat.

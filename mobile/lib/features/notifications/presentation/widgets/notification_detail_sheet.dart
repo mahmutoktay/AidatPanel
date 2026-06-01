@@ -134,14 +134,17 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
+                        color: AppColors.infoBg,
                         borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppColors.info.withValues(alpha: 0.35),
+                        ),
                       ),
                       child: Text(
                         t.unreadBadge,
                         style: AppTypography.caption.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w700,
+                          color: AppColors.info,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -160,14 +163,15 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSizes.spacingM),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.fill,
                   borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-                  border: Border.all(color: AppColors.border),
+                  border: AppColors.cardBorder,
                 ),
                 child: Text(
                   n.body,
-                  style: AppTypography.body1.copyWith(
+                  style: AppTypography.bodyLarge.copyWith(
                     color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w500,
                     height: 1.45,
                   ),
                 ),

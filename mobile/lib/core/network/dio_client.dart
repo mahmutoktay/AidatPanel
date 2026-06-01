@@ -1,19 +1,21 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+
 import '../constants/api_constants.dart';
 import '../constants/app_constants.dart';
 import '../storage/secure_storage.dart';
 import 'api_exception.dart';
+import 'safe_log_interceptor.dart';
+import 'token_refresh_service.dart';
 
 class DioClient {
   late Dio _dio;
   late Dio _refreshDio;
+  late TokenRefreshService _tokenRefresh;
   final SecureStorage _secureStorage;
 
   DioClient({required SecureStorage secureStorage})
-    : _secureStorage = secureStorage {
+      : _secureStorage = secureStorage {
     _initializeDio();
   }
 
@@ -27,6 +29,20 @@ class DioClient {
       ),
     );
 
+    _refreshDio = Dio(
+      BaseOptions(
+        baseUrl: ApiConstants.baseUrl,
+        connectTimeout: AppConstants.apiTimeout,
+        receiveTimeout: AppConstants.apiTimeout,
+        contentType: 'application/json',
+      ),
+    );
+
+    _tokenRefresh = TokenRefreshService(
+      refreshDio: _refreshDio,
+      secureStorage: _secureStorage,
+    );
+
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: _onRequest,
@@ -36,28 +52,8 @@ class DioClient {
     );
 
     if (kDebugMode) {
-      _dio.interceptors.add(
-        LogInterceptor(
-          requestBody: true,
-          responseBody: true,
-          requestHeader: false,
-          responseHeader: false,
-          error: true,
-          logPrint: (o) => debugPrint('[DIO] $o'),
-        ),
-      );
+      _dio.interceptors.add(SafeLogInterceptor());
     }
-
-    // Ayrı Dio instance: refresh token için (interceptor'sız)
-    // Sonsuz döngü riskini önler
-    _refreshDio = Dio(
-      BaseOptions(
-        baseUrl: ApiConstants.baseUrl,
-        connectTimeout: AppConstants.apiTimeout,
-        receiveTimeout: AppConstants.apiTimeout,
-        contentType: 'application/json',
-      ),
-    );
   }
 
   static const _publicPaths = {
@@ -69,17 +65,33 @@ class DioClient {
     ApiConstants.resetPassword,
   };
 
+  bool _isPublicPath(String path) =>
+      _publicPaths.any((p) => path.endsWith(p));
+
+  Future<String?> _ensureValidAccessToken() async {
+    final token = await _secureStorage.getToken();
+    if (token == null) return null;
+
+    if (!await _secureStorage.needsTokenRefresh()) {
+      return token;
+    }
+
+    final refreshed = await _tokenRefresh.refreshAndPersist();
+    return refreshed?.accessToken;
+  }
+
   Future<void> _onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final isPublic = _publicPaths.any((p) => options.path.endsWith(p));
-    if (isPublic) return handler.next(options);
+    if (_isPublicPath(options.path)) {
+      return handler.next(options);
+    }
 
-    final token = await _secureStorage.getToken();
-    if (token != null) {
-      final isExpired = await _secureStorage.isTokenExpired();
-      if (isExpired) {
+    final token = await _ensureValidAccessToken();
+    if (token == null) {
+      final hasRefresh = await _secureStorage.getRefreshToken();
+      if (hasRefresh != null) {
         return handler.reject(
           DioException(
             requestOptions: options,
@@ -88,9 +100,10 @@ class DioClient {
           ),
         );
       }
-      options.headers['Authorization'] = 'Bearer $token';
+      return handler.next(options);
     }
 
+    options.headers['Authorization'] = 'Bearer $token';
     return handler.next(options);
   }
 
@@ -105,35 +118,15 @@ class DioClient {
     DioException error,
     ErrorInterceptorHandler handler,
   ) async {
-    // Wrong credentials on login/register/join also return 401. If we still have a
-    // refresh token from an old session, retrying those requests after refresh
-    // loops forever and keeps authState.isLoading stuck true.
     final requestPath = error.requestOptions.path;
-    final isPublicAuthRequest =
-        _publicPaths.any((p) => requestPath.endsWith(p));
+    final isPublicAuthRequest = _isPublicPath(requestPath);
 
     if (error.response?.statusCode == 401 && !isPublicAuthRequest) {
-      final refreshToken = await _secureStorage.getRefreshToken();
-      if (refreshToken != null) {
+      final refreshed = await _tokenRefresh.refreshAndPersist();
+      if (refreshed != null) {
+        final opts = error.requestOptions;
+        opts.headers['Authorization'] = 'Bearer ${refreshed.accessToken}';
         try {
-          // Cached _refreshDio instance kullan (interceptor'sız)
-          final response = await _refreshDio.post(
-            ApiConstants.refresh,
-            data: {'refreshToken': refreshToken},
-          );
-
-          final responseData = response.data is Map && response.data['data'] != null
-              ? response.data['data'] as Map<String, dynamic>
-              : response.data as Map<String, dynamic>;
-          final newToken = responseData['accessToken'] as String;
-          await _secureStorage.saveToken(newToken);
-          await _secureStorage.saveTokenExpiry(
-            _parseJwtExpiry(newToken) ??
-                DateTime.now().add(const Duration(minutes: 15)),
-          );
-
-          final opts = error.requestOptions;
-          opts.headers['Authorization'] = 'Bearer $newToken';
           final retryResponse = await _dio.request<dynamic>(
             opts.path,
             options: Options(method: opts.method, headers: opts.headers),
@@ -141,22 +134,20 @@ class DioClient {
             queryParameters: opts.queryParameters,
           );
           return handler.resolve(retryResponse);
-        } on DioException {
-          // Refresh başarısız - token'ları temizle ve logout yap
-          await _secureStorage.clearAuth();
-          return handler.reject(
-            DioException(
-              requestOptions: error.requestOptions,
-              error: 'Oturum süreniz doldu. Lütfen tekrar giriş yapın.',
-              type: DioExceptionType.cancel,
-            ),
-          );
-        } catch (e) {
-          await _secureStorage.clearAuth();
-          return handler.reject(error);
+        } on DioException catch (retryError) {
+          return handler.reject(retryError);
         }
       }
+
+      return handler.reject(
+        DioException(
+          requestOptions: error.requestOptions,
+          error: 'Oturum süreniz doldu. Lütfen tekrar giriş yapın.',
+          type: DioExceptionType.cancel,
+        ),
+      );
     }
+
     return handler.reject(error);
   }
 
@@ -248,21 +239,6 @@ class DioClient {
     }
   }
 
-  DateTime? _parseJwtExpiry(String token) {
-    try {
-      final parts = token.split('.');
-      if (parts.length != 3) return null;
-      final payload = base64Url.normalize(parts[1]);
-      final decoded = utf8.decode(base64Url.decode(payload));
-      final data = jsonDecode(decoded) as Map<String, dynamic>;
-      final exp = data['exp'] as int?;
-      if (exp == null) return null;
-      return DateTime.fromMillisecondsSinceEpoch(exp * 1000);
-    } catch (_) {
-      return null;
-    }
-  }
-
   ApiException _handleException(DioException error) {
     if (error.type == DioExceptionType.connectionTimeout ||
         error.type == DioExceptionType.receiveTimeout) {
@@ -271,16 +247,13 @@ class DioClient {
 
     if (error.response != null) {
       final statusCode = error.response!.statusCode;
-      
-      // Safe message extraction
+
       String message = 'Bir hata oluştu';
       try {
         if (error.response!.data is Map<String, dynamic>) {
           message = error.response!.data['message'] as String? ?? message;
         }
-      } catch (e) {
-        // Fallback to default message if parsing fails
-      }
+      } catch (_) {}
 
       switch (statusCode) {
         case 401:

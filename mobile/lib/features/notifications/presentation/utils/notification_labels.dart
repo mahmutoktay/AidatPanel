@@ -75,6 +75,7 @@ extension NotificationEntityNavigation on NotificationEntity {
       notificationId: id,
       ticketId: str(data?['ticketId']),
       dekontId: str(data?['dekontId']),
+      dueId: str(data?['dueId']),
       buildingId: str(data?['buildingId']),
       status: str(data?['status']),
       route: str(data?['route']),

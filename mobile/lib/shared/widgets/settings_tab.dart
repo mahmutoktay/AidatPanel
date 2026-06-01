@@ -9,10 +9,11 @@ import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
-import '../../features/buildings/presentation/screens/saved_ibans_screen.dart';
 import '../../features/profile/presentation/widgets/change_password_bottom_sheet.dart';
-import '../../features/profile/presentation/widgets/delete_account_dialog.dart';
+import '../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../l10n/strings.g.dart';
+import 'profile_avatar.dart';
+import 'profile_avatar_actions.dart';
 import 'toast_overlay.dart';
 
 class SettingsTab extends ConsumerWidget {
@@ -25,107 +26,89 @@ class SettingsTab extends ConsumerWidget {
     final currentLocale = ref.watch(localeProvider);
 
     return SingleChildScrollView(
-      padding: AppSizes.screenBodyScrollPadding,
+      padding: ProfileSettingsUi.screenPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (user != null) _ProfileCard(user: user),
-          const SizedBox(height: AppSizes.spacingL),
-
-          _SectionHeader(title: context.t.common.account),
-          const SizedBox(height: AppSizes.spacingS),
-          _SettingsCard(
-            children: [
-              if (user?.role == UserRole.manager) ...[
-                _SettingsTile(
-                  icon: Icons.account_balance_wallet_outlined,
-                  title: context.t.features.buildings.collection.savedIbansTitle,
-                  onTap: () {
-                    Navigator.of(context, rootNavigator: true).push<void>(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const SavedIbansScreen(),
-                      ),
-                    );
-                  },
-                ),
-                const _Divider(),
-              ],
-              _SettingsTile(
-                icon: Icons.lock_outline,
-                title: context.t.common.changePassword,
-                onTap: () => ChangePasswordBottomSheet.show(context),
+          if (user != null) ...[
+            _ProfileHero(user: user, onAvatarTap: () => handleProfileAvatarTap(context, ref)),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  final path = user.role == UserRole.manager
+                      ? '/manager-dashboard/profile'
+                      : '/resident-dashboard/profile';
+                  context.push(path);
+                },
+                style: ProfileSettingsUi.primaryButton,
+                child: Text(context.t.common.editProfile),
               ),
-              const _Divider(),
-              _SettingsTile(
-                icon: Icons.language,
-                title: context.t.common.language,
-                trailing: currentLocale == AppLocale.tr ? 'Türkçe' : 'English',
-                onTap: () => _showLanguageSheet(context, ref),
-              ),
-              const _Divider(),
-              _SettingsTile(
-                icon: Icons.notifications_outlined,
-                title: context.t.common.notifications,
-                onTap: () => _showComingSoon(context, ref),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.spacingL),
-
-          _SectionHeader(title: context.t.common.info),
-          const SizedBox(height: AppSizes.spacingS),
-          _SettingsCard(
-            children: [
-              _SettingsTile(
-                icon: Icons.privacy_tip_outlined,
-                title: context.t.common.privacyPolicy,
-                onTap: () => _showComingSoon(context, ref),
-              ),
-              const _Divider(),
-              _SettingsTile(
-                icon: Icons.shield_outlined,
-                title: context.t.common.kvkk,
-                onTap: () => _showComingSoon(context, ref),
-              ),
-              const _Divider(),
-              _SettingsTile(
-                icon: Icons.help_outline,
-                title: context.t.common.helpSupport,
-                onTap: () => _showComingSoon(context, ref),
-              ),
-              const _Divider(),
-              _SettingsTile(
-                icon: Icons.info_outline,
-                title: context.t.common.about,
-                trailing: 'v${AppConstants.appVersion}',
-                onTap: () => _showAboutDialog(context),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.spacingL),
-
-          _SectionHeader(title: context.t.common.dangerZone),
-          const SizedBox(height: AppSizes.spacingS),
-          _SettingsCard(
-            children: [
-              _SettingsTile(
-                icon: Icons.delete_forever_outlined,
-                title: context.t.common.deleteAccount,
-                iconColor: AppColors.error,
-                titleColor: AppColors.error,
-                onTap: () => DeleteAccountDialog.show(context),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.spacingXL),
-
-          if (kDebugMode) ...[
-            _TokenTestButton(),
-            const SizedBox(height: AppSizes.spacingM),
+            ),
+            const SizedBox(height: 24),
+            const Divider(height: 1, color: ProfileSettingsUi.line),
+            const SizedBox(height: 8),
           ],
 
-          _LogoutButton(),
-          const SizedBox(height: AppSizes.spacingL),
+          _SettingsTile(
+            icon: Icons.lock_outline,
+            title: context.t.common.changePassword,
+            onTap: () => ChangePasswordBottomSheet.show(context),
+          ),
+          if (user?.role == UserRole.manager)
+            _SettingsTile(
+              icon: Icons.account_balance_wallet_outlined,
+              title: context.t.features.buildings.collection.savedIbansTitle,
+              onTap: () => context.push('/manager-dashboard/saved-ibans'),
+            ),
+          _SettingsTile(
+            icon: Icons.language_outlined,
+            title: context.t.common.language,
+            trailing: currentLocale == AppLocale.tr ? 'Türkçe' : 'English',
+            onTap: () => _showLanguageSheet(context, ref),
+          ),
+          _SettingsTile(
+            icon: Icons.notifications_outlined,
+            title: context.t.common.notifications,
+            onTap: () => context.push('/notifications'),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Divider(height: 1, color: ProfileSettingsUi.line),
+          ),
+          _SettingsTile(
+            icon: Icons.privacy_tip_outlined,
+            title: context.t.common.privacyPolicy,
+            onTap: () => _showComingSoon(context, ref),
+          ),
+          _SettingsTile(
+            icon: Icons.shield_outlined,
+            title: context.t.common.kvkk,
+            onTap: () => _showComingSoon(context, ref),
+          ),
+          _SettingsTile(
+            icon: Icons.help_outline,
+            title: context.t.common.helpSupport,
+            onTap: () => _showComingSoon(context, ref),
+          ),
+          _SettingsTile(
+            icon: Icons.info_outline,
+            title: context.t.common.about,
+            trailing: 'v${AppConstants.appVersion}',
+            onTap: () => _showAboutDialog(context),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Divider(height: 1, color: ProfileSettingsUi.line),
+          ),
+          _LogoutTile(),
+
+          if (kDebugMode) ...[
+            const SizedBox(height: 16),
+            _TokenTestButton(),
+          ],
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -144,7 +127,7 @@ class SettingsTab extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => Container(
         decoration: const BoxDecoration(
-          color: AppColors.surface,
+          color: ProfileSettingsUi.background,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         padding: EdgeInsets.fromLTRB(
@@ -158,7 +141,7 @@ class SettingsTab extends ConsumerWidget {
           children: [
             _BottomSheetHandle(),
             const SizedBox(height: AppSizes.spacingM),
-            Text(context.t.common.language, style: AppTypography.h3),
+            Text(context.t.common.language, style: ProfileSettingsUi.title),
             const SizedBox(height: AppSizes.spacingL),
             _LanguageOption(
               flag: '🇹🇷',
@@ -205,100 +188,55 @@ class SettingsTab extends ConsumerWidget {
   }
 }
 
-class _ProfileCard extends StatelessWidget {
+class _ProfileHero extends StatelessWidget {
   final UserEntity user;
+  final VoidCallback onAvatarTap;
 
-  const _ProfileCard({required this.user});
+  const _ProfileHero({
+    required this.user,
+    required this.onAvatarTap,
+  });
 
-  String get _initials {
-    final parts = user.name
-        .trim()
-        .split(' ')
-        .where((p) => p.isNotEmpty)
-        .toList();
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+  String _handle() {
+    if (user.email.isNotEmpty) {
+      final at = user.email.indexOf('@');
+      final name = at > 0 ? user.email.substring(0, at) : user.email;
+      return '@$name';
     }
-    return parts.isNotEmpty ? parts[0][0].toUpperCase() : '?';
+    if (user.phone != null && user.phone!.isNotEmpty) {
+      return user.phone!;
+    }
+    return '';
   }
 
   @override
   Widget build(BuildContext context) {
-    final roleLabel = user.role == UserRole.manager
-        ? context.t.common.manager
-        : context.t.common.resident;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.spacingM,
-        vertical: AppSizes.spacingL,
-      ),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    final handle = _handle();
+    return Column(
+      children: [
+        ProfileAvatar(
+          size: ProfileSettingsUi.avatarSize,
+          userName: user.name,
+          onTap: onAvatarTap,
         ),
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 32,
-            backgroundColor: Colors.white,
-            child: Text(
-              _initials,
-              style: AppTypography.h2.copyWith(color: AppColors.primary),
-            ),
-          ),
-          const SizedBox(width: AppSizes.spacingM),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  user.name,
-                  style: AppTypography.h3.copyWith(color: Colors.white),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: AppSizes.spacingXS),
-                if (user.email.isNotEmpty) ...[
-                  Text(
-                    user.email,
-                    style: AppTypography.caption.copyWith(
-                      color: Colors.white.withValues(alpha: 0.8),
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ] else if (user.phone != null && user.phone!.isNotEmpty) ...[
-                  Text(
-                    user.phone!,
-                    style: AppTypography.caption.copyWith(
-                      color: Colors.white.withValues(alpha: 0.8),
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-                const SizedBox(height: AppSizes.spacingS),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    roleLabel,
-                    style: AppTypography.label.copyWith(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
+        const SizedBox(height: 14),
+        Text(
+          user.name,
+          style: ProfileSettingsUi.name,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        if (handle.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            handle,
+            style: ProfileSettingsUi.handle,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
-      ),
+      ],
     );
   }
 }
@@ -330,47 +268,44 @@ class _LanguageOption extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.07)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
+              ? ProfileSettingsUi.fill
+              : ProfileSettingsUi.background,
+          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: isSelected ? 2 : 1,
+            color: isSelected ? ProfileSettingsUi.ink : ProfileSettingsUi.line,
+            width: isSelected ? AppSizes.cardBorderWidth : 1,
           ),
         ),
         child: Row(
           children: [
-            Text(flag, style: const TextStyle(fontSize: 28)),
-            const SizedBox(width: AppSizes.spacingM),
+            Text(flag, style: const TextStyle(fontSize: 24)),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: AppTypography.body1.copyWith(
+                    style: ProfileSettingsUi.rowTitle.copyWith(
                       color: isSelected
-                          ? AppColors.primary
-                          : AppColors.textPrimary,
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w500,
+                          ? ProfileSettingsUi.ink
+                          : ProfileSettingsUi.ink,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
                     ),
                   ),
                   Text(
                     subtitle,
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                    style: ProfileSettingsUi.rowTrailing,
                   ),
                 ],
               ),
             ),
             if (isSelected)
-              Icon(
+              const Icon(
                 Icons.check_circle_rounded,
-                color: AppColors.primary,
-                size: 24,
+                color: ProfileSettingsUi.ink,
+                size: 20,
               ),
           ],
         ),
@@ -387,45 +322,10 @@ class _BottomSheetHandle extends StatelessWidget {
         width: 40,
         height: 4,
         decoration: BoxDecoration(
-          color: AppColors.border,
+          color: ProfileSettingsUi.line,
           borderRadius: BorderRadius.circular(2),
         ),
       ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-
-  const _SectionHeader({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingS),
-      child: Text(
-        title,
-        style: AppTypography.label.copyWith(color: AppColors.textSecondary),
-      ),
-    );
-  }
-}
-
-class _SettingsCard extends StatelessWidget {
-  final List<Widget> children;
-
-  const _SettingsCard({required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(children: children),
     );
   }
 }
@@ -437,6 +337,7 @@ class _SettingsTile extends StatelessWidget {
   final VoidCallback onTap;
   final Color? iconColor;
   final Color? titleColor;
+  final bool showChevron;
 
   const _SettingsTile({
     required this.icon,
@@ -445,85 +346,66 @@ class _SettingsTile extends StatelessWidget {
     this.trailing,
     this.iconColor,
     this.titleColor,
+    this.showChevron = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.spacingM,
-          vertical: AppSizes.spacingM,
-        ),
-        child: Row(
-          children: [
-            Icon(icon,
-                size: AppSizes.iconSize, color: iconColor ?? AppColors.primary),
-            const SizedBox(width: AppSizes.spacingM),
-            Expanded(
-              child: Text(
-                title,
-                style: AppTypography.body1.copyWith(
-                  color: titleColor ?? AppColors.textPrimary,
+    return Material(
+      color: ProfileSettingsUi.background,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: ProfileSettingsUi.rowHeight,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  size: ProfileSettingsUi.iconSize,
+                  color: iconColor ?? ProfileSettingsUi.ink,
                 ),
-              ),
-            ),
-            if (trailing != null) ...[
-              Text(
-                trailing!,
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.textSecondary,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: ProfileSettingsUi.rowTitle.copyWith(
+                      color: titleColor ?? ProfileSettingsUi.ink,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSizes.spacingS),
-            ],
-            const Icon(
-              Icons.chevron_right,
-              size: AppSizes.iconSize,
-              color: AppColors.textDisabled,
+                if (trailing != null) ...[
+                  Text(trailing!, style: ProfileSettingsUi.rowTrailing),
+                  const SizedBox(width: 8),
+                ],
+                if (showChevron)
+                  const Icon(
+                    Icons.chevron_right,
+                    size: 22,
+                    color: ProfileSettingsUi.muted,
+                  ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _Divider extends StatelessWidget {
-  const _Divider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
-      child: Divider(height: 1, color: AppColors.border),
-    );
-  }
-}
-
-class _LogoutButton extends ConsumerWidget {
+class _LogoutTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
 
-    return ElevatedButton.icon(
-      onPressed: authState.isLoading
-          ? null
+    return _SettingsTile(
+      icon: Icons.logout_rounded,
+      title: context.t.common.logout,
+      showChevron: false,
+      onTap: authState.isLoading
+          ? () {}
           : () => _confirmLogout(context, ref),
-      icon: const Icon(Icons.logout_rounded, size: AppSizes.iconSize),
-      label: Text(context.t.common.logout),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.error,
-        foregroundColor: Colors.white,
-        minimumSize: const Size(double.infinity, AppSizes.buttonHeightPrimary),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSizes.buttonRadius),
-        ),
-        textStyle: AppTypography.button,
-        elevation: 0,
-      ),
     );
   }
 
@@ -533,90 +415,77 @@ class _LogoutButton extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => Container(
         decoration: const BoxDecoration(
-          color: AppColors.surface,
+          color: ProfileSettingsUi.background,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         padding: EdgeInsets.fromLTRB(
-          AppSizes.spacingL,
-          AppSizes.spacingS,
-          AppSizes.spacingL,
-          AppSizes.spacingL + MediaQuery.of(context).padding.bottom,
+          20,
+          8,
+          20,
+          20 + MediaQuery.of(context).padding.bottom,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _BottomSheetHandle(),
-            const SizedBox(height: AppSizes.spacingL),
+            const SizedBox(height: 20),
             Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.12),
+              width: 56,
+              height: 56,
+              decoration: const BoxDecoration(
+                color: ProfileSettingsUi.fill,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.logout_rounded,
-                size: 36,
-                color: AppColors.error,
+                size: 26,
+                color: ProfileSettingsUi.ink,
               ),
             ),
-            const SizedBox(height: AppSizes.spacingM),
+            const SizedBox(height: 14),
             Text(
               context.t.common.logout,
-              style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+              style: ProfileSettingsUi.name.copyWith(fontSize: 18),
             ),
-            const SizedBox(height: AppSizes.spacingS),
+            const SizedBox(height: 8),
             Text(
               context.t.common.logoutConfirm,
-              style: AppTypography.body1.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: ProfileSettingsUi.handle,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSizes.spacingXL),
+            const SizedBox(height: 24),
             Row(
               children: [
                 Expanded(
                   child: SizedBox(
-                    height: AppSizes.buttonHeightSecondary,
+                    height: ProfileSettingsUi.buttonHeight,
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(sheetContext),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.textPrimary,
+                        foregroundColor: ProfileSettingsUi.ink,
                         side: const BorderSide(
-                          color: AppColors.borderColor,
-                          width: 1.5,
+                          color: ProfileSettingsUi.line,
+                          width: 1,
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                            AppSizes.buttonRadius,
+                            ProfileSettingsUi.radiusMd,
                           ),
                         ),
                       ),
                       child: Text(
                         context.t.common.cancelBtn,
-                        style: AppTypography.button.copyWith(
-                          color: AppColors.textPrimary,
-                        ),
+                        style: ProfileSettingsUi.rowTitle,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: AppSizes.spacingM),
+                const SizedBox(width: 12),
                 Expanded(
                   child: SizedBox(
-                    height: AppSizes.buttonHeightSecondary,
+                    height: ProfileSettingsUi.buttonHeight,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.error,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSizes.buttonRadius,
-                          ),
-                        ),
-                        elevation: 0,
-                      ),
+                      style: ProfileSettingsUi.primaryButton,
                       onPressed: () async {
                         Navigator.pop(sheetContext);
                         await ref.read(authStateProvider.notifier).logout(ref);
@@ -630,7 +499,7 @@ class _LogoutButton extends ConsumerWidget {
                       },
                       child: Text(
                         context.t.common.logout,
-                        style: AppTypography.button,
+                        style: ProfileSettingsUi.buttonLabel,
                       ),
                     ),
                   ),
@@ -647,19 +516,20 @@ class _LogoutButton extends ConsumerWidget {
 class _TokenTestButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ElevatedButton.icon(
+    return OutlinedButton.icon(
       onPressed: () => _checkTokenExpiry(context, ref),
-      icon: const Icon(Icons.timer_outlined, size: AppSizes.iconSize),
-      label: Text(context.t.common.tokenExpiryTest),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.warning,
-        foregroundColor: Colors.white,
-        minimumSize: const Size(double.infinity, AppSizes.buttonHeightPrimary),
+      icon: const Icon(Icons.timer_outlined, size: 18),
+      label: Text(
+        context.t.common.tokenExpiryTest,
+        style: ProfileSettingsUi.rowTitle,
+      ),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: ProfileSettingsUi.ink,
+        side: const BorderSide(color: ProfileSettingsUi.line),
+        minimumSize: const Size(double.infinity, ProfileSettingsUi.buttonHeight),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSizes.buttonRadius),
+          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
         ),
-        textStyle: AppTypography.button,
-        elevation: 0,
       ),
     );
   }

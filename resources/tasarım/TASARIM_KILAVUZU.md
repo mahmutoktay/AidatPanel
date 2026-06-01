@@ -33,10 +33,10 @@
 | Sadelik | Her ekranda tek ana aksiyon. Gereksiz öğe yok. |
 
 **Görsel Dil:**
-- Koyu lacivert (`#1B3A6B`) güven ve kurumsal hissi verir.
-- Gradient hero alanı ekrana kimlik kazandırır.
-- Yuvarlak köşeler (16dp kart, 12dp buton/input) modern ve soft bir his yaratır.
-- Beyaz form alanı gradient üzerine "kağıt" gibi oturur.
+- Monokrom siyah-beyaz-gri palet; marka rengi siyah (`#111111`).
+- Beyaz yüzeyler, siyah metin ve ikonlar; dekoratif gradient yok.
+- Yuvarlak köşeler (16dp kart, 12dp buton/input) modern ve sade bir his yaratır.
+- Form alanları beyaz kart üzerinde gri çerçeve ile ayrılır.
 
 ---
 
@@ -44,59 +44,59 @@
 
 **Dosya:** `mobile/lib/core/theme/app_colors.dart`
 
-Tüm renk referansları `AppColors.xxx` üzerinden yapılır. Ham hex veya `Colors.xxx` kullanılmaz (istisnalar aşağıda belirtilmiştir).
+Tüm renk referansları `AppColors.xxx` üzerinden yapılır. Ham hex veya `Colors.red/green/blue` kullanılmaz.
 
 ### Ana Renkler
 
 | Token | Hex | Kullanım |
 |-------|-----|----------|
-| `AppColors.primary` | `#1B3A6B` | Buton bg, ikon rengi, başlık vurgusu, gradient başlangıcı |
-| `AppColors.primaryLight` | `#2D5FA8` | Gradient sonu, badge bg tonu, avatar bg |
-| `AppColors.accent` | `#F59E0B` | Özel vurgu (badge, önemli metrik). Nadiren kullanılır. |
+| `AppColors.primary` | `#111111` | AppBar bg, ikon, başlık vurgusu, seçili nav |
+| `AppColors.primaryLight` | `#333333` | İkincil siyah ton |
+| `AppColors.accent` | `#111111` | Vurgu (monokrom) |
 
-### Durum Renkleri
+### Durum Renkleri (monokrom)
+
+Durum ayrımı **renk kodu ile değil**, ikon + metin etiketi ile yapılır.
 
 | Token | Hex | Kullanım |
 |-------|-----|----------|
-| `AppColors.success` | `#16A34A` | Ödendi badge, PasswordCriterion met, pozitif durum |
-| `AppColors.successLight` | `#10B981` | Hafif yeşil vurgu |
-| `AppColors.successBg` | `#DCFCE7` | Başarı badge arka planı |
-| `AppColors.error` | `#DC2626` | Hata mesajı, PasswordCriterion unmet, gecikmiş ödeme |
-| `AppColors.errorBg` | `#FEE2E2` | Hata badge arka planı |
-| `AppColors.warning` | `#F59E0B` | Bekleyen ödeme, uyarı durumu |
-| `AppColors.warningBg` | `#FEF3C7` | Uyarı badge arka planı |
-| `AppColors.info` | `#2563EB` | Bilgi toast'ı |
+| `AppColors.success` | `#111111` | Olumlu durum metni |
+| `AppColors.error` | `#111111` | Olumsuz durum metni |
+| `AppColors.warning` | `#6B7280` | Bekleyen / nötr uyarı |
+| `AppColors.info` | `#111111` | Bilgi metni |
+| `AppColors.successBg` | `#E5E7EB` | Badge arka planı |
+| `AppColors.errorBg` | `#F3F4F6` | Badge arka planı |
+| `AppColors.warningBg` | `#F3F4F6` | Badge arka planı |
+| `AppColors.infoBg` | `#F3F4F6` | Badge arka planı |
 
 ### Nötr Renkler
 
 | Token | Hex | Kullanım |
 |-------|-----|----------|
-| `AppColors.background` | `#F8FAFC` | `Scaffold.backgroundColor`, ekran arka planı |
-| `AppColors.surface` | `#FFFFFF` | Kart bg, form alanı bg, white hero sheet |
-| `AppColors.border` / `AppColors.borderColor` | `#E2E8F0` | Kart kenarlık, ayırıcı çizgi |
-| `AppColors.textPrimary` | `#0F172A` | Ana metin (başlık, gövde) |
-| `AppColors.textSecondary` | `#475569` | İkincil metin (açıklama, hint) |
-| `AppColors.textDisabled` | `#94A3B8` | Devre dışı öğe metni, NavigationBar etkin olmayan ikon |
+| `AppColors.background` | `#FFFFFF` | Scaffold arka planı |
+| `AppColors.surface` | `#FFFFFF` | Kart bg, form alanı |
+| `AppColors.fill` | `#F3F4F6` | İkon kabarcığı, hafif vurgu alanı |
+| `AppColors.border` / `AppColors.borderColor` | `#E5E7EB` | Kart kenarlık, ayırıcı |
+| `AppColors.textPrimary` | `#111111` | Ana metin |
+| `AppColors.textSecondary` | `#6B7280` | İkincil metin |
+| `AppColors.textDisabled` | `#9CA3AF` | Devre dışı metin / ikon |
+
+### Buton Stili
+
+- **Varsayılan:** beyaz/şeffaf gövde + siyah border + siyah metin (`AppButtonStyles.outlinedPrimary`)
+- **Güçlü CTA:** siyah dolgu + beyaz metin (`AppButtonStyles.elevatedPrimary` veya `FilledButton`)
+- Renkli (mavi/yeşil/kırmızı) dolgu **kullanılmaz**
 
 ### Beyaz Renk Kullanımı (İstisna)
 
-Gradient arka plan üzerindeki öğelerde `Colors.white` ve yarı saydam türevleri kullanılır:
+Siyah AppBar veya siyah CTA buton üzerinde:
 
 ```dart
-// İkon container arka planı (hero alanında)
-color: Colors.white.withValues(alpha: 0.15)
-
-// İkon / başlık rengi (hero üzerinde)
+// AppBar başlık / ikon
 color: Colors.white
 
-// Alt başlık / açıklama (hero üzerinde)
-color: Colors.white.withValues(alpha: 0.85)
-
-// Bölücü çizgi (gradient kart içinde)
-color: Colors.white.withValues(alpha: 0.3)
-
-// Konum ikonu (gradient kart içinde)
-color: Colors.white.withValues(alpha: 0.7)
+// Siyah buton metni
+foregroundColor: Colors.white
 ```
 
 ---

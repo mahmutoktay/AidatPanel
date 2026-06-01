@@ -7,6 +7,7 @@ import '../../data/datasources/dues_remote_datasource.dart';
 import '../../data/repositories/dues_repository_impl.dart';
 import '../../domain/entities/due_entity.dart';
 import '../../domain/repositories/dues_repository.dart';
+import '../../domain/resident_dues_list.dart';
 
 final duesRemoteDataSourceProvider = Provider<DuesRemoteDataSource>((ref) {
   return DuesRemoteDataSourceImpl(
@@ -107,11 +108,12 @@ class DuesNotifier extends StateNotifier<DuesState> {
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final dues = await _repository.getMyDues(
+      final raw = await _repository.getMyDues(
         month: month,
         year: year,
         status: status,
       );
+      final dues = prepareResidentDuesList(raw);
       state = state.copyWith(isLoading: false, dues: dues);
     } catch (e) {
       state = state.copyWith(

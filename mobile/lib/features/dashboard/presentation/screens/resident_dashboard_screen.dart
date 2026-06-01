@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/platform/system_navigator_bridge.dart';
+import '../../../../core/navigation/app_back_navigation.dart';
+import '../../../../core/navigation/dashboard_back_handler.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -10,7 +11,9 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/notification_icon_button.dart';
+import '../../../../core/notifications/notification_toast.dart';
 import '../../../../shared/widgets/settings_tab.dart';
+import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../../shared/widgets/tint_dashboard_tile.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dues/domain/entities/due_entity.dart';
@@ -45,7 +48,9 @@ class _ResidentDashboardScreenState
       initialIndex: initialIndex,
     );
     _tabController.addListener(() {
+      if (_tabController.indexIsChanging) return;
       ref.read(residentTabIndexProvider.notifier).state = _tabController.index;
+      prefetchNotifications(ref);
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -61,6 +66,12 @@ class _ResidentDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<int>(residentTabIndexProvider, (previous, next) {
+      if (_tabController.index != next) {
+        _tabController.animateTo(next);
+      }
+    });
+
     if (!_requestedInitialDues) {
       _requestedInitialDues = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -76,26 +87,36 @@ class _ResidentDashboardScreenState
       });
     }
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
-        await SystemNavigatorBridge.moveAppToBackground();
+    return DashboardBackHandler(
+      dashboardRootPath: '/resident-dashboard',
+      currentTabIndex: _tabController.index,
+      exitHintMessage: context.t.common.pressBackAgainToExit,
+      goToHomeTab: () {
+        ref.read(residentTabIndexProvider.notifier).state = 0;
+        _tabController.animateTo(0);
       },
+      onExitHint: (message) => ref.read(toastProvider.notifier).show(
+        message,
+        type: ToastType.info,
+        duration: AppBackNavigation.exitGracePeriod,
+      ),
       child: Scaffold(
         backgroundColor: AppColors.surface,
-        appBar: AppBar(
-          title: Text(context.t.features.apartments.residentPanel),
-          centerTitle: true,
-          actions: const [NotificationIconButton()],
-        ),
-        body: TabBarView(
-          controller: _tabController,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildHomeTab(),
-            _buildDuesTab(),
-            _buildIssuesTab(),
-            _buildSettingsTab(),
+            DashboardRoleBar(title: context.t.common.resident),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildHomeTab(),
+                  _buildDuesTab(),
+                  _buildIssuesTab(),
+                  _buildSettingsTab(),
+                ],
+              ),
+            ),
           ],
         ),
         bottomNavigationBar: NavigationBar(
@@ -133,9 +154,9 @@ class _ResidentDashboardScreenState
 
   Widget _buildHomeTab() {
     final authState = ref.watch(authStateProvider);
+    final userName = authState.user?.name ?? context.t.common.user;
     final dues = ref.watch(duesNotifierProvider).dues;
     final tickets = ref.watch(ticketsNotifierProvider).tickets;
-    final userName = authState.user?.name ?? context.t.common.user;
     final pendingCount = dues
         .where((d) => d.status == DueStatus.pending)
         .length;
@@ -156,12 +177,13 @@ class _ResidentDashboardScreenState
       color: AppColors.primary,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: AppSizes.screenBodyScrollPadding,
+        padding: AppSizes.screenBodyScrollPadding.copyWith(top: AppSizes.spacingS),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            DashboardWelcomeLine(userName: userName),
+            const SizedBox(height: AppSizes.spacingM),
             _ResidentHeroSummaryCard(
-              userName: userName,
               pendingCount: pendingCount,
               overdueCount: overdueCount,
               paidCount: paidCount,
@@ -171,7 +193,7 @@ class _ResidentDashboardScreenState
               pendingCount: pendingCount,
               billsCount: dues.length,
               openTicketCount: openTicketCount,
-              onDues: () => context.push('/payment'),
+              onDues: () => context.push('/resident-dashboard/payment'),
               onBills: _goToDuesTab,
               onSupport: _goToIssuesTab,
             ),
@@ -205,6 +227,7 @@ class _ResidentDashboardScreenState
     await Future.wait([
       ref.read(duesNotifierProvider.notifier).loadMyDues(),
       ref.read(ticketsNotifierProvider.notifier).loadMyTickets(),
+      pollAndShowNotificationToasts(ref),
     ]);
   }
 
@@ -240,9 +263,7 @@ class _ResidentDashboardScreenState
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.18),
-                ),
+                border: AppColors.cardBorder,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -294,13 +315,11 @@ class _ResidentDashboardScreenState
 
 /// Yönetici ana sayfadaki `_HeroSummaryCard` ile aynı düzen.
 class _ResidentHeroSummaryCard extends StatelessWidget {
-  final String userName;
   final int pendingCount;
   final int overdueCount;
   final int paidCount;
 
   const _ResidentHeroSummaryCard({
-    required this.userName,
     required this.pendingCount,
     required this.overdueCount,
     required this.paidCount,
@@ -308,66 +327,38 @@ class _ResidentHeroSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                text: '${context.t.common.welcome}, ',
-                style: AppTypography.body1.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              TextSpan(
-                text: userName,
-                style: AppTypography.h4.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: TintDashboardTile(
+              icon: Icons.pending_outlined,
+              value: pendingCount.toString(),
+              label: context.t.common.pendingStatus,
+              valueColor: AppColors.warning,
+            ),
           ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: AppSizes.spacingM),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: TintDashboardTile(
-                  icon: Icons.pending_outlined,
-                  value: pendingCount.toString(),
-                  label: context.t.common.pendingStatus,
-                  tint: AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: AppSizes.spacingS),
-              Expanded(
-                child: TintDashboardTile(
-                  icon: Icons.warning_amber_rounded,
-                  value: overdueCount.toString(),
-                  label: context.t.common.overdueStatus,
-                  tint: AppColors.error,
-                ),
-              ),
-              const SizedBox(width: AppSizes.spacingS),
-              Expanded(
-                child: TintDashboardTile(
-                  icon: Icons.check_circle_outline,
-                  value: paidCount.toString(),
-                  label: context.t.common.paidStatus,
-                  tint: AppColors.success,
-                ),
-              ),
-            ],
+          const SizedBox(width: AppSizes.spacingS),
+          Expanded(
+            child: TintDashboardTile(
+              icon: Icons.warning_amber_rounded,
+              value: overdueCount.toString(),
+              label: context.t.common.overdueStatus,
+              valueColor: AppColors.error,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: AppSizes.spacingS),
+          Expanded(
+            child: TintDashboardTile(
+              icon: Icons.check_circle_outline,
+              value: paidCount.toString(),
+              label: context.t.common.paidStatus,
+              valueColor: AppColors.success,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -402,7 +393,7 @@ class _ResidentQuickActionsRow extends StatelessWidget {
               icon: Icons.payment_outlined,
               value: pendingCount.toString(),
               label: t.makePayment,
-              tint: AppColors.primary,
+              valueColor: AppColors.info,
               onTap: onDues,
             ),
           ),
@@ -412,7 +403,7 @@ class _ResidentQuickActionsRow extends StatelessWidget {
               icon: Icons.receipt_outlined,
               value: billsCount.toString(),
               label: t.bills,
-              tint: AppColors.accent,
+              valueColor: AppColors.accent,
               onTap: onBills,
             ),
           ),
@@ -422,7 +413,7 @@ class _ResidentQuickActionsRow extends StatelessWidget {
               icon: Icons.support_agent_outlined,
               value: openTicketCount.toString(),
               label: t.support,
-              tint: AppColors.primaryLight,
+              valueColor: AppColors.info,
               onTap: onSupport,
             ),
           ),

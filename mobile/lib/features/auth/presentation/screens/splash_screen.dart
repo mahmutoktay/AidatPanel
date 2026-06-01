@@ -66,16 +66,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       setState(() => _hasBootError = false);
     }
 
-    final restoreFuture =
-        ref.read(authStateProvider.notifier).restoreSession();
+    final restoreFuture = ref.read(authStateProvider.notifier).restoreSession();
     final minDelayFuture = Future<void>.delayed(_minSplashDuration);
 
     // restoreSession bitince yönlendir; pre-warm'ı dashboard mount olduktan
     // sonra ConsumerStatefulWidget'in initState'i kendisi tetikler. Splash
     // sırasında pre-warm denemesi UI thread'i bloklayıp ANR'a yol açıyordu.
     try {
-      await Future.wait<void>([restoreFuture, minDelayFuture])
-          .timeout(_bootstrapTimeout);
+      await Future.wait<void>([
+        restoreFuture,
+        minDelayFuture,
+      ]).timeout(_bootstrapTimeout);
     } on TimeoutException {
       if (!mounted) return;
       setState(() => _hasBootError = true);
@@ -107,11 +108,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ),
       child: Column(
         children: [
-          Icon(
-            Icons.cloud_off_outlined,
-            color: AppColors.error,
-            size: 32,
-          ),
+          Icon(Icons.cloud_off_outlined, color: AppColors.error, size: 32),
           const SizedBox(height: AppSizes.spacingM),
           Text(
             context.t.features.auth.splashConnectionError,
@@ -125,9 +122,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           Text(
             context.t.features.auth.splashConnectionHint,
             textAlign: TextAlign.center,
-            style: AppTypography.body2.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSizes.spacingL),
           SizedBox(
@@ -162,10 +157,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               },
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primary,
-                side: const BorderSide(
-                  color: AppColors.primary,
-                  width: 1.5,
-                ),
+                side: const BorderSide(color: AppColors.primary, width: 1.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSizes.cardRadius),
                 ),
@@ -252,8 +244,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       height: 32,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
                       ),
                     ),
                 ],

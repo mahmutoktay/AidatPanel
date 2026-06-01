@@ -31,7 +31,7 @@ class DekontListCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.14)),
+        border: AppColors.cardBorder,
       ),
       child: Material(
         color: Colors.transparent,

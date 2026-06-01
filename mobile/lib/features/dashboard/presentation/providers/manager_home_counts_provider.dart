@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../buildings/data/buildings_store.dart';
+import '../../../dekont/presentation/providers/dekont_provider.dart';
 import '../../../expenses/presentation/providers/expenses_provider.dart';
 import '../../../notifications/presentation/providers/notifications_provider.dart';
 
@@ -40,4 +41,25 @@ final managerMonthAnnouncementsCountProvider =
   } catch (_) {
     return 0;
   }
+});
+
+/// Yönetici ana sayfa — inceleme bekleyen dekont sayısı (tüm binalar).
+final managerPendingDekontsCountProvider =
+    FutureProvider.autoDispose<int>((ref) async {
+  final buildings = ref.watch(buildingsStoreProvider).value;
+  if (buildings == null || buildings.isEmpty) return 0;
+
+  final repo = ref.watch(dekontRepositoryProvider);
+  var count = 0;
+
+  for (final building in buildings) {
+    try {
+      final dekonts = await repo.getBuildingDekonts(building.id);
+      count += dekonts.where((d) => d.status.needsManagerAttention).length;
+    } catch (_) {
+      // Tek bina hatası tüm sayacı düşürmez.
+    }
+  }
+
+  return count;
 });

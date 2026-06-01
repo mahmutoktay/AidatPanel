@@ -13,6 +13,7 @@ import '../../../../shared/widgets/password_criterion.dart';
 import '../../../../shared/widgets/password_field.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/auth_brand_header.dart';
 import '../widgets/sign_up_role_toggle.dart';
 
 /// Birleşik üyelik ekranı: varsayılan sakin (davet kodu), üstten yönetici geçişi.
@@ -115,7 +116,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     }
 
     if (email.isEmpty || password.isEmpty) {
-      ref.read(toastProvider.notifier).show(
+      ref
+          .read(toastProvider.notifier)
+          .show(
             context.t.features.auth.emailAndPasswordRequired,
             type: ToastType.error,
           );
@@ -127,9 +130,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       final errorMessage = emailError == 'email_required'
           ? context.t.validation.emailRequired
           : emailError == 'email_invalid'
-              ? context.t.validation.emailInvalid
-              : context.t.validation.emailTooLong;
-      ref.read(toastProvider.notifier).show(errorMessage, type: ToastType.error);
+          ? context.t.validation.emailInvalid
+          : context.t.validation.emailTooLong;
+      ref
+          .read(toastProvider.notifier)
+          .show(errorMessage, type: ToastType.error);
       return;
     }
 
@@ -139,13 +144,17 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         final errorMessage = phoneError == 'phone_required'
             ? context.t.validation.phoneRequired
             : context.t.validation.phoneInvalid;
-        ref.read(toastProvider.notifier).show(errorMessage, type: ToastType.error);
+        ref
+            .read(toastProvider.notifier)
+            .show(errorMessage, type: ToastType.error);
         return;
       }
     }
 
     if (password != confirmPassword) {
-      ref.read(toastProvider.notifier).show(
+      ref
+          .read(toastProvider.notifier)
+          .show(
             context.t.features.auth.passwordsDoNotMatch,
             type: ToastType.error,
           );
@@ -154,21 +163,21 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     final passwordError = InputValidators.validatePassword(password);
     if (passwordError != null) {
-      ref.read(toastProvider.notifier).show(passwordError, type: ToastType.error);
+      ref
+          .read(toastProvider.notifier)
+          .show(passwordError, type: ToastType.error);
       return;
     }
 
-    ref.read(authStateProvider.notifier).register(
-          email,
-          password,
-          name,
-          phone.isEmpty ? null : phone,
-        );
+    ref
+        .read(authStateProvider.notifier)
+        .register(email, password, name, phone.isEmpty ? null : phone);
   }
 
   void _handleJoin() {
-    final inviteCode =
-        AuthValidators.normalizeInviteCode(_inviteCodeController.text);
+    final inviteCode = AuthValidators.normalizeInviteCode(
+      _inviteCodeController.text,
+    );
     final email = _emailController.text.trim();
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
@@ -179,7 +188,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         email.isEmpty ||
         name.isEmpty ||
         password.isEmpty) {
-      ref.read(toastProvider.notifier).show(
+      ref
+          .read(toastProvider.notifier)
+          .show(
             context.t.features.auth.inviteCodeAndPasswordRequired,
             type: ToastType.error,
           );
@@ -187,7 +198,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     }
 
     if (!AuthValidators.isValidInviteCode(inviteCode)) {
-      ref.read(toastProvider.notifier).show(
+      ref
+          .read(toastProvider.notifier)
+          .show(
             context.t.features.auth.invalidInviteCodeFormat,
             type: ToastType.error,
           );
@@ -199,14 +212,18 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       final errorMessage = emailError == 'email_required'
           ? context.t.validation.emailRequired
           : emailError == 'email_invalid'
-              ? context.t.validation.emailInvalid
-              : context.t.validation.emailTooLong;
-      ref.read(toastProvider.notifier).show(errorMessage, type: ToastType.error);
+          ? context.t.validation.emailInvalid
+          : context.t.validation.emailTooLong;
+      ref
+          .read(toastProvider.notifier)
+          .show(errorMessage, type: ToastType.error);
       return;
     }
 
     if (phone.isNotEmpty && !AuthValidators.isValidPhone(phone)) {
-      ref.read(toastProvider.notifier).show(
+      ref
+          .read(toastProvider.notifier)
+          .show(
             context.t.features.auth.invalidPhoneFormat,
             type: ToastType.error,
           );
@@ -214,7 +231,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     }
 
     if (password != confirmPassword) {
-      ref.read(toastProvider.notifier).show(
+      ref
+          .read(toastProvider.notifier)
+          .show(
             context.t.features.auth.passwordsDoNotMatch,
             type: ToastType.error,
           );
@@ -226,21 +245,25 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       final errorMessage = passwordError == 'password_required'
           ? context.t.validation.passwordRequired
           : passwordError == 'password_too_short'
-              ? context.t.validation.passwordTooShort
-              : passwordError == 'password_too_long'
-                  ? context.t.validation.passwordTooLong
-                  : passwordError == 'password_uppercase_required'
-                      ? context.t.validation.passwordUppercaseRequired
-                      : passwordError == 'password_lowercase_required'
-                          ? context.t.validation.passwordLowercaseRequired
-                          : passwordError == 'password_number_required'
-                              ? context.t.validation.passwordNumberRequired
-                              : context.t.validation.passwordSpecialCharRequired;
-      ref.read(toastProvider.notifier).show(errorMessage, type: ToastType.error);
+          ? context.t.validation.passwordTooShort
+          : passwordError == 'password_too_long'
+          ? context.t.validation.passwordTooLong
+          : passwordError == 'password_uppercase_required'
+          ? context.t.validation.passwordUppercaseRequired
+          : passwordError == 'password_lowercase_required'
+          ? context.t.validation.passwordLowercaseRequired
+          : passwordError == 'password_number_required'
+          ? context.t.validation.passwordNumberRequired
+          : context.t.validation.passwordSpecialCharRequired;
+      ref
+          .read(toastProvider.notifier)
+          .show(errorMessage, type: ToastType.error);
       return;
     }
 
-    ref.read(authStateProvider.notifier).join(
+    ref
+        .read(authStateProvider.notifier)
+        .join(
           inviteCode,
           email,
           password,
@@ -285,8 +308,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         setState(() {
           if (normalized.isNotEmpty &&
               !AuthValidators.isValidInviteCode(normalized)) {
-            _inviteCodeError =
-                context.t.features.auth.invalidInviteCodeFormat;
+            _inviteCodeError = context.t.features.auth.invalidInviteCodeFormat;
           } else {
             _inviteCodeError = null;
           }
@@ -341,10 +363,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         errorText: _emailError == null
             ? null
             : _emailError == 'email_required'
-                ? context.t.validation.emailRequired
-                : _emailError == 'email_invalid'
-                    ? context.t.validation.emailInvalid
-                    : context.t.validation.emailTooLong,
+            ? context.t.validation.emailRequired
+            : _emailError == 'email_invalid'
+            ? context.t.validation.emailInvalid
+            : context.t.validation.emailTooLong,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSizes.spacingM,
           vertical: AppSizes.spacingM,
@@ -482,8 +504,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           helperText: _confirmPasswordController.text.isEmpty
               ? null
               : _passwordsMatch
-                  ? null
-                  : context.t.features.auth.passwordsDoNotMatch,
+              ? null
+              : context.t.features.auth.passwordsDoNotMatch,
         ),
       ],
     );
@@ -531,7 +553,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     ref.listen(authStateProvider, (previous, next) {
       if (next.registrationSuccess &&
           !(previous?.registrationSuccess ?? false)) {
-        ref.read(toastProvider.notifier).show(
+        ref
+            .read(toastProvider.notifier)
+            .show(
               context.t.features.auth.registrationSuccess,
               type: ToastType.success,
               duration: const Duration(seconds: 6),
@@ -544,7 +568,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         syncFcmAfterAuth(ref);
       }
       if (next.error != null && next.error != previous?.error) {
-        ref.read(toastProvider.notifier).show(
+        ref
+            .read(toastProvider.notifier)
+            .show(
               next.error ?? context.t.features.auth.errorOccurred,
               type: ToastType.error,
             );
@@ -560,13 +586,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         children: [
           const Positioned.fill(
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryLight],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
+              decoration: BoxDecoration(color: AppColors.surface),
             ),
           ),
           Positioned.fill(
@@ -575,59 +595,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 72,
-                          height: 72,
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.12),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.asset(
-                              'assets/brand/app_logo.png',
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: AppSizes.spacingM),
-                        Text(
-                          context.t.features.auth.appTitle,
-                          style: AppTypography.h2.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: AppSizes.spacingXS),
-                        Text(
-                          context.t.features.auth.appSubtitle,
-                          style: AppTypography.body2.copyWith(
-                            color: Colors.white.withValues(alpha: 0.85),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const AuthBrandHeader(),
                   Expanded(
                     child: Container(
                       decoration: const BoxDecoration(
                         color: AppColors.surface,
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(28),
-                        ),
                       ),
                       child: SingleChildScrollView(
                         padding: AppSizes.screenBodyScrollPadding,
@@ -660,7 +632,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   ? _buildManagerForm(isLoading)
                                   : _buildResidentForm(isLoading),
                             ),
-                            const SizedBox(height: AppSizes.spacingFieldSpacing),
+                            const SizedBox(
+                              height: AppSizes.spacingFieldSpacing,
+                            ),
                             ElevatedButton(
                               onPressed: isLoading ? null : _onSubmit,
                               child: isLoading
@@ -691,7 +665,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             left: 0,
             child: SafeArea(
               child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: AppColors.textPrimary,
+                ),
                 onPressed: isLoading ? null : () => context.pop(),
               ),
             ),

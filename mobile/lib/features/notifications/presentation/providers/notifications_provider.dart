@@ -71,12 +71,28 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   final NotificationRepository _repository;
   Timer? _badgeSyncDebounce;
 
+  final Set<String> _toastedNotificationIds = {};
+  bool _toastBaselineReady = false;
+  bool _pollInFlight = false;
+
   NotificationsNotifier(this._repository) : super(const NotificationsState());
 
   @override
   void dispose() {
     _badgeSyncDebounce?.cancel();
     super.dispose();
+  }
+
+  /// Oturum kapanınca / kullanıcı değişince toast tekrarını sıfırlar.
+  void resetToastTracking() {
+    _toastedNotificationIds.clear();
+    _toastBaselineReady = false;
+  }
+
+  void markNotificationToasted(String id) {
+    if (id.isEmpty) return;
+    _toastBaselineReady = true;
+    _toastedNotificationIds.add(id);
   }
 
   /// Rozeti API ile senkronize eder (liste ekranını etkilemez).
@@ -89,6 +105,38 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     }
   }
 
+  /// Okunmamışları kontrol eder; daha önce gösterilmemiş olanları döner (toast için).
+  Future<List<NotificationEntity>> pollForNewNotifications() async {
+    if (_pollInFlight) return const [];
+    _pollInFlight = true;
+    try {
+      final result = await _repository.list(limit: 10, unreadOnly: true);
+      state = state.copyWith(unreadCount: result.unreadCount);
+      return _extractNewForToast(result.items);
+    } catch (_) {
+      return const [];
+    } finally {
+      _pollInFlight = false;
+    }
+  }
+
+  List<NotificationEntity> _extractNewForToast(List<NotificationEntity> items) {
+    if (!_toastBaselineReady) {
+      _toastedNotificationIds.addAll(items.map((n) => n.id));
+      _toastBaselineReady = true;
+      return const [];
+    }
+
+    final fresh = <NotificationEntity>[];
+    for (final n in items) {
+      if (_toastedNotificationIds.contains(n.id)) continue;
+      _toastedNotificationIds.add(n.id);
+      fresh.add(n);
+    }
+    // API en yeni önce — kuyruk eskiden yeniye işlesin.
+    return fresh.reversed.toList();
+  }
+
   /// FCM push geldiğinde: önce anında +1, ardından sunucudan doğrula.
   void onPushReceived() {
     state = state.copyWith(unreadCount: state.unreadCount + 1);
@@ -98,9 +146,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       unawaited(syncUnreadBadge());
     });
 
-    if (state.items.isNotEmpty) {
-      unawaited(load(refresh: true));
-    }
+    unawaited(load(refresh: true));
   }
 
   Future<void> load({bool refresh = true}) async {

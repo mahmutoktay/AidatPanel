@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../firebase_options.dart';
+import 'local_notification_service.dart';
 
 /// Arka planda gelen FCM mesajları (top-level, isolate girişi).
 @pragma('vm:entry-point')
@@ -11,10 +12,15 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (kDebugMode) {
     debugPrint('[FCM background] ${message.messageId} data=${message.data}');
   }
+  await LocalNotificationService.instance.showFromRemoteMessage(
+    message,
+    forceShow: false,
+  );
 }
 
 /// Production (`main.dart`) için Firebase + arka plan handler.
 Future<void> initFirebase() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await LocalNotificationService.instance.initialize();
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 }

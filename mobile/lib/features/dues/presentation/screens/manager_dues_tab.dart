@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
@@ -42,6 +44,25 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   Widget build(BuildContext context) {
     final buildings = ref.watch(buildingsStoreProvider).value ?? [];
     final duesState = ref.watch(duesNotifierProvider);
+    final highlightDueId = ref.watch(managerDueHighlightIdProvider);
+
+    ref.listen<ManagerDueNavigationIntent?>(
+      managerDueNavigationIntentProvider,
+      (previous, next) {
+        if (next == null) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (!mounted) return;
+          final buildingId = next.buildingId;
+          if (buildingId != null &&
+              buildingId.isNotEmpty &&
+              buildings.any((b) => b.id == buildingId)) {
+            setState(() => _selectedBuildingId = buildingId);
+            await _reloadDues();
+          }
+          ref.read(managerDueNavigationIntentProvider.notifier).state = null;
+        });
+      },
+    );
 
     _tryInitialize(buildings);
 
@@ -111,7 +132,11 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) => KeyedSubtree(
                     key: ValueKey<String>(dues[index].id),
-                    child: _buildDueCard(context, dues[index]),
+                    child: _buildDueCard(
+                      context,
+                      dues[index],
+                      highlighted: highlightDueId == dues[index].id,
+                    ),
                   ),
                   childCount: dues.length,
                 ),
@@ -172,7 +197,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.borderColor),
+        border: AppColors.cardBorder,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -351,7 +376,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.borderColor),
+        border: AppColors.cardBorder,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -413,6 +438,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
             height: AppSizes.buttonHeightSecondary,
             child: ElevatedButton(
               onPressed: isLoading ? null : () => _updateDueAmount(buildings),
+              style: AppButtonStyles.elevatedInfo(),
               child: Text(context.t.common.update),
             ),
           ),
@@ -421,15 +447,21 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     );
   }
 
-  Widget _buildDueCard(BuildContext context, DueEntity due) {
+  Widget _buildDueCard(
+    BuildContext context,
+    DueEntity due, {
+    bool highlighted = false,
+  }) {
     final statusVisual = _statusVisual(context, due.status);
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       padding: const EdgeInsets.all(AppSizes.cardPadding),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: highlighted ? AppColors.fill : AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.borderColor),
+        border: highlighted
+            ? Border.all(color: AppColors.primary, width: 2)
+            : AppColors.cardBorder,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -456,24 +488,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                   ),
                 ),
               ),
-              PopupMenuButton<DueStatus>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (status) => _updateStatus(due.id, status),
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    value: DueStatus.paid,
-                    child: Text(context.t.common.paidStatus),
-                  ),
-                  PopupMenuItem(
-                    value: DueStatus.pending,
-                    child: Text(context.t.common.pendingStatus),
-                  ),
-                  PopupMenuItem(
-                    value: DueStatus.overdue,
-                    child: Text(context.t.common.overdueStatus),
-                  ),
-                ],
-              ),
+              _buildDueStatusMenu(context, due),
             ],
           ),
           const SizedBox(height: AppSizes.spacingS),
@@ -493,6 +508,37 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
               style: AppTypography.caption.copyWith(color: AppColors.error),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  /// Aidat kartındaki üç-nokta menüsü — rozet renkleri + 56dp satır yüksekliği.
+  Widget _buildDueStatusMenu(BuildContext context, DueEntity due) {
+    return SizedBox(
+      width: AppSizes.minTouchTargetComfort,
+      height: AppSizes.minTouchTargetComfort,
+      child: PopupMenuButton<DueStatus>(
+        tooltip: context.t.common.status,
+        padding: EdgeInsets.zero,
+        icon: const Icon(
+          Icons.more_vert,
+          size: AppSizes.iconSize,
+          color: AppColors.textSecondary,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+          side: AppColors.cardBorderSide,
+        ),
+        color: AppColors.surface,
+        elevation: 4,
+        offset: const Offset(0, AppSizes.spacingXS),
+        constraints: const BoxConstraints(minWidth: 220),
+        onSelected: (status) => _updateStatus(due.id, status),
+        itemBuilder: (_) => [
+          _dueStatusMenuItem(context, value: DueStatus.paid, current: due.status),
+          _dueStatusMenuItem(context, value: DueStatus.pending, current: due.status),
+          _dueStatusMenuItem(context, value: DueStatus.overdue, current: due.status),
         ],
       ),
     );
@@ -624,6 +670,50 @@ class _StatusVisual {
   });
 }
 
+PopupMenuItem<DueStatus> _dueStatusMenuItem(
+  BuildContext context, {
+  required DueStatus value,
+  required DueStatus current,
+}) {
+  final visual = _statusVisual(context, value);
+  final isCurrent = value == current;
+  final icon = switch (value) {
+    DueStatus.paid => Icons.check_circle_outline,
+    DueStatus.pending => Icons.schedule_outlined,
+    DueStatus.overdue => Icons.warning_amber_outlined,
+    DueStatus.waived => Icons.block_outlined,
+  };
+
+  return PopupMenuItem<DueStatus>(
+    value: value,
+    height: AppSizes.minTouchTargetComfort,
+    padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
+    child: Row(
+      children: [
+        Icon(icon, size: AppSizes.listRowIconSize, color: visual.fg),
+        const SizedBox(width: AppSizes.spacingS),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: visual.bg,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            visual.label,
+            style: AppTypography.caption.copyWith(
+              color: visual.fg,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        const Spacer(),
+        if (isCurrent)
+          Icon(Icons.check, size: AppSizes.listRowIconSize, color: visual.fg),
+      ],
+    ),
+  );
+}
+
 _StatusVisual _statusVisual(BuildContext context, DueStatus status) {
   switch (status) {
     case DueStatus.paid:
@@ -642,7 +732,7 @@ _StatusVisual _statusVisual(BuildContext context, DueStatus status) {
       return _StatusVisual(
         label: context.t.common.waivedStatus,
         fg: AppColors.textSecondary,
-        bg: AppColors.borderColor,
+        bg: AppColors.fill,
       );
     case DueStatus.pending:
       return _StatusVisual(

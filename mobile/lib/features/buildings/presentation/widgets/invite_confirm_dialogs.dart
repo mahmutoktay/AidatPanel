@@ -154,7 +154,7 @@ class _DialogActionRow extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
-                side: BorderSide(color: AppColors.borderColor, width: 1.5),
+                side: AppColors.cardBorderSide,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

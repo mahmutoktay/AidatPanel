@@ -12,7 +12,7 @@
 ///   - profileRepositoryProvider    → MockProfileRepository (şifre Eski123. , reset kodu ABCDEF)
 ///   - ticketRepositoryProvider     → MockTicketRepository (örnek talep)
 ///   - expenseDataSourceProvider    → MockExpenseDataSource (b1/b2 gider + özet)
-///   - notificationDataSourceProvider → MockNotificationDataSource (Faz 2 bildirim örnekleri)
+///   - notificationRemoteDataSourceProvider → MockNotificationDataSource (Faz 2 bildirim örnekleri)
 ///
 /// Splash → restoreSession sahte manager kullanıcı döner → router otomatik
 /// olarak `/manager-dashboard` rotasına yönlendirir. Login/register ekranlarına
@@ -76,7 +76,7 @@ void main() async {
         ticketRepositoryProvider.overrideWithValue(mockTickets),
         dekontRepositoryProvider.overrideWithValue(mockDekont),
         expenseDataSourceProvider.overrideWithValue(mockExpenses),
-        notificationDataSourceProvider.overrideWithValue(mockNotifications),
+        notificationRemoteDataSourceProvider.overrideWithValue(mockNotifications),
       ],
       child: const _DevBanner(child: _DevApp()),
     ),

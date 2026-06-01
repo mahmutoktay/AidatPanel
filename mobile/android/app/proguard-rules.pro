@@ -43,10 +43,6 @@
 -dontwarn okio.**
 -dontwarn javax.annotation.**
 
-# Keep model classes
--keep class com.aidatpanel.app.** { *; }
--keepclassmembers class com.aidatpanel.app.** { *; }
-
 # Generics
 -keepattributes Signature
 -keepattributes *Annotation*

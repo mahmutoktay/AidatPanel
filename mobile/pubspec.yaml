@@ -3,7 +3,7 @@ description: "AidatPanel - Türk apartman ve site yöneticileri için mobil aida
 publish_to: 'none'
 
 # --- Google Play (sürüm kodu = + sonrası; her AAB öncesi +1 — CLAUDE.md) ---
-version: 0.1.3+1778674163
+version: 0.1.3+1778674164
 
 environment:
   sdk: ^3.11.5
@@ -18,7 +18,6 @@ dependencies:
 
   # State Management
   flutter_riverpod: ^2.5.0
-  riverpod_annotation: ^2.3.0
 
   # Navigation
   go_router: ^13.0.0
@@ -34,17 +33,19 @@ dependencies:
   # Firebase (FAZ 2 — push / FCM)
   firebase_core: ^3.15.2
   firebase_messaging: ^15.0.0
+  flutter_local_notifications: ^18.0.1
+  permission_handler: ^11.4.0
 
 
   # Utils
   intl: ^0.19.0
   equatable: ^2.0.5
-  json_annotation: ^4.8.1
-  freezed_annotation: ^2.4.0
   share_plus: ^12.0.2
   package_info_plus: ^8.0.0
   image_picker: ^1.1.2
   file_picker: ^8.1.7
+
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -53,9 +54,6 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 
   build_runner: ^2.4.0
-  riverpod_generator: ^2.3.0
-  freezed: ^2.4.0
-  json_serializable: ^6.7.0
   flutter_launcher_icons: ^0.14.4
 
 # Dependency overrides for compatibility
@@ -107,6 +105,7 @@ flutter:
 
   assets:
     - assets/brand/app_logo.png
+    - assets/profile/default_avatar.png
 
 flutter_launcher_icons:
   android: true

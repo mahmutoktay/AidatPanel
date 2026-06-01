@@ -276,11 +276,11 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
         fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderColor),
+          borderSide: AppColors.cardBorderSide,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderColor),
+          borderSide: AppColors.cardBorderSide,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -375,11 +375,11 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
                 : AppColors.textDisabled.withValues(alpha: 0.12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.borderColor),
+              borderSide: AppColors.cardBorderSide,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.borderColor),
+              borderSide: AppColors.cardBorderSide,
             ),
           ),
           child: Text(

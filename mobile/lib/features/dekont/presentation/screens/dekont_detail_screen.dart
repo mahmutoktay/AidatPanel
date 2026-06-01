@@ -252,7 +252,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
                       height: AppSizes.buttonHeightPrimary,
                       child: ElevatedButton(
                         onPressed: () => context.push('/payment'),
-                        style: AppButtonStyles.elevatedPrimary(),
+                        style: AppButtonStyles.elevatedSuccess(),
                         child: Text(t.reupload),
                       ),
                     ),
@@ -263,7 +263,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
                       height: AppSizes.buttonHeightPrimary,
                       child: ElevatedButton(
                         onPressed: () => _openReviewSheet(dekont),
-                        style: AppButtonStyles.elevatedPrimary(),
+                        style: AppButtonStyles.elevatedInfo(),
                         child: Text('${t.approve} / ${t.reject}'),
                       ),
                     ),
@@ -373,12 +373,7 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
                       onPressed: _submitting
                           ? null
                           : () => _submit(DekontReviewDecision.reject),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.error,
-                        minimumSize: const Size.fromHeight(
-                          AppSizes.buttonHeightSecondary,
-                        ),
-                      ),
+                      style: AppButtonStyles.outlinedDanger(),
                       child: Text(t.reject),
                     ),
                   ),
@@ -388,7 +383,7 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
                       onPressed: _submitting
                           ? null
                           : () => _submit(DekontReviewDecision.approve),
-                      style: AppButtonStyles.elevatedPrimary(),
+                      style: AppButtonStyles.elevatedSuccess(),
                       child: _submitting
                           ? const SizedBox(
                               width: 22,

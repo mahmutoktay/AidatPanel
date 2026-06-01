@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/utils/upload_file_utils.dart';
 import '../models/dekont_model.dart';
 
 abstract class DekontRemoteDataSource {
@@ -62,8 +63,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
     required String filePath,
     String? dueId,
   }) async {
-    final segments = filePath.replaceAll('\\', '/').split('/');
-    final fileName = segments.isNotEmpty ? segments.last : 'dekont.pdf';
+    final fileName = UploadFileUtils.safeFileName(filePath, fallback: 'dekont.pdf');
     final form = FormData.fromMap({
       'file': await MultipartFile.fromFile(filePath, filename: fileName),
       'dueId': ?dueId,

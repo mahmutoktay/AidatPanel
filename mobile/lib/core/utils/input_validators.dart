@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
+
 /// Input validation utilities for AidatPanel forms
 /// Provides comprehensive validation with Turkish error messages
 class InputValidators {
@@ -243,15 +245,15 @@ class InputValidators {
     switch (strength) {
       case 0:
       case 1:
-        return Colors.red;
+        return AppColors.textDisabled;
       case 2:
       case 3:
-        return Colors.orange;
+        return AppColors.textSecondary;
       case 4:
       case 5:
-        return Colors.green;
+        return AppColors.textPrimary;
       default:
-        return Colors.grey;
+        return AppColors.textDisabled;
     }
   }
 }

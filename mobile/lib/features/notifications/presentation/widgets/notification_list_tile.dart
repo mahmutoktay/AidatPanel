@@ -29,113 +29,136 @@ class NotificationListTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.spacingS),
       child: Material(
-        color: n.isRead
-            ? AppColors.surface
-            : AppColors.primary.withValues(alpha: 0.04),
-        elevation: n.isRead ? 0 : 1,
-        shadowColor: AppColors.primary.withValues(alpha: 0.12),
+        color: AppColors.surface,
+        elevation: n.isRead ? 0 : 2,
+        shadowColor: AppColors.textPrimary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-          child: Container(
+          child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppSizes.cardRadius),
               border: Border.all(
                 color: n.isRead
                     ? AppColors.border
-                    : AppColors.primary.withValues(alpha: 0.22),
+                    : visual.color.withValues(alpha: 0.45),
+                width: n.isRead ? AppSizes.cardBorderWidth : 1.5,
               ),
             ),
-            padding: const EdgeInsets.all(AppSizes.spacingM),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: visual.background,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(visual.icon, color: visual.color, size: 24),
-                ),
-                const SizedBox(width: AppSizes.spacingM),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!n.isRead)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSizes.spacingS,
+                        ),
+                        child: Container(
+                          width: 4,
+                          decoration: BoxDecoration(
+                            color: visual.color,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                      ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSizes.spacingM),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              n.title,
-                              style: AppTypography.body1.copyWith(
-                                fontWeight:
-                                    n.isRead ? FontWeight.w600 : FontWeight.w800,
-                                color: AppColors.textPrimary,
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: visual.background,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: visual.color.withValues(alpha: 0.2),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            ),
+                            child: Icon(
+                              visual.icon,
+                              color: visual.color,
+                              size: 24,
                             ),
                           ),
-                          if (!n.isRead)
-                            Container(
-                              width: 10,
-                              height: 10,
-                              margin: const EdgeInsets.only(left: 8),
-                              decoration: const BoxDecoration(
-                                color: AppColors.primary,
-                                shape: BoxShape.circle,
-                              ),
+                          const SizedBox(width: AppSizes.spacingM),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  n.title,
+                                  style: AppTypography.bodyLarge.copyWith(
+                                    fontWeight: n.isRead
+                                        ? FontWeight.w600
+                                        : FontWeight.w800,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: visual.background,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: visual.color.withValues(alpha: 0.25),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    n.type.label(context),
+                                    style: AppTypography.caption.copyWith(
+                                      color: visual.color,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: AppSizes.spacingXS),
+                                Text(
+                                  n.body,
+                                  style: AppTypography.body1.copyWith(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.4,
+                                  ),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: AppSizes.spacingXS),
+                                Text(
+                                  dateStr,
+                                  style: AppTypography.caption.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
+                          ),
+                          const SizedBox(width: AppSizes.spacingS),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: AppColors.textSecondary,
+                            size: 22,
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: visual.background,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          n.type.label(context),
-                          style: AppTypography.caption.copyWith(
-                            color: visual.color,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppSizes.spacingXS),
-                      Text(
-                        n.body,
-                        style: AppTypography.body2.copyWith(
-                          color: AppColors.textSecondary,
-                          height: 1.35,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppSizes.spacingXS),
-                      Text(
-                        dateStr,
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.textDisabled,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
+                  ],
                 ),
-                const SizedBox(width: AppSizes.spacingS),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: AppColors.textDisabled,
-                  size: 22,
-                ),
-              ],
+              ),
             ),
           ),
         ),

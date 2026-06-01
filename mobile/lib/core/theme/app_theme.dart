@@ -11,18 +11,23 @@ class AppTheme {
       brightness: Brightness.light,
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.surface,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
-        secondary: AppColors.accent,
+        onPrimary: Colors.white,
+        secondary: AppColors.textSecondary,
         error: AppColors.error,
         surface: AppColors.surface,
+        onSurface: AppColors.textPrimary,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        titleTextStyle: AppTypography.h3.copyWith(color: Colors.white),
+        titleTextStyle: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: AppButtonStyles.elevatedPrimary(fullWidth: true),
@@ -36,7 +41,7 @@ class AppTheme {
             AppSizes.buttonHeightSecondary,
           ),
           shape: AppButtonStyles.shape,
-          textStyle: AppTypography.button,
+          textStyle: AppTypography.button.copyWith(color: Colors.white),
           elevation: 0,
         ),
       ),
@@ -64,11 +69,11 @@ class AppTheme {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: AppColors.cardBorderSide,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: AppColors.cardBorderSide,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.inputRadius),
@@ -76,7 +81,7 @@ class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-          borderSide: const BorderSide(color: AppColors.error),
+          borderSide: const BorderSide(color: AppColors.primary),
         ),
         hintStyle: AppTypography.body1.copyWith(color: AppColors.textDisabled),
         labelStyle: AppTypography.label.copyWith(
@@ -94,7 +99,7 @@ class AppTheme {
         ),
         labelLarge: AppTypography.label.copyWith(color: AppColors.textPrimary),
       ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surface,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textDisabled,
@@ -103,16 +108,16 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.surface,
-        indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+        indicatorColor: AppColors.fill,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return IconThemeData(
+            return const IconThemeData(
               color: AppColors.primary,
               size: AppSizes.iconSize,
             );
           }
-          return IconThemeData(
+          return const IconThemeData(
             color: AppColors.textDisabled,
             size: AppSizes.iconSize,
           );

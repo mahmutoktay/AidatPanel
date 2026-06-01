@@ -30,7 +30,7 @@ class InviteSelectableTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderColor),
+        border: AppColors.cardBorder,
       ),
       child: Material(
         color: Colors.transparent,

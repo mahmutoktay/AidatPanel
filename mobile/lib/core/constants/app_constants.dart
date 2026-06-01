@@ -11,6 +11,8 @@ class AppConstants {
   static const String userKey = 'user';
   static const String languageKey = 'language';
   static const String fcmTokenKey = 'fcm_token';
+  /// userId → fotoğraf referansı (çıkışta silinmez; backend yokken yerel).
+  static const String profilePhotosKey = 'profile_photos_v1';
 
   // Timeouts
   static const Duration apiTimeout = Duration(seconds: 30);

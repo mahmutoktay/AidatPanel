@@ -1,7 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-
+import '../../../../core/notifications/notification_navigation.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -22,22 +23,40 @@ class NotificationsScreen extends ConsumerStatefulWidget {
       _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
+class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
+    with WidgetsBindingObserver {
+  static const _pollInterval = Duration(seconds: 10);
+
   final _scrollController = ScrollController();
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _scrollController.addListener(_onScroll);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(notificationsNotifierProvider.notifier).load(refresh: true);
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reload());
+    _pollTimer = Timer.periodic(_pollInterval, (_) => _reload());
   }
 
   @override
   void dispose() {
+    _pollTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _reload();
+    }
+  }
+
+  Future<void> _reload() async {
+    if (!mounted) return;
+    await ref.read(notificationsNotifierProvider.notifier).load(refresh: true);
   }
 
   void _onScroll() {
@@ -71,7 +90,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       context,
       notification: shown,
       onMarkRead: () {},
-      onNavigate: path != null ? () => context.push(path) : null,
+      onNavigate: path != null
+          ? () => navigateFromNotificationPath(context, ref, path)
+          : null,
     );
   }
 
@@ -82,10 +103,22 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final locale = Localizations.localeOf(context).toString();
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.fill,
       appBar: AppBar(
-        title: Text(context.t.common.notifications),
+        title: Text(
+          context.t.common.notifications,
+          style: AppTypography.h3.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         centerTitle: true,
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: AppColors.border),
+        ),
         actions: [
           if (state.unreadCount > 0)
             IconButton(
@@ -93,15 +126,14 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               onPressed: state.isLoading
                   ? null
                   : () => ref
-                      .read(notificationsNotifierProvider.notifier)
-                      .markAllRead(),
+                        .read(notificationsNotifierProvider.notifier)
+                        .markAllRead(),
               icon: const Icon(Icons.done_all_rounded),
             ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () =>
-            ref.read(notificationsNotifierProvider.notifier).load(refresh: true),
+        onRefresh: _reload,
         color: AppColors.primary,
         child: _buildBody(context, state, locale),
       ),
@@ -186,30 +218,25 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                 vertical: AppSizes.spacingS,
               ),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primary.withValues(alpha: 0.12),
-                    AppColors.primaryLight.withValues(alpha: 0.06),
-                  ],
-                ),
+                color: AppColors.infoBg,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.15),
+                  color: AppColors.info.withValues(alpha: 0.35),
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.mark_email_unread_rounded,
-                    color: AppColors.primary,
+                    color: AppColors.info,
                     size: 22,
                   ),
                   const SizedBox(width: AppSizes.spacingS),
                   Expanded(
                     child: Text(
                       '${state.unreadCount} ${t.unreadBadge.toLowerCase()}',
-                      style: AppTypography.body2.copyWith(
-                        color: AppColors.primary,
+                      style: AppTypography.body1.copyWith(
+                        color: AppColors.textPrimary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/utils/upload_file_utils.dart';
 import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -45,12 +46,39 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: const ['pdf', 'jpg', 'jpeg', 'png'],
+      allowedExtensions: UploadFileUtils.allowedExtensions.toList(),
     );
     if (result == null || result.files.isEmpty) return;
     final path = result.files.single.path;
     if (path == null) return;
+    if (!mounted) return;
+
+    final t = context.t.features.dekont;
+    final validationError = UploadFileUtils.validateReceiptFile(path);
+    if (validationError != null) {
+      ref.read(toastProvider.notifier).show(
+            _uploadValidationMessage(t, validationError),
+            type: ToastType.error,
+          );
+      return;
+    }
+
     ref.read(makePaymentNotifierProvider.notifier).setPickedFile(path);
+  }
+
+  String _uploadValidationMessage(dynamic t, String key) {
+    switch (key) {
+      case 'fileTooLarge':
+        return t.fileTooLarge;
+      case 'fileEmpty':
+        return t.fileEmpty;
+      case 'fileNotFound':
+        return t.fileNotFound;
+      case 'invalidExtension':
+        return t.invalidExtension;
+      default:
+        return t.uploadFailed;
+    }
   }
 
   Future<void> _upload() async {
@@ -247,7 +275,7 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
                                 paymentState.pickedFilePath == null
                             ? null
                             : _upload,
-                        style: AppButtonStyles.elevatedPrimary(),
+                        style: AppButtonStyles.elevatedSuccess(),
                         child: busy
                             ? Row(
                                 mainAxisAlignment: MainAxisAlignment.center,

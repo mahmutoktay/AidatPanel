@@ -51,9 +51,7 @@ class AppDateField extends StatelessWidget {
             decoration: BoxDecoration(
               color: enabled ? AppColors.surface : AppColors.background,
               borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-              border: Border.all(
-                color: enabled ? AppColors.border : AppColors.borderColor,
-              ),
+              border: AppColors.cardBorder,
             ),
             child: Row(
               children: [

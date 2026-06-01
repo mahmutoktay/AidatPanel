@@ -265,7 +265,7 @@ class MockNotificationDataSource implements NotificationDataSource {
     }
     return NotificationListResult(
       items: items,
-      unreadCount: items.where((n) => !n.isRead).length,
+      unreadCount: _items.where((n) => !n.isRead).length,
     );
   }
 

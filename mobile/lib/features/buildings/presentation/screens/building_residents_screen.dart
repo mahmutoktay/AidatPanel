@@ -463,9 +463,7 @@ class _BuildingResidentsScreenState
           decoration: BoxDecoration(
             color: AppColors.primary.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.18),
-            ),
+            border: AppColors.cardBorder,
           ),
           child: Text(
             '$residentsCount ${context.t.common.apartmentsBadge}',
@@ -494,7 +492,7 @@ class _BuildingResidentsScreenState
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.borderColor),
+        border: AppColors.cardBorder,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -503,18 +501,9 @@ class _BuildingResidentsScreenState
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.primary.withValues(alpha: 0.18),
-                  AppColors.primaryLight.withValues(alpha: 0.12),
-                ],
-              ),
+              color: AppColors.fill,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.18),
-              ),
+              border: AppColors.cardBorder,
             ),
             alignment: Alignment.center,
             child: const Icon(
@@ -1102,16 +1091,9 @@ class _BuildingResidentsScreenState
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary.withValues(alpha: 0.06),
-            AppColors.primaryLight.withValues(alpha: 0.04),
-          ],
-        ),
+        color: AppColors.fill,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.10)),
+        border: AppColors.cardBorder,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1120,26 +1102,9 @@ class _BuildingResidentsScreenState
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isOccupied
-                    ? [
-                        AppColors.primary.withValues(alpha: 0.18),
-                        AppColors.primaryLight.withValues(alpha: 0.12),
-                      ]
-                    : [
-                        AppColors.borderColor.withValues(alpha: 0.6),
-                        AppColors.borderColor.withValues(alpha: 0.3),
-                      ],
-              ),
+              color: isOccupied ? AppColors.fill : AppColors.surface,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: isOccupied
-                    ? AppColors.primary.withValues(alpha: 0.18)
-                    : AppColors.borderColor,
-                width: 1.5,
-              ),
+              border: AppColors.cardBorder,
             ),
             alignment: Alignment.center,
             child: isOccupied && resident != null
@@ -1185,7 +1150,7 @@ class _BuildingResidentsScreenState
                       decoration: BoxDecoration(
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.borderColor),
+                        border: AppColors.cardBorder,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -1262,27 +1227,23 @@ class _BuildingResidentsScreenState
         icon: Icons.receipt_long_outlined,
         label: context.t.common.monthlyDues,
         value: '₺${apt.monthlyDues.toStringAsFixed(0)}',
-        tint: AppColors.primary,
       ),
       _SheetStatTile(
         icon: Icons.account_balance_wallet_outlined,
         label: context.t.common.balance,
         value: '₺${apt.balance.toStringAsFixed(0)}',
-        tint: apt.balance > 0 ? AppColors.error : AppColors.success,
       ),
       if (apt.lastPaymentDate != null)
         _SheetStatTile(
           icon: Icons.event_available_outlined,
           label: context.t.common.lastPayment,
           value: _formatShortDate(apt.lastPaymentDate!),
-          tint: AppColors.info,
         )
       else
         _SheetStatTile(
           icon: Icons.event_busy_outlined,
           label: context.t.common.lastPayment,
           value: '—',
-          tint: AppColors.textSecondary,
         ),
     ];
 
@@ -1309,7 +1270,7 @@ class _BuildingResidentsScreenState
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.borderColor),
+        border: AppColors.cardBorder,
       ),
       child: Column(
         children: [
@@ -1352,7 +1313,7 @@ class _BuildingResidentsScreenState
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderColor),
+        border: AppColors.cardBorder,
       ),
       child: Column(
         children: [
@@ -1415,13 +1376,11 @@ class _SheetStatTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  final Color tint;
 
   const _SheetStatTile({
     required this.icon,
     required this.label,
     required this.value,
-    required this.tint,
   });
 
   @override
@@ -1429,9 +1388,9 @@ class _SheetStatTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingS),
       decoration: BoxDecoration(
-        color: tint.withValues(alpha: 0.06),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: tint.withValues(alpha: 0.18)),
+        border: AppColors.cardBorder,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1441,11 +1400,12 @@ class _SheetStatTile extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: tint.withValues(alpha: 0.14),
+              color: AppColors.fill,
               borderRadius: BorderRadius.circular(10),
+              border: AppColors.cardBorder,
             ),
             alignment: Alignment.center,
-            child: Icon(icon, size: 18, color: tint),
+            child: Icon(icon, size: 18, color: AppColors.textPrimary),
           ),
           const SizedBox(height: AppSizes.spacingS),
           Text(

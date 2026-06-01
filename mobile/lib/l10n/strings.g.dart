@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 1192 (596 per locale)
+/// Strings: 1230 (615 per locale)
 ///
-/// Built on 2026-05-29 at 16:42 UTC
+/// Built on 2026-06-01 at 13:47 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -177,6 +177,7 @@ class _StringsCommonEn {
 	String get logoutConfirm => 'Are you sure you want to logout?';
 	String get logoutSuccess => 'Signed out successfully.';
 	String get account => 'Account';
+	String get editProfile => 'Edit Profile';
 	String get changePassword => 'Change Password';
 	String get language => 'Language';
 	String get turkish => 'Turkish';
@@ -317,6 +318,8 @@ class _StringsCommonEn {
 	String get allYears => 'All years';
 	String get note => 'Note';
 	String get myDuesHistory => 'My Dues History';
+	String get currentPeriodDue => 'Current due';
+	String get myPastDues => 'My past dues';
 	String get buildingDues => 'Building Dues';
 	String get noDuesYet => 'No dues records yet';
 	String get duesUpdated => 'Dues status updated';
@@ -466,6 +469,7 @@ class _StringsFeaturesEn {
 	late final _StringsFeaturesDekontEn dekont = _StringsFeaturesDekontEn._(_root);
 	late final _StringsFeaturesExpensesEn expenses = _StringsFeaturesExpensesEn._(_root);
 	late final _StringsFeaturesNotificationsEn notifications = _StringsFeaturesNotificationsEn._(_root);
+	late final _StringsFeaturesProfileEn profile = _StringsFeaturesProfileEn._(_root);
 	late final _StringsFeaturesFaz2En faz2 = _StringsFeaturesFaz2En._(_root);
 }
 
@@ -657,6 +661,7 @@ class _StringsFeaturesDekontEn {
 	String get makePaymentTitle => 'Make Payment';
 	String get myDekontsTitle => 'My Receipts';
 	String get managerTitle => 'Receipt Review';
+	String get reviewAction => 'Review receipt';
 	String get detailTitle => 'Receipt Detail';
 	String get paymentInfoTitle => 'Transfer details';
 	String get collectionNotConfigured => 'Your manager has not set up collection IBAN yet. You can still upload a receipt.';
@@ -674,6 +679,10 @@ class _StringsFeaturesDekontEn {
 	String get upload => 'Upload receipt';
 	String get uploadSuccess => 'Receipt uploaded';
 	String get uploadFailed => 'Upload failed';
+	String get fileTooLarge => 'File must be 10 MB or smaller';
+	String get fileEmpty => 'The selected file is empty';
+	String get fileNotFound => 'File not found';
+	String get invalidExtension => 'Only PDF, JPEG, or PNG files are allowed';
 	String get processing => 'Processing receipt…';
 	String get viewDekonts => 'My receipts';
 	String get emptyTitle => 'No receipts yet';
@@ -799,6 +808,26 @@ class _StringsFeaturesNotificationsEn {
 	String get titleTooLong => 'Title must be at most 120 characters';
 	String get bodyTooLong => 'Message must be at most 2000 characters';
 	String get noBuilding => 'Add a building first';
+}
+
+// Path: features.profile
+class _StringsFeaturesProfileEn {
+	_StringsFeaturesProfileEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get title => 'Profile Details';
+	String get fullName => 'Full name';
+	String get email => 'Email';
+	String get phone => 'Phone';
+	String get role => 'Role';
+	String get languagePref => 'Language preference';
+	String get notProvided => 'Not provided';
+	String get editHint => 'Profile editing will be available soon.';
+	String get photoSaved => 'Profile photo saved for this account.';
+	String get photoRemoved => 'Profile photo removed.';
+	String get removePhoto => 'Remove profile photo';
 }
 
 // Path: features.faz2
@@ -929,6 +958,7 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get logoutConfirm => 'Çıkış yapmak istediğinize emin misiniz?';
 	@override String get logoutSuccess => 'Başarıyla çıkış yaptınız.';
 	@override String get account => 'Hesap';
+	@override String get editProfile => 'Profili Düzenle';
 	@override String get changePassword => 'Şifre Değiştir';
 	@override String get language => 'Dil';
 	@override String get turkish => 'Türkçe';
@@ -1069,6 +1099,8 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get allYears => 'Tüm yıllar';
 	@override String get note => 'Not';
 	@override String get myDuesHistory => 'Aidat Geçmişim';
+	@override String get currentPeriodDue => 'Güncel aidat';
+	@override String get myPastDues => 'Geçmiş aidatlarım';
 	@override String get buildingDues => 'Bina Aidatları';
 	@override String get noDuesYet => 'Henüz aidat kaydı yok';
 	@override String get duesUpdated => 'Aidat durumu güncellendi';
@@ -1218,6 +1250,7 @@ class _StringsFeaturesTr implements _StringsFeaturesEn {
 	@override late final _StringsFeaturesDekontTr dekont = _StringsFeaturesDekontTr._(_root);
 	@override late final _StringsFeaturesExpensesTr expenses = _StringsFeaturesExpensesTr._(_root);
 	@override late final _StringsFeaturesNotificationsTr notifications = _StringsFeaturesNotificationsTr._(_root);
+	@override late final _StringsFeaturesProfileTr profile = _StringsFeaturesProfileTr._(_root);
 	@override late final _StringsFeaturesFaz2Tr faz2 = _StringsFeaturesFaz2Tr._(_root);
 }
 
@@ -1409,6 +1442,7 @@ class _StringsFeaturesDekontTr implements _StringsFeaturesDekontEn {
 	@override String get makePaymentTitle => 'Ödeme Yap';
 	@override String get myDekontsTitle => 'Dekontlarım';
 	@override String get managerTitle => 'Dekont İnceleme';
+	@override String get reviewAction => 'Dekont İncele';
 	@override String get detailTitle => 'Dekont Detayı';
 	@override String get paymentInfoTitle => 'Havale bilgileri';
 	@override String get collectionNotConfigured => 'Yöneticiniz henüz tahsilat IBAN bilgisini tanımlamadı. Yine de dekont yükleyebilirsiniz.';
@@ -1426,6 +1460,10 @@ class _StringsFeaturesDekontTr implements _StringsFeaturesDekontEn {
 	@override String get upload => 'Dekontu yükle';
 	@override String get uploadSuccess => 'Dekont yüklendi';
 	@override String get uploadFailed => 'Dekont yüklenemedi';
+	@override String get fileTooLarge => 'Dosya en fazla 10 MB olabilir';
+	@override String get fileEmpty => 'Seçilen dosya boş';
+	@override String get fileNotFound => 'Dosya bulunamadı';
+	@override String get invalidExtension => 'Yalnızca PDF, JPEG veya PNG yükleyebilirsiniz';
 	@override String get processing => 'Dekont işleniyor…';
 	@override String get viewDekonts => 'Dekontlarım';
 	@override String get emptyTitle => 'Henüz dekont yok';
@@ -1553,6 +1591,26 @@ class _StringsFeaturesNotificationsTr implements _StringsFeaturesNotificationsEn
 	@override String get noBuilding => 'Önce bir bina ekleyin';
 }
 
+// Path: features.profile
+class _StringsFeaturesProfileTr implements _StringsFeaturesProfileEn {
+	_StringsFeaturesProfileTr._(this._root);
+
+	@override final _StringsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Profil Bilgileri';
+	@override String get fullName => 'Ad Soyad';
+	@override String get email => 'E-posta';
+	@override String get phone => 'Telefon';
+	@override String get role => 'Rol';
+	@override String get languagePref => 'Dil tercihi';
+	@override String get notProvided => 'Belirtilmemiş';
+	@override String get editHint => 'Profil düzenleme yakında eklenecek.';
+	@override String get photoSaved => 'Profil fotoğrafı bu hesap için kaydedildi.';
+	@override String get photoRemoved => 'Profil fotoğrafı kaldırıldı.';
+	@override String get removePhoto => 'Profil fotoğrafını kaldır';
+}
+
 // Path: features.faz2
 class _StringsFeaturesFaz2Tr implements _StringsFeaturesFaz2En {
 	_StringsFeaturesFaz2Tr._(this._root);
@@ -1650,6 +1708,7 @@ extension on Translations {
 			case 'common.logoutConfirm': return 'Are you sure you want to logout?';
 			case 'common.logoutSuccess': return 'Signed out successfully.';
 			case 'common.account': return 'Account';
+			case 'common.editProfile': return 'Edit Profile';
 			case 'common.changePassword': return 'Change Password';
 			case 'common.language': return 'Language';
 			case 'common.turkish': return 'Turkish';
@@ -1790,6 +1849,8 @@ extension on Translations {
 			case 'common.allYears': return 'All years';
 			case 'common.note': return 'Note';
 			case 'common.myDuesHistory': return 'My Dues History';
+			case 'common.currentPeriodDue': return 'Current due';
+			case 'common.myPastDues': return 'My past dues';
 			case 'common.buildingDues': return 'Building Dues';
 			case 'common.noDuesYet': return 'No dues records yet';
 			case 'common.duesUpdated': return 'Dues status updated';
@@ -2097,6 +2158,7 @@ extension on Translations {
 			case 'features.dekont.makePaymentTitle': return 'Make Payment';
 			case 'features.dekont.myDekontsTitle': return 'My Receipts';
 			case 'features.dekont.managerTitle': return 'Receipt Review';
+			case 'features.dekont.reviewAction': return 'Review receipt';
 			case 'features.dekont.detailTitle': return 'Receipt Detail';
 			case 'features.dekont.paymentInfoTitle': return 'Transfer details';
 			case 'features.dekont.collectionNotConfigured': return 'Your manager has not set up collection IBAN yet. You can still upload a receipt.';
@@ -2114,6 +2176,10 @@ extension on Translations {
 			case 'features.dekont.upload': return 'Upload receipt';
 			case 'features.dekont.uploadSuccess': return 'Receipt uploaded';
 			case 'features.dekont.uploadFailed': return 'Upload failed';
+			case 'features.dekont.fileTooLarge': return 'File must be 10 MB or smaller';
+			case 'features.dekont.fileEmpty': return 'The selected file is empty';
+			case 'features.dekont.fileNotFound': return 'File not found';
+			case 'features.dekont.invalidExtension': return 'Only PDF, JPEG, or PNG files are allowed';
 			case 'features.dekont.processing': return 'Processing receipt…';
 			case 'features.dekont.viewDekonts': return 'My receipts';
 			case 'features.dekont.emptyTitle': return 'No receipts yet';
@@ -2221,6 +2287,17 @@ extension on Translations {
 			case 'features.notifications.titleTooLong': return 'Title must be at most 120 characters';
 			case 'features.notifications.bodyTooLong': return 'Message must be at most 2000 characters';
 			case 'features.notifications.noBuilding': return 'Add a building first';
+			case 'features.profile.title': return 'Profile Details';
+			case 'features.profile.fullName': return 'Full name';
+			case 'features.profile.email': return 'Email';
+			case 'features.profile.phone': return 'Phone';
+			case 'features.profile.role': return 'Role';
+			case 'features.profile.languagePref': return 'Language preference';
+			case 'features.profile.notProvided': return 'Not provided';
+			case 'features.profile.editHint': return 'Profile editing will be available soon.';
+			case 'features.profile.photoSaved': return 'Profile photo saved for this account.';
+			case 'features.profile.photoRemoved': return 'Profile photo removed.';
+			case 'features.profile.removePhoto': return 'Remove profile photo';
 			case 'features.faz2.sectionTitle': return 'Phase 2';
 			case 'features.faz2.tickets': return 'Requests';
 			case 'features.faz2.expenses': return 'Expenses';
@@ -2254,6 +2331,7 @@ extension on _StringsTr {
 			case 'common.logoutConfirm': return 'Çıkış yapmak istediğinize emin misiniz?';
 			case 'common.logoutSuccess': return 'Başarıyla çıkış yaptınız.';
 			case 'common.account': return 'Hesap';
+			case 'common.editProfile': return 'Profili Düzenle';
 			case 'common.changePassword': return 'Şifre Değiştir';
 			case 'common.language': return 'Dil';
 			case 'common.turkish': return 'Türkçe';
@@ -2394,6 +2472,8 @@ extension on _StringsTr {
 			case 'common.allYears': return 'Tüm yıllar';
 			case 'common.note': return 'Not';
 			case 'common.myDuesHistory': return 'Aidat Geçmişim';
+			case 'common.currentPeriodDue': return 'Güncel aidat';
+			case 'common.myPastDues': return 'Geçmiş aidatlarım';
 			case 'common.buildingDues': return 'Bina Aidatları';
 			case 'common.noDuesYet': return 'Henüz aidat kaydı yok';
 			case 'common.duesUpdated': return 'Aidat durumu güncellendi';
@@ -2701,6 +2781,7 @@ extension on _StringsTr {
 			case 'features.dekont.makePaymentTitle': return 'Ödeme Yap';
 			case 'features.dekont.myDekontsTitle': return 'Dekontlarım';
 			case 'features.dekont.managerTitle': return 'Dekont İnceleme';
+			case 'features.dekont.reviewAction': return 'Dekont İncele';
 			case 'features.dekont.detailTitle': return 'Dekont Detayı';
 			case 'features.dekont.paymentInfoTitle': return 'Havale bilgileri';
 			case 'features.dekont.collectionNotConfigured': return 'Yöneticiniz henüz tahsilat IBAN bilgisini tanımlamadı. Yine de dekont yükleyebilirsiniz.';
@@ -2718,6 +2799,10 @@ extension on _StringsTr {
 			case 'features.dekont.upload': return 'Dekontu yükle';
 			case 'features.dekont.uploadSuccess': return 'Dekont yüklendi';
 			case 'features.dekont.uploadFailed': return 'Dekont yüklenemedi';
+			case 'features.dekont.fileTooLarge': return 'Dosya en fazla 10 MB olabilir';
+			case 'features.dekont.fileEmpty': return 'Seçilen dosya boş';
+			case 'features.dekont.fileNotFound': return 'Dosya bulunamadı';
+			case 'features.dekont.invalidExtension': return 'Yalnızca PDF, JPEG veya PNG yükleyebilirsiniz';
 			case 'features.dekont.processing': return 'Dekont işleniyor…';
 			case 'features.dekont.viewDekonts': return 'Dekontlarım';
 			case 'features.dekont.emptyTitle': return 'Henüz dekont yok';
@@ -2825,6 +2910,17 @@ extension on _StringsTr {
 			case 'features.notifications.titleTooLong': return 'Başlık en fazla 120 karakter olabilir';
 			case 'features.notifications.bodyTooLong': return 'Mesaj en fazla 2000 karakter olabilir';
 			case 'features.notifications.noBuilding': return 'Önce bir bina ekleyin';
+			case 'features.profile.title': return 'Profil Bilgileri';
+			case 'features.profile.fullName': return 'Ad Soyad';
+			case 'features.profile.email': return 'E-posta';
+			case 'features.profile.phone': return 'Telefon';
+			case 'features.profile.role': return 'Rol';
+			case 'features.profile.languagePref': return 'Dil tercihi';
+			case 'features.profile.notProvided': return 'Belirtilmemiş';
+			case 'features.profile.editHint': return 'Profil düzenleme yakında eklenecek.';
+			case 'features.profile.photoSaved': return 'Profil fotoğrafı bu hesap için kaydedildi.';
+			case 'features.profile.photoRemoved': return 'Profil fotoğrafı kaldırıldı.';
+			case 'features.profile.removePhoto': return 'Profil fotoğrafını kaldır';
 			case 'features.faz2.sectionTitle': return 'Faz 2';
 			case 'features.faz2.tickets': return 'Talepler';
 			case 'features.faz2.expenses': return 'Giderler';

@@ -130,7 +130,7 @@ class _DeleteApartmentDialogState extends ConsumerState<DeleteApartmentDialog> {
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-              border: Border.all(color: AppColors.borderColor),
+              border: AppColors.cardBorder,
             ),
             child: Row(
               children: [
@@ -159,7 +159,7 @@ class _DeleteApartmentDialogState extends ConsumerState<DeleteApartmentDialog> {
           onPressed: _deleting ? null : () => Navigator.of(context).pop(false),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textPrimary,
-            side: const BorderSide(color: AppColors.borderColor, width: 1.5),
+            side: AppColors.cardBorderSide,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),

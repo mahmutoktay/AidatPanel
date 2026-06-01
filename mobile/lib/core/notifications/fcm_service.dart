@@ -5,7 +5,9 @@ import '../network/api_exception.dart';
 import '../storage/secure_storage.dart';
 import 'fcm_platform.dart';
 import 'fcm_token_remote_datasource.dart';
+import 'local_notification_service.dart';
 import 'notification_payload.dart';
+import 'notification_permissions.dart';
 
 typedef FcmNavigationHandler = void Function(NotificationPayload payload);
 
@@ -32,10 +34,16 @@ class FcmService {
     if (_listenersAttached) return;
     _listenersAttached = true;
 
-    FirebaseMessaging.onMessage.listen((message) {
+    FirebaseMessaging.onMessage.listen((message) async {
       if (kDebugMode) {
-        debugPrint('[FCM foreground] ${message.notification?.title}');
+        debugPrint(
+          '[FCM foreground] ${message.notification?.title ?? message.data['title']}',
+        );
       }
+      await LocalNotificationService.instance.showFromRemoteMessage(
+        message,
+        forceShow: true,
+      );
       onForegroundMessage?.call(message);
     });
 
@@ -61,15 +69,7 @@ class FcmService {
 
   Future<void> requestPermissions() async {
     if (!isFcmSupported) return;
-
-    final settings = await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-    if (kDebugMode) {
-      debugPrint('[FCM] izin durumu: ${settings.authorizationStatus}');
-    }
+    await requestNotificationPermissions(messaging: _messaging);
   }
 
   /// Oturum açıkken token alır ve backend'e yükler.

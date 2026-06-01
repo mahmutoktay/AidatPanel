@@ -223,16 +223,9 @@ class _TicketHeaderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            statusColor.withValues(alpha: 0.14),
-            AppColors.surface,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: statusColor.withValues(alpha: 0.25)),
+        border: AppColors.cardBorder,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,7 +280,7 @@ class _TicketHeaderCard extends StatelessWidget {
       case TicketStatus.open:
         return AppColors.warning;
       case TicketStatus.inProgress:
-        return AppColors.primary;
+        return AppColors.info;
       case TicketStatus.resolved:
         return AppColors.success;
       case TicketStatus.closed:
@@ -309,7 +302,7 @@ class _SurfaceSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.border),
+        border: AppColors.cardBorder,
       ),
       child: child,
     );
@@ -389,7 +382,7 @@ class _TimelineEntry extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
+                  border: AppColors.cardBorder,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -520,7 +513,7 @@ class _ManagerActions extends StatelessWidget {
                   : const Icon(Icons.note_add_outlined),
               label: Text(t.addNote),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.info,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),

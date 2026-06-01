@@ -37,7 +37,7 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
       backgroundColor: AppColors.surface,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openCreate(context),
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.info,
         icon: const Icon(Icons.add, color: Colors.white),
         label: Text(
           t.newTicket,

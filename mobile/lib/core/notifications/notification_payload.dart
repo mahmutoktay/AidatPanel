@@ -6,6 +6,7 @@ class NotificationPayload {
   final String? notificationId;
   final String? ticketId;
   final String? dekontId;
+  final String? dueId;
   final String? buildingId;
   final String? status;
   final String? route;
@@ -15,6 +16,7 @@ class NotificationPayload {
     this.notificationId,
     this.ticketId,
     this.dekontId,
+    this.dueId,
     this.buildingId,
     this.status,
     this.route,
@@ -32,10 +34,26 @@ class NotificationPayload {
       notificationId: str(data['notificationId']),
       ticketId: str(data['ticketId']),
       dekontId: str(data['dekontId']),
+      dueId: str(data['dueId']),
       buildingId: str(data['buildingId']),
       status: str(data['status']),
       route: str(data['route']),
     );
+  }
+
+  String _dashboardPath({
+    required String basePath,
+    required String tab,
+    UserRole? role,
+  }) {
+    final q = <String, String>{'tab': tab};
+    if (dueId != null && dueId!.isNotEmpty) q['dueId'] = dueId!;
+    if (role == UserRole.manager &&
+        buildingId != null &&
+        buildingId!.isNotEmpty) {
+      q['buildingId'] = buildingId!;
+    }
+    return Uri(path: basePath, queryParameters: q).toString();
   }
 
   /// GoRouter yolu; rol ve `type` ile backend deep link matrisine uyumlu.
@@ -65,7 +83,18 @@ class NotificationPayload {
         return route ?? '/notifications';
       case 'DUE_PAID':
       case 'DUE_REMINDER':
-        return route ?? '/resident-dashboard';
+        if (role == UserRole.manager) {
+          return _dashboardPath(
+            basePath: '/manager-dashboard',
+            tab: 'dues',
+            role: role,
+          );
+        }
+        return _dashboardPath(
+          basePath: '/resident-dashboard',
+          tab: 'dues',
+          role: role,
+        );
       default:
         if (normalized == 'SYSTEM' && did != null) {
           return '/dekonts/$did';

@@ -64,12 +64,12 @@ class FriendlyErrorScreen extends StatelessWidget {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: AppColors.errorBg,
+                  color: AppColors.fill,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   copy.icon,
-                  color: AppColors.error,
+                  color: AppColors.textPrimary,
                   size: 44,
                 ),
               ),
@@ -96,8 +96,9 @@ class FriendlyErrorScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSizes.spacingM),
                   decoration: BoxDecoration(
-                    color: AppColors.errorBg,
+                    color: AppColors.fill,
                     borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+                    border: AppColors.cardBorder,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,7 +106,7 @@ class FriendlyErrorScreen extends StatelessWidget {
                       Text(
                         'Sadece geliştirici görür (debug):',
                         style: AppTypography.caption.copyWith(
-                          color: AppColors.error,
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -113,7 +114,7 @@ class FriendlyErrorScreen extends StatelessWidget {
                       Text(
                         details.exceptionAsString(),
                         style: AppTypography.caption.copyWith(
-                          color: AppColors.error,
+                          color: AppColors.textPrimary,
                           fontFamily: 'monospace',
                         ),
                         maxLines: 6,

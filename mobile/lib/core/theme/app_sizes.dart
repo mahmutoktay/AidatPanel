@@ -23,6 +23,8 @@ class AppSizes {
 
   // Kart ve köşe - Daha yuvarlak ve modern
   static const double cardRadius = 16.0; // +4
+  /// Kart, kutu ve benzeri çerçeve kalınlığı — [AppColors.cardBorder].
+  static const double cardBorderWidth = 1.3;
   static const double buttonRadius = 12.0; // +2
   static const double inputRadius = 12.0; // +2
   static const double dialogRadius = 20.0; // Dialog'lar için
