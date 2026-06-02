@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 1230 (615 per locale)
+/// Strings: 1408 (704 per locale)
 ///
-/// Built on 2026-06-01 at 13:47 UTC
+/// Built on 2026-06-02 at 16:10 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -151,6 +151,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final _StringsCommonEn common = _StringsCommonEn._(_root);
 	late final _StringsValidationEn validation = _StringsValidationEn._(_root);
 	late final _StringsFeaturesEn features = _StringsFeaturesEn._(_root);
+	late final _StringsLegalEn legal = _StringsLegalEn._(_root);
 	late final _StringsDbContextEn db_context = _StringsDbContextEn._(_root);
 }
 
@@ -176,6 +177,10 @@ class _StringsCommonEn {
 	String get confirmMessage => 'Are you sure?';
 	String get logoutConfirm => 'Are you sure you want to logout?';
 	String get logoutSuccess => 'Signed out successfully.';
+	String get logoutAllDevices => 'Sign out other devices';
+	String get logoutAllDevicesConfirm => 'Sessions on your other phones and tablets will end. You will stay signed in on this device.';
+	String get logoutAllDevicesSuccess => 'Other devices have been signed out.';
+	String get logoutAllDevicesFailed => 'Could not complete this action. Please try again.';
 	String get account => 'Account';
 	String get editProfile => 'Edit Profile';
 	String get changePassword => 'Change Password';
@@ -201,6 +206,7 @@ class _StringsCommonEn {
 	String get loadingBuildings => 'Loading buildings…';
 	String get loadFailed => 'Failed to load';
 	String get unexpectedError => 'Something went wrong. Please try again.';
+	String get rateLimitHint => 'The server is currently busy. We\'ll retry shortly.';
 	String get tryAgain => 'Try Again';
 	String get home => 'Home';
 	String get buildings => 'Buildings';
@@ -470,7 +476,50 @@ class _StringsFeaturesEn {
 	late final _StringsFeaturesExpensesEn expenses = _StringsFeaturesExpensesEn._(_root);
 	late final _StringsFeaturesNotificationsEn notifications = _StringsFeaturesNotificationsEn._(_root);
 	late final _StringsFeaturesProfileEn profile = _StringsFeaturesProfileEn._(_root);
+	late final _StringsFeaturesSubscriptionEn subscription = _StringsFeaturesSubscriptionEn._(_root);
 	late final _StringsFeaturesFaz2En faz2 = _StringsFeaturesFaz2En._(_root);
+}
+
+// Path: legal
+class _StringsLegalEn {
+	_StringsLegalEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get companyName => 'Vefa Yazılım';
+	String get contactEmail => 'store@vefayazilim.com';
+	String get contactBlock => 'Data controller: Vefa Yazılım\nEmail: store@vefayazilim.com';
+	String get updatedLabel => 'Last updated';
+	String get updatedDate => 'June 2026';
+	String get privacyIntro => 'This policy explains how Vefa Yazılım processes your personal data when you use the AidatPanel mobile app. By continuing to use the app, you acknowledge that you have read this policy.';
+	String get privacyS1Title => '1. Data controller';
+	String get privacyS1Body => 'Your personal data is processed by Vefa Yazılım as the data controller for AidatPanel, in compliance with applicable data protection laws, including Turkish KVKK where applicable. For privacy and KVKK requests: store@vefayazilim.com';
+	String get privacyS2Title => '2. Data we collect';
+	String get privacyS2Body => 'We may process account details (name, email, phone, language), building and apartment association, dues and payment records, support tickets, announcements and notification preferences, receipt images you upload, device push token (FCM), and secure session tokens.';
+	String get privacyS3Title => '3. Purposes';
+	String get privacyS3Body => 'Data is used for dues and expense management, payment and receipt workflows, in-building communication, authentication, service security, legal obligations, and sending notifications you enable.';
+	String get privacyS4Title => '4. Retention and security';
+	String get privacyS4Body => 'Data is stored on secure servers; communication uses HTTPS. Session data is kept in secure device storage. Data is retained for the service relationship and as required by law.';
+	String get privacyS5Title => '5. Sharing';
+	String get privacyS5Body => 'We do not sell your data. It may be shared only with infrastructure providers necessary to run the service (hosting, push notifications, etc.) and authorities when legally required.';
+	String get privacyS6Title => '6. Your rights';
+	String get privacyS6Body => 'You may request access, correction, deletion, or restriction of processing. Account closure (soft delete) is available in Settings; records that must be kept by law may be stored in anonymized form. Submit requests to store@vefayazilim.com.';
+	String get kvkkIntro => 'This notice is provided under Turkish Personal Data Protection Law No. 6698 (KVKK) for processing by Vefa Yazılım.';
+	String get kvkkS1Title => 'Data controller and contact';
+	String get kvkkS1Body => 'The data controller for AidatPanel is Vefa Yazılım. You may submit KVKK requests to store@vefayazilim.com or using your registered email in the app.';
+	String get kvkkS2Title => 'Data categories';
+	String get kvkkS2Body => 'Categories may include identity and contact, customer transaction (dues, payments, expenses), visual records (receipts), security (logs, tokens), and communication (notification consent).';
+	String get kvkkS3Title => 'Purposes and legal bases';
+	String get kvkkS3Body => 'Processing is based on contract performance, legal obligation, legitimate interest, and your explicit consent where required (e.g. notifications).';
+	String get kvkkS4Title => 'Transfers';
+	String get kvkkS4Body => 'Data may be transferred to hosting and technical providers within Türkiye as needed to provide the service, with appropriate safeguards.';
+	String get kvkkS5Title => 'Collection method';
+	String get kvkkS5Body => 'Data is collected electronically via app forms, automated logs, files you upload, and the notification infrastructure.';
+	String get kvkkS6Title => 'Data subject rights';
+	String get kvkkS6Body => 'You may exercise your rights under Article 11 of KVKK by contacting Vefa Yazılım at store@vefayazilim.com; requests are answered within statutory time limits.';
+	String get helpIntro => 'Help center coming soon';
+	String get helpBody => 'FAQs, step-by-step guides, and support channels will be added here soon. For app support: store@vefayazilim.com (Vefa Yazılım). For urgent building matters, contact your building manager or site administration.';
 }
 
 // Path: db_context
@@ -782,11 +831,38 @@ class _StringsFeaturesNotificationsEn {
 
 	// Translations
 	String get markAllRead => 'Mark all read';
+	String get markAllReadLong => 'Mark all as read';
 	String get viewRelated => 'Open related item';
 	String get unreadBadge => 'New';
 	String get emptyTitle => 'No notifications';
 	String get emptySubtitle => 'New notifications will appear here';
+	String get emptyUnreadTitle => 'No unread notifications';
+	String get emptyUnreadSubtitle => 'You\'re all caught up';
 	String get loadError => 'Could not load notifications';
+	String get filterAll => 'All';
+	String get filterUnread => 'Unread';
+	String get sectionToday => 'Today';
+	String get sectionYesterday => 'Yesterday';
+	String get sectionThisWeek => 'This week';
+	String get sectionEarlier => 'Earlier';
+	String get timeNow => 'Just now';
+	String get timeMinuteShort => 'min ago';
+	String get timeHourShort => 'h ago';
+	String get detailLoadError => 'Could not load details';
+	String get fieldStatus => 'Status';
+	String get fieldCategory => 'Category';
+	String get fieldApartment => 'Apartment';
+	String get fieldAmount => 'Amount';
+	String get fieldUploadedBy => 'Uploaded by';
+	String get fieldDescription => 'Description';
+	String get fieldManagerNote => 'Manager note';
+	String get fieldRejectionReason => 'Rejection reason';
+	String get fieldLatestUpdate => 'Latest update';
+	String get fieldCreatedAt => 'Created';
+	String get fieldPeriod => 'Period';
+	String get actionViewTicket => 'View request';
+	String get actionViewDekont => 'Review receipt';
+	String get actionViewDue => 'View due';
 	String get typeDueReminder => 'Due reminder';
 	String get typeDuePaid => 'Due paid';
 	String get typeTicketCreated => 'New request';
@@ -825,9 +901,42 @@ class _StringsFeaturesProfileEn {
 	String get languagePref => 'Language preference';
 	String get notProvided => 'Not provided';
 	String get editHint => 'Profile editing will be available soon.';
+	String get sectionPersonal => 'Personal Information';
+	String get sectionAccount => 'Account Information';
+	String get editPhotoHint => 'Tap to change photo';
+	String get editTitle => 'Edit Profile';
+	String get phoneOptionalHint => 'Optional';
+	String get profileUpdated => 'Your profile has been updated.';
+	String get profileUpdateFailed => 'Could not update profile. Please try again.';
+	String get profileLoadFailed => 'Could not load profile.';
+	String get readOnlySection => 'Cannot be edited here';
+	String get editSheetHint => 'Only name and phone can be updated. Other details are shown on the profile screen above.';
 	String get photoSaved => 'Profile photo saved for this account.';
 	String get photoRemoved => 'Profile photo removed.';
 	String get removePhoto => 'Remove profile photo';
+}
+
+// Path: features.subscription
+class _StringsFeaturesSubscriptionEn {
+	_StringsFeaturesSubscriptionEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get title => 'Subscription';
+	String get statusActive => 'Active';
+	String get statusExpired => 'Expired';
+	String get statusCancelled => 'Cancelled';
+	String get statusTrial => 'Trial';
+	String get statusUnknown => 'Unknown';
+	String get planMonthly => 'Monthly plan';
+	String get planAnnual => 'Annual plan';
+	String get planUnknown => 'Plan';
+	String get renewsOn => 'Renews: {date}';
+	String get noSubscription => 'No subscription on file yet.';
+	String get backendPending => 'Subscription is not connected to the server yet. Purchases coming soon.';
+	String get purchaseComingSoon => 'Purchase coming soon';
+	String get loadFailed => 'Could not load subscription.';
 }
 
 // Path: features.faz2
@@ -932,6 +1041,7 @@ class _StringsTr implements Translations {
 	@override late final _StringsCommonTr common = _StringsCommonTr._(_root);
 	@override late final _StringsValidationTr validation = _StringsValidationTr._(_root);
 	@override late final _StringsFeaturesTr features = _StringsFeaturesTr._(_root);
+	@override late final _StringsLegalTr legal = _StringsLegalTr._(_root);
 	@override late final _StringsDbContextTr db_context = _StringsDbContextTr._(_root);
 }
 
@@ -957,6 +1067,10 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get confirmMessage => 'Emin misiniz?';
 	@override String get logoutConfirm => 'Çıkış yapmak istediğinize emin misiniz?';
 	@override String get logoutSuccess => 'Başarıyla çıkış yaptınız.';
+	@override String get logoutAllDevices => 'Diğer cihazlardan çıkış';
+	@override String get logoutAllDevicesConfirm => 'Diğer telefon ve tabletlerdeki oturumlar kapanır. Bu cihazda girişiniz devam eder.';
+	@override String get logoutAllDevicesSuccess => 'Diğer cihazlardaki oturumlar kapatıldı.';
+	@override String get logoutAllDevicesFailed => 'İşlem tamamlanamadı. Lütfen tekrar deneyin.';
 	@override String get account => 'Hesap';
 	@override String get editProfile => 'Profili Düzenle';
 	@override String get changePassword => 'Şifre Değiştir';
@@ -982,6 +1096,7 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get loadingBuildings => 'Binalar yükleniyor…';
 	@override String get loadFailed => 'Yüklenemedi';
 	@override String get unexpectedError => 'İşlem tamamlanamadı. Lütfen tekrar deneyin.';
+	@override String get rateLimitHint => 'Sunucu şu an yoğun görünüyor. Kısa süre sonra yeniden denenecek.';
 	@override String get tryAgain => 'Tekrar Dene';
 	@override String get home => 'Ana Sayfa';
 	@override String get buildings => 'Binalar';
@@ -1251,7 +1366,50 @@ class _StringsFeaturesTr implements _StringsFeaturesEn {
 	@override late final _StringsFeaturesExpensesTr expenses = _StringsFeaturesExpensesTr._(_root);
 	@override late final _StringsFeaturesNotificationsTr notifications = _StringsFeaturesNotificationsTr._(_root);
 	@override late final _StringsFeaturesProfileTr profile = _StringsFeaturesProfileTr._(_root);
+	@override late final _StringsFeaturesSubscriptionTr subscription = _StringsFeaturesSubscriptionTr._(_root);
 	@override late final _StringsFeaturesFaz2Tr faz2 = _StringsFeaturesFaz2Tr._(_root);
+}
+
+// Path: legal
+class _StringsLegalTr implements _StringsLegalEn {
+	_StringsLegalTr._(this._root);
+
+	@override final _StringsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get companyName => 'Vefa Yazılım';
+	@override String get contactEmail => 'store@vefayazilim.com';
+	@override String get contactBlock => 'Veri sorumlusu: Vefa Yazılım\nE-posta: store@vefayazilim.com';
+	@override String get updatedLabel => 'Son güncelleme';
+	@override String get updatedDate => 'Haziran 2026';
+	@override String get privacyIntro => 'Bu metin, Vefa Yazılım tarafından sunulan AidatPanel mobil uygulamasını kullanırken kişisel verilerinizin nasıl işlendiğini açıklar. Uygulamayı kullanmaya devam ederek bu politikayı okuduğunuzu kabul etmiş sayılırsınız.';
+	@override String get privacyS1Title => '1. Veri sorumlusu';
+	@override String get privacyS1Body => 'AidatPanel hizmeti kapsamında kişisel verileriniz, veri sorumlusu Vefa Yazılım tarafından 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) ve ilgili mevzuata uygun olarak işlenir. KVKK ve gizlilik talepleriniz için: store@vefayazilim.com';
+	@override String get privacyS2Title => '2. Toplanan veriler';
+	@override String get privacyS2Body => 'Hesap bilgileri (ad, e-posta, telefon, dil tercihi), apartman ve daire ilişkisi, aidat ve ödeme kayıtları, destek talepleri, duyuru ve bildirim tercihleri, dekont ve makbuz görselleri (yüklediğinizde), cihaz bildirim anahtarı (FCM) ve güvenli oturum bilgileri (şifrelenmiş token) işlenebilir.';
+	@override String get privacyS3Title => '3. İşleme amaçları';
+	@override String get privacyS3Body => 'Verileriniz; aidat ve gider yönetimi, tahsilat ve dekont süreçleri, apartman içi iletişim ve duyurular, kimlik doğrulama, hizmet güvenliği, yasal yükümlülükler ve size bildirim göndermek amacıyla işlenir.';
+	@override String get privacyS4Title => '4. Saklama ve güvenlik';
+	@override String get privacyS4Body => 'Veriler güvenli sunucularda saklanır; iletişim HTTPS ile şifrelenir. Oturum bilgileri cihazınızda güvenli depolamada tutulur. Yasal zorunluluklar dışında veriler, hizmet ilişkisi süresince ve mevzuattaki süreler boyunca muhafaza edilir.';
+	@override String get privacyS5Title => '5. Paylaşım';
+	@override String get privacyS5Body => 'Kişisel verileriniz üçüncü taraflara satılmaz. Yalnızca hizmetin sunulması için gerekli altyapı sağlayıcıları (barındırma, bildirim servisi vb.) ve kanunen yetkili kurumlarla, mevzuata uygun şekilde paylaşılabilir.';
+	@override String get privacyS6Title => '6. Haklarınız';
+	@override String get privacyS6Body => 'KVKK kapsamında verilerinize erişme, düzeltme, silme, işlemeyi kısıtlama ve itiraz etme haklarına sahipsiniz. Hesap kapatma (soft delete) Ayarlar üzerinden yapılabilir; yasal saklama gerektiren kayıtlar anonimleştirilerek tutulabilir. Başvurularınızı store@vefayazilim.com adresine iletebilirsiniz.';
+	@override String get kvkkIntro => '6698 sayılı Kanun uyarınca Vefa Yazılım tarafından işlenen kişisel verilerinize ilişkin aydınlatma metnidir.';
+	@override String get kvkkS1Title => 'Veri sorumlusu ve iletişim';
+	@override String get kvkkS1Body => 'AidatPanel kapsamındaki kişisel veri işleme faaliyetleri için veri sorumlusu Vefa Yazılım’dır. KVKK taleplerinizi store@vefayazilim.com adresine veya uygulamada kayıtlı e-posta adresinizle iletebilirsiniz.';
+	@override String get kvkkS2Title => 'İşlenen veri kategorileri';
+	@override String get kvkkS2Body => 'Kimlik ve iletişim, müşteri işlem (aidat, ödeme, gider), görsel kayıt (dekont), işlem güvenliği (log, token) ve pazarlama/iletişim (bildirim izni) kategorilerinde veri işlenebilir.';
+	@override String get kvkkS3Title => 'İşleme amaçları ve hukuki sebepler';
+	@override String get kvkkS3Body => 'Verileriniz; sözleşmenin kurulması ve ifası, hukuki yükümlülük, meşru menfaat ve açık rızanız (bildirimler gibi) kapsamında işlenir.';
+	@override String get kvkkS4Title => 'Aktarım';
+	@override String get kvkkS4Body => 'Veriler, yurt içinde barındırma ve teknik hizmet sağlayıcılarına, hizmetin gerektirdiği ölçüde aktarılabilir. Aktarım yapılan taraflarla gerekli güvenlik önlemleri alınır.';
+	@override String get kvkkS5Title => 'Toplama yöntemi';
+	@override String get kvkkS5Body => 'Veriler; uygulama formları, otomatik kayıtlar, yüklediğiniz belgeler ve bildirim altyapısı aracılığıyla elektronik ortamda toplanır.';
+	@override String get kvkkS6Title => 'İlgili kişi hakları';
+	@override String get kvkkS6Body => 'Kanunun 11. maddesi kapsamındaki haklarınızı kullanmak için talebinizi Vefa Yazılım’a (store@vefayazilim.com) iletebilirsiniz; başvurularınız mevzuattaki sürelerde yanıtlanır.';
+	@override String get helpIntro => 'Yardım merkezi hazırlanıyor';
+	@override String get helpBody => 'Sık sorulan sorular, adım adım rehberler ve destek kanalları yakında bu bölümde yer alacak. Uygulama desteği için: store@vefayazilim.com (Vefa Yazılım). Acil apartman işleri için yöneticiniz veya site yönetiminizle iletişime geçebilirsiniz.';
 }
 
 // Path: db_context
@@ -1563,11 +1721,38 @@ class _StringsFeaturesNotificationsTr implements _StringsFeaturesNotificationsEn
 
 	// Translations
 	@override String get markAllRead => 'Tümünü oku';
+	@override String get markAllReadLong => 'Tümünü okundu işaretle';
 	@override String get viewRelated => 'İlgili kayda git';
 	@override String get unreadBadge => 'Yeni';
 	@override String get emptyTitle => 'Bildirim yok';
 	@override String get emptySubtitle => 'Yeni bildirimler burada görünecek';
+	@override String get emptyUnreadTitle => 'Okunmamış bildirim yok';
+	@override String get emptyUnreadSubtitle => 'Tüm bildirimleri okudunuz';
 	@override String get loadError => 'Bildirimler yüklenemedi';
+	@override String get filterAll => 'Tümü';
+	@override String get filterUnread => 'Okunmamış';
+	@override String get sectionToday => 'Bugün';
+	@override String get sectionYesterday => 'Dün';
+	@override String get sectionThisWeek => 'Bu hafta';
+	@override String get sectionEarlier => 'Daha eski';
+	@override String get timeNow => 'Az önce';
+	@override String get timeMinuteShort => 'dk önce';
+	@override String get timeHourShort => 'saat önce';
+	@override String get detailLoadError => 'Detay yüklenemedi';
+	@override String get fieldStatus => 'Durum';
+	@override String get fieldCategory => 'Kategori';
+	@override String get fieldApartment => 'Daire';
+	@override String get fieldAmount => 'Tutar';
+	@override String get fieldUploadedBy => 'Yükleyen';
+	@override String get fieldDescription => 'Açıklama';
+	@override String get fieldManagerNote => 'Yönetici notu';
+	@override String get fieldRejectionReason => 'Red nedeni';
+	@override String get fieldLatestUpdate => 'Son güncelleme';
+	@override String get fieldCreatedAt => 'Oluşturulma';
+	@override String get fieldPeriod => 'Dönem';
+	@override String get actionViewTicket => 'Talebi Görüntüle';
+	@override String get actionViewDekont => 'Dekontu İncele';
+	@override String get actionViewDue => 'Aidatı Gör';
 	@override String get typeDueReminder => 'Aidat hatırlatma';
 	@override String get typeDuePaid => 'Aidat ödendi';
 	@override String get typeTicketCreated => 'Yeni talep';
@@ -1606,9 +1791,42 @@ class _StringsFeaturesProfileTr implements _StringsFeaturesProfileEn {
 	@override String get languagePref => 'Dil tercihi';
 	@override String get notProvided => 'Belirtilmemiş';
 	@override String get editHint => 'Profil düzenleme yakında eklenecek.';
+	@override String get sectionPersonal => 'Kişisel Bilgiler';
+	@override String get sectionAccount => 'Hesap Bilgileri';
+	@override String get editPhotoHint => 'Fotoğrafı değiştirmek için dokunun';
+	@override String get editTitle => 'Profili Düzenle';
+	@override String get phoneOptionalHint => 'Boş bırakılabilir';
+	@override String get profileUpdated => 'Profil bilgileriniz güncellendi.';
+	@override String get profileUpdateFailed => 'Profil güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get profileLoadFailed => 'Profil bilgileri yüklenemedi.';
+	@override String get readOnlySection => 'Buradan düzenlenemez';
+	@override String get editSheetHint => 'Yalnızca ad ve telefon güncellenir. Diğer bilgiler yukarıdaki profil ekranında görünür.';
 	@override String get photoSaved => 'Profil fotoğrafı bu hesap için kaydedildi.';
 	@override String get photoRemoved => 'Profil fotoğrafı kaldırıldı.';
 	@override String get removePhoto => 'Profil fotoğrafını kaldır';
+}
+
+// Path: features.subscription
+class _StringsFeaturesSubscriptionTr implements _StringsFeaturesSubscriptionEn {
+	_StringsFeaturesSubscriptionTr._(this._root);
+
+	@override final _StringsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Abonelik';
+	@override String get statusActive => 'Aktif';
+	@override String get statusExpired => 'Süresi doldu';
+	@override String get statusCancelled => 'İptal edildi';
+	@override String get statusTrial => 'Deneme';
+	@override String get statusUnknown => 'Bilinmiyor';
+	@override String get planMonthly => 'Aylık plan';
+	@override String get planAnnual => 'Yıllık plan';
+	@override String get planUnknown => 'Plan';
+	@override String get renewsOn => 'Yenileme: {date}';
+	@override String get noSubscription => 'Henüz abonelik kaydı yok.';
+	@override String get backendPending => 'Abonelik sunucuya henüz bağlanmadı. Satın alma yakında açılacak.';
+	@override String get purchaseComingSoon => 'Satın alma yakında';
+	@override String get loadFailed => 'Abonelik bilgisi alınamadı.';
 }
 
 // Path: features.faz2
@@ -1707,6 +1925,10 @@ extension on Translations {
 			case 'common.confirmMessage': return 'Are you sure?';
 			case 'common.logoutConfirm': return 'Are you sure you want to logout?';
 			case 'common.logoutSuccess': return 'Signed out successfully.';
+			case 'common.logoutAllDevices': return 'Sign out other devices';
+			case 'common.logoutAllDevicesConfirm': return 'Sessions on your other phones and tablets will end. You will stay signed in on this device.';
+			case 'common.logoutAllDevicesSuccess': return 'Other devices have been signed out.';
+			case 'common.logoutAllDevicesFailed': return 'Could not complete this action. Please try again.';
 			case 'common.account': return 'Account';
 			case 'common.editProfile': return 'Edit Profile';
 			case 'common.changePassword': return 'Change Password';
@@ -1732,6 +1954,7 @@ extension on Translations {
 			case 'common.loadingBuildings': return 'Loading buildings…';
 			case 'common.loadFailed': return 'Failed to load';
 			case 'common.unexpectedError': return 'Something went wrong. Please try again.';
+			case 'common.rateLimitHint': return 'The server is currently busy. We\'ll retry shortly.';
 			case 'common.tryAgain': return 'Try Again';
 			case 'common.home': return 'Home';
 			case 'common.buildings': return 'Buildings';
@@ -2261,11 +2484,38 @@ extension on Translations {
 			case 'features.expenses.receiptUploadFailed': return 'Receipt upload failed. The expense was saved.';
 			case 'features.expenses.receiptPickFailed': return 'Could not pick a photo';
 			case 'features.notifications.markAllRead': return 'Mark all read';
+			case 'features.notifications.markAllReadLong': return 'Mark all as read';
 			case 'features.notifications.viewRelated': return 'Open related item';
 			case 'features.notifications.unreadBadge': return 'New';
 			case 'features.notifications.emptyTitle': return 'No notifications';
 			case 'features.notifications.emptySubtitle': return 'New notifications will appear here';
+			case 'features.notifications.emptyUnreadTitle': return 'No unread notifications';
+			case 'features.notifications.emptyUnreadSubtitle': return 'You\'re all caught up';
 			case 'features.notifications.loadError': return 'Could not load notifications';
+			case 'features.notifications.filterAll': return 'All';
+			case 'features.notifications.filterUnread': return 'Unread';
+			case 'features.notifications.sectionToday': return 'Today';
+			case 'features.notifications.sectionYesterday': return 'Yesterday';
+			case 'features.notifications.sectionThisWeek': return 'This week';
+			case 'features.notifications.sectionEarlier': return 'Earlier';
+			case 'features.notifications.timeNow': return 'Just now';
+			case 'features.notifications.timeMinuteShort': return 'min ago';
+			case 'features.notifications.timeHourShort': return 'h ago';
+			case 'features.notifications.detailLoadError': return 'Could not load details';
+			case 'features.notifications.fieldStatus': return 'Status';
+			case 'features.notifications.fieldCategory': return 'Category';
+			case 'features.notifications.fieldApartment': return 'Apartment';
+			case 'features.notifications.fieldAmount': return 'Amount';
+			case 'features.notifications.fieldUploadedBy': return 'Uploaded by';
+			case 'features.notifications.fieldDescription': return 'Description';
+			case 'features.notifications.fieldManagerNote': return 'Manager note';
+			case 'features.notifications.fieldRejectionReason': return 'Rejection reason';
+			case 'features.notifications.fieldLatestUpdate': return 'Latest update';
+			case 'features.notifications.fieldCreatedAt': return 'Created';
+			case 'features.notifications.fieldPeriod': return 'Period';
+			case 'features.notifications.actionViewTicket': return 'View request';
+			case 'features.notifications.actionViewDekont': return 'Review receipt';
+			case 'features.notifications.actionViewDue': return 'View due';
 			case 'features.notifications.typeDueReminder': return 'Due reminder';
 			case 'features.notifications.typeDuePaid': return 'Due paid';
 			case 'features.notifications.typeTicketCreated': return 'New request';
@@ -2295,13 +2545,70 @@ extension on Translations {
 			case 'features.profile.languagePref': return 'Language preference';
 			case 'features.profile.notProvided': return 'Not provided';
 			case 'features.profile.editHint': return 'Profile editing will be available soon.';
+			case 'features.profile.sectionPersonal': return 'Personal Information';
+			case 'features.profile.sectionAccount': return 'Account Information';
+			case 'features.profile.editPhotoHint': return 'Tap to change photo';
+			case 'features.profile.editTitle': return 'Edit Profile';
+			case 'features.profile.phoneOptionalHint': return 'Optional';
+			case 'features.profile.profileUpdated': return 'Your profile has been updated.';
+			case 'features.profile.profileUpdateFailed': return 'Could not update profile. Please try again.';
+			case 'features.profile.profileLoadFailed': return 'Could not load profile.';
+			case 'features.profile.readOnlySection': return 'Cannot be edited here';
+			case 'features.profile.editSheetHint': return 'Only name and phone can be updated. Other details are shown on the profile screen above.';
 			case 'features.profile.photoSaved': return 'Profile photo saved for this account.';
 			case 'features.profile.photoRemoved': return 'Profile photo removed.';
 			case 'features.profile.removePhoto': return 'Remove profile photo';
+			case 'features.subscription.title': return 'Subscription';
+			case 'features.subscription.statusActive': return 'Active';
+			case 'features.subscription.statusExpired': return 'Expired';
+			case 'features.subscription.statusCancelled': return 'Cancelled';
+			case 'features.subscription.statusTrial': return 'Trial';
+			case 'features.subscription.statusUnknown': return 'Unknown';
+			case 'features.subscription.planMonthly': return 'Monthly plan';
+			case 'features.subscription.planAnnual': return 'Annual plan';
+			case 'features.subscription.planUnknown': return 'Plan';
+			case 'features.subscription.renewsOn': return 'Renews: {date}';
+			case 'features.subscription.noSubscription': return 'No subscription on file yet.';
+			case 'features.subscription.backendPending': return 'Subscription is not connected to the server yet. Purchases coming soon.';
+			case 'features.subscription.purchaseComingSoon': return 'Purchase coming soon';
+			case 'features.subscription.loadFailed': return 'Could not load subscription.';
 			case 'features.faz2.sectionTitle': return 'Phase 2';
 			case 'features.faz2.tickets': return 'Requests';
 			case 'features.faz2.expenses': return 'Expenses';
 			case 'features.faz2.announcement': return 'Announce';
+			case 'legal.companyName': return 'Vefa Yazılım';
+			case 'legal.contactEmail': return 'store@vefayazilim.com';
+			case 'legal.contactBlock': return 'Data controller: Vefa Yazılım\nEmail: store@vefayazilim.com';
+			case 'legal.updatedLabel': return 'Last updated';
+			case 'legal.updatedDate': return 'June 2026';
+			case 'legal.privacyIntro': return 'This policy explains how Vefa Yazılım processes your personal data when you use the AidatPanel mobile app. By continuing to use the app, you acknowledge that you have read this policy.';
+			case 'legal.privacyS1Title': return '1. Data controller';
+			case 'legal.privacyS1Body': return 'Your personal data is processed by Vefa Yazılım as the data controller for AidatPanel, in compliance with applicable data protection laws, including Turkish KVKK where applicable. For privacy and KVKK requests: store@vefayazilim.com';
+			case 'legal.privacyS2Title': return '2. Data we collect';
+			case 'legal.privacyS2Body': return 'We may process account details (name, email, phone, language), building and apartment association, dues and payment records, support tickets, announcements and notification preferences, receipt images you upload, device push token (FCM), and secure session tokens.';
+			case 'legal.privacyS3Title': return '3. Purposes';
+			case 'legal.privacyS3Body': return 'Data is used for dues and expense management, payment and receipt workflows, in-building communication, authentication, service security, legal obligations, and sending notifications you enable.';
+			case 'legal.privacyS4Title': return '4. Retention and security';
+			case 'legal.privacyS4Body': return 'Data is stored on secure servers; communication uses HTTPS. Session data is kept in secure device storage. Data is retained for the service relationship and as required by law.';
+			case 'legal.privacyS5Title': return '5. Sharing';
+			case 'legal.privacyS5Body': return 'We do not sell your data. It may be shared only with infrastructure providers necessary to run the service (hosting, push notifications, etc.) and authorities when legally required.';
+			case 'legal.privacyS6Title': return '6. Your rights';
+			case 'legal.privacyS6Body': return 'You may request access, correction, deletion, or restriction of processing. Account closure (soft delete) is available in Settings; records that must be kept by law may be stored in anonymized form. Submit requests to store@vefayazilim.com.';
+			case 'legal.kvkkIntro': return 'This notice is provided under Turkish Personal Data Protection Law No. 6698 (KVKK) for processing by Vefa Yazılım.';
+			case 'legal.kvkkS1Title': return 'Data controller and contact';
+			case 'legal.kvkkS1Body': return 'The data controller for AidatPanel is Vefa Yazılım. You may submit KVKK requests to store@vefayazilim.com or using your registered email in the app.';
+			case 'legal.kvkkS2Title': return 'Data categories';
+			case 'legal.kvkkS2Body': return 'Categories may include identity and contact, customer transaction (dues, payments, expenses), visual records (receipts), security (logs, tokens), and communication (notification consent).';
+			case 'legal.kvkkS3Title': return 'Purposes and legal bases';
+			case 'legal.kvkkS3Body': return 'Processing is based on contract performance, legal obligation, legitimate interest, and your explicit consent where required (e.g. notifications).';
+			case 'legal.kvkkS4Title': return 'Transfers';
+			case 'legal.kvkkS4Body': return 'Data may be transferred to hosting and technical providers within Türkiye as needed to provide the service, with appropriate safeguards.';
+			case 'legal.kvkkS5Title': return 'Collection method';
+			case 'legal.kvkkS5Body': return 'Data is collected electronically via app forms, automated logs, files you upload, and the notification infrastructure.';
+			case 'legal.kvkkS6Title': return 'Data subject rights';
+			case 'legal.kvkkS6Body': return 'You may exercise your rights under Article 11 of KVKK by contacting Vefa Yazılım at store@vefayazilim.com; requests are answered within statutory time limits.';
+			case 'legal.helpIntro': return 'Help center coming soon';
+			case 'legal.helpBody': return 'FAQs, step-by-step guides, and support channels will be added here soon. For app support: store@vefayazilim.com (Vefa Yazılım). For urgent building matters, contact your building manager or site administration.';
 			case 'db_context.user_entry': return 'Record: {value}';
 			case 'db_context.building_name': return 'Building: {value}';
 			case 'db_context.apartment_label': return 'Apartment: {value}';
@@ -2330,6 +2637,10 @@ extension on _StringsTr {
 			case 'common.confirmMessage': return 'Emin misiniz?';
 			case 'common.logoutConfirm': return 'Çıkış yapmak istediğinize emin misiniz?';
 			case 'common.logoutSuccess': return 'Başarıyla çıkış yaptınız.';
+			case 'common.logoutAllDevices': return 'Diğer cihazlardan çıkış';
+			case 'common.logoutAllDevicesConfirm': return 'Diğer telefon ve tabletlerdeki oturumlar kapanır. Bu cihazda girişiniz devam eder.';
+			case 'common.logoutAllDevicesSuccess': return 'Diğer cihazlardaki oturumlar kapatıldı.';
+			case 'common.logoutAllDevicesFailed': return 'İşlem tamamlanamadı. Lütfen tekrar deneyin.';
 			case 'common.account': return 'Hesap';
 			case 'common.editProfile': return 'Profili Düzenle';
 			case 'common.changePassword': return 'Şifre Değiştir';
@@ -2355,6 +2666,7 @@ extension on _StringsTr {
 			case 'common.loadingBuildings': return 'Binalar yükleniyor…';
 			case 'common.loadFailed': return 'Yüklenemedi';
 			case 'common.unexpectedError': return 'İşlem tamamlanamadı. Lütfen tekrar deneyin.';
+			case 'common.rateLimitHint': return 'Sunucu şu an yoğun görünüyor. Kısa süre sonra yeniden denenecek.';
 			case 'common.tryAgain': return 'Tekrar Dene';
 			case 'common.home': return 'Ana Sayfa';
 			case 'common.buildings': return 'Binalar';
@@ -2884,11 +3196,38 @@ extension on _StringsTr {
 			case 'features.expenses.receiptUploadFailed': return 'Makbuz yüklenemedi. Gider kaydı oluşturuldu.';
 			case 'features.expenses.receiptPickFailed': return 'Fotoğraf seçilemedi';
 			case 'features.notifications.markAllRead': return 'Tümünü oku';
+			case 'features.notifications.markAllReadLong': return 'Tümünü okundu işaretle';
 			case 'features.notifications.viewRelated': return 'İlgili kayda git';
 			case 'features.notifications.unreadBadge': return 'Yeni';
 			case 'features.notifications.emptyTitle': return 'Bildirim yok';
 			case 'features.notifications.emptySubtitle': return 'Yeni bildirimler burada görünecek';
+			case 'features.notifications.emptyUnreadTitle': return 'Okunmamış bildirim yok';
+			case 'features.notifications.emptyUnreadSubtitle': return 'Tüm bildirimleri okudunuz';
 			case 'features.notifications.loadError': return 'Bildirimler yüklenemedi';
+			case 'features.notifications.filterAll': return 'Tümü';
+			case 'features.notifications.filterUnread': return 'Okunmamış';
+			case 'features.notifications.sectionToday': return 'Bugün';
+			case 'features.notifications.sectionYesterday': return 'Dün';
+			case 'features.notifications.sectionThisWeek': return 'Bu hafta';
+			case 'features.notifications.sectionEarlier': return 'Daha eski';
+			case 'features.notifications.timeNow': return 'Az önce';
+			case 'features.notifications.timeMinuteShort': return 'dk önce';
+			case 'features.notifications.timeHourShort': return 'saat önce';
+			case 'features.notifications.detailLoadError': return 'Detay yüklenemedi';
+			case 'features.notifications.fieldStatus': return 'Durum';
+			case 'features.notifications.fieldCategory': return 'Kategori';
+			case 'features.notifications.fieldApartment': return 'Daire';
+			case 'features.notifications.fieldAmount': return 'Tutar';
+			case 'features.notifications.fieldUploadedBy': return 'Yükleyen';
+			case 'features.notifications.fieldDescription': return 'Açıklama';
+			case 'features.notifications.fieldManagerNote': return 'Yönetici notu';
+			case 'features.notifications.fieldRejectionReason': return 'Red nedeni';
+			case 'features.notifications.fieldLatestUpdate': return 'Son güncelleme';
+			case 'features.notifications.fieldCreatedAt': return 'Oluşturulma';
+			case 'features.notifications.fieldPeriod': return 'Dönem';
+			case 'features.notifications.actionViewTicket': return 'Talebi Görüntüle';
+			case 'features.notifications.actionViewDekont': return 'Dekontu İncele';
+			case 'features.notifications.actionViewDue': return 'Aidatı Gör';
 			case 'features.notifications.typeDueReminder': return 'Aidat hatırlatma';
 			case 'features.notifications.typeDuePaid': return 'Aidat ödendi';
 			case 'features.notifications.typeTicketCreated': return 'Yeni talep';
@@ -2918,13 +3257,70 @@ extension on _StringsTr {
 			case 'features.profile.languagePref': return 'Dil tercihi';
 			case 'features.profile.notProvided': return 'Belirtilmemiş';
 			case 'features.profile.editHint': return 'Profil düzenleme yakında eklenecek.';
+			case 'features.profile.sectionPersonal': return 'Kişisel Bilgiler';
+			case 'features.profile.sectionAccount': return 'Hesap Bilgileri';
+			case 'features.profile.editPhotoHint': return 'Fotoğrafı değiştirmek için dokunun';
+			case 'features.profile.editTitle': return 'Profili Düzenle';
+			case 'features.profile.phoneOptionalHint': return 'Boş bırakılabilir';
+			case 'features.profile.profileUpdated': return 'Profil bilgileriniz güncellendi.';
+			case 'features.profile.profileUpdateFailed': return 'Profil güncellenemedi. Lütfen tekrar deneyin.';
+			case 'features.profile.profileLoadFailed': return 'Profil bilgileri yüklenemedi.';
+			case 'features.profile.readOnlySection': return 'Buradan düzenlenemez';
+			case 'features.profile.editSheetHint': return 'Yalnızca ad ve telefon güncellenir. Diğer bilgiler yukarıdaki profil ekranında görünür.';
 			case 'features.profile.photoSaved': return 'Profil fotoğrafı bu hesap için kaydedildi.';
 			case 'features.profile.photoRemoved': return 'Profil fotoğrafı kaldırıldı.';
 			case 'features.profile.removePhoto': return 'Profil fotoğrafını kaldır';
+			case 'features.subscription.title': return 'Abonelik';
+			case 'features.subscription.statusActive': return 'Aktif';
+			case 'features.subscription.statusExpired': return 'Süresi doldu';
+			case 'features.subscription.statusCancelled': return 'İptal edildi';
+			case 'features.subscription.statusTrial': return 'Deneme';
+			case 'features.subscription.statusUnknown': return 'Bilinmiyor';
+			case 'features.subscription.planMonthly': return 'Aylık plan';
+			case 'features.subscription.planAnnual': return 'Yıllık plan';
+			case 'features.subscription.planUnknown': return 'Plan';
+			case 'features.subscription.renewsOn': return 'Yenileme: {date}';
+			case 'features.subscription.noSubscription': return 'Henüz abonelik kaydı yok.';
+			case 'features.subscription.backendPending': return 'Abonelik sunucuya henüz bağlanmadı. Satın alma yakında açılacak.';
+			case 'features.subscription.purchaseComingSoon': return 'Satın alma yakında';
+			case 'features.subscription.loadFailed': return 'Abonelik bilgisi alınamadı.';
 			case 'features.faz2.sectionTitle': return 'Faz 2';
 			case 'features.faz2.tickets': return 'Talepler';
 			case 'features.faz2.expenses': return 'Giderler';
 			case 'features.faz2.announcement': return 'Duyuru';
+			case 'legal.companyName': return 'Vefa Yazılım';
+			case 'legal.contactEmail': return 'store@vefayazilim.com';
+			case 'legal.contactBlock': return 'Veri sorumlusu: Vefa Yazılım\nE-posta: store@vefayazilim.com';
+			case 'legal.updatedLabel': return 'Son güncelleme';
+			case 'legal.updatedDate': return 'Haziran 2026';
+			case 'legal.privacyIntro': return 'Bu metin, Vefa Yazılım tarafından sunulan AidatPanel mobil uygulamasını kullanırken kişisel verilerinizin nasıl işlendiğini açıklar. Uygulamayı kullanmaya devam ederek bu politikayı okuduğunuzu kabul etmiş sayılırsınız.';
+			case 'legal.privacyS1Title': return '1. Veri sorumlusu';
+			case 'legal.privacyS1Body': return 'AidatPanel hizmeti kapsamında kişisel verileriniz, veri sorumlusu Vefa Yazılım tarafından 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) ve ilgili mevzuata uygun olarak işlenir. KVKK ve gizlilik talepleriniz için: store@vefayazilim.com';
+			case 'legal.privacyS2Title': return '2. Toplanan veriler';
+			case 'legal.privacyS2Body': return 'Hesap bilgileri (ad, e-posta, telefon, dil tercihi), apartman ve daire ilişkisi, aidat ve ödeme kayıtları, destek talepleri, duyuru ve bildirim tercihleri, dekont ve makbuz görselleri (yüklediğinizde), cihaz bildirim anahtarı (FCM) ve güvenli oturum bilgileri (şifrelenmiş token) işlenebilir.';
+			case 'legal.privacyS3Title': return '3. İşleme amaçları';
+			case 'legal.privacyS3Body': return 'Verileriniz; aidat ve gider yönetimi, tahsilat ve dekont süreçleri, apartman içi iletişim ve duyurular, kimlik doğrulama, hizmet güvenliği, yasal yükümlülükler ve size bildirim göndermek amacıyla işlenir.';
+			case 'legal.privacyS4Title': return '4. Saklama ve güvenlik';
+			case 'legal.privacyS4Body': return 'Veriler güvenli sunucularda saklanır; iletişim HTTPS ile şifrelenir. Oturum bilgileri cihazınızda güvenli depolamada tutulur. Yasal zorunluluklar dışında veriler, hizmet ilişkisi süresince ve mevzuattaki süreler boyunca muhafaza edilir.';
+			case 'legal.privacyS5Title': return '5. Paylaşım';
+			case 'legal.privacyS5Body': return 'Kişisel verileriniz üçüncü taraflara satılmaz. Yalnızca hizmetin sunulması için gerekli altyapı sağlayıcıları (barındırma, bildirim servisi vb.) ve kanunen yetkili kurumlarla, mevzuata uygun şekilde paylaşılabilir.';
+			case 'legal.privacyS6Title': return '6. Haklarınız';
+			case 'legal.privacyS6Body': return 'KVKK kapsamında verilerinize erişme, düzeltme, silme, işlemeyi kısıtlama ve itiraz etme haklarına sahipsiniz. Hesap kapatma (soft delete) Ayarlar üzerinden yapılabilir; yasal saklama gerektiren kayıtlar anonimleştirilerek tutulabilir. Başvurularınızı store@vefayazilim.com adresine iletebilirsiniz.';
+			case 'legal.kvkkIntro': return '6698 sayılı Kanun uyarınca Vefa Yazılım tarafından işlenen kişisel verilerinize ilişkin aydınlatma metnidir.';
+			case 'legal.kvkkS1Title': return 'Veri sorumlusu ve iletişim';
+			case 'legal.kvkkS1Body': return 'AidatPanel kapsamındaki kişisel veri işleme faaliyetleri için veri sorumlusu Vefa Yazılım’dır. KVKK taleplerinizi store@vefayazilim.com adresine veya uygulamada kayıtlı e-posta adresinizle iletebilirsiniz.';
+			case 'legal.kvkkS2Title': return 'İşlenen veri kategorileri';
+			case 'legal.kvkkS2Body': return 'Kimlik ve iletişim, müşteri işlem (aidat, ödeme, gider), görsel kayıt (dekont), işlem güvenliği (log, token) ve pazarlama/iletişim (bildirim izni) kategorilerinde veri işlenebilir.';
+			case 'legal.kvkkS3Title': return 'İşleme amaçları ve hukuki sebepler';
+			case 'legal.kvkkS3Body': return 'Verileriniz; sözleşmenin kurulması ve ifası, hukuki yükümlülük, meşru menfaat ve açık rızanız (bildirimler gibi) kapsamında işlenir.';
+			case 'legal.kvkkS4Title': return 'Aktarım';
+			case 'legal.kvkkS4Body': return 'Veriler, yurt içinde barındırma ve teknik hizmet sağlayıcılarına, hizmetin gerektirdiği ölçüde aktarılabilir. Aktarım yapılan taraflarla gerekli güvenlik önlemleri alınır.';
+			case 'legal.kvkkS5Title': return 'Toplama yöntemi';
+			case 'legal.kvkkS5Body': return 'Veriler; uygulama formları, otomatik kayıtlar, yüklediğiniz belgeler ve bildirim altyapısı aracılığıyla elektronik ortamda toplanır.';
+			case 'legal.kvkkS6Title': return 'İlgili kişi hakları';
+			case 'legal.kvkkS6Body': return 'Kanunun 11. maddesi kapsamındaki haklarınızı kullanmak için talebinizi Vefa Yazılım’a (store@vefayazilim.com) iletebilirsiniz; başvurularınız mevzuattaki sürelerde yanıtlanır.';
+			case 'legal.helpIntro': return 'Yardım merkezi hazırlanıyor';
+			case 'legal.helpBody': return 'Sık sorulan sorular, adım adım rehberler ve destek kanalları yakında bu bölümde yer alacak. Uygulama desteği için: store@vefayazilim.com (Vefa Yazılım). Acil apartman işleri için yöneticiniz veya site yönetiminizle iletişime geçebilirsiniz.';
 			case 'db_context.user_entry': return 'Kayıt: {value}';
 			case 'db_context.building_name': return 'Bina: {value}';
 			case 'db_context.apartment_label': return 'Daire: {value}';

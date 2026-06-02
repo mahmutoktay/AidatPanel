@@ -12,6 +12,7 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../apartments/data/apartments_store.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
+import '../../data/buildings_store.dart';
 import '../../data/invite_code_store.dart';
 import '../../domain/entities/building_entity.dart';
 import '../../utils/invite_code_helpers.dart';
@@ -22,12 +23,7 @@ import '../widgets/invite_step_indicator.dart';
 
 /// Davet kodu üretme akışı (3 adım): Bina → Daire → Kod.
 class InviteCodeScreen extends ConsumerStatefulWidget {
-  final List<BuildingEntity> buildings;
-
-  const InviteCodeScreen({
-    super.key,
-    required this.buildings,
-  });
+  const InviteCodeScreen({super.key});
 
   @override
   ConsumerState<InviteCodeScreen> createState() => _InviteCodeScreenState();
@@ -69,10 +65,21 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   Widget _buildStepContent() {
     switch (_step) {
       case 0:
-        return _BuildingPickerStep(
-          key: const ValueKey('step-0'),
-          buildings: widget.buildings,
-          onPick: _onBuildingPicked,
+        final buildingsAsync = ref.watch(buildingsStoreProvider);
+        return buildingsAsync.when(
+          loading: () => const Center(
+            key: ValueKey('step-0-loading'),
+            child: CircularProgressIndicator(),
+          ),
+          error: (e, _) => Center(
+            key: const ValueKey('step-0-error'),
+            child: Text(userFacingError(e)),
+          ),
+          data: (buildings) => _BuildingPickerStep(
+            key: const ValueKey('step-0'),
+            buildings: buildings,
+            onPick: _onBuildingPicked,
+          ),
         );
       case 1:
         final asyncApts =
@@ -195,7 +202,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
 
   void _onBackPressed() {
     if (_step == 0) {
-      Navigator.pop(context);
+      context.pop();
     } else if (_step == 1) {
       setState(() {
         _step = 0;

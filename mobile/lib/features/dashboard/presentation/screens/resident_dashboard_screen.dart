@@ -95,11 +95,13 @@ class _ResidentDashboardScreenState
         ref.read(residentTabIndexProvider.notifier).state = 0;
         _tabController.animateTo(0);
       },
-      onExitHint: (message) => ref.read(toastProvider.notifier).show(
-        message,
-        type: ToastType.info,
-        duration: AppBackNavigation.exitGracePeriod,
-      ),
+      onExitHint: (message) => ref
+          .read(toastProvider.notifier)
+          .show(
+            message,
+            type: ToastType.info,
+            duration: AppBackNavigation.exitGracePeriod,
+          ),
       child: Scaffold(
         backgroundColor: AppColors.surface,
         body: Column(
@@ -109,6 +111,7 @@ class _ResidentDashboardScreenState
             Expanded(
               child: TabBarView(
                 controller: _tabController,
+                physics: const NeverScrollableScrollPhysics(),
                 children: [
                   _buildHomeTab(),
                   _buildDuesTab(),
@@ -177,9 +180,11 @@ class _ResidentDashboardScreenState
       color: AppColors.primary,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: AppSizes.screenBodyScrollPadding.copyWith(top: AppSizes.spacingS),
+        padding: AppSizes.screenBodyScrollPadding.copyWith(
+          top: AppSizes.spacingS,
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             DashboardWelcomeLine(userName: userName),
             const SizedBox(height: AppSizes.spacingM),
@@ -189,6 +194,14 @@ class _ResidentDashboardScreenState
               paidCount: paidCount,
             ),
             const SizedBox(height: AppSizes.spacingM),
+            Text(
+              context.t.common.quickActions,
+              style: AppTypography.h4.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: AppSizes.spacingS),
             _ResidentQuickActionsRow(
               pendingCount: pendingCount,
               billsCount: dues.length,
@@ -269,7 +282,7 @@ class _ResidentDashboardScreenState
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
                         tx['type']!,
@@ -327,32 +340,33 @@ class _ResidentHeroSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
+    return SizedBox(
+      height: DashboardMetricTile.kTileHeight,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: TintDashboardTile(
+            child: DashboardMetricTile(
               icon: Icons.pending_outlined,
-              value: pendingCount.toString(),
+              animatedValue: pendingCount,
               label: context.t.common.pendingStatus,
               valueColor: AppColors.warning,
             ),
           ),
           const SizedBox(width: AppSizes.spacingS),
           Expanded(
-            child: TintDashboardTile(
+            child: DashboardMetricTile(
               icon: Icons.warning_amber_rounded,
-              value: overdueCount.toString(),
+              animatedValue: overdueCount,
               label: context.t.common.overdueStatus,
               valueColor: AppColors.error,
             ),
           ),
           const SizedBox(width: AppSizes.spacingS),
           Expanded(
-            child: TintDashboardTile(
+            child: DashboardMetricTile(
               icon: Icons.check_circle_outline,
-              value: paidCount.toString(),
+              animatedValue: paidCount,
               label: context.t.common.paidStatus,
               valueColor: AppColors.success,
             ),
@@ -384,36 +398,40 @@ class _ResidentQuickActionsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.t.common;
-    return IntrinsicHeight(
+    return SizedBox(
+      height: DashboardActionTile.compactRowHeight,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: TintDashboardTile(
+            child: DashboardActionTile(
               icon: Icons.payment_outlined,
               value: pendingCount.toString(),
               label: t.makePayment,
               valueColor: AppColors.info,
+              compact: true,
               onTap: onDues,
             ),
           ),
           const SizedBox(width: AppSizes.spacingS),
           Expanded(
-            child: TintDashboardTile(
+            child: DashboardActionTile(
               icon: Icons.receipt_outlined,
               value: billsCount.toString(),
               label: t.bills,
               valueColor: AppColors.accent,
+              compact: true,
               onTap: onBills,
             ),
           ),
           const SizedBox(width: AppSizes.spacingS),
           Expanded(
-            child: TintDashboardTile(
+            child: DashboardActionTile(
               icon: Icons.support_agent_outlined,
               value: openTicketCount.toString(),
               label: t.support,
               valueColor: AppColors.info,
+              compact: true,
               onTap: onSupport,
             ),
           ),

@@ -142,6 +142,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Uygulama açılışında SecureStorage'daki oturumu geri yükler.
   /// Splash bu future'ı bekleyip ardından yönlendirme yapar.
+  /// Profil / dil güncellemesi sonrası oturum kullanıcısını ve önbelleği senkronlar.
+  Future<void> syncCachedUser(UserEntity user) async {
+    await _authRepository.persistUser(user);
+    if (state.isAuthenticated) {
+      state = state.copyWith(user: user, clearError: true);
+    }
+  }
+
   Future<void> restoreSession() async {
     if (state.isAuthenticated) return;
     try {
@@ -171,6 +179,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = AuthState();
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
+    }
+  }
+
+  /// Diğer cihazların oturumunu kapatır; bu cihazda giriş kalır.
+  Future<void> logoutAllDevices() async {
+    if (state.isLoading) return;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      await _authRepository.logoutAllDevices();
+      state = state.copyWith(isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: userFacingError(e),
+      );
+      rethrow;
     }
   }
 }

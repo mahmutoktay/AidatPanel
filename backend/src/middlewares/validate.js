@@ -78,6 +78,24 @@ const optionalPhone = z.preprocess(
     .optional()
 );
 
+/** PUT /me — `phone: null` veya boş string profilden telefonu siler (meService). */
+const profilePhone = z.preprocess(
+  (v) => {
+    if (v === "") return null;
+    if (v === undefined) return undefined;
+    return v;
+  },
+  z
+    .union([
+      z.null(),
+      z
+        .string()
+        .min(10, "Telefon numarası en az 10 karakter olmalıdır")
+        .max(15, "Telefon numarası en fazla 15 karakter olabilir"),
+    ])
+    .optional()
+);
+
 export const authSchemas = {
   register: {
     body: z.object({
@@ -177,13 +195,16 @@ export const meSchemas = {
           .min(2, "İsim en az 2 karakter olmalıdır")
           .max(50, "İsim en fazla 50 karakter olabilir")
           .optional(),
-        phone: optionalPhone,
+        phone: profilePhone,
         language: z.enum(["tr", "en"]).optional(),
       })
       .refine(
         (d) =>
           d.name !== undefined || d.phone !== undefined || d.language !== undefined,
-        { message: "En az bir alan gönderin (name, phone veya language)." }
+        {
+          message:
+            "En az bir alan gönderin (name, phone veya language). Telefonu silmek için phone: null gönderin.",
+        }
       ),
   },
 

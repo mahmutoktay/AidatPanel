@@ -38,6 +38,7 @@ import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/buildings/data/buildings_store.dart';
 import 'features/dues/presentation/providers/dues_provider.dart';
 import 'features/profile/presentation/providers/profile_provider.dart';
+import 'features/subscription/presentation/providers/subscription_provider.dart';
 import 'features/tickets/presentation/providers/tickets_provider.dart';
 import 'features/dekont/presentation/providers/dekont_provider.dart';
 import 'dev/mock_dekont_repository.dart';
@@ -60,6 +61,7 @@ void main() async {
   MockAuthRepository.seedManagerSession();
   final mockDues = MockDuesRepository();
   final mockProfile = MockProfileRepository();
+  final mockSubscription = MockSubscriptionRepository();
   final mockTickets = MockTicketRepository();
   final mockDekont = MockDekontRepository();
   final mockExpenses = MockExpenseDataSource()..seedPreview();
@@ -73,6 +75,7 @@ void main() async {
         apartmentRepositoryProvider.overrideWithValue(mockApartments),
         duesRepositoryProvider.overrideWithValue(mockDues),
         profileRepositoryProvider.overrideWithValue(mockProfile),
+        subscriptionRepositoryProvider.overrideWithValue(mockSubscription),
         ticketRepositoryProvider.overrideWithValue(mockTickets),
         dekontRepositoryProvider.overrideWithValue(mockDekont),
         expenseDataSourceProvider.overrideWithValue(mockExpenses),

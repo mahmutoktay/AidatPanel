@@ -21,7 +21,19 @@ import '../../features/dekont/presentation/screens/make_payment_screen.dart';
 import '../../features/dekont/presentation/screens/manager_dekonts_screen.dart';
 import '../../features/dekont/presentation/screens/my_dekonts_screen.dart';
 import '../../features/buildings/presentation/screens/saved_ibans_screen.dart';
+import '../../features/buildings/presentation/screens/add_building_screen.dart';
+import '../../features/buildings/presentation/screens/building_residents_screen.dart';
+import '../../features/buildings/presentation/screens/invite_code_screen.dart';
+import '../../features/buildings/data/buildings_store.dart';
+import '../../features/buildings/domain/entities/building_entity.dart';
 import '../../features/profile/presentation/screens/profile_details_screen.dart';
+import '../../features/subscription/presentation/screens/subscription_screen.dart';
+import '../../features/profile/presentation/screens/legal_document_screen.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_sizes.dart';
+import '../../core/utils/user_error_message.dart';
+import '../../l10n/strings.g.dart';
+import '../../shared/widgets/empty_state_widget.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -52,6 +64,26 @@ List<RouteBase> _managerDashboardChildRoutes() => [
     builder: (context, state) => const NotificationsScreen(),
   ),
   GoRoute(
+    path: 'add-building',
+    name: 'manager_add_building',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const AddBuildingScreen(),
+  ),
+  GoRoute(
+    path: 'invite-code',
+    name: 'manager_invite_code',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const InviteCodeScreen(),
+  ),
+  GoRoute(
+    path: 'buildings/:buildingId',
+    name: 'manager_building_residents',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => _BuildingResidentsRoute(
+      buildingId: state.pathParameters['buildingId']!,
+    ),
+  ),
+  GoRoute(
     path: 'saved-ibans',
     name: 'manager_saved_ibans',
     parentNavigatorKey: rootNavigatorKey,
@@ -62,6 +94,12 @@ List<RouteBase> _managerDashboardChildRoutes() => [
     name: 'manager_profile',
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) => const ProfileDetailsScreen(),
+  ),
+  GoRoute(
+    path: 'subscription',
+    name: 'manager_subscription',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const SubscriptionScreen(),
   ),
 ];
 
@@ -246,6 +284,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/legal/privacy',
+        name: 'legal_privacy',
+        builder: (context, state) => const LegalDocumentScreen(
+          kind: LegalDocumentKind.privacy,
+        ),
+      ),
+      GoRoute(
+        path: '/legal/kvkk',
+        name: 'legal_kvkk',
+        builder: (context, state) => const LegalDocumentScreen(
+          kind: LegalDocumentKind.kvkk,
+        ),
+      ),
+      GoRoute(
+        path: '/legal/help',
+        name: 'legal_help',
+        builder: (context, state) => const LegalDocumentScreen(
+          kind: LegalDocumentKind.help,
+        ),
+      ),
+      GoRoute(
         path: '/manager-dashboard',
         name: 'manager_dashboard',
         builder: (context, state) {
@@ -341,3 +400,90 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+class _BuildingResidentsRoute extends ConsumerWidget {
+  const _BuildingResidentsRoute({required this.buildingId});
+
+  final String buildingId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final buildingsAsync = ref.watch(buildingsStoreProvider);
+    return buildingsAsync.when(
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (err, _) => _BuildingResidentsFallbackScreen(
+        message: userFacingError(err),
+        onRetry: () =>
+            ref.read(buildingsStoreProvider.notifier).loadBuildings(),
+      ),
+      data: (buildings) {
+        BuildingEntity? building;
+        for (final item in buildings) {
+          if (item.id == buildingId) {
+            building = item;
+            break;
+          }
+        }
+        if (building == null) {
+          return _BuildingResidentsFallbackScreen(
+            message: context.t.common.noResults,
+            onRetry: () =>
+                ref.read(buildingsStoreProvider.notifier).loadBuildings(),
+          );
+        }
+        return BuildingResidentsScreen(building: building);
+      },
+    );
+  }
+}
+
+/// Bina listesi yüklenemediğinde veya bina kaydı listede yokken boş ekran yerine.
+class _BuildingResidentsFallbackScreen extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _BuildingResidentsFallbackScreen({
+    required this.message,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.surface,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(context.t.common.buildingDetail),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: AppSizes.screenBodyScrollPadding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Center(
+                  child: EmptyStateWidget(
+                    icon: Icons.error_outline,
+                    title: context.t.common.loadFailed,
+                    subtitle: message,
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: AppSizes.buttonHeightPrimary,
+                child: ElevatedButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh, size: 22),
+                  label: Text(context.t.common.tryAgain),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

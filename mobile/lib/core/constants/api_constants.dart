@@ -20,6 +20,8 @@ class ApiConstants {
   static const String login = '$apiVersion/auth/login';
   static const String refresh = '$apiVersion/auth/refresh';
   static const String logout = '$apiVersion/auth/logout';
+  static const String logoutAllDevices =
+      '$apiVersion/auth/logout-all-devices';
   static const String join = '$apiVersion/auth/join';
   static const String forgotPassword = '$apiVersion/auth/forgot-password';
   static const String resetPassword = '$apiVersion/auth/reset-password';

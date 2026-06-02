@@ -15,9 +15,12 @@ abstract class AuthRemoteDataSource {
   Future<TokenRefreshResult> refreshToken(String refreshToken);
 
   /// Sunucuya `POST /auth/logout` (Bearer) atar.
-  /// Backend `refreshTokenVersion`'ı artırarak mevcut refresh token'ı geçersiz kılar.
-  /// Belge §3 ve "kontrol listesi" madde 4 zorunlu kılar.
+  /// Backend `refreshTokenVersion++` ve `fcmToken: null` yapar; mobil yerel oturumu siler.
   Future<void> logout();
+
+  /// `POST /auth/logout-all-devices` — diğer cihazların refresh oturumunu düşürür,
+  /// bu cihaza yeni access + refresh token döner.
+  Future<TokenRefreshResult> logoutAllDevices();
 
   /// Tur 5 / §10/6 — `POST /auth/forgot-password` body `{ email }`.
   /// Backend her zaman 200 döner (enumeration leak yok); kod sadece kayıtlı
@@ -84,6 +87,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> logout() async {
     await _dioClient.post(ApiConstants.logout);
+  }
+
+  @override
+  Future<TokenRefreshResult> logoutAllDevices() async {
+    final response = await _dioClient.post(ApiConstants.logoutAllDevices);
+    final raw = response.data;
+    final Map<String, dynamic> payload = raw is Map && raw['data'] != null
+        ? raw['data'] as Map<String, dynamic>
+        : raw as Map<String, dynamic>;
+    return TokenRefreshResult(
+      accessToken: payload['accessToken'] as String,
+      refreshToken: payload['refreshToken'] as String?,
+    );
   }
 
   @override

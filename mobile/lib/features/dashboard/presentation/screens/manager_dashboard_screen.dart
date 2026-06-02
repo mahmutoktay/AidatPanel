@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/app_back_navigation.dart';
+import '../../../../core/network/api_exception.dart';
 import '../../../../core/navigation/dashboard_back_handler.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_button_styles.dart';
@@ -22,9 +25,6 @@ import '../../../tickets/presentation/providers/manager_open_tickets_count_provi
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
-import '../../../buildings/presentation/screens/add_building_screen.dart';
-import '../../../buildings/presentation/screens/building_residents_screen.dart';
-import '../../../buildings/presentation/screens/invite_code_screen.dart';
 import '../../../buildings/presentation/widgets/delete_building_dialog.dart';
 import '../../../buildings/presentation/widgets/edit_building_bottom_sheet.dart';
 import '../../../buildings/presentation/widgets/edit_building_collection_bottom_sheet.dart';
@@ -43,6 +43,8 @@ class ManagerDashboardScreen extends ConsumerStatefulWidget {
 class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  DateTime? _lastTransientErrorHintAt;
+  String? _lastTransientErrorMessage;
 
   @override
   void initState() {
@@ -92,11 +94,13 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
         ref.read(managerTabIndexProvider.notifier).state = 0;
         _tabController.animateTo(0);
       },
-      onExitHint: (message) => ref.read(toastProvider.notifier).show(
-        message,
-        type: ToastType.info,
-        duration: AppBackNavigation.exitGracePeriod,
-      ),
+      onExitHint: (message) => ref
+          .read(toastProvider.notifier)
+          .show(
+            message,
+            type: ToastType.info,
+            duration: AppBackNavigation.exitGracePeriod,
+          ),
       child: Scaffold(
         backgroundColor: AppColors.surface,
         body: Column(
@@ -106,6 +110,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
             Expanded(
               child: TabBarView(
                 controller: _tabController,
+                physics: const NeverScrollableScrollPhysics(),
                 children: [
                   _buildHomeTab(buildingsAsync),
                   _buildBuildingsTab(buildingsAsync),
@@ -156,18 +161,26 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
       managerMonthAnnouncementsCountProvider,
     );
     final pendingDekontsAsync = ref.watch(managerPendingDekontsCountProvider);
-    final openTicketCount = openTicketsAsync.value ?? 0;
-    final monthExpenseCount = monthExpensesAsync.value ?? 0;
-    final monthAnnouncementCount = monthAnnouncementsAsync.value ?? 0;
-    final pendingDekontCount = pendingDekontsAsync.value ?? 0;
+    _maybeShowTransientErrorHint([
+      buildingsAsync,
+      openTicketsAsync,
+      monthExpensesAsync,
+      monthAnnouncementsAsync,
+      pendingDekontsAsync,
+    ]);
+    final openTicketCount = openTicketsAsync.valueOrNull ?? 0;
+    final monthExpenseCount = monthExpensesAsync.valueOrNull ?? 0;
+    final monthAnnouncementCount = monthAnnouncementsAsync.valueOrNull ?? 0;
+    final pendingDekontCount = pendingDekontsAsync.valueOrNull ?? 0;
     final authState = ref.watch(authStateProvider);
     final userName = authState.user?.name ?? context.t.common.user;
-    final buildings = buildingsAsync.value ?? const <BuildingEntity>[];
+    final buildings = buildingsAsync.valueOrNull ?? const <BuildingEntity>[];
     // Tüm binaların dues'unu paralel çeken provider — collectionRate ve
     // overdueCount'u backend `collectedDues` döndürmediği için buradan
     // hesaplıyoruz (DuesNotifier sadece tek seçili binayı tutuyor).
     final allDuesAsync = ref.watch(allBuildingsDuesProvider);
-    final allDues = allDuesAsync.value ?? const <String, List<DueEntity>>{};
+    final allDues =
+        allDuesAsync.valueOrNull ?? const <String, List<DueEntity>>{};
 
     int totalApartments = 0;
     for (final b in buildings) {
@@ -187,7 +200,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
           top: AppSizes.spacingS,
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             DashboardWelcomeLine(userName: userName),
             const SizedBox(height: AppSizes.spacingM),
@@ -197,6 +210,14 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
               overdueCount: overdueCount,
             ),
             const SizedBox(height: AppSizes.spacingM),
+            Text(
+              context.t.common.quickActions,
+              style: AppTypography.h4.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: AppSizes.spacingS),
             _ManagerQuickActionsRow(
               openTicketCount: openTicketCount,
               monthExpenseCount: monthExpenseCount,
@@ -266,6 +287,51 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
         ),
       ),
     );
+  }
+
+  void _maybeShowTransientErrorHint(List<AsyncValue<dynamic>> values) {
+    Object? firstError;
+    for (final value in values) {
+      if (value.hasError) {
+        firstError = value.error;
+        break;
+      }
+    }
+    if (firstError == null || !mounted) return;
+
+    var isRateLimited = false;
+    if (firstError is ApiException && firstError.statusCode == 429) {
+      isRateLimited = true;
+    } else {
+      final fallback = userFacingError(firstError).toLowerCase();
+      isRateLimited =
+          fallback.contains('çok fazla istek') ||
+          fallback.contains('too many requests') ||
+          fallback.contains('429');
+    }
+    if (!isRateLimited) return;
+    final message = context.t.common.rateLimitHint;
+
+    final now = DateTime.now();
+    final shouldDebounce =
+        _lastTransientErrorMessage == message &&
+        _lastTransientErrorHintAt != null &&
+        now.difference(_lastTransientErrorHintAt!) <
+            const Duration(seconds: 20);
+    if (shouldDebounce) return;
+
+    _lastTransientErrorMessage = message;
+    _lastTransientErrorHintAt = now;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref
+          .read(toastProvider.notifier)
+          .show(
+            message,
+            type: ToastType.info,
+            duration: const Duration(seconds: 5),
+          );
+    });
   }
 
   /// Pull-to-refresh: bina listesi + tüm binaların dues'u birlikte yenilenir.
@@ -351,16 +417,33 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
       ),
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-          onTap: () => _onBuildingTapped(building),
-          child: _buildBuildingCardContent(building),
+        clipBehavior: Clip.antiAlias,
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        child: Stack(
+          children: [
+            InkWell(
+              borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+              onTap: () => _onBuildingTapped(building),
+              child: _buildBuildingCardContent(
+                building,
+                reserveMenuSlot: true,
+              ),
+            ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: _buildBuildingActionsMenu(building),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildBuildingCardContent(BuildingEntity building) {
+  Widget _buildBuildingCardContent(
+    BuildingEntity building, {
+    bool reserveMenuSlot = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -387,7 +470,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
               const SizedBox(width: AppSizes.spacingM),
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Row(
                       children: [
@@ -443,7 +526,10 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                   ],
                 ),
               ),
-              _buildBuildingActionsMenu(building),
+              if (reserveMenuSlot)
+                const SizedBox(width: AppSizes.minTouchTargetComfort)
+              else
+                _buildBuildingActionsMenu(building),
             ],
           ),
         ),
@@ -470,7 +556,8 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                 child: Builder(
                   builder: (_) {
                     final allDues =
-                        ref.watch(allBuildingsDuesProvider).value ?? const {};
+                        ref.watch(allBuildingsDuesProvider).valueOrNull ??
+                        const {};
                     final rate = buildingCollectionRate(allDues, building.id);
                     return _buildStatItem(
                       icon: Icons.trending_up,
@@ -550,7 +637,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
       width: AppSizes.minTouchTargetComfort,
       height: AppSizes.minTouchTargetComfort,
       child: PopupMenuButton<_BuildingAction>(
-        tooltip: '',
+        tooltip: MaterialLocalizations.of(context).showMenuTooltip,
         padding: EdgeInsets.zero,
         icon: const Icon(
           Icons.more_vert,
@@ -565,19 +652,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
         elevation: 4,
         offset: const Offset(0, AppSizes.spacingXS),
         constraints: const BoxConstraints(minWidth: 240),
-        onSelected: (action) {
-          switch (action) {
-            case _BuildingAction.edit:
-              _onEditBuilding(building);
-              break;
-            case _BuildingAction.collection:
-              _onEditBuildingCollection(building);
-              break;
-            case _BuildingAction.delete:
-              _onDeleteBuilding(building);
-              break;
-          }
-        },
+        onSelected: (action) => _onBuildingMenuAction(building, action),
         itemBuilder: (_) => [
           _buildingActionMenuItem(
             value: _BuildingAction.edit,
@@ -630,16 +705,22 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     );
   }
 
-  void _onEditBuilding(BuildingEntity building) {
-    EditBuildingBottomSheet.show(context, building: building);
-  }
-
-  void _onEditBuildingCollection(BuildingEntity building) {
-    EditBuildingCollectionBottomSheet.show(context, building: building);
-  }
-
-  Future<void> _onDeleteBuilding(BuildingEntity building) async {
-    await DeleteBuildingDialog.show(context, building: building);
+  /// Popup menü route'u kapandıktan sonra sheet/dialog aç (çakışmayı önler).
+  void _onBuildingMenuAction(BuildingEntity building, _BuildingAction action) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      switch (action) {
+        case _BuildingAction.edit:
+          EditBuildingBottomSheet.show(context, building: building);
+          break;
+        case _BuildingAction.collection:
+          EditBuildingCollectionBottomSheet.show(context, building: building);
+          break;
+        case _BuildingAction.delete:
+          unawaited(DeleteBuildingDialog.show(context, building: building));
+          break;
+      }
+    });
   }
 
   Widget _buildStatItem({
@@ -673,27 +754,15 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
   }
 
   void _onAddBuildingPressed() {
-    Navigator.of(context, rootNavigator: true).push<void>(
-      MaterialPageRoute(builder: (_) => const AddBuildingScreen()),
-    );
+    context.push('/manager-dashboard/add-building');
   }
 
   void _onCreateInviteCodePressed() {
-    Navigator.of(context, rootNavigator: true).push<void>(
-      MaterialPageRoute(
-        builder: (_) => InviteCodeScreen(
-          buildings: ref.read(buildingsStoreProvider).value ?? [],
-        ),
-      ),
-    );
+    context.push('/manager-dashboard/invite-code');
   }
 
   void _onBuildingTapped(BuildingEntity building) {
-    Navigator.of(context, rootNavigator: true).push<void>(
-      MaterialPageRoute(
-        builder: (_) => BuildingResidentsScreen(building: building),
-      ),
-    );
+    context.push('/manager-dashboard/buildings/${building.id}');
   }
 
   Widget _buildDuesTab() {
@@ -742,7 +811,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                       const SizedBox(width: AppSizes.spacingM),
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
@@ -817,7 +886,7 @@ class _BuildingsAsyncSection extends StatelessWidget {
       // Veri varken arka planda yenileniyor (refresh) → eski listeyi göster.
       // Sadece ilk yüklemede (data null iken) loader çıkar.
       loading: () {
-        final cached = buildingsAsync.value;
+        final cached = buildingsAsync.valueOrNull;
         if (cached != null && cached.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -955,31 +1024,33 @@ class _HeroSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
+    return SizedBox(
+      height: DashboardMetricTile.kTileHeight,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: TintDashboardTile(
+            child: DashboardMetricTile(
               icon: Icons.apartment_outlined,
-              value: totalApartments.toString(),
+              animatedValue: totalApartments,
               label: context.t.common.totalApartments,
             ),
           ),
           const SizedBox(width: AppSizes.spacingS),
           Expanded(
-            child: TintDashboardTile(
+            child: DashboardMetricTile(
               icon: Icons.trending_up,
-              value: '%${collectionRate.toStringAsFixed(0)}',
+              animatedValue: collectionRate.round(),
+              valuePrefix: '%',
               label: context.t.common.collection,
               valueColor: AppColors.success,
             ),
           ),
           const SizedBox(width: AppSizes.spacingS),
           Expanded(
-            child: TintDashboardTile(
+            child: DashboardMetricTile(
               icon: Icons.warning_amber_rounded,
-              value: overdueCount.toString(),
+              animatedValue: overdueCount,
               label: context.t.common.overdueStatus,
               valueColor: AppColors.error,
             ),
@@ -1067,43 +1138,61 @@ class _ManagerQuickActionsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.t.features.faz2;
     final dekontT = context.t.features.dekont;
-    return GridView.count(
-      crossAxisCount: 3,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      mainAxisSpacing: AppSizes.spacingS,
-      crossAxisSpacing: AppSizes.spacingS,
-      childAspectRatio: 1.05,
+    return Column(
       children: [
-        TintDashboardTile(
-          icon: Icons.support_agent_outlined,
-          value: openTicketCount.toString(),
-          label: t.tickets,
-          valueColor: AppColors.info,
-          onTap: onTickets,
+        SizedBox(
+          height: DashboardActionTile.compactRowHeight,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: DashboardActionTile(
+                  icon: Icons.support_agent_outlined,
+                  value: openTicketCount.toString(),
+                  label: t.tickets,
+                  valueColor: AppColors.info,
+                  compact: true,
+                  onTap: onTickets,
+                ),
+              ),
+              const SizedBox(width: AppSizes.spacingS),
+              Expanded(
+                child: DashboardActionTile(
+                  icon: Icons.receipt_long_outlined,
+                  value: monthExpenseCount.toString(),
+                  label: t.expenses,
+                  valueColor: AppColors.accent,
+                  compact: true,
+                  onTap: onExpenses,
+                ),
+              ),
+              const SizedBox(width: AppSizes.spacingS),
+              Expanded(
+                child: DashboardActionTile(
+                  icon: Icons.campaign_outlined,
+                  value: monthAnnouncementCount.toString(),
+                  label: t.announcement,
+                  valueColor: AppColors.primaryLight,
+                  compact: true,
+                  onTap: onAnnouncement,
+                ),
+              ),
+            ],
+          ),
         ),
-        TintDashboardTile(
-          icon: Icons.receipt_long_outlined,
-          value: monthExpenseCount.toString(),
-          label: t.expenses,
-          valueColor: AppColors.accent,
-          onTap: onExpenses,
-        ),
-        TintDashboardTile(
-          icon: Icons.campaign_outlined,
-          value: monthAnnouncementCount.toString(),
-          label: t.announcement,
-          valueColor: AppColors.primaryLight,
-          onTap: onAnnouncement,
-        ),
-        TintDashboardTile(
-          icon: Icons.rate_review_outlined,
-          value: pendingDekontCount.toString(),
-          label: dekontT.reviewAction,
-          iconColor: AppColors.textPrimary,
-          valueColor: AppColors.textPrimary,
-          onTap: onDekonts,
+        const SizedBox(height: AppSizes.spacingS),
+        SizedBox(
+          width: double.infinity,
+          height: AppSizes.minTouchTargetComfort,
+          child: DashboardActionTile(
+            icon: Icons.rate_review_outlined,
+            value: pendingDekontCount.toString(),
+            label: dekontT.reviewAction,
+            iconColor: AppColors.textPrimary,
+            valueColor: AppColors.textPrimary,
+            compact: false,
+            onTap: onDekonts,
+          ),
         ),
       ],
     );

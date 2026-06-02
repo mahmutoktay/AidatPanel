@@ -28,6 +28,8 @@ import '../core/utils/iban_utils.dart';
 import '../features/dues/domain/entities/due_entity.dart';
 import '../features/dues/domain/repositories/dues_repository.dart';
 import '../features/profile/data/repositories/profile_repository.dart';
+import '../features/subscription/domain/entities/subscription_entity.dart';
+import '../features/subscription/domain/repositories/subscription_repository.dart';
 import '../features/tickets/domain/entities/ticket_entity.dart';
 import '../features/tickets/domain/entities/ticket_update_entity.dart';
 import '../features/tickets/domain/repositories/ticket_repository.dart';
@@ -79,6 +81,12 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> persistUser(UserEntity user) async {
+    await Future.delayed(_delay);
+    _sessionUser = user;
+  }
+
+  @override
   Future<UserEntity> login(String identifier, String password) async {
     await Future.delayed(_delay);
     final id = identifier.trim().toLowerCase();
@@ -109,9 +117,20 @@ class MockAuthRepository implements AuthRepository {
     _sessionUser = null;
   }
 
+  @override
+  Future<void> logoutAllDevices() async {
+    await Future.delayed(_delay);
+  }
+
   /// İlk açılışta otomatik yönetici (isteğe bağlı). main_dev çağırır.
   static void seedManagerSession() {
     _sessionUser = _devManager;
+  }
+
+  static UserEntity? get sessionUser => _sessionUser;
+
+  static void updateSessionUser(UserEntity user) {
+    _sessionUser = user;
   }
 
   /// Tur 5 §10/6 — Backend her zaman 200 döner; mock da aynı davranışı
@@ -169,6 +188,74 @@ class MockProfileRepository implements ProfileRepository {
         statusCode: 409,
       );
     }
+  }
+
+  @override
+  Future<UserEntity> getProfile() async {
+    await Future.delayed(_delay);
+    final user = MockAuthRepository.sessionUser;
+    if (user == null) {
+      throw ApiException(message: 'Unauthorized', statusCode: 401);
+    }
+    return user;
+  }
+
+  @override
+  Future<UserEntity> updateProfile({
+    required String name,
+    String? phone,
+  }) async {
+    await Future.delayed(_delay);
+    final user = MockAuthRepository.sessionUser;
+    if (user == null) {
+      throw ApiException(message: 'Unauthorized', statusCode: 401);
+    }
+    final updated = UserEntity(
+      id: user.id,
+      email: user.email,
+      name: name.trim(),
+      phone: phone?.trim().isEmpty == true ? null : phone?.trim(),
+      role: user.role,
+      fcmToken: user.fcmToken,
+      language: user.language,
+      apartmentId: user.apartmentId,
+    );
+    MockAuthRepository.updateSessionUser(updated);
+    return updated;
+  }
+
+  @override
+  Future<UserEntity> updateLanguage(String languageCode) async {
+    await Future.delayed(_delay);
+    final user = MockAuthRepository.sessionUser;
+    if (user == null) {
+      throw ApiException(message: 'Unauthorized', statusCode: 401);
+    }
+    final updated = UserEntity(
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: user.role,
+      fcmToken: user.fcmToken,
+      language: languageCode,
+      apartmentId: user.apartmentId,
+    );
+    MockAuthRepository.updateSessionUser(updated);
+    return updated;
+  }
+}
+
+class MockSubscriptionRepository implements SubscriptionRepository {
+  @override
+  Future<SubscriptionEntity?> getMySubscription() async {
+    await Future.delayed(_delay);
+    return const SubscriptionEntity(
+      id: 'sub_dev_1',
+      status: SubscriptionStatus.trial,
+      plan: 'monthly',
+      currentPeriodEnd: null,
+    );
   }
 }
 

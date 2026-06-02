@@ -5,6 +5,7 @@ import {
   refreshToken,
   join,
   logout,
+  logoutAllDevices,
   forgotPassword,
   resetPassword,
 } from "../controllers/authControllers.js";
@@ -25,5 +26,6 @@ router.post("/join", validate(authSchemas.join), join);
 router.post("/forgot-password", validate(authSchemas.forgotPassword), forgotPassword);
 router.post("/reset-password", validate(authSchemas.resetPassword), resetPassword);
 router.post("/logout", authMiddleware, logout);
+router.post("/logout-all-devices", authMiddleware, logoutAllDevices);
 
 export default router;

@@ -30,6 +30,7 @@ class AppBackNavigation {
     required void Function(String message) onExitHint,
   }) {
     final path = _currentPath(context);
+    final rootNavigator = Navigator.of(context, rootNavigator: true);
 
     // Tam ekran üst route (parentNavigatorKey ile root'ta açılan sayfalar).
     if (path != dashboardRootPath) {
@@ -39,7 +40,20 @@ class AppBackNavigation {
         router.pop();
         return true;
       }
+      if (rootNavigator.canPop()) {
+        resetExitTimer();
+        rootNavigator.pop();
+        return true;
+      }
       return false;
+    }
+
+    // GoRouter path'i dashboard kökü görünse de root navigator üzerinde
+    // MaterialPageRoute/dialog gibi üst route açık olabilir.
+    if (rootNavigator.canPop()) {
+      resetExitTimer();
+      rootNavigator.pop();
+      return true;
     }
 
     // Dashboard kökü — önce Ana Sayfa sekmesi.

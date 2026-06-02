@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_button_styles.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/app_select_field.dart';
+import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../providers/notifications_provider.dart';
@@ -42,11 +46,20 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
     super.dispose();
   }
 
+  void _openAddBuilding() {
+    Navigator.of(context).pop();
+    context.push('/manager-dashboard/add-building');
+  }
+
   @override
   Widget build(BuildContext context) {
-    final buildings = ref.watch(buildingsStoreProvider).value ?? [];
+    final buildingsAsync = ref.watch(buildingsStoreProvider);
+    final buildings = buildingsAsync.valueOrNull ?? const [];
     final t = context.t.features.notifications;
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
+    final isLoadingBuildings =
+        buildingsAsync.isLoading && buildings.isEmpty;
+    final loadFailed = buildingsAsync.hasError && buildings.isEmpty;
 
     if (_buildingId == null && buildings.isNotEmpty) {
       _buildingId = buildings.first.id;
@@ -93,13 +106,63 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppSizes.spacingM),
-                  if (buildings.isEmpty)
-                    Text(
-                      t.noBuilding,
-                      textAlign: TextAlign.center,
-                      style: AppTypography.body2.copyWith(
-                        color: AppColors.textSecondary,
+                  if (isLoadingBuildings)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: AppSizes.spacingXL,
                       ),
+                      child: Center(
+                        child: SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    )
+                  else if (loadFailed)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        EmptyStateWidget(
+                          icon: Icons.cloud_off_outlined,
+                          title: context.t.features.auth.splashConnectionError,
+                          subtitle: buildingsAsync.error != null
+                              ? userFacingError(buildingsAsync.error!)
+                              : context.t.features.auth.splashConnectionHint,
+                        ),
+                        const SizedBox(height: AppSizes.spacingL),
+                        SizedBox(
+                          height: AppSizes.buttonHeightPrimary,
+                          child: ElevatedButton.icon(
+                            onPressed: () => ref
+                                .read(buildingsStoreProvider.notifier)
+                                .loadBuildings(),
+                            style: AppButtonStyles.elevatedPrimary(),
+                            icon: const Icon(Icons.refresh, size: 22),
+                            label: Text(context.t.common.tryAgain),
+                          ),
+                        ),
+                      ],
+                    )
+                  else if (buildings.isEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        EmptyStateWidget(
+                          icon: Icons.apartment_outlined,
+                          title: t.noBuilding,
+                        ),
+                        const SizedBox(height: AppSizes.spacingL),
+                        SizedBox(
+                          height: AppSizes.buttonHeightPrimary,
+                          child: ElevatedButton.icon(
+                            onPressed: _openAddBuilding,
+                            style: AppButtonStyles.elevatedPrimary(),
+                            icon: const Icon(Icons.add_business),
+                            label: Text(context.t.common.addBuilding),
+                          ),
+                        ),
+                      ],
                     )
                   else ...[
                     AppSelectField<String>(

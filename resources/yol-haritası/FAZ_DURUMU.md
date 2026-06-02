@@ -1,7 +1,7 @@
 # AidatPanel — Yol Haritası ve Faz Durumu
 
 **Tek kaynak:** Tüm fazlar, checklist, onaylar, eksikler ve mimari özeti bu dosyada.  
-**Güncelleme:** 2026-05-29 · **Branch:** `mobile/app` · **Mobil:** Furkan
+**Güncelleme:** 2026-06-02 · **Branch:** `mobile/app` · **Mobil:** Furkan
 
 **AI asistanlar** her oturumda bu dosyayı okur; yalnızca **AKTİF** fazda kod yazar (`CLAUDE.md` faz kapısı).
 
@@ -14,24 +14,25 @@
 | 0 | Foundation | ✅ Tamam | — | ✅ |
 | 1 | Aidat + Dashboard + Tur 5 | ✅ Tamam | 2026-05-15 | ✅ 2026-05-10 |
 | 2 | Bildirimler + Giderler | ✅ Tamam | 2026-06-05 | ✅ 2026-05-29 |
-| 3 | Talepler (Tickets) | ✅ Tamam | — | ✅ 2026-05-29 |
-| 3 | **Dekont + tahsilat IBAN** | ⏳ Mobil kod ✅ · Canlı E2E bekliyor | — | — |
-| 3 | Reports (PDF özet) | ⏳ Backend yok | 2026-06-19 | — |
-| 4 | Profil + Abonelik | 🔒 Kilitli | 2026-07-03 | — |
+| 3 | Tickets + Dekont/IBAN (+ Reports ertelendi) | ✅ Tamam | — | ✅ 2026-06-02 |
+| 4 | Profil + Abonelik | ▶ **AKTİF** | 2026-07-03 | — |
 | 5 | Test + sertleştirme | 🔒 Kilitli | 2026-07-10 | — |
 | 6 | v1.0.0 Lansman | 🔒 Kilitli | 2026-07-14 | — |
 
 ```
-▶ AKTİF ÇALIŞMA: FAZ 3 — Dekont + IBAN (mobil)
-▶ FAZ 3 Tickets: kapalı (ONAY ✅) · Reports: backend bekliyor
-▶ FAZ 0–2: kapalı
+▶ AKTİF ÇALIŞMA: FAZ 4 — Profil + Abonelik
+▶ FAZ 3: kapalı (ONAY ✅ 2026-06-02) · Reports ertelendi → backlog #12
+▶ FAZ 0–3: kapalı
 ```
 
 **Sıradaki işler (checklist `[ ]`):**
-- [ ] **FAZ 3 — Dekont + IBAN** (aşağıdaki alt checklist; rehber: `origin/backend/yedek` → `API/FLUTTER-DEKONT-IMPLEMENTATION.md`, sözleşme §12)
-- [ ] FAZ 3 — Reports API + mobil ekran + PDF (backend yok)
+- [x] **FAZ 3** — Tickets + Dekont/IBAN tamam · `ONAY: Furkan ✅` (2026-06-02)
+- [ ] **FAZ 4** — Canlı E2E + ONAY (profil/dil/abonelik okuma tamam; RevenueCat satın alma webhook sonrası)
 - [ ] Gider makbuz **dosya** upload (`POST /expenses/{id}/proof`) — FAZ 2 kalıntısı; backend yok
-- [ ] FAZ 4–6 (profil, abonelik, test, store) — FAZ 3 tamamlanınca
+- [ ] FAZ 5–6 (test, store) — FAZ 4 tamamlanınca
+
+**Ertelenen (unutma — FAZ 3 dışı backlog):**
+- [ ] **Reports** — yönetici aylık özet PDF (`GET /buildings/{id}/reports`); backend yok · aşağı § Reports (ertelendi)
 
 **Referanslar:** API → `origin/backend/yedek` · `API/FLUTTER-BACKEND.md` §12 · Dekont rehberi → `API/FLUTTER-DEKONT-IMPLEMENTATION.md` · Dev → `flutter run -t lib/main_dev.dart`
 
@@ -240,18 +241,14 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 
 ---
 
-## 🛠 FAZ 3 — Tickets + Dekont/IBAN + Reports
+## ✅ FAZ 3 — Tickets + Dekont/IBAN (TAMAMLANDI)
 
-**Durum:** Tickets ✅ · Dekont/IBAN ✅ kod · canlı E2E bekliyor · Reports ⏳ backend yok  
-**ONAY (Tickets):** Furkan ✅ (2026-05-29)  
-**ONAY (Dekont/IBAN):** — (mobil E2E sonrası)  
-**ONAY (Reports):** — (backend + mobil sonrası)
+**Durum:** TAMAMLANDI ✅ (2026-06-02)  
+**ONAY: Furkan ✅** (2026-06-02) — Tickets (2026-05-29) + Dekont/IBAN (2026-06-02) kapsamında resmî kapanış.
 
 > **Tickets:** `origin/backend/yedek` + mobil `features/tickets/` — canlı E2E tamam (2026-05-29).  
-> **Dekont + IBAN:** Backend Faz 2 ✅ — mobil `features/dekont/` tamamlandı (2026-05-29). Canlı E2E + ONAY bekliyor.  
-> **Reports:** `GET /buildings/:id/reports` + PDF — backend repoda **yok** (yönetici aylık özet; **aidat dekontu değil**).
-
-**FAZ 3 kapanışı (üç parça):** Tickets ONAY ✅ + Dekont/IBAN mobil E2E + ONAY + Reports (backend hazır olunca) E2E + ONAY. Reports gelene kadar Dekont/IBAN ile FAZ 3’ün büyük kısmı kapatılabilir; FAZ 4 kilidi için ürün kararı: Reports zorunlu mu?
+> **Dekont + IBAN:** Backend Faz 2 ✅ — mobil `features/dekont/` + canlı E2E + ONAY (2026-06-02).  
+> **Reports:** **ertelendi** (2026-06-02 ürün kararı) — FAZ 3 kapsamı dışı; backlog #12. Backend `GET /buildings/:id/reports` + PDF yok. Yönetici aylık özet; **aidat dekontu / arıza değil**. Backend hazır olunca mobil + E2E + ayrı ONAY.
 
 ### Tickets (features/tickets/)
 | Görev | Backend Durumu |
@@ -276,7 +273,7 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 
 | Modül | Kim | Backend | Mobil |
 |-------|-----|---------|--------|
-| **M3** Tahsilat / IBAN tanımlama | Yönetici | ✅ `POST /buildings`, `GET /collection-presets`, `PATCH .../collection` | ✅ UI + kayıtlı IBAN · canlı E2E bekliyor |
+| **M3** Tahsilat / IBAN tanımlama | Yönetici | ✅ `POST /buildings`, `GET /collection-presets`, `PATCH .../collection` | ✅ UI + kayıtlı IBAN |
 | **M4** Ödeme yap + dekont yükle | Sakin | ✅ `GET /me/payment-collection`, `POST /dekonts/upload` | ✅ |
 | **M5** Dekontlarım | Sakin | ✅ `GET /me/dekonts`, `GET /dekonts/:id`, `GET .../file` | ✅ |
 | **M6** Dekont inceleme | Yönetici | ✅ `GET /buildings/:id/dekonts`, `PATCH .../review` | ✅ |
@@ -293,7 +290,7 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 - [x] `POST /buildings` body’de tahsilat alanları (opsiyonel; doluysa client IBAN doğrulama)
 - [x] Mevcut bina: `PATCH /buildings/:id/collection` (sheet + bina menüsü)
 - [x] IBAN tanımsız bina uyarısı (liste/detay, opsiyonel) — menü + bina kartı ikonu
-- [ ] **Canlı E2E** — bina oluştur + tahsilat PATCH (Furkan, `main.dart`)
+- [x] **Canlı E2E** — bina oluştur + tahsilat PATCH (Furkan, `main.dart`)
 
 #### M4 — Sakin: Ödeme yap + PDF/resim dekont yükleme
 
@@ -332,14 +329,17 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 
 #### FAZ 3 (Dekont/IBAN) çıkış kapısı
 
-- [ ] Yönetici: bina oluştururken/güncellerken IBAN E2E
-- [ ] Sakin: ödeme bilgisi + dekont PDF/resim upload E2E
-- [ ] Yönetici: inceleme onay/red E2E
-- [ ] `ONAY: Furkan ✅` (tarih)
+- [x] Yönetici: bina oluştururken/güncellerken IBAN E2E
+- [x] Sakin: ödeme bilgisi + dekont PDF/resim upload E2E
+- [x] Yönetici: inceleme onay/red E2E
+- [x] `ONAY: Furkan ✅` (2026-06-02)
 
 ---
 
-### Reports (features/reports/) — yönetici aylık özet PDF (dekont değil)
+### Reports (features/reports/) — **ERTELENDİ** · backlog #12
+
+> **FAZ 3 dışı.** Furkan kararı (2026-06-02): FAZ 3 resmî kapanış; Reports sonraya. AI asistanlar bu maddeyi backlog’da tutar; backend açılınca önceliklendirilir.
+
 | Görev | Backend Durumu |
 |-------|----------------|
 | `GET /buildings/{id}/reports`, PDF export | ❌ **YOK** — backend açacak |
@@ -347,17 +347,13 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 - [ ] **⚠️ backend bekliyor** — GET /buildings/{id}/reports bağlama
 - [ ] **⚠️ backend bekliyor** — Aylık özet rapor ekranı
 - [ ] **⚠️ backend bekliyor** — PDF export
-
-### FAZ 3 (Reports) çıkış kapısı
-
-- [ ] Rapor listesi + PDF export canlı E2E
-- [ ] `ONAY: Furkan ✅` (tarih)
+- [ ] Canlı E2E + `ONAY: Furkan ✅` (Reports tamamlanınca)
 
 ---
 
-## 🔒 FAZ 4 — Subscription + Profile
+## ▶ FAZ 4 — Subscription + Profile
 
-**Durum:** KİLİTLİ — FAZ 3 (Tickets + Dekont/IBAN + Reports) tamamlanmadan açılamaz  
+**Durum:** **AKTİF** — FAZ 3 kapandı (2026-06-02); Reports FAZ 3 dışı ertelendi  
 **Hedef:** ~2026-07-03
 
 > Backend ekibi profil ve şifre sıfırlama uçlarını **canlıya almış** (Belge §3, §4).
@@ -370,17 +366,24 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 > kalan maddeler ileri seviye iyileştirmeler ve sunucuya dil tercihi
 > yazımı; "Tüm cihazlardan çıkış" gibi opsiyonel ekler.
 
-- [ ] Profil bilgileri ekranı: `GET /me` ile yeniden yükle, `PUT /me` ile name/phone güncelle (Tur 5 §10/4 ile birlikte gelen şifre değiştir UI'sının yanına eklenebilir)
-- [ ] `PUT /me/language` — UI zaten lokalde dil değiştiriyor; sunucuya yansıtmak (bildirim e-postaları için lazım, FAZ 2'ye kadar düşük öncelik)
-- [ ] "Tüm cihazlardan çıkış yap" — backend `refreshTokenVersion++` ile aslında zaten tek noktadan çıkış yapıyor; kullanıcıya görünür kontrol gerekirse not düşülür
+- [x] Profil bilgileri ekranı: `GET /me` ile yeniden yükle, `PUT /me` ile name/phone güncelle (`EditProfileBottomSheet`, `ProfileNotifier`)
+- [x] `PUT /me/language` — Ayarlar dil seçimi sunucuya yazılır (`changeLocale` + `syncCachedUser`)
+- [x] "Diğer cihazlardan çıkış" — `POST /auth/logout-all-devices` + Ayarlar tile (`_LogoutAllDevicesTile`); normal `logout` bu cihazı da çıkarır
+- [ ] Canlı E2E — profil güncelleme + dil senkronu (`main.dart`)
 
 ### Subscription (features/subscription/)
 | Görev | Backend Durumu |
 |-------|----------------|
 | RevenueCat webhook | ❌ **YOK** — backend açacak |
 
-- [ ] **⚠️ backend bekliyor** — RevenueCat SDK entegrasyonu (mobile tarafı eklenebilir, ama webhook olmadan abonelik durumu sunucuya yansımaz)
-- [ ] **⚠️ backend bekliyor** — Abonelik ekranı (plan seçimi, aktif plan gösterimi — sunucu durumunu okuyamaz)
+- [ ] **⚠️ backend bekliyor** — RevenueCat SDK + satın alma (webhook olmadan sunucu senkronu yok)
+- [x] Abonelik ekranı — `GET /me/subscription` okuma + bilgilendirme; satın alma butonu devre dışı (`SubscriptionScreen`, yönetici ayarlar)
+
+### FAZ 4 çıkış kapısı
+
+- [ ] Profil + dil canlı E2E
+- [ ] Abonelik okuma ekranı canlı E2E (veya backend 404 → bilgi kartı doğrulandı)
+- [ ] `ONAY: Furkan ✅` (tarih)
 
 ---
 
@@ -427,10 +430,12 @@ Checklist tamamlanmadan veya ilgili backend uçları hazır olmadan FAZ 2 başla
 | 5 | Pagination (büyük listeler) | ⏳ | FAZ 5 |
 | 6 | Bina kartı dolu daire `0/N` | ⏳ | API’de `occupiedApartments` yok |
 | 7 | Sakin aidat filtre UI | ⏳ | API var, UI yok |
-| 8 | `PUT /me/language` sunucuya yazma | ⏳ | FAZ 4 |
-| 9 | Profil `GET/PUT /me` ekranı | ⏳ | FAZ 4 |
+| 8 | `PUT /me/language` sunucuya yazma | ✅ | FAZ 4 — mobil (2026-06-02) |
+| 9 | Profil `GET/PUT /me` ekranı | ✅ | FAZ 4 — mobil (2026-06-02) |
+| 13 | RevenueCat satın alma + webhook | ⏳ | FAZ 4 — okuma ekranı var; SDK/webhook bekliyor |
 | 10 | Gider makbuz dosya `/proof` | ⏳ | Backend yok; `receiptUrl` HTTPS var |
-| 11 | Dekont + tahsilat IBAN mobil | ⏳ | **FAZ 3** — kod ✅; canlı E2E + ONAY bekliyor |
+| 11 | Dekont + tahsilat IBAN mobil | ✅ | **FAZ 3** — canlı E2E + ONAY tamamlandı (2026-06-02) |
+| 12 | **Reports** (aylık özet PDF) | ⏳ **ertelendi** | FAZ 3 dışı backlog; `GET /buildings/{id}/reports` backend yok · unutulmasın |
 
 ---
 
@@ -459,10 +464,10 @@ mobile/lib/features/
 ├── notifications/  ✅
 ├── expenses/       ✅
 ├── tickets/        ✅
-├── dekont/         ✅ upload, inceleme, ödeme bilgisi (canlı E2E bekliyor)
-├── reports/        ⏳ FAZ 3 (boş / backend bekliyor)
-├── profile/        🔶 (şifre/KVKK FAZ 1’de; tam profil FAZ 4)
-└── subscription/   ⏳ FAZ 4
+├── dekont/         ✅ upload, inceleme, ödeme bilgisi (canlı E2E tamam)
+├── reports/        ⏳ ertelendi (backlog #12; backend bekliyor)
+├── profile/        ✅ GET/PUT /me + dil + şifre/KVKK (canlı E2E bekliyor)
+└── subscription/   🔶 okuma ekranı; RevenueCat satın alma webhook sonrası
 ```
 
 Clean Architecture: `domain` → `data` → `presentation` · Riverpod StateNotifier · GoRouter

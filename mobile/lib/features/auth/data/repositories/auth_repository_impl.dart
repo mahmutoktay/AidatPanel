@@ -28,6 +28,9 @@ abstract class AuthRepository {
   );
   Future<void> logout();
 
+  /// Diğer cihazlardan çıkış; bu cihazda yeni token ile oturum sürer.
+  Future<void> logoutAllDevices();
+
   /// Tur 5 / §10/6 — Şifremi unuttum akışı.
   /// Backend her zaman 200 döner; UI kullanıcıya "kod gönderildi" mesajı
   /// gösterip reset ekranına geçirir (enumeration leak korumalı).
@@ -44,6 +47,9 @@ abstract class AuthRepository {
   /// - Refresh 401/403 alırsa storage temizlenir, null döner.
   /// - Ağ hatasında stale token'la user döndürür (interceptor sonra yeniler).
   Future<UserEntity?> restoreSession();
+
+  /// Profil güncellemesi sonrası SecureStorage kullanıcı önbelleğini yazar.
+  Future<void> persistUser(UserEntity user);
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -147,6 +153,26 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> logoutAllDevices() async {
+    try {
+      final tokens = await _remoteDataSource.logoutAllDevices();
+      await _secureStorage.saveToken(tokens.accessToken);
+      if (tokens.refreshToken != null) {
+        await _secureStorage.saveRefreshToken(tokens.refreshToken!);
+      }
+      await _secureStorage.saveTokenExpiry(
+        JwtUtils.parseExpiry(tokens.accessToken),
+      );
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(
+        message: 'Diğer cihazlardan çıkış yapılamadı, lütfen tekrar deneyin',
+      );
+    }
+  }
+
+  @override
   Future<void> forgotPassword(String email) async {
     try {
       await _remoteDataSource.forgotPassword(email: email);
@@ -169,6 +195,20 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (_) {
       throw ApiException(message: 'Şifre sıfırlanamadı, lütfen tekrar deneyin');
     }
+  }
+
+  @override
+  Future<void> persistUser(UserEntity user) async {
+    final data = UserData(
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: user.role == UserRole.manager ? 'MANAGER' : 'RESIDENT',
+      language: user.language,
+      apartmentId: user.apartmentId,
+    );
+    await _secureStorage.saveUser(jsonEncode(data.toJson()));
   }
 
   @override

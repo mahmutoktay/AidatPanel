@@ -43,7 +43,7 @@ class SettingsTab extends ConsumerWidget {
                   context.push(path);
                 },
                 style: ProfileSettingsUi.primaryButton,
-                child: Text(context.t.common.editProfile),
+                child: Text(context.t.features.profile.title),
               ),
             ),
             const SizedBox(height: 24),
@@ -56,12 +56,18 @@ class SettingsTab extends ConsumerWidget {
             title: context.t.common.changePassword,
             onTap: () => ChangePasswordBottomSheet.show(context),
           ),
-          if (user?.role == UserRole.manager)
+          if (user?.role == UserRole.manager) ...[
             _SettingsTile(
               icon: Icons.account_balance_wallet_outlined,
               title: context.t.features.buildings.collection.savedIbansTitle,
               onTap: () => context.push('/manager-dashboard/saved-ibans'),
             ),
+            _SettingsTile(
+              icon: Icons.card_membership_outlined,
+              title: context.t.features.subscription.title,
+              onTap: () => context.push('/manager-dashboard/subscription'),
+            ),
+          ],
           _SettingsTile(
             icon: Icons.language_outlined,
             title: context.t.common.language,
@@ -80,17 +86,17 @@ class SettingsTab extends ConsumerWidget {
           _SettingsTile(
             icon: Icons.privacy_tip_outlined,
             title: context.t.common.privacyPolicy,
-            onTap: () => _showComingSoon(context, ref),
+            onTap: () => context.push('/legal/privacy'),
           ),
           _SettingsTile(
             icon: Icons.shield_outlined,
             title: context.t.common.kvkk,
-            onTap: () => _showComingSoon(context, ref),
+            onTap: () => context.push('/legal/kvkk'),
           ),
           _SettingsTile(
             icon: Icons.help_outline,
             title: context.t.common.helpSupport,
-            onTap: () => _showComingSoon(context, ref),
+            onTap: () => context.push('/legal/help'),
           ),
           _SettingsTile(
             icon: Icons.info_outline,
@@ -102,6 +108,8 @@ class SettingsTab extends ConsumerWidget {
             padding: EdgeInsets.symmetric(vertical: 8),
             child: Divider(height: 1, color: ProfileSettingsUi.line),
           ),
+          _LogoutAllDevicesTile(),
+          const SizedBox(height: 4),
           _LogoutTile(),
 
           if (kDebugMode) ...[
@@ -112,12 +120,6 @@ class SettingsTab extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  void _showComingSoon(BuildContext context, WidgetRef ref) {
-    ref
-        .read(toastProvider.notifier)
-        .show(context.t.common.comingSoon, type: ToastType.info);
   }
 
   void _showLanguageSheet(BuildContext context, WidgetRef ref) {
@@ -148,9 +150,16 @@ class SettingsTab extends ConsumerWidget {
               title: 'Türkçe',
               subtitle: 'Turkish',
               isSelected: currentLocale == AppLocale.tr,
-              onTap: () {
-                changeLocale(ref, AppLocale.tr);
+              onTap: () async {
+                final ok = await changeLocale(ref, AppLocale.tr);
+                if (!sheetContext.mounted) return;
                 Navigator.pop(sheetContext);
+                if (!ok) {
+                  ref.read(toastProvider.notifier).show(
+                        context.t.features.profile.profileUpdateFailed,
+                        type: ToastType.error,
+                      );
+                }
               },
             ),
             const SizedBox(height: AppSizes.spacingS),
@@ -159,9 +168,16 @@ class SettingsTab extends ConsumerWidget {
               title: 'English',
               subtitle: 'İngilizce',
               isSelected: currentLocale == AppLocale.en,
-              onTap: () {
-                changeLocale(ref, AppLocale.en);
+              onTap: () async {
+                final ok = await changeLocale(ref, AppLocale.en);
+                if (!sheetContext.mounted) return;
                 Navigator.pop(sheetContext);
+                if (!ok) {
+                  ref.read(toastProvider.notifier).show(
+                        context.t.features.profile.profileUpdateFailed,
+                        type: ToastType.error,
+                      );
+                }
               },
             ),
             const SizedBox(height: AppSizes.spacingM),
@@ -382,6 +398,134 @@ class _SettingsTile extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LogoutAllDevicesTile extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
+
+    return _SettingsTile(
+      icon: Icons.phonelink_erase_rounded,
+      title: context.t.common.logoutAllDevices,
+      showChevron: false,
+      onTap: authState.isLoading
+          ? () {}
+          : () => _confirmLogoutAllDevices(context, ref),
+    );
+  }
+
+  void _confirmLogoutAllDevices(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Container(
+        decoration: const BoxDecoration(
+          color: ProfileSettingsUi.background,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          8,
+          20,
+          20 + MediaQuery.of(context).padding.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _BottomSheetHandle(),
+            const SizedBox(height: 20),
+            Container(
+              width: 56,
+              height: 56,
+              decoration: const BoxDecoration(
+                color: ProfileSettingsUi.fill,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.phonelink_erase_rounded,
+                size: 26,
+                color: ProfileSettingsUi.ink,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              context.t.common.logoutAllDevices,
+              style: ProfileSettingsUi.name.copyWith(fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.t.common.logoutAllDevicesConfirm,
+              style: ProfileSettingsUi.handle,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: ProfileSettingsUi.buttonHeight,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(sheetContext),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: ProfileSettingsUi.ink,
+                        side: const BorderSide(
+                          color: ProfileSettingsUi.line,
+                          width: 1,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            ProfileSettingsUi.radiusMd,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        context.t.common.cancelBtn,
+                        style: ProfileSettingsUi.rowTitle,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SizedBox(
+                    height: ProfileSettingsUi.buttonHeight,
+                    child: ElevatedButton(
+                      style: ProfileSettingsUi.primaryButton,
+                      onPressed: () async {
+                        Navigator.pop(sheetContext);
+                        try {
+                          await ref
+                              .read(authStateProvider.notifier)
+                              .logoutAllDevices();
+                          if (!context.mounted) return;
+                          ref.read(toastProvider.notifier).show(
+                                context.t.common.logoutAllDevicesSuccess,
+                                type: ToastType.success,
+                                duration: const Duration(seconds: 4),
+                              );
+                        } catch (_) {
+                          if (!context.mounted) return;
+                          ref.read(toastProvider.notifier).show(
+                                context.t.common.logoutAllDevicesFailed,
+                                type: ToastType.error,
+                              );
+                        }
+                      },
+                      child: Text(
+                        context.t.common.confirm,
+                        style: ProfileSettingsUi.buttonLabel,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

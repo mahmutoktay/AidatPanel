@@ -17,6 +17,7 @@ class FcmService {
 
   bool _listenersAttached = false;
   Future<void>? _syncInFlight;
+  DateTime? _rateLimitedUntil;
 
   FcmService({
     required FirebaseMessaging messaging,
@@ -145,6 +146,17 @@ class FcmService {
   }
 
   Future<void> _uploadIfPossible(String token) async {
+    final now = DateTime.now();
+    if (_rateLimitedUntil != null && now.isBefore(_rateLimitedUntil!)) {
+      if (kDebugMode) {
+        debugPrint(
+          '[FCM] PUT /me/fcm-token atlandı: rate limit aktif '
+          '(${_rateLimitedUntil!.toIso8601String()})',
+        );
+      }
+      return;
+    }
+
     const maxAttempts = 4;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       final access = await _secureStorage.getToken();
@@ -162,6 +174,16 @@ class FcmService {
         }
         return;
       } on ApiException catch (e) {
+        if (e.statusCode == 429) {
+          _rateLimitedUntil = DateTime.now().add(const Duration(minutes: 15));
+          if (kDebugMode) {
+            debugPrint(
+              '[FCM] 429 alındı, tekrar denemeler durduruldu. '
+              'Yeni deneme: ${_rateLimitedUntil!.toIso8601String()}',
+            );
+          }
+          return;
+        }
         if (kDebugMode) {
           debugPrint(
             '[FCM] PUT /me/fcm-token başarısız (${e.statusCode}): ${e.message} '

@@ -1,4 +1,5 @@
 import '../../../../core/network/api_exception.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../datasources/profile_remote_datasource.dart';
 import 'profile_repository.dart';
 
@@ -7,6 +8,45 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   ProfileRepositoryImpl({required ProfileRemoteDataSource remoteDataSource})
       : _remoteDataSource = remoteDataSource;
+
+  @override
+  Future<UserEntity> getProfile() async {
+    try {
+      final data = await _remoteDataSource.getMe();
+      return data.toEntity();
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'Profil bilgileri alınamadı');
+    }
+  }
+
+  @override
+  Future<UserEntity> updateProfile({
+    required String name,
+    String? phone,
+  }) async {
+    try {
+      final data = await _remoteDataSource.updateMe(name: name, phone: phone);
+      return data.toEntity();
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'Profil güncellenemedi');
+    }
+  }
+
+  @override
+  Future<UserEntity> updateLanguage(String languageCode) async {
+    try {
+      final data = await _remoteDataSource.updateLanguage(languageCode);
+      return data.toEntity();
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'Dil tercihi kaydedilemedi');
+    }
+  }
 
   @override
   Future<void> changePassword({

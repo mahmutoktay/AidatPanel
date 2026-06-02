@@ -258,6 +258,30 @@ const logout = async (req, res, next) => {
   }
 };
 
+/** Diğer cihazların refresh oturumlarını düşürür; bu cihaza yeni token çifti döner. */
+const logoutAllDevices = async (req, res, next) => {
+  try {
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        refreshTokenVersion: { increment: 1 },
+      },
+    });
+    const accessToken = generateAccessToken(user);
+    const newRefreshToken = generateRefreshToken(user);
+    res.status(200).json({
+      success: true,
+      message: "Diğer cihazlardaki oturumlar sonlandırıldı.",
+      data: {
+        accessToken,
+        refreshToken: newRefreshToken,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -291,4 +315,13 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-export { register, login, refreshToken, join, logout, forgotPassword, resetPassword };
+export {
+  register,
+  login,
+  refreshToken,
+  join,
+  logout,
+  logoutAllDevices,
+  forgotPassword,
+  resetPassword,
+};

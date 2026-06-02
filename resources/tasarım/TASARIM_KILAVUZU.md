@@ -387,6 +387,30 @@ PasswordCriterion(
 
 ---
 
+### DashboardMetricTile / DashboardActionTile
+
+**Dosya:** `mobile/lib/shared/widgets/tint_dashboard_tile.dart`  
+**Amaç:** Yönetici ve sakin ana sayfa özet grid'i (3 sütun).
+
+| Widget | Kullanım | Kabuk |
+|--------|----------|--------|
+| `DashboardMetricTile` | Salt okunur metrik (daire sayısı, tahsilat %, gecikmiş) | `AppColors.fill`, 12dp radius, **çerçeve yok** |
+| `DashboardActionTile` | Tıklanabilir hızlı işlem | Aynı fill zemin + `InkWell` + chevron |
+
+**Metric iç düzeni:** Büyük değer (üst) → küçük etiket (`textSecondary`) → sağ altta 18sp outline ikon.
+
+**Action iç düzeni:** Sol 40×40 ikon yuvası (`surface` + ince border) → etiket → sayı rozeti (`count > 0` vurgulu) → `chevron_right`.
+
+**Düzen (yönetici):**
+- Satır 1: 3× metric
+- Satır 2: 3× action
+- Satır 3: Dekont action **tam genişlik** (boş hücre yok)
+- Üstünde section başlığı: `context.t.common.quickActions`
+
+`TintDashboardTile` yalnızca geriye uyumluluk için bırakıldı; yeni kodda metric/action ayrımı kullanılır.
+
+---
+
 ### EmptyStateWidget
 
 **Dosya:** `mobile/lib/shared/widgets/empty_state_widget.dart`  
@@ -684,7 +708,7 @@ mobile/lib/
 │   │   ├── password_criterion.dart     ← Şifre kural göstergesi
 │   │   ├── empty_state_widget.dart     ← Boş liste göstergesi
 │   │   ├── friendly_error_screen.dart  ← Ağ / genel hata ekranı
-│   │   ├── tint_dashboard_tile.dart    ← Dashboard özet kutusu
+│   │   ├── tint_dashboard_tile.dart    ← DashboardMetricTile + DashboardActionTile
 │   │   ├── app_select_field.dart       ← Erişilebilir seçim alanı
 │   │   ├── settings_tab.dart           ← Ayarlar sekmesi (profil, dil, çıkış)
 │   │   ├── notification_icon_button.dart

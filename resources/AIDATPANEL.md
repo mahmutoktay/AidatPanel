@@ -283,7 +283,8 @@ enum NotificationType {
 POST   /api/auth/register          # Yönetici kaydı
 POST   /api/auth/login             # Giriş
 POST   /api/auth/refresh           # Token yenile
-POST   /api/auth/logout            # Çıkış
+POST   /api/auth/logout            # Çıkış (bu cihaz + refreshTokenVersion++)
+POST   /api/auth/logout-all-devices # Diğer cihazlardan çıkış; bu cihaza yeni token
 POST   /api/auth/join              # Sakin davet koduyla kaydolur
 POST   /api/auth/forgot-password   # Şifre sıfırlama maili
 POST   /api/auth/reset-password    # Yeni şifre set
