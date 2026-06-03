@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/cache_invalidator.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/storage/secure_storage.dart';
@@ -8,10 +9,20 @@ import '../../data/repositories/auth_repository_impl.dart'
     show AuthRepository, AuthRepositoryImpl;
 import '../../domain/entities/user_entity.dart';
 
+/// Oturum sonlandığında callback almak için global değişken.
+/// DioClient > TokenRefreshService token yenileyemezse bu callback tetiklenir.
+/// AuthNotifier kurulumda bu callback'i kendine bağlar.
+typedef SessionExpiredCallback = void Function();
+SessionExpiredCallback? onSessionExpired;
+
 final secureStorageProvider = Provider((ref) => SecureStorage());
 
 final dioClientProvider = Provider((ref) {
-  return DioClient(secureStorage: ref.watch(secureStorageProvider));
+  return DioClient(
+    secureStorage: ref.watch(secureStorageProvider),
+    // Getter olarak iletilir: çağrı anında güncel değer alınır.
+    onSessionExpiredGetter: () => onSessionExpired,
+  );
 });
 
 final authRemoteDataSourceProvider = Provider((ref) {
@@ -35,6 +46,7 @@ class AuthState {
   final String? error;
   final bool isAuthenticated;
   final bool registrationSuccess;
+  final bool isManualLogout;
 
   AuthState({
     this.isLoading = false,
@@ -42,6 +54,7 @@ class AuthState {
     this.error,
     this.isAuthenticated = false,
     this.registrationSuccess = false,
+    this.isManualLogout = false,
   });
 
   AuthState copyWith({
@@ -50,6 +63,7 @@ class AuthState {
     String? error,
     bool? isAuthenticated,
     bool? registrationSuccess,
+    bool? isManualLogout,
     bool clearUser = false,
     bool clearError = false,
   }) {
@@ -59,6 +73,7 @@ class AuthState {
       error: clearError ? null : (error ?? this.error),
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       registrationSuccess: registrationSuccess ?? this.registrationSuccess,
+      isManualLogout: isManualLogout ?? this.isManualLogout,
     );
   }
 }
@@ -66,7 +81,17 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _authRepository;
 
-  AuthNotifier(this._authRepository) : super(AuthState());
+  AuthNotifier(this._authRepository) : super(AuthState()) {
+    // Oturum sonlanınca (başka cihazdan çıkış, refresh başarısız vb.)
+    // state'i sıfırla ve hata mesajı koy (UI bildirim gösterecek).
+    // Oturum sonlanınca (başka cihazdan çıkış, refresh başarısız vb.)
+    // state'i sıfırla ve hata mesajı koy (UI bildirim gösterecek).
+    // Not: Dil bağımsız mesaj l10n dosyasında; burada yedek olarak İngilizce
+    // kullanılır, app_router.dart l10n sürümünü gösterir.
+    onSessionExpired = () {
+      state = AuthState();
+    };
+  }
 
   /// `identifier` email **veya** telefon (Belge §3).
   Future<void> login(String identifier, String password, WidgetRef ref) async {
@@ -77,6 +102,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Reset tab index on successful login
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);
+      // Önceki kullanıcıya ait tüm cached verileri temizle
+      invalidateAllCachedProviders(ref);
       state = state.copyWith(
         isLoading: false,
         user: user,
@@ -129,6 +156,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Reset tab index on successful join
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);
+      // Önceki kullanıcıya ait tüm cached verileri temizle
+      invalidateAllCachedProviders(ref);
       state = state.copyWith(
         isLoading: false,
         user: user,
@@ -152,12 +181,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> restoreSession() async {
     if (state.isAuthenticated) return;
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final user = await _authRepository.restoreSession();
       if (user != null) {
         state = state.copyWith(
           user: user,
           isAuthenticated: true,
+          isLoading: false,
           clearError: true,
         );
       } else {
@@ -169,14 +200,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout(WidgetRef ref) async {
+    if (state.isLoading) return;
     state = state.copyWith(isLoading: true, error: null);
     try {
       // Reset tab index on logout
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);
+      // Çıkışta tüm cached verileri temizle
+      invalidateAllCachedProviders(ref);
       await _authRepository.logout();
       await Future.delayed(const Duration(milliseconds: 500));
-      state = AuthState();
+      state = AuthState(isManualLogout: true);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
     }
@@ -188,13 +222,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       await _authRepository.logoutAllDevices();
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isLoading: false, clearError: true);
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: userFacingError(e),
-      );
-      rethrow;
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
     }
   }
 }

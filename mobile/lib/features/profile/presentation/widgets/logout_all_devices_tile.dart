@@ -159,22 +159,22 @@ class LogoutAllDevicesConfirmSheet extends ConsumerWidget {
 
   Future<void> _confirm(BuildContext context, WidgetRef ref) async {
     final t = context.t;
-    Navigator.pop(context);
-    try {
-      await ref.read(authStateProvider.notifier).logoutAllDevices();
-      if (!context.mounted) return;
-      ref.read(toastProvider.notifier).show(
-            t.common.logoutAllDevicesSuccess,
-            type: ToastType.success,
-            duration: const Duration(seconds: 4),
-          );
-    } catch (_) {
-      if (!context.mounted) return;
-      ref.read(toastProvider.notifier).show(
-            t.common.logoutAllDevicesFailed,
-            type: ToastType.error,
-          );
+    // Önce API çağrısını yap (sheet açıkken)
+    await ref.read(authStateProvider.notifier).logoutAllDevices();
+    // Sheet'i kapat (hala mounted mı kontrol et)
+    if (context.mounted) {
+      Navigator.pop(context);
     }
+    // Toast provider widget ağacının üst katmanında, sheet'ten bağımsız
+    final authState = ref.read(authStateProvider);
+    final hasError = authState.error != null;
+    ref
+        .read(toastProvider.notifier)
+        .show(
+          hasError ? authState.error! : t.common.logoutAllDevicesSuccess,
+          type: hasError ? ToastType.error : ToastType.success,
+          duration: const Duration(seconds: 4),
+        );
   }
 }
 

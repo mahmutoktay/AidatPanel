@@ -91,13 +91,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   void _switchToResident() {
     if (!_isManager) return;
-    FocusScope.of(context).unfocus();
     setState(() => _isManager = false);
   }
 
   void _switchToManager() {
     if (_isManager) return;
-    FocusScope.of(context).unfocus();
     setState(() => _isManager = true);
   }
 
@@ -592,13 +590,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   const AuthBrandHeader(),
                   Expanded(
                     child: Container(
-                      decoration: const BoxDecoration(
-                        color: AppColors.surface,
-                      ),
+                      decoration: const BoxDecoration(color: AppColors.surface),
                       child: SingleChildScrollView(
                         padding: AppSizes.screenBodyScrollPadding,
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [

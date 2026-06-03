@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 1408 (704 per locale)
+/// Strings: 1410 (705 per locale)
 ///
-/// Built on 2026-06-02 at 16:10 UTC
+/// Built on 2026-06-03 at 15:58 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -181,6 +181,7 @@ class _StringsCommonEn {
 	String get logoutAllDevicesConfirm => 'Sessions on your other phones and tablets will end. You will stay signed in on this device.';
 	String get logoutAllDevicesSuccess => 'Other devices have been signed out.';
 	String get logoutAllDevicesFailed => 'Could not complete this action. Please try again.';
+	String get sessionExpired => 'Your session on this device has been ended by another device.';
 	String get account => 'Account';
 	String get editProfile => 'Edit Profile';
 	String get changePassword => 'Change Password';
@@ -1071,6 +1072,7 @@ class _StringsCommonTr implements _StringsCommonEn {
 	@override String get logoutAllDevicesConfirm => 'Diğer telefon ve tabletlerdeki oturumlar kapanır. Bu cihazda girişiniz devam eder.';
 	@override String get logoutAllDevicesSuccess => 'Diğer cihazlardaki oturumlar kapatıldı.';
 	@override String get logoutAllDevicesFailed => 'İşlem tamamlanamadı. Lütfen tekrar deneyin.';
+	@override String get sessionExpired => 'Bu cihazdaki oturumunuz başka bir cihazdan sonlandırıldı.';
 	@override String get account => 'Hesap';
 	@override String get editProfile => 'Profili Düzenle';
 	@override String get changePassword => 'Şifre Değiştir';
@@ -1929,6 +1931,7 @@ extension on Translations {
 			case 'common.logoutAllDevicesConfirm': return 'Sessions on your other phones and tablets will end. You will stay signed in on this device.';
 			case 'common.logoutAllDevicesSuccess': return 'Other devices have been signed out.';
 			case 'common.logoutAllDevicesFailed': return 'Could not complete this action. Please try again.';
+			case 'common.sessionExpired': return 'Your session on this device has been ended by another device.';
 			case 'common.account': return 'Account';
 			case 'common.editProfile': return 'Edit Profile';
 			case 'common.changePassword': return 'Change Password';
@@ -2641,6 +2644,7 @@ extension on _StringsTr {
 			case 'common.logoutAllDevicesConfirm': return 'Diğer telefon ve tabletlerdeki oturumlar kapanır. Bu cihazda girişiniz devam eder.';
 			case 'common.logoutAllDevicesSuccess': return 'Diğer cihazlardaki oturumlar kapatıldı.';
 			case 'common.logoutAllDevicesFailed': return 'İşlem tamamlanamadı. Lütfen tekrar deneyin.';
+			case 'common.sessionExpired': return 'Bu cihazdaki oturumunuz başka bir cihazdan sonlandırıldı.';
 			case 'common.account': return 'Hesap';
 			case 'common.editProfile': return 'Profili Düzenle';
 			case 'common.changePassword': return 'Şifre Değiştir';

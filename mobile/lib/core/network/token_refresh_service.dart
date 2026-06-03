@@ -8,24 +8,31 @@ class TokenRefreshResult {
   final String accessToken;
   final String? refreshToken;
 
-  const TokenRefreshResult({
-    required this.accessToken,
-    this.refreshToken,
-  });
+  const TokenRefreshResult({required this.accessToken, this.refreshToken});
 }
+
+/// Oturum sonlandığında çağrılacak callback türü.
+typedef SessionExpiredCallback = void Function();
 
 /// Tek uçuş (single-flight) refresh — eşzamanlı 401'lerde tek POST /auth/refresh.
 class TokenRefreshService {
   final Dio _refreshDio;
   final SecureStorage _secureStorage;
 
+  /// Callback değil, callback döndüren bir getter.
+  /// Bu sayede DioClient oluşturulduktan sonra callback tanımlansa bile
+  /// çağrı anında güncel değer alınır.
+  final SessionExpiredCallback? Function()? _onSessionExpiredGetter;
+
   Future<TokenRefreshResult?>? _inFlight;
 
   TokenRefreshService({
     required Dio refreshDio,
     required SecureStorage secureStorage,
-  })  : _refreshDio = refreshDio,
-        _secureStorage = secureStorage;
+    SessionExpiredCallback? Function()? onSessionExpiredGetter,
+  }) : _refreshDio = refreshDio,
+       _secureStorage = secureStorage,
+       _onSessionExpiredGetter = onSessionExpiredGetter;
 
   /// Başarılı refresh sonrası token'ları kaydeder ve sonucu döner.
   /// Refresh token yoksa veya sunucu reddederse `null`.
@@ -80,9 +87,11 @@ class TokenRefreshService {
       );
     } on DioException {
       await _secureStorage.clearAuth();
+      _onSessionExpiredGetter?.call()?.call();
       return null;
     } catch (_) {
       await _secureStorage.clearAuth();
+      _onSessionExpiredGetter?.call()?.call();
       return null;
     }
   }

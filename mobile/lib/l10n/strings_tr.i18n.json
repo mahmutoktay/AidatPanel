@@ -20,6 +20,7 @@
     "logoutAllDevicesConfirm": "Diğer telefon ve tabletlerdeki oturumlar kapanır. Bu cihazda girişiniz devam eder.",
     "logoutAllDevicesSuccess": "Diğer cihazlardaki oturumlar kapatıldı.",
     "logoutAllDevicesFailed": "İşlem tamamlanamadı. Lütfen tekrar deneyin.",
+    "sessionExpired": "Bu cihazdaki oturumunuz başka bir cihazdan sonlandırıldı.",
     "account": "Hesap",
     "editProfile": "Profili Düzenle",
     "changePassword": "Şifre Değiştir",

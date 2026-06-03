@@ -13,9 +13,10 @@ class DioClient {
   late Dio _refreshDio;
   late TokenRefreshService _tokenRefresh;
   final SecureStorage _secureStorage;
+  final SessionExpiredCallback? Function()? onSessionExpiredGetter;
 
-  DioClient({required SecureStorage secureStorage})
-      : _secureStorage = secureStorage {
+  DioClient({required SecureStorage secureStorage, this.onSessionExpiredGetter})
+    : _secureStorage = secureStorage {
     _initializeDio();
   }
 
@@ -41,6 +42,7 @@ class DioClient {
     _tokenRefresh = TokenRefreshService(
       refreshDio: _refreshDio,
       secureStorage: _secureStorage,
+      onSessionExpiredGetter: onSessionExpiredGetter,
     );
 
     _dio.interceptors.add(
@@ -65,8 +67,7 @@ class DioClient {
     ApiConstants.resetPassword,
   };
 
-  bool _isPublicPath(String path) =>
-      _publicPaths.any((p) => path.endsWith(p));
+  bool _isPublicPath(String path) => _publicPaths.any((p) => path.endsWith(p));
 
   Future<String?> _ensureValidAccessToken() async {
     var token = await _secureStorage.getToken();

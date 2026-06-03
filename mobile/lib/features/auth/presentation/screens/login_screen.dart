@@ -148,14 +148,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const AuthBrandHeader(),
                 Expanded(
                   child: Container(
-                    decoration: const BoxDecoration(
-                      color: AppColors.surface,
-                    ),
+                    decoration: const BoxDecoration(color: AppColors.surface),
                     child: SingleChildScrollView(
                       padding: AppSizes.screenBodyScrollPadding,
-                      // Kullanıcı listeyi sürüklerse klavye otomatik kapansın.
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [

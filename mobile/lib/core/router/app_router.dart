@@ -34,6 +34,7 @@ import '../../core/theme/app_sizes.dart';
 import '../../core/utils/user_error_message.dart';
 import '../../l10n/strings.g.dart';
 import '../../shared/widgets/empty_state_widget.dart';
+import '../../shared/widgets/toast_overlay.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -137,6 +138,20 @@ List<RouteBase> _residentDashboardChildRoutes() => [
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshListenable = ValueNotifier<int>(0);
   ref.listen<AuthState>(authStateProvider, (previous, next) {
+    // Oturum sonlanınca toast bildirimi göster.
+    // Normal logout → başarı mesajı, başka cihazdan çıkış / refresh başarısız → sessionExpired mesajı.
+    if (previous?.isAuthenticated == true && !next.isAuthenticated) {
+      // GoRouter henüz yönlendirme yapmadı; toast'ı gecikmeli göster.
+      Future.microtask(() {
+        final message = next.isManualLogout
+            ? t.common.logoutSuccess
+            : t.common.sessionExpired;
+        final type = next.isManualLogout ? ToastType.success : ToastType.error;
+        ref
+            .read(toastProvider.notifier)
+            .show(message, type: type, duration: const Duration(seconds: 5));
+      });
+    }
     refreshListenable.value++;
   });
   ref.onDispose(refreshListenable.dispose);
@@ -286,23 +301,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/legal/privacy',
         name: 'legal_privacy',
-        builder: (context, state) => const LegalDocumentScreen(
-          kind: LegalDocumentKind.privacy,
-        ),
+        builder: (context, state) =>
+            const LegalDocumentScreen(kind: LegalDocumentKind.privacy),
       ),
       GoRoute(
         path: '/legal/kvkk',
         name: 'legal_kvkk',
-        builder: (context, state) => const LegalDocumentScreen(
-          kind: LegalDocumentKind.kvkk,
-        ),
+        builder: (context, state) =>
+            const LegalDocumentScreen(kind: LegalDocumentKind.kvkk),
       ),
       GoRoute(
         path: '/legal/help',
         name: 'legal_help',
-        builder: (context, state) => const LegalDocumentScreen(
-          kind: LegalDocumentKind.help,
-        ),
+        builder: (context, state) =>
+            const LegalDocumentScreen(kind: LegalDocumentKind.help),
       ),
       GoRoute(
         path: '/manager-dashboard',
@@ -410,9 +422,8 @@ class _BuildingResidentsRoute extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final buildingsAsync = ref.watch(buildingsStoreProvider);
     return buildingsAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (err, _) => _BuildingResidentsFallbackScreen(
         message: userFacingError(err),
         onRetry: () =>

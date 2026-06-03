@@ -20,6 +20,7 @@
     "logoutAllDevicesConfirm": "Sessions on your other phones and tablets will end. You will stay signed in on this device.",
     "logoutAllDevicesSuccess": "Other devices have been signed out.",
     "logoutAllDevicesFailed": "Could not complete this action. Please try again.",
+    "sessionExpired": "Your session on this device has been ended by another device.",
     "account": "Account",
     "editProfile": "Edit Profile",
     "changePassword": "Change Password",
