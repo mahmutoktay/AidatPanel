@@ -7,17 +7,26 @@ import {
 const isProduction = process.env.NODE_ENV === "production";
 const isE2E = process.env.AIDATPANEL_E2E === "1";
 
+/// Kullanıcı bazlı rate limit key: authenticated ise userId, yoksa IP.
+/// Böylece aynı WiFi'daki birden çok kullanıcı birbirini etkilemez.
+function userOrIpKey(req) {
+  return req.user?.id || req.ip;
+}
+
 const apiMaxRequests =
   Number(process.env.API_RATE_LIMIT_MAX) ||
-  (isE2E ? 0 : isProduction ? 100 : 5000);
+  (isE2E ? 0 : isProduction ? 600 : 5000);
 
 /**
  * Genel API rate limiter
- * Production: 15 dk / 100 istek (IP). Development / E2E: yüksek limit veya kapalı.
+ * Production: 15 dk / 600 istek (kullanıcı bazlı).
+ * 600 istek = sayfa başına ~4 istekten, 15dk'da ~150 sayfa görüntüleme.
+ * Development / E2E: yüksek limit veya kapalı.
  */
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: apiMaxRequests,
+  keyGenerator: userOrIpKey,
   skip: () => isE2E || (!isProduction && apiMaxRequests === 0),
   message: {
     success: false,
