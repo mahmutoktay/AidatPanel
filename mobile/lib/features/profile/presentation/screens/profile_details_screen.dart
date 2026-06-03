@@ -13,6 +13,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_notifier.dart';
 import '../theme/profile_settings_ui.dart';
 import '../widgets/delete_account_sheet.dart';
+import '../widgets/logout_all_devices_tile.dart';
 
 /// Ayarlar → Profil bilgileri.
 ///
@@ -128,7 +129,8 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     ProfileState profileState,
   ) {
     final t = context.t;
-    final showEdit = user != null && !profileState.isLoading && !_editing;
+    final showEdit =
+        user != null && !_editing && !profileState.isSaving;
 
     return AppBar(
       backgroundColor: ProfileSettingsUi.background,
@@ -311,6 +313,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
             const SizedBox(height: 4),
             const _GroupDivider(),
             const SizedBox(height: 4),
+            const LogoutAllDevicesTile(),
             _DangerTile(
               icon: Icons.delete_outline,
               label: t.common.deleteAccount,
@@ -572,7 +575,6 @@ class _DangerTile extends StatelessWidget {
                     label,
                     style: ProfileSettingsUi.rowTitle.copyWith(
                       color: AppColors.error,
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),

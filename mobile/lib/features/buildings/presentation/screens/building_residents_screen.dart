@@ -9,6 +9,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/selection_mode_widgets.dart';
+import '../../../../shared/widgets/tint_dashboard_tile.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../apartments/data/apartments_store.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
@@ -449,7 +450,7 @@ class _BuildingResidentsScreenState
       children: [
         Text(
           context.t.common.residents,
-          style: AppTypography.h3.copyWith(
+          style: AppTypography.h4.copyWith(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w800,
           ),
@@ -463,7 +464,6 @@ class _BuildingResidentsScreenState
           decoration: BoxDecoration(
             color: AppColors.primary.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(20),
-            border: AppColors.cardBorder,
           ),
           child: Text(
             '$residentsCount ${context.t.common.apartmentsBadge}',
@@ -488,70 +488,86 @@ class _BuildingResidentsScreenState
 
   Widget _buildHeader(BuildingEntity building) {
     return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: AppColors.cardBorder,
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: AppColors.fill,
-              borderRadius: BorderRadius.circular(14),
-              border: AppColors.cardBorder,
-            ),
-            alignment: Alignment.center,
-            child: const Icon(
-              Icons.apartment_rounded,
-              color: AppColors.primary,
-              size: 28,
-            ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: AppSizes.minTouchTargetComfort,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.spacingM,
+            vertical: 14,
           ),
-          const SizedBox(width: AppSizes.spacingM),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  building.name,
-                  style: AppTypography.h3.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w800,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.18),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
-                Row(
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.apartment_rounded,
+                  color: AppColors.primary,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.location_on_outlined,
-                      size: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        building.displayAddress,
-                        style: AppTypography.body2.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                    Text(
+                      building.name,
+                      style: AppTypography.body1.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 17,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Icon(
+                              Icons.location_on_outlined,
+                              size: 16,
+                              color: AppColors.textSecondary
+                                  .withValues(alpha: 0.85),
+                            ),
+                          ),
+                          const WidgetSpan(child: SizedBox(width: 4)),
+                          TextSpan(text: building.displayAddress),
+                        ],
+                      ),
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -569,33 +585,28 @@ class _BuildingResidentsScreenState
     final showSelection = _selectionMode && isOccupied;
     final selected = _selectedApartmentIds.contains(apt.id);
 
-    // Boş daire kartı için soluk bir görünüm: yönetici tarafında "burada
-    // henüz sakin yok" mesajının ilk bakışta okunabilmesi için arka plan
-    // ve kenarlık tonu hafifçe değiştiriliyor.
-    final cardColor = AppColors.surface;
-    final borderColor = isOccupied
-        ? AppColors.borderColor
-        : AppColors.borderColor.withValues(alpha: 0.5);
-    final effectiveBorderColor = showSelection && selected
-        ? AppColors.primary
-        : borderColor;
+    const tileRadius = BorderRadius.all(Radius.circular(12));
+    final perMonthLabel = context.t.common.perMonth
+        .trim()
+        .replaceAll('/', '')
+        .trim();
 
     final card = Container(
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(
-          color: effectiveBorderColor,
-          width: showSelection && selected ? 2 : 1,
-        ),
+        color: AppColors.fill,
+        borderRadius: tileRadius,
+        border: showSelection && selected
+            ? Border.all(color: AppColors.primary, width: 2)
+            : null,
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.spacingM),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if (showSelection) ...[
                   SizedBox(
@@ -614,13 +625,16 @@ class _BuildingResidentsScreenState
                   const SizedBox(width: AppSizes.spacingS),
                 ],
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
-                    color: isOccupied
-                        ? AppColors.primaryLight.withValues(alpha: 0.15)
-                        : AppColors.borderColor.withValues(alpha: 0.4),
-                    shape: BoxShape.circle,
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isOccupied
+                          ? AppColors.primary.withValues(alpha: 0.18)
+                          : AppColors.borderColor.withValues(alpha: 0.6),
+                    ),
                   ),
                   alignment: Alignment.center,
                   child: isOccupied
@@ -629,15 +643,16 @@ class _BuildingResidentsScreenState
                           style: AppTypography.body1.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w700,
+                            fontSize: 17,
                           ),
                         )
                       : Icon(
                           Icons.person_off_outlined,
-                          size: 22,
+                          size: 24,
                           color: AppColors.textSecondary,
                         ),
                 ),
-                const SizedBox(width: AppSizes.spacingM),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -647,9 +662,10 @@ class _BuildingResidentsScreenState
                         style: AppTypography.caption.copyWith(
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
+                          fontSize: 13,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       Text(
                         isOccupied
                             ? apt.residentName
@@ -658,11 +674,14 @@ class _BuildingResidentsScreenState
                           color: isOccupied
                               ? AppColors.textPrimary
                               : AppColors.textSecondary,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 17,
                           fontStyle: isOccupied
                               ? FontStyle.normal
                               : FontStyle.italic,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -674,7 +693,7 @@ class _BuildingResidentsScreenState
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: statusInfo.bgColor,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -692,7 +711,7 @@ class _BuildingResidentsScreenState
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.borderColor.withValues(alpha: 0.5),
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -705,129 +724,47 @@ class _BuildingResidentsScreenState
                   ),
               ],
             ),
-            // Alt satır: "Detaylar.." → daire / sakin bilgisi ve işlemler alt sayfası.
-            // Çoklu seçim modunda detay/işlem footer'ı gizleniyor: kart yalnızca
-            // başlık + durum rozetiyle sade ve hızlı seçilebilir kalır.
             if (showSelection) ...[
               const SizedBox(height: AppSizes.spacingS),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    '₺${apt.monthlyDues.toStringAsFixed(0)}'
-                    '${context.t.common.perMonth}',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '₺${apt.monthlyDues.toStringAsFixed(0)} $perMonthLabel',
+                  style: AppTypography.body2.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
                   ),
-                ],
+                ),
               ),
             ] else ...[
-              const SizedBox(height: AppSizes.spacingM),
-              Container(height: 1, color: borderColor),
-              const SizedBox(height: AppSizes.spacingM),
-              if (isOccupied)
-                Row(
+              const SizedBox(height: AppSizes.spacingS),
+              Container(
+                padding: const EdgeInsets.all(AppSizes.spacingS),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '₺${apt.monthlyDues.toStringAsFixed(0)}',
-                          style: AppTypography.body1.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        Text(
-                          context.t.common.perMonth
-                              .trim()
-                              .replaceAll('/', '')
-                              .trim(),
-                          style: AppTypography.caption.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                    DashboardMetricTile(
+                      icon: Icons.payments_outlined,
+                      label: context.t.common.monthlyDues,
+                      value: '₺${apt.monthlyDues.toStringAsFixed(0)}',
+                      animateValue: false,
                     ),
-                    const Spacer(),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
+                    if (isOccupied) ...[
+                      const SizedBox(height: AppSizes.spacingS),
+                      _buildApartmentDetailsAction(
+                        context,
                         onTap: () =>
                             _showApartmentDetailsBottomSheet(context, apt),
-                        borderRadius: BorderRadius.circular(
-                          AppSizes.buttonRadius,
-                        ),
-                        child: Ink(
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(
-                              AppSizes.buttonRadius,
-                            ),
-                            border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.22),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSizes.spacingM,
-                              vertical: AppSizes.spacingS,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.info_outline_rounded,
-                                  size: 18,
-                                  color: AppColors.primary,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  context.t.common.residentDetailsLink,
-                                  style: AppTypography.body1.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                       ),
-                    ),
-                  ],
-                )
-              else
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '₺${apt.monthlyDues.toStringAsFixed(0)}',
-                          style: AppTypography.body1.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        Text(
-                          context.t.common.perMonth
-                              .trim()
-                              .replaceAll('/', '')
-                              .trim(),
-                          style: AppTypography.caption.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
+                    ],
                   ],
                 ),
+              ),
             ],
           ],
         ),
@@ -838,13 +775,80 @@ class _BuildingResidentsScreenState
       return Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+          borderRadius: tileRadius,
+          splashColor: AppColors.border.withValues(alpha: 0.4),
+          highlightColor: AppColors.border.withValues(alpha: 0.25),
           onTap: () => _toggleApartmentSelection(apt),
           child: card,
         ),
       );
     }
     return card;
+  }
+
+  /// Daire kartı — Dekont / hızlı işlem satırı ile aynı fill aksiyon stili.
+  Widget _buildApartmentDetailsAction(
+    BuildContext context, {
+    required VoidCallback onTap,
+  }) {
+    const actionRadius = BorderRadius.all(Radius.circular(12));
+
+    return Material(
+      color: AppColors.fill,
+      borderRadius: actionRadius,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: actionRadius,
+        splashColor: AppColors.border.withValues(alpha: 0.4),
+        highlightColor: AppColors.border.withValues(alpha: 0.25),
+        child: SizedBox(
+          height: AppSizes.minTouchTargetComfort,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.18),
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.info_outline_rounded,
+                    size: 22,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    context.t.common.residentDetailsLink,
+                    style: AppTypography.body1.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  size: 22,
+                  color: AppColors.textSecondary.withValues(alpha: 0.7),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _showApartmentDetailsBottomSheet(
@@ -1092,25 +1096,26 @@ class _BuildingResidentsScreenState
       padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
         color: AppColors.fill,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: AppColors.cardBorder,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 72,
-            height: 72,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
-              color: isOccupied ? AppColors.fill : AppColors.surface,
-              shape: BoxShape.circle,
-              border: AppColors.cardBorder,
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.18),
+              ),
             ),
             alignment: Alignment.center,
             child: isOccupied && resident != null
                 ? Text(
                     _initialsFromName(resident.name),
-                    style: AppTypography.h2.copyWith(
+                    style: AppTypography.h3.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w800,
                     ),
@@ -1118,7 +1123,7 @@ class _BuildingResidentsScreenState
                 : Icon(
                     Icons.home_work_outlined,
                     color: AppColors.textSecondary,
-                    size: 34,
+                    size: 28,
                   ),
           ),
           const SizedBox(width: AppSizes.spacingM),
@@ -1150,7 +1155,6 @@ class _BuildingResidentsScreenState
                       decoration: BoxDecoration(
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(20),
-                        border: AppColors.cardBorder,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -1222,39 +1226,43 @@ class _BuildingResidentsScreenState
     required BuildContext context,
     required ApartmentEntity apt,
   }) {
-    final tiles = <Widget>[
-      _SheetStatTile(
-        icon: Icons.receipt_long_outlined,
-        label: context.t.common.monthlyDues,
-        value: '₺${apt.monthlyDues.toStringAsFixed(0)}',
-      ),
-      _SheetStatTile(
-        icon: Icons.account_balance_wallet_outlined,
-        label: context.t.common.balance,
-        value: '₺${apt.balance.toStringAsFixed(0)}',
-      ),
-      if (apt.lastPaymentDate != null)
-        _SheetStatTile(
-          icon: Icons.event_available_outlined,
-          label: context.t.common.lastPayment,
-          value: _formatShortDate(apt.lastPaymentDate!),
-        )
-      else
-        _SheetStatTile(
-          icon: Icons.event_busy_outlined,
-          label: context.t.common.lastPayment,
-          value: '—',
-        ),
-    ];
+    final lastPaymentValue = apt.lastPaymentDate != null
+        ? _formatShortDate(apt.lastPaymentDate!)
+        : '—';
 
-    return IntrinsicHeight(
+    return SizedBox(
+      height: DashboardMetricTile.kTileHeight,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (var i = 0; i < tiles.length; i++) ...[
-            if (i > 0) const SizedBox(width: AppSizes.spacingS),
-            Expanded(child: tiles[i]),
-          ],
+          Expanded(
+            child: DashboardMetricTile(
+              icon: Icons.receipt_long_outlined,
+              label: context.t.common.monthlyDues,
+              value: '₺${apt.monthlyDues.toStringAsFixed(0)}',
+              animateValue: false,
+            ),
+          ),
+          const SizedBox(width: AppSizes.spacingS),
+          Expanded(
+            child: DashboardMetricTile(
+              icon: Icons.account_balance_wallet_outlined,
+              label: context.t.common.balance,
+              value: '₺${apt.balance.toStringAsFixed(0)}',
+              animateValue: false,
+            ),
+          ),
+          const SizedBox(width: AppSizes.spacingS),
+          Expanded(
+            child: DashboardMetricTile(
+              icon: apt.lastPaymentDate != null
+                  ? Icons.event_available_outlined
+                  : Icons.event_busy_outlined,
+              label: context.t.common.lastPayment,
+              value: lastPaymentValue,
+              animateValue: false,
+            ),
+          ),
         ],
       ),
     );
@@ -1267,28 +1275,36 @@ class _BuildingResidentsScreenState
     required String phone,
   }) {
     return Container(
+      padding: const EdgeInsets.all(AppSizes.spacingS),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: AppColors.cardBorder,
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
-        children: [
-          _SheetContactRow(
-            icon: Icons.mail_outline_rounded,
-            label: context.t.features.auth.email,
-            value: email,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
-            child: Divider(height: 1, color: AppColors.borderColor),
-          ),
-          _SheetContactRow(
-            icon: Icons.phone_outlined,
-            label: context.t.features.auth.phone,
-            value: phone,
-          ),
-        ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            _SheetContactRow(
+              icon: Icons.mail_outline_rounded,
+              label: context.t.features.auth.email,
+              value: email,
+            ),
+            Divider(
+              height: 1,
+              indent: AppSizes.spacingM,
+              endIndent: AppSizes.spacingM,
+              color: AppColors.borderColor,
+            ),
+            _SheetContactRow(
+              icon: Icons.phone_outlined,
+              label: context.t.features.auth.phone,
+              value: phone,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1311,9 +1327,8 @@ class _BuildingResidentsScreenState
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingXL),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: AppColors.cardBorder,
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
@@ -1371,68 +1386,6 @@ class _BuildingResidentsScreenState
   }
 }
 
-/// Modern stat kartı (Aidat / Bakiye / Son ödeme).
-class _SheetStatTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _SheetStatTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingS),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: AppColors.cardBorder,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: AppColors.fill,
-              borderRadius: BorderRadius.circular(10),
-              border: AppColors.cardBorder,
-            ),
-            alignment: Alignment.center,
-            child: Icon(icon, size: 18, color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: AppSizes.spacingS),
-          Text(
-            label,
-            style: AppTypography.caption.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: AppTypography.body1.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w800,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// İkon liderli iletişim satırı.
 class _SheetContactRow extends StatelessWidget {
   final IconData icon;
@@ -1459,8 +1412,11 @@ class _SheetContactRow extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.18),
+              ),
             ),
             alignment: Alignment.center,
             child: Icon(icon, color: AppColors.primary, size: 20),

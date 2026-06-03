@@ -7,7 +7,6 @@ import 'package:aidatpanel/l10n/strings.g.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:slang_flutter/slang_flutter.dart';
 
 void main() {
   setUpAll(() {

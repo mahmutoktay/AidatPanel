@@ -42,10 +42,20 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
   final ProfileRepository _repository;
   final Ref _ref;
+  bool _loadInFlight = false;
 
   Future<void> loadProfile() async {
-    if (state.isLoading) return;
-    state = state.copyWith(isLoading: true, clearError: true);
+    if (_loadInFlight) return;
+
+    final cachedUser = _ref.read(authStateProvider).user;
+    final hasDisplayUser = state.user != null || cachedUser != null;
+
+    _loadInFlight = true;
+    state = state.copyWith(
+      isLoading: !hasDisplayUser,
+      user: state.user ?? cachedUser,
+      clearError: true,
+    );
     try {
       final user = await _repository.getProfile();
       await _ref.read(authStateProvider.notifier).syncCachedUser(user);
@@ -60,6 +70,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         isLoading: false,
         error: userFacingError(e),
       );
+    } finally {
+      _loadInFlight = false;
     }
   }
 

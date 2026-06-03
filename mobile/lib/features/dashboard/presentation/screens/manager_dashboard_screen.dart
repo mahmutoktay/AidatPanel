@@ -25,6 +25,7 @@ import '../../../tickets/presentation/providers/manager_open_tickets_count_provi
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
+import '../../../buildings/presentation/widgets/building_actions_sheet.dart';
 import '../../../buildings/presentation/widgets/delete_building_dialog.dart';
 import '../../../buildings/presentation/widgets/edit_building_bottom_sheet.dart';
 import '../../../buildings/presentation/widgets/edit_building_collection_bottom_sheet.dart';
@@ -408,32 +409,155 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
   }
 
   Widget _buildDetailedBuildingCard(BuildingEntity building) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: AppColors.cardBorder,
+    const tileRadius = BorderRadius.all(Radius.circular(12));
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.fill,
+          borderRadius: tileRadius,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: tileRadius,
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            children: [
+              InkWell(
+                borderRadius: tileRadius,
+                splashColor: AppColors.border.withValues(alpha: 0.4),
+                highlightColor: AppColors.border.withValues(alpha: 0.25),
+                onTap: () => _onBuildingTapped(building),
+                child: _buildBuildingCardContent(
+                  building,
+                  reserveMenuSlot: true,
+                ),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: _buildBuildingActionsMenu(building),
+              ),
+            ],
+          ),
+        ),
       ),
-      child: Material(
-        color: Colors.transparent,
-        clipBehavior: Clip.antiAlias,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        child: Stack(
+    );
+  }
+
+  /// Ana menü “Yönetilen Binalar” ve Binalarım kartı üst satırı — ortak stil.
+  Widget _buildManagedBuildingHeader(
+    BuildingEntity building, {
+    bool reserveMenuSlot = false,
+    bool showChevron = false,
+  }) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minHeight: AppSizes.minTouchTargetComfort,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.spacingM,
+          vertical: 14,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            InkWell(
-              borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-              onTap: () => _onBuildingTapped(building),
-              child: _buildBuildingCardContent(
-                building,
-                reserveMenuSlot: true,
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.18),
+                ),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.apartment_rounded,
+                color: AppColors.primary,
+                size: 26,
               ),
             ),
-            Positioned(
-              top: 0,
-              right: 0,
-              child: _buildBuildingActionsMenu(building),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          building.name,
+                          style: AppTypography.body1.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 17,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (!building.isCollectionConfigured) ...[
+                        const SizedBox(width: AppSizes.spacingXS),
+                        Tooltip(
+                          message: context
+                              .t
+                              .features
+                              .buildings
+                              .collection
+                              .ibanNotConfigured,
+                          child: Icon(
+                            Icons.warning_amber_rounded,
+                            size: 20,
+                            color: AppColors.warning,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.middle,
+                          child: Icon(
+                            Icons.location_on_outlined,
+                            size: 16,
+                            color:
+                                AppColors.textSecondary.withValues(alpha: 0.85),
+                          ),
+                        ),
+                        const WidgetSpan(child: SizedBox(width: 4)),
+                        TextSpan(text: building.displayAddress),
+                      ],
+                    ),
+                    style: AppTypography.body2.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
+                    maxLines: reserveMenuSlot ? 2 : 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
+            if (reserveMenuSlot)
+              const SizedBox(width: AppSizes.minTouchTargetComfort)
+            else if (showChevron) ...[
+              const SizedBox(width: 10),
+              Icon(
+                Icons.chevron_right,
+                size: 24,
+                color: AppColors.textSecondary.withValues(alpha: 0.7),
+              ),
+            ] else
+              _buildBuildingActionsMenu(building),
           ],
         ),
       ),
@@ -444,199 +568,132 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     BuildingEntity building, {
     bool reserveMenuSlot = false,
   }) {
+    final allDues =
+        ref.watch(allBuildingsDuesProvider).valueOrNull ?? const {};
+    final collectionRate = buildingCollectionRate(allDues, building.id);
+    final showPerApartmentDues =
+        building.dueAmount != null && building.dueAmount! > 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        _buildManagedBuildingHeader(
+          building,
+          reserveMenuSlot: reserveMenuSlot,
+        ),
         Padding(
-          padding: const EdgeInsets.all(AppSizes.spacingM),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: AppColors.fill,
-                  borderRadius: BorderRadius.circular(14),
-                  border: AppColors.cardBorder,
+          padding: EdgeInsets.fromLTRB(
+            AppSizes.spacingM,
+            0,
+            AppSizes.spacingM,
+            AppSizes.spacingM,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(AppSizes.spacingS),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: DashboardMetricTile.kTileHeight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: DashboardMetricTile(
+                          icon: Icons.door_front_door_outlined,
+                          label: context.t.common.apartment,
+                          value:
+                              '${building.occupiedApartments}/${building.totalApartments}',
+                          animateValue: false,
+                        ),
+                      ),
+                      const SizedBox(width: AppSizes.spacingS),
+                      Expanded(
+                        child: DashboardMetricTile(
+                          icon: Icons.trending_up,
+                          label: context.t.common.collection,
+                          animatedValue: collectionRate.round(),
+                          valuePrefix: '%',
+                          valueColor: AppColors.success,
+                          animateValue: false,
+                        ),
+                      ),
+                      const SizedBox(width: AppSizes.spacingS),
+                      Expanded(
+                        child: DashboardMetricTile(
+                          icon: Icons.payments_outlined,
+                          label: context.t.common.monthlyDues,
+                          value:
+                              '₺${building.totalMonthlyDues.toStringAsFixed(0)}',
+                          animateValue: false,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.apartment_rounded,
-                  color: AppColors.primary,
-                  size: 26,
-                ),
-              ),
-              const SizedBox(width: AppSizes.spacingM),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
+                if (showPerApartmentDues) ...[
+                  const SizedBox(height: AppSizes.spacingS),
+                  Container(
+                    height: AppSizes.minTouchTargetComfort,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.spacingM,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.fill,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Row(
                       children: [
+                        Icon(
+                          Icons.receipt_long_outlined,
+                          size: 18,
+                          color: AppColors.textSecondary.withValues(alpha: 0.85),
+                        ),
+                        const SizedBox(width: AppSizes.spacingS),
                         Expanded(
                           child: Text(
-                            building.name,
-                            style: AppTypography.h4.copyWith(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w700,
+                            context.t.common.monthlyDuesPerApartment,
+                            style: AppTypography.body2.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (!building.isCollectionConfigured) ...[
-                          const SizedBox(width: AppSizes.spacingXS),
-                          Tooltip(
-                            message: context
-                                .t
-                                .features
-                                .buildings
-                                .collection
-                                .ibanNotConfigured,
-                            child: Icon(
-                              Icons.warning_amber_rounded,
-                              size: 20,
-                              color: AppColors.warning,
-                            ),
+                        const SizedBox(width: AppSizes.spacingS),
+                        Text(
+                          '₺${building.dueAmount!.toStringAsFixed(0)}',
+                          style: AppTypography.body1.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 17,
                           ),
-                        ],
+                        ),
                       ],
                     ),
-                    const SizedBox(height: AppSizes.spacingXS),
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
-                            child: Icon(
-                              Icons.location_on_outlined,
-                              size: 16,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const WidgetSpan(child: SizedBox(width: 4)),
-                          TextSpan(text: building.displayAddress),
-                        ],
-                      ),
-                      style: AppTypography.body2.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              if (reserveMenuSlot)
-                const SizedBox(width: AppSizes.minTouchTargetComfort)
-              else
-                _buildBuildingActionsMenu(building),
-            ],
-          ),
-        ),
-        Container(height: 1, color: AppColors.primary.withValues(alpha: 0.14)),
-        Padding(
-          padding: const EdgeInsets.all(AppSizes.spacingM),
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildStatItem(
-                  icon: Icons.door_front_door_outlined,
-                  label: context.t.common.apartment,
-                  value:
-                      '${building.occupiedApartments}/${building.totalApartments}',
-                  color: AppColors.primary,
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 40,
-                color: AppColors.primary.withValues(alpha: 0.14),
-              ),
-              Expanded(
-                child: Builder(
-                  builder: (_) {
-                    final allDues =
-                        ref.watch(allBuildingsDuesProvider).valueOrNull ??
-                        const {};
-                    final rate = buildingCollectionRate(allDues, building.id);
-                    return _buildStatItem(
-                      icon: Icons.trending_up,
-                      label: context.t.common.collection,
-                      value: '%${rate.toStringAsFixed(0)}',
-                      color: AppColors.success,
-                    );
-                  },
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 40,
-                color: AppColors.primary.withValues(alpha: 0.14),
-              ),
-              Expanded(
-                child: _buildStatItem(
-                  icon: Icons.payments_outlined,
-                  label: context.t.common.monthlyDues,
-                  value: '₺${building.totalMonthlyDues.toStringAsFixed(0)}',
-                  color: AppColors.accent,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (building.dueAmount != null && building.dueAmount! > 0)
-          Container(
-            margin: const EdgeInsets.fromLTRB(
-              AppSizes.spacingM,
-              0,
-              AppSizes.spacingM,
-              AppSizes.spacingM,
-            ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.spacingM,
-              vertical: AppSizes.spacingS,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.accent.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.receipt_long_outlined,
-                  size: 18,
-                  color: AppColors.accent,
-                ),
-                const SizedBox(width: AppSizes.spacingS),
-                Text(
-                  context.t.common.monthlyDuesPerApartment,
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textSecondary,
                   ),
-                ),
-                const Spacer(),
-                Text(
-                  '₺${building.dueAmount!.toStringAsFixed(0)}',
-                  style: AppTypography.body2.copyWith(
-                    color: AppColors.accent,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                ],
               ],
             ),
           ),
+        ),
       ],
     );
   }
 
-  /// Bina kartının sağ üstünde yer alan üç-nokta menüsü.
+  /// Bina kartının sağ üstünde — işlemler alt sayfasını açar.
   Widget _buildBuildingActionsMenu(BuildingEntity building) {
-    final collectionReady = building.isCollectionConfigured;
-
     return SizedBox(
       width: AppSizes.minTouchTargetComfort,
       height: AppSizes.minTouchTargetComfort,
-      child: PopupMenuButton<_BuildingAction>(
+      child: IconButton(
         tooltip: MaterialLocalizations.of(context).showMenuTooltip,
         padding: EdgeInsets.zero,
         icon: const Icon(
@@ -644,113 +701,36 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
           color: AppColors.textSecondary,
           size: AppSizes.iconSize,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-          side: AppColors.cardBorderSide,
-        ),
-        color: AppColors.surface,
-        elevation: 4,
-        offset: const Offset(0, AppSizes.spacingXS),
-        constraints: const BoxConstraints(minWidth: 240),
-        onSelected: (action) => _onBuildingMenuAction(building, action),
-        itemBuilder: (_) => [
-          _buildingActionMenuItem(
-            value: _BuildingAction.edit,
-            child: _buildingMenuRow(
-              icon: Icons.edit_outlined,
-              fg: AppColors.info,
-              bg: AppColors.infoBg,
-              label: context.t.common.editBuilding,
-            ),
-          ),
-          _buildingActionMenuItem(
-            value: _BuildingAction.collection,
-            child: _buildingMenuRow(
-              icon: collectionReady
-                  ? Icons.account_balance_wallet_outlined
-                  : Icons.warning_amber_outlined,
-              fg: collectionReady ? AppColors.success : AppColors.warning,
-              bg: collectionReady ? AppColors.successBg : AppColors.warningBg,
-              label: context.t.features.buildings.collection.menuEdit,
-              trailing: collectionReady
-                  ? null
-                  : Tooltip(
-                      message: context
-                          .t
-                          .features
-                          .buildings
-                          .collection
-                          .ibanNotConfigured,
-                      child: Icon(
-                        Icons.warning_amber_rounded,
-                        size: AppSizes.iconSizeSmall,
-                        color: AppColors.warning,
-                      ),
-                    ),
-            ),
-          ),
-          const PopupMenuDivider(height: 1),
-          _buildingActionMenuItem(
-            value: _BuildingAction.delete,
-            child: _buildingMenuRow(
-              icon: Icons.delete_outline,
-              fg: AppColors.error,
-              bg: AppColors.errorBg,
-              label: context.t.common.deleteBuilding,
-              labelColor: AppColors.error,
-            ),
-          ),
-        ],
+        onPressed: () => _openBuildingActionsSheet(building),
       ),
     );
   }
 
-  /// Popup menü route'u kapandıktan sonra sheet/dialog aç (çakışmayı önler).
-  void _onBuildingMenuAction(BuildingEntity building, _BuildingAction action) {
+  Future<void> _openBuildingActionsSheet(BuildingEntity building) async {
+    final action = await BuildingActionsSheet.show(
+      context,
+      building: building,
+    );
+    if (!mounted || action == null) return;
+    _onBuildingMenuAction(building, action);
+  }
+
+  /// Alt sayfa kapandıktan sonra düzenleme sheet / dialog aç (çakışmayı önler).
+  void _onBuildingMenuAction(BuildingEntity building, BuildingMenuAction action) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       switch (action) {
-        case _BuildingAction.edit:
+        case BuildingMenuAction.edit:
           EditBuildingBottomSheet.show(context, building: building);
           break;
-        case _BuildingAction.collection:
+        case BuildingMenuAction.collection:
           EditBuildingCollectionBottomSheet.show(context, building: building);
           break;
-        case _BuildingAction.delete:
+        case BuildingMenuAction.delete:
           unawaited(DeleteBuildingDialog.show(context, building: building));
           break;
       }
     });
-  }
-
-  Widget _buildStatItem({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Icon(icon, color: color, size: 22),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: AppTypography.body1.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w700,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
   }
 
   void _onAddBuildingPressed() {
@@ -774,87 +754,29 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
   }
 
   List<Widget> _buildBuildingCards(List<BuildingEntity> buildings) {
+    const tileRadius = BorderRadius.all(Radius.circular(12));
+
     return buildings
         .map(
-          (building) => Container(
-            margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-              border: AppColors.cardBorder,
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-                onTap: () => _onBuildingTapped(building),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSizes.spacingM),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: AppColors.fill,
-                          borderRadius: BorderRadius.circular(12),
-                          border: AppColors.cardBorder,
-                        ),
-                        alignment: Alignment.center,
-                        child: const Icon(
-                          Icons.apartment_rounded,
-                          color: AppColors.primary,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: AppSizes.spacingM),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              building.name,
-                              style: AppTypography.h4.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.w800,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text.rich(
-                              TextSpan(
-                                children: [
-                                  WidgetSpan(
-                                    alignment: PlaceholderAlignment.middle,
-                                    child: Icon(
-                                      Icons.location_on_outlined,
-                                      size: 14,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  const WidgetSpan(child: SizedBox(width: 4)),
-                                  TextSpan(text: building.displayAddress),
-                                ],
-                              ),
-                              style: AppTypography.body2.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: AppSizes.spacingS),
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.textSecondary,
-                        size: 22,
-                      ),
-                    ],
+          (building) => Padding(
+            padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: AppColors.fill,
+                borderRadius: tileRadius,
+              ),
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: tileRadius,
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  borderRadius: tileRadius,
+                  onTap: () => _onBuildingTapped(building),
+                  splashColor: AppColors.border.withValues(alpha: 0.4),
+                  highlightColor: AppColors.border.withValues(alpha: 0.25),
+                  child: _buildManagedBuildingHeader(
+                    building,
+                    showChevron: true,
                   ),
                 ),
               ),
@@ -1059,58 +981,6 @@ class _HeroSummaryCard extends StatelessWidget {
       ),
     );
   }
-}
-
-enum _BuildingAction { edit, collection, delete }
-
-PopupMenuItem<_BuildingAction> _buildingActionMenuItem({
-  required _BuildingAction value,
-  required Widget child,
-}) {
-  return PopupMenuItem<_BuildingAction>(
-    value: value,
-    height: AppSizes.minTouchTargetComfort,
-    padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
-    child: child,
-  );
-}
-
-Widget _buildingMenuRow({
-  required IconData icon,
-  required Color fg,
-  required Color bg,
-  required String label,
-  Color? labelColor,
-  Widget? trailing,
-}) {
-  return Row(
-    children: [
-      Container(
-        width: 40,
-        height: 40,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, size: AppSizes.listRowIconSize, color: fg),
-      ),
-      const SizedBox(width: AppSizes.spacingS),
-      Expanded(
-        child: Text(
-          label,
-          style: AppTypography.body1.copyWith(
-            color: labelColor ?? AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      if (trailing != null) ...[
-        const SizedBox(width: AppSizes.spacingXS),
-        trailing,
-      ],
-    ],
-  );
 }
 
 class _ManagerQuickActionsRow extends StatelessWidget {
