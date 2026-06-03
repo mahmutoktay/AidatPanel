@@ -9,6 +9,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/selection_mode_widgets.dart';
+import '../../../../shared/widgets/async_error_widget.dart';
 import '../../../../shared/widgets/tint_dashboard_tile.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../apartments/data/apartments_store.dart';
@@ -365,30 +366,13 @@ class _BuildingResidentsScreenState
             : null,
         body: asyncApartments.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.error_outline, size: 48, color: AppColors.error),
-                const SizedBox(height: AppSizes.spacingM),
-                Text(
-                  userFacingError(e),
-                  style: AppTypography.body1.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSizes.spacingM),
-                ElevatedButton(
-                  onPressed: () => ref
-                      .read(
-                        apartmentsStoreProvider(widget.building.id).notifier,
-                      )
-                      .loadApartments(),
-                  child: Text(context.t.features.buildings.tekrarDene),
-                ),
-              ],
-            ),
+          error: (e, _) => AsyncErrorWidget(
+            message: userFacingError(e),
+            onRetry: () => ref
+                .read(
+                  apartmentsStoreProvider(widget.building.id).notifier,
+                )
+                .loadApartments(),
           ),
           data: (residents) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

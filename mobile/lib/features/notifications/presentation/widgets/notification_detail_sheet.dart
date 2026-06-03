@@ -88,14 +88,14 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxSheetHeight),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Color(0x1A0F172A),
+            color: AppColors.primary.withValues(alpha: 0.1),
             blurRadius: 24,
-            offset: Offset(0, -4),
+            offset: const Offset(0, -4),
           ),
         ],
       ),

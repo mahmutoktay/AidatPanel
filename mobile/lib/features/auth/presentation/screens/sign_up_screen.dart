@@ -217,14 +217,17 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       return;
     }
 
-    if (phone.isNotEmpty && !AuthValidators.isValidPhone(phone)) {
-      ref
-          .read(toastProvider.notifier)
-          .show(
-            context.t.features.auth.invalidPhoneFormat,
-            type: ToastType.error,
-          );
-      return;
+    if (phone.isNotEmpty) {
+      final phoneError = InputValidators.validatePhone(phone);
+      if (phoneError != null) {
+        ref
+            .read(toastProvider.notifier)
+            .show(
+              context.t.validation.phoneInvalid,
+              type: ToastType.error,
+            );
+        return;
+      }
     }
 
     if (password != confirmPassword) {
@@ -411,15 +414,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       onChanged: (value) {
         setState(() {
-          if (_isManager) {
-            _phoneError = value.trim().isEmpty
-                ? null
-                : InputValidators.validatePhone(value);
-          } else if (value.isNotEmpty && !AuthValidators.isValidPhone(value)) {
-            _phoneError = context.t.features.auth.invalidPhoneNumber;
-          } else {
-            _phoneError = null;
-          }
+          _phoneError = value.trim().isEmpty
+              ? null
+              : InputValidators.validatePhone(value);
         });
       },
     );

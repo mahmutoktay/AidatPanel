@@ -10,7 +10,7 @@ class InputValidators {
     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
   );
 
-  static final phoneRegex = RegExp(r'^[0-9]{10}$');
+  static final phoneRegex = RegExp(r'^5[0-9]{9}$');
   static final _phoneStripRegex = RegExp(r'[^0-9]');
 
   static final nameRegex = RegExp(r'^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,50}$');

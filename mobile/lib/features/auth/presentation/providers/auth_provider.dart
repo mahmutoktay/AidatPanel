@@ -40,7 +40,10 @@ final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(ref.watch(authRepositoryProvider));
 });
 
+enum LogoutReason { manual, otherDevices }
+
 class AuthState {
+  final LogoutReason? logoutReason;
   final bool isLoading;
   final UserEntity? user;
   final String? error;
@@ -49,6 +52,7 @@ class AuthState {
   final bool isManualLogout;
 
   AuthState({
+    this.logoutReason,
     this.isLoading = false,
     this.user,
     this.error,
@@ -58,6 +62,7 @@ class AuthState {
   });
 
   AuthState copyWith({
+    LogoutReason? logoutReason,
     bool? isLoading,
     UserEntity? user,
     String? error,
@@ -68,6 +73,7 @@ class AuthState {
     bool clearError = false,
   }) {
     return AuthState(
+      logoutReason: logoutReason ?? this.logoutReason,
       isLoading: isLoading ?? this.isLoading,
       user: clearUser ? null : (user ?? this.user),
       error: clearError ? null : (error ?? this.error),
@@ -84,12 +90,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier(this._authRepository) : super(AuthState()) {
     // Oturum sonlanınca (başka cihazdan çıkış, refresh başarısız vb.)
     // state'i sıfırla ve hata mesajı koy (UI bildirim gösterecek).
-    // Oturum sonlanınca (başka cihazdan çıkış, refresh başarısız vb.)
-    // state'i sıfırla ve hata mesajı koy (UI bildirim gösterecek).
     // Not: Dil bağımsız mesaj l10n dosyasında; burada yedek olarak İngilizce
     // kullanılır, app_router.dart l10n sürümünü gösterir.
     onSessionExpired = () {
-      state = AuthState();
+      state = AuthState(logoutReason: LogoutReason.otherDevices);
     };
   }
 
@@ -210,7 +214,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       invalidateAllCachedProviders(ref);
       await _authRepository.logout();
       await Future.delayed(const Duration(milliseconds: 500));
-      state = AuthState(isManualLogout: true);
+      state = AuthState(isManualLogout: true, logoutReason: LogoutReason.manual);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
     }

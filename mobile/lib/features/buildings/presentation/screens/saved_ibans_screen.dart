@@ -8,6 +8,7 @@ import '../../../../core/utils/iban_utils.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/selection_mode_widgets.dart';
+import '../../../../shared/widgets/async_error_widget.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../domain/entities/saved_iban_item.dart';
@@ -150,14 +151,9 @@ class _SavedIbansScreenState extends ConsumerState<SavedIbansScreen> {
         ),
         body: async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(
-            child: Padding(
-              padding: AppSizes.screenBodyScrollPadding,
-              child: _SavedIbansErrorBody(
-                message: userFacingError(error),
-                onRetry: () => ref.invalidate(savedIbansListProvider),
-              ),
-            ),
+          error: (error, _) => AsyncErrorWidget(
+            message: userFacingError(error),
+            onRetry: () => ref.invalidate(savedIbansListProvider),
           ),
           data: (items) {
             if (items.isEmpty) {
@@ -433,45 +429,3 @@ class _SavedIbanDeleteButton extends StatelessWidget {
   }
 }
 
-class _SavedIbansErrorBody extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _SavedIbansErrorBody({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Icon(Icons.error_outline, color: AppColors.error, size: 40),
-        const SizedBox(height: AppSizes.spacingM),
-        Text(
-          context.t.common.loadFailed,
-          style: AppTypography.h4,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppSizes.spacingS),
-        Text(
-          message,
-          style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppSizes.spacingL),
-        SizedBox(
-          height: AppSizes.buttonHeightSecondary,
-          child: ElevatedButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh, size: 20),
-            label: Text(context.t.common.tryAgain),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

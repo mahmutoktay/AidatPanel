@@ -15,6 +15,12 @@ class DioClient {
   final SecureStorage _secureStorage;
   final SessionExpiredCallback? Function()? onSessionExpiredGetter;
 
+  final Map<String, ({Response<dynamic> response, DateTime expiry})> _cache = {};
+
+  String _getCacheKey(String path, Map<String, dynamic>? queryParameters) {
+    return '$path?${queryParameters?.toString() ?? ''}';
+  }
+
   DioClient({required SecureStorage secureStorage, this.onSessionExpiredGetter})
     : _secureStorage = secureStorage {
     _initializeDio();
@@ -152,12 +158,27 @@ class DioClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    final cacheKey = _getCacheKey(path, queryParameters);
+    final cached = _cache[cacheKey];
+    if (cached != null && DateTime.now().isBefore(cached.expiry)) {
+      if (cached.response is Response<T>) {
+        return cached.response as Response<T>;
+      }
+    }
+
     try {
-      return await _dio.get<T>(
+      final response = await _dio.get<T>(
         path,
         queryParameters: queryParameters,
         options: options,
       );
+      if (response.statusCode == 200) {
+        _cache[cacheKey] = (
+          response: response,
+          expiry: DateTime.now().add(const Duration(seconds: 30)),
+        );
+      }
+      return response;
     } on DioException catch (e) {
       throw _handleException(e);
     }
@@ -169,6 +190,7 @@ class DioClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    _cache.clear();
     try {
       return await _dio.post<T>(
         path,
@@ -187,6 +209,7 @@ class DioClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    _cache.clear();
     try {
       return await _dio.put<T>(
         path,
@@ -205,6 +228,7 @@ class DioClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    _cache.clear();
     try {
       return await _dio.patch<T>(
         path,
@@ -223,6 +247,7 @@ class DioClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    _cache.clear();
     try {
       return await _dio.delete<T>(
         path,
