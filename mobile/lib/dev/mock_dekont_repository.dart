@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import '../features/dekont/domain/entities/dekont_entity.dart';
+import '../features/dekont/domain/entities/dekont_upload_result.dart';
 import '../features/dekont/domain/entities/dekont_status.dart';
 import '../features/dekont/domain/entities/payment_collection_entity.dart';
 import '../features/dekont/domain/repositories/dekont_repository.dart';
@@ -75,13 +76,16 @@ class MockDekontRepository implements DekontRepository {
   }
 
   @override
-  Future<DekontEntity> uploadDekont({
-    required String filePath,
+  Future<DekontUploadResult> uploadDekont({
+    required String fileName,
+    required List<int> fileBytes,
+    String? filePath,
     String? dueId,
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 400));
     _counter++;
     final id = 'dk-mock-new-$_counter';
+    final safeName = fileName.split('/').last.split('\\').last;
     final entity = DekontEntity(
       id: id,
       buildingId: 'b1',
@@ -90,11 +94,11 @@ class MockDekontRepository implements DekontRepository {
       dueId: dueId,
       status: DekontStatus.received,
       source: 'RESIDENT_UPLOAD',
-      originalFilename: filePath.split('/').last.split('\\').last,
-      mimeType: filePath.toLowerCase().endsWith('.pdf')
+      originalFilename: safeName,
+      mimeType: safeName.toLowerCase().endsWith('.pdf')
           ? 'application/pdf'
           : 'image/jpeg',
-      sizeBytes: 50_000,
+      sizeBytes: fileBytes.length,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -102,7 +106,7 @@ class MockDekontRepository implements DekontRepository {
     await Future<void>.delayed(const Duration(milliseconds: 300));
     final settled = entity.copyWithStatus(DekontStatus.needsManagerReview);
     _replace(settled);
-    return settled;
+    return DekontUploadResult(dekont: settled);
   }
 
   @override

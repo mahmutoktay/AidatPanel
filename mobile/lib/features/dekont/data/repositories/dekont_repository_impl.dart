@@ -1,8 +1,15 @@
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/api_user_message.dart';
+import '../../domain/errors/duplicate_dekont_exception.dart';
+import '../../../../l10n/strings.g.dart';
+import '../../debug/dekont_debug_log.dart';
+import '../../../../core/utils/upload_file_utils.dart';
 import '../../domain/entities/dekont_entity.dart';
 import '../../domain/entities/payment_collection_entity.dart';
+import '../../domain/entities/dekont_upload_result.dart';
 import '../../domain/repositories/dekont_repository.dart';
 import '../datasources/dekont_remote_datasource.dart';
+import '../models/dekont_model.dart';
 
 class DekontRepositoryImpl implements DekontRepository {
   final DekontRemoteDataSource _remote;
@@ -12,31 +19,208 @@ class DekontRepositoryImpl implements DekontRepository {
 
   @override
   Future<PaymentCollectionEntity> getPaymentCollection() async {
+    dekontDebugLog('repository.getPaymentCollection');
     try {
       return (await _remote.getPaymentCollection()).toEntity();
-    } on ApiException {
+    } on ApiException catch (e) {
+      dekontDebugLog('repository.getPaymentCollection api', e.message);
       rethrow;
-    } catch (e) {
-      throw ApiException(message: 'Ödeme bilgileri alınamadı: $e');
+    } catch (e, st) {
+      dekontDebugLog('repository.getPaymentCollection fail', '$e\n$st');
+      throw ApiException(
+        message: LocaleSettings
+            .instance.currentTranslations.features.dekont.errorPaymentInfo,
+      );
     }
   }
 
   @override
-  Future<DekontEntity> uploadDekont({
-    required String filePath,
+  Future<DekontUploadResult> uploadDekont({
+    required String fileName,
+    required List<int> fileBytes,
+    String? filePath,
     String? dueId,
   }) async {
+    dekontDebugLog('repository.uploadDekont', {
+      'fileName': fileName,
+      'bytes': fileBytes.length,
+      'dueId': dueId,
+    });
     try {
-      return (await _remote.uploadDekont(filePath: filePath, dueId: dueId))
+      final entity = (await _remote.uploadDekont(
+        fileName: fileName,
+        fileBytes: fileBytes,
+        filePath: filePath,
+        dueId: dueId,
+      ))
           .toEntity();
+      dekontDebugLog('repository.uploadDekont ok', '${entity.id} ${entity.status.apiValue}');
+      return DekontUploadResult(dekont: entity);
     } on ApiException catch (e) {
-      throw ApiException(
-        message: _humanizeFromApi(e),
-        statusCode: e.statusCode,
+      dekontDebugLog(
+        'repository.uploadDekont api',
+        'status=${e.statusCode} msg=${e.message}',
       );
-    } catch (e) {
-      throw ApiException(message: 'Dekont yüklenemedi: $e');
+
+      if (e.statusCode == 409) {
+        final existing = await _resolveConflictEntity(e);
+        if (existing != null) {
+          dekontDebugLog('repository.uploadDekont duplicate', existing.id);
+          throw DuplicateDekontException(
+            dekont: existing,
+            message: e.message,
+            responseData: e.responseData,
+          );
+        }
+      }
+
+      if (_shouldAttemptRecovery(e)) {
+        final recovered = await _tryRecoverUploadedDekont(
+          fileName: fileName,
+          sizeBytes: fileBytes.length,
+          dueId: dueId,
+        );
+        if (recovered != null) {
+          dekontDebugLog('repository.uploadDekont recovered', recovered.id);
+          return DekontUploadResult(dekont: recovered, recovered: true);
+        }
+      }
+
+      throw ApiException(
+        message: mapApiUserMessage(e, context: ApiMessageContext.dekont),
+        statusCode: e.statusCode,
+        originalException: e.originalException,
+        responseData: e.responseData,
+      );
+    } catch (e, st) {
+      if (e is DuplicateDekontException) rethrow;
+      dekontDebugLog('repository.uploadDekont unexpected', '$e\n$st');
+
+      if (e is! NetworkException && _shouldAttemptRecoveryForUnknown(e)) {
+        final recovered = await _tryRecoverUploadedDekont(
+          fileName: fileName,
+          sizeBytes: fileBytes.length,
+          dueId: dueId,
+        );
+        if (recovered != null) {
+          dekontDebugLog('repository.uploadDekont recovered-after-timeout', recovered.id);
+          return DekontUploadResult(dekont: recovered, recovered: true);
+        }
+      }
+
+      final wrapped = e is ApiException
+          ? e
+          : ApiException(message: e.toString(), originalException: e);
+      throw ApiException(
+        message: mapApiUserMessage(
+          wrapped,
+          context: ApiMessageContext.dekont,
+        ),
+        statusCode: wrapped.statusCode,
+        originalException: e,
+      );
     }
+  }
+
+  bool _shouldAttemptRecovery(ApiException e) {
+    if (e is NetworkException) return false;
+    if (e.statusCode == 409) return false;
+    if (e.statusCode == 401 || e.statusCode == 403) return false;
+    if (e.statusCode == 400 || e.statusCode == 422 || e.statusCode == 413) {
+      return false;
+    }
+    return true;
+  }
+
+  bool _shouldAttemptRecoveryForUnknown(Object e) {
+    if (e is NetworkException) return false;
+    if (e is ApiException) return _shouldAttemptRecovery(e);
+    return true;
+  }
+
+  Future<DekontEntity?> _resolveConflictEntity(ApiException e) async {
+    final root = e.responseData;
+    if (root == null) return null;
+    final payload = root['data'];
+    if (payload is! Map) return null;
+    final map = Map<String, dynamic>.from(payload);
+    final dekontJson = map['dekont'];
+    if (dekontJson is Map) {
+      try {
+        return DekontModel.fromJson(Map<String, dynamic>.from(dekontJson))
+            .toEntity();
+      } catch (_) {
+        return null;
+      }
+    }
+    final id = map['dekontId'];
+    if (id is String && id.isNotEmpty) {
+      try {
+        return (await _remote.getDekont(id)).toEntity();
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /// Sunucu kaydetti ama istemci yanıtı alamadı — listeden bul.
+  Future<DekontEntity?> _tryRecoverUploadedDekont({
+    required String fileName,
+    required int sizeBytes,
+    String? dueId,
+  }) async {
+    dekontDebugLog('repository.recover-upload start');
+    const delays = [Duration.zero, Duration(milliseconds: 800), Duration(seconds: 2)];
+    for (var attempt = 0; attempt < delays.length; attempt++) {
+      if (delays[attempt] > Duration.zero) {
+        await Future.delayed(delays[attempt]);
+      }
+      try {
+        final recovered = await _matchRecoveredDekont(
+          fileName: fileName,
+          sizeBytes: sizeBytes,
+          dueId: dueId,
+        );
+        if (recovered != null) {
+          dekontDebugLog('repository.recover-upload ok', {
+            'id': recovered.id,
+            'attempt': attempt + 1,
+          });
+          return recovered;
+        }
+      } catch (e, st) {
+        dekontDebugLog('repository.recover-upload attempt fail', '$e\n$st');
+      }
+    }
+    dekontDebugLog('repository.recover-upload', 'not-found');
+    return null;
+  }
+
+  Future<DekontEntity?> _matchRecoveredDekont({
+    required String fileName,
+    required int sizeBytes,
+    String? dueId,
+  }) async {
+    final safeName = UploadFileUtils.safeFileName(fileName, fallback: 'dekont.pdf');
+    final list = await _remote.getMyDekonts();
+    if (list.isEmpty) return null;
+
+    DekontModel? best;
+
+    for (final m in list) {
+      final nameMatch =
+          m.originalFilename == safeName || m.originalFilename == fileName;
+      final sizeMatch = m.sizeBytes == sizeBytes;
+      final dueMatch = dueId == null || dueId.isEmpty || m.dueId == dueId;
+      if (nameMatch && sizeMatch && dueMatch) {
+        if (best == null || m.createdAt.isAfter(best.createdAt)) {
+          best = m;
+        }
+      }
+    }
+
+    return best?.toEntity();
   }
 
   @override
@@ -46,7 +230,10 @@ class DekontRepositoryImpl implements DekontRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Dekont detayı alınamadı: $e');
+      throw ApiException(
+        message: LocaleSettings
+            .instance.currentTranslations.features.dekont.errorDetailLoad,
+      );
     }
   }
 
@@ -58,7 +245,10 @@ class DekontRepositoryImpl implements DekontRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Dekont listesi alınamadı: $e');
+      throw ApiException(
+        message: LocaleSettings
+            .instance.currentTranslations.features.dekont.errorListLoad,
+      );
     }
   }
 
@@ -78,7 +268,10 @@ class DekontRepositoryImpl implements DekontRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Bina dekontları alınamadı: $e');
+      throw ApiException(
+        message: LocaleSettings
+            .instance.currentTranslations.features.dekont.errorListLoad,
+      );
     }
   }
 
@@ -89,23 +282,35 @@ class DekontRepositoryImpl implements DekontRepository {
     String? note,
     String? dueId,
   }) async {
+    dekontDebugLog('repository.reviewDekont', {
+      'id': id,
+      'decision': decision.name,
+      'dueId': dueId,
+    });
     try {
       final apiDecision =
           decision == DekontReviewDecision.approve ? 'APPROVE' : 'REJECT';
-      return (await _remote.reviewDekont(
+      final entity = (await _remote.reviewDekont(
         id: id,
         decision: apiDecision,
         note: note,
         dueId: dueId,
       ))
           .toEntity();
+      dekontDebugLog('repository.reviewDekont ok', entity.status.apiValue);
+      return entity;
     } on ApiException catch (e) {
+      dekontDebugLog('repository.reviewDekont api', e.message);
       throw ApiException(
-        message: _humanizeFromApi(e),
+        message: mapApiUserMessage(e, context: ApiMessageContext.dekont),
         statusCode: e.statusCode,
       );
-    } catch (e) {
-      throw ApiException(message: 'İnceleme kaydedilemedi: $e');
+    } catch (e, st) {
+      dekontDebugLog('repository.reviewDekont fail', '$e\n$st');
+      throw ApiException(
+        message: LocaleSettings
+            .instance.currentTranslations.features.dekont.reviewFailed,
+      );
     }
   }
 
@@ -116,25 +321,10 @@ class DekontRepositoryImpl implements DekontRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Dosya indirilemedi: $e');
+      throw ApiException(
+        message: LocaleSettings
+            .instance.currentTranslations.features.dekont.errorFileDownload,
+      );
     }
-  }
-
-  String _humanizeFromApi(ApiException e) {
-    final code = e.statusCode;
-    final msg = e.message.toLowerCase();
-    if (code == 409) {
-      if (msg.contains('hash') || msg.contains('duplicate')) {
-        return 'Bu dekont daha önce yüklenmiş';
-      }
-      return 'Bu dekont zaten işlenmiş';
-    }
-    if (code == 429) {
-      return 'Çok fazla yükleme yaptınız. Lütfen bir süre sonra tekrar deneyin';
-    }
-    if (code == 400 && msg.contains('dueid')) {
-      return 'Onay için aidat seçimi gerekli';
-    }
-    return e.message;
   }
 }

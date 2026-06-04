@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../../../core/providers/cache_invalidator.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/network/dio_client.dart';
@@ -51,7 +52,7 @@ class AuthState {
   final bool registrationSuccess;
   final bool isManualLogout;
 
-  AuthState({
+  const AuthState({
     this.logoutReason,
     this.isLoading = false,
     this.user,
@@ -93,7 +94,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     // Not: Dil bağımsız mesaj l10n dosyasında; burada yedek olarak İngilizce
     // kullanılır, app_router.dart l10n sürümünü gösterir.
     onSessionExpired = () {
-      state = AuthState(logoutReason: LogoutReason.otherDevices);
+      state = const AuthState(
+        logoutReason: LogoutReason.otherDevices,
+        isAuthenticated: false,
+        isManualLogout: false,
+      );
     };
   }
 
@@ -106,8 +111,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Reset tab index on successful login
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);
-      // Önceki kullanıcıya ait tüm cached verileri temizle
-      invalidateAllCachedProviders(ref);
+      await _onAuthenticated(ref, user);
       state = state.copyWith(
         isLoading: false,
         user: user,
@@ -160,8 +164,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Reset tab index on successful join
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);
-      // Önceki kullanıcıya ait tüm cached verileri temizle
-      invalidateAllCachedProviders(ref);
+      await _onAuthenticated(ref, user);
       state = state.copyWith(
         isLoading: false,
         user: user,
@@ -171,6 +174,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
     }
+  }
+
+  Future<void> _onAuthenticated(WidgetRef ref, UserEntity user) async {
+    final previousId = state.user?.id;
+    ref.read(dioClientProvider).clearResponseCache();
+    if (previousId != null && previousId != user.id) {
+      await clearDekontPreviewsOnUserSwitch(ref);
+    }
+    invalidateAllCachedProviders(ref);
   }
 
   /// Uygulama açılışında SecureStorage'daki oturumu geri yükler.
@@ -210,8 +222,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Reset tab index on logout
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);
-      // Çıkışta tüm cached verileri temizle
-      invalidateAllCachedProviders(ref);
+      ref.read(dioClientProvider).clearResponseCache();
+      await invalidateCachesOnLogout(ref);
       await _authRepository.logout();
       await Future.delayed(const Duration(milliseconds: 500));
       state = AuthState(isManualLogout: true, logoutReason: LogoutReason.manual);

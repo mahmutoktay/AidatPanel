@@ -63,13 +63,10 @@ android {
                 if (keystorePropertiesFile.exists()) "release" else "debug",
             )
 
-            // ProGuard/R8 obfuscation ve code shrinking
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            // Release çökme (R8 + reflection): minify kapalı. APK ve appbundle aynı release tipi.
+            // Minify tekrar açılacaksa proguard-rules.pro + check_plugin_registrant + cihaz smoke zorunlu.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
@@ -80,4 +77,14 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+}
+
+// Java GeneratedPluginRegistrant Kotlin sınıflarını derleyemez — Kotlin kayıt kullanılıyor.
+tasks.register<Delete>("deleteGeneratedPluginRegistrant") {
+    delete(file("src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java"))
+}
+tasks.configureEach {
+    if (name.contains("compile") && name.contains("Java")) {
+        dependsOn("deleteGeneratedPluginRegistrant")
+    }
 }

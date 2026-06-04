@@ -1,6 +1,7 @@
 import { prisma } from "../config/db.js";
-import { ibansMatch } from "../utils/iban.js";
+import { recipientMatchesCollectionIban } from "../utils/iban.js";
 import { HttpError } from "../utils/httpError.js";
+import { dekontLog } from "../utils/dekontDebug.js";
 
 const AMOUNT_TOLERANCE = Number(process.env.DEKONT_AMOUNT_TOLERANCE) || 0.05;
 const GRACE_DAYS = Number(process.env.DEKONT_GRACE_DAYS) || 7;
@@ -43,12 +44,25 @@ export async function evaluateDekontBusinessRules(dekontId, parsed) {
     return result;
   }
 
-  const receiverIban = parsed?.receiverIban ? String(parsed.receiverIban) : "";
-  result.recipientOk = ibansMatch(receiverIban, dekont.building.collectionIban);
-  if (!result.recipientOk) {
+  const recipientCheck = recipientMatchesCollectionIban({
+    parsedReceiverIban: parsed?.receiverIban ?? dekont.receiverIban,
+    collectionIban: dekont.building.collectionIban,
+    rawText: dekont.rawText,
+  });
+  result.recipientOk = recipientCheck.ok;
+  if (!recipientCheck.ok) {
+    dekontLog("rules.recipient_mismatch", recipientCheck);
     result.suggestedStatus = "RECIPIENT_MISMATCH";
     result.reasons.push("recipient_mismatch");
     return result;
+  }
+  if (recipientCheck.source === "rawtext_scan") {
+    result.reasons.push("recipient_matched_rawtext_fallback");
+    dekontLog("rules.recipient_rawtext_fallback", {
+      dekontId,
+      matchedIban: recipientCheck.matchedIban,
+      parsedIban: recipientCheck.parsedIban,
+    });
   }
 
   // reference uniqueness (building scoped)
@@ -99,6 +113,15 @@ export async function evaluateDekontBusinessRules(dekontId, parsed) {
   if (result.recipientOk && result.amountOk !== false && result.dateOk !== false) {
     result.suggestedStatus = "MATCHED";
   }
+
+  dekontLog("rules.result", {
+    dekontId,
+    suggestedStatus: result.suggestedStatus,
+    reasons: result.reasons,
+    recipientOk: result.recipientOk,
+    amountOk: result.amountOk,
+    dateOk: result.dateOk,
+  });
 
   return result;
 }

@@ -25,4 +25,27 @@ class JwtUtils {
       return fb;
     }
   }
+
+  /// GET önbellek anahtarı: kullanıcı + oturum revizyonu (`rv`).
+  static String sessionCacheSuffix(String? accessToken) {
+    if (accessToken == null || accessToken.isEmpty) return 'anon';
+    try {
+      final data = _decodePayload(accessToken);
+      final id = data['id'];
+      final rv = data['rv'] ?? 0;
+      return '${id ?? 'u'}:$rv';
+    } catch (_) {
+      return 't${accessToken.hashCode}';
+    }
+  }
+
+  static Map<String, dynamic> _decodePayload(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw const FormatException('invalid jwt');
+    }
+    final payload = base64Url.normalize(parts[1]);
+    final decoded = utf8.decode(base64Url.decode(payload));
+    return jsonDecode(decoded) as Map<String, dynamic>;
+  }
 }

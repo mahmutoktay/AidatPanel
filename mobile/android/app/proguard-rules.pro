@@ -1,5 +1,6 @@
 # AidatPanel ProGuard Rules
-# Flutter ve kullanılan paketler için obfuscation kuralları
+# NOT: release buildType'ta isMinifyEnabled=false iken bu dosya uygulanmaz.
+# Minify açılınca PluginRegistrant reflection + flutter_local_notifications için zorunlu.
 
 # Flutter
 -keep class io.flutter.app.** { *; }
@@ -30,6 +31,19 @@
 
 # Secure Storage
 -keep class com.it_nomads.fluttersecurestorage.** { *; }
+
+# package_info_plus / share_plus (PluginRegistrant reflection — R8 release)
+-keep class dev.fluttercommunity.plus.packageinfo.PackageInfoPlugin { *; }
+-keep class dev.fluttercommunity.plus.share.SharePlusPlugin { *; }
+-keep class dev.fluttercommunity.plus.packageinfo.** { *; }
+-keep class dev.fluttercommunity.plus.share.** { *; }
+
+# JNI (path_provider_android vb.)
+-keep class com.github.dart_lang.jni.** { *; }
+-keep class com.github.dart_lang.jni_flutter.** { *; }
+
+# pdfx (dekont PDF önizleme)
+-keep class io.scer.pdfx.** { *; }
 
 # Riverpod
 -keep class flutter_riverpod.** { *; }

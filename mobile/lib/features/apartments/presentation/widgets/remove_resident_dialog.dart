@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -55,7 +56,7 @@ class _RemoveResidentDialogState extends ConsumerState<RemoveResidentDialog> {
       if (!mounted) return;
       setState(() => _removing = false);
       ref.read(toastProvider.notifier).show(
-            _humanize(e),
+            userFacingError(e),
             type: ToastType.error,
             duration: const Duration(seconds: 6),
           );
@@ -67,26 +68,6 @@ class _RemoveResidentDialogState extends ConsumerState<RemoveResidentDialog> {
             type: ToastType.error,
           );
     }
-  }
-
-  /// Backend olası 403/404 mesajları:
-  ///  - 403: bu binayı sen yönetmiyorsun
-  ///  - 404: daire / sakin yok
-  String _humanize(ApiException e) {
-    final raw = e.message.toLowerCase();
-    if (raw.contains('forbidden') ||
-        raw.contains('not the manager') ||
-        raw.contains('yetk')) {
-      return context.t.common.residentRemoveForbidden;
-    }
-    if (raw.contains('not found') ||
-        raw.contains('no resident') ||
-        raw.contains('bulunam')) {
-      return context.t.common.residentRemoveNotFound;
-    }
-    return e.message.isNotEmpty
-        ? e.message
-        : context.t.common.residentRemoveFailed;
   }
 
   @override

@@ -68,6 +68,7 @@ class LogoutAllDevicesConfirmSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.t;
+    final isLoading = ref.watch(authStateProvider).isLoading;
 
     return Container(
       decoration: const BoxDecoration(
@@ -116,7 +117,7 @@ class LogoutAllDevicesConfirmSheet extends ConsumerWidget {
                 child: SizedBox(
                   height: ProfileSettingsUi.buttonHeight,
                   child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: isLoading ? null : () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: ProfileSettingsUi.ink,
                       side: const BorderSide(
@@ -142,11 +143,17 @@ class LogoutAllDevicesConfirmSheet extends ConsumerWidget {
                   height: ProfileSettingsUi.buttonHeight,
                   child: ElevatedButton(
                     style: ProfileSettingsUi.primaryButton,
-                    onPressed: () => _confirm(context, ref),
-                    child: Text(
-                      t.common.confirm,
-                      style: ProfileSettingsUi.buttonLabel,
-                    ),
+                    onPressed: isLoading ? null : () => _confirm(context, ref),
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(
+                            t.common.confirm,
+                            style: ProfileSettingsUi.buttonLabel,
+                          ),
                   ),
                 ),
               ),
@@ -158,23 +165,21 @@ class LogoutAllDevicesConfirmSheet extends ConsumerWidget {
   }
 
   Future<void> _confirm(BuildContext context, WidgetRef ref) async {
+    if (ref.read(authStateProvider).isLoading) return;
+
     final t = context.t;
-    // Önce API çağrısını yap (sheet açıkken)
     await ref.read(authStateProvider.notifier).logoutAllDevices();
-    // Sheet'i kapat (hala mounted mı kontrol et)
-    if (context.mounted) {
-      Navigator.pop(context);
-    }
-    // Toast provider widget ağacının üst katmanında, sheet'ten bağımsız
+
+    if (!context.mounted) return;
+    Navigator.pop(context);
+
     final authState = ref.read(authStateProvider);
     final hasError = authState.error != null;
-    ref
-        .read(toastProvider.notifier)
-        .show(
-          hasError ? authState.error! : t.common.logoutAllDevicesSuccess,
-          type: hasError ? ToastType.error : ToastType.success,
-          duration: const Duration(seconds: 4),
-        );
+    ref.read(toastProvider.notifier).show(
+      hasError ? authState.error! : t.common.logoutAllDevicesSuccess,
+      type: hasError ? ToastType.error : ToastType.success,
+      duration: const Duration(seconds: 4),
+    );
   }
 }
 

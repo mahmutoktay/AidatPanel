@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/network/token_refresh_service.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/utils/jwt_utils.dart';
 import '../../domain/entities/user_entity.dart';
@@ -154,22 +155,33 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> logoutAllDevices() async {
+    _remoteDataSource.beginSessionMutation();
     try {
       final tokens = await _remoteDataSource.logoutAllDevices();
-      await _secureStorage.saveToken(tokens.accessToken);
-      if (tokens.refreshToken != null) {
-        await _secureStorage.saveRefreshToken(tokens.refreshToken!);
-      }
-      await _secureStorage.saveTokenExpiry(
-        JwtUtils.parseExpiry(tokens.accessToken),
-      );
+      await _persistTokenPair(tokens);
     } on ApiException {
       rethrow;
     } catch (_) {
       throw ApiException(
         message: 'Diğer cihazlardan çıkış yapılamadı, lütfen tekrar deneyin',
       );
+    } finally {
+      _remoteDataSource.endSessionMutation();
     }
+  }
+
+  Future<void> _persistTokenPair(TokenRefreshResult tokens) async {
+    final refresh = tokens.refreshToken;
+    if (refresh == null || refresh.isEmpty) {
+      throw ApiException(
+        message: 'Diğer cihazlardan çıkış yapılamadı, lütfen tekrar deneyin',
+      );
+    }
+    await _secureStorage.saveToken(tokens.accessToken);
+    await _secureStorage.saveRefreshToken(refresh);
+    await _secureStorage.saveTokenExpiry(
+      JwtUtils.parseExpiry(tokens.accessToken),
+    );
   }
 
   @override

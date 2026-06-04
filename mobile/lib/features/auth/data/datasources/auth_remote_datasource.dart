@@ -15,8 +15,12 @@ abstract class AuthRemoteDataSource {
   Future<TokenRefreshResult> refreshToken(String refreshToken);
 
   /// Sunucuya `POST /auth/logout` (Bearer) atar.
-  /// Backend `refreshTokenVersion++` ve `fcmToken: null` yapar; mobil yerel oturumu siler.
+  /// Backend oturum kaydını değiştirmez; mobil `SecureStorage.clearAuth()` ile çıkar.
   Future<void> logout();
+
+  /// Paralel 401'lerin `logout-all-devices` sırasında oturumu düşürmesini engeller.
+  void beginSessionMutation();
+  void endSessionMutation();
 
   /// `POST /auth/logout-all-devices` — diğer cihazların refresh oturumunu düşürür,
   /// bu cihaza yeni access + refresh token döner.
@@ -40,6 +44,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final DioClient _dioClient;
 
   AuthRemoteDataSourceImpl({required DioClient dioClient}) : _dioClient = dioClient;
+
+  @override
+  void beginSessionMutation() => _dioClient.beginSessionMutation();
+
+  @override
+  void endSessionMutation() => _dioClient.endSessionMutation();
 
   @override
   Future<LoginResponse> login(LoginRequest request) async {

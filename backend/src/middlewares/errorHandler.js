@@ -3,6 +3,24 @@
  * Tüm hataları merkezi olarak yönetir
  */
 
+import { HttpError } from "../utils/httpError.js";
+
+function isDekontRoute(req) {
+  const url = req?.originalUrl || req?.url || "";
+  return url.includes("/dekonts");
+}
+
+function logUnhandledError(err, req) {
+  const route = `${req?.method ?? "?"} ${req?.originalUrl ?? req?.url ?? "?"}`;
+  console.error("[api] unhandled error", {
+    route,
+    name: err?.name,
+    message: err?.message,
+    code: err?.code,
+    stack: err?.stack,
+  });
+}
+
 export const errorHandler = (err, req, res, next) => {
   // Console.error kaldırıldı - Node.js crash'i önlendi
 
@@ -68,11 +86,15 @@ export const errorHandler = (err, req, res, next) => {
   }
 
   // HttpError (access.js, service katmanı)
-  if (err instanceof Error && err.name === "HttpError" && err.statusCode) {
-    return res.status(err.statusCode).json({
+  if (err instanceof HttpError || (err instanceof Error && err.name === "HttpError" && err.statusCode)) {
+    const body = {
       success: false,
       message: err.message,
-    });
+    };
+    if (err.data != null) {
+      body.data = err.data;
+    }
+    return res.status(err.statusCode).json(body);
   }
 
   // Multer (dosya yükleme)
@@ -108,12 +130,27 @@ export const errorHandler = (err, req, res, next) => {
   // Varsayılan hata (500)
   const statusCode = err.statusCode || err.status || 500;
   const message = err.message || "Sunucu hatası";
+  const dekontRoute = isDekontRoute(req);
+
+  if (dekontRoute) {
+    logUnhandledError(err, req);
+  }
+
+  const clientMessage =
+    process.env.NODE_ENV === "production"
+      ? dekontRoute
+        ? statusCode >= 500
+          ? "Dekont yüklenemedi. Lütfen tekrar deneyin."
+          : "Bir hata oluştu"
+        : "Bir hata oluştu"
+      : message;
 
   res.status(statusCode).json({
     success: false,
-    message: process.env.NODE_ENV === "production" 
-      ? "Bir hata oluştu" 
-      : message,
+    message: clientMessage,
+    ...(dekontRoute && process.env.NODE_ENV === "production" && {
+      errorCode: statusCode >= 500 ? "DEKONT_UPLOAD_FAILED" : "DEKONT_REQUEST_FAILED",
+    }),
     ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
   });
 };

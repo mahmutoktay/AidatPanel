@@ -243,9 +243,10 @@ const join = async (req, res, next) => {
 const logout = async (req, res, next) => {
   try {
     // Mobil kendi yerel token'larını SecureStorage.clearAuth() ile temizler.
-    // fcmToken'a dokunmuyoruz çünkü aynı kullanıcının diğer cihazları
-    // bu token ile push almaya devam etmelidir.
-    // Çoklu cihaz desteği için ileride ayrı bir UserDevice tablosu gerekir.
+    // refreshTokenVersion artırılmaz → diğer cihazların oturumu sürer.
+    // Tüm cihazları düşürmek için POST /auth/logout-all-devices kullanılır.
+    // fcmToken'a dokunulmaz; diğer cihazlar push almaya devam eder.
+    // Tek cihaz hedefli çıkış için ileride UserDevice tablosu planlanır.
     res.status(200).json({
       success: true,
       message: "Çıkış başarılı.",

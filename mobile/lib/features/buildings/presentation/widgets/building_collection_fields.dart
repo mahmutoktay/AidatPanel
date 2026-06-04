@@ -161,7 +161,7 @@ class _BuildingCollectionFieldsState
       );
     }
 
-    final presets = presetsAsync.valueOrNull ?? const <CollectionPresetEntity>[];
+    final presets = presetsAsync.value ?? const <CollectionPresetEntity>[];
     final hasPresets = presets.isNotEmpty;
     final selectedPreset = _findSelectedPreset(presets);
 

@@ -53,7 +53,15 @@ router.post(
   "/upload",
   dekontUploadLimiter,
   requireRoles("RESIDENT", "MANAGER"),
-  upload.single("file"),
+  (req, res, next) => {
+    upload.single("file")(req, res, (err) => {
+      if (err) {
+        console.error("[dekont] multer hata", err?.message || err);
+        return next(err);
+      }
+      next();
+    });
+  },
   validate(dekontSchemas.upload),
   uploadDekont
 );

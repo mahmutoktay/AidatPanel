@@ -37,3 +37,62 @@ export function ibansMatch(a, b) {
   if (!na || !nb) return false;
   return na === nb;
 }
+
+/** Tam TR IBAN (26 karakter) — boşluklu/boşluksuz metinden */
+const TR_IBAN_FULL_PATTERN = /TR\s*\d{2}(?:\s*\d{4}){5}\s*\d{2}/gi;
+
+/**
+ * Metindeki tüm geçerli TR IBAN'larını döndürür (normalize, tekrarsız).
+ * @param {string} text
+ * @returns {string[]}
+ */
+export function extractAllTrIbans(text) {
+  if (text == null || text === "") return [];
+  const seen = new Set();
+  const out = [];
+  const re = new RegExp(TR_IBAN_FULL_PATTERN.source, TR_IBAN_FULL_PATTERN.flags);
+  for (const m of String(text).matchAll(re)) {
+    const n = normalizeIban(m[0]);
+    if (/^TR\d{24}$/.test(n) && !seen.has(n)) {
+      seen.add(n);
+      out.push(n);
+    }
+  }
+  return out;
+}
+
+/**
+ * Dekont alıcı IBAN doğrulaması: önce OCR parsed alan, olmazsa rawText taraması.
+ *
+ * @param {{ parsedReceiverIban?: string|null, collectionIban?: string|null, rawText?: string|null }} input
+ */
+export function recipientMatchesCollectionIban({
+  parsedReceiverIban,
+  collectionIban,
+  rawText,
+}) {
+  const expected = normalizeIban(collectionIban);
+  if (!expected) {
+    return { ok: false, matchedIban: null, source: "no_collection_iban" };
+  }
+
+  const parsed = normalizeIban(parsedReceiverIban);
+  if (parsed && ibansMatch(parsed, expected)) {
+    return { ok: true, matchedIban: parsed, source: "parsed_field" };
+  }
+
+  const fromText = extractAllTrIbans(rawText);
+  const hit = fromText.find((iban) => ibansMatch(iban, expected));
+  if (hit) {
+    return { ok: true, matchedIban: hit, source: "rawtext_scan" };
+  }
+
+  return {
+    ok: false,
+    matchedIban: parsed || fromText[0] || null,
+    source: "mismatch",
+    parsedIban: parsed || null,
+    collectionIban: expected,
+    ibansInRawText: fromText,
+  };
+}

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 /// Manager dashboard için tab index state provider
 /// TabController ile sync edilir, BottomNavigationBar'ın currentIndex'ini yönetir

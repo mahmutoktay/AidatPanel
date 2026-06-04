@@ -105,6 +105,7 @@ Tam liste: `.env.example`
 | [`../AIDATPANEL.md`](../AIDATPANEL.md) | Master referans |
 | [`../API/README.md`](../API/README.md) | API dokümantasyon indeksi |
 | [`../API/FLUTTER-BACKEND.md`](../API/FLUTTER-BACKEND.md) | Mobil entegrasyon sözleşmesi |
+| [`../resources/api/DEKONT_FILE_404_TROUBLESHOOTING.md`](../resources/api/DEKONT_FILE_404_TROUBLESHOOTING.md) | Dekont 404/502 + PM2/nginx |
 | [`FURKAN_ICIN_DOKUMANTASYON.md`](FURKAN_ICIN_DOKUMANTASYON.md) | Flutter JWT rehberi |
 | [`GOREVDAGILIMI.md`](GOREVDAGILIMI.md) | Fazlar ve görev dağılımı |
 | [`../planning/DEKONT_VERIFICATION_PLAN.md`](../planning/DEKONT_VERIFICATION_PLAN.md) | Dekont implementasyon planı |

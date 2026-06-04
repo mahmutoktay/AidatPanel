@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/profile/presentation/providers/profile_provider.dart';

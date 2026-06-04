@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -6,10 +7,12 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/api_user_message.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -17,10 +20,12 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
+import '../../data/dekont_preview_cache.dart';
 import '../../domain/entities/dekont_entity.dart';
 import '../../domain/entities/dekont_status.dart';
 import '../providers/dekont_provider.dart';
 import '../utils/dekont_labels.dart';
+import '../widgets/dekont_file_preview.dart';
 
 class DekontDetailScreen extends ConsumerStatefulWidget {
   final String dekontId;
@@ -34,18 +39,74 @@ class DekontDetailScreen extends ConsumerStatefulWidget {
 class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
   Uint8List? _fileBytes;
   bool _loadingFile = false;
+  String? _fileError;
 
-  Future<void> _loadFile() async {
-    setState(() => _loadingFile = true);
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadFile();
+    });
+  }
+
+  Future<void> _loadFile({bool forceFromServer = false}) async {
+    setState(() {
+      _loadingFile = true;
+      _fileError = null;
+    });
     try {
+      if (!forceFromServer) {
+        final memoryCached =
+            ref.read(dekontLocalPreviewProvider)[widget.dekontId];
+        if (memoryCached != null && memoryCached.isNotEmpty) {
+          if (mounted) {
+            setState(() {
+              _fileBytes = memoryCached;
+              _fileError = null;
+            });
+          }
+          return;
+        }
+
+        final diskCached = await DekontPreviewCache.load(widget.dekontId);
+        if (diskCached != null && diskCached.isNotEmpty) {
+          if (mounted) {
+            setState(() {
+              _fileBytes = diskCached;
+              _fileError = null;
+            });
+            ref.read(dekontLocalPreviewProvider.notifier).update(
+                  (m) => {...m, widget.dekontId: diskCached},
+                );
+          }
+          return;
+        }
+      }
+
       final bytes = await ref
           .read(dekontRepositoryProvider)
           .getDekontFileBytes(widget.dekontId);
-      if (mounted) setState(() => _fileBytes = Uint8List.fromList(bytes));
-    } catch (_) {
       if (mounted) {
+        final copy = Uint8List.fromList(bytes);
+        setState(() {
+          _fileBytes = copy;
+          _fileError = null;
+        });
+        ref.read(dekontLocalPreviewProvider.notifier).update(
+              (m) => {...m, widget.dekontId: copy},
+            );
+        await DekontPreviewCache.save(widget.dekontId, copy);
+      }
+    } catch (e) {
+      if (mounted) {
+        if (e is ApiException && e.statusCode == 404) {
+          ref.invalidate(myDekontsNotifierProvider);
+          ref.invalidate(managerDekontsNotifierProvider);
+        }
+        final msg = userFacingError(e, context: ApiMessageContext.dekont);
+        setState(() => _fileError = msg);
         ref.read(toastProvider.notifier).show(
-              context.t.features.dekont.loadError,
+              msg,
               type: ToastType.error,
             );
       }
@@ -102,7 +163,10 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(userFacingError(e), textAlign: TextAlign.center),
+                Text(
+                  userFacingError(e, context: ApiMessageContext.dekont),
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: AppSizes.spacingM),
                 FilledButton(
                   onPressed: () =>
@@ -122,6 +186,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
             onRefresh: () async {
               ref.invalidate(dekontDetailProvider(widget.dekontId));
               await ref.read(dekontDetailProvider(widget.dekontId).future);
+              await _loadFile(forceFromServer: true);
             },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -194,50 +259,44 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
                   const SizedBox(height: AppSizes.spacingM),
                   if (_loadingFile)
                     const Center(child: CircularProgressIndicator())
-                  else if (_fileBytes == null)
+                  else if (_fileBytes != null) ...[
+                    DekontFilePreview(
+                      bytes: _fileBytes!,
+                      mimeType: dekont.mimeType,
+                      fileName: dekont.originalFilename,
+                    ),
+                  ] else if (_fileError != null) ...[
+                    Text(
+                      _fileError!,
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.error,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSizes.spacingM),
+                    OutlinedButton(
+                      onPressed: _loadFile,
+                      style: AppButtonStyles.outlinedPrimary(),
+                      child: Text(context.t.common.tryAgain),
+                    ),
+                    if (!isManager) ...[
+                      const SizedBox(height: AppSizes.spacingM),
+                      SizedBox(
+                        height: AppSizes.buttonHeightPrimary,
+                        child: ElevatedButton(
+                          onPressed: () => context.push('/payment'),
+                          style: AppButtonStyles.elevatedSuccess(),
+                          child: Text(t.reupload),
+                        ),
+                      ),
+                    ],
+                  ] else
                     OutlinedButton(
                       onPressed: _loadFile,
                       style: AppButtonStyles.outlinedPrimary(),
                       child: Text(t.filePreview),
-                    )
-                  else ...[
-                    if (dekont.mimeType.startsWith('image/'))
-                      ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(AppSizes.cardRadius),
-                        child: Image.memory(
-                          _fileBytes!,
-                          fit: BoxFit.contain,
-                        ),
-                      )
-                    else
-                      Container(
-                        padding: const EdgeInsets.all(AppSizes.spacingL),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius:
-                              BorderRadius.circular(AppSizes.cardRadius),
-                          border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.14),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.picture_as_pdf,
-                              size: 40,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: AppSizes.spacingM),
-                            Expanded(
-                              child: Text(
-                                dekont.originalFilename,
-                                style: AppTypography.body1,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    ),
+                  if (_fileBytes != null) ...[
                     const SizedBox(height: AppSizes.spacingM),
                     OutlinedButton.icon(
                       onPressed: () => _shareFile(dekont),

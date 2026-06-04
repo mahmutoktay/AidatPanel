@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -53,7 +54,7 @@ class _DeleteApartmentDialogState extends ConsumerState<DeleteApartmentDialog> {
       if (!mounted) return;
       setState(() => _deleting = false);
       ref.read(toastProvider.notifier).show(
-            _humanize(e),
+            userFacingError(e),
             type: ToastType.error,
             duration: const Duration(seconds: 6),
           );
@@ -65,20 +66,6 @@ class _DeleteApartmentDialogState extends ConsumerState<DeleteApartmentDialog> {
             type: ToastType.error,
           );
     }
-  }
-
-  String _humanize(ApiException e) {
-    final raw = e.message.toLowerCase();
-    if (raw.contains('foreign') ||
-        raw.contains('p2003') ||
-        raw.contains('still') ||
-        raw.contains('resident') ||
-        raw.contains('due')) {
-      return context.t.common.apartmentDeleteFailedFK;
-    }
-    return e.message.isNotEmpty
-        ? e.message
-        : context.t.common.apartmentDeleteFailed;
   }
 
   @override

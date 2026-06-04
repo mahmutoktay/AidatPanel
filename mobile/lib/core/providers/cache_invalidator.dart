@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/buildings/data/buildings_store.dart';
 import '../../features/buildings/data/invite_code_store.dart';
 import '../../features/buildings/presentation/providers/saved_ibans_provider.dart';
+import '../../features/dekont/data/dekont_preview_cache.dart';
 import '../../features/dekont/presentation/providers/dekont_provider.dart';
 import '../../features/dues/presentation/providers/dues_provider.dart';
 import '../../features/expenses/presentation/providers/expenses_provider.dart';
@@ -47,4 +48,20 @@ void invalidateAllCachedProviders(WidgetRef ref) {
   ref.invalidate(makePaymentNotifierProvider);
   ref.invalidate(myDekontsNotifierProvider);
   ref.invalidate(managerDekontsNotifierProvider);
+}
+
+Future<void> _clearDekontFilePreviews(WidgetRef ref) async {
+  ref.read(dekontLocalPreviewProvider.notifier).state = {};
+  await DekontPreviewCache.clearAll();
+}
+
+/// Başka hesapla giriş — önceki kullanıcının dekont dosya önizlemesini sil.
+Future<void> clearDekontPreviewsOnUserSwitch(WidgetRef ref) async {
+  await _clearDekontFilePreviews(ref);
+}
+
+/// Oturum kapanırken tüm önbellek + dekont dosya önizlemesini temizler.
+Future<void> invalidateCachesOnLogout(WidgetRef ref) async {
+  invalidateAllCachedProviders(ref);
+  await _clearDekontFilePreviews(ref);
 }

@@ -336,6 +336,7 @@ model Dekont {
   payments DuePayment[]
 
   @@unique([buildingId, referenceNumber])
+  @@unique([buildingId, fileHash])
   @@index([buildingId, createdAt])
   @@index([uploadedById])
   @@index([status])

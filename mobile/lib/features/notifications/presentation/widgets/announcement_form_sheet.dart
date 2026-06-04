@@ -54,7 +54,7 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
   @override
   Widget build(BuildContext context) {
     final buildingsAsync = ref.watch(buildingsStoreProvider);
-    final buildings = buildingsAsync.valueOrNull ?? const [];
+    final buildings = buildingsAsync.value ?? const [];
     final t = context.t.features.notifications;
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
     final isLoadingBuildings =

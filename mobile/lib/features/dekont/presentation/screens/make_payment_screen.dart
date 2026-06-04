@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +11,7 @@ import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/api_user_message.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -34,6 +37,7 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      ref.read(makePaymentNotifierProvider.notifier).ensureIdleOnScreen();
       ref.read(makePaymentNotifierProvider.notifier).loadPaymentInfo();
       if (widget.preselectedDueId != null) {
         ref
@@ -44,17 +48,43 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
   }
 
   Future<void> _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: UploadFileUtils.allowedExtensions.toList(),
+      withData: true,
     );
     if (result == null || result.files.isEmpty) return;
-    final path = result.files.single.path;
-    if (path == null) return;
+    final picked = result.files.single;
     if (!mounted) return;
 
     final t = context.t.features.dekont;
-    final validationError = UploadFileUtils.validateReceiptFile(path);
+    final name = picked.name;
+
+    List<int>? bytes = picked.bytes;
+    if (bytes == null || bytes.isEmpty) {
+      final path = picked.path;
+      if (path != null) {
+        final fileError = UploadFileUtils.validateReceiptFile(path);
+        if (fileError != null) {
+          ref.read(toastProvider.notifier).show(
+                _uploadValidationMessage(t, fileError),
+                type: ToastType.error,
+              );
+          return;
+        }
+        bytes = await File(path).readAsBytes();
+      }
+    }
+
+    if (bytes == null || bytes.isEmpty) {
+      ref.read(toastProvider.notifier).show(
+            t.fileNotFound,
+            type: ToastType.error,
+          );
+      return;
+    }
+
+    final validationError = UploadFileUtils.validateReceiptBytes(bytes, name);
     if (validationError != null) {
       ref.read(toastProvider.notifier).show(
             _uploadValidationMessage(t, validationError),
@@ -63,7 +93,11 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
       return;
     }
 
-    ref.read(makePaymentNotifierProvider.notifier).setPickedFile(path);
+    ref.read(makePaymentNotifierProvider.notifier).setPickedReceipt(
+          fileName: name,
+          fileBytes: bytes,
+          filePath: picked.path,
+        );
   }
 
   String _uploadValidationMessage(dynamic t, String key) {
@@ -87,16 +121,32 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
         await ref.read(makePaymentNotifierProvider.notifier).upload();
     if (!mounted) return;
     if (dekont != null) {
+      final wasDuplicate =
+          ref.read(makePaymentNotifierProvider).uploadWasDuplicate;
+      final wasRecovered =
+          ref.read(makePaymentNotifierProvider).uploadWasRecovered;
+      ref.read(makePaymentNotifierProvider.notifier).endUploadSession();
+      final toastMessage = wasDuplicate
+          ? t.errorUploadDuplicate
+          : wasRecovered
+              ? t.uploadRecoveredExisting
+              : t.uploadSuccess;
       ref.read(toastProvider.notifier).show(
-            t.uploadSuccess,
-            type: ToastType.success,
+            toastMessage,
+            type: wasDuplicate ? ToastType.info : ToastType.success,
           );
-      context.push('/dekonts/${dekont.id}');
+      await context.push('/dekonts/${dekont.id}');
+      if (mounted) {
+        ref.read(makePaymentNotifierProvider.notifier).ensureIdleOnScreen();
+      }
     } else {
       final err = ref.read(makePaymentNotifierProvider).error;
       if (err != null) {
         ref.read(toastProvider.notifier).show(
-              userFacingError(err),
+              userFacingError(
+                err,
+                context: ApiMessageContext.dekont,
+              ),
               type: ToastType.error,
             );
       }
@@ -121,7 +171,7 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
           (d) => d.status == DueStatus.pending || d.status == DueStatus.overdue,
         )
         .toList();
-    final busy = paymentState.isUploading || paymentState.isPolling;
+    final busy = paymentState.isUploading;
 
     return PopScope(
       canPop: !busy,
@@ -258,12 +308,10 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
                       icon: const Icon(Icons.attach_file),
                       label: Text(t.pickFile),
                     ),
-                    if (paymentState.pickedFilePath != null) ...[
+                    if (paymentState.pickedFileName != null) ...[
                       const SizedBox(height: AppSizes.spacingS),
                       Text(
-                        paymentState.pickedFilePath!.split('/').last
-                            .split('\\')
-                            .last,
+                        paymentState.pickedFileName!,
                         style: AppTypography.body2,
                       ),
                     ],
@@ -272,7 +320,7 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
                       height: AppSizes.buttonHeightPrimary,
                       child: ElevatedButton(
                         onPressed: busy ||
-                                paymentState.pickedFilePath == null
+                                paymentState.pickedFileBytes == null
                             ? null
                             : _upload,
                         style: AppButtonStyles.elevatedSuccess(),
@@ -291,12 +339,7 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: AppSizes.spacingS),
-                                  Text(
-                                    paymentState.isPolling
-                                        ? t.processing
-                                        : t.upload,
-                                    style: AppTypography.button,
-                                  ),
+                                  Text(t.upload, style: AppTypography.button),
                                 ],
                               )
                             : Text(t.upload, style: AppTypography.button),

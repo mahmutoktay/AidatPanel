@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -181,7 +182,7 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
     } on ApiException catch (e) {
       if (mounted) {
         ref.read(toastProvider.notifier).show(
-              _createErrorMessage(e.message),
+              userFacingError(e),
               type: ToastType.error,
             );
       }
@@ -201,7 +202,7 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
     if (lower.contains('route') || lower.contains('bulunamad')) {
       return context.t.features.tickets.createServiceUnavailable;
     }
-    return msg;
+    return userFacingError(ApiException(message: msg));
   }
 }
 

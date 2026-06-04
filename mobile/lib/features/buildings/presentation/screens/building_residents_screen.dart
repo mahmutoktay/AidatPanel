@@ -64,23 +64,6 @@ class _BuildingResidentsScreenState
     });
   }
 
-  String _humanizeRemoveResident(ApiException e) {
-    final raw = e.message.toLowerCase();
-    if (raw.contains('forbidden') ||
-        raw.contains('not the manager') ||
-        raw.contains('yetk')) {
-      return context.t.common.residentRemoveForbidden;
-    }
-    if (raw.contains('not found') ||
-        raw.contains('no resident') ||
-        raw.contains('bulunam')) {
-      return context.t.common.residentRemoveNotFound;
-    }
-    return e.message.isNotEmpty
-        ? e.message
-        : context.t.common.residentRemoveFailed;
-  }
-
   /// Çoklu çıkarma onayında gösterilecek sıra: kullanıcının seçim sırası.
   List<ApartmentEntity> _selectedApartmentsOrdered(List<String> ids) {
     final all = ref.read(apartmentsStoreProvider(widget.building.id)).value;
@@ -308,7 +291,7 @@ class _BuildingResidentsScreenState
         ref
             .read(toastProvider.notifier)
             .show(
-              _humanizeRemoveResident(e),
+              userFacingError(e),
               type: ToastType.error,
               duration: const Duration(seconds: 6),
             );

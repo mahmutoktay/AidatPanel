@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
@@ -84,7 +85,7 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
       if (!mounted) return;
       setState(() => _deleting = false);
       toast.show(
-        _humanize(e),
+        userFacingError(e),
         type: ToastType.error,
         duration: const Duration(seconds: 6),
       );
@@ -96,19 +97,6 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
         type: ToastType.error,
       );
     }
-  }
-
-  String _humanize(ApiException e) {
-    final raw = e.message.toLowerCase();
-    if (e.statusCode == 409 ||
-        raw.contains('manage') ||
-        raw.contains('building') ||
-        raw.contains('bina')) {
-      return context.t.common.deleteAccountFailedManager;
-    }
-    return e.message.isNotEmpty
-        ? e.message
-        : context.t.common.deleteAccountFailed;
   }
 
   @override

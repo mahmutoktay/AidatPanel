@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -92,16 +93,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       context.go('/login');
     } on ApiException catch (e) {
       if (!mounted) return;
-      // Backend 400 = invalid/expired token; mesajı insanlaştır.
-      final isInvalid = e.statusCode == 400 ||
-          e.message.toLowerCase().contains('token') ||
-          e.message.toLowerCase().contains('expired');
       ref.read(toastProvider.notifier).show(
-            isInvalid
-                ? context.t.common.resetPasswordFailed
-                : (e.message.isNotEmpty
-                    ? e.message
-                    : context.t.common.resetPasswordFailed),
+            userFacingError(e),
             type: ToastType.error,
             duration: const Duration(seconds: 6),
           );

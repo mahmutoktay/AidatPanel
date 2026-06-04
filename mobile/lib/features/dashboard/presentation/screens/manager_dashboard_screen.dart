@@ -169,19 +169,19 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
       monthAnnouncementsAsync,
       pendingDekontsAsync,
     ]);
-    final openTicketCount = openTicketsAsync.valueOrNull ?? 0;
-    final monthExpenseCount = monthExpensesAsync.valueOrNull ?? 0;
-    final monthAnnouncementCount = monthAnnouncementsAsync.valueOrNull ?? 0;
-    final pendingDekontCount = pendingDekontsAsync.valueOrNull ?? 0;
+    final openTicketCount = openTicketsAsync.value ?? 0;
+    final monthExpenseCount = monthExpensesAsync.value ?? 0;
+    final monthAnnouncementCount = monthAnnouncementsAsync.value ?? 0;
+    final pendingDekontCount = pendingDekontsAsync.value ?? 0;
     final authState = ref.watch(authStateProvider);
     final userName = authState.user?.name ?? context.t.common.user;
-    final buildings = buildingsAsync.valueOrNull ?? const <BuildingEntity>[];
+    final buildings = buildingsAsync.value ?? const <BuildingEntity>[];
     // Tüm binaların dues'unu paralel çeken provider — collectionRate ve
     // overdueCount'u backend `collectedDues` döndürmediği için buradan
     // hesaplıyoruz (DuesNotifier sadece tek seçili binayı tutuyor).
     final allDuesAsync = ref.watch(allBuildingsDuesProvider);
     final allDues =
-        allDuesAsync.valueOrNull ?? const <String, List<DueEntity>>{};
+        allDuesAsync.value ?? const <String, List<DueEntity>>{};
 
     int totalApartments = 0;
     for (final b in buildings) {
@@ -569,7 +569,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     bool reserveMenuSlot = false,
   }) {
     final allDues =
-        ref.watch(allBuildingsDuesProvider).valueOrNull ?? const {};
+        ref.watch(allBuildingsDuesProvider).value ?? const {};
     final collectionRate = buildingCollectionRate(allDues, building.id);
     final showPerApartmentDues =
         building.dueAmount != null && building.dueAmount! > 0;
@@ -808,7 +808,7 @@ class _BuildingsAsyncSection extends StatelessWidget {
       // Veri varken arka planda yenileniyor (refresh) → eski listeyi göster.
       // Sadece ilk yüklemede (data null iken) loader çıkar.
       loading: () {
-        final cached = buildingsAsync.valueOrNull;
+        final cached = buildingsAsync.value;
         if (cached != null && cached.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

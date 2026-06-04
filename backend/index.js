@@ -19,6 +19,7 @@ import dekontRoutes from "./src/routes/dekontRoutes.js";
 import { apiLimiter } from "./src/middlewares/rateLimitMiddleware.js";
 import { errorHandler, notFoundHandler } from "./src/middlewares/errorHandler.js";
 import { attachWebSocketServer } from "./src/realtime/wsGateway.js";
+import { ensureDekontStorageDirs } from "./src/utils/ensureDekontStorage.js";
 
 const app = express();
 
@@ -73,6 +74,7 @@ let server;
 async function bootstrap() {
   await connectDB();
   initFirebase();
+  await ensureDekontStorageDirs();
   server = app.listen(port, () => {
     console.log("Server is running on port: ", port);
   });
@@ -84,23 +86,19 @@ bootstrap().catch((err) => {
   process.exit(1);
 });
 
-// Handle unhandled promise rejections (e.g., database connection errors)
+// Yakalanmamış promise — tek istek yüzünden tüm API'yi kapatma (502/502 dalgası önlenir)
 process.on("unhandledRejection", (err) => {
-  console.error("Unhandled Rejection:", err);
-  if (server) {
-    server.close(async () => {
-      await disconnectDB();
-      process.exit(1);
-    });
-  } else {
-    process.exit(1);
-  }
+  console.error("[api] Unhandled Rejection:", err?.stack || err);
 });
 
-// Handle uncaught exceptions
+// Gerçek senkron çökme — yine de logla; production'da PM2 yeniden başlatır
 process.on("uncaughtException", async (err) => {
-  console.error("Uncaught Exception:", err);
-  await disconnectDB();
+  console.error("[api] Uncaught Exception:", err?.stack || err);
+  try {
+    await disconnectDB();
+  } catch (_) {
+    /* ignore */
+  }
   process.exit(1);
 });
 

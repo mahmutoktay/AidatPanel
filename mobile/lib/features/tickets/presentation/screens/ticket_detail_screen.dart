@@ -149,7 +149,10 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
       }
     } on ApiException catch (e) {
       if (mounted) {
-        ref.read(toastProvider.notifier).show(e.message, type: ToastType.error);
+        ref.read(toastProvider.notifier).show(
+              userFacingError(e),
+              type: ToastType.error,
+            );
       }
     } catch (e) {
       if (mounted) {
@@ -182,7 +185,10 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
       }
     } on ApiException catch (e) {
       if (mounted) {
-        ref.read(toastProvider.notifier).show(e.message, type: ToastType.error);
+        ref.read(toastProvider.notifier).show(
+              userFacingError(e),
+              type: ToastType.error,
+            );
       }
     } catch (e) {
       if (mounted) {

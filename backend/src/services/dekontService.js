@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
 import { assertManagerOwnsBuilding } from "../utils/access.js";
@@ -5,6 +6,7 @@ import {
   saveDekontFile,
   moveTempToDekontFile,
   dekontFileExists,
+  deleteDekontFile,
 } from "./dekontStorageService.js";
 import {
   validateMulterDekontFile,
@@ -29,6 +31,7 @@ import {
   mergeCreatedAtCursorWhere,
 } from "../utils/listQuery.js";
 import { dekontListSelect, formatDekont } from "../utils/dekontFormat.js";
+import { dekontLog, dekontLogError } from "../utils/dekontDebug.js";
 
 /**
  * @returns {Promise<import("@prisma/client").Dekont>}
@@ -54,6 +57,23 @@ export async function assertCanAccessDekont(dekontId, user) {
   }
 
   return dekont;
+}
+
+/** DB'de dosya yolu yok / pending veya diskte dosya eksik. */
+async function isDekontFileBroken(row) {
+  if (!row?.storedPath || row.storedPath === "pending") {
+    return true;
+  }
+  return !(await dekontFileExists(row.storedPath));
+}
+
+async function removeBrokenDekontRecord(row) {
+  if (!row?.id) return;
+  if (row.storedPath && row.storedPath !== "pending") {
+    await deleteDekontFile(row.storedPath).catch(() => {});
+  }
+  await prisma.dekont.delete({ where: { id: row.id } }).catch(() => {});
+  dekontLog("removed broken dekont record", { dekontId: row.id });
 }
 
 async function resolveUploadContext(user, dueId) {
@@ -126,6 +146,8 @@ export async function createDekontFromUpload(user, file, { dueId } = {}) {
     throw new HttpError(400, "Dosya gereklidir.");
   }
 
+  let createdDekontId = null;
+  let savedStoredPath = null;
   let validation;
   try {
     validation = await validateMulterDekontFile(file);
@@ -140,51 +162,78 @@ export async function createDekontFromUpload(user, file, { dueId } = {}) {
         buildingId: context.buildingId,
         fileHash: validation.fileHash,
       },
+      select: { ...dekontListSelect, storedPath: true },
     });
 
     if (duplicate) {
-      throw new HttpError(409, "Bu dekont dosyası daha önce yüklenmiş.");
+      if (await isDekontFileBroken(duplicate)) {
+        dekontLogError(
+          "duplicate dekont broken — removing and re-uploading",
+          new Error("BROKEN_STORED_PATH"),
+          { dekontId: duplicate.id, storedPath: duplicate.storedPath }
+        );
+        await removeBrokenDekontRecord(duplicate);
+      } else {
+        throw new HttpError(409, "Bu dekont dosyası daha önce yüklenmiş.", {
+          dekontId: duplicate.id,
+          dekont: formatDekont(duplicate),
+        });
+      }
     }
 
     const sizeBytes = file.size ?? validation.sizeBytes ?? file.buffer?.length ?? 0;
+    const dekontId = randomUUID();
+    let storedPath = null;
 
-    const dekont = await prisma.dekont.create({
-      data: {
-        buildingId: context.buildingId,
-        apartmentId: context.apartmentId,
-        uploadedById: user.id,
-        dueId: context.dueId,
-        status: "RECEIVED",
-        source: context.source,
-        storedPath: "pending",
-        originalFilename: file.originalname || "dekont",
-        mimeType: validation.mime,
-        sizeBytes,
-        fileHash: validation.fileHash,
-      },
-    });
-
-    let storedPath;
     if (file.path) {
       storedPath = await moveTempToDekontFile(file.path, {
         buildingId: context.buildingId,
-        dekontId: dekont.id,
+        dekontId,
         mimeType: validation.mime,
       });
       file.path = null;
     } else {
       storedPath = await saveDekontFile(file.buffer, {
         buildingId: context.buildingId,
-        dekontId: dekont.id,
+        dekontId,
         mimeType: validation.mime,
       });
     }
 
-    const updated = await prisma.dekont.update({
-      where: { id: dekont.id },
-      data: { storedPath },
+    const fileOnDisk = await dekontFileExists(storedPath);
+    dekontLog("upload file saved before db", {
+      dekontId,
+      storedPath,
+      fileOnDisk,
+      sizeBytes,
+    });
+    if (!fileOnDisk) {
+      await deleteDekontFile(storedPath).catch(() => {});
+      throw new HttpError(
+        503,
+        "Dosya sunucuya kaydedilemedi. Lütfen daha sonra tekrar deneyin."
+      );
+    }
+    savedStoredPath = storedPath;
+
+    const dekont = await prisma.dekont.create({
+      data: {
+        id: dekontId,
+        buildingId: context.buildingId,
+        apartmentId: context.apartmentId,
+        uploadedById: user.id,
+        dueId: context.dueId,
+        status: "RECEIVED",
+        source: context.source,
+        storedPath,
+        originalFilename: file.originalname || "dekont",
+        mimeType: validation.mime,
+        sizeBytes,
+        fileHash: validation.fileHash,
+      },
       select: dekontListSelect,
     });
+    createdDekontId = dekont.id;
 
     enqueueDekontPipeline(
       async () => {
@@ -194,7 +243,67 @@ export async function createDekontFromUpload(user, file, { dueId } = {}) {
       { label: `upload-${dekont.id}` }
     );
 
-    return formatDekont(updated);
+    return formatDekont(dekont);
+  } catch (err) {
+    if (createdDekontId) {
+      const row = await prisma.dekont
+        .findUnique({
+          where: { id: createdDekontId },
+          select: { id: true, storedPath: true },
+        })
+        .catch(() => null);
+      if (row) {
+        await removeBrokenDekontRecord(row);
+      }
+    } else if (savedStoredPath) {
+      await deleteDekontFile(savedStoredPath).catch(() => {});
+    }
+    if (err instanceof HttpError || err?.name === "HttpError") {
+      throw err;
+    }
+    if (err?.code === "P2002") {
+      const target = err.meta?.target;
+      const fields = Array.isArray(target) ? target : [];
+      const isFileHashConflict =
+        fields.includes("fileHash") ||
+        fields.includes("buildingId_fileHash") ||
+        (fields.includes("buildingId") && fields.includes("fileHash"));
+      if (isFileHashConflict && validation?.fileHash) {
+        const context = await resolveUploadContext(user, dueId ?? undefined);
+        const duplicate = await prisma.dekont.findFirst({
+          where: {
+            buildingId: context.buildingId,
+            fileHash: validation.fileHash,
+          },
+          select: { ...dekontListSelect, storedPath: true },
+        });
+        if (duplicate) {
+          throw new HttpError(409, "Bu dekont dosyası daha önce yüklenmiş.", {
+            dekontId: duplicate.id,
+            dekont: formatDekont(duplicate),
+          });
+        }
+      }
+    }
+    console.error("[dekont] upload failed:", err);
+    dekontLogError("upload failed", err, {
+      userId: user?.id,
+      createdDekontId,
+      savedStoredPath,
+    });
+    const fsCodes = new Set(["EACCES", "ENOENT", "EROFS", "EPERM"]);
+    if (fsCodes.has(err?.code)) {
+      throw new HttpError(
+        503,
+        "Dosya sunucuya kaydedilemedi. Lütfen daha sonra tekrar deneyin."
+      );
+    }
+    throw new HttpError(
+      500,
+      process.env.NODE_ENV === "production"
+        ? "Dekont yüklenemedi. Lütfen tekrar deneyin."
+        : err?.message || "Dekont yüklenemedi."
+    );
   } finally {
     await cleanupMulterTempFile(file);
   }
@@ -208,8 +317,9 @@ export async function getDekontByIdForUser(dekontId, user) {
       parseError: true,
       parserProfile: true,
       parsedJson: true,
-      uploadedById: true,
       building: { select: { managerId: true } },
+      apartment: { select: { id: true, number: true } },
+      uploadedBy: { select: { id: true, name: true, email: true } },
     },
   });
 
@@ -225,8 +335,13 @@ export async function getDekontByIdForUser(dekontId, user) {
     throw new HttpError(404, "Dekont bulunamadı.");
   }
 
-  const { building: _b, uploadedById: _u, ...rest } = row;
-  return formatDekont(rest);
+  const { building: _b, ...rest } = row;
+  const formatted = formatDekont(rest);
+  return {
+    ...formatted,
+    apartment: row.apartment ?? undefined,
+    uploadedBy: row.uploadedBy ?? undefined,
+  };
 }
 
 export async function listDekontsForResident(userId, filters = {}) {
@@ -354,9 +469,37 @@ export async function reviewDekont(dekontId, managerId, { decision, note, dueId 
 
 export async function getDekontFileForUser(dekontId, user) {
   const dekont = await assertCanAccessDekont(dekontId, user);
-  const exists = await dekontFileExists(dekont.storedPath);
-  if (!exists) {
-    throw new HttpError(404, "Dekont dosyası bulunamadı.");
+  const pathMissing =
+    !dekont.storedPath || dekont.storedPath === "pending";
+  const exists =
+    !pathMissing && (await dekontFileExists(dekont.storedPath));
+
+  if (pathMissing || !exists) {
+    const ageMs = Date.now() - new Date(dekont.createdAt).getTime();
+    const stale = ageMs > 2 * 60 * 1000;
+
+    dekontLogError("GET file unavailable", new Error("FILE_UNAVAILABLE"), {
+      dekontId,
+      storedPath: dekont.storedPath,
+      pathMissing,
+      exists,
+      ageMs,
+      stale,
+    });
+
+    if (stale) {
+      await removeBrokenDekontRecord(dekont);
+      throw new HttpError(
+        404,
+        "Dekont dosyası kaydedilememiş. Lütfen dekontu yeniden yükleyin."
+      );
+    }
+
+    throw new HttpError(
+      503,
+      "Dekont dosyası henüz hazırlanıyor. Lütfen kısa süre sonra tekrar deneyin."
+    );
   }
+
   return dekont;
 }

@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,9 +18,22 @@ import 'l10n/strings.g.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _installGlobalErrorHandlers();
-  await initFirebase();
-  await initAppInfo();
-  await initLocale();
+  try {
+    await initFirebase();
+  } catch (e, st) {
+    developer.log('initFirebase başarısız', name: 'main', error: e, stackTrace: st);
+  }
+  try {
+    await initAppInfo();
+  } catch (e, st) {
+    developer.log('initAppInfo başarısız', name: 'main', error: e, stackTrace: st);
+  }
+  try {
+    await initLocale();
+  } catch (e, st) {
+    developer.log('initLocale başarısız', name: 'main', error: e, stackTrace: st);
+    LocaleSettings.setLocale(AppLocale.tr);
+  }
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -51,8 +66,12 @@ void _installGlobalErrorHandlers() {
 }
 
 Future<void> initAppInfo() async {
-  final packageInfo = await PackageInfo.fromPlatform();
-  AppConstants.appVersion = packageInfo.version;
+  try {
+    final packageInfo = await PackageInfo.fromPlatform();
+    AppConstants.appVersion = packageInfo.version;
+  } catch (_) {
+    // Eklenti kaydı başarısızsa uygulama yine açılsın (sürüm gösterimi boş kalabilir).
+  }
 }
 
 Future<void> initLocale() async {

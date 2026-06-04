@@ -30,7 +30,7 @@ class LocalNotificationService {
       iOS: darwinInit,
     );
 
-    await _plugin.initialize(initSettings);
+    await _plugin.initialize(settings: initSettings);
 
     if (Platform.isAndroid) {
       await _plugin
@@ -82,7 +82,12 @@ class LocalNotificationService {
     );
 
     try {
-      await _plugin.show(id, title, body ?? '', details);
+      await _plugin.show(
+        id: id,
+        title: title,
+        body: body ?? '',
+        notificationDetails: details,
+      );
     } catch (e, st) {
       if (kDebugMode) {
         debugPrint('[LocalNotification] show hata: $e\n$st');

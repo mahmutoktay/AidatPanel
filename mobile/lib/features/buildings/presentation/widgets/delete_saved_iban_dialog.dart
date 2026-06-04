@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -72,7 +73,10 @@ class _DeleteSavedIbanDialogState extends ConsumerState<DeleteSavedIbanDialog> {
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _deleting = false);
-      ref.read(toastProvider.notifier).show(e.message, type: ToastType.error);
+      ref.read(toastProvider.notifier).show(
+            userFacingError(e),
+            type: ToastType.error,
+          );
     } catch (_) {
       if (!mounted) return;
       setState(() => _deleting = false);

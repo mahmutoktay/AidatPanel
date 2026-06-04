@@ -59,10 +59,9 @@ enum DekontStatus {
   bool get isTerminal =>
       this == DekontStatus.paymentApplied || this == DekontStatus.rejected;
 
+  /// OCR/iş kuralı aktif çalışıyor — RECEIVED bekleyen kayıt değil.
   bool get isProcessing =>
-      this == DekontStatus.received ||
-      this == DekontStatus.extracting ||
-      this == DekontStatus.matching;
+      this == DekontStatus.extracting || this == DekontStatus.matching;
 
   bool get needsManagerAttention =>
       this == DekontStatus.needsManagerReview ||

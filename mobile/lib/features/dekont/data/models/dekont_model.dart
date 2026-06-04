@@ -108,8 +108,8 @@ class DekontModel {
     final apt = json['apartment'];
     if (apt is Map) {
       apartment = DekontApartmentSummary(
-        id: (apt['id'] ?? '') as String,
-        number: (apt['number'] ?? '') as String,
+        id: _asString(apt['id']),
+        number: _asString(apt['number']),
       );
     }
 
@@ -117,8 +117,8 @@ class DekontModel {
     final uploader = json['uploadedBy'];
     if (uploader is Map) {
       uploadedBy = DekontUserSummary(
-        id: (uploader['id'] ?? '') as String,
-        name: (uploader['name'] ?? '') as String,
+        id: _asString(uploader['id']),
+        name: _asString(uploader['name']),
         email: uploader['email'] as String?,
       );
     }
@@ -130,21 +130,21 @@ class DekontModel {
     }
 
     return DekontModel(
-      id: (json['id'] ?? '') as String,
-      buildingId: (json['buildingId'] ?? '') as String,
+      id: _asString(json['id']),
+      buildingId: _asString(json['buildingId']),
       apartmentId: json['apartmentId'] as String?,
-      uploadedById: (json['uploadedById'] ?? '') as String,
+      uploadedById: _asString(json['uploadedById']),
       dueId: json['dueId'] as String?,
-      status: (json['status'] ?? 'RECEIVED') as String,
-      source: (json['source'] ?? 'RESIDENT_UPLOAD') as String,
-      originalFilename: (json['originalFilename'] ?? '') as String,
-      mimeType: (json['mimeType'] ?? 'application/pdf') as String,
-      sizeBytes: (json['sizeBytes'] as num?)?.toInt() ?? 0,
-      recipientVerified: json['recipientVerified'] as bool?,
+      status: _asString(json['status'], fallback: 'RECEIVED'),
+      source: _asString(json['source'], fallback: 'RESIDENT_UPLOAD'),
+      originalFilename: _asString(json['originalFilename']),
+      mimeType: _asString(json['mimeType'], fallback: 'application/pdf'),
+      sizeBytes: _asInt(json['sizeBytes']),
+      recipientVerified: _asBool(json['recipientVerified']),
       referenceNumber: json['referenceNumber'] as String?,
       parsedAmount: json['parsedAmount']?.toString(),
       transactionDate: _parseDate(json['transactionDate']),
-      aiConfidence: (json['aiConfidence'] as num?)?.toDouble(),
+      aiConfidence: _asDouble(json['aiConfidence']),
       reviewedAt: _parseDate(json['reviewedAt']),
       reviewNote: json['reviewNote'] as String?,
       rejectionReason: json['rejectionReason'] as String?,
@@ -161,6 +161,38 @@ class DekontModel {
   static DateTime? _parseDate(dynamic value) {
     if (value is String && value.isNotEmpty) {
       return DateTime.tryParse(value);
+    }
+    return null;
+  }
+
+  static String _asString(dynamic value, {String fallback = ''}) {
+    if (value == null) return fallback;
+    return value.toString();
+  }
+
+  static int _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  static double? _asDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  static bool? _asBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final l = value.toLowerCase();
+      if (l == 'true' || l == '1') return true;
+      if (l == 'false' || l == '0') return false;
     }
     return null;
   }

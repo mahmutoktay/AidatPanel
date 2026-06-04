@@ -1,6 +1,22 @@
 import path from "path";
+import { fileURLToPath } from "url";
 
 /** Dekont upload ve doğrulama sabitleri */
+
+const backendRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../.."
+);
+
+function resolveStoragePath(envValue, defaultRelative) {
+  if (envValue && String(envValue).trim()) {
+    const trimmed = String(envValue).trim();
+    return path.isAbsolute(trimmed)
+      ? trimmed
+      : path.resolve(process.cwd(), trimmed);
+  }
+  return path.join(backendRoot, defaultRelative);
+}
 
 export const DEKONT_MAX_BYTES =
   Number(process.env.DEKONT_MAX_BYTES) || 10 * 1024 * 1024;
@@ -11,13 +27,17 @@ export const DEKONT_ALLOWED_MIMES = new Set([
   "image/png",
 ]);
 
-export const DEKONT_UPLOAD_DIR =
-  process.env.DEKONT_UPLOAD_DIR || "./uploads/dekonts";
+/** Üretimde mutlak path + kalıcı volume önerilir (ör. /var/aidatpanel/uploads/dekonts). */
+export const DEKONT_UPLOAD_DIR = resolveStoragePath(
+  process.env.DEKONT_UPLOAD_DIR,
+  "uploads/dekonts"
+);
 
 /** Multer geçici dosyaları (bellek yerine disk) */
 export const DEKONT_UPLOAD_TMP_DIR =
-  process.env.DEKONT_UPLOAD_TMP_DIR ||
-  path.join(DEKONT_UPLOAD_DIR, "_tmp");
+  process.env.DEKONT_UPLOAD_TMP_DIR?.trim()
+    ? resolveStoragePath(process.env.DEKONT_UPLOAD_TMP_DIR, "_tmp")
+    : path.join(DEKONT_UPLOAD_DIR, "_tmp");
 
 /** Yalnızca yerel disk (`DEKONT_UPLOAD_DIR`) */
 export const DEKONT_STORAGE = "local";

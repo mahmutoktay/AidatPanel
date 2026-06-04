@@ -11,6 +11,7 @@ import { extractDekontTextForPipeline } from "./dekontOcrRunner.js";
 import { evaluateDekontBusinessRules } from "./dekontBusinessRulesService.js";
 import { applyDekontPayment } from "./dekontPaymentService.js";
 import { enqueueDekontPipeline } from "./dekontPipelineQueue.js";
+import { dekontLog, dekontLogError } from "../utils/dekontDebug.js";
 
 /** OCR öncesi event loop'a nefes — eşzamanlı HTTP istekleri işlenebilsin */
 function yieldEventLoop() {
@@ -55,6 +56,7 @@ async function tryAutoApplyPayment(dekontId, managerId) {
  */
 export async function runVerificationPipeline(dekontId, attempt = 1, options = {}) {
   const { skipUploadValidation = false } = options;
+  dekontLog("pipeline.start", { dekontId, attempt, skipUploadValidation });
   const dekont = await prisma.dekont.findUnique({
     where: { id: dekontId },
     include: { building: true, due: true },
@@ -66,6 +68,10 @@ export async function runVerificationPipeline(dekontId, attempt = 1, options = {
       (dekont.status === "EXTRACT_FAILED" && attempt > 1));
 
   if (!mayRun) {
+    dekontLog("pipeline.skip", {
+      dekontId,
+      status: dekont?.status ?? "missing",
+    });
     return;
   }
 
@@ -73,6 +79,7 @@ export async function runVerificationPipeline(dekontId, attempt = 1, options = {
     where: { id: dekontId },
     data: { status: "EXTRACTING" },
   });
+  dekontLog("pipeline.extracting", { dekontId, attempt });
 
   try {
     if (!skipUploadValidation) {
@@ -96,6 +103,12 @@ export async function runVerificationPipeline(dekontId, attempt = 1, options = {
       dekont.storedPath,
       dekont.mimeType
     );
+    dekontLog("pipeline.ocr-done", {
+      dekontId,
+      profile: ocr.profile,
+      confidence: ocr.confidence,
+      textLen: ocr.rawText?.length ?? 0,
+    });
 
     await prisma.dekont.update({
       where: { id: dekontId },

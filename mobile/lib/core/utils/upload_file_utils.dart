@@ -34,6 +34,21 @@ class UploadFileUtils {
   static String? mimeTypeForExtension(String ext) => _mimeByExt[ext.toLowerCase()];
 
   /// Geçerliyse `null`, aksi halde hata anahtarı (i18n).
+  static String? validateReceiptBytes(List<int> bytes, String fileName) {
+    final ext = extensionFromPath(fileName);
+    if (!allowedExtensions.contains(ext)) {
+      return 'invalidExtension';
+    }
+    if (bytes.isEmpty) {
+      return 'fileEmpty';
+    }
+    if (bytes.length > maxBytes) {
+      return 'fileTooLarge';
+    }
+    return null;
+  }
+
+  /// Geçerliyse `null`, aksi halde hata anahtarı (i18n).
   static String? validateReceiptFile(String path) {
     final ext = extensionFromPath(path);
     if (!allowedExtensions.contains(ext)) {

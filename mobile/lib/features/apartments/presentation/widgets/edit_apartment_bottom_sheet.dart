@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -93,9 +94,7 @@ class _EditApartmentBottomSheetState
       if (!mounted) return;
       setState(() => _saving = false);
       ref.read(toastProvider.notifier).show(
-            e.message.isNotEmpty
-                ? e.message
-                : context.t.common.apartmentUpdateFailed,
+            userFacingError(e),
             type: ToastType.error,
           );
     } catch (_) {

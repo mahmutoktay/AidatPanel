@@ -1,11 +1,14 @@
 import '../entities/dekont_entity.dart';
+import '../entities/dekont_upload_result.dart';
 import '../entities/payment_collection_entity.dart';
 
 abstract class DekontRepository {
   Future<PaymentCollectionEntity> getPaymentCollection();
 
-  Future<DekontEntity> uploadDekont({
-    required String filePath,
+  Future<DekontUploadResult> uploadDekont({
+    required String fileName,
+    required List<int> fileBytes,
+    String? filePath,
     String? dueId,
   });
 
