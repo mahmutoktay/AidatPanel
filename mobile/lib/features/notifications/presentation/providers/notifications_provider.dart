@@ -104,6 +104,8 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     _lastPollAt = null;
   }
 
+  bool isNotificationToasted(String id) => _toastedNotificationIds.contains(id);
+
   void markNotificationToasted(String id) {
     if (id.isEmpty) return;
     _toastBaselineReady = true;

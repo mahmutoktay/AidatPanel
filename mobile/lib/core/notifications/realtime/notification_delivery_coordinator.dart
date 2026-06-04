@@ -107,17 +107,29 @@ class NotificationDeliveryCoordinator {
 
     final notifier = ref.read(notificationsNotifierProvider.notifier);
     final notificationId = event.payload.notificationId;
-    if (notificationId != null && notificationId.isNotEmpty) {
-      notifier.markNotificationToasted(notificationId);
-    }
 
+    // Birden çok kanal (FCM + polling) aynı bildirimi iletirse
+    // sadece bir toast göster. notificationId'si olmayan (ör. rozet)
+    // olaylar her zaman gösterilir.
     if (event.showToast) {
       final title = event.title?.trim() ?? '';
       if (title.isNotEmpty) {
-        ref.read(toastProvider.notifier).showNotification(
-              notificationToastMessage(title: title, body: event.body),
-            );
+        final alreadyToasted = notificationId != null &&
+            notificationId.isNotEmpty &&
+            notifier.isNotificationToasted(notificationId);
+        if (!alreadyToasted) {
+          ref.read(toastProvider.notifier).showNotification(
+                notificationToastMessage(title: title, body: event.body),
+              );
+        }
       }
+    }
+
+    // Toast gösterildikten SONRA işaretle — böylece aynı olay içinde
+    // yanlışlıkla atlanmaz, ama ikinci kanal (polling) aynı ID'yi
+    // görünce toast'ı tekrarlamaz.
+    if (notificationId != null && notificationId.isNotEmpty) {
+      notifier.markNotificationToasted(notificationId);
     }
 
     if (event.syncBadge) {
@@ -128,6 +140,11 @@ class NotificationDeliveryCoordinator {
   void _showPollingToasts(List<NotificationEntity> items) {
     final ref = _ref;
     if (ref == null || items.isEmpty) return;
+    // Polling toast'larını da işaretle ki sonraki timer yine göstermesin
+    final notifier = ref.read(notificationsNotifierProvider.notifier);
+    for (final n in items) {
+      notifier.markNotificationToasted(n.id);
+    }
     enqueueNotificationToasts(ref, items);
   }
 

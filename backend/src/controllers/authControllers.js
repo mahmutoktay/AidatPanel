@@ -242,12 +242,10 @@ const join = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    await prisma.user.update({
-      where: { id: req.user.id },
-      data: {
-        fcmToken: null,
-      },
-    });
+    // Mobil kendi yerel token'larını SecureStorage.clearAuth() ile temizler.
+    // fcmToken'a dokunmuyoruz çünkü aynı kullanıcının diğer cihazları
+    // bu token ile push almaya devam etmelidir.
+    // Çoklu cihaz desteği için ileride ayrı bir UserDevice tablosu gerekir.
     res.status(200).json({
       success: true,
       message: "Çıkış başarılı.",
