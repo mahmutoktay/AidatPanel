@@ -287,11 +287,11 @@ String? _mapDekont(
   }
 
   if (_has(raw, 'dosya içeriği') || _has(raw, 'türle uyuşmuyor')) {
-    return api.fileContentMismatch as String;
+    return api.fileContentMismatch;
   }
 
   if (_has(raw, 'geçersiz pdf')) {
-    return api.invalidPdf as String;
+    return api.invalidPdf;
   }
 
   if (_has(raw, 'dosya gereklidir') || _has(raw, 'dosya okunamadı')) {
@@ -340,7 +340,7 @@ String? _mapDekont(
   }
 
   if (_has(raw, 'dekont bulunamadı')) {
-    return api.dekontNotFound as String;
+    return api.dekontNotFound;
   }
 
   if (_has(raw, 'yeniden yükleyin') ||
@@ -350,7 +350,7 @@ String? _mapDekont(
 
   if (_has(raw, 'daire ataması gerekli') ||
       _has(raw, 'daire kaydınız bulunmuyor')) {
-    return api.noApartmentForPayment as String;
+    return api.noApartmentForPayment;
   }
 
   if (code == 503) {
@@ -370,7 +370,7 @@ String? _mapDekont(
   }
 
   if (error is NetworkException) {
-    return api.networkError as String;
+    return api.networkError;
   }
 
   return null;

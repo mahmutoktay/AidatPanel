@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,7 +49,6 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: UploadFileUtils.allowedExtensions.toList(),
-      withData: true,
     );
     if (result == null || result.files.isEmpty) return;
     final picked = result.files.single;
@@ -60,23 +57,30 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
     final t = context.t.features.dekont;
     final name = picked.name;
 
-    List<int>? bytes = picked.bytes;
-    if (bytes == null || bytes.isEmpty) {
-      final path = picked.path;
-      if (path != null) {
-        final fileError = UploadFileUtils.validateReceiptFile(path);
-        if (fileError != null) {
-          ref.read(toastProvider.notifier).show(
-                _uploadValidationMessage(t, fileError),
-                type: ToastType.error,
-              );
-          return;
-        }
-        bytes = await File(path).readAsBytes();
+    final path = picked.path;
+    if (path != null) {
+      final fileError = UploadFileUtils.validateReceiptFile(path);
+      if (fileError != null) {
+        ref.read(toastProvider.notifier).show(
+              _uploadValidationMessage(t, fileError),
+              type: ToastType.error,
+            );
+        return;
       }
     }
 
-    if (bytes == null || bytes.isEmpty) {
+    late final List<int> bytes;
+    try {
+      bytes = await picked.readAsBytes();
+    } catch (_) {
+      ref.read(toastProvider.notifier).show(
+            t.fileNotFound,
+            type: ToastType.error,
+          );
+      return;
+    }
+
+    if (bytes.isEmpty) {
       ref.read(toastProvider.notifier).show(
             t.fileNotFound,
             type: ToastType.error,

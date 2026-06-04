@@ -249,7 +249,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
     }
 
     try {
-      return DekontModel.fromJson(Map<String, dynamic>.from(data as Map));
+      return DekontModel.fromJson(Map<String, dynamic>.from(data));
     } catch (e, st) {
       if (kDebugMode) {
         debugPrint('[dekont-upload] parse hata: $e\n$st\npayload: $data');
