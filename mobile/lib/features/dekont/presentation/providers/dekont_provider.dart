@@ -178,6 +178,10 @@ class MakePaymentNotifier extends StateNotifier<MakePaymentState> {
     );
   }
 
+  void clearPickedReceipt() {
+    state = state.copyWith(clearFile: true, clearError: true);
+  }
+
   Future<DekontEntity?> upload() async {
     final bytes = state.pickedFileBytes;
     final name = state.pickedFileName;

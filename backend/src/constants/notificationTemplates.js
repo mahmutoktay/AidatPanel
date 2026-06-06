@@ -1,52 +1,54 @@
 /** Bildirim başlık/gövde şablonları — tek kaynak (A12). */
 
 export const TICKET_CREATED_MANAGER = {
-  title: "Yeni talep",
+  title: "Yeni Destek Talebi",
   body: (apartmentNumber, ticketTitle) =>
-    `Daire ${apartmentNumber}: ${ticketTitle}`,
+    `Daire ${apartmentNumber} yeni bir talep oluşturdu: "${ticketTitle}"`,
 };
 
 export const TICKET_UPDATE_NOTE = {
-  title: "Talebiniz güncellendi",
-  body: (preview) => `Yöneticiniz talebinize not ekledi: ${preview}`,
+  title: "Talebinize Yanıt Geldi",
+  body: (preview) => `Yöneticiniz talebinize bir not ekledi: "${preview}"`,
 };
 
 export const DUE_PAID_RESIDENT = {
-  title: "Aidatınız ödendi",
+  title: "Ödemeniz Başarıyla İşlendi ✓",
   body: (month, year) =>
-    `${month}/${year} dönemi aidatınız ödendi olarak işaretlendi.`,
+    `${month}/${year} dönemi aidat ödemeniz başarıyla hesabınıza işlenmiştir.`,
 };
 
 export const DUE_REMINDER_RESIDENT = {
-  title: "Aidat hatırlatması",
+  title: "Aidat Ödeme Hatırlatması",
   body: (month, year, amount, currency) =>
-    `${month}/${year} dönemi aidatınız (${amount} ${currency}) henüz ödenmemiştir.`,
+    `${month}/${year} dönemi aidat tutarınız (${amount} ${currency}) henüz ödenmemiştir. Lütfen ödemenizi gerçekleştiriniz.`,
 };
 
 export const DEKONT_RECEIVED_MANAGER = {
-  title: "Yeni dekont",
+  title: "Yeni Ödeme Bildirimi",
   body: (apartmentNumber, filename) =>
-    `Daire ${apartmentNumber}: ${filename} yüklendi.`,
+    `Daire ${apartmentNumber} tarafından yeni bir ödeme dekontu (${filename}) sisteme yüklendi.`,
 };
 
 export const DEKONT_NEEDS_REVIEW_MANAGER = {
-  title: "Dekont inceleme",
+  title: "Dekont İnceleme Bekliyor",
   body: (apartmentNumber) =>
-    `Daire ${apartmentNumber} dekontu inceleme bekliyor.`,
+    `Daire ${apartmentNumber} tarafından yüklenen dekont incelemenizi bekliyor.`,
 };
 
 export const DEKONT_PAYMENT_APPLIED_RESIDENT = {
-  title: "Dekont onaylandı",
-  body: (month, year) => `${month}/${year} dönemi dekontunuz onaylandı ve ödeme işlendi.`,
+  title: "Ödemeniz Onaylandı ✓",
+  body: (month, year) => `${month}/${year} dönemine ait aidat ödemeniz yöneticiniz tarafından onaylanmış ve hesabınıza işlenmiştir.`,
 };
 
 export const DEKONT_MATCHED_MANAGER = {
-  title: "Dekont eşleşti",
+  title: "Dekont Otomatik Eşleştirildi",
   body: (apartmentNumber) =>
-    `Daire ${apartmentNumber} dekontu otomatik kurallarla eşleşti; onay bekleyebilir.`,
+    `Daire ${apartmentNumber} dekontu sistem tarafından otomatik olarak eşleştirildi. Onayınızı bekliyor.`,
 };
 
 export const DEKONT_REJECTED_RESIDENT = {
-  title: "Dekont reddedildi",
-  body: (reason) => reason || "Yöneticiniz dekontunuzu reddetti.",
+  title: "Dekontunuz Reddedildi",
+  body: (reason) => reason
+    ? `Yöneticiniz dekontunuzu şu gerekçeyle reddetti: "${reason}". Lütfen düzeltip tekrar yükleyiniz.`
+    : "Yöneticiniz dekontunuzu reddetti. Detaylar için uygulama içinden inceleyebilirsiniz.",
 };

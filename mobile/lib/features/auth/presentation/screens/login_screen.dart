@@ -7,11 +7,11 @@ import '../../../../core/navigation/auth_back_handler.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/utils/input_validators.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_brand_header.dart';
+import '../widgets/auth_text_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -26,7 +26,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   late FocusNode _identifierFocusNode;
   // Identifier "next" tuşundan sonra şifreye odaklanmak için.
   late FocusNode _passwordFocusNode;
-  bool _obscurePassword = true;
+  final ValueNotifier<bool> _obscurePasswordNotifier = ValueNotifier(true);
   bool _usePhoneLogin = false;
 
   @override
@@ -44,6 +44,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _passwordController.dispose();
     _identifierFocusNode.dispose();
     _passwordFocusNode.dispose();
+    _obscurePasswordNotifier.dispose();
     super.dispose();
   }
 
@@ -54,60 +55,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _identifierController.clear();
     });
     Future.delayed(const Duration(milliseconds: 100), () {
+      if (!mounted) return;
       _identifierFocusNode.requestFocus();
     });
   }
 
   void _handleLogin(BuildContext context) {
     if (ref.read(authStateProvider).isLoading) return;
-    final raw = _identifierController.text.trim();
-    final password = _passwordController.text;
-
-    // Input validation
-    String? identifierError;
-    String? passwordError;
-
-    if (_usePhoneLogin) {
-      final phoneError = InputValidators.validatePhone(raw);
-      identifierError = phoneError == null
-          ? null
-          : phoneError == 'phone_required'
-          ? context.t.validation.phoneRequired
-          : context.t.validation.phoneInvalid;
-    } else {
-      final emailError = InputValidators.validateEmail(raw);
-      identifierError = emailError == null
-          ? null
-          : emailError == 'email_required'
-          ? context.t.validation.emailRequired
-          : emailError == 'email_invalid'
-          ? context.t.validation.emailInvalid
-          : context.t.validation.emailTooLong;
-    }
-
-    passwordError = password.isEmpty
-        ? context.t.features.auth.passwordRequired
-        : null;
-
-    // Show validation errors
-    if (identifierError != null || passwordError != null) {
-      String errorMessage = '';
-      if (identifierError != null) {
-        errorMessage += identifierError;
-      }
-      if (passwordError != null) {
-        if (errorMessage.isNotEmpty) errorMessage += '\n';
-        errorMessage += passwordError;
-      }
-
-      ref
-          .read(toastProvider.notifier)
-          .show(errorMessage, type: ToastType.error);
-      return;
-    }
-
-    final identifier = _usePhoneLogin ? '+90$raw' : raw;
-    ref.read(authStateProvider.notifier).login(identifier, password, ref);
+    ref.read(authStateProvider.notifier).submitLogin(
+          _identifierController.text,
+          _passwordController.text,
+          _usePhoneLogin,
+          ref,
+        );
   }
 
   @override
@@ -212,47 +172,50 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                           const SizedBox(height: AppSizes.spacingFieldSpacing),
-                          TextField(
-                            controller: _passwordController,
-                            focusNode: _passwordFocusNode,
-                            enabled: !authState.isLoading,
-                            obscureText: _obscurePassword,
-                            textInputAction: TextInputAction.done,
-                            // Şifre tamamlandığında klavyeden direkt giriş.
-                            onSubmitted: (_) => _handleLogin(context),
-                            autofillHints: const [AutofillHints.password],
-                            style: AppTypography.body1,
-                            decoration: InputDecoration(
-                              labelText: context.t.features.auth.password,
-                              hintText: context.t.features.auth.passwordHint,
-                              prefixIcon: Icon(
-                                Icons.lock_outlined,
-                                size: AppSizes.iconSize,
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  size: AppSizes.iconSize,
+                          ValueListenableBuilder<bool>(
+                            valueListenable: _obscurePasswordNotifier,
+                            builder: (context, isObscure, child) {
+                              return TextField(
+                                controller: _passwordController,
+                                focusNode: _passwordFocusNode,
+                                enabled: !authState.isLoading,
+                                obscureText: isObscure,
+                                textInputAction: TextInputAction.done,
+                                // Şifre tamamlandığında klavyeden direkt giriş.
+                                onSubmitted: (_) => _handleLogin(context),
+                                autofillHints: const [AutofillHints.password],
+                                style: AppTypography.body1,
+                                decoration: InputDecoration(
+                                  labelText: context.t.features.auth.password,
+                                  hintText: context.t.features.auth.passwordHint,
+                                  prefixIcon: Icon(
+                                    Icons.lock_outlined,
+                                    size: AppSizes.iconSize,
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      isObscure
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      size: AppSizes.iconSize,
+                                    ),
+                                    onPressed: () {
+                                      _obscurePasswordNotifier.value = !isObscure;
+                                    },
+                                    iconSize: AppSizes.iconTouchTarget,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: AppSizes.spacingM,
+                                    vertical: AppSizes.spacingM,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      AppSizes.inputRadius,
+                                    ),
+                                  ),
                                 ),
-                                onPressed: () {
-                                  setState(
-                                    () => _obscurePassword = !_obscurePassword,
-                                  );
-                                },
-                                iconSize: AppSizes.iconTouchTarget,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: AppSizes.spacingM,
-                                vertical: AppSizes.spacingM,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppSizes.inputRadius,
-                                ),
-                              ),
-                            ),
+                              );
+                            },
                           ),
                           const SizedBox(height: AppSizes.spacingFieldSpacing),
                           ElevatedButton(
@@ -303,64 +266,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                           const SizedBox(height: AppSizes.spacingXS),
-                          Center(
-                            child: Semantics(
-                              button: true,
-                              label: context.t.common.forgotPassword,
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: authState.isLoading
-                                    ? null
-                                    : () => context.push('/forgot-password'),
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    minWidth: AppSizes.minTouchTarget,
-                                    minHeight: AppSizes.minTouchTarget,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      context.t.common.forgotPassword,
-                                      textAlign: TextAlign.center,
-                                      style: AppTypography.body2.copyWith(
-                                        color: authState.isLoading
-                                            ? AppColors.textDisabled
-                                            : AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                          AuthTextButton(
+                            label: context.t.common.forgotPassword,
+                            onTap: authState.isLoading
+                                ? null
+                                : () => context.push('/forgot-password'),
                           ),
                           const SizedBox(height: AppSizes.spacingXS),
-                          Center(
-                            child: Semantics(
-                              button: true,
-                              label: context.t.features.auth.signUp,
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: authState.isLoading
-                                    ? null
-                                    : () => context.push('/sign-up'),
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    minWidth: AppSizes.minTouchTarget,
-                                    minHeight: AppSizes.minTouchTarget,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      context.t.features.auth.signUp,
-                                      textAlign: TextAlign.center,
-                                      style: AppTypography.body2.copyWith(
-                                        color: authState.isLoading
-                                            ? AppColors.textDisabled
-                                            : AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                          AuthTextButton(
+                            label: context.t.features.auth.signUp,
+                            onTap: authState.isLoading
+                                ? null
+                                : () => context.push('/sign-up'),
                           ),
                           const SizedBox(height: AppSizes.spacingL),
                           Text(

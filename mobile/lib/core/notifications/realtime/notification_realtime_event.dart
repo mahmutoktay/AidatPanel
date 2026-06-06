@@ -44,7 +44,7 @@ class NotificationRealtimeEvent {
     Map<String, dynamic> json,
   ) {
     final data = <String, dynamic>{
-      'type': json['type']?.toString(),
+      'type': json['type']?.toString() ?? json['event']?.toString(),
       'notificationId': json['notificationId']?.toString(),
       'title': json['title']?.toString(),
       'body': json['body']?.toString(),

@@ -119,6 +119,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
 
   // ---------- AKIŞ ----------
   void _onBuildingPicked(BuildingEntity b) {
+    ref.invalidate(apartmentsStoreProvider(b.id));
     setState(() {
       _selectedBuilding = b;
       _selectedApartment = null;
@@ -393,7 +394,7 @@ class _ApartmentPickerStep extends StatelessWidget {
   }
 
   Widget _buildApartmentTile(BuildContext context, ApartmentEntity apt) {
-    final isOccupied = apt.phone != null;
+    final isOccupied = apt.isOccupied;
     final activeCode = activeCodes[apt.id];
     final hasActiveCode = activeCode != null && !activeCode.isExpired;
 

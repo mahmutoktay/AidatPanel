@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +18,7 @@ import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../providers/dekont_provider.dart';
+import '../providers/share_intent_provider.dart';
 import '../widgets/copy_payment_field.dart';
 
 class MakePaymentScreen extends ConsumerStatefulWidget {
@@ -42,6 +45,16 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
             .read(makePaymentNotifierProvider.notifier)
             .selectDue(widget.preselectedDueId);
       }
+      
+      final pendingFile = ref.read(pendingDekontFileProvider);
+      if (pendingFile != null) {
+        ref.read(makePaymentNotifierProvider.notifier).setPickedReceipt(
+              fileName: pendingFile['fileName'],
+              fileBytes: pendingFile['fileBytes'],
+              filePath: pendingFile['filePath'],
+            );
+        ref.read(pendingDekontFileProvider.notifier).state = null;
+      }
     });
   }
 
@@ -57,30 +70,8 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
     final t = context.t.features.dekont;
     final name = picked.name;
 
-    final path = picked.path;
-    if (path != null) {
-      final fileError = UploadFileUtils.validateReceiptFile(path);
-      if (fileError != null) {
-        ref.read(toastProvider.notifier).show(
-              _uploadValidationMessage(t, fileError),
-              type: ToastType.error,
-            );
-        return;
-      }
-    }
-
-    late final List<int> bytes;
-    try {
-      bytes = await picked.readAsBytes();
-    } catch (_) {
-      ref.read(toastProvider.notifier).show(
-            t.fileNotFound,
-            type: ToastType.error,
-          );
-      return;
-    }
-
-    if (bytes.isEmpty) {
+    final bytes = picked.path != null ? await File(picked.path!).readAsBytes() : null;
+    if (bytes == null || bytes.isEmpty) {
       ref.read(toastProvider.notifier).show(
             t.fileNotFound,
             type: ToastType.error,
@@ -139,9 +130,8 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
             toastMessage,
             type: wasDuplicate ? ToastType.info : ToastType.success,
           );
-      await context.push('/dekonts/${dekont.id}');
-      if (mounted) {
-        ref.read(makePaymentNotifierProvider.notifier).ensureIdleOnScreen();
+      if (!wasDuplicate) {
+        await context.push('/dekonts/${dekont.id}');
       }
     } else {
       final err = ref.read(makePaymentNotifierProvider).error;
@@ -154,6 +144,10 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
               type: ToastType.error,
             );
       }
+    }
+    
+    if (mounted) {
+      ref.read(makePaymentNotifierProvider.notifier).ensureIdleOnScreen();
     }
   }
 
@@ -306,19 +300,48 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSizes.spacingM),
-                    OutlinedButton.icon(
-                      onPressed: busy ? null : _pickFile,
-                      style: AppButtonStyles.outlinedPrimary(),
-                      icon: const Icon(Icons.attach_file),
-                      label: Text(t.pickFile),
-                    ),
-                    if (paymentState.pickedFileName != null) ...[
-                      const SizedBox(height: AppSizes.spacingS),
-                      Text(
-                        paymentState.pickedFileName!,
-                        style: AppTypography.body2,
+                    if (paymentState.pickedFileName == null)
+                      OutlinedButton.icon(
+                        onPressed: busy ? null : _pickFile,
+                        style: AppButtonStyles.outlinedPrimary(),
+                        icon: const Icon(Icons.attach_file),
+                        label: Text(t.pickFile),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.spacingM,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.description_outlined, color: AppColors.primary),
+                            const SizedBox(width: AppSizes.spacingS),
+                            Expanded(
+                              child: Text(
+                                paymentState.pickedFileName!,
+                                style: AppTypography.body2.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: busy
+                                  ? null
+                                  : () => ref.read(makePaymentNotifierProvider.notifier).clearPickedReceipt(),
+                              icon: const Icon(Icons.close, color: AppColors.primary),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
                     const SizedBox(height: AppSizes.spacingL),
                     SizedBox(
                       height: AppSizes.buttonHeightPrimary,

@@ -169,6 +169,12 @@ class _FilterChip extends StatelessWidget {
           color: selected ? Colors.white : AppColors.textPrimary,
         ),
         selectedColor: AppColors.primary,
+        backgroundColor: AppColors.fill,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide.none,
+        ),
+        showCheckmark: selected,
       ),
     );
   }

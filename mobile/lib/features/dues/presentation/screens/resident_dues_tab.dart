@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -122,24 +121,49 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
       Row(
         children: [
           Expanded(
-            child: SizedBox(
-              height: AppSizes.buttonHeightSecondary,
-              child: ElevatedButton.icon(
-                onPressed: () => context.push('/resident-dashboard/payment'),
-                style: AppButtonStyles.elevatedPayment(),
-                icon: const Icon(Icons.payment_outlined),
-                label: Text(t.makePaymentTitle),
+            child: Material(
+              color: AppColors.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20),
+              child: InkWell(
+                onTap: () => context.push('/resident-dashboard/payment'),
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.payment_outlined, color: AppColors.primary),
+                      const SizedBox(height: 8),
+                      Text(
+                        t.makePaymentTitle,
+                        style: AppTypography.button.copyWith(color: AppColors.primary),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
           const SizedBox(width: AppSizes.spacingS),
           Expanded(
-            child: SizedBox(
-              height: AppSizes.buttonHeightSecondary,
-              child: OutlinedButton.icon(
-                onPressed: () => context.push('/resident-dashboard/dekonts'),
-                icon: const Icon(Icons.receipt_long_outlined),
-                label: Text(t.myDekontsTitle),
+            child: Material(
+              color: AppColors.fill,
+              borderRadius: BorderRadius.circular(20),
+              child: InkWell(
+                onTap: () => context.push('/resident-dashboard/dekonts'),
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.receipt_long_outlined, color: AppColors.textPrimary),
+                      const SizedBox(height: 8),
+                      Text(
+                        t.myDekontsTitle,
+                        style: AppTypography.button.copyWith(color: AppColors.textPrimary),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -162,11 +186,8 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       padding: const EdgeInsets.all(AppSizes.cardPadding),
       decoration: BoxDecoration(
-        color: highlighted ? AppColors.fill : AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: highlighted
-            ? Border.all(color: AppColors.primary, width: 2)
-            : AppColors.cardBorder,
+        color: highlighted ? AppColors.primary.withValues(alpha: 0.08) : AppColors.fill,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

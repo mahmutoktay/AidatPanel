@@ -8,6 +8,7 @@ import {
   resetPasswordWithTokenService,
 } from "../services/passwordResetService.js";
 import { HttpError } from "../utils/httpError.js";
+import { publishToUser } from "../realtime/realtimeHub.js";
 
 const register = async (req, res, next) => {
   try {
@@ -265,6 +266,10 @@ const logoutAllDevices = async (req, res, next) => {
         refreshTokenVersion: { increment: 1 },
       },
     });
+    
+    // WebSocket ile bağlı tüm cihazlara 'force_logout' yolla (Anında düşürme)
+    publishToUser(user.id, { event: "force_logout" });
+
     const accessToken = generateAccessToken(user);
     const newRefreshToken = generateRefreshToken(user);
     res.status(200).json({

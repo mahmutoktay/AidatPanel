@@ -168,7 +168,7 @@ class LogoutAllDevicesConfirmSheet extends ConsumerWidget {
     if (ref.read(authStateProvider).isLoading) return;
 
     final t = context.t;
-    await ref.read(authStateProvider.notifier).logoutAllDevices();
+    await ref.read(authStateProvider.notifier).logoutAllDevices(ref);
 
     if (!context.mounted) return;
     Navigator.pop(context);

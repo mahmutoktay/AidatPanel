@@ -103,7 +103,7 @@ class WebSocketNotificationRealtimeSource implements NotificationRealtimeSource 
       final json = jsonDecode(raw) as Map<String, dynamic>;
       final event = json['event']?.toString();
       if (event == RealtimeEvents.connected) return;
-      if (event == RealtimeEvents.notificationCreated) {
+      if (event == RealtimeEvents.notificationCreated || event == 'force_logout') {
         _onEvent?.call(NotificationRealtimeEvent.fromRealtimeJson(json));
       }
     } catch (e) {

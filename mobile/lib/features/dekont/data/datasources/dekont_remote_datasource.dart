@@ -83,7 +83,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
     String? filePath,
     String? dueId,
   }) async {
-    if (fileBytes.isEmpty) {
+    if ((filePath == null || filePath.isEmpty) && fileBytes.isEmpty) {
       throw ApiException(message: 'Dosya boş');
     }
 
@@ -100,6 +100,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
         filename: safeName,
         contentType: DioMediaType.parse(mime),
       );
+      
       final formFields = <String, dynamic>{'file': filePart};
       if (dueId != null && dueId.isNotEmpty) {
         formFields['dueId'] = dueId;

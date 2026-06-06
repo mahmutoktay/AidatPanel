@@ -89,7 +89,7 @@ class _DekontFilePreviewState extends State<DekontFilePreview> {
   Widget build(BuildContext context) {
     if (widget._isImage) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        borderRadius: BorderRadius.circular(20),
         child: Image.memory(
           widget.bytes,
           fit: BoxFit.contain,
@@ -128,7 +128,7 @@ class _DekontFilePreviewState extends State<DekontFilePreview> {
           SizedBox(
             height: maxHeight,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+              borderRadius: BorderRadius.circular(20),
               child: ColoredBox(
                 color: Colors.white,
                 child: PdfViewPinch(
@@ -161,7 +161,7 @@ class _PdfFallback extends StatelessWidget {
       padding: const EdgeInsets.all(AppSizes.spacingL),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: AppColors.primary.withValues(alpha: 0.14),
         ),

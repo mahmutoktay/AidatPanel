@@ -45,7 +45,11 @@ class AppBackNavigation {
         rootNavigator.pop();
         return true;
       }
-      return false;
+      // GoRouter stack boşsa bile, dashboard kökü değilsek kullanıcıyı
+      // uygulamadan çıkarmak yerine dashboard'a yönlendir.
+      resetExitTimer();
+      goToHomeTab();
+      return true;
     }
 
     // GoRouter path'i dashboard kökü görünse de root navigator üzerinde

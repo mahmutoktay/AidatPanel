@@ -9,6 +9,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
+import '../../../dekont/presentation/providers/share_intent_provider.dart';
 import '../../presentation/providers/auth_provider.dart';
 import '../../domain/entities/user_entity.dart' show UserRole;
 
@@ -178,7 +179,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   void _navigateBasedOnAuth() {
     final authState = ref.read(authStateProvider);
     if (authState.isAuthenticated && authState.user != null) {
-      if (authState.user!.role == UserRole.manager) {
+      // ── Share Intent: Cold start'ta bekleyen dosya var mı? ──
+      // ShareIntentNotifier cold start'ta dosyayı sadece state'e yazar,
+      // navigate ETMEZ. Yönlendirme sorumluluğu burada — tek noktada.
+      // Bu sayede go() çağrısı push()'u ezmez (race condition yok).
+      final pendingFile = ref.read(pendingDekontFileProvider);
+      final isResident = authState.user!.role == UserRole.resident;
+
+      if (pendingFile != null && isResident) {
+        debugPrint('[splash] Bekleyen share intent dosyası var. '
+            'Doğrudan dekont sayfasına yönlendiriliyor...');
+        context.go('/resident-dashboard/payment');
+      } else if (authState.user!.role == UserRole.manager) {
         context.go('/manager-dashboard');
       } else {
         context.go('/resident-dashboard');

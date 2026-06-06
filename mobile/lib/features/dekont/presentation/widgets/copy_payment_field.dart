@@ -31,9 +31,8 @@ class CopyPaymentField extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: AppColors.cardBorder,
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +43,7 @@ class CopyPaymentField extends StatelessWidget {
           ),
           const SizedBox(height: AppSizes.spacingXS),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Text(

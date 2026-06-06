@@ -29,14 +29,13 @@ class DekontListCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: AppColors.cardBorder,
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+          borderRadius: BorderRadius.circular(20),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(AppSizes.spacingM),

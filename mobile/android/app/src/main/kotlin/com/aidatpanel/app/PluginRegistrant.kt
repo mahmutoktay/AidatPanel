@@ -14,6 +14,8 @@ import com.github.dart_lang.jni_flutter.JniFlutterPlugin
 
 import com.it_nomads.fluttersecurestorage.FlutterSecureStoragePlugin
 
+import com.kasem.receive_sharing_intent.ReceiveSharingIntentPlugin
+
 import com.mr.flutter.plugin.filepicker.FilePickerPlugin
 
 import io.scer.pdfx.PdfxPlugin
@@ -80,6 +82,8 @@ object PluginRegistrant {
 
         flutterEngine.plugins.add(PdfxPlugin())
 
+        flutterEngine.plugins.add(ReceiveSharingIntentPlugin())
+
         addPluginReflective(
 
             flutterEngine,
@@ -87,6 +91,16 @@ object PluginRegistrant {
             "dev.fluttercommunity.plus.share.SharePlusPlugin",
 
             "share_plus",
+
+        )
+
+        addPluginReflective(
+
+            flutterEngine,
+
+            "studio.midoridesign.gal.GalPlugin",
+
+            "gal",
 
         )
 

@@ -9,6 +9,8 @@ import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart'
     show AuthRepository, AuthRepositoryImpl;
 import '../../domain/entities/user_entity.dart';
+import '../../../../l10n/strings.g.dart';
+import '../../../../core/utils/input_validators.dart';
 
 /// Oturum sonlandığında callback almak için global değişken.
 /// DioClient > TokenRefreshService token yenileyemezse bu callback tetiklenir.
@@ -100,6 +102,53 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isManualLogout: false,
       );
     };
+  }
+
+  Future<void> submitLogin(
+    String rawIdentifier,
+    String password,
+    bool isPhone,
+    WidgetRef ref,
+  ) async {
+    if (state.isLoading) return;
+
+    final t = LocaleSettings.instance.currentTranslations;
+    String? identifierError;
+    String? passwordError;
+
+    if (isPhone) {
+      final phoneError = InputValidators.validatePhone(rawIdentifier);
+      identifierError = phoneError == null
+          ? null
+          : phoneError == 'phone_required'
+              ? t.validation.phoneRequired
+              : t.validation.phoneInvalid;
+    } else {
+      final emailError = InputValidators.validateEmail(rawIdentifier);
+      identifierError = emailError == null
+          ? null
+          : emailError == 'email_required'
+              ? t.validation.emailRequired
+              : emailError == 'email_invalid'
+                  ? t.validation.emailInvalid
+                  : t.validation.emailTooLong;
+    }
+
+    passwordError = password.isEmpty ? t.features.auth.passwordRequired : null;
+
+    if (identifierError != null || passwordError != null) {
+      String errorMessage = '';
+      if (identifierError != null) errorMessage += identifierError;
+      if (passwordError != null) {
+        if (errorMessage.isNotEmpty) errorMessage += '\n';
+        errorMessage += passwordError;
+      }
+      state = state.copyWith(isLoading: false, error: errorMessage);
+      return;
+    }
+
+    final identifier = isPhone ? '+90${rawIdentifier.trim()}' : rawIdentifier.trim();
+    await login(identifier, password, ref);
   }
 
   /// `identifier` email **veya** telefon (Belge §3).
@@ -232,13 +281,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  /// Diğer cihazların oturumunu kapatır; bu cihazda giriş kalır.
-  Future<void> logoutAllDevices() async {
+  Future<void> logoutLocal(WidgetRef ref) async {
+    resetManagerTabIndex(ref);
+    resetResidentTabIndex(ref);
+    ref.read(dioClientProvider).clearResponseCache();
+    await invalidateCachesOnLogout(ref);
+    await _authRepository.logout();
+    await Future.delayed(const Duration(milliseconds: 300));
+    state = const AuthState(isManualLogout: true, logoutReason: LogoutReason.manual);
+  }
+
+  /// Tüm cihazların oturumunu kapatır ve bu cihazı da Login ekranına düşürür.
+  Future<void> logoutAllDevices(WidgetRef ref) async {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       await _authRepository.logoutAllDevices();
-      state = state.copyWith(isLoading: false, clearError: true);
+      await logoutLocal(ref);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
     }

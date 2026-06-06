@@ -10,6 +10,7 @@ import '../../features/expenses/presentation/providers/expenses_provider.dart';
 import '../../features/notifications/presentation/providers/notifications_provider.dart';
 import '../../features/subscription/presentation/providers/subscription_provider.dart';
 import '../../features/tickets/presentation/providers/tickets_provider.dart';
+import '../../features/dekont/presentation/providers/share_intent_provider.dart';
 
 /// Kullanıcı değiştiğinde (login/logout) tüm cached StateNotifierProvider'ları
 /// [ref.invalidate] ile geçersiz kılarak yeni kullanıcının verilerinin
@@ -48,6 +49,8 @@ void invalidateAllCachedProviders(WidgetRef ref) {
   ref.invalidate(makePaymentNotifierProvider);
   ref.invalidate(myDekontsNotifierProvider);
   ref.invalidate(managerDekontsNotifierProvider);
+  ref.invalidate(shareIntentProvider);
+  ref.invalidate(pendingDekontFileProvider);
 }
 
 Future<void> _clearDekontFilePreviews(WidgetRef ref) async {

@@ -11,6 +11,7 @@ import 'core/notifications/firebase_bootstrap.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/secure_storage.dart';
+import 'features/dekont/presentation/providers/share_intent_provider.dart';
 import 'shared/widgets/friendly_error_screen.dart';
 import 'shared/widgets/toast_overlay.dart';
 import 'l10n/strings.g.dart';
@@ -86,11 +87,43 @@ Future<void> initLocale() async {
   }
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  /// Uygulamayı Cold Start gibi komple yeniden başlatır.
+  /// Logout/hesap değişimi sırasında çağrılarak tüm State,
+  /// Provider ve cache'lerin bellekten uçması garanti edilir.
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_MyAppState>()?.restartApp();
+  }
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Key _appKey = UniqueKey();
+
+  void restartApp() {
+    setState(() {
+      _appKey = UniqueKey();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _MyAppContent(key: _appKey);
+  }
+}
+
+class _MyAppContent extends ConsumerWidget {
+  const _MyAppContent({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Intent dinleyicisini başlat
+    ref.watch(shareIntentProvider);
+    
     final router = ref.watch(appRouterProvider);
     return TranslationProvider(
       child: MaterialApp.router(

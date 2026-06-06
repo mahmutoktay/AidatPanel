@@ -103,6 +103,13 @@ class NotificationDeliveryCoordinator {
   void _onRealtimeEvent(NotificationRealtimeEvent event) {
     final ref = _ref;
     if (ref == null) return;
+    
+    // Anında çıkış (Zorunlu Logout) - Cihaz diğer oturumdan atıldıysa bekletme
+    if (event.payload.type == 'force_logout') {
+      ref.read(authStateProvider.notifier).logoutLocal(ref);
+      return;
+    }
+
     if (!ref.read(authStateProvider).isAuthenticated) return;
 
     final notifier = ref.read(notificationsNotifierProvider.notifier);

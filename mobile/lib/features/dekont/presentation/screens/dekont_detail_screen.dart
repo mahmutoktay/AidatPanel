@@ -24,6 +24,7 @@ import '../../data/dekont_preview_cache.dart';
 import '../../domain/entities/dekont_entity.dart';
 import '../../domain/entities/dekont_status.dart';
 import '../providers/dekont_provider.dart';
+import '../providers/dekont_download_provider.dart';
 import '../utils/dekont_labels.dart';
 import '../widgets/dekont_file_preview.dart';
 
@@ -142,6 +143,24 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     }
   }
 
+  Future<void> _downloadDekont(DekontEntity dekont) async {
+    ref.read(toastProvider.notifier).show('İndirme başlatıldı...', type: ToastType.info);
+    
+    try {
+      final message = await ref.read(dekontDownloadProvider).downloadAndSave(
+        dekont.id,
+        dekont.mimeType,
+        dekont.originalFilename,
+      );
+      
+      if (!mounted) return;
+      ref.read(toastProvider.notifier).show(message, type: ToastType.success, duration: const Duration(seconds: 4));
+    } catch (e) {
+      if (!mounted) return;
+      ref.read(toastProvider.notifier).show(e.toString(), type: ToastType.error);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final detail = ref.watch(dekontDetailProvider(widget.dekontId));
@@ -154,6 +173,13 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
       appBar: AppBar(
         title: Text(t.detailTitle),
         centerTitle: true,
+        actions: [
+          if (detail.asData?.value != null)
+            IconButton(
+              icon: const Icon(Icons.download_rounded),
+              onPressed: () => _downloadDekont(detail.asData!.value),
+            ),
+        ],
       ),
       body: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -195,62 +221,102 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(AppSizes.spacingM),
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(AppSizes.spacingL),
                     decoration: BoxDecoration(
-                      color: visual.background,
-                      borderRadius:
-                          BorderRadius.circular(AppSizes.cardRadius),
+                      color: AppColors.fill,
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(
-                      visual.label,
-                      style: AppTypography.h3.copyWith(color: visual.color),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    dekont.originalFilename,
+                                    style: AppTypography.h4.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    date,
+                                    style: AppTypography.body2.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: AppSizes.spacingS),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSizes.spacingM,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: visual.background,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                visual.label,
+                                style: AppTypography.body2.copyWith(
+                                  color: visual.color,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (dekont.apartment != null ||
+                            dekont.uploadedBy != null ||
+                            dekont.parsedAmount != null ||
+                            dekont.rejectionReason != null) ...[
+                          const SizedBox(height: AppSizes.spacingM),
+                          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
+                          const SizedBox(height: AppSizes.spacingM),
+                        ],
+                        if (dekont.apartment != null) ...[
+                          Text(
+                            '${t.apartment}: ${dekont.apartment!.number}',
+                            style: AppTypography.body1,
+                          ),
+                          const SizedBox(height: 4),
+                        ],
+                        if (dekont.uploadedBy != null) ...[
+                          Text(
+                            '${t.uploadedBy}: ${dekont.uploadedBy!.name}',
+                            style: AppTypography.body1,
+                          ),
+                          const SizedBox(height: 4),
+                        ],
+                        if (dekont.parsedAmount != null) ...[
+                          const SizedBox(height: AppSizes.spacingS),
+                          Text(
+                            '${t.parsedAmount}: ${dekont.parsedAmount}',
+                            style: AppTypography.h4.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                        if (dekont.rejectionReason != null) ...[
+                          const SizedBox(height: AppSizes.spacingS),
+                          Text(
+                            '${t.rejectionReason}: ${dekont.rejectionReason}',
+                            style: AppTypography.body1.copyWith(
+                              color: AppColors.error,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  Text(
-                    dekont.originalFilename,
-                    style: AppTypography.h4.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    date,
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  if (dekont.apartment != null) ...[
-                    const SizedBox(height: AppSizes.spacingS),
-                    Text(
-                      '${t.apartment}: ${dekont.apartment!.number}',
-                      style: AppTypography.body2,
-                    ),
-                  ],
-                  if (dekont.uploadedBy != null) ...[
-                    const SizedBox(height: AppSizes.spacingS),
-                    Text(
-                      '${t.uploadedBy}: ${dekont.uploadedBy!.name}',
-                      style: AppTypography.body2,
-                    ),
-                  ],
-                  if (dekont.parsedAmount != null) ...[
-                    const SizedBox(height: AppSizes.spacingM),
-                    Text(
-                      '${t.parsedAmount}: ${dekont.parsedAmount}',
-                      style: AppTypography.body1.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                  if (dekont.rejectionReason != null) ...[
-                    const SizedBox(height: AppSizes.spacingM),
-                    Text(
-                      '${t.rejectionReason}: ${dekont.rejectionReason}',
-                      style: AppTypography.body2.copyWith(
-                        color: AppColors.error,
-                      ),
-                    ),
-                  ],
                   const SizedBox(height: AppSizes.spacingL),
                   Text(
                     t.filePreview,

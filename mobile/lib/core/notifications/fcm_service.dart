@@ -5,7 +5,6 @@ import '../network/api_exception.dart';
 import '../storage/secure_storage.dart';
 import 'fcm_platform.dart';
 import 'fcm_token_remote_datasource.dart';
-import 'local_notification_service.dart';
 import 'notification_payload.dart';
 typedef FcmNavigationHandler = void Function(NotificationPayload payload);
 
@@ -34,16 +33,22 @@ class FcmService {
     if (_listenersAttached) return;
     _listenersAttached = true;
 
+    // iOS: Uygulama ön plandayken sistem bildirimini (banner/alert) bastırır.
+    // Bildirim yalnızca uygulama içi overlay (toast) olarak gösterilecek.
+    await _messaging.setForegroundNotificationPresentationOptions(
+      alert: false,
+      badge: true,
+      sound: false,
+    );
+
     FirebaseMessaging.onMessage.listen((message) async {
       if (kDebugMode) {
         debugPrint(
           '[FCM foreground] ${message.notification?.title ?? message.data['title']}',
         );
       }
-      await LocalNotificationService.instance.showFromRemoteMessage(
-        message,
-        fromForeground: true,
-      );
+      // Ön planda sistem tepsisi bildirimi BASILMAZ.
+      // Sadece uygulama içi overlay (toast) tetiklenir.
       onForegroundMessage?.call(message);
     });
 
