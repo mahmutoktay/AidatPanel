@@ -1,32 +1,50 @@
-# AidatPanel
+<div align="center">
+  <img src="resources/banner.png" alt="AidatPanel Banner" width="100%" />
+</div>
 
-Türk apartman ve site yönetimi için tam yığın monorepo: **mobil (Flutter)**, **backend (Node.js)**, **web** (landing).
+# AidatPanel 🏢
 
-## Klasörler
+[![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)](mobile/)
+[![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)](backend/)
+[![PostgreSQL](https://img.shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white)](backend/)
+[![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)](backend/)
+
+Türk apartman ve site yönetimi için geliştirilmiş modern, hızlı ve tam yığın (full-stack) monorepo çözümüdür. Yönetici ve sakinler için pratik kullanım sunan **mobil (Flutter)**, güçlü **backend (Node.js)** ve **web** bileşenlerinden oluşur.
+
+---
+
+## 📂 Proje Yapısı
 
 | Klasör | Açıklama |
 |--------|----------|
-| [`mobile/`](mobile/) | Flutter uygulaması (iOS + Android) |
-| [`backend/`](backend/) | Express 5 + Prisma + PostgreSQL API |
-| [`resources/`](resources/) | Yol haritası, API notları, tasarım |
-| [`web/`](web/) | Tanıtım sitesi (varsa) |
+| [`mobile/`](mobile/) | **📱 Flutter Uygulaması:** Yönetici ve sakinler için iOS & Android arayüzü |
+| [`backend/`](backend/) | **⚙️ Node.js API:** Express 5 + Prisma + PostgreSQL altyapısı |
+| [`resources/`](resources/) | **📚 Kaynaklar:** Yol haritası, API notları, tasarımlar ve rehberler |
+| [`web/`](web/) | **🌐 Web Sitesi:** Tanıtım ve landing sayfası (varsa) |
 
-## Hızlı başlangıç
+---
 
-### Backend (yerel)
+## 🚀 Hızlı Başlangıç
+
+### 1️⃣ Backend (Yerel Geliştirme)
+
+Backend klasörüne geçip bağımlılıkları yükleyin ve veritabanı ayarlarını yapılandırın:
 
 ```bash
 cd backend
 npm install
 cp .env.example .env
-# DATABASE_URL, JWT_* düzenleyin
+# .env içindeki DATABASE_URL, JWT_* gibi değişkenleri düzenleyin
 npx prisma migrate deploy
 npm run dev
 ```
 
-API: `http://127.0.0.1:4200/api/v1` — ayrıntı: [`backend/README.md`](backend/README.md)
+> **API Endpoint:** `http://127.0.0.1:4200/api/v1` 
+> *Daha fazla detay için:* [`backend/README.md`](backend/README.md)
 
-### Mobil
+### 2️⃣ Mobil (Flutter)
+
+Mobil uygulamayı derleyip çalıştırmak için:
 
 ```bash
 cd mobile
@@ -34,18 +52,25 @@ flutter pub get
 flutter run
 ```
 
-Canlı API + push: `main.dart`. Mock: `flutter run -t lib/main_dev.dart`
+> **Not:** Canlı API ve push bildirimleri test etmek için `main.dart` kullanılır. Mock verilerle geliştirmek için `flutter run -t lib/main_dev.dart` çalıştırabilirsiniz.
 
-## Bildirimler (FCM + canlı mimari)
+---
 
-- Push: backend `pushService.js` → Firebase FCM; mobil token `PUT /me/fcm-token`
-- Rozet: `GET /api/v1/notifications/unread-count` (hafif poll)
-- Genişletilebilir katman (Instagram-benzeri): [`resources/bildirim/REALTIME_NOTIFICATIONS.md`](resources/bildirim/REALTIME_NOTIFICATIONS.md)
-- **Tek seferde deploy:** [`resources/bildirim/DEPLOY_TEK_SEFER.md`](resources/bildirim/DEPLOY_TEK_SEFER.md)
-- E2E: [`resources/bildirim/FCM_E2E_CHECKLIST.md`](resources/bildirim/FCM_E2E_CHECKLIST.md)
+## 🔔 Bildirim Mimarisi (FCM & Realtime)
 
-## Belgeler
+Uygulama içinde anlık bildirim (push) ve gerçek zamanlı rozet güncellemeleri kullanılmaktadır:
 
-- Faz / görevler: [`resources/yol-haritası/FAZ_DURUMU.md`](resources/yol-haritası/FAZ_DURUMU.md)
-- AI kuralları: [`CLAUDE.md`](CLAUDE.md)
-- Mimari özet: [`resources/AIDATPANEL.md`](resources/AIDATPANEL.md)
+- **Push Bildirimleri:** Backend (`pushService.js`) üzerinden Firebase FCM'e iletilir. Mobil cihaz token'ı `PUT /me/fcm-token` ile kaydedilir.
+- **Rozet Güncellemeleri:** Hafif bir polling mekanizmasıyla `GET /api/v1/notifications/unread-count` üzerinden alınır.
+- **Kapsamlı Rehberler:**
+  - Genişletilebilir Katman (Instagram-benzeri): [`resources/bildirim/REALTIME_NOTIFICATIONS.md`](resources/bildirim/REALTIME_NOTIFICATIONS.md)
+  - Tek seferde deploy: [`resources/bildirim/DEPLOY_TEK_SEFER.md`](resources/bildirim/DEPLOY_TEK_SEFER.md)
+  - Uçtan uca FCM testi: [`resources/bildirim/FCM_E2E_CHECKLIST.md`](resources/bildirim/FCM_E2E_CHECKLIST.md)
+
+---
+
+## 📖 Ek Belgeler
+
+- **Faz ve Görevler:** [`resources/yol-haritası/FAZ_DURUMU.md`](resources/yol-haritası/FAZ_DURUMU.md)
+- **AI Asistan Kuralları:** [`CLAUDE.md`](CLAUDE.md)
+- **Mimari Özet:** [`resources/AIDATPANEL.md`](resources/AIDATPANEL.md)
