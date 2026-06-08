@@ -410,7 +410,8 @@
         "savedIbansDeleteBuildingWarning": "Collection details will also be cleared on {count} building(s).",
         "savedIbansDeleteSuccess": "IBAN deleted",
         "savedIbansDeleteBulkSuccess": "{count} IBAN(s) deleted",
-        "ibanNotConfigured": "Collection IBAN not configured"
+        "ibanNotConfigured": "Collection IBAN not configured",
+        "ibanAlreadyExists": "This IBAN is already registered in the system. Please check and try a different IBAN."
       }
     },
     "auth": {
@@ -562,7 +563,8 @@
       "processing": "Processing receipt…",
       "viewDekonts": "My receipts",
       "emptyTitle": "No receipts yet",
-      "emptySubtitle": "After paying, upload your bank receipt here",
+      "emptySubtitleResident": "You don't have any receipts yet. You can use the upload button on the top right to add a new receipt.",
+      "emptySubtitleManager": "There are no receipts uploaded by users.",
       "filterAll": "All",
       "filterPending": "Under review",
       "filterApproved": "Approved",

@@ -22,6 +22,7 @@ class BuildingModel {
   final String? collectionAccountTitle;
   final String? paymentReferenceTemplate;
   final bool? isCollectionConfiguredFromApi;
+  final int? occupiedApartmentsFromApi;
 
   BuildingModel({
     required this.id,
@@ -39,6 +40,7 @@ class BuildingModel {
     this.collectionAccountTitle,
     this.paymentReferenceTemplate,
     this.isCollectionConfiguredFromApi,
+    this.occupiedApartmentsFromApi,
   });
 
   factory BuildingModel.fromJson(Map<String, dynamic> json) {
@@ -64,6 +66,7 @@ class BuildingModel {
       collectionAccountTitle: json['collectionAccountTitle'] as String?,
       paymentReferenceTemplate: json['paymentReferenceTemplate'] as String?,
       isCollectionConfiguredFromApi: json['isCollectionConfigured'] as bool?,
+      occupiedApartmentsFromApi: json['occupiedApartments'] as int?,
     );
   }
 
@@ -77,7 +80,7 @@ class BuildingModel {
       address: address,
       city: city ?? '',
       totalApartments: total,
-      occupiedApartments: 0,
+      occupiedApartments: occupiedApartmentsFromApi ?? 0,
       totalMonthlyDues: monthly,
       collectedDues: 0.0,
       dueAmount: dueAmount,

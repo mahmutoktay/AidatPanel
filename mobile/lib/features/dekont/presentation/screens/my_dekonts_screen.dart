@@ -122,7 +122,7 @@ class _MyDekontsScreenState extends ConsumerState<MyDekontsScreen> {
                                 EmptyStateWidget(
                                   icon: Icons.receipt_long_outlined,
                                   title: t.emptyTitle,
-                                  subtitle: t.emptySubtitle,
+                                  subtitle: t.emptySubtitleResident,
                                 ),
                               ],
                             )

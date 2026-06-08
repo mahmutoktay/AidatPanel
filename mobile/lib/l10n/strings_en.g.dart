@@ -1746,8 +1746,11 @@ class Translations$features$dekont$en {
 	/// en: 'No receipts yet'
 	String get emptyTitle => 'No receipts yet';
 
-	/// en: 'After paying, upload your bank receipt here'
-	String get emptySubtitle => 'After paying, upload your bank receipt here';
+	/// en: 'You don't have any receipts yet. You can use the upload button on the top right to add a new receipt.'
+	String get emptySubtitleResident => 'You don\'t have any receipts yet. You can use the upload button on the top right to add a new receipt.';
+
+	/// en: 'There are no receipts uploaded by users.'
+	String get emptySubtitleManager => 'There are no receipts uploaded by users.';
 
 	/// en: 'All'
 	String get filterAll => 'All';
@@ -2474,6 +2477,9 @@ class Translations$features$buildings$collection$en {
 
 	/// en: 'Collection IBAN not configured'
 	String get ibanNotConfigured => 'Collection IBAN not configured';
+
+	/// en: 'This IBAN is already registered in the system. Please check and try a different IBAN.'
+	String get ibanAlreadyExists => 'This IBAN is already registered in the system. Please check and try a different IBAN.';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -2886,6 +2892,7 @@ extension on Translations {
 			'features.buildings.collection.savedIbansDeleteSuccess' => 'IBAN deleted',
 			'features.buildings.collection.savedIbansDeleteBulkSuccess' => '{count} IBAN(s) deleted',
 			'features.buildings.collection.ibanNotConfigured' => 'Collection IBAN not configured',
+			'features.buildings.collection.ibanAlreadyExists' => 'This IBAN is already registered in the system. Please check and try a different IBAN.',
 			'features.auth.register' => 'Register',
 			'features.auth.login' => 'Login',
 			'features.auth.join' => 'Join',
@@ -2995,9 +3002,9 @@ extension on Translations {
 			'features.dekont.collectionNotConfigured' => 'Your manager has not set up collection IBAN yet. You can still upload a receipt.',
 			'features.dekont.ibanLabel' => 'IBAN',
 			'features.dekont.accountTitleLabel' => 'Account title',
-			'features.dekont.referenceLabel' => 'Transfer reference',
 			_ => null,
 		} ?? switch (path) {
+			'features.dekont.referenceLabel' => 'Transfer reference',
 			'features.dekont.copy' => 'Copy',
 			'features.dekont.copied' => 'Copied to clipboard',
 			'features.dekont.selectDue' => 'Select due',
@@ -3030,7 +3037,8 @@ extension on Translations {
 			'features.dekont.processing' => 'Processing receipt…',
 			'features.dekont.viewDekonts' => 'My receipts',
 			'features.dekont.emptyTitle' => 'No receipts yet',
-			'features.dekont.emptySubtitle' => 'After paying, upload your bank receipt here',
+			'features.dekont.emptySubtitleResident' => 'You don\'t have any receipts yet. You can use the upload button on the top right to add a new receipt.',
+			'features.dekont.emptySubtitleManager' => 'There are no receipts uploaded by users.',
 			'features.dekont.filterAll' => 'All',
 			'features.dekont.filterPending' => 'Under review',
 			'features.dekont.filterApproved' => 'Approved',

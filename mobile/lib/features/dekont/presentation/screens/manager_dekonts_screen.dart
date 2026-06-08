@@ -154,7 +154,7 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
                                     EmptyStateWidget(
                                       icon: Icons.receipt_long_outlined,
                                       title: t.emptyTitle,
-                                      subtitle: t.emptySubtitle,
+                                      subtitle: t.emptySubtitleManager,
                                     ),
                                   ],
                                 )

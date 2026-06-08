@@ -141,21 +141,50 @@ export const createBuildingService = async ({
 };
 
 export const getBuildingsService = async (managerId) => {
-  return await prisma.building.findMany({
+  const buildings = await prisma.building.findMany({
     where: { managerId },
     orderBy: { createdAt: "desc" },
     include: {
       _count: {
         select: { apartments: true },
       },
+      apartments: {
+        where: { resident: { isNot: null } },
+        select: { id: true },
+      },
     },
+  });
+
+  return buildings.map(b => {
+    const { apartments, ...rest } = b;
+    return {
+      ...rest,
+      occupiedApartments: apartments.length,
+    };
   });
 };
 
 export const getBuildingByIdService = async (id, managerId) => {
-  return await prisma.building.findFirst({
+  const building = await prisma.building.findFirst({
     where: { id, managerId },
+    include: {
+      _count: {
+        select: { apartments: true },
+      },
+      apartments: {
+        where: { resident: { isNot: null } },
+        select: { id: true },
+      },
+    },
   });
+
+  if (!building) return null;
+
+  const { apartments, ...rest } = building;
+  return {
+    ...rest,
+    occupiedApartments: apartments.length,
+  };
 };
 
 export const updateBuildingService = async (id, managerId, data) => {

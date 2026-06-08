@@ -682,7 +682,8 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 	@override String get processing => 'Dekont işleniyor…';
 	@override String get viewDekonts => 'Dekontlarım';
 	@override String get emptyTitle => 'Henüz dekont yok';
-	@override String get emptySubtitle => 'Ödeme yaptıktan sonra dekontunuzu buradan yükleyebilirsiniz';
+	@override String get emptySubtitleResident => 'Henüz bir dekontunuz bulunmuyor. Yeni dekont eklemek için sağ üst köşedeki yükleme butonunu kullanabilirsiniz.';
+	@override String get emptySubtitleManager => 'Kullanıcılar tarafından yüklenmiş herhangi bir dekont bulunmamaktadır.';
 	@override String get filterAll => 'Tümü';
 	@override String get filterPending => 'İncelemede';
 	@override String get filterApproved => 'Onaylandı';
@@ -961,6 +962,7 @@ class _Translations$features$buildings$collection$tr implements Translations$fea
 	@override String get savedIbansDeleteSuccess => 'IBAN silindi';
 	@override String get savedIbansDeleteBulkSuccess => '{count} IBAN silindi';
 	@override String get ibanNotConfigured => 'Tahsilat IBAN tanımlı değil';
+	@override String get ibanAlreadyExists => 'Bu IBAN numarası zaten sistemde kayıtlı. Lütfen farklı bir IBAN kontrol edip tekrar deneyiniz.';
 }
 
 /// The flat map containing all translations for locale <tr>.
@@ -1373,6 +1375,7 @@ extension on TranslationsTr {
 			'features.buildings.collection.savedIbansDeleteSuccess' => 'IBAN silindi',
 			'features.buildings.collection.savedIbansDeleteBulkSuccess' => '{count} IBAN silindi',
 			'features.buildings.collection.ibanNotConfigured' => 'Tahsilat IBAN tanımlı değil',
+			'features.buildings.collection.ibanAlreadyExists' => 'Bu IBAN numarası zaten sistemde kayıtlı. Lütfen farklı bir IBAN kontrol edip tekrar deneyiniz.',
 			'features.auth.register' => 'Kaydol',
 			'features.auth.login' => 'Giriş Yap',
 			'features.auth.join' => 'Katıl',
@@ -1482,9 +1485,9 @@ extension on TranslationsTr {
 			'features.dekont.collectionNotConfigured' => 'Yöneticiniz henüz tahsilat IBAN bilgisini tanımlamadı. Yine de dekont yükleyebilirsiniz.',
 			'features.dekont.ibanLabel' => 'IBAN',
 			'features.dekont.accountTitleLabel' => 'Alıcı unvanı',
-			'features.dekont.referenceLabel' => 'Havale açıklaması',
 			_ => null,
 		} ?? switch (path) {
+			'features.dekont.referenceLabel' => 'Havale açıklaması',
 			'features.dekont.copy' => 'Kopyala',
 			'features.dekont.copied' => 'Panoya kopyalandı',
 			'features.dekont.selectDue' => 'Aidat seçin',
@@ -1517,7 +1520,8 @@ extension on TranslationsTr {
 			'features.dekont.processing' => 'Dekont işleniyor…',
 			'features.dekont.viewDekonts' => 'Dekontlarım',
 			'features.dekont.emptyTitle' => 'Henüz dekont yok',
-			'features.dekont.emptySubtitle' => 'Ödeme yaptıktan sonra dekontunuzu buradan yükleyebilirsiniz',
+			'features.dekont.emptySubtitleResident' => 'Henüz bir dekontunuz bulunmuyor. Yeni dekont eklemek için sağ üst köşedeki yükleme butonunu kullanabilirsiniz.',
+			'features.dekont.emptySubtitleManager' => 'Kullanıcılar tarafından yüklenmiş herhangi bir dekont bulunmamaktadır.',
 			'features.dekont.filterAll' => 'Tümü',
 			'features.dekont.filterPending' => 'İncelemede',
 			'features.dekont.filterApproved' => 'Onaylandı',

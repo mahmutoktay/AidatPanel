@@ -410,7 +410,8 @@
         "savedIbansDeleteBuildingWarning": "{count} binanın tahsilat bilgisi de temizlenecek.",
         "savedIbansDeleteSuccess": "IBAN silindi",
         "savedIbansDeleteBulkSuccess": "{count} IBAN silindi",
-        "ibanNotConfigured": "Tahsilat IBAN tanımlı değil"
+        "ibanNotConfigured": "Tahsilat IBAN tanımlı değil",
+        "ibanAlreadyExists": "Bu IBAN numarası zaten sistemde kayıtlı. Lütfen farklı bir IBAN kontrol edip tekrar deneyiniz."
       }
     },
     "auth": {
@@ -562,7 +563,8 @@
       "processing": "Dekont işleniyor…",
       "viewDekonts": "Dekontlarım",
       "emptyTitle": "Henüz dekont yok",
-      "emptySubtitle": "Ödeme yaptıktan sonra dekontunuzu buradan yükleyebilirsiniz",
+      "emptySubtitleResident": "Henüz bir dekontunuz bulunmuyor. Yeni dekont eklemek için sağ üst köşedeki yükleme butonunu kullanabilirsiniz.",
+      "emptySubtitleManager": "Kullanıcılar tarafından yüklenmiş herhangi bir dekont bulunmamaktadır.",
       "filterAll": "Tümü",
       "filterPending": "İncelemede",
       "filterApproved": "Onaylandı",

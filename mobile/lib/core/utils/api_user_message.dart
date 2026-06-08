@@ -158,6 +158,9 @@ String? _mapProfile(dynamic c, dynamic api, String raw, String msg, int? code) {
 }
 
 String? _mapBuilding(dynamic c, dynamic api, String raw, String msg, int? code) {
+  if (_has(raw, 'bu iban zaten kayıtlı')) {
+    return c.features.buildings.collection.ibanAlreadyExists as String;
+  }
   if (_has(raw, 'geçersiz tr iban') || _has(raw, 'geçersiz iban')) {
     return api.invalidIban as String;
   }
