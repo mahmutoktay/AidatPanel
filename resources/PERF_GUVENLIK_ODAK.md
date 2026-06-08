@@ -38,7 +38,7 @@
 |---|------|-----|
 | I1 | Regresyon | Login, bina, daire, aidat, davet, şifre, silme akışları |
 | I2 | Loading / hata | Async işlerde görünür yükleme; hatalar sade Türkçe |
-| I3 | Erişilebilirlik | Min font / dokunma alanı (`TASARIM_KILAVUZU.md`) |
+| I3 | Erişilebilirlik | Min font / dokunma alanı |
 
 ---
 

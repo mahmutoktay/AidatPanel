@@ -235,9 +235,6 @@
 - Hata mesajları: sade Türkçe, teknik terim yok
 - Loading: her async işte görünür gösterge
 - Animasyon: max **200ms**, `Curves.easeInOut`
-
-Detay: `resources/tasarım/TASARIM_KILAVUZU.md`
-
 ---
 
 ## Nasıl Kullanılır

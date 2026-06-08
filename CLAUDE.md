@@ -12,7 +12,6 @@ Göreve göre ek okuma:
 | Görev türü | Okunacak dosya |
 |------------|---------------|
 | API / data layer / backend entegrasyonu | `resources/AIDATPANEL.md` |
-| Ekran / widget / UI implementasyonu | `resources/tasarım/TASARIM_KILAVUZU.md` |
 
 ---
 
@@ -193,5 +192,4 @@ Play’deki mevcut en büyük sürüm kodundan küçük/eşit kod yükleme redde
 |------|-------|
 | Yol haritası + faz durumu (tek kaynak) | `resources/yol-haritası/FAZ_DURUMU.md` |
 | API şeması, backend, kullanıcı rolleri | `resources/AIDATPANEL.md` |
-| Ekran layout, widget'lar, renkler | `resources/tasarım/TASARIM_KILAVUZU.md` |
 | Tam feature örneği | `mobile/lib/features/auth/` |
