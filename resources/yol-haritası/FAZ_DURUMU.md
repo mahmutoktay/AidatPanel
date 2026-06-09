@@ -27,7 +27,7 @@
 
 **Sıradaki işler (checklist `[ ]`):**
 - [ ] **FAZ 4 (Backend)** — RevenueCat webhook (`POST /subscription/webhook/revenuecat`)
-- [ ] **FAZ 4 (Backend)** — `logout` endpoint'inde FCM token temizleme eksikliği (Bug Fix)
+- [x] **FAZ 4 (Backend)** — `logout` endpoint'inde FCM token temizleme eksikliği (Bug Fix)
 - [ ] **FAZ 4 (Mobil)** — Canlı E2E + ONAY (profil/dil/abonelik okuma tamam; satın alma webhook sonrası)
 - [ ] Gider makbuz **dosya** upload (`POST /expenses/{id}/proof`) — FAZ 2 kalıntısı; backend yok
 - [ ] FAZ 5–6 (test, store) — FAZ 4 tamamlanınca
@@ -162,7 +162,7 @@
 - [x] Profil bilgileri ekranı (`GET /me`, `PUT /me` name/phone)
 - [x] `PUT /me/language` (Dil seçimi sunucu senkronu)
 - [x] "Diğer cihazlardan çıkış" (`POST /auth/logout-all-devices` + WebSocket `force_logout`)
-- [ ] **Backend Bug Fix**: `POST /auth/logout` FCM token'ını silecek şekilde güncellenecek
+- [x] **Backend Bug Fix**: `POST /auth/logout` FCM token'ını silecek şekilde güncellendi
 - [ ] Canlı E2E — profil güncelleme + dil senkronu
 
 ### Subscription (features/subscription/)
@@ -215,12 +215,12 @@
 | 2 | Certificate pinning | Mobil | ⏳ | FAZ 5 |
 | 3 | Test coverage %30+ | Mobil | ⏳ | FAZ 5 |
 | 4 | Pagination (büyük listeler) | Mobil | ⏳ | FAZ 5 |
-| 5 | Bina kartı dolu daire `0/N` | Backend | ⏳ | API’de `occupiedApartments` yok |
+| 5 | Bina kartı dolu daire `0/N` | Backend | ✅ | API’de `occupiedApartments` eklendi |
 | 6 | Profil / Dil / Şifre uçları | Fullstack | ✅ | FAZ 4 |
 | 7 | RevenueCat satın alma + webhook | Fullstack | 🔴 Blok | FAZ 4 — okuma ekranı var; webhook bekliyor |
 | 8 | Gider makbuz dosya `/proof` | Backend | ⏳ | FAZ 2 Kalıntısı; backend yok (`receiptUrl` kullanılıyor) |
 | 9 | **Reports** (aylık özet PDF) | Backend | ⏳ Ertelendi | FAZ 3 dışı backlog (#12); `GET /buildings/{id}/reports` yok |
-| 10 | `logout` FCM token temizliği | Backend | 🔴 Hata | FAZ 4 — Push token'ı silinmiyor |
+| 10 | `logout` FCM token temizliği | Backend | ✅ | FAZ 4 — Çıkışta fcmToken sıfırlandı |
 | 11 | Upload için ayrı Dio instance | Mobil | ⏳ | FAZ 5 — Race condition riskini önlemek için |
 | 12 | `validate.js` & `meService.js` Refactor | Backend | ⏳ | FAZ 5 — Monolitik dosyaların bölünmesi |
 | 13 | OCR performans iyileştirmesi | Backend | ⏳ | FAZ 5 — `setImmediate` darboğazını giderme |
