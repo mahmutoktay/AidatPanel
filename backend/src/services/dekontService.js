@@ -183,19 +183,21 @@ export async function createDekontFromUpload(user, file, { dueId } = {}) {
 
     const sizeBytes = file.size ?? validation.sizeBytes ?? file.buffer?.length ?? 0;
     const dekontId = randomUUID();
+    const prefix = context.source === "RESIDENT_UPLOAD" ? "residents/" : "managers/";
+    const storageDekontId = `${prefix}${dekontId}`;
     let storedPath = null;
 
     if (file.path) {
       storedPath = await moveTempToDekontFile(file.path, {
         buildingId: context.buildingId,
-        dekontId,
+        dekontId: storageDekontId,
         mimeType: validation.mime,
       });
       file.path = null;
     } else {
       storedPath = await saveDekontFile(file.buffer, {
         buildingId: context.buildingId,
-        dekontId,
+        dekontId: storageDekontId,
         mimeType: validation.mime,
       });
     }

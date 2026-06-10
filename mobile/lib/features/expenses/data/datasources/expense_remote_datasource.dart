@@ -148,7 +148,7 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
     final segments = filePath.replaceAll('\\', '/').split('/');
     final fileName = segments.isNotEmpty ? segments.last : 'receipt.jpg';
     final form = FormData.fromMap({
-      'proof': await MultipartFile.fromFile(filePath, filename: fileName),
+      'file': await MultipartFile.fromFile(filePath, filename: fileName),
     });
     final response = await _dioClient.post(
       ApiConstants.expenseProof(expenseId),

@@ -11,6 +11,9 @@ import {
   buildListResponse,
   mergeCreatedAtCursorWhere,
 } from "../utils/listQuery.js";
+import { validateMulterDekontFile, cleanupMulterTempFile } from "../utils/dekontUploadFile.js";
+import { moveTempToDekontFile, saveDekontFile, dekontFileExists, deleteDekontFile } from "./dekontStorageService.js";
+import { extractDekontTextForPipeline } from "./dekontOcrRunner.js";
 
 function serializeExpense(expense) {
   return {
@@ -166,4 +169,78 @@ export async function deleteExpenseService(expenseId, managerId) {
   });
 
   return { id: expenseId };
+}
+
+export async function uploadExpenseProofService(expenseId, managerId, file) {
+  const expense = await assertManagerOwnsExpense(expenseId, managerId);
+
+  let savedStoredPath = null;
+  try {
+    const validation = await validateMulterDekontFile(file);
+    if (!validation.ok) {
+      throw new HttpError(validation.code, validation.message);
+    }
+
+    let storedPath = null;
+    if (file.path) {
+      storedPath = await moveTempToDekontFile(file.path, {
+        buildingId: expense.buildingId,
+        dekontId: `expenses/exp_${expenseId}`, // Yöneticinin yüklediği dekontlar "expenses" klasöründe
+        mimeType: validation.mime,
+      });
+      file.path = null;
+    } else {
+      storedPath = await saveDekontFile(file.buffer, {
+        buildingId: expense.buildingId,
+        dekontId: `expenses/exp_${expenseId}`,
+        mimeType: validation.mime,
+      });
+    }
+
+    savedStoredPath = storedPath;
+
+    // OCR işlemi yapalım
+    let rawText = null;
+    let parsedJson = null;
+    let parsedAmount = null;
+    let transactionDate = null;
+    let aiConfidence = null;
+
+    try {
+      const ocr = await extractDekontTextForPipeline(storedPath, validation.mime);
+      if (ocr) {
+        rawText = ocr.rawText || null;
+        parsedJson = ocr.parsed || null;
+        parsedAmount = ocr.parsed?.amount || null;
+        if (ocr.parsed?.transactionDate) {
+          transactionDate = new Date(ocr.parsed.transactionDate);
+        }
+        aiConfidence = ocr.confidence || null;
+      }
+    } catch (ocrErr) {
+      console.warn(`[expenseService] OCR hatası: ${ocrErr.message}`);
+      // OCR hata verse bile belgeyi kaydetmeye devam ediyoruz
+    }
+
+    const updatedExpense = await prisma.expense.update({
+      where: { id: expenseId },
+      data: {
+        receiptUrl: `/dekonts/file?path=${encodeURIComponent(storedPath)}`, // Geçici bir yol olarak kaydedildi
+        rawText,
+        parsedJson,
+        parsedAmount,
+        transactionDate,
+        aiConfidence,
+      },
+    });
+
+    return serializeExpense(updatedExpense);
+  } catch (err) {
+    if (savedStoredPath) {
+      await deleteDekontFile(savedStoredPath).catch(() => {});
+    }
+    throw err;
+  } finally {
+    await cleanupMulterTempFile(file);
+  }
 }

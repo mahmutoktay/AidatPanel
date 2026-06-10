@@ -570,6 +570,11 @@ export const expenseSchemas = {
       expenseId: z.string().uuid("Geçerli bir gider ID'si giriniz"),
     }),
   },
+  uploadProof: {
+    params: z.object({
+      expenseId: z.string().uuid("Geçerli bir gider ID'si giriniz"),
+    }),
+  },
 };
 
 const ticketStatusEnum = z.enum(["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]);

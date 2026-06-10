@@ -4,6 +4,7 @@ import {
   createExpenseService,
   updateExpenseService,
   deleteExpenseService,
+  uploadExpenseProofService,
 } from "../services/expenseService.js";
 import { HttpError } from "../utils/httpError.js";
 
@@ -83,6 +84,31 @@ export const deleteExpense = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Gider silindi.",
+      data,
+    });
+  } catch (err) {
+    handleHttp(err, res, next);
+  }
+};
+
+export const uploadExpenseProof = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Dosya gereklidir.",
+      });
+    }
+
+    const data = await uploadExpenseProofService(
+      req.params.expenseId,
+      req.user.id,
+      req.file
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Gider makbuzu başarıyla yüklendi ve işlendi.",
       data,
     });
   } catch (err) {

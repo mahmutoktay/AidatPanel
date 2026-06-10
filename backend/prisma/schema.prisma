@@ -186,7 +186,16 @@ model Expense {
   date       DateTime
   note       String?
   receiptUrl String?
+  
+  // OCR verileri
+  rawText         String?       @db.Text
+  parsedJson      Json?
+  parsedAmount    Decimal?      @db.Decimal(12, 2)
+  transactionDate DateTime?
+  aiConfidence    Float?
+
   createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
 
   @@index([buildingId])
   @@index([buildingId, date])

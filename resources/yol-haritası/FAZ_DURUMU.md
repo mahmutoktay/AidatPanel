@@ -15,22 +15,22 @@
 | 1 | Aidat + Dashboard + Tur 5 | ✅ Tamam | 2026-05-15 | ✅ 2026-05-10 |
 | 2 | Bildirimler + Giderler | ✅ Tamam (Eksik Backend Uçları Var) | 2026-06-05 | ✅ 2026-05-29 |
 | 3 | Tickets + Dekont/IBAN (+ Reports ertelendi) | ✅ Tamam | — | ✅ 2026-06-02 |
-| 4 | Profil + Abonelik | ▶ **AKTİF** | 2026-07-03 | — |
+| 4 | Profil + Eksik Tamamlama | ▶ **AKTİF** | 2026-07-03 | — |
 | 5 | Test + Sertleştirme (Fullstack) | 🔒 Kilitli | 2026-07-10 | — |
-| 6 | v1.0.0 Lansman | 🔒 Kilitli | 2026-07-14 | — |
+| 6 | Subscription (Lansman Öncesi) | 🔒 Kilitli | 2026-07-12 | — |
+| 7 | v1.0.0 Lansman | 🔒 Kilitli | 2026-07-14 | — |
 
 ```
-▶ AKTİF ÇALIŞMA: FAZ 4 — Profil + Abonelik
+▶ AKTİF ÇALIŞMA: FAZ 4 — Profil + Eksik Tamamlama
 ▶ FAZ 3: kapalı (ONAY ✅ 2026-06-02) · Reports ertelendi → backlog #12
 ▶ FAZ 0–3: kapalı
 ```
 
 **Sıradaki işler (checklist `[ ]`):**
-- [ ] **FAZ 4 (Backend)** — RevenueCat webhook (`POST /subscription/webhook/revenuecat`)
+- [x] Gider makbuz **dosya** upload (`POST /expenses/{id}/proof`) — FAZ 2 kalıntısı tamamlandı
 - [x] **FAZ 4 (Backend)** — `logout` endpoint'inde FCM token temizleme eksikliği (Bug Fix)
-- [ ] **FAZ 4 (Mobil)** — Canlı E2E + ONAY (profil/dil/abonelik okuma tamam; satın alma webhook sonrası)
-- [ ] Gider makbuz **dosya** upload (`POST /expenses/{id}/proof`) — FAZ 2 kalıntısı; backend yok
-- [ ] FAZ 5–6 (test, store) — FAZ 4 tamamlanınca
+- [ ] **FAZ 4 (Mobil)** — Canlı E2E + ONAY (profil/dil/abonelik okuma tamam)
+- [ ] FAZ 5–7 (test, abonelik, store) — FAZ 4 tamamlanınca
 
 **Ertelenen (unutma — FAZ 3 dışı backlog):**
 - [ ] **Reports** — yönetici aylık özet PDF (`GET /buildings/{id}/reports`); backend yok · aşağı § Reports (ertelendi)
@@ -151,24 +151,20 @@
 
 ---
 
-## ▶ FAZ 4 — Subscription + Profile
+## ▶ FAZ 4 — Profil + Eksik Tamamlama
 
 **Durum:** **AKTİF** — FAZ 3 kapandı (2026-06-02); Reports FAZ 3 dışı ertelendi  
 **Hedef:** ~2026-07-03
 
-> **ÖNEMLİ:** Backend ekibi profil ve şifre sıfırlama uçlarını **canlıya aldı**. Fakat **RevenueCat webhook henüz yok** ve **`logout` endpoint FCM token temizliği eksik**.
+> **ÖNEMLİ:** Backend ekibi profil ve şifre sıfırlama uçlarını **canlıya aldı**. **`logout` endpoint FCM token temizliği tamamlandı**.
 
-### Profil (features/profile/)
+### Profil & Diğer Eksikler
 - [x] Profil bilgileri ekranı (`GET /me`, `PUT /me` name/phone)
 - [x] `PUT /me/language` (Dil seçimi sunucu senkronu)
 - [x] "Diğer cihazlardan çıkış" (`POST /auth/logout-all-devices` + WebSocket `force_logout`)
 - [x] **Backend Bug Fix**: `POST /auth/logout` FCM token'ını silecek şekilde güncellendi
+- [x] Gider makbuz **dosya** upload (`POST /expenses/{id}/proof`) — Tamamlandı
 - [ ] Canlı E2E — profil güncelleme + dil senkronu
-
-### Subscription (features/subscription/)
-- [ ] **Backend Görevi**: RevenueCat webhook (`POST /subscription/webhook/revenuecat`)
-- [ ] **Mobil Görevi**: RevenueCat SDK + satın alma (webhook hazırlandıktan sonra)
-- [x] Abonelik okuma ekranı (`GET /me/subscription`); satın alma butonu devre dışı
 
 ---
 
@@ -195,9 +191,22 @@
 
 ---
 
-## 🔒 FAZ 6 — v1.0.0 Lansman
+## 🔒 FAZ 6 — Subscription (Lansman Öncesi)
 
 **Durum:** KİLİTLİ — Faz 5 tamamlanmadan açılamaz  
+**Hedef:** ~2026-07-12
+
+### Subscription (features/subscription/)
+- [ ] **Backend Görevi**: RevenueCat webhook (`POST /subscription/webhook/revenuecat`)
+- [ ] **Mobil Görevi**: RevenueCat SDK + satın alma 
+- [x] Abonelik okuma ekranı (`GET /me/subscription`); satın alma butonu devre dışı
+- [ ] Canlı E2E — Abonelik akışı testleri
+
+---
+
+## 🔒 FAZ 7 — v1.0.0 Lansman
+
+**Durum:** KİLİTLİ — Faz 6 tamamlanmadan açılamaz  
 **Hedef:** ~2026-07-14
 
 - [ ] App Store (iOS) & Google Play Store submit
@@ -218,7 +227,7 @@
 | 5 | Bina kartı dolu daire `0/N` | Backend | ✅ | API’de `occupiedApartments` eklendi |
 | 6 | Profil / Dil / Şifre uçları | Fullstack | ✅ | FAZ 4 |
 | 7 | RevenueCat satın alma + webhook | Fullstack | 🔴 Blok | FAZ 4 — okuma ekranı var; webhook bekliyor |
-| 8 | Gider makbuz dosya `/proof` | Backend | ⏳ | FAZ 2 Kalıntısı; backend yok (`receiptUrl` kullanılıyor) |
+| 8 | Gider makbuz dosya `/proof` | Backend | ✅ | FAZ 2 Kalıntısı tamamlandı |
 | 9 | **Reports** (aylık özet PDF) | Backend | ⏳ Ertelendi | FAZ 3 dışı backlog (#12); `GET /buildings/{id}/reports` yok |
 | 10 | `logout` FCM token temizliği | Backend | ✅ | FAZ 4 — Çıkışta fcmToken sıfırlandı |
 | 11 | Upload için ayrı Dio instance | Mobil | ⏳ | FAZ 5 — Race condition riskini önlemek için |

@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
+
+import '../../../../core/utils/upload_file_utils.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -11,10 +13,10 @@ import '../../../../l10n/strings.g.dart';
 
 /// Gider formu — makbuz seçimi (galeri). Başlık + sağda [+] fotoğraf simgesi.
 class ExpenseReceiptSection extends StatelessWidget {
-  final XFile? pickedFile;
+  final PlatformFile? pickedFile;
   final String? existingReceiptUrl;
   final bool enabled;
-  final ValueChanged<XFile?> onChanged;
+  final ValueChanged<PlatformFile?> onChanged;
   final VoidCallback? onPickFailed;
 
   const ExpenseReceiptSection({
@@ -28,13 +30,13 @@ class ExpenseReceiptSection extends StatelessWidget {
 
   Future<void> _pick(BuildContext context) async {
     try {
-      final file = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 2048,
-        maxHeight: 2048,
-        imageQuality: 85,
+      final result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: UploadFileUtils.allowedExtensions.toList(),
       );
-      if (file != null) onChanged(file);
+      if (result != null && result.files.isNotEmpty) {
+        onChanged(result.files.single);
+      }
     } catch (_) {
       onPickFailed?.call();
     }
@@ -89,19 +91,37 @@ class ExpenseReceiptSection extends StatelessWidget {
           Stack(
             alignment: Alignment.topRight,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-                child: Image.file(
-                  File(pickedFile!.path),
-                  height: 160,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSizes.spacingL),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+                  border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.description_outlined, color: AppColors.primary, size: 32),
+                    const SizedBox(width: AppSizes.spacingM),
+                    Expanded(
+                      child: Text(
+                        pickedFile!.name,
+                        style: AppTypography.body1.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(AppSizes.spacingS),
+                padding: const EdgeInsets.all(AppSizes.spacingXS),
                 child: Material(
-                  color: AppColors.surface.withValues(alpha: 0.92),
+                  color: Colors.transparent,
                   shape: const CircleBorder(),
                   child: IconButton(
                     onPressed: enabled ? () => onChanged(null) : null,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -54,7 +54,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   late ExpenseCategory _category;
   late DateTime _date;
   bool _submitting = false;
-  XFile? _receiptFile;
+  PlatformFile? _receiptFile;
 
   bool get _isEdit => widget.expense != null;
 
