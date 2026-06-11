@@ -353,41 +353,50 @@ class _BuildingResidentsScreenState
                   message: context.t.common.selectionRemoveHint,
                 ),
               Expanded(
-                child: SingleChildScrollView(
+                child: ListView.builder(
                   padding: _selectionMode
                       ? const EdgeInsets.fromLTRB(
                           AppSizes.dashboardScreenPaddingHorizontal,
                           AppSizes.spacingL,
                           AppSizes.dashboardScreenPaddingHorizontal,
-                          96, 
+                          96,
                         )
                       : AppSizes.screenBodyScrollPadding,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildHeader(widget.building),
-                      const SizedBox(height: AppSizes.spacingL),
-                      _buildResidentsSectionHeader(
-                        context,
-                        residentsCount: residents.length,
-                        showSelectTrigger: !_selectionMode && hasOccupied,
-                      ),
-                      const SizedBox(height: AppSizes.spacingM),
-                      if (residents.isEmpty)
-                        _buildEmptyState(context)
-                      else
-                        ...residents.asMap().entries.map(
-                          (entry) => BuildingResidentCard(
-                             index: entry.key + 1,
-                             apt: entry.value,
-                             selectionMode: _selectionMode,
-                             selected: _selectedApartmentIds.contains(entry.value.id),
-                             onToggleSelection: _toggleApartmentSelection,
-                             onShowDetails: () => ApartmentDetailsSheet.show(context, apt: entry.value),
+                  itemCount: residents.isEmpty ? 3 : 3 + residents.length,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return _buildHeader(widget.building);
+                    }
+                    if (index == 1) {
+                      return const SizedBox(height: AppSizes.spacingL);
+                    }
+                    if (index == 2) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildResidentsSectionHeader(
+                            context,
+                            residentsCount: residents.length,
+                            showSelectTrigger: !_selectionMode && hasOccupied,
                           ),
-                        ),
-                    ],
-                  ),
+                          const SizedBox(height: AppSizes.spacingM),
+                          if (residents.isEmpty)
+                            _buildEmptyState(context),
+                        ],
+                      );
+                    }
+
+                    final residentIndex = index - 3;
+                    final apt = residents[residentIndex];
+                    return BuildingResidentCard(
+                      index: residentIndex + 1,
+                      apt: apt,
+                      selectionMode: _selectionMode,
+                      selected: _selectedApartmentIds.contains(apt.id),
+                      onToggleSelection: _toggleApartmentSelection,
+                      onShowDetails: () => ApartmentDetailsSheet.show(context, apt: apt),
+                    );
+                  },
                 ),
               ),
             ],

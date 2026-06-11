@@ -54,26 +54,47 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
                 bottom: AppSizes.spacingXL + 72,
               ),
               sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  Text(
-                    t.myTickets,
-                    style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
-                  ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  if (ticketsState.isLoading && ticketsState.tickets.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(top: AppSizes.spacingXL),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  else if (ticketsState.tickets.isEmpty)
-                    EmptyStateWidget(
-                      icon: Icons.support_agent_outlined,
-                      title: t.emptyTitle,
-                      subtitle: t.emptySubtitle,
-                    )
-                  else
-                    ...ticketsState.tickets.map(
-                      (ticket) => Padding(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == 0) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t.myTickets,
+                            style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+                          ),
+                          const SizedBox(height: AppSizes.spacingM),
+                        ],
+                      );
+                    }
+
+                    final adjustedIndex = index - 1;
+
+                    if (ticketsState.isLoading && ticketsState.tickets.isEmpty) {
+                      if (adjustedIndex == 0) {
+                        return const Padding(
+                          padding: EdgeInsets.only(top: AppSizes.spacingXL),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      return null;
+                    }
+
+                    if (ticketsState.tickets.isEmpty) {
+                      if (adjustedIndex == 0) {
+                        return EmptyStateWidget(
+                          icon: Icons.support_agent_outlined,
+                          title: t.emptyTitle,
+                          subtitle: t.emptySubtitle,
+                        );
+                      }
+                      return null;
+                    }
+
+                    if (adjustedIndex < ticketsState.tickets.length) {
+                      final ticket = ticketsState.tickets[adjustedIndex];
+                      return Padding(
                         padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
                         child: TicketListCard(
                           ticket: ticket,
@@ -88,9 +109,18 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
                             }
                           },
                         ),
-                      ),
-                    ),
-                ]),
+                      );
+                    }
+
+                    return null;
+                  },
+                  childCount: 1 +
+                      (ticketsState.isLoading && ticketsState.tickets.isEmpty
+                          ? 1
+                          : ticketsState.tickets.isEmpty
+                              ? 1
+                              : ticketsState.tickets.length),
+                ),
               ),
             ),
           ],

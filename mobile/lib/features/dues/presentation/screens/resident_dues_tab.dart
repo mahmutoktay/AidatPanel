@@ -34,85 +34,104 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
       });
     }
 
+    final items = _buildBodyItems(context, duesState, highlightDueId);
+
     return RefreshIndicator(
       onRefresh: () => ref.read(duesNotifierProvider.notifier).loadMyDues(),
-      child: ListView(
+      child: ListView.builder(
         padding: AppSizes.screenBodyScrollPadding,
-        children: _buildBody(context, duesState, highlightDueId),
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          final item = items[index];
+          if (item is _LoadingItem) {
+            return const Padding(
+              padding: EdgeInsets.only(top: AppSizes.spacingXL),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (item is _EmptyStateItem) {
+            return Padding(
+              padding: const EdgeInsets.only(top: AppSizes.spacingXL),
+              child: Center(
+                child: Text(
+                  context.t.common.noDuesYet,
+                  style: AppTypography.body1.copyWith(color: AppColors.textSecondary),
+                ),
+              ),
+            );
+          }
+          if (item is _ActionButtonsItem) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: _buildActionButtons(context),
+            );
+          }
+          if (item is _SectionHeaderItem) {
+            return Text(
+              item.title,
+              style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+            );
+          }
+          if (item is _DueCardItem) {
+            return _buildDueCard(
+              context,
+              item.due,
+              highlighted: item.highlighted,
+            );
+          }
+          if (item is _SpacingItem) {
+            return SizedBox(height: item.height);
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
 
-  List<Widget> _buildBody(
+  List<_ResidentDuesRowItem> _buildBodyItems(
     BuildContext context,
     DuesState duesState,
     String? highlightDueId,
   ) {
     if (duesState.isLoading) {
-      return const [
-        Padding(
-          padding: EdgeInsets.only(top: AppSizes.spacingXL),
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      ];
+      return const [_LoadingItem()];
     }
 
     if (duesState.dues.isEmpty) {
-      return [
-        Padding(
-          padding: const EdgeInsets.only(top: AppSizes.spacingXL),
-          child: Center(
-            child: Text(
-              context.t.common.noDuesYet,
-              style: AppTypography.body1.copyWith(color: AppColors.textSecondary),
-            ),
-          ),
-        ),
-      ];
+      return const [_EmptyStateItem()];
     }
 
     final split = splitResidentDuesForDisplay(duesState.dues);
-    final children = <Widget>[
-      ..._buildActionButtons(context),
+    final items = <_ResidentDuesRowItem>[
+      const _ActionButtonsItem(),
     ];
 
     if (split.current.isNotEmpty) {
-      children.addAll([
-        Text(
-          context.t.common.currentPeriodDue,
-          style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
-        ),
-        const SizedBox(height: AppSizes.spacingM),
-        for (final due in split.current)
-          _buildDueCard(
-            context,
-            due,
-            highlighted:
-                highlightDueId == null || highlightDueId == due.id,
-          ),
-      ]);
+      items.add(_SectionHeaderItem(context.t.common.currentPeriodDue));
+      items.add(const _SpacingItem(AppSizes.spacingM));
+      for (final due in split.current) {
+        items.add(_DueCardItem(
+          due,
+          highlighted: highlightDueId == null || highlightDueId == due.id,
+        ));
+      }
     }
 
     if (split.past.isNotEmpty) {
       if (split.current.isNotEmpty) {
-        children.add(const SizedBox(height: AppSizes.spacingL));
+        items.add(const _SpacingItem(AppSizes.spacingL));
       }
-      children.addAll([
-        Text(
-          context.t.common.myPastDues,
-          style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
-        ),
-        const SizedBox(height: AppSizes.spacingM),
-        for (final due in split.past)
-          _buildDueCard(
-            context,
-            due,
-            highlighted: highlightDueId == due.id,
-          ),
-      ]);
+      items.add(_SectionHeaderItem(context.t.common.myPastDues));
+      items.add(const _SpacingItem(AppSizes.spacingM));
+      for (final due in split.past) {
+        items.add(_DueCardItem(
+          due,
+          highlighted: highlightDueId == due.id,
+        ));
+      }
     }
 
-    return children;
+    return items;
   }
 
   List<Widget> _buildActionButtons(BuildContext context) {
@@ -300,4 +319,36 @@ class _StatusVisual {
     required this.fg,
     required this.bg,
   });
+}
+
+sealed class _ResidentDuesRowItem {
+  const _ResidentDuesRowItem();
+}
+
+class _LoadingItem extends _ResidentDuesRowItem {
+  const _LoadingItem();
+}
+
+class _EmptyStateItem extends _ResidentDuesRowItem {
+  const _EmptyStateItem();
+}
+
+class _ActionButtonsItem extends _ResidentDuesRowItem {
+  const _ActionButtonsItem();
+}
+
+class _SectionHeaderItem extends _ResidentDuesRowItem {
+  final String title;
+  const _SectionHeaderItem(this.title);
+}
+
+class _DueCardItem extends _ResidentDuesRowItem {
+  final DueEntity due;
+  final bool highlighted;
+  const _DueCardItem(this.due, {required this.highlighted});
+}
+
+class _SpacingItem extends _ResidentDuesRowItem {
+  final double height;
+  const _SpacingItem(this.height);
 }
