@@ -4,7 +4,7 @@ enum UserRole { manager, resident }
 
 class UserEntity extends Equatable {
   final String id;
-  final String email;
+  final String? email;
   final String name;
   final String? phone;
   final UserRole role;
@@ -17,7 +17,7 @@ class UserEntity extends Equatable {
 
   const UserEntity({
     required this.id,
-    required this.email,
+    this.email,
     required this.name,
     this.phone,
     required this.role,

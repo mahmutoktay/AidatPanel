@@ -86,6 +86,11 @@ String mapApiUserMessage(
 
   if (error is ValidationException ||
       (code == 400 && (_has(raw, 'validasyon') || _has(raw, 'geçersiz')))) {
+    final errors = error.responseData?['errors'];
+    if (errors is List && errors.isNotEmpty) {
+      final messages = errors.map((e) => e['message']?.toString() ?? '').where((m) => m.isNotEmpty).join(', ');
+      if (messages.isNotEmpty) return messages;
+    }
     return api.validationError;
   }
 
@@ -153,6 +158,9 @@ String? _mapProfile(dynamic c, dynamic api, String raw, String msg, int? code) {
   }
   if (_has(raw, 'telefon numarası zaten kullanılıyor')) {
     return api.duplicatePhone as String;
+  }
+  if (_has(raw, 'en az biri mutlaka bulunmalıdır') || _has(raw, 'min_contact_required')) {
+    return raw;
   }
   return null;
 }

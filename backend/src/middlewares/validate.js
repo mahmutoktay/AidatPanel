@@ -96,6 +96,22 @@ const profilePhone = z.preprocess(
     .optional()
 );
 
+const profileEmail = z.preprocess(
+  (v) => {
+    if (v === "") return null;
+    if (v === undefined) return undefined;
+    return v;
+  },
+  z
+    .union([
+      z.null(),
+      z
+        .string()
+        .email("Geçerli bir email adresi giriniz"),
+    ])
+    .optional()
+);
+
 export const authSchemas = {
   register: {
     body: z.object({
@@ -195,15 +211,17 @@ export const meSchemas = {
           .min(2, "İsim en az 2 karakter olmalıdır")
           .max(50, "İsim en fazla 50 karakter olabilir")
           .optional(),
+        email: profileEmail,
         phone: profilePhone,
         language: z.enum(["tr", "en"]).optional(),
+        currentPassword: z.string().optional(),
       })
       .refine(
         (d) =>
-          d.name !== undefined || d.phone !== undefined || d.language !== undefined,
+          d.name !== undefined || d.phone !== undefined || d.language !== undefined || d.email !== undefined,
         {
           message:
-            "En az bir alan gönderin (name, phone veya language). Telefonu silmek için phone: null gönderin.",
+            "En az bir alan gönderin (name, email, phone veya language). E-posta veya telefonu silmek için null gönderin.",
         }
       ),
   },

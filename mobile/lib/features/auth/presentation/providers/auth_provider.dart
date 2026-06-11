@@ -181,7 +181,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      await _authRepository.register(email, password, name, phone);
+      final formattedPhone = (phone != null && phone.trim().isNotEmpty)
+          ? (phone.trim().startsWith('+90') ? phone.trim() : '+90${phone.trim()}')
+          : null;
+      await _authRepository.register(email, password, name, formattedPhone);
       state = state.copyWith(
         isLoading: false,
         registrationSuccess: true,
@@ -203,12 +206,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
+      final formattedPhone = (phone != null && phone.trim().isNotEmpty)
+          ? (phone.trim().startsWith('+90') ? phone.trim() : '+90${phone.trim()}')
+          : null;
       final user = await _authRepository.join(
         inviteCode,
         email,
         password,
         name,
-        phone,
+        formattedPhone,
       );
       // Reset tab index on successful join
       resetManagerTabIndex(ref);

@@ -8,10 +8,12 @@ abstract class ProfileRemoteDataSource {
   /// `GET /api/v1/me` — güncel profil bilgisi.
   Future<UserData> getMe();
 
-  /// `PUT /api/v1/me` — ad / telefon güncelleme.
+  /// `PUT /api/v1/me` — ad / telefon / email güncelleme.
   Future<UserData> updateMe({
     required String name,
+    String? email,
     String? phone,
+    String? currentPassword,
   });
 
   /// `PUT /api/v1/me/language` — bildirim dili (tr | en).
@@ -54,17 +56,28 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<UserData> updateMe({
     required String name,
+    String? email,
     String? phone,
+    String? currentPassword,
   }) async {
     final body = <String, dynamic>{'name': name.trim()};
     final trimmedPhone = phone?.trim();
-    // Profil kaydında telefon her zaman gönderilir: dolu → güncelle,
-    // boş/null → sunucuda sil (PUT /me body.phone: null).
     if (trimmedPhone != null && trimmedPhone.isNotEmpty) {
-      body['phone'] = trimmedPhone;
+      body['phone'] = trimmedPhone.startsWith('+90') ? trimmedPhone : '+90$trimmedPhone';
     } else {
       body['phone'] = null;
     }
+    
+    final trimmedEmail = email?.trim();
+    if (trimmedEmail != null && trimmedEmail.isNotEmpty) {
+      body['email'] = trimmedEmail;
+    } else {
+      body['email'] = null;
+    }
+    if (currentPassword != null && currentPassword.isNotEmpty) {
+      body['currentPassword'] = currentPassword;
+    }
+
     final response = await _dioClient.put(
       ApiConstants.profile,
       data: body,

@@ -5,7 +5,9 @@ abstract class ProfileRepository {
 
   Future<UserEntity> updateProfile({
     required String name,
+    String? email,
     String? phone,
+    String? currentPassword,
   });
 
   Future<UserEntity> updateLanguage(String languageCode);

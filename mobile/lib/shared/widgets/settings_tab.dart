@@ -212,9 +212,9 @@ class _ProfileHero extends StatelessWidget {
   });
 
   String _handle() {
-    if (user.email.isNotEmpty) {
-      final at = user.email.indexOf('@');
-      final name = at > 0 ? user.email.substring(0, at) : user.email;
+    if (user.email != null && user.email!.isNotEmpty) {
+      final at = user.email!.indexOf('@');
+      final name = at > 0 ? user.email!.substring(0, at) : user.email!;
       return '@$name';
     }
     if (user.phone != null && user.phone!.isNotEmpty) {

@@ -203,7 +203,9 @@ class MockProfileRepository implements ProfileRepository {
   @override
   Future<UserEntity> updateProfile({
     required String name,
+    String? email,
     String? phone,
+    String? currentPassword,
   }) async {
     await Future.delayed(_delay);
     final user = MockAuthRepository.sessionUser;
@@ -212,7 +214,7 @@ class MockProfileRepository implements ProfileRepository {
     }
     final updated = UserEntity(
       id: user.id,
-      email: user.email,
+      email: email != null && email.trim().isNotEmpty ? email.trim() : user.email,
       name: name.trim(),
       phone: phone?.trim().isEmpty == true ? null : phone?.trim(),
       role: user.role,

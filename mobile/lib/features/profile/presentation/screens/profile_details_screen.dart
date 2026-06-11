@@ -34,6 +34,7 @@ class ProfileDetailsScreen extends ConsumerStatefulWidget {
 class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
 
   bool _editing = false;
@@ -49,6 +50,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _emailController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
@@ -68,6 +70,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     final user = _currentUser;
     if (user == null) return;
     _nameController.text = user.name;
+    _emailController.text = user.email ?? '';
     _phoneController.text = _phoneDigits(user.phone);
     setState(() => _editing = true);
   }
@@ -82,10 +85,36 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     FocusScope.of(context).unfocus();
 
+    final user = _currentUser;
+    if (user == null) return;
+
     final phone = _phoneController.text.trim();
+    final newEmail = _emailController.text.trim();
+    
+    if (phone.isEmpty && newEmail.isEmpty) {
+      ref.read(toastProvider.notifier).show(
+        'En az bir iletişim kanalı (E-posta veya Telefon) kayıtlı olmalıdır.',
+        type: ToastType.error,
+      );
+      return;
+    }
+    
+    final isEmailChanged = newEmail != (user.email ?? '');
+    final isPhoneChanged = phone != _phoneDigits(user.phone);
+    
+    String? currentPassword;
+    if (isEmailChanged || isPhoneChanged) {
+      currentPassword = await _showPasswordDialog(context);
+      if (currentPassword == null || currentPassword.isEmpty) {
+        return; // User cancelled or didn't enter password
+      }
+    }
+
     final ok = await ref.read(profileNotifierProvider.notifier).saveProfile(
           name: _nameController.text.trim(),
+          email: newEmail.isEmpty ? null : newEmail,
           phone: phone.isEmpty ? null : phone,
+          currentPassword: currentPassword,
         );
     if (!mounted) return;
 
@@ -102,6 +131,61 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
             type: ToastType.error,
           );
     }
+  }
+
+  Future<String?> _showPasswordDialog(BuildContext context) async {
+    final t = context.t;
+    final controller = TextEditingController();
+    bool obscure = true;
+
+    return showDialog<String>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          backgroundColor: ProfileSettingsUi.background,
+          title: Text('Güvenlik Doğrulaması', style: ProfileSettingsUi.title),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'E-posta veya telefon numaranızı değiştirmek için mevcut şifrenizi girmelisiniz.',
+                style: ProfileSettingsUi.fieldValue,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                obscureText: obscure,
+                autofocus: true,
+                cursorColor: ProfileSettingsUi.ink,
+                decoration: InputDecoration(
+                  labelText: t.features.auth.password,
+                  labelStyle: ProfileSettingsUi.fieldLabel,
+                  suffixIcon: IconButton(
+                    icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () => setState(() => obscure = !obscure),
+                    color: ProfileSettingsUi.muted,
+                  ),
+                  focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: ProfileSettingsUi.ink, width: 1.4),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(t.common.cancel, style: const TextStyle(color: ProfileSettingsUi.muted)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(controller.text),
+              style: ProfileSettingsUi.primaryButton,
+              child: Text(t.common.confirm),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -244,6 +328,25 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
               validator: (value) => InputValidators.validateName(value),
             ),
             _InlineField(
+              icon: Icons.email_outlined,
+              label: t.features.profile.email,
+              controller: _emailController,
+              enabled: !profileState.isSaving,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.email],
+              validator: (value) {
+                final raw = value?.trim() ?? '';
+                if (raw.isEmpty) return null;
+                final key = InputValidators.validateEmail(raw);
+                if (key == 'email_required') return null;
+                if (key == null) return null;
+                return 'Geçerli bir e-posta adresi giriniz';
+              },
+              showClearSuffix: true,
+              onChanged: (_) => setState(() {}),
+            ),
+            _InlineField(
               icon: Icons.phone_outlined,
               label: t.features.profile.phone,
               controller: _phoneController,
@@ -273,6 +376,14 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
               value: user.name,
             ),
             _InfoTile(
+              icon: Icons.email_outlined,
+              label: t.features.profile.email,
+              value: (user.email != null && user.email!.isNotEmpty)
+                  ? user.email!
+                  : t.features.profile.notProvided,
+              isEmpty: user.email == null || user.email!.isEmpty,
+            ),
+            _InfoTile(
               icon: Icons.phone_outlined,
               label: t.features.profile.phone,
               value: (user.phone != null && user.phone!.isNotEmpty)
@@ -287,15 +398,6 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
           const SizedBox(height: 4),
 
           // Hesap — sadece okunabilir alanlar
-          _InfoTile(
-            icon: Icons.email_outlined,
-            label: t.features.profile.email,
-            value: user.email.isNotEmpty
-                ? user.email
-                : t.features.profile.notProvided,
-            isEmpty: user.email.isEmpty,
-            locked: true,
-          ),
           _InfoTile(
             icon: Icons.badge_outlined,
             label: t.features.profile.role,
@@ -385,9 +487,9 @@ class _ProfileHero extends StatelessWidget {
   });
 
   String _handle() {
-    if (user.email.isNotEmpty) {
-      final at = user.email.indexOf('@');
-      final name = at > 0 ? user.email.substring(0, at) : user.email;
+    if (user.email != null && user.email!.isNotEmpty) {
+      final at = user.email!.indexOf('@');
+      final name = at > 0 ? user.email!.substring(0, at) : user.email!;
       return '@$name';
     }
     if (user.phone != null && user.phone!.isNotEmpty) {

@@ -24,10 +24,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<UserEntity> updateProfile({
     required String name,
+    String? email,
     String? phone,
+    String? currentPassword,
   }) async {
     try {
-      final data = await _remoteDataSource.updateMe(name: name, phone: phone);
+      final data = await _remoteDataSource.updateMe(
+        name: name,
+        email: email,
+        phone: phone,
+        currentPassword: currentPassword,
+      );
       return data.toEntity();
     } on ApiException {
       rethrow;

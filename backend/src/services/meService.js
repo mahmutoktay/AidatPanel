@@ -90,7 +90,7 @@ export async function getProfileService(userId) {
   return toPublicUser(user);
 }
 
-export async function updateProfileService(userId, { name, phone, language }) {
+export async function updateProfileService(userId, { name, email, phone, language, currentPassword }) {
   const user = await prisma.user.findFirst({
     where: { id: userId, deletedAt: null },
   });
@@ -98,7 +98,37 @@ export async function updateProfileService(userId, { name, phone, language }) {
     throw new HttpError(401, "Kullanıcı bulunamadı.");
   }
 
-  if (phone !== undefined && phone !== null && phone !== user.phone) {
+  const isEmailChanged = email !== undefined && email !== user.email;
+  const isPhoneChanged = phone !== undefined && phone !== user.phone;
+
+  const newEmail = email !== undefined ? email : user.email;
+  const newPhone = phone !== undefined ? phone : user.phone;
+
+  if (!newEmail && !newPhone) {
+    throw new HttpError(400, "Sistemde e-posta adresi veya telefon numarasından en az biri mutlaka bulunmalıdır.", { code: "MIN_CONTACT_REQUIRED" });
+  }
+
+  if (isEmailChanged || isPhoneChanged) {
+    if (!currentPassword) {
+      throw new HttpError(400, "E-posta veya telefon numarası değiştirmek için mevcut şifrenizi girmelisiniz.");
+    }
+    const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!ok) {
+      throw new HttpError(400, "Mevcut şifreniz hatalı.");
+    }
+  }
+
+  if (isEmailChanged && email !== null) {
+    const taken = await prisma.user.findFirst({
+      where: { email, NOT: { id: userId }, deletedAt: null },
+      select: { id: true },
+    });
+    if (taken) {
+      throw new HttpError(409, "Bu e-posta adresi zaten kullanılıyor.");
+    }
+  }
+
+  if (isPhoneChanged && phone !== null) {
     const taken = await prisma.user.findFirst({
       where: { phone, NOT: { id: userId }, deletedAt: null },
       select: { id: true },
@@ -110,6 +140,7 @@ export async function updateProfileService(userId, { name, phone, language }) {
 
   const data = {};
   if (name !== undefined) data.name = name;
+  if (email !== undefined) data.email = email;
   if (phone !== undefined) data.phone = phone;
   if (language !== undefined) data.language = language;
 

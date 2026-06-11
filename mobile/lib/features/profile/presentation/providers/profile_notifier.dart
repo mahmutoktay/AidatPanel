@@ -78,12 +78,19 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
   Future<bool> saveProfile({
     required String name,
+    String? email,
     String? phone,
+    String? currentPassword,
   }) async {
     if (state.isSaving) return false;
     state = state.copyWith(isSaving: true, clearError: true);
     try {
-      final user = await _repository.updateProfile(name: name, phone: phone);
+      final user = await _repository.updateProfile(
+        name: name,
+        email: email,
+        phone: phone,
+        currentPassword: currentPassword,
+      );
       await _ref.read(authStateProvider.notifier).syncCachedUser(user);
       state = state.copyWith(isSaving: false, user: user, clearError: true);
       return true;
