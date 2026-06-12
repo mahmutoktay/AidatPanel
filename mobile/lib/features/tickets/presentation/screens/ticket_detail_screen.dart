@@ -91,6 +91,7 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
               ),
               const SizedBox(height: AppSizes.spacingM),
               _SurfaceSection(
+                title: context.t.features.tickets.fieldDescription,
                 child: Text(
                   ticket.description,
                   style: AppTypography.body1.copyWith(
@@ -214,68 +215,130 @@ class _TicketHeaderCard extends StatelessWidget {
     this.showStatusChip = true,
   });
 
+  IconData _categoryIcon(TicketCategory category) {
+    switch (category) {
+      case TicketCategory.complaint:
+        return Icons.report_problem_outlined;
+      case TicketCategory.request:
+        return Icons.handyman_outlined;
+      case TicketCategory.malfunction:
+        return Icons.build_circle_outlined;
+      case TicketCategory.other:
+        return Icons.more_horiz_rounded;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final statusColor = _statusColor(ticket.status);
+    final date =
+        '${ticket.createdAt.day}.${ticket.createdAt.month}.${ticket.createdAt.year}';
+    final apt = ticket.apartmentNumber?.trim();
     final meta = showSubtitleMeta
         ? [
-            if (ticket.apartmentNumber != null &&
-                ticket.apartmentNumber!.isNotEmpty)
-              ticket.apartmentNumber!,
+            if (apt != null && apt.isNotEmpty) apt,
             ticket.category.label(context),
           ].join(' · ')
-        : '';
+        : ticket.category.label(context);
 
     return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingM),
+      padding: const EdgeInsets.all(AppSizes.cardPadding),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: AppColors.cardBorder,
+        border: Border.all(
+          color: statusColor.withValues(alpha: 0.2),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.textPrimary.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  ticket.title,
-                  style: AppTypography.h3.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w800,
-                  ),
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              _categoryIcon(ticket.category),
+              color: statusColor,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: AppSizes.spacingM),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        ticket.title,
+                        style: AppTypography.h4.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    if (showStatusChip)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          ticket.status.label(context),
+                          style: AppTypography.caption.copyWith(
+                            color: statusColor,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              ),
-              if (showStatusChip)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    ticket.status.label(context),
+                if (meta.isNotEmpty) ...[
+                  const SizedBox(height: AppSizes.spacingXS),
+                  Text(
+                    meta,
                     style: AppTypography.caption.copyWith(
-                      color: statusColor,
-                      fontWeight: FontWeight.w800,
+                      color: AppColors.textSecondary,
                     ),
                   ),
+                ],
+                const SizedBox(height: AppSizes.spacingS),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.schedule_outlined,
+                      size: 14,
+                      color: AppColors.textDisabled,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      date,
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textDisabled,
+                      ),
+                    ),
+                  ],
                 ),
-            ],
-          ),
-          if (meta.isNotEmpty) ...[
-            const SizedBox(height: AppSizes.spacingS),
-            Text(
-              meta,
-              style: AppTypography.body2.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              ],
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -296,9 +359,10 @@ class _TicketHeaderCard extends StatelessWidget {
 }
 
 class _SurfaceSection extends StatelessWidget {
+  final String title;
   final Widget child;
 
-  const _SurfaceSection({required this.child});
+  const _SurfaceSection({required this.title, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -309,8 +373,38 @@ class _SurfaceSection extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
         border: AppColors.cardBorder,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.textPrimary.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: child,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.textSecondary.withValues(alpha: 0.3)),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                title.toUpperCase(),
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.6,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          child,
+        ],
+      ),
     );
   }
 }
