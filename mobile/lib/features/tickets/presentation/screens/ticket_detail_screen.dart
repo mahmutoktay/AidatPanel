@@ -244,18 +244,8 @@ class _TicketHeaderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.cardPadding),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(
-          color: statusColor.withValues(alpha: 0.2),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,8 +254,11 @@ class _TicketHeaderCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: statusColor.withValues(alpha: 0.18),
+              ),
             ),
             child: Icon(
               _categoryIcon(ticket.category),
@@ -370,16 +363,8 @@ class _SurfaceSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: AppColors.cardBorder,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -388,7 +373,7 @@ class _SurfaceSection extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                border: Border.all(color: AppColors.textSecondary.withValues(alpha: 0.3)),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -536,9 +521,8 @@ class _ManagerActions extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

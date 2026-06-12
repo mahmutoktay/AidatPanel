@@ -30,16 +30,8 @@ class TicketStatusStepper extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: AppColors.cardBorder,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -48,7 +40,7 @@ class TicketStatusStepper extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                border: Border.all(color: AppColors.accent.withValues(alpha: 0.5)),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
