@@ -29,7 +29,7 @@
 **Sıradaki işler (checklist `[ ]`):**
 - [x] Gider makbuz **dosya** upload (`POST /expenses/{id}/proof`) — FAZ 2 kalıntısı tamamlandı
 - [x] **FAZ 4 (Backend)** — `logout` endpoint'inde FCM token temizleme eksikliği (Bug Fix)
-- [ ] **FAZ 4 (Mobil)** — Canlı E2E + ONAY (profil/dil/abonelik okuma tamam)
+- [x] **FAZ 4 (Mobil)** — Canlı E2E + ONAY (profil/dil/abonelik okuma tamam)
 - [ ] FAZ 5–7 (test, abonelik, store) — FAZ 4 tamamlanınca
 
 **Ertelenen (unutma — FAZ 3 dışı backlog):**
@@ -164,7 +164,7 @@
 - [x] "Diğer cihazlardan çıkış" (`POST /auth/logout-all-devices` + WebSocket `force_logout`)
 - [x] **Backend Bug Fix**: `POST /auth/logout` FCM token'ını silecek şekilde güncellendi
 - [x] Gider makbuz **dosya** upload (`POST /expenses/{id}/proof`) — Tamamlandı
-- [ ] Canlı E2E — profil güncelleme + dil senkronu
+- [x] Canlı E2E — profil güncelleme + dil senkronu
 
 ---
 
