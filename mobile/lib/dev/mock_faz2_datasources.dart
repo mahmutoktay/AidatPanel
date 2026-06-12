@@ -70,6 +70,26 @@ class MockExpenseDataSource implements ExpenseDataSource {
   }
 
   @override
+  Future<List<ExpenseModel>> getMyExpenses({
+    int? month,
+    int? year,
+    String? category,
+  }) async {
+    await Future.delayed(_delay);
+    var list = List<ExpenseModel>.from(_byBuilding['b1'] ?? []);
+    if (month != null) {
+      list = list.where((e) => e.date.month == month).toList();
+    }
+    if (year != null) {
+      list = list.where((e) => e.date.year == year).toList();
+    }
+    if (category != null) {
+      list = list.where((e) => e.category == category).toList();
+    }
+    return list;
+  }
+
+  @override
   Future<Map<String, dynamic>> getSummary(
     String buildingId, {
     required int month,
@@ -190,6 +210,7 @@ class MockExpenseDataSource implements ExpenseDataSource {
         date: old.date,
         note: old.note,
         receiptUrl: url,
+        receiptUrls: filePaths.map((p) => 'mock://receipt/$p').toList(),
         createdAt: old.createdAt,
       );
       list[idx] = updated;

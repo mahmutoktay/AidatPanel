@@ -21,6 +21,7 @@ class ExpenseEntity extends Equatable {
   final DateTime date;
   final String? note;
   final String? receiptUrl;
+  final List<String> receiptUrls;
   final DateTime createdAt;
 
   const ExpenseEntity({
@@ -33,12 +34,13 @@ class ExpenseEntity extends Equatable {
     required this.date,
     this.note,
     this.receiptUrl,
+    this.receiptUrls = const [],
     required this.createdAt,
   });
 
   @override
   List<Object?> get props =>
-      [id, buildingId, title, amount, parsedAmount, category, date, note, receiptUrl, createdAt];
+      [id, buildingId, title, amount, parsedAmount, category, date, note, receiptUrl, receiptUrls, createdAt];
 }
 
 class ExpenseSummaryEntity extends Equatable {

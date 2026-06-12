@@ -85,6 +85,7 @@ class ApiConstants {
       '$apiVersion/buildings/$buildingId/dekonts';
 
   // Expenses endpoints
+  static const String myExpenses = '$apiVersion/me/expenses';
   static String expense(String expenseId) => '$apiVersion/expenses/$expenseId';
   static String expenseProof(String expenseId) =>
       '$apiVersion/expenses/$expenseId/proof';

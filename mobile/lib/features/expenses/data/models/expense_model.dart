@@ -10,6 +10,7 @@ class ExpenseModel {
   final DateTime date;
   final String? note;
   final String? receiptUrl;
+  final List<String> receiptUrls;
   final DateTime createdAt;
 
   const ExpenseModel({
@@ -22,6 +23,7 @@ class ExpenseModel {
     required this.date,
     this.note,
     this.receiptUrl,
+    this.receiptUrls = const [],
     required this.createdAt,
   });
 
@@ -36,6 +38,15 @@ class ExpenseModel {
         ? parsedRaw.toDouble()
         : double.tryParse('$parsedRaw');
 
+    final receiptUrlsRaw = json['receiptUrls'];
+    final receiptUrls = receiptUrlsRaw is List
+        ? receiptUrlsRaw.map((e) => '$e').toList()
+        : <String>[];
+
+    final fallbackUrls = receiptUrls.isEmpty && json['receiptUrl'] != null
+        ? [json['receiptUrl'] as String]
+        : receiptUrls;
+
     return ExpenseModel(
       id: (json['id'] ?? '') as String,
       buildingId: (json['buildingId'] ?? '') as String,
@@ -46,6 +57,7 @@ class ExpenseModel {
       date: _parseDate(json['date']),
       note: json['note'] as String?,
       receiptUrl: json['receiptUrl'] as String?,
+      receiptUrls: fallbackUrls,
       createdAt: _parseDate(json['createdAt']),
     );
   }
@@ -67,6 +79,7 @@ class ExpenseModel {
         date: date,
         note: note,
         receiptUrl: receiptUrl,
+        receiptUrls: receiptUrls,
         createdAt: createdAt,
       );
 

@@ -109,10 +109,41 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
     }
   }
 
+  Future<void> loadMyExpenses({
+    int? month,
+    int? year,
+  }) async {
+    state = state.copyWith(
+      isLoading: true,
+      clearError: true,
+      month: month,
+      year: year,
+    );
+    try {
+      final expenses = await _repository.getMyExpenses(
+        month: month,
+        year: year,
+      );
+      state = state.copyWith(
+        isLoading: false,
+        expenses: expenses,
+        clearSummary: true,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: userFacingError(e),
+      );
+    }
+  }
+
   Future<void> reload() async {
     final id = state.buildingId;
-    if (id == null) return;
-    await load(id, month: state.month, year: state.year);
+    if (id == null) {
+      await loadMyExpenses(month: state.month, year: state.year);
+    } else {
+      await load(id, month: state.month, year: state.year);
+    }
   }
 
   Future<({bool success, String? receiptWarning, bool receiptUploadDeferred})>

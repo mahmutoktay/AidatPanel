@@ -5,8 +5,11 @@ import {
   updateExpenseService,
   deleteExpenseService,
   uploadExpenseProofsService,
+  getExpenseFileService,
+  listExpensesForResidentService,
 } from "../services/expenseService.js";
 import { HttpError } from "../utils/httpError.js";
+import { createDekontReadStream } from "../services/dekontStorageService.js";
 
 const handleHttp = (err, res, next) => {
   if (err instanceof HttpError) {
@@ -98,11 +101,21 @@ export const deleteExpense = async (req, res, next) => {
   }
 };
 
-/** Çoklu makbuz yükleme: multer array("files", 5) ile çalışır. */
 export const uploadExpenseProofs = async (req, res, next) => {
   try {
-    const files = req.files;
-    if (!files || files.length === 0) {
+    let files = [];
+    if (req.files) {
+      if (Array.isArray(req.files)) {
+        files = req.files;
+      } else {
+        files = [
+          ...(req.files.files || []),
+          ...(req.files["files[]"] || []),
+        ];
+      }
+    }
+
+    if (files.length === 0) {
       return res.status(400).json({
         success: false,
         message: "En az bir makbuz dosyası gereklidir.",
@@ -127,3 +140,49 @@ export const uploadExpenseProofs = async (req, res, next) => {
 
 /** @deprecated Tek dosya desteği için geriye uyumluluk — yeni kod uploadExpenseProofs kullanmalı. */
 export const uploadExpenseProof = uploadExpenseProofs;
+
+export const getExpenseFile = async (req, res, next) => {
+  try {
+    const { expenseId } = req.params;
+    const { storedPath, mimeType, filename, sizeBytes } = await getExpenseFileService(
+      expenseId,
+      req.user.id,
+      req.user.role
+    );
+
+    const stream = createDekontReadStream(storedPath);
+
+    res.setHeader("Content-Type", mimeType);
+    if (sizeBytes) {
+      res.setHeader("Content-Length", String(sizeBytes));
+    }
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${filename}"`
+    );
+    res.setHeader("Cache-Control", "private, no-store");
+
+    stream.on("error", (err) => {
+      console.error("[expense] file stream error", err);
+      next(err);
+    });
+
+    stream.pipe(res);
+  } catch (err) {
+    handleHttp(err, res, next);
+  }
+};
+
+export const getMyExpenses = async (req, res, next) => {
+  try {
+    const { month, year, category } = req.query;
+    const data = await listExpensesForResidentService(req.user.id, {
+      month,
+      year,
+      category,
+    });
+    res.status(200).json({ success: true, data });
+  } catch (err) {
+    handleHttp(err, res, next);
+  }
+};

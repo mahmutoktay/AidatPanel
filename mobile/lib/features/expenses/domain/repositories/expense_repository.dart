@@ -8,6 +8,12 @@ abstract class ExpenseRepository {
     String? category,
   });
 
+  Future<List<ExpenseEntity>> getMyExpenses({
+    int? month,
+    int? year,
+    String? category,
+  });
+
   Future<ExpenseSummaryEntity> getSummary(
     String buildingId, {
     required int month,

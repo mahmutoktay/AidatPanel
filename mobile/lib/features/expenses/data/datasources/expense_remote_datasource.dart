@@ -12,6 +12,12 @@ abstract class ExpenseDataSource {
     String? category,
   });
 
+  Future<List<ExpenseModel>> getMyExpenses({
+    int? month,
+    int? year,
+    String? category,
+  });
+
   Future<Map<String, dynamic>> getSummary(
     String buildingId, {
     required int month,
@@ -62,6 +68,27 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
 
     final response = await _dioClient.get(
       ApiConstants.buildingExpenses(buildingId),
+      queryParameters: query.isEmpty ? null : query,
+    );
+    final data = response.data['data'] as List;
+    return data
+        .map((j) => ExpenseModel.fromJson(j as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<List<ExpenseModel>> getMyExpenses({
+    int? month,
+    int? year,
+    String? category,
+  }) async {
+    final query = <String, dynamic>{};
+    if (month != null) query['month'] = month;
+    if (year != null) query['year'] = year;
+    if (category != null) query['category'] = category;
+
+    final response = await _dioClient.get(
+      ApiConstants.myExpenses,
       queryParameters: query.isEmpty ? null : query,
     );
     final data = response.data['data'] as List;
@@ -137,16 +164,16 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
 
   @override
   Future<ExpenseModel> uploadReceipts(String expenseId, List<String> filePaths) async {
-    final files = <MultipartFile>[];
+    final form = FormData();
     for (final path in filePaths) {
       final segments = path.replaceAll('\\', '/').split('/');
       final fileName = segments.isNotEmpty ? segments.last : 'receipt.jpg';
-      files.add(await MultipartFile.fromFile(path, filename: fileName));
+      form.files.add(MapEntry(
+        'files',
+        await MultipartFile.fromFile(path, filename: fileName),
+      ));
     }
 
-    final form = FormData.fromMap({
-      'files': files,
-    });
     final response = await _dioClient.post(
       ApiConstants.expenseProof(expenseId),
       data: form,

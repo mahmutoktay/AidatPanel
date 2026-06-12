@@ -1668,8 +1668,8 @@ class Translations$features$dekont$en {
 	/// en: 'Upload receipt'
 	String get uploadSectionTitle => 'Upload receipt';
 
-	/// en: 'PDF or photo (JPEG, PNG)'
-	String get uploadHint => 'PDF or photo (JPEG, PNG)';
+	/// en: 'PDF document or photo (JPEG, PNG) (Max 10 MB)'
+	String get uploadHint => 'PDF document or photo (JPEG, PNG) (Max 10 MB)';
 
 	/// en: 'Choose file'
 	String get pickFile => 'Choose file';
@@ -1974,8 +1974,8 @@ class Translations$features$expenses$en {
 	/// en: 'Receipt photo'
 	String get receiptTitle => 'Receipt photo';
 
-	/// en: 'Optional — gallery (file upload not on live API yet)'
-	String get receiptHint => 'Optional — gallery (file upload not on live API yet)';
+	/// en: 'Optional — PDF document or photo (JPEG, PNG) (Max 10 MB)'
+	String get receiptHint => 'Optional — PDF document or photo (JPEG, PNG) (Max 10 MB)';
 
 	/// en: 'Add photo'
 	String get receiptAdd => 'Add photo';
@@ -1994,6 +1994,18 @@ class Translations$features$expenses$en {
 
 	/// en: 'Could not pick a photo'
 	String get receiptPickFailed => 'Could not pick a photo';
+
+	/// en: 'Expense Detail'
+	String get detailTitle => 'Expense Detail';
+
+	/// en: 'Created at'
+	String get fieldCreatedAt => 'Created at';
+
+	/// en: 'View receipt'
+	String get viewReceipt => 'View receipt';
+
+	/// en: 'No receipt uploaded'
+	String get receiptMissing => 'No receipt uploaded';
 }
 
 // Path: features.notifications
@@ -3011,7 +3023,7 @@ extension on Translations {
 			'features.dekont.selectDueHint' => 'Select the due you paid',
 			'features.dekont.noPendingDues' => 'No pending dues',
 			'features.dekont.uploadSectionTitle' => 'Upload receipt',
-			'features.dekont.uploadHint' => 'PDF or photo (JPEG, PNG)',
+			'features.dekont.uploadHint' => 'PDF document or photo (JPEG, PNG) (Max 10 MB)',
 			'features.dekont.pickFile' => 'Choose file',
 			'features.dekont.upload' => 'Upload receipt',
 			'features.dekont.uploadSuccess' => 'Receipt uploaded',
@@ -3110,13 +3122,17 @@ extension on Translations {
 			'features.expenses.receiptUrlHint' => 'Optional — public URL to the receipt file',
 			'features.expenses.receiptUrlInvalid' => 'URL must start with https://',
 			'features.expenses.receiptTitle' => 'Receipt photo',
-			'features.expenses.receiptHint' => 'Optional — gallery (file upload not on live API yet)',
+			'features.expenses.receiptHint' => 'Optional — PDF document or photo (JPEG, PNG) (Max 10 MB)',
 			'features.expenses.receiptAdd' => 'Add photo',
 			'features.expenses.receiptChange' => 'Change photo',
 			'features.expenses.receiptRemove' => 'Remove photo',
 			'features.expenses.receiptPendingBackend' => 'Expense saved. Receipt will upload when the API is live.',
 			'features.expenses.receiptUploadFailed' => 'Receipt upload failed. The expense was saved.',
 			'features.expenses.receiptPickFailed' => 'Could not pick a photo',
+			'features.expenses.detailTitle' => 'Expense Detail',
+			'features.expenses.fieldCreatedAt' => 'Created at',
+			'features.expenses.viewReceipt' => 'View receipt',
+			'features.expenses.receiptMissing' => 'No receipt uploaded',
 			'features.notifications.markAllRead' => 'Mark all read',
 			'features.notifications.markAllReadLong' => 'Mark all as read',
 			'features.notifications.viewRelated' => 'Open related item',

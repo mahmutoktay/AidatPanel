@@ -18,6 +18,8 @@ import '../../features/tickets/presentation/screens/create_ticket_screen.dart';
 import '../../features/tickets/presentation/screens/manager_tickets_screen.dart';
 import '../../features/tickets/presentation/screens/ticket_detail_screen.dart';
 import '../../features/expenses/presentation/screens/manager_expenses_screen.dart';
+import '../../features/expenses/domain/entities/expense_entity.dart';
+import '../../features/expenses/presentation/screens/expense_detail_screen.dart';
 import '../../features/dekont/presentation/screens/dekont_detail_screen.dart';
 import '../../features/dekont/presentation/screens/make_payment_screen.dart';
 import '../../features/dekont/presentation/screens/manager_dekonts_screen.dart';
@@ -344,6 +346,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = state.pathParameters['dekontId']!;
           return DekontDetailScreen(dekontId: id);
+        },
+      ),
+      GoRoute(
+        path: '/expenses/:expenseId',
+        name: 'expense_detail',
+        builder: (context, state) {
+          final id = state.pathParameters['expenseId']!;
+          final expense = state.extra as ExpenseEntity?;
+          return ExpenseDetailScreen(expenseId: id, initialExpense: expense);
         },
       ),
       GoRoute(

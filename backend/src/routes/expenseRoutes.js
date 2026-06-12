@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireRoles } from "../middlewares/roleMiddleware.js";
 import { validate, expenseSchemas } from "../middlewares/validate.js";
-import { updateExpense, deleteExpense, uploadExpenseProof, uploadExpenseProofs } from "../controllers/expenseController.js";
+import { updateExpense, deleteExpense, uploadExpenseProof, uploadExpenseProofs, getExpenseFile } from "../controllers/expenseController.js";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
@@ -33,9 +33,16 @@ const upload = multer({
     }
     cb(new Error("Desteklenmeyen dosya türü. PDF veya JPEG/PNG yükleyin."));
   },
-});const router = Router();
+});
+
+const router = Router();
 
 router.use(authMiddleware);
+
+// Gider makbuzu indirme rotaları hem sakine hem yöneticiye açıktır
+router.get("/:expenseId/file", getExpenseFile);
+router.get("/:expenseId/file/:filename", getExpenseFile);
+
 router.use(requireRoles("MANAGER"));
 
 router.put("/:expenseId", validate(expenseSchemas.update), updateExpense);
@@ -44,7 +51,10 @@ router.delete("/:expenseId", validate(expenseSchemas.delete), deleteExpense);
 router.post(
   "/:expenseId/proof",
   (req, res, next) => {
-    upload.array("files", 10)(req, res, (err) => {
+    upload.fields([
+      { name: "files", maxCount: 10 },
+      { name: "files[]", maxCount: 10 },
+    ])(req, res, (err) => {
       if (err) {
         console.error("[expense] multer hata", err?.message || err);
         return next(err);

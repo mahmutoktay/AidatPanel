@@ -10,6 +10,9 @@ import '../../../../shared/providers/navigation_provider.dart';
 import '../../domain/entities/due_entity.dart';
 import '../../domain/resident_dues_list.dart';
 import '../providers/dues_provider.dart';
+import '../../../expenses/presentation/providers/expenses_provider.dart';
+import '../../../expenses/domain/entities/expense_entity.dart';
+import '../../../expenses/presentation/utils/expense_labels.dart';
 
 class ResidentDuesTab extends ConsumerStatefulWidget {
   const ResidentDuesTab({super.key});
@@ -19,25 +22,42 @@ class ResidentDuesTab extends ConsumerStatefulWidget {
 }
 
 class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
-  bool _requested = false;
+  bool _requestedDues = false;
+  bool _requestedExpenses = false;
+  int _selectedSegment = 0; // 0: Aidatlar, 1: Giderler
 
   @override
   Widget build(BuildContext context) {
     final duesState = ref.watch(duesNotifierProvider);
+    final expensesState = ref.watch(expensesNotifierProvider);
     final highlightDueId = ref.watch(residentDueHighlightIdProvider);
 
-    if (!_requested) {
-      _requested = true;
+    if (!_requestedDues) {
+      _requestedDues = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ref.read(duesNotifierProvider.notifier).loadMyDues();
       });
     }
 
-    final items = _buildBodyItems(context, duesState, highlightDueId);
+    if (_selectedSegment == 1 && !_requestedExpenses) {
+      _requestedExpenses = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(expensesNotifierProvider.notifier).loadMyExpenses();
+      });
+    }
+
+    final items = _buildBodyItems(context, duesState, expensesState, highlightDueId);
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(duesNotifierProvider.notifier).loadMyDues(),
+      onRefresh: () async {
+        if (_selectedSegment == 0) {
+          await ref.read(duesNotifierProvider.notifier).loadMyDues();
+        } else {
+          await ref.read(expensesNotifierProvider.notifier).loadMyExpenses();
+        }
+      },
       child: ListView.builder(
         padding: AppSizes.screenBodyScrollPadding,
         itemCount: items.length,
@@ -54,8 +74,35 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
               padding: const EdgeInsets.only(top: AppSizes.spacingXL),
               child: Center(
                 child: Text(
-                  context.t.common.noDuesYet,
+                  item.isDue
+                      ? context.t.common.noDuesYet
+                      : context.t.features.expenses.emptyTitle,
                   style: AppTypography.body1.copyWith(color: AppColors.textSecondary),
+                ),
+              ),
+            );
+          }
+          if (item is _ErrorStateItem) {
+            return Padding(
+              padding: const EdgeInsets.only(top: AppSizes.spacingXL),
+              child: Center(
+                child: Column(
+                  children: [
+                    Text(
+                      item.message,
+                      style: AppTypography.body1.copyWith(color: AppColors.error),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSizes.spacingM),
+                    FilledButton(
+                      onPressed: () {
+                        setState(() {
+                          _requestedExpenses = false;
+                        });
+                      },
+                      child: Text(context.t.common.tryAgain),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -64,6 +111,16 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: _buildActionButtons(context),
+            );
+          }
+          if (item is _SegmentedControlItem) {
+            return _SegmentedControl(
+              selectedIndex: _selectedSegment,
+              onChanged: (val) {
+                setState(() {
+                  _selectedSegment = val;
+                });
+              },
             );
           }
           if (item is _SectionHeaderItem) {
@@ -79,6 +136,9 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
               highlighted: item.highlighted,
             );
           }
+          if (item is _ExpenseCardItem) {
+            return _buildExpenseCard(context, item.expense);
+          }
           if (item is _SpacingItem) {
             return SizedBox(height: item.height);
           }
@@ -91,43 +151,69 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
   List<_ResidentDuesRowItem> _buildBodyItems(
     BuildContext context,
     DuesState duesState,
+    ExpensesState expensesState,
     String? highlightDueId,
   ) {
-    if (duesState.isLoading) {
-      return const [_LoadingItem()];
-    }
-
-    if (duesState.dues.isEmpty) {
-      return const [_EmptyStateItem()];
-    }
-
-    final split = splitResidentDuesForDisplay(duesState.dues);
     final items = <_ResidentDuesRowItem>[
       const _ActionButtonsItem(),
+      const _SegmentedControlItem(),
+      const _SpacingItem(AppSizes.spacingM),
     ];
 
-    if (split.current.isNotEmpty) {
-      items.add(_SectionHeaderItem(context.t.common.currentPeriodDue));
-      items.add(const _SpacingItem(AppSizes.spacingM));
-      for (final due in split.current) {
-        items.add(_DueCardItem(
-          due,
-          highlighted: highlightDueId == null || highlightDueId == due.id,
-        ));
+    if (_selectedSegment == 0) {
+      if (duesState.isLoading) {
+        items.add(const _LoadingItem());
+        return items;
       }
-    }
 
-    if (split.past.isNotEmpty) {
-      if (split.current.isNotEmpty) {
-        items.add(const _SpacingItem(AppSizes.spacingL));
+      if (duesState.dues.isEmpty) {
+        items.add(const _EmptyStateItem(isDue: true));
+        return items;
       }
-      items.add(_SectionHeaderItem(context.t.common.myPastDues));
-      items.add(const _SpacingItem(AppSizes.spacingM));
-      for (final due in split.past) {
-        items.add(_DueCardItem(
-          due,
-          highlighted: highlightDueId == due.id,
-        ));
+
+      final split = splitResidentDuesForDisplay(duesState.dues);
+      if (split.current.isNotEmpty) {
+        items.add(_SectionHeaderItem(context.t.common.currentPeriodDue));
+        items.add(const _SpacingItem(AppSizes.spacingM));
+        for (final due in split.current) {
+          items.add(_DueCardItem(
+            due,
+            highlighted: highlightDueId == null || highlightDueId == due.id,
+          ));
+        }
+      }
+
+      if (split.past.isNotEmpty) {
+        if (split.current.isNotEmpty) {
+          items.add(const _SpacingItem(AppSizes.spacingL));
+        }
+        items.add(_SectionHeaderItem(context.t.common.myPastDues));
+        items.add(const _SpacingItem(AppSizes.spacingM));
+        for (final due in split.past) {
+          items.add(_DueCardItem(
+            due,
+            highlighted: highlightDueId == due.id,
+          ));
+        }
+      }
+    } else {
+      if (expensesState.isLoading) {
+        items.add(const _LoadingItem());
+        return items;
+      }
+
+      if (expensesState.error != null && expensesState.expenses.isEmpty) {
+        items.add(_ErrorStateItem(message: expensesState.error!));
+        return items;
+      }
+
+      if (expensesState.expenses.isEmpty) {
+        items.add(const _EmptyStateItem(isDue: false));
+        return items;
+      }
+
+      for (final expense in expensesState.expenses) {
+        items.add(_ExpenseCardItem(expense));
       }
     }
 
@@ -247,6 +333,68 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
     );
   }
 
+  Widget _buildExpenseCard(BuildContext context, ExpenseEntity expense) {
+    final date =
+        '${expense.date.day}.${expense.date.month}.${expense.date.year}';
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
+      decoration: BoxDecoration(
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => context.push('/expenses/${expense.id}', extra: expense),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSizes.cardPadding),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      expense.title,
+                      style: AppTypography.h4.copyWith(color: AppColors.textPrimary),
+                    ),
+                    const SizedBox(height: AppSizes.spacingXS),
+                    Text(
+                      '${expense.category.label(context)} · $date',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    if (expense.note != null && expense.note!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSizes.spacingXS),
+                        child: Text(
+                          expense.note!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.body2.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSizes.spacingS),
+              Text(
+                '${expense.amount?.toStringAsFixed(2) ?? "0.00"} ₺',
+                style: AppTypography.body1.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   String _monthName(BuildContext context, int month) {
     final t = context.t.common;
     switch (month) {
@@ -321,6 +469,89 @@ class _StatusVisual {
   });
 }
 
+class _SegmentedControl extends StatelessWidget {
+  final int selectedIndex;
+  final ValueChanged<int> onChanged;
+
+  const _SegmentedControl({
+    required this.selectedIndex,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _SegmentItem(
+              label: context.t.common.dues,
+              selected: selectedIndex == 0,
+              onTap: () => onChanged(0),
+            ),
+          ),
+          Expanded(
+            child: _SegmentItem(
+              label: context.t.features.expenses.title,
+              selected: selectedIndex == 1,
+              onTap: () => onChanged(1),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SegmentItem extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SegmentItem({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.surface : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: AppTypography.body1.copyWith(
+              fontWeight: FontWeight.w700,
+              color: selected ? AppColors.primary : AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 sealed class _ResidentDuesRowItem {
   const _ResidentDuesRowItem();
 }
@@ -330,11 +561,21 @@ class _LoadingItem extends _ResidentDuesRowItem {
 }
 
 class _EmptyStateItem extends _ResidentDuesRowItem {
-  const _EmptyStateItem();
+  final bool isDue;
+  const _EmptyStateItem({required this.isDue});
+}
+
+class _ErrorStateItem extends _ResidentDuesRowItem {
+  final String message;
+  const _ErrorStateItem({required this.message});
 }
 
 class _ActionButtonsItem extends _ResidentDuesRowItem {
   const _ActionButtonsItem();
+}
+
+class _SegmentedControlItem extends _ResidentDuesRowItem {
+  const _SegmentedControlItem();
 }
 
 class _SectionHeaderItem extends _ResidentDuesRowItem {
@@ -346,6 +587,11 @@ class _DueCardItem extends _ResidentDuesRowItem {
   final DueEntity due;
   final bool highlighted;
   const _DueCardItem(this.due, {required this.highlighted});
+}
+
+class _ExpenseCardItem extends _ResidentDuesRowItem {
+  final ExpenseEntity expense;
+  const _ExpenseCardItem(this.expense);
 }
 
 class _SpacingItem extends _ResidentDuesRowItem {

@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
@@ -13,12 +14,22 @@ import {
   mergeCreatedAtCursorWhere,
 } from "../utils/listQuery.js";
 import { validateMulterDekontFile, cleanupMulterTempFile } from "../utils/dekontUploadFile.js";
-import { moveTempToDekontFile, saveDekontFile, dekontFileExists, deleteDekontFile } from "./dekontStorageService.js";
+import {
+  moveTempToDekontFile,
+  saveDekontFile,
+  dekontFileExists,
+  deleteDekontFile,
+  resolveDekontAbsolutePath,
+} from "./dekontStorageService.js";
 import { extractDekontTextForPipeline } from "./dekontOcrRunner.js";
 
 const ALLOWED_IMAGE_MIMES = new Set(["image/jpeg", "image/png"]);
 
 function serializeExpense(expense) {
+  const receiptUrls = Array.isArray(expense.storedPaths)
+    ? expense.storedPaths.map(p => `/api/v1/expenses/${expense.id}/file/${p.split('/').pop()}`)
+    : [];
+
   return {
     ...expense,
     amount: expense.amount != null
@@ -27,6 +38,64 @@ function serializeExpense(expense) {
     parsedAmount: expense.parsedAmount != null
       ? (expense.parsedAmount?.toString?.() ?? String(expense.parsedAmount))
       : null,
+    receiptUrl: expense.receiptUrl
+      ? `/api/v1/expenses/${expense.id}/file/${expense.receiptUrl.split('/').pop()}`
+      : null,
+    receiptUrls,
+  };
+}
+
+export async function getExpenseFileService(expenseId, userId, userRole) {
+  let expense;
+  if (userRole === "MANAGER") {
+    expense = await assertManagerOwnsExpense(expenseId, userId);
+  } else if (userRole === "RESIDENT") {
+    const user = await prisma.user.findFirst({
+      where: { id: userId, deletedAt: null },
+      select: { apartment: { select: { buildingId: true } } },
+    });
+    const buildingId = user?.apartment?.buildingId;
+    if (!buildingId) {
+      throw new HttpError(403, "Binanız bulunamadı.");
+    }
+    expense = await prisma.expense.findFirst({
+      where: { id: expenseId, buildingId },
+    });
+    if (!expense) {
+      throw new HttpError(404, "Gider kaydı bulunamadı.");
+    }
+  } else {
+    throw new HttpError(403, "Bu işlem için yetkiniz yok.");
+  }
+
+  if (!expense.receiptUrl) {
+    throw new HttpError(404, "Bu gidere ait makbuz bulunamadı.");
+  }
+  const exists = await dekontFileExists(expense.receiptUrl);
+  if (!exists) {
+    throw new HttpError(404, "Makbuz dosyası diskte bulunamadı.");
+  }
+
+  const ext = expense.receiptUrl.substring(expense.receiptUrl.lastIndexOf(".")).toLowerCase();
+  let mimeType = "application/octet-stream";
+  if (ext === ".pdf") mimeType = "application/pdf";
+  else if (ext === ".jpg" || ext === ".jpeg") mimeType = "image/jpeg";
+  else if (ext === ".png") mimeType = "image/png";
+
+  const filename = expense.receiptUrl.split('/').pop();
+  const absolutePath = resolveDekontAbsolutePath(expense.receiptUrl);
+  
+  let sizeBytes = null;
+  try {
+    const stats = await fs.promises.stat(absolutePath);
+    sizeBytes = stats.size;
+  } catch (_) {}
+
+  return {
+    storedPath: expense.receiptUrl,
+    mimeType,
+    filename,
+    sizeBytes,
   };
 }
 
@@ -321,4 +390,42 @@ export async function uploadExpenseProofsService(expenseId, managerId, files) {
       await cleanupMulterTempFile(file).catch(() => {});
     }
   }
+}
+
+export async function listExpensesForResidentService(userId, filters = {}) {
+  const user = await prisma.user.findFirst({
+    where: { id: userId, deletedAt: null, role: "RESIDENT" },
+    select: { apartment: { select: { buildingId: true } } },
+  });
+  const buildingId = user?.apartment?.buildingId;
+  if (!buildingId) {
+    throw new HttpError(404, "Binanız bulunamadı.");
+  }
+
+  const paginated = wantsPaginatedList(filters);
+  const pageLimit = paginated ? resolvePageLimit(filters.limit) : resolveListTake(filters.limit);
+  const take = paginated ? pageLimit + 1 : pageLimit;
+
+  let where = buildListWhere(buildingId, filters);
+
+  if (paginated && filters.cursor) {
+    where = await mergeCreatedAtCursorWhere(where, filters.cursor, (id) =>
+      prisma.expense.findFirst({
+        where: { id, buildingId },
+        select: { id: true, createdAt: true },
+      })
+    );
+  }
+
+  const orderBy = paginated
+    ? [{ createdAt: "desc" }, { id: "desc" }]
+    : { date: "desc" };
+
+  const expenses = await prisma.expense.findMany({
+    where,
+    orderBy,
+    take,
+  });
+
+  return buildListResponse(filters, expenses, serializeExpense);
 }

@@ -78,6 +78,14 @@ class _SummaryOnlyExpenseDs implements ExpenseDataSource {
       throw UnimplementedError();
 
   @override
+  Future<List<ExpenseModel>> getMyExpenses({
+    int? month,
+    int? year,
+    String? category,
+  }) =>
+      throw UnimplementedError();
+
+  @override
   Future<ExpenseModel> createExpense(
     String buildingId, {
     required String title,

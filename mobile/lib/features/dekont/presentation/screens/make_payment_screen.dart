@@ -292,56 +292,11 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: AppSizes.spacingS),
-                    Text(
-                      t.uploadHint,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
                     const SizedBox(height: AppSizes.spacingM),
                     if (paymentState.pickedFileName == null)
-                      OutlinedButton.icon(
-                        onPressed: busy ? null : _pickFile,
-                        style: AppButtonStyles.outlinedPrimary(),
-                        icon: const Icon(Icons.attach_file),
-                        label: Text(t.pickFile),
-                      )
+                      _buildDropzone(context, busy)
                     else
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.spacingM,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.description_outlined, color: AppColors.primary),
-                            const SizedBox(width: AppSizes.spacingS),
-                            Expanded(
-                              child: Text(
-                                paymentState.pickedFileName!,
-                                style: AppTypography.body2.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: busy
-                                  ? null
-                                  : () => ref.read(makePaymentNotifierProvider.notifier).clearPickedReceipt(),
-                              icon: const Icon(Icons.close, color: AppColors.primary),
-                            ),
-                          ],
-                        ),
-                      ),
+                      _buildPickedFileItem(context, paymentState, busy),
                     const SizedBox(height: AppSizes.spacingL),
                     SizedBox(
                       height: AppSizes.buttonHeightPrimary,
@@ -377,6 +332,187 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
               ),
       ),
     );
+  }
+
+  Widget _buildDropzone(BuildContext context, bool busy) {
+    final t = context.t.features.dekont;
+    return InkWell(
+      onTap: busy ? null : _pickFile,
+      borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSizes.spacingM,
+          horizontal: AppSizes.spacingM,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.25),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.receipt_long_outlined,
+                color: AppColors.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: AppSizes.spacingM),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    t.pickFile,
+                    style: AppTypography.body1.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    t.uploadHint,
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPickedFileItem(BuildContext context, MakePaymentState state, bool busy) {
+    final filename = state.pickedFileName!;
+    final ext = filename.split('.').last.toLowerCase();
+    final isImage = ['jpg', 'jpeg', 'png'].contains(ext);
+    final sizeBytes = state.pickedFileBytes?.length ?? 0;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        border: Border.all(
+          color: AppColors.borderColor,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        child: Row(
+          children: [
+            // Preview thumbnail
+            if (isImage && state.pickedFilePath != null)
+              Image.file(
+                File(state.pickedFilePath!),
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => _buildFileIcon(Icons.image_outlined, AppColors.textSecondary),
+              )
+            else if (ext == 'pdf')
+              _buildFileIcon(Icons.picture_as_pdf_outlined, Colors.red[700]!)
+            else
+              _buildFileIcon(Icons.description_outlined, AppColors.primary),
+            
+            const SizedBox(width: AppSizes.spacingM),
+            
+            // File Info
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingS),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      filename,
+                      style: AppTypography.body1.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (sizeBytes > 0) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        _formatFileSize(sizeBytes),
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            
+            // Delete button
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: busy
+                    ? null
+                    : () => ref.read(makePaymentNotifierProvider.notifier).clearPickedReceipt(),
+                borderRadius: const BorderRadius.horizontal(
+                  right: Radius.circular(AppSizes.cardRadius),
+                ),
+                child: Container(
+                  width: AppSizes.minTouchTarget,
+                  height: 64,
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.error,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFileIcon(IconData icon, Color color) {
+    return Container(
+      width: 64,
+      height: 64,
+      color: color.withValues(alpha: 0.08),
+      child: Icon(
+        icon,
+        color: color,
+        size: 28,
+      ),
+    );
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
   }
 }
 

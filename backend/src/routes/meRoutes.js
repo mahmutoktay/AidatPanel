@@ -2,6 +2,7 @@ import express from "express";
 import { getMyDues } from "../controllers/dueController.js";
 import { getMyTickets } from "../controllers/ticketController.js";
 import { getMyDekonts } from "../controllers/dekontController.js";
+import { getMyExpenses } from "../controllers/expenseController.js";
 import {
   getMe,
   getMyPaymentCollection,
@@ -32,6 +33,9 @@ router.get("/payment-collection", requireRoles("RESIDENT"), getMyPaymentCollecti
 
 /** GET /api/v1/me/dues — yalnızca sakin */
 router.get("/dues", requireRoles("RESIDENT"), validate(dueSchemas.myDues), getMyDues);
+
+/** GET /api/v1/me/expenses — yalnızca sakin */
+router.get("/expenses", requireRoles("RESIDENT"), validate(meSchemas.myExpenses), getMyExpenses);
 
 /** GET /api/v1/me/tickets — yalnızca sakin */
 router.get("/tickets", requireRoles("RESIDENT"), validate(ticketSchemas.myTickets), getMyTickets);

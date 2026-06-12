@@ -83,6 +83,14 @@ class _FakeExpenseDs implements ExpenseDataSource {
       Future.value([]);
 
   @override
+  Future<List<ExpenseModel>> getMyExpenses({
+    int? month,
+    int? year,
+    String? category,
+  }) =>
+      Future.value([]);
+
+  @override
   Future<ExpenseModel> updateExpense(
     String expenseId, {
     String? title,

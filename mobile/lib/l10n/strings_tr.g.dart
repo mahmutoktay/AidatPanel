@@ -656,7 +656,7 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 	@override String get selectDueHint => 'Ödeme yaptığınız aidatı seçin';
 	@override String get noPendingDues => 'Bekleyen aidat bulunmuyor';
 	@override String get uploadSectionTitle => 'Dekont yükle';
-	@override String get uploadHint => 'PDF veya fotoğraf (JPEG, PNG)';
+	@override String get uploadHint => 'PDF belgesi veya fotoğraf (JPEG, PNG) (Maks. 10 MB)';
 	@override String get pickFile => 'Dosya seç';
 	@override String get upload => 'Dekontu yükle';
 	@override String get uploadSuccess => 'Dekont yüklendi';
@@ -764,13 +764,17 @@ class _Translations$features$expenses$tr implements Translations$features$expens
 	@override String get receiptUrlHint => 'Opsiyonel — internetteki makbuz dosyası adresi';
 	@override String get receiptUrlInvalid => 'Adres https:// ile başlamalıdır';
 	@override String get receiptTitle => 'Makbuz fotoğrafı';
-	@override String get receiptHint => 'Opsiyonel — galeriden seçin (canlı sunucuda dosya yükleme henüz yok)';
+	@override String get receiptHint => 'İsteğe bağlı — PDF belgesi veya fotoğraf (JPEG, PNG) (Maks. 10 MB)';
 	@override String get receiptAdd => 'Fotoğraf ekle';
 	@override String get receiptChange => 'Fotoğrafı değiştir';
 	@override String get receiptRemove => 'Fotoğrafı kaldır';
 	@override String get receiptPendingBackend => 'Gider kaydedildi. Makbuz sunucuya yüklenecek (API hazır olunca).';
 	@override String get receiptUploadFailed => 'Makbuz yüklenemedi. Gider kaydı oluşturuldu.';
 	@override String get receiptPickFailed => 'Fotoğraf seçilemedi';
+	@override String get detailTitle => 'Gider Detayı';
+	@override String get fieldCreatedAt => 'Eklenme zamanı';
+	@override String get viewReceipt => 'Makbuzu gör';
+	@override String get receiptMissing => 'Makbuz yüklenmemiş';
 }
 
 // Path: features.notifications
@@ -1494,7 +1498,7 @@ extension on TranslationsTr {
 			'features.dekont.selectDueHint' => 'Ödeme yaptığınız aidatı seçin',
 			'features.dekont.noPendingDues' => 'Bekleyen aidat bulunmuyor',
 			'features.dekont.uploadSectionTitle' => 'Dekont yükle',
-			'features.dekont.uploadHint' => 'PDF veya fotoğraf (JPEG, PNG)',
+			'features.dekont.uploadHint' => 'PDF belgesi veya fotoğraf (JPEG, PNG) (Maks. 10 MB)',
 			'features.dekont.pickFile' => 'Dosya seç',
 			'features.dekont.upload' => 'Dekontu yükle',
 			'features.dekont.uploadSuccess' => 'Dekont yüklendi',
@@ -1593,13 +1597,17 @@ extension on TranslationsTr {
 			'features.expenses.receiptUrlHint' => 'Opsiyonel — internetteki makbuz dosyası adresi',
 			'features.expenses.receiptUrlInvalid' => 'Adres https:// ile başlamalıdır',
 			'features.expenses.receiptTitle' => 'Makbuz fotoğrafı',
-			'features.expenses.receiptHint' => 'Opsiyonel — galeriden seçin (canlı sunucuda dosya yükleme henüz yok)',
+			'features.expenses.receiptHint' => 'İsteğe bağlı — PDF belgesi veya fotoğraf (JPEG, PNG) (Maks. 10 MB)',
 			'features.expenses.receiptAdd' => 'Fotoğraf ekle',
 			'features.expenses.receiptChange' => 'Fotoğrafı değiştir',
 			'features.expenses.receiptRemove' => 'Fotoğrafı kaldır',
 			'features.expenses.receiptPendingBackend' => 'Gider kaydedildi. Makbuz sunucuya yüklenecek (API hazır olunca).',
 			'features.expenses.receiptUploadFailed' => 'Makbuz yüklenemedi. Gider kaydı oluşturuldu.',
 			'features.expenses.receiptPickFailed' => 'Fotoğraf seçilemedi',
+			'features.expenses.detailTitle' => 'Gider Detayı',
+			'features.expenses.fieldCreatedAt' => 'Eklenme zamanı',
+			'features.expenses.viewReceipt' => 'Makbuzu gör',
+			'features.expenses.receiptMissing' => 'Makbuz yüklenmemiş',
 			'features.notifications.markAllRead' => 'Tümünü oku',
 			'features.notifications.markAllReadLong' => 'Tümünü okundu işaretle',
 			'features.notifications.viewRelated' => 'İlgili kayda git',

@@ -537,7 +537,7 @@
       "selectDueHint": "Ödeme yaptığınız aidatı seçin",
       "noPendingDues": "Bekleyen aidat bulunmuyor",
       "uploadSectionTitle": "Dekont yükle",
-      "uploadHint": "PDF veya fotoğraf (JPEG, PNG)",
+      "uploadHint": "PDF belgesi veya fotoğraf (JPEG, PNG) (Maks. 10 MB)",
       "pickFile": "Dosya seç",
       "upload": "Dekontu yükle",
       "uploadSuccess": "Dekont yüklendi",
@@ -638,13 +638,17 @@
       "receiptUrlHint": "Opsiyonel — internetteki makbuz dosyası adresi",
       "receiptUrlInvalid": "Adres https:// ile başlamalıdır",
       "receiptTitle": "Makbuz fotoğrafı",
-      "receiptHint": "Opsiyonel — galeriden seçin (canlı sunucuda dosya yükleme henüz yok)",
+      "receiptHint": "İsteğe bağlı — PDF belgesi veya fotoğraf (JPEG, PNG) (Maks. 10 MB)",
       "receiptAdd": "Fotoğraf ekle",
       "receiptChange": "Fotoğrafı değiştir",
       "receiptRemove": "Fotoğrafı kaldır",
       "receiptPendingBackend": "Gider kaydedildi. Makbuz sunucuya yüklenecek (API hazır olunca).",
       "receiptUploadFailed": "Makbuz yüklenemedi. Gider kaydı oluşturuldu.",
-      "receiptPickFailed": "Fotoğraf seçilemedi"
+      "receiptPickFailed": "Fotoğraf seçilemedi",
+      "detailTitle": "Gider Detayı",
+      "fieldCreatedAt": "Eklenme zamanı",
+      "viewReceipt": "Makbuzu gör",
+      "receiptMissing": "Makbuz yüklenmemiş"
     },
     "notifications": {
       "markAllRead": "Tümünü oku",

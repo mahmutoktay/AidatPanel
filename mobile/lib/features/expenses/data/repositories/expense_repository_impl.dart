@@ -32,6 +32,26 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
+  Future<List<ExpenseEntity>> getMyExpenses({
+    int? month,
+    int? year,
+    String? category,
+  }) async {
+    try {
+      final models = await _remote.getMyExpenses(
+        month: month,
+        year: year,
+        category: category,
+      );
+      return models.map((m) => m.toEntity()).toList();
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'Gider listesi alınırken bir hata oluştu');
+    }
+  }
+
+  @override
   Future<ExpenseSummaryEntity> getSummary(
     String buildingId, {
     required int month,

@@ -318,20 +318,9 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: AppSizes.spacingL),
-                  Text(
-                    t.filePreview,
-                    style: AppTypography.h3,
-                  ),
-                  const SizedBox(height: AppSizes.spacingM),
                   if (_loadingFile)
                     const Center(child: CircularProgressIndicator())
-                  else if (_fileBytes != null) ...[
-                    DekontFilePreview(
-                      bytes: _fileBytes!,
-                      mimeType: dekont.mimeType,
-                      fileName: dekont.originalFilename,
-                    ),
-                  ] else if (_fileError != null) ...[
+                  else if (_fileError != null) ...[
                     Text(
                       _fileError!,
                       style: AppTypography.body2.copyWith(
@@ -357,11 +346,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
                       ),
                     ],
                   ] else
-                    OutlinedButton(
-                      onPressed: _loadFile,
-                      style: AppButtonStyles.outlinedPrimary(),
-                      child: Text(t.filePreview),
-                    ),
+                    _buildFileCard(context, dekont),
                   if (_fileBytes != null) ...[
                     const SizedBox(height: AppSizes.spacingM),
                     OutlinedButton.icon(
@@ -398,6 +383,152 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildFileCard(BuildContext context, DekontEntity dekont) {
+    final filename = dekont.originalFilename;
+    final ext = filename.split('.').last.toLowerCase();
+    final isPdf = ext == 'pdf';
+    final sizeBytes = _fileBytes?.length ?? 0;
+    final t = context.t.features.dekont;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        border: Border.all(
+          color: AppColors.borderColor,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        child: Row(
+          children: [
+            _buildFileIcon(
+              isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
+              isPdf ? Colors.red[700]! : AppColors.primary,
+            ),
+            const SizedBox(width: AppSizes.spacingM),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingS),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      filename,
+                      style: AppTypography.body1.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (sizeBytes > 0) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        _formatFileSize(sizeBytes),
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: AppSizes.spacingS),
+              child: IconButton(
+                onPressed: _fileBytes != null ? () => _showPreviewDialog(context, dekont) : null,
+                icon: const Icon(Icons.visibility_outlined),
+                color: AppColors.primary,
+                tooltip: t.filePreview,
+                constraints: const BoxConstraints(
+                  minWidth: AppSizes.minTouchTarget,
+                  minHeight: AppSizes.minTouchTarget,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFileIcon(IconData icon, Color color) {
+    return Container(
+      width: 64,
+      height: 64,
+      color: color.withValues(alpha: 0.08),
+      child: Icon(
+        icon,
+        color: color,
+        size: 28,
+      ),
+    );
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
+  }
+
+  void _showPreviewDialog(BuildContext context, DekontEntity dekont) {
+    showDialog(
+      context: context,
+      useSafeArea: false,
+      builder: (dialogContext) => Scaffold(
+        appBar: AppBar(
+          title: Text(dekont.originalFilename),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.pop(dialogContext),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.download_rounded),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                _downloadDekont(dekont);
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.share_outlined),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                _shareFile(dekont);
+              },
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSizes.spacingM),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DekontFilePreview(
+                  bytes: _fileBytes!,
+                  mimeType: dekont.mimeType,
+                  fileName: dekont.originalFilename,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

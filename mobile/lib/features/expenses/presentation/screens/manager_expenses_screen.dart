@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -325,14 +326,20 @@ class _ExpenseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final date =
         '${expense.date.day}.${expense.date.month}.${expense.date.year}';
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.cardPadding),
-      decoration: BoxDecoration(
-        color: AppColors.fill,
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: AppColors.fill,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        onTap: () => context.push('/expenses/${expense.id}', extra: expense),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSizes.cardPadding),
+          child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             child: Column(
@@ -400,7 +407,9 @@ class _ExpenseCard extends StatelessWidget {
               ),
             ],
           ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }

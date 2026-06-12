@@ -537,7 +537,7 @@
       "selectDueHint": "Select the due you paid",
       "noPendingDues": "No pending dues",
       "uploadSectionTitle": "Upload receipt",
-      "uploadHint": "PDF or photo (JPEG, PNG)",
+      "uploadHint": "PDF document or photo (JPEG, PNG) (Max 10 MB)",
       "pickFile": "Choose file",
       "upload": "Upload receipt",
       "uploadSuccess": "Receipt uploaded",
@@ -638,13 +638,17 @@
       "receiptUrlHint": "Optional — public URL to the receipt file",
       "receiptUrlInvalid": "URL must start with https://",
       "receiptTitle": "Receipt photo",
-      "receiptHint": "Optional — gallery (file upload not on live API yet)",
+      "receiptHint": "Optional — PDF document or photo (JPEG, PNG) (Max 10 MB)",
       "receiptAdd": "Add photo",
       "receiptChange": "Change photo",
       "receiptRemove": "Remove photo",
       "receiptPendingBackend": "Expense saved. Receipt will upload when the API is live.",
       "receiptUploadFailed": "Receipt upload failed. The expense was saved.",
-      "receiptPickFailed": "Could not pick a photo"
+      "receiptPickFailed": "Could not pick a photo",
+      "detailTitle": "Expense Detail",
+      "fieldCreatedAt": "Created at",
+      "viewReceipt": "View receipt",
+      "receiptMissing": "No receipt uploaded"
     },
     "notifications": {
       "markAllRead": "Mark all read",

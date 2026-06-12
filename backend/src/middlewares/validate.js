@@ -243,6 +243,26 @@ export const meSchemas = {
   },
 
   updateFcmToken: fcmSchemas.updateToken,
+
+  myExpenses: {
+    query: z.object({
+      month: z.string().optional(),
+      year: z.string().optional(),
+      category: z
+        .enum([
+          "CLEANING",
+          "ELEVATOR",
+          "ELECTRICITY",
+          "WATER",
+          "INSURANCE",
+          "REPAIR",
+          "GARDEN",
+          "OTHER",
+        ])
+        .optional(),
+      ...listPaginationFields,
+    }),
+  },
 };
 
 const optionalIban = z
