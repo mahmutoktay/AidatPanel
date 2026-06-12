@@ -69,21 +69,17 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   Future<ExpenseEntity> createExpense(
     String buildingId, {
     required String title,
-    required double amount,
     required ExpenseCategory category,
     required DateTime date,
     String? note,
-    String? receiptUrl,
   }) async {
     try {
       final model = await _remote.createExpense(
         buildingId,
         title: title,
-        amount: amount,
         category: ExpenseModel.categoryToApi(category),
         date: date,
         note: note,
-        receiptUrl: receiptUrl,
       );
       return model.toEntity();
     } on ApiException {
@@ -134,13 +130,14 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
-  Future<String> uploadReceipt(String expenseId, String filePath) async {
+  Future<ExpenseEntity> uploadReceipts(String expenseId, List<String> filePaths) async {
     try {
-      return await _remote.uploadReceipt(expenseId, filePath);
+      final model = await _remote.uploadReceipts(expenseId, filePaths);
+      return model.toEntity();
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Makbuz yüklenirken bir hata oluştu');
+      throw ApiException(message: 'Makbuzlar yüklenirken bir hata oluştu');
     }
   }
 

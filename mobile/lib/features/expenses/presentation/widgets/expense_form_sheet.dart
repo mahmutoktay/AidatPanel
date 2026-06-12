@@ -48,13 +48,11 @@ class ExpenseFormSheet extends ConsumerStatefulWidget {
 class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
-  late final TextEditingController _amountController;
   late final TextEditingController _noteController;
-  late final TextEditingController _receiptUrlController;
   late ExpenseCategory _category;
   late DateTime _date;
   bool _submitting = false;
-  PlatformFile? _receiptFile;
+  List<PlatformFile> _receiptFiles = [];
 
   bool get _isEdit => widget.expense != null;
 
@@ -63,11 +61,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     super.initState();
     final e = widget.expense;
     _titleController = TextEditingController(text: e?.title ?? '');
-    _amountController = TextEditingController(
-      text: e != null ? e.amount.toStringAsFixed(2) : '',
-    );
     _noteController = TextEditingController(text: e?.note ?? '');
-    _receiptUrlController = TextEditingController(text: e?.receiptUrl ?? '');
     _category = e?.category ?? ExpenseCategory.other;
     _date = e?.date ?? DateTime.now();
   }
@@ -75,9 +69,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   @override
   void dispose() {
     _titleController.dispose();
-    _amountController.dispose();
     _noteController.dispose();
-    _receiptUrlController.dispose();
     super.dispose();
   }
 
@@ -134,19 +126,6 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                         (v == null || v.trim().isEmpty) ? t.required : null,
                   ),
                   const SizedBox(height: AppSizes.spacingM),
-                  TextFormField(
-                    controller: _amountController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(labelText: t.fieldAmount),
-                    validator: (v) {
-                      final n = double.tryParse(v?.replaceAll(',', '.') ?? '');
-                      if (n == null || n <= 0) return t.amountInvalid;
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSizes.spacingM),
                   AppSelectField<ExpenseCategory>(
                     label: t.fieldCategory,
                     value: _category,
@@ -172,29 +151,12 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                     maxLines: 2,
                     decoration: InputDecoration(labelText: t.fieldNote),
                   ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  TextFormField(
-                    controller: _receiptUrlController,
-                    keyboardType: TextInputType.url,
-                    decoration: InputDecoration(
-                      labelText: t.receiptUrlLabel,
-                      hintText: t.receiptUrlHint,
-                    ),
-                    validator: (v) {
-                      final raw = v?.trim() ?? '';
-                      if (raw.isEmpty) return null;
-                      if (!raw.toLowerCase().startsWith('https://')) {
-                        return t.receiptUrlInvalid;
-                      }
-                      return null;
-                    },
-                  ),
                   const SizedBox(height: AppSizes.spacingL),
                   ExpenseReceiptSection(
-                    pickedFile: _receiptFile,
+                    pickedFiles: _receiptFiles,
                     existingReceiptUrl: widget.expense?.receiptUrl,
                     enabled: !_submitting,
-                    onChanged: (file) => setState(() => _receiptFile = file),
+                    onChanged: (files) => setState(() => _receiptFiles = files),
                     onPickFailed: () {
                       ref.read(toastProvider.notifier).show(
                             t.receiptPickFailed,
@@ -237,35 +199,26 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _submitting = true);
-    final amount = double.parse(
-      _amountController.text.trim().replaceAll(',', '.'),
-    );
     final note = _noteController.text.trim();
     final notifier = ref.read(expensesNotifierProvider.notifier);
-    final receiptPath = _receiptFile?.path;
-    final receiptUrlRaw = _receiptUrlController.text.trim();
-    final receiptUrl =
-        receiptUrlRaw.isEmpty ? null : receiptUrlRaw;
+    final receiptPaths = _receiptFiles.map((f) => f.path).whereType<String>().toList();
+
     final result = _isEdit
         ? await notifier.update(
             expenseId: widget.expense!.id,
             title: _titleController.text.trim(),
-            amount: amount,
             category: _category,
             date: _date,
             note: note.isEmpty ? '' : note,
-            receiptUrl: receiptUrl,
-            receiptFilePath: receiptPath,
+            receiptFilePaths: receiptPaths,
           )
         : await notifier.create(
             buildingId: widget.buildingId,
             title: _titleController.text.trim(),
-            amount: amount,
             category: _category,
             date: _date,
             note: note.isEmpty ? null : note,
-            receiptUrl: receiptUrl,
-            receiptFilePath: receiptPath,
+            receiptFilePaths: receiptPaths,
           );
     if (!mounted) return;
     setState(() => _submitting = false);

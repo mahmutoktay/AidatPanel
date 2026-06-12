@@ -81,11 +81,9 @@ class _SummaryOnlyExpenseDs implements ExpenseDataSource {
   Future<ExpenseModel> createExpense(
     String buildingId, {
     required String title,
-    required double amount,
     required String category,
     required DateTime date,
     String? note,
-    String? receiptUrl,
   }) =>
       throw UnimplementedError();
 
@@ -93,8 +91,8 @@ class _SummaryOnlyExpenseDs implements ExpenseDataSource {
   Future<void> deleteExpense(String expenseId) => throw UnimplementedError();
 
   @override
-  Future<String> uploadReceipt(String expenseId, String filePath) async =>
-      'mock://receipt/$expenseId';
+  Future<ExpenseModel> uploadReceipts(String expenseId, List<String> filePaths) async =>
+      throw UnimplementedError();
 
   @override
   Future<ExpenseModel> updateExpense(

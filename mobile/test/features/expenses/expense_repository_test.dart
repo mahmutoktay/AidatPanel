@@ -1,8 +1,6 @@
-import 'package:aidatpanel/core/network/api_exception.dart';
 import 'package:aidatpanel/features/expenses/data/datasources/expense_remote_datasource.dart';
 import 'package:aidatpanel/features/expenses/data/models/expense_model.dart';
 import 'package:aidatpanel/features/expenses/data/repositories/expense_repository_impl.dart';
-import 'package:aidatpanel/features/expenses/domain/entities/expense_entity.dart';
 import 'package:aidatpanel/l10n/strings.g.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,45 +18,40 @@ void main() {
       expect(summary.byCategory.first.count, 2);
     });
 
-    test('createExpense receiptUrl ile gönderir', () async {
+    test('uploadReceipts makbuzları gönderir', () async {
       final ds = _FakeExpenseDs();
       final repo = ExpenseRepositoryImpl(remote: ds);
-      await repo.createExpense(
-        'b1',
-        title: 'Test',
-        amount: 100,
-        category: ExpenseCategory.cleaning,
-        date: DateTime(2026, 5, 1),
-        receiptUrl: 'https://example.com/r.pdf',
+      await repo.uploadReceipts(
+        'e1',
+        ['/path/to/receipt.jpg'],
       );
-      expect(ds.lastCreateReceiptUrl, 'https://example.com/r.pdf');
+      expect(ds.lastUploadExpenseId, 'e1');
+      expect(ds.lastUploadFilePaths, ['/path/to/receipt.jpg']);
     });
   });
 }
 
 class _FakeExpenseDs implements ExpenseDataSource {
-  String? lastCreateReceiptUrl;
+  String? lastUploadExpenseId;
+  List<String>? lastUploadFilePaths;
 
   @override
   Future<ExpenseModel> createExpense(
     String buildingId, {
     required String title,
-    required double amount,
     required String category,
     required DateTime date,
     String? note,
-    String? receiptUrl,
   }) async {
-    lastCreateReceiptUrl = receiptUrl;
     return ExpenseModel(
       id: 'e1',
       buildingId: buildingId,
       title: title,
-      amount: amount,
+      amount: null,
       category: category,
       date: date,
       note: note,
-      receiptUrl: receiptUrl,
+      receiptUrl: null,
       createdAt: DateTime.now(),
     );
   }
@@ -105,7 +98,17 @@ class _FakeExpenseDs implements ExpenseDataSource {
   Future<void> deleteExpense(String expenseId) => throw UnimplementedError();
 
   @override
-  Future<String> uploadReceipt(String expenseId, String filePath) async {
-    throw NotFoundException();
+  Future<ExpenseModel> uploadReceipts(String expenseId, List<String> filePaths) async {
+    lastUploadExpenseId = expenseId;
+    lastUploadFilePaths = filePaths;
+    return ExpenseModel(
+      id: expenseId,
+      buildingId: 'b1',
+      title: 'Test',
+      amount: 150,
+      category: 'CLEANING',
+      date: DateTime.now(),
+      createdAt: DateTime.now(),
+    );
   }
 }

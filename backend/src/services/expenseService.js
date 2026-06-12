@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
 import {
@@ -15,10 +16,17 @@ import { validateMulterDekontFile, cleanupMulterTempFile } from "../utils/dekont
 import { moveTempToDekontFile, saveDekontFile, dekontFileExists, deleteDekontFile } from "./dekontStorageService.js";
 import { extractDekontTextForPipeline } from "./dekontOcrRunner.js";
 
+const ALLOWED_IMAGE_MIMES = new Set(["image/jpeg", "image/png"]);
+
 function serializeExpense(expense) {
   return {
     ...expense,
-    amount: expense.amount?.toString?.() ?? String(expense.amount),
+    amount: expense.amount != null
+      ? (expense.amount?.toString?.() ?? String(expense.amount))
+      : null,
+    parsedAmount: expense.parsedAmount != null
+      ? (expense.parsedAmount?.toString?.() ?? String(expense.parsedAmount))
+      : null,
   };
 }
 
@@ -120,10 +128,13 @@ export async function getExpenseSummaryService(buildingId, managerId, { month, y
   };
 }
 
+/**
+ * Gider oluşturur — tutar OCR'dan gelecek; şimdilik null.
+ */
 export async function createExpenseService(
   buildingId,
   managerId,
-  { title, amount, category, date, note, receiptUrl }
+  { title, category, date, note }
 ) {
   await assertManagerOwnsBuilding(buildingId, managerId);
 
@@ -131,11 +142,11 @@ export async function createExpenseService(
     data: {
       buildingId,
       title,
-      amount,
+      amount: null,    // OCR tamamlanınca güncellenecek
       category,
       date: new Date(date),
       note: note ?? null,
-      receiptUrl: receiptUrl ?? null,
+      storedPaths: [],
     },
   });
 
@@ -151,7 +162,6 @@ export async function updateExpenseService(expenseId, managerId, data) {
   if (data.category !== undefined) updateData.category = data.category;
   if (data.date !== undefined) updateData.date = new Date(data.date);
   if (data.note !== undefined) updateData.note = data.note;
-  if (data.receiptUrl !== undefined) updateData.receiptUrl = data.receiptUrl;
 
   const expense = await prisma.expense.update({
     where: { id: expenseId },
@@ -162,7 +172,13 @@ export async function updateExpenseService(expenseId, managerId, data) {
 }
 
 export async function deleteExpenseService(expenseId, managerId) {
-  await assertManagerOwnsExpense(expenseId, managerId);
+  const expense = await assertManagerOwnsExpense(expenseId, managerId);
+
+  // Kayıtlı tüm dosyaları sil
+  const paths = Array.isArray(expense.storedPaths) ? expense.storedPaths : [];
+  for (const p of paths) {
+    await deleteDekontFile(p).catch(() => {});
+  }
 
   await prisma.expense.delete({
     where: { id: expenseId },
@@ -171,76 +187,138 @@ export async function deleteExpenseService(expenseId, managerId) {
   return { id: expenseId };
 }
 
-export async function uploadExpenseProofService(expenseId, managerId, file) {
+/**
+ * Çoklu makbuz (proof) yükleme + OCR toplama.
+ * files: multer req.files[] (her biri disk'e yazılmış)
+ */
+export async function uploadExpenseProofsService(expenseId, managerId, files) {
   const expense = await assertManagerOwnsExpense(expenseId, managerId);
 
-  let savedStoredPath = null;
+  if (!files || files.length === 0) {
+    throw new HttpError(400, "En az bir makbuz dosyası gereklidir.");
+  }
+
+  const savedPaths = [];
+  const ocrResults = [];
+  let totalParsedAmount = 0;
+  let hasAnyAmount = false;
+
   try {
-    const validation = await validateMulterDekontFile(file);
-    if (!validation.ok) {
-      throw new HttpError(validation.code, validation.message);
-    }
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
 
-    let storedPath = null;
-    if (file.path) {
-      storedPath = await moveTempToDekontFile(file.path, {
-        buildingId: expense.buildingId,
-        dekontId: `expenses/exp_${expenseId}`, // Yöneticinin yüklediği dekontlar "expenses" klasöründe
-        mimeType: validation.mime,
-      });
-      file.path = null;
-    } else {
-      storedPath = await saveDekontFile(file.buffer, {
-        buildingId: expense.buildingId,
-        dekontId: `expenses/exp_${expenseId}`,
-        mimeType: validation.mime,
-      });
-    }
-
-    savedStoredPath = storedPath;
-
-    // OCR işlemi yapalım
-    let rawText = null;
-    let parsedJson = null;
-    let parsedAmount = null;
-    let transactionDate = null;
-    let aiConfidence = null;
-
-    try {
-      const ocr = await extractDekontTextForPipeline(storedPath, validation.mime);
-      if (ocr) {
-        rawText = ocr.rawText || null;
-        parsedJson = ocr.parsed || null;
-        parsedAmount = ocr.parsed?.amount || null;
-        if (ocr.parsed?.transactionDate) {
-          transactionDate = new Date(ocr.parsed.transactionDate);
-        }
-        aiConfidence = ocr.confidence || null;
+      const validation = await validateMulterDekontFile(file);
+      if (!validation.ok) {
+        throw new HttpError(validation.code, validation.message);
       }
-    } catch (ocrErr) {
-      console.warn(`[expenseService] OCR hatası: ${ocrErr.message}`);
-      // OCR hata verse bile belgeyi kaydetmeye devam ediyoruz
+
+      // Dosyayı kaydet
+      const fileId = `exp_${expenseId}_${i}_${randomUUID().slice(0, 8)}`;
+      let storedPath = null;
+
+      if (file.path) {
+        storedPath = await moveTempToDekontFile(file.path, {
+          buildingId: expense.buildingId,
+          dekontId: fileId,
+          mimeType: validation.mime,
+          source: "EXPENSE",
+        });
+        file.path = null;
+      } else {
+        storedPath = await saveDekontFile(file.buffer, {
+          buildingId: expense.buildingId,
+          dekontId: fileId,
+          mimeType: validation.mime,
+          source: "EXPENSE",
+        });
+      }
+
+      const fileOnDisk = await dekontFileExists(storedPath);
+      if (!fileOnDisk) {
+        throw new HttpError(503, "Dosya sunucuya kaydedilemedi. Lütfen daha sonra tekrar deneyin.");
+      }
+
+      savedPaths.push(storedPath);
+
+      // OCR — sadece image/jpeg veya image/png ise (PDF için de çalışır)
+      let parsedAmount = null;
+      let confidence = null;
+      let rawText = null;
+      let ocrNote = null;
+
+      try {
+        if (ALLOWED_IMAGE_MIMES.has(validation.mime) || validation.mime === "application/pdf") {
+          const ocr = await extractDekontTextForPipeline(storedPath, validation.mime);
+          if (ocr) {
+            rawText = ocr.rawText || null;
+            confidence = ocr.confidence || null;
+            if (ocr.parsed?.amount) {
+              const amount = parseFloat(String(ocr.parsed.amount).replace(",", "."));
+              if (!isNaN(amount) && amount > 0) {
+                parsedAmount = amount;
+                totalParsedAmount += amount;
+                hasAnyAmount = true;
+              }
+            }
+          }
+        } else {
+          ocrNote = "Desteklenmeyen dosya türü — OCR atlandı.";
+        }
+      } catch (ocrErr) {
+        console.warn(`[expenseService] OCR hatası (${i + 1}. dosya):`, ocrErr.message);
+        ocrNote = "OCR işlemi sırasında hata oluştu.";
+      }
+
+      ocrResults.push({
+        index: i,
+        path: storedPath,
+        parsedAmount,
+        confidence,
+        rawText: rawText ? rawText.slice(0, 500) : null, // fazla veri saklama
+        note: ocrNote,
+      });
     }
 
+    // Eski dosyaları temizle (yeniler başarıyla kaydedildiyse)
+    const oldPaths = Array.isArray(expense.storedPaths) ? expense.storedPaths : [];
+    for (const oldPath of oldPaths) {
+      await deleteDekontFile(oldPath).catch(() => {});
+    }
+
+    // Expense'i güncelle
     const updatedExpense = await prisma.expense.update({
       where: { id: expenseId },
       data: {
-        receiptUrl: `/dekonts/file?path=${encodeURIComponent(storedPath)}`, // Geçici bir yol olarak kaydedildi
-        rawText,
-        parsedJson,
-        parsedAmount,
-        transactionDate,
-        aiConfidence,
+        storedPaths: savedPaths,
+        amount: hasAnyAmount ? totalParsedAmount : null,
+        parsedAmount: hasAnyAmount ? totalParsedAmount : null,
+        ocrReceiptsJson: ocrResults,
+        // receiptUrl eski alan — ilk dosyanın yolunu referans olarak yaz
+        receiptUrl: savedPaths.length > 0 ? savedPaths[0] : null,
       },
     });
 
-    return serializeExpense(updatedExpense);
+    const result = serializeExpense(updatedExpense);
+    result.ocrSummary = {
+      fileCount: files.length,
+      hasAmount: hasAnyAmount,
+      totalParsedAmount: hasAnyAmount ? totalParsedAmount.toFixed(2) : null,
+      message: hasAnyAmount
+        ? `${files.length} makbuzdan toplam tutar okundu: ${totalParsedAmount.toFixed(2)} TL`
+        : "Makbuzlardan tutar bilgisi okunamadı.",
+    };
+
+    return result;
   } catch (err) {
-    if (savedStoredPath) {
-      await deleteDekontFile(savedStoredPath).catch(() => {});
+    // Başarıyla kaydedilmiş dosyaları temizle
+    for (const sp of savedPaths) {
+      await deleteDekontFile(sp).catch(() => {});
     }
     throw err;
   } finally {
-    await cleanupMulterTempFile(file);
+    // Multer geçici dosyalarını temizle
+    for (const file of files) {
+      await cleanupMulterTempFile(file).catch(() => {});
+    }
   }
 }

@@ -77,9 +77,8 @@ class AppSelectField<T> extends StatelessWidget {
               vertical: AppSizes.spacingS,
             ),
             decoration: BoxDecoration(
-              color: enabled ? AppColors.surface : AppColors.background,
+              color: enabled ? AppColors.fill : AppColors.background,
               borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-              border: AppColors.cardBorder,
             ),
             child: Row(
               children: [

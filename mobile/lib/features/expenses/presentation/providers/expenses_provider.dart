@@ -119,26 +119,22 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
       create({
     required String buildingId,
     required String title,
-    required double amount,
     required ExpenseCategory category,
     required DateTime date,
     String? note,
-    String? receiptUrl,
-    String? receiptFilePath,
+    List<String>? receiptFilePaths,
   }) async {
     try {
       final entity = await _repository.createExpense(
         buildingId,
         title: title,
-        amount: amount,
         category: category,
         date: date,
         note: note,
-        receiptUrl: receiptUrl,
       );
-      final upload = await _tryUploadReceipt(
+      final upload = await _tryUploadReceipts(
         entity.id,
-        receiptFilePath,
+        receiptFilePaths,
       );
       await load(buildingId, month: state.month, year: state.year);
       return (
@@ -161,7 +157,7 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
     DateTime? date,
     String? note,
     String? receiptUrl,
-    String? receiptFilePath,
+    List<String>? receiptFilePaths,
   }) async {
     try {
       await _repository.updateExpense(
@@ -173,9 +169,9 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
         note: note,
         receiptUrl: receiptUrl,
       );
-      final upload = await _tryUploadReceipt(
+      final upload = await _tryUploadReceipts(
         expenseId,
-        receiptFilePath,
+        receiptFilePaths,
       );
       await reload();
       return (
@@ -190,15 +186,15 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
   }
 
   /// Makbuz dosyası: canlı API'de `/proof` yoksa gider kaydı kalır, `deferred` döner.
-  Future<({String? warning, bool deferred})> _tryUploadReceipt(
+  Future<({String? warning, bool deferred})> _tryUploadReceipts(
     String expenseId,
-    String? receiptFilePath,
+    List<String>? receiptFilePaths,
   ) async {
-    if (receiptFilePath == null || receiptFilePath.isEmpty) {
+    if (receiptFilePaths == null || receiptFilePaths.isEmpty) {
       return (warning: null, deferred: false);
     }
     try {
-      await _repository.uploadReceipt(expenseId, receiptFilePath);
+      await _repository.uploadReceipts(expenseId, receiptFilePaths);
       return (warning: null, deferred: false);
     } on ApiException catch (e) {
       if (e.statusCode == 404 || e.statusCode == 405) {

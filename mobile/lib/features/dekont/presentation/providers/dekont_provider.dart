@@ -183,9 +183,11 @@ class MakePaymentNotifier extends StateNotifier<MakePaymentState> {
   }
 
   Future<DekontEntity?> upload() async {
+    if (_isUploading) return null; // Double-tap race condition önlemi
+
     final bytes = state.pickedFileBytes;
     final name = state.pickedFileName;
-    if (bytes == null || bytes.isEmpty || name == null || _isUploading) {
+    if (bytes == null || bytes.isEmpty || name == null) {
       state = state.copyWith(
         error: LocaleSettings
             .instance.currentTranslations.features.dekont.errorNoFileSelected,

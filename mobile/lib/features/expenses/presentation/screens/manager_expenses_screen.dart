@@ -269,9 +269,8 @@ class _SummaryCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(AppSizes.cardPadding),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.fill,
           borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-          border: AppColors.cardBorder,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,8 +286,18 @@ class _SummaryCard extends StatelessWidget {
                 runSpacing: AppSizes.spacingXS,
                 children: summary.byCategory.map((c) {
                   return Chip(
+                    backgroundColor: Colors.white,
+                    side: BorderSide.none,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                     label: Text(
                       '${c.category.label(context)}: ${c.amount.toStringAsFixed(0)} ₺ (${c.count})',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   );
                 }).toList(),
@@ -319,9 +328,8 @@ class _ExpenseCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.cardPadding),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.fill,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: AppColors.cardBorder,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -356,12 +364,25 @@ class _ExpenseCard extends StatelessWidget {
               ],
             ),
           ),
-          Text(
-            '${expense.amount.toStringAsFixed(2)} ₺',
-            style: AppTypography.body1.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${expense.amount?.toStringAsFixed(2) ?? "0.00"} ₺',
+                style: AppTypography.body1.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              if (expense.parsedAmount != null &&
+                  expense.parsedAmount != expense.amount)
+                Text(
+                  '(OCR: ${expense.parsedAmount!.toStringAsFixed(2)} ₺)',
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+            ],
           ),
           PopupMenuButton<String>(
             onSelected: (v) {

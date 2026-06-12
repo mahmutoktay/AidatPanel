@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireRoles } from "../middlewares/roleMiddleware.js";
 import { validate, expenseSchemas } from "../middlewares/validate.js";
-import { updateExpense, deleteExpense, uploadExpenseProof } from "../controllers/expenseController.js";
+import { updateExpense, deleteExpense, uploadExpenseProof, uploadExpenseProofs } from "../controllers/expenseController.js";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
@@ -44,7 +44,7 @@ router.delete("/:expenseId", validate(expenseSchemas.delete), deleteExpense);
 router.post(
   "/:expenseId/proof",
   (req, res, next) => {
-    upload.single("file")(req, res, (err) => {
+    upload.array("files", 10)(req, res, (err) => {
       if (err) {
         console.error("[expense] multer hata", err?.message || err);
         return next(err);
@@ -53,7 +53,7 @@ router.post(
     });
   },
   validate(expenseSchemas.uploadProof),
-  uploadExpenseProof
+  uploadExpenseProofs
 );
 
 export default router;

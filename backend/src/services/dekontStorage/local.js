@@ -11,11 +11,33 @@ export function extensionForMime(mimeType) {
 }
 
 /**
- * @returns {Promise<string>} storedPath — göreli yol (DB)
+ * Rol alt dizinini belirler.
+ * source: "RESIDENT_UPLOAD" → "Sakinler"
+ * source: "MANAGER_UPLOAD"  → "Yoneticiler"
+ * source: "EXPENSE"         → "Giderler"
  */
-export async function saveDekontFile(buffer, { buildingId, dekontId, mimeType }) {
+function resolveRoleSubdir(source) {
+  if (source === "RESIDENT_UPLOAD") return "Sakinler";
+  if (source === "MANAGER_UPLOAD") return "Yoneticiler";
+  if (source === "EXPENSE") return "Giderler";
+  return "Diger";
+}
+
+/**
+ * Yeni klasör hiyerarşisi:
+ *   Binalar/{buildingId}/{Sakinler|Yoneticiler|Giderler}/{dekontId}.ext
+ *
+ * @param {object} opts
+ * @param {string} opts.buildingId
+ * @param {string} opts.dekontId
+ * @param {string} opts.mimeType
+ * @param {string} [opts.source] — "RESIDENT_UPLOAD" | "MANAGER_UPLOAD" | "EXPENSE"
+ * @returns {Promise<string>} storedPath — göreli yol (DB'de saklanır)
+ */
+export async function saveDekontFile(buffer, { buildingId, dekontId, mimeType, source }) {
   const ext = extensionForMime(mimeType);
-  const relativePath = path.join(buildingId, `${dekontId}${ext}`);
+  const subdir = resolveRoleSubdir(source);
+  const relativePath = path.join("Binalar", buildingId, subdir, `${dekontId}${ext}`);
   const absolutePath = path.join(DEKONT_UPLOAD_DIR, relativePath);
   await fs.promises.mkdir(path.dirname(absolutePath), { recursive: true });
   await fs.promises.writeFile(absolutePath, buffer);
@@ -28,10 +50,11 @@ export async function saveDekontFile(buffer, { buildingId, dekontId, mimeType })
  */
 export async function moveTempToDekontFile(
   tempAbsolutePath,
-  { buildingId, dekontId, mimeType }
+  { buildingId, dekontId, mimeType, source }
 ) {
   const ext = extensionForMime(mimeType);
-  const relativePath = path.join(buildingId, `${dekontId}${ext}`);
+  const subdir = resolveRoleSubdir(source);
+  const relativePath = path.join("Binalar", buildingId, subdir, `${dekontId}${ext}`);
   const absolutePath = path.join(DEKONT_UPLOAD_DIR, relativePath);
   await fs.promises.mkdir(path.dirname(absolutePath), { recursive: true });
 

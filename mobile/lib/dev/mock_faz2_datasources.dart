@@ -84,11 +84,11 @@ class MockExpenseDataSource implements ExpenseDataSource {
     final byCat = <String, Map<String, dynamic>>{};
     var total = 0.0;
     for (final e in list) {
-      total += e.amount;
+      total += e.amount ?? 0;
       final cat = e.category;
       byCat.putIfAbsent(cat, () => {'category': cat, 'amount': 0.0, 'count': 0});
       byCat[cat]!['amount'] =
-          (byCat[cat]!['amount'] as double) + e.amount;
+          (byCat[cat]!['amount'] as double) + (e.amount ?? 0);
       byCat[cat]!['count'] = (byCat[cat]!['count'] as int) + 1;
     }
     return {
@@ -112,22 +112,20 @@ class MockExpenseDataSource implements ExpenseDataSource {
   Future<ExpenseModel> createExpense(
     String buildingId, {
     required String title,
-    required double amount,
     required String category,
     required DateTime date,
     String? note,
-    String? receiptUrl,
   }) async {
     await Future.delayed(_delay);
     final model = ExpenseModel(
       id: 'exp_${DateTime.now().millisecondsSinceEpoch}',
       buildingId: buildingId,
       title: title,
-      amount: amount,
+      amount: null,
       category: category,
       date: date,
       note: note,
-      receiptUrl: receiptUrl,
+      receiptUrl: null,
       createdAt: DateTime.now(),
     );
     _byBuilding.putIfAbsent(buildingId, () => []).insert(0, model);
@@ -175,25 +173,27 @@ class MockExpenseDataSource implements ExpenseDataSource {
   }
 
   @override
-  Future<String> uploadReceipt(String expenseId, String filePath) async {
+  Future<ExpenseModel> uploadReceipts(String expenseId, List<String> filePaths) async {
     await Future.delayed(_delay);
     for (final list in _byBuilding.values) {
       final idx = list.indexWhere((e) => e.id == expenseId);
       if (idx < 0) continue;
       final old = list[idx];
-      final url = 'mock://receipt/$expenseId';
-      list[idx] = ExpenseModel(
+      final url = filePaths.isNotEmpty ? 'mock://receipt/${filePaths.first}' : 'mock://receipt/default';
+      final updated = ExpenseModel(
         id: old.id,
         buildingId: old.buildingId,
         title: old.title,
-        amount: old.amount,
+        amount: 250.0,
+        parsedAmount: 250.0,
         category: old.category,
         date: old.date,
         note: old.note,
         receiptUrl: url,
         createdAt: old.createdAt,
       );
-      return url;
+      list[idx] = updated;
+      return updated;
     }
     throw StateError('Expense not found: $expenseId');
   }

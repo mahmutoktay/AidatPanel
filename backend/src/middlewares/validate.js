@@ -539,7 +539,6 @@ export const expenseSchemas = {
     }),
     body: z.object({
       title: z.string().min(1).max(200),
-      amount: z.number().positive("Tutar pozitif olmalıdır"),
       category: z.enum([
         "CLEANING",
         "ELEVATOR",
@@ -552,7 +551,6 @@ export const expenseSchemas = {
       ]),
       date: z.string().datetime({ message: "Geçerli bir tarih giriniz (ISO 8601)" }),
       note: z.string().max(500).optional(),
-      receiptUrl: z.string().url().max(2048).optional().nullable(),
     }),
   },
   update: {

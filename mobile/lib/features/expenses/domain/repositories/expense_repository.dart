@@ -24,11 +24,9 @@ abstract class ExpenseRepository {
   Future<ExpenseEntity> createExpense(
     String buildingId, {
     required String title,
-    required double amount,
     required ExpenseCategory category,
     required DateTime date,
     String? note,
-    String? receiptUrl,
   });
 
   Future<ExpenseEntity> updateExpense(
@@ -43,5 +41,5 @@ abstract class ExpenseRepository {
 
   Future<void> deleteExpense(String expenseId);
 
-  Future<String> uploadReceipt(String expenseId, String filePath);
+  Future<ExpenseEntity> uploadReceipts(String expenseId, List<String> filePaths);
 }

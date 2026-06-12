@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/api_constants.dart';
-import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/dio_client.dart';
 import '../models/expense_model.dart';
 
@@ -22,11 +21,9 @@ abstract class ExpenseDataSource {
   Future<ExpenseModel> createExpense(
     String buildingId, {
     required String title,
-    required double amount,
     required String category,
     required DateTime date,
     String? note,
-    String? receiptUrl,
   });
 
   Future<ExpenseModel> updateExpense(
@@ -41,8 +38,8 @@ abstract class ExpenseDataSource {
 
   Future<void> deleteExpense(String expenseId);
 
-  /// Makbuz fotoğrafı — `POST /expenses/{id}/proof` (multipart).
-  Future<String> uploadReceipt(String expenseId, String filePath);
+  /// Makbuz fotoğrafları — `POST /expenses/{id}/proof` (multipart array).
+  Future<ExpenseModel> uploadReceipts(String expenseId, List<String> filePaths);
 }
 
 class ExpenseRemoteDataSource implements ExpenseDataSource {
@@ -90,22 +87,17 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
   Future<ExpenseModel> createExpense(
     String buildingId, {
     required String title,
-    required double amount,
     required String category,
     required DateTime date,
     String? note,
-    String? receiptUrl,
   }) async {
     final response = await _dioClient.post(
       ApiConstants.buildingExpenses(buildingId),
       data: {
         'title': title,
-        'amount': amount,
         'category': category,
         'date': date.toUtc().toIso8601String(),
         if (note != null && note.isNotEmpty) 'note': note,
-        if (receiptUrl != null && receiptUrl.isNotEmpty)
-          'receiptUrl': receiptUrl,
       },
     );
     return ExpenseModel.fromJson(response.data['data'] as Map<String, dynamic>);
@@ -144,22 +136,23 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
   }
 
   @override
-  Future<String> uploadReceipt(String expenseId, String filePath) async {
-    final segments = filePath.replaceAll('\\', '/').split('/');
-    final fileName = segments.isNotEmpty ? segments.last : 'receipt.jpg';
+  Future<ExpenseModel> uploadReceipts(String expenseId, List<String> filePaths) async {
+    final files = <MultipartFile>[];
+    for (final path in filePaths) {
+      final segments = path.replaceAll('\\', '/').split('/');
+      final fileName = segments.isNotEmpty ? segments.last : 'receipt.jpg';
+      files.add(await MultipartFile.fromFile(path, filename: fileName));
+    }
+
     final form = FormData.fromMap({
-      'file': await MultipartFile.fromFile(filePath, filename: fileName),
+      'files': files,
     });
     final response = await _dioClient.post(
       ApiConstants.expenseProof(expenseId),
       data: form,
       options: Options(contentType: 'multipart/form-data'),
     );
-    final data = response.data['data'];
-    if (data is Map<String, dynamic>) {
-      final url = data['receiptUrl'] ?? data['url'];
-      if (url is String && url.isNotEmpty) return url;
-    }
-    throw ApiException(message: 'Makbuz yanıtı işlenemedi');
+    
+    return ExpenseModel.fromJson(response.data['data'] as Map<String, dynamic>);
   }
 }

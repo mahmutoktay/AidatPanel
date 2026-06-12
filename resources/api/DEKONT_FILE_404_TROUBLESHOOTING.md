@@ -79,7 +79,7 @@ ls -la "$DEKONT_UPLOAD_DIR/{buildingId}/"
 cd /home/aidatpanel-api/htdocs/api.aidatpanel.com   # proje kökü
 npm ci --omit=dev
 npx prisma migrate deploy
-pm2 start index.js --name aidatpanel-api
+pm2 start index.js --name aidapanel-api
 pm2 save
 pm2 startup   # sunucu yeniden başlayınca otomatik kalkması için
 ```
@@ -90,8 +90,8 @@ Deploy sonrası:
 git pull
 npm ci --omit=dev
 npx prisma migrate deploy
-pm2 restart aidatpanel-api
-pm2 logs aidatpanel-api --lines 100
+pm2 restart aidapanel-api
+pm2 logs aidapanel-api --lines 100
 ```
 
 Kontrol:

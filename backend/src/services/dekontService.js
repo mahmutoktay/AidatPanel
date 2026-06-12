@@ -183,7 +183,7 @@ export async function createDekontFromUpload(user, file, { dueId } = {}) {
 
     const sizeBytes = file.size ?? validation.sizeBytes ?? file.buffer?.length ?? 0;
     const dekontId = randomUUID();
-    const prefix = context.source === "RESIDENT_UPLOAD" ? "residents/" : "managers/";
+    const prefix = context.source === "RESIDENT_UPLOAD" ? "residents_" : "managers_";
     const storageDekontId = `${prefix}${dekontId}`;
     let storedPath = null;
 
@@ -192,6 +192,7 @@ export async function createDekontFromUpload(user, file, { dueId } = {}) {
         buildingId: context.buildingId,
         dekontId: storageDekontId,
         mimeType: validation.mime,
+        source: context.source,
       });
       file.path = null;
     } else {
@@ -199,6 +200,7 @@ export async function createDekontFromUpload(user, file, { dueId } = {}) {
         buildingId: context.buildingId,
         dekontId: storageDekontId,
         mimeType: validation.mime,
+        source: context.source,
       });
     }
 

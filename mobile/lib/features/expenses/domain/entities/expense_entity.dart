@@ -15,7 +15,8 @@ class ExpenseEntity extends Equatable {
   final String id;
   final String buildingId;
   final String title;
-  final double amount;
+  final double? amount;
+  final double? parsedAmount;
   final ExpenseCategory category;
   final DateTime date;
   final String? note;
@@ -26,7 +27,8 @@ class ExpenseEntity extends Equatable {
     required this.id,
     required this.buildingId,
     required this.title,
-    required this.amount,
+    this.amount,
+    this.parsedAmount,
     required this.category,
     required this.date,
     this.note,
@@ -36,7 +38,7 @@ class ExpenseEntity extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, buildingId, title, amount, category, date, note, receiptUrl, createdAt];
+      [id, buildingId, title, amount, parsedAmount, category, date, note, receiptUrl, createdAt];
 }
 
 class ExpenseSummaryEntity extends Equatable {

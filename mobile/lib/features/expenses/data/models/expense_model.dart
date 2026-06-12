@@ -4,7 +4,8 @@ class ExpenseModel {
   final String id;
   final String buildingId;
   final String title;
-  final double amount;
+  final double? amount;
+  final double? parsedAmount;
   final String category;
   final DateTime date;
   final String? note;
@@ -15,7 +16,8 @@ class ExpenseModel {
     required this.id,
     required this.buildingId,
     required this.title,
-    required this.amount,
+    this.amount,
+    this.parsedAmount,
     required this.category,
     required this.date,
     this.note,
@@ -27,13 +29,19 @@ class ExpenseModel {
     final amountRaw = json['amount'];
     final amount = amountRaw is num
         ? amountRaw.toDouble()
-        : double.tryParse('$amountRaw') ?? 0;
+        : double.tryParse('$amountRaw');
+
+    final parsedRaw = json['parsedAmount'];
+    final parsedAmount = parsedRaw is num
+        ? parsedRaw.toDouble()
+        : double.tryParse('$parsedRaw');
 
     return ExpenseModel(
       id: (json['id'] ?? '') as String,
       buildingId: (json['buildingId'] ?? '') as String,
       title: (json['title'] ?? '') as String,
       amount: amount,
+      parsedAmount: parsedAmount,
       category: (json['category'] ?? 'OTHER') as String,
       date: _parseDate(json['date']),
       note: json['note'] as String?,
@@ -54,6 +62,7 @@ class ExpenseModel {
         buildingId: buildingId,
         title: title,
         amount: amount,
+        parsedAmount: parsedAmount,
         category: _parseCategory(category),
         date: date,
         note: note,

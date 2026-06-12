@@ -181,18 +181,24 @@ model Expense {
   buildingId String
   building   Building        @relation(fields: [buildingId], references: [id])
   title      String
-  amount     Decimal         @db.Decimal(10, 2)
+  /// OCR'dan otomatik hesaplanan toplam tutar; henüz OCR tamamlanmamışsa null.
+  amount     Decimal?        @db.Decimal(10, 2)
   category   ExpenseCategory
   date       DateTime
   note       String?
+  /// @deprecated Artık storedPaths kullanılıyor; eski kayıtlar için korundu.
   receiptUrl String?
-  
-  // OCR verileri
+  /// Çoklu makbuz dosyalarının sunucu yolları (JSON array of strings)
+  storedPaths Json?          @default("[]")
+
+  // OCR verileri (birden fazla fiş için toplam)
   rawText         String?       @db.Text
   parsedJson      Json?
   parsedAmount    Decimal?      @db.Decimal(12, 2)
   transactionDate DateTime?
   aiConfidence    Float?
+  /// Her fişin OCR detayı: [{path, parsedAmount, confidence, rawText}]
+  ocrReceiptsJson Json?
 
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt

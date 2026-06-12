@@ -62,26 +62,26 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: AppColors.fill,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 17,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-          borderSide: AppColors.cardBorderSide,
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-          borderSide: AppColors.cardBorderSide,
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-          borderSide: const BorderSide(color: AppColors.primary),
+          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
         hintStyle: AppTypography.body1.copyWith(color: AppColors.textDisabled),
         labelStyle: AppTypography.label.copyWith(
