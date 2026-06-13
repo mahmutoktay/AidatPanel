@@ -34,8 +34,6 @@ flutter run -t lib/main_dev.dart
 
 Kapalı uygulamada tray push için Play Store’lu emülatör, `main.dart`, bildirim izni ve sakin hesabında `[FCM] PUT /me/fcm-token başarılı` logu gerekir. Yönetici telefon + sakin emülatör **farklı hesap** olmalı.
 
-Ayrıntılı adımlar: [`resources/bildirim/FCM_E2E_CHECKLIST.md`](../resources/bildirim/FCM_E2E_CHECKLIST.md).
-
 ## Proje belgeleri
 
 API sözleşmesi ve fazlar: `resources/AIDATPANEL.md`, `resources/yol-haritası/FAZ_DURUMU.md`. Backend API: `origin/backend/yedek` → `API/FLUTTER-BACKEND.md`. Bu README yalnızca mobil pakete giriş içindir.

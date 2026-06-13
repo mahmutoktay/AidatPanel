@@ -1,7 +1,4 @@
-/**
- * Canlı bildirim olayları — WebSocket / SSE ile mobil aynı sözleşmeyi kullanır.
- * @see resources/bildirim/REALTIME_NOTIFICATIONS.md
- */
+/** Canlı bildirim olayları — WebSocket / SSE ile mobil aynı sözleşmeyi kullanır. */
 export const REALTIME_EVENTS = {
   /** Yeni in-app bildirim + (opsiyonel) FCM zaten gitti */
   NOTIFICATION_CREATED: "notification.created",

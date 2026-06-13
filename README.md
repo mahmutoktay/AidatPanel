@@ -62,10 +62,6 @@ Uygulama içinde anlık bildirim (push) ve gerçek zamanlı rozet güncellemeler
 
 - **Push Bildirimleri:** Backend (`pushService.js`) üzerinden Firebase FCM'e iletilir. Mobil cihaz token'ı `PUT /me/fcm-token` ile kaydedilir.
 - **Rozet Güncellemeleri:** Hafif bir polling mekanizmasıyla `GET /api/v1/notifications/unread-count` üzerinden alınır.
-- **Kapsamlı Rehberler:**
-  - Genişletilebilir Katman (Instagram-benzeri): [`resources/bildirim/REALTIME_NOTIFICATIONS.md`](resources/bildirim/REALTIME_NOTIFICATIONS.md)
-  - Tek seferde deploy: [`resources/bildirim/DEPLOY_TEK_SEFER.md`](resources/bildirim/DEPLOY_TEK_SEFER.md)
-  - Uçtan uca FCM testi: [`resources/bildirim/FCM_E2E_CHECKLIST.md`](resources/bildirim/FCM_E2E_CHECKLIST.md)
 
 ---
 
