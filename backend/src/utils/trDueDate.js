@@ -32,3 +32,13 @@ export function endOfDueDayIstanbul(calendarYear, calendarMonth, dueDay) {
   const monthIndex = calendarMonth - 1;
   return new Date(Date.UTC(calendarYear, monthIndex, dueDay, 20, 59, 59, 999));
 }
+
+/**
+ * Vade sonrası geçen tam gün sayısı (dueDate geçmişteyse ≥ 1).
+ * @param {Date|string} dueDate
+ * @param {Date} [now=new Date()]
+ */
+export function computeOverdueDays(dueDate, now = new Date()) {
+  const diffTime = now.getTime() - new Date(dueDate).getTime();
+  return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+}

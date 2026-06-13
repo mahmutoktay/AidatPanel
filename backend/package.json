@@ -11,7 +11,9 @@
     "test:push": "node scripts/send-test-push.mjs",
     "verify:firebase": "node scripts/diagnose-fcm.mjs",
     "diagnose:fcm": "node scripts/diagnose-fcm.mjs",
-    "test:dekont-regex": "node tools/parseDekontSamples.js"
+    "test:dekont-regex": "node tools/parseDekontSamples.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
   },
   "keywords": [],
   "author": "",
@@ -32,12 +34,14 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
     "pdf-parse": "^1.1.4",
+    "pdfkit": "^0.16.0",
     "pg": "^8.20.0",
     "sharp": "^0.33.5",
     "ws": "^8.18.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
     "nodemon": "^3.1.14",
     "prisma": "^7.8.0"
   }

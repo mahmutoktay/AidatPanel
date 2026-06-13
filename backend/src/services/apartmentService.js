@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { buildDueRowsForApartments } from "../utils/dueGeneration.js";
 import { userPublicSelect } from "./meService.js";
 
 // GET apartments
@@ -70,12 +71,26 @@ export const createApartmentService = async ({ buildingId, number, floor, manage
     return null;
   }
 
-  return await prisma.apartment.create({
-    data: {
-      buildingId,
-      number,
-      floor,
-    },
+  return await prisma.$transaction(async (tx) => {
+    const apartment = await tx.apartment.create({
+      data: {
+        buildingId,
+        number,
+        floor,
+      },
+    });
+
+    const dueRows = buildDueRowsForApartments([apartment.id], {
+      dueAmount: building.dueAmount,
+      dueDay: building.dueDay,
+      currency: building.currency,
+    });
+
+    if (dueRows.length > 0) {
+      await tx.due.createMany({ data: dueRows });
+    }
+
+    return apartment;
   });
 };
 

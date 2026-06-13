@@ -1,0 +1,98 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/network/api_exception.dart';
+import '../../../../core/network/dio_client.dart';
+import '../../domain/entities/report_entity.dart';
+
+abstract class ReportRemoteDataSource {
+  Future<ReportFileResult> downloadReport(ReportDownloadParams params);
+}
+
+class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
+  ReportRemoteDataSourceImpl({required DioClient dioClient})
+      : _dioClient = dioClient;
+
+  final DioClient _dioClient;
+
+  @override
+  Future<ReportFileResult> downloadReport(ReportDownloadParams params) async {
+    final query = <String, dynamic>{
+      'type': params.type == ReportType.monthly ? 'monthly' : 'annual',
+      'year': params.year,
+    };
+    if (params.type == ReportType.monthly && params.month != null) {
+      query['month'] = params.month;
+    }
+
+    if (kDebugMode) {
+      debugPrint(
+        '[reports] GET ${ApiConstants.buildingReports(params.buildingId)} '
+        'base=${ApiConstants.baseUrl} query=$query',
+      );
+    }
+
+    final response = await _dioClient.get<List<int>>(
+      ApiConstants.buildingReports(params.buildingId),
+      queryParameters: query,
+      options: Options(
+        responseType: ResponseType.bytes,
+        receiveTimeout: const Duration(minutes: 2),
+      ),
+    );
+
+    final bytes = response.data ?? [];
+    if (bytes.isEmpty) {
+      throw ApiException(
+        message: 'Rapor dosyası boş',
+        statusCode: response.statusCode,
+      );
+    }
+
+    final jsonError = _tryParseJsonErrorBytes(bytes);
+    if (jsonError != null) {
+      throw ApiException(
+        message: jsonError,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return ReportFileResult(
+      bytes: bytes,
+      fileName: _buildFileName(params),
+    );
+  }
+
+  String _buildFileName(ReportDownloadParams params) {
+    final slug = params.buildingName
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+    final safeSlug = slug.isEmpty ? 'bina' : slug;
+    if (params.type == ReportType.annual) {
+      return 'rapor-yillik-$safeSlug-${params.year}.pdf';
+    }
+    final m = (params.month ?? 1).toString().padLeft(2, '0');
+    return 'rapor-$safeSlug-${params.year}-$m.pdf';
+  }
+
+  String? _tryParseJsonErrorBytes(List<int> bytes) {
+    if (bytes.isEmpty || bytes.length > 4096) return null;
+    if (bytes.first != 0x7b && bytes.first != 0x5b) return null;
+    try {
+      final decoded = jsonDecode(utf8.decode(bytes));
+      if (decoded is Map<String, dynamic>) {
+        if (decoded['success'] == false) {
+          final msg = decoded['message'];
+          if (msg is String && msg.trim().isNotEmpty) return msg.trim();
+        }
+        final msg = decoded['message'];
+        if (msg is String && msg.trim().isNotEmpty) return msg.trim();
+      }
+    } catch (_) {}
+    return null;
+  }
+}

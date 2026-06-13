@@ -5,6 +5,8 @@ import {
   updateBuildingDueAmountService,
 } from "../services/dueService.js";
 import { remindBuildingDuesService } from "../services/dueReminderService.js";
+import { bulkGenerateBuildingDuesService } from "../services/dueBulkService.js";
+import { HttpError } from "../utils/httpError.js";
 
 /**
  * GET /api/v1/buildings/:id/dues
@@ -119,6 +121,41 @@ export const postRemindBuildingDues = async (req, res, next) => {
       data,
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/v1/buildings/:id/dues/bulk
+ * Yönetici: Eksik aidatları toplu oluştur (bulunulan ay → yıl sonu veya tek ay)
+ */
+export const postBulkGenerateBuildingDues = async (req, res, next) => {
+  try {
+    const { id: buildingId } = req.params;
+    const { month, year } = req.body ?? {};
+
+    const data = await bulkGenerateBuildingDuesService(
+      buildingId,
+      { managerId: req.user.id },
+      { month, year }
+    );
+
+    const created = data.created ?? 0;
+    res.status(200).json({
+      success: true,
+      message:
+        created > 0
+          ? `${created} aidat kaydı oluşturuldu.`
+          : data.message ?? "Oluşturulacak yeni aidat bulunamadı.",
+      data,
+    });
+  } catch (error) {
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
     next(error);
   }
 };

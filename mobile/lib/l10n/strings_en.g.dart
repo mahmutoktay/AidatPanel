@@ -950,6 +950,7 @@ class Translations$features$en {
 	late final Translations$features$notifications$en notifications = Translations$features$notifications$en._(_root);
 	late final Translations$features$profile$en profile = Translations$features$profile$en._(_root);
 	late final Translations$features$subscription$en subscription = Translations$features$subscription$en._(_root);
+	late final Translations$features$reports$en reports = Translations$features$reports$en._(_root);
 	late final Translations$features$faz2$en faz2 = Translations$features$faz2$en._(_root);
 }
 
@@ -2302,6 +2303,57 @@ class Translations$features$subscription$en {
 	String get loadFailed => 'Could not load subscription.';
 }
 
+// Path: features.reports
+class Translations$features$reports$en {
+	Translations$features$reports$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Download report'
+	String get menuDownload => 'Download report';
+
+	/// en: 'PDF report'
+	String get sheetTitle => 'PDF report';
+
+	/// en: 'Monthly summary'
+	String get typeMonthly => 'Monthly summary';
+
+	/// en: 'Annual summary'
+	String get typeAnnual => 'Annual summary';
+
+	/// en: 'Month'
+	String get fieldMonth => 'Month';
+
+	/// en: 'Year'
+	String get fieldYear => 'Year';
+
+	/// en: 'Show report'
+	String get download => 'Show report';
+
+	/// en: 'Preparing report…'
+	String get downloading => 'Preparing report…';
+
+	/// en: 'Report preview'
+	String get previewTitle => 'Report preview';
+
+	/// en: 'Pinch to zoom and scroll to view pages.'
+	String get pdfPreviewHint => 'Pinch to zoom and scroll to view pages.';
+
+	/// en: 'PDF could not be opened on this device. Use «Share report» below to open it in another app.'
+	String get pdfPreviewUnavailable => 'PDF could not be opened on this device. Use «Share report» below to open it in another app.';
+
+	/// en: 'Share report'
+	String get shareReport => 'Share report';
+
+	/// en: 'Could not share the report. Please try again.'
+	String get shareFailed => 'Could not share the report. Please try again.';
+
+	/// en: 'Could not generate the report. Please try again.'
+	String get failed => 'Could not generate the report. Please try again.';
+}
+
 // Path: features.faz2
 class Translations$features$faz2$en {
 	Translations$features$faz2$en._(this._root);
@@ -3222,6 +3274,20 @@ extension on Translations {
 			'features.subscription.backendPending' => 'Subscription is not connected to the server yet. Purchases coming soon.',
 			'features.subscription.purchaseComingSoon' => 'Purchase coming soon',
 			'features.subscription.loadFailed' => 'Could not load subscription.',
+			'features.reports.menuDownload' => 'Download report',
+			'features.reports.sheetTitle' => 'PDF report',
+			'features.reports.typeMonthly' => 'Monthly summary',
+			'features.reports.typeAnnual' => 'Annual summary',
+			'features.reports.fieldMonth' => 'Month',
+			'features.reports.fieldYear' => 'Year',
+			'features.reports.download' => 'Show report',
+			'features.reports.downloading' => 'Preparing report…',
+			'features.reports.previewTitle' => 'Report preview',
+			'features.reports.pdfPreviewHint' => 'Pinch to zoom and scroll to view pages.',
+			'features.reports.pdfPreviewUnavailable' => 'PDF could not be opened on this device. Use «Share report» below to open it in another app.',
+			'features.reports.shareReport' => 'Share report',
+			'features.reports.shareFailed' => 'Could not share the report. Please try again.',
+			'features.reports.failed' => 'Could not generate the report. Please try again.',
 			'features.faz2.sectionTitle' => 'Phase 2',
 			'features.faz2.tickets' => 'Requests',
 			'features.faz2.expenses' => 'Expenses',

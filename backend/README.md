@@ -1,6 +1,6 @@
 # AidatPanel Backend API
 
-Türk apartman ve site yöneticileri için aidat yönetim platformunun Node.js API’si (Express 5, Prisma 7, PostgreSQL).
+Türk apartman ve site yöneticileri için aidat yönetim platformunun Node.js API'si (Express 5, Prisma 7, PostgreSQL).
 
 ## Hızlı başlangıç
 
@@ -24,7 +24,9 @@ npm run dev
 
 API: `http://127.0.0.1:4200/api/v1`
 
-Smoke test: `python3 test.py` (sunucu çalışırken)
+```bash
+npm test   # unit testler (dueGeneration, trDueDate, authRateLimitKey)
+```
 
 ---
 
@@ -32,55 +34,53 @@ Smoke test: `python3 test.py` (sunucu çalışırken)
 
 ```
 backend/
-├── index.js                 # Express giriş, /api/v1 mount
+├── index.js
 ├── prisma/schema.prisma
-├── prisma/migrations/
 ├── src/
-│   ├── config/              # db, firebase, dekont
-│   ├── routes/              # auth, buildings, dekonts, notifications, …
-│   ├── controllers/
-│   ├── services/
-│   ├── middlewares/         # authMiddleware, validate (Zod), rateLimit
-│   ├── constants/
-│   └── utils/
-├── uploads/dekonts/         # Yerel dekont depolama (gitignore)
-├── test.py                  # E2E smoke (Faz 1 + 2A + dekont)
-└── tools/parseDekontSamples.js
+│   ├── routes/              # auth, buildings, dekonts, me, notifications, …
+│   ├── controllers/         # ince HTTP katmanı
+│   ├── services/            # iş mantığı
+│   ├── validators/          # Zod şemaları (feature bazlı)
+│   ├── middlewares/         # auth, validate, rateLimit
+│   ├── jobs/                # dueAutoGenerateJob (aidat bakımı)
+│   └── realtime/            # WebSocket gateway
+├── __tests__/               # Jest unit testler
+└── uploads/dekonts/
 ```
 
 ---
 
 ## API özeti
 
-Tüm route’lar `/api/v1` altında. Yanıt gövdesi: `{ "success": true|false, "message"?, "data"?, "errors"? }`.
+Tüm route'lar `/api/v1` altında. Yanıt: `{ "success": true|false, "message"?, "data"?, "errors"? }`.
 
 | Alan | Route dosyası | Not |
 |------|---------------|-----|
-| Auth | `authRoutes` | register, login (`identifier`), refresh, logout, forgot/reset |
-| Buildings | `buildingRoutes` | CRUD, dues, expenses, tickets, announcements, collection, dekont listesi |
-| Apartments | `apartmentRoutes` | CRUD, resident, invite-code |
-| Me | `meRoutes` | profil, dues, tickets, dekonts, fcm-token, KVKK delete |
-| Notifications | `notificationRoutes` | liste, `GET /unread-count`, okundu, duyuru |
-| Realtime | `realtime/wsGateway.js` | WebSocket `/api/v1/realtime` (`REALTIME_WS_ENABLED`) |
-| Tickets | `ticketRoutes`, `apartmentTicketRoutes` | talep + güncelleme |
-| Expenses | `expenseRoutes` | gider CRUD + özet |
-| Dekonts | `dekontRoutes` | upload, review, file stream |
+| Auth | `authRoutes` | register, login, refresh, join, logout, logout-all-devices, forgot/reset |
+| Me | `meRoutes` | profil, şifre, dil, fcm-token, KVKK delete |
+| Buildings | `buildingRoutes` | CRUD, dues, expenses, tickets, announcements, collection, dekont |
+| Apartments | `apartmentRoutes` | CRUD, resident çıkarma, invite-code |
+| Notifications | `notificationRoutes` | liste, unread-count, okundu |
+| Realtime | `realtime/wsGateway.js` | `wss://…/api/v1/realtime?token=` |
+| Tickets | `ticketRoutes` | talep + güncelleme |
+| Expenses | `expenseRoutes` | CRUD, proof upload, dosya indirme |
+| Dekonts | `dekontRoutes` | upload, review, OCR pipeline |
 
-Detaylı sözleşme: [`../API/FLUTTER-BACKEND.md`](../API/FLUTTER-BACKEND.md)
+### Aidat bakımı (otomatik)
+
+`DUE_AUTO_GENERATE_ENABLED=true` ile günlük job:
+- Eksik aidat üretimi (`bulunulan ay → yıl sonu`)
+- `PENDING` → `OVERDUE` geçişi
+
+Manuel: `POST /buildings/:id/dues/bulk` (yönetici)
 
 ---
 
 ## Dekont
 
-- **Endpoint’ler:** `POST /dekonts/upload`, `GET /dekonts/:id`, `GET /dekonts/:id/file`, `PATCH /dekonts/:id/review`, `GET /me/dekonts`, `GET /buildings/:id/dekonts`, `PATCH /buildings/:id/collection`
-- **OCR:** `pdf-parse`, Tesseract CLI — Vision API yok
+- **Endpoint'ler:** `POST /dekonts/upload`, `GET /dekonts/:id/file`, `PATCH /dekonts/:id/review`, `GET /me/dekonts`, `GET /buildings/:id/dekonts`, `PATCH /buildings/:id/collection`
+- **OCR:** Tesseract (worker thread destekli), `pdf-parse`
 - **Env:** `backend/.env.example` (`DEKONT_*`, `TESSERACT_CMD`)
-
-```bash
-# Arch örnek
-sudo pacman -S tesseract tesseract-data-tur poppler
-cd backend && python3 test.py
-```
 
 ---
 
@@ -90,9 +90,10 @@ cd backend && python3 test.py
 |----------|----------|
 | `DATABASE_URL` | PostgreSQL |
 | `JWT_SECRET`, `REFRESH_TOKEN_SECRET` | Token imzalama |
-| `ALLOWED_ORIGINS` | CORS (Flutter web) |
-| `FIREBASE_SERVICE_ACCOUNT_JSON` | Push (production’da gerekli) |
-| `DEKONT_UPLOAD_DIR` | Varsayılan `./uploads/dekonts/` |
+| `ALLOWED_ORIGINS` | CORS |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Push |
+| `REALTIME_WS_ENABLED` | WebSocket |
+| `DUE_AUTO_GENERATE_ENABLED` | Aidat bakım job'u |
 
 Tam liste: `.env.example`
 
@@ -102,21 +103,8 @@ Tam liste: `.env.example`
 
 | Dosya | İçerik |
 |-------|--------|
-| [`../AIDATPANEL.md`](../AIDATPANEL.md) | Master referans |
-| [`../API/README.md`](../API/README.md) | API dokümantasyon indeksi |
-| [`../API/FLUTTER-BACKEND.md`](../API/FLUTTER-BACKEND.md) | Mobil entegrasyon sözleşmesi |
-| [`../resources/api/DEKONT_FILE_404_TROUBLESHOOTING.md`](../resources/api/DEKONT_FILE_404_TROUBLESHOOTING.md) | Dekont 404/502 + PM2/nginx |
-| [`FURKAN_ICIN_DOKUMANTASYON.md`](FURKAN_ICIN_DOKUMANTASYON.md) | Flutter JWT rehberi |
-| [`GOREVDAGILIMI.md`](GOREVDAGILIMI.md) | Fazlar ve görev dağılımı |
-| [`../planning/DEKONT_VERIFICATION_PLAN.md`](../planning/DEKONT_VERIFICATION_PLAN.md) | Dekont implementasyon planı |
-| [`../API/YUSUF_YAPILANLAR_BİLDİRİM.md`](../API/YUSUF_YAPILANLAR_BİLDİRİM.md) | Bildirim modülü notları |
-
----
-
-## Geliştirme notları
-
-- Şema değişikliği: `npx prisma migrate dev` (geliştirme) / `migrate deploy` (CI/prod)
-- Prisma Studio: `npx prisma studio`
-- Dekont regex örnekleri: `npm run test:dekont-regex`
-- Bildirim demo: `npm run demo:notifications`
-- `.env` dosyasını commit etmeyin
+| [`../resources/AIDATPANEL.md`](../resources/AIDATPANEL.md) | Master referans (API + mobil mimari) |
+| [`../resources/yol-haritası/FAZ_DURUMU.md`](../resources/yol-haritası/FAZ_DURUMU.md) | Faz durumu |
+| [`../resources/bildirim/REALTIME_NOTIFICATIONS.md`](../resources/bildirim/REALTIME_NOTIFICATIONS.md) | Bildirim mimarisi |
+| [`../resources/api/DEKONT_FILE_404_TROUBLESHOOTING.md`](../resources/api/DEKONT_FILE_404_TROUBLESHOOTING.md) | Dekont 404/502 |
+| [`../resources/api/AUTH_LOGOUT_ALL_DEVICES.md`](../resources/api/AUTH_LOGOUT_ALL_DEVICES.md) | logout-all-devices sözleşmesi |

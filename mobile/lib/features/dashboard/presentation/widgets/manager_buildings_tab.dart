@@ -16,6 +16,7 @@ import '../../../buildings/presentation/widgets/building_actions_sheet.dart';
 import '../../../buildings/presentation/widgets/delete_building_dialog.dart';
 import '../../../buildings/presentation/widgets/edit_building_bottom_sheet.dart';
 import '../../../buildings/presentation/widgets/edit_building_collection_bottom_sheet.dart';
+import '../../../reports/presentation/widgets/report_download_sheet.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 
 // manager_dashboard_screen.dart içinden gelen _BuildingsAsyncSection'ı burada kullanamayız
@@ -409,6 +410,9 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
           break;
         case BuildingMenuAction.collection:
           EditBuildingCollectionBottomSheet.show(context, building: building);
+          break;
+        case BuildingMenuAction.report:
+          ReportDownloadSheet.show(context, building: building);
           break;
         case BuildingMenuAction.delete:
           unawaited(DeleteBuildingDialog.show(context, building: building));

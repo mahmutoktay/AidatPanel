@@ -20,6 +20,7 @@ import { apiLimiter } from "./src/middlewares/rateLimitMiddleware.js";
 import { errorHandler, notFoundHandler } from "./src/middlewares/errorHandler.js";
 import { attachWebSocketServer } from "./src/realtime/wsGateway.js";
 import { ensureDekontStorageDirs } from "./src/utils/ensureDekontStorage.js";
+import { startDueAutoGenerateScheduler } from "./src/jobs/dueAutoGenerateJob.js";
 
 const app = express();
 
@@ -51,6 +52,13 @@ app.use("/api/v1", apiLimiter);
 // BODY PARSING MIDDLEWARE'I
 app.use(express.json());
 
+if (process.env.NODE_ENV !== "production") {
+  app.use((req, res, next) => {
+    console.log(`[http] ${req.method} ${req.originalUrl}`);
+    next();
+  });
+}
+
 // ROTALAR — Faz 2A mount sırası (PLAN.md A0): notifications/tickets önce
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/tickets", ticketRoutes);
@@ -79,6 +87,7 @@ async function bootstrap() {
     console.log("Server is running on port: ", port);
   });
   attachWebSocketServer(server);
+  startDueAutoGenerateScheduler();
 }
 
 bootstrap().catch((err) => {

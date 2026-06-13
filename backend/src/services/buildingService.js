@@ -1,5 +1,5 @@
 import { prisma } from "../config/db.js";
-import { endOfDueDayIstanbul, getIstanbulYearMonth } from "../utils/trDueDate.js";
+import { buildDueRowsForApartments } from "../utils/dueGeneration.js";
 import { isValidTrIban, normalizeIban } from "../utils/iban.js";
 import { HttpError } from "../utils/httpError.js";
 
@@ -101,27 +101,12 @@ export const createBuildingService = async ({
           : [];
 
       // 3. Aidatlar — bulunulan aydan yıl sonuna (toplu INSERT)
-      if (dueAmount && apartments.length > 0) {
-        const { year: currentYear, month: currentMonth } = getIstanbulYearMonth();
-        const dueRows = [];
-
-        for (const apartment of apartments) {
-          for (let month = currentMonth; month <= 12; month++) {
-            dueRows.push({
-              apartmentId: apartment.id,
-              amount: dueAmount,
-              currency,
-              month,
-              year: currentYear,
-              dueDate: endOfDueDayIstanbul(currentYear, month, dueDay),
-              status: "PENDING",
-            });
-          }
-        }
-
-        if (dueRows.length > 0) {
-          await tx.due.createMany({ data: dueRows });
-        }
+      const dueRows = buildDueRowsForApartments(
+        apartments.map((a) => a.id),
+        { dueAmount, dueDay, currency }
+      );
+      if (dueRows.length > 0) {
+        await tx.due.createMany({ data: dueRows });
       }
 
       return await tx.building.findUnique({

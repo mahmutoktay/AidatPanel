@@ -12,6 +12,21 @@ flutter pub get
 flutter run
 ```
 
+**Yerel backend ile test** (VPS DB tüneli + `backend` içinde `npm run dev`):
+
+```bash
+# Linux masaüstü / iOS simülatör
+flutter run --dart-define=API_BASE_URL=http://127.0.0.1:4200
+
+# Android emülatör (localhost = 10.0.2.2)
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:4200
+
+# Fiziksel telefon (aynı Wi‑Fi; PC IP'nizi yazın)
+flutter run --dart-define=API_BASE_URL=http://192.168.1.10:4200
+```
+
+`main.dart` ile gerçek giriş yapın; `main_dev.dart` mock bina ID kullanır — rapor indirme çalışmaz.
+
 Sunucu olmadan arayüz denemek için (mock veri, ekranda **DEV** rozeti):
 
 ```bash
@@ -32,11 +47,15 @@ flutter run -t lib/main_dev.dart
 
 ## Push bildirimi (FCM) test
 
-Kapalı uygulamada tray push için Play Store’lu emülatör, `main.dart`, bildirim izni ve sakin hesabında `[FCM] PUT /me/fcm-token başarılı` logu gerekir. Yönetici telefon + sakin emülatör **farklı hesap** olmalı.
+Kapalı uygulamada tray push için Play Store’lu emülatör, `main.dart`, bildirim izni ve sakin hesabında `[FCM] PUT /me/fcm-token başarılı` logu gerekir. Yönetici telefon + sakin emülatör **farklı hesap** olmalı. Mimari: [`resources/bildirim/REALTIME_NOTIFICATIONS.md`](../resources/bildirim/REALTIME_NOTIFICATIONS.md).
+
+## Android notları
+
+- Dekont PDF önizleme (`pdfx`): [`docs/DEKONT_ANDROID_REBUILD.md`](docs/DEKONT_ANDROID_REBUILD.md) — hot reload ile native eklenti kaydı olmaz; tam derleme gerekir.
 
 ## Proje belgeleri
 
-API sözleşmesi ve fazlar: `resources/AIDATPANEL.md`, `resources/yol-haritası/FAZ_DURUMU.md`. Backend API: `origin/backend/yedek` → `API/FLUTTER-BACKEND.md`. Bu README yalnızca mobil pakete giriş içindir.
+API ve mimari: [`resources/AIDATPANEL.md`](../resources/AIDATPANEL.md), faz durumu: [`resources/yol-haritası/FAZ_DURUMU.md`](../resources/yol-haritası/FAZ_DURUMU.md), backend: [`backend/README.md`](../backend/README.md).
 
 ---
 

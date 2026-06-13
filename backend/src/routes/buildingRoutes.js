@@ -12,6 +12,7 @@ import {
   updateDueStatus,
   updateBuildingDueAmount,
   postRemindBuildingDues,
+  postBulkGenerateBuildingDues,
 } from "../controllers/dueController.js";
 import { getTicketsByBuilding } from "../controllers/ticketController.js";
 import {
@@ -22,6 +23,7 @@ import {
 import { postBuildingAnnouncement } from "../controllers/announcementController.js";
 import { getDekontsByBuilding } from "../controllers/dekontController.js";
 import { patchBuildingCollection } from "../controllers/buildingCollectionController.js";
+import { getBuildingReport } from "../controllers/reportController.js";
 
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireRoles } from "../middlewares/roleMiddleware.js";
@@ -33,6 +35,7 @@ import {
   expenseSchemas,
   notificationSchemas,
   dekontSchemas,
+  reportSchemas,
 } from "../middlewares/validate.js";
 
 const router = express.Router();
@@ -47,10 +50,16 @@ router.get("/collection-presets", getCollectionPresets);
 // Aidatlar — /:id/... bina detayından önce (okunabilirlik; Express yine de doğru eşleştirir)
 router.get("/:id/dues", validate(dueSchemas.getByBuilding), getDuesByBuilding);
 router.post("/:id/dues/remind", validate(dueSchemas.remind), postRemindBuildingDues);
+router.post("/:id/dues/bulk", validate(dueSchemas.bulk), postBulkGenerateBuildingDues);
 router.get(
   "/:id/expenses/summary",
   validate(expenseSchemas.summaryByBuilding),
   getExpenseSummary
+);
+router.get(
+  "/:id/reports",
+  validate(reportSchemas.buildingReport),
+  getBuildingReport
 );
 router.get("/:id/expenses", validate(expenseSchemas.listByBuilding), getExpensesByBuilding);
 router.post("/:id/expenses", validate(expenseSchemas.create), createExpense);

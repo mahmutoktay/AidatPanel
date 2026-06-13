@@ -278,90 +278,110 @@ enum NotificationType {
 
 ## 🔌 API Endpoint'leri
 
-### Auth
+### Auth (`/api/v1/auth`)
 ```
-POST   /api/auth/register          # Yönetici kaydı
-POST   /api/auth/login             # Giriş
-POST   /api/auth/refresh           # Token yenile
-POST   /api/auth/logout            # Çıkış (bu cihaz + refreshTokenVersion++)
-POST   /api/auth/logout-all-devices # Diğer cihazlardan çıkış; bu cihaza yeni token
-POST   /api/auth/join              # Sakin davet koduyla kaydolur
-POST   /api/auth/forgot-password   # Şifre sıfırlama maili
-POST   /api/auth/reset-password    # Yeni şifre set
-```
-
-### Buildings (Yönetici only)
-```
-GET    /api/buildings              # Yöneticinin tüm apartmanları
-POST   /api/buildings              # Yeni apartman ekle
-GET    /api/buildings/:id          # Apartman detayı
-PUT    /api/buildings/:id          # Güncelle
-DELETE /api/buildings/:id          # Sil
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login             # body: identifier (email veya telefon) + password
+POST   /api/v1/auth/refresh
+POST   /api/v1/auth/logout            # FCM token temizler
+POST   /api/v1/auth/logout-all-devices
+POST   /api/v1/auth/join
+POST   /api/v1/auth/forgot-password
+POST   /api/v1/auth/reset-password
 ```
 
-### Apartments (Yönetici only)
+### Buildings (Yönetici)
 ```
-GET    /api/buildings/:id/apartments          # Apartmandaki daireler
-POST   /api/buildings/:id/apartments          # Daire ekle
-PUT    /api/buildings/:buildingId/apartments/:id
-DELETE /api/buildings/:buildingId/apartments/:id
-POST   /api/apartments/:id/invite-code        # Davet kodu üret
+GET    /api/v1/buildings
+POST   /api/v1/buildings
+GET    /api/v1/buildings/:id
+PUT    /api/v1/buildings/:id
+DELETE /api/v1/buildings/:id
+PATCH  /api/v1/buildings/:id/collection    # Tahsilat IBAN
+GET    /api/v1/buildings/:id/dekonts
+POST   /api/v1/buildings/:id/announcements
+```
+
+### Apartments (Yönetici)
+```
+GET    /api/v1/buildings/:buildingId/apartments
+POST   /api/v1/buildings/:buildingId/apartments
+PUT    /api/v1/buildings/:buildingId/apartments/:id
+DELETE /api/v1/buildings/:buildingId/apartments/:id
+DELETE /api/v1/buildings/:buildingId/apartments/:id/resident
+POST   /api/v1/apartments/:apartmentId/invite-code
 ```
 
 ### Dues (Aidat)
 ```
-GET    /api/buildings/:id/dues               # Tüm aidat listesi (Yönetici)
-POST   /api/buildings/:id/dues/bulk          # Toplu aidat oluştur (Yönetici)
-PATCH  /api/dues/:id/status                  # Ödendi/ödenmedi işaretle (Yönetici)
-GET    /api/me/dues                          # Kendi aidat geçmişim (Sakin)
+GET    /api/v1/buildings/:id/dues
+POST   /api/v1/buildings/:id/dues/bulk      # Eksik aidatları oluştur
+POST   /api/v1/buildings/:id/dues/remind
+PATCH  /api/v1/buildings/:id/dues/:dueId/status
+PATCH  /api/v1/buildings/:id/due-amount
+GET    /api/v1/me/dues                      # Sakin
 ```
 
 ### Expenses (Gider)
 ```
-GET    /api/buildings/:id/expenses           # Gider listesi (Yönetici)
-POST   /api/buildings/:id/expenses           # Gider ekle (Yönetici)
-PUT    /api/expenses/:id                     # Güncelle (Yönetici)
-DELETE /api/expenses/:id                     # Sil (Yönetici)
-GET    /api/buildings/:id/expenses/summary   # Aylık özet (Yönetici)
+GET    /api/v1/buildings/:id/expenses
+POST   /api/v1/buildings/:id/expenses
+GET    /api/v1/buildings/:id/expenses/summary
+GET    /api/v1/buildings/:id/reports          # PDF (type=monthly|annual)
+PUT    /api/v1/expenses/:id
+DELETE /api/v1/expenses/:id
+POST   /api/v1/expenses/:id/proof           # Makbuz upload (multipart)
+GET    /api/v1/expenses/:id/file
+GET    /api/v1/me/expenses                  # Sakin (okuma)
 ```
 
-### Tickets (Arıza/Talep)
+### Tickets
 ```
-GET    /api/buildings/:id/tickets            # Tüm talepler (Yönetici)
-GET    /api/tickets/:id                      # Talep detayı
-POST   /api/apartments/:id/tickets           # Yeni talep (Sakin)
-POST   /api/tickets/:id/updates             # Güncelleme ekle (Yönetici)
-PATCH  /api/tickets/:id/status              # Durum değiştir (Yönetici)
-GET    /api/me/tickets                       # Kendi taleplerim (Sakin)
+GET    /api/v1/buildings/:id/tickets
+GET    /api/v1/tickets/:id
+POST   /api/v1/apartments/:apartmentId/tickets
+POST   /api/v1/tickets/:id/updates
+PATCH  /api/v1/tickets/:id/status
+GET    /api/v1/me/tickets
+```
+
+### Dekont
+```
+POST   /api/v1/dekonts/upload
+GET    /api/v1/dekonts/:id
+GET    /api/v1/dekonts/:id/file
+PATCH  /api/v1/dekonts/:id/review
+GET    /api/v1/me/dekonts
+GET    /api/v1/me/payment-collection
 ```
 
 ### Notifications
 ```
-GET    /api/v1/notifications                 # Bildirimlerim (liste)
-GET    /api/v1/notifications/unread-count    # Rozet — okunmamış sayısı (hafif)
-PATCH  /api/v1/notifications/:id/read       # Okundu işaretle
-PATCH  /api/v1/notifications/read-all       # Tümünü oku
-PUT    /api/v1/me/fcm-token                  # FCM token güncelle
+GET    /api/v1/notifications
+GET    /api/v1/notifications/unread-count
+PATCH  /api/v1/notifications/:id/read
+PATCH  /api/v1/notifications/read-all
+PUT    /api/v1/me/fcm-token
 ```
 
-### Reports (Yönetici only)
+### Profile (`/api/v1/me`)
 ```
-GET    /api/buildings/:id/reports/monthly    # Aylık rapor (PDF)
-GET    /api/buildings/:id/reports/summary    # Özet istatistik
-```
-
-### Subscription
-```
-POST   /api/subscription/webhook/revenuecat  # RevenueCat webhook (ödeme olayları)
-GET    /api/me/subscription                  # Abonelik durumum
+GET    /api/v1/me
+PUT    /api/v1/me               # name, email, phone, language (email/phone değişimi → currentPassword)
+PUT    /api/v1/me/password
+PUT    /api/v1/me/language
+DELETE /api/v1/me               # KVKK hesap kapatma
 ```
 
-### Profile
+### Realtime
 ```
-GET    /api/me                               # Profil bilgisi
-PUT    /api/me                               # Güncelle
-PUT    /api/me/password                      # Şifre değiştir
-PUT    /api/me/language                      # Dil değiştir
+WSS    /api/v1/realtime?token=ACCESS_JWT
+```
+
+### Ertelenen / yok
+```
+GET    /api/v1/me/subscription                # FAZ 6
+POST   /api/v1/subscription/webhook/revenuecat # FAZ 6
 ```
 
 ---

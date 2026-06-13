@@ -3,6 +3,7 @@ import { DUE_PAID_RESIDENT } from "../constants/notificationTemplates.js";
 import { prisma } from "../config/db.js";
 import { userPublicSelect } from "./meService.js";
 import { createForUsers } from "./notificationService.js";
+import { computeOverdueDays } from "../utils/trDueDate.js";
 import {
   resolveListTake,
   resolvePageLimit,
@@ -121,12 +122,7 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
     updateData.paidAt = null;
     updateData.overdueDays = 0;
   } else if (status === "OVERDUE") {
-    // Gecikme gün sayısını hesapla
-    const today = new Date();
-    const dueDate = new Date(due.dueDate);
-    const diffTime = today.getTime() - dueDate.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    updateData.overdueDays = Math.max(0, diffDays);
+    updateData.overdueDays = computeOverdueDays(due.dueDate);
   }
 
   if (note !== undefined) {

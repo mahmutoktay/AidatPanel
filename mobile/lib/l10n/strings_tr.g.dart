@@ -368,6 +368,7 @@ class _Translations$features$tr implements Translations$features$en {
 	@override late final _Translations$features$notifications$tr notifications = _Translations$features$notifications$tr._(_root);
 	@override late final _Translations$features$profile$tr profile = _Translations$features$profile$tr._(_root);
 	@override late final _Translations$features$subscription$tr subscription = _Translations$features$subscription$tr._(_root);
+	@override late final _Translations$features$reports$tr reports = _Translations$features$reports$tr._(_root);
 	@override late final _Translations$features$faz2$tr faz2 = _Translations$features$faz2$tr._(_root);
 }
 
@@ -891,6 +892,29 @@ class _Translations$features$subscription$tr implements Translations$features$su
 	@override String get backendPending => 'Abonelik sunucuya henüz bağlanmadı. Satın alma yakında açılacak.';
 	@override String get purchaseComingSoon => 'Satın alma yakında';
 	@override String get loadFailed => 'Abonelik bilgisi alınamadı.';
+}
+
+// Path: features.reports
+class _Translations$features$reports$tr implements Translations$features$reports$en {
+	_Translations$features$reports$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get menuDownload => 'Rapor indir';
+	@override String get sheetTitle => 'PDF rapor';
+	@override String get typeMonthly => 'Aylık özet';
+	@override String get typeAnnual => 'Yıllık özet';
+	@override String get fieldMonth => 'Ay';
+	@override String get fieldYear => 'Yıl';
+	@override String get download => 'Raporu göster';
+	@override String get downloading => 'Rapor hazırlanıyor…';
+	@override String get previewTitle => 'Rapor önizleme';
+	@override String get pdfPreviewHint => 'İki parmakla yakınlaştırıp kaydırabilirsiniz.';
+	@override String get pdfPreviewUnavailable => 'PDF bu cihazda açılamadı. Alttaki «Raporu paylaş» ile başka bir uygulamada açabilirsiniz.';
+	@override String get shareReport => 'Raporu paylaş';
+	@override String get shareFailed => 'Rapor paylaşılamadı. Lütfen tekrar deneyin.';
+	@override String get failed => 'Rapor oluşturulamadı. Lütfen tekrar deneyin.';
 }
 
 // Path: features.faz2
@@ -1697,6 +1721,20 @@ extension on TranslationsTr {
 			'features.subscription.backendPending' => 'Abonelik sunucuya henüz bağlanmadı. Satın alma yakında açılacak.',
 			'features.subscription.purchaseComingSoon' => 'Satın alma yakında',
 			'features.subscription.loadFailed' => 'Abonelik bilgisi alınamadı.',
+			'features.reports.menuDownload' => 'Rapor indir',
+			'features.reports.sheetTitle' => 'PDF rapor',
+			'features.reports.typeMonthly' => 'Aylık özet',
+			'features.reports.typeAnnual' => 'Yıllık özet',
+			'features.reports.fieldMonth' => 'Ay',
+			'features.reports.fieldYear' => 'Yıl',
+			'features.reports.download' => 'Raporu göster',
+			'features.reports.downloading' => 'Rapor hazırlanıyor…',
+			'features.reports.previewTitle' => 'Rapor önizleme',
+			'features.reports.pdfPreviewHint' => 'İki parmakla yakınlaştırıp kaydırabilirsiniz.',
+			'features.reports.pdfPreviewUnavailable' => 'PDF bu cihazda açılamadı. Alttaki «Raporu paylaş» ile başka bir uygulamada açabilirsiniz.',
+			'features.reports.shareReport' => 'Raporu paylaş',
+			'features.reports.shareFailed' => 'Rapor paylaşılamadı. Lütfen tekrar deneyin.',
+			'features.reports.failed' => 'Rapor oluşturulamadı. Lütfen tekrar deneyin.',
 			'features.faz2.sectionTitle' => 'Faz 2',
 			'features.faz2.tickets' => 'Talepler',
 			'features.faz2.expenses' => 'Giderler',

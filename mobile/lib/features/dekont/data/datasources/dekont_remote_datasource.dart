@@ -123,7 +123,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
         final response = await _dioClient.postMultipart(
           ApiConstants.dekontUpload,
           data: buildForm(),
-          rebuildFormData: buildForm,
+          rebuildFormData: () async => buildForm(),
         );
         final code = response.statusCode;
         dekontDebugLog(

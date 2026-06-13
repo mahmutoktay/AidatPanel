@@ -164,22 +164,25 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
 
   @override
   Future<ExpenseModel> uploadReceipts(String expenseId, List<String> filePaths) async {
-    final form = FormData();
-    for (final path in filePaths) {
-      final segments = path.replaceAll('\\', '/').split('/');
-      final fileName = segments.isNotEmpty ? segments.last : 'receipt.jpg';
-      form.files.add(MapEntry(
-        'files',
-        await MultipartFile.fromFile(path, filename: fileName),
-      ));
+    Future<FormData> buildForm() async {
+      final form = FormData();
+      for (final path in filePaths) {
+        final segments = path.replaceAll('\\', '/').split('/');
+        final fileName = segments.isNotEmpty ? segments.last : 'receipt.jpg';
+        form.files.add(MapEntry(
+          'files',
+          await MultipartFile.fromFile(path, filename: fileName),
+        ));
+      }
+      return form;
     }
 
-    final response = await _dioClient.post(
+    final response = await _dioClient.postMultipart(
       ApiConstants.expenseProof(expenseId),
-      data: form,
-      options: Options(contentType: 'multipart/form-data'),
+      data: await buildForm(),
+      rebuildFormData: buildForm,
     );
-    
+
     return ExpenseModel.fromJson(response.data['data'] as Map<String, dynamic>);
   }
 }

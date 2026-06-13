@@ -1,8 +1,6 @@
 /** @type {import('jest').Config} */
 export default {
   testEnvironment: "node",
-  transform: {},
-  extensionsToTreatAsEsm: [".js"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
@@ -16,6 +14,5 @@ export default {
     "/node_modules/",
     "/__tests__/",
   ],
-  // Test veritabanı kullanımı için
   setupFilesAfterEnv: ["./__tests__/setup.js"],
 };

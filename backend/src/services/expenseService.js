@@ -21,9 +21,7 @@ import {
   deleteDekontFile,
   resolveDekontAbsolutePath,
 } from "./dekontStorageService.js";
-import { extractDekontTextForPipeline } from "./dekontOcrRunner.js";
-
-const ALLOWED_IMAGE_MIMES = new Set(["image/jpeg", "image/png"]);
+import { enqueueExpenseOcrPipeline } from "./expenseOcrService.js";
 
 function serializeExpense(expense) {
   const receiptUrls = Array.isArray(expense.storedPaths)
@@ -268,9 +266,7 @@ export async function uploadExpenseProofsService(expenseId, managerId, files) {
   }
 
   const savedPaths = [];
-  const ocrResults = [];
-  let totalParsedAmount = 0;
-  let hasAnyAmount = false;
+  const ocrQueueFiles = [];
 
   try {
     for (let i = 0; i < files.length; i++) {
@@ -281,7 +277,6 @@ export async function uploadExpenseProofsService(expenseId, managerId, files) {
         throw new HttpError(validation.code, validation.message);
       }
 
-      // Dosyayı kaydet
       const fileId = `exp_${expenseId}_${i}_${randomUUID().slice(0, 8)}`;
       let storedPath = null;
 
@@ -308,73 +303,37 @@ export async function uploadExpenseProofsService(expenseId, managerId, files) {
       }
 
       savedPaths.push(storedPath);
-
-      // OCR — sadece image/jpeg veya image/png ise (PDF için de çalışır)
-      let parsedAmount = null;
-      let confidence = null;
-      let rawText = null;
-      let ocrNote = null;
-
-      try {
-        if (ALLOWED_IMAGE_MIMES.has(validation.mime) || validation.mime === "application/pdf") {
-          const ocr = await extractDekontTextForPipeline(storedPath, validation.mime);
-          if (ocr) {
-            rawText = ocr.rawText || null;
-            confidence = ocr.confidence || null;
-            if (ocr.parsed?.amount) {
-              const amount = parseFloat(String(ocr.parsed.amount).replace(",", "."));
-              if (!isNaN(amount) && amount > 0) {
-                parsedAmount = amount;
-                totalParsedAmount += amount;
-                hasAnyAmount = true;
-              }
-            }
-          }
-        } else {
-          ocrNote = "Desteklenmeyen dosya türü — OCR atlandı.";
-        }
-      } catch (ocrErr) {
-        console.warn(`[expenseService] OCR hatası (${i + 1}. dosya):`, ocrErr.message);
-        ocrNote = "OCR işlemi sırasında hata oluştu.";
-      }
-
-      ocrResults.push({
-        index: i,
-        path: storedPath,
-        parsedAmount,
-        confidence,
-        rawText: rawText ? rawText.slice(0, 500) : null, // fazla veri saklama
-        note: ocrNote,
-      });
+      ocrQueueFiles.push({ path: storedPath, mime: validation.mime });
     }
 
-    // Eski dosyaları temizle (yeniler başarıyla kaydedildiyse)
     const oldPaths = Array.isArray(expense.storedPaths) ? expense.storedPaths : [];
     for (const oldPath of oldPaths) {
       await deleteDekontFile(oldPath).catch(() => {});
     }
 
-    // Expense'i güncelle
     const updatedExpense = await prisma.expense.update({
       where: { id: expenseId },
       data: {
         storedPaths: savedPaths,
-        amount: hasAnyAmount ? totalParsedAmount : null,
-        parsedAmount: hasAnyAmount ? totalParsedAmount : null,
-        ocrReceiptsJson: ocrResults,
-        // receiptUrl eski alan — ilk dosyanın yolunu referans olarak yaz
+        amount: null,
+        parsedAmount: null,
+        ocrReceiptsJson: null,
         receiptUrl: savedPaths.length > 0 ? savedPaths[0] : null,
       },
     });
 
+    enqueueExpenseOcrPipeline(expenseId, ocrQueueFiles);
+
     const result = serializeExpense(updatedExpense);
     result.ocrSummary = {
       fileCount: files.length,
-      hasAmount: hasAnyAmount,
-      totalParsedAmount: hasAnyAmount ? totalParsedAmount.toFixed(2) : null,
-      message: hasAnyAmount
-        ? `${files.length} makbuzdan toplam tutar okundu: ${totalParsedAmount.toFixed(2)} TL`
-        : "Makbuzlardan tutar bilgisi okunamadı.",
+      hasAmount: false,
+      totalParsedAmount: null,
+      ocrPending: true,
+      message:
+        files.length === 1
+          ? "Makbuz kaydedildi. Tutar okuma işlemi arka planda devam ediyor."
+          : `${files.length} makbuz kaydedildi. Tutar okuma işlemi arka planda devam ediyor.`,
     };
 
     return result;

@@ -745,6 +745,22 @@
       "purchaseComingSoon": "Satın alma yakında",
       "loadFailed": "Abonelik bilgisi alınamadı."
     },
+    "reports": {
+      "menuDownload": "Rapor indir",
+      "sheetTitle": "PDF rapor",
+      "typeMonthly": "Aylık özet",
+      "typeAnnual": "Yıllık özet",
+      "fieldMonth": "Ay",
+      "fieldYear": "Yıl",
+      "download": "Raporu göster",
+      "downloading": "Rapor hazırlanıyor…",
+      "previewTitle": "Rapor önizleme",
+      "pdfPreviewHint": "İki parmakla yakınlaştırıp kaydırabilirsiniz.",
+      "pdfPreviewUnavailable": "PDF bu cihazda açılamadı. Alttaki «Raporu paylaş» ile başka bir uygulamada açabilirsiniz.",
+      "shareReport": "Raporu paylaş",
+      "shareFailed": "Rapor paylaşılamadı. Lütfen tekrar deneyin.",
+      "failed": "Rapor oluşturulamadı. Lütfen tekrar deneyin."
+    },
     "faz2": {
       "sectionTitle": "Faz 2",
       "tickets": "Talepler",

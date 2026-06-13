@@ -1,308 +1,114 @@
-import { prisma } from "../config/db.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { generateAccessToken, generateRefreshToken } from "../utils/generateTokens.js";
-import { validateInviteCode } from "../services/inviteCodeService.js";
+import {
+  registerService,
+  loginService,
+  refreshAccessTokenService,
+  joinWithInviteCodeService,
+  logoutService,
+  logoutAllDevicesService,
+} from "../services/authService.js";
 import {
   requestPasswordResetService,
   resetPasswordWithTokenService,
 } from "../services/passwordResetService.js";
 import { HttpError } from "../utils/httpError.js";
-import { publishToUser } from "../realtime/realtimeHub.js";
 
-const register = async (req, res, next) => {
+const handleHttp = (err, res, next) => {
+  if (err instanceof HttpError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+    });
+  }
+  next(err);
+};
+
+export const register = async (req, res, next) => {
   try {
-    const { name, email, phone, password } = req.body;
-
-    const mevcutKullanici = await prisma.user.findFirst({
-      where: { email, deletedAt: null },
-    });
-    if (mevcutKullanici) {
-      return res.status(409).json({ success: false, message: "Bu email adresi zaten kullanılıyor." });
-    }
-
-    if (phone) {
-      const mevcutTelefon = await prisma.user.findFirst({
-        where: { phone, deletedAt: null },
-      });
-      if (mevcutTelefon) {
-        return res.status(409).json({ success: false, message: "Bu telefon numarası zaten kullanılıyor." });
-      }
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        phone,
-        passwordHash: hashedPassword,
-        role: "MANAGER", // Normal kayıt olanlar otomatik MANAGER
-      },
-    });
+    const data = await registerService(req.body);
     res.status(201).json({
       success: true,
       message: "Hesabınız başarıyla oluşturuldu.",
-      data: {
-        user: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        language: user.language,
-        apartmentId: user.apartmentId,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
+      data,
     });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    handleHttp(err, res, next);
   }
 };
 
-const login = async (req, res, next) => {
+export const login = async (req, res, next) => {
   try {
-    const { identifier, password } = req.body;
-
-    // identifier '@' içeriyorsa email, yoksa telefon numarası
-    const isEmail = identifier.includes('@');
-
-    const user = isEmail
-      ? await prisma.user.findFirst({
-          where: { email: identifier, deletedAt: null },
-        })
-      : await prisma.user.findFirst({
-          where: { phone: identifier, deletedAt: null },
-        });
-
-    if (!user || user.deletedAt) {
-      return res.status(401).json({
-        success: false,
-        message: "Email/telefon veya şifre hatalı."
-      });
-    }
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: "Email/telefon veya şifre hatalı."
-      });
-    }
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const data = await loginService(req.body);
     res.status(200).json({
       success: true,
       message: "Giriş başarılı.",
-      data: {
-        accessToken,
-        refreshToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          phone: user.phone,
-          language: user.language,
-          apartmentId: user.apartmentId,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-        },
-      }
+      data,
     });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    handleHttp(err, res, next);
   }
 };
 
-const refreshToken = async (req, res, next) => {
+export const refreshToken = async (req, res, next) => {
   try {
-    const { refreshToken } = req.body;
-    if (!refreshToken) {
-      return res.status(401).json({
-        success: false,
-        message: "Refresh token gerekli."
-      });
-    }
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    const tokenRv = decoded.rv ?? 0;
-    const user = await prisma.user.findFirst({
-      where: { id: decoded.id, deletedAt: null },
-    });
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Kullanıcı bulunamadı."
-      });
-    }
-    if ((user.refreshTokenVersion ?? 0) !== tokenRv) {
-      return res.status(401).json({
-        success: false,
-        message: "Oturum sonlandırıldı. Lütfen tekrar giriş yapın.",
-      });
-    }
-    const newAccessToken = generateAccessToken(user);
-    res.status(200).json({
-      success: true,
-      data: { accessToken: newAccessToken }
-    });
-  } catch (error) {
-    next(error);
+    const data = await refreshAccessTokenService(req.body.refreshToken);
+    res.status(200).json({ success: true, data });
+  } catch (err) {
+    handleHttp(err, res, next);
   }
 };
 
-const join = async (req, res, next) => {
+export const join = async (req, res, next) => {
   try {
-    const { name, email, phone, password, inviteCode } = req.body;
-
-    // Davet kodunu doğrula
-    const inviteCodeData = await validateInviteCode(inviteCode);
-
-    const mevcutKullanici = await prisma.user.findFirst({
-      where: { email, deletedAt: null },
-    });
-    if (mevcutKullanici) {
-      return res.status(409).json({
-        success: false,
-        message: "Bu email adresi zaten kullanılıyor."
-      });
-    }
-
-    if (phone) {
-      const mevcutTelefon = await prisma.user.findFirst({
-        where: { phone, deletedAt: null },
-      });
-      if (mevcutTelefon) {
-        return res.status(409).json({
-          success: false,
-          message: "Bu telefon numarası zaten kullanılıyor."
-        });
-      }
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Transaction: kullanıcı oluştur + davet kodunu kullanıldı işaretle
-    const result = await prisma.$transaction(async (tx) => {
-      // RESIDENT olarak kullanıcı oluştur
-      const user = await tx.user.create({
-        data: {
-          name,
-          email,
-          phone,
-          passwordHash: hashedPassword,
-          role: "RESIDENT",
-          apartmentId: inviteCodeData.apartmentId
-        },
-      });
-
-      // Davet kodunu kullanıldı olarak işaretle
-      await tx.inviteCode.update({
-        where: { id: inviteCodeData.id },
-        data: {
-          usedAt: new Date(),
-          usedBy: user.id,
-        },
-      });
-
-      return user;
-    });
-
-    // Token'lar oluştur
-    const accessToken = generateAccessToken(result);
-    const refreshToken = generateRefreshToken(result);
-
+    const data = await joinWithInviteCodeService(req.body);
     res.status(201).json({
       success: true,
       message: "Apartmana başarıyla katıldınız.",
-      data: {
-        accessToken,
-        refreshToken,
-        user: {
-          id: result.id,
-          email: result.email,
-          name: result.name,
-          phone: result.phone,
-          role: result.role,
-          language: result.language,
-          apartmentId: result.apartmentId,
-          createdAt: result.createdAt,
-          updatedAt: result.updatedAt,
-        },
-      }
+      data,
     });
-  } catch (error) {
-    if (error.message.includes("davet kodu")) {
-      return res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    }
-    next(error);
+  } catch (err) {
+    handleHttp(err, res, next);
   }
 };
 
-const logout = async (req, res, next) => {
+export const logout = async (req, res, next) => {
   try {
-    // Mobil kendi yerel token'larını temizler.
-    // Kullanıcı çıkış yaptığında (tek cihaz/token altyapısı nedeniyle)
-    // push bildirimlerini kesmek için fcmToken'ı null yapıyoruz.
-    await prisma.user.update({
-      where: { id: req.user.id },
-      data: { fcmToken: null },
-    });
-
+    await logoutService(req.user.id);
     res.status(200).json({
       success: true,
       message: "Çıkış başarılı.",
     });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
-/** Diğer cihazların refresh oturumlarını düşürür; bu cihaza yeni token çifti döner. */
-const logoutAllDevices = async (req, res, next) => {
+export const logoutAllDevices = async (req, res, next) => {
   try {
-    const user = await prisma.user.update({
-      where: { id: req.user.id },
-      data: {
-        refreshTokenVersion: { increment: 1 },
-      },
-    });
-    
-    // WebSocket ile bağlı tüm cihazlara 'force_logout' yolla (Anında düşürme)
-    publishToUser(user.id, { event: "force_logout" });
-
-    const accessToken = generateAccessToken(user);
-    const newRefreshToken = generateRefreshToken(user);
+    const data = await logoutAllDevicesService(req.user.id);
     res.status(200).json({
       success: true,
       message: "Diğer cihazlardaki oturumlar sonlandırıldı.",
-      data: {
-        accessToken,
-        refreshToken: newRefreshToken,
-      },
+      data,
     });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
-const forgotPassword = async (req, res, next) => {
+export const forgotPassword = async (req, res, next) => {
   try {
-    const { email } = req.body;
-    await requestPasswordResetService(email);
+    await requestPasswordResetService(req.body.email);
     res.status(200).json({
       success: true,
       message:
         "E-posta adresi sistemde kayıtlıysa şifre sıfırlama talimatları gönderildi.",
     });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
-const resetPassword = async (req, res, next) => {
+export const resetPassword = async (req, res, next) => {
   try {
     const { token, password } = req.body;
     await resetPasswordWithTokenService(token, password);
@@ -310,24 +116,7 @@ const resetPassword = async (req, res, next) => {
       success: true,
       message: "Şifreniz güncellendi. Yeni şifreyle giriş yapabilirsiniz.",
     });
-  } catch (error) {
-    if (error instanceof HttpError) {
-      return res.status(error.statusCode).json({
-        success: false,
-        message: error.message,
-      });
-    }
-    next(error);
+  } catch (err) {
+    handleHttp(err, res, next);
   }
-};
-
-export {
-  register,
-  login,
-  refreshToken,
-  join,
-  logout,
-  logoutAllDevices,
-  forgotPassword,
-  resetPassword,
 };

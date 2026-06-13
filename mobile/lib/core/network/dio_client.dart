@@ -13,6 +13,8 @@ import 'token_refresh_service.dart';
 
 class DioClient {
   late Dio _dio;
+  /// Uzun süren multipart yüklemeler — `_dio` timeout'larını ezmez.
+  late Dio _uploadDio;
   late Dio _refreshDio;
   late TokenRefreshService _tokenRefresh;
   final SecureStorage _secureStorage;
@@ -56,24 +58,22 @@ class DioClient {
     _initializeDio();
   }
 
-  void _initializeDio() {
-    _dio = Dio(
+  Dio _createDio(Duration timeout) {
+    return Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
-        connectTimeout: AppConstants.apiTimeout,
-        receiveTimeout: AppConstants.apiTimeout,
+        connectTimeout: timeout,
+        receiveTimeout: timeout,
+        sendTimeout: timeout,
         contentType: 'application/json',
       ),
     );
+  }
 
-    _refreshDio = Dio(
-      BaseOptions(
-        baseUrl: ApiConstants.baseUrl,
-        connectTimeout: AppConstants.apiTimeout,
-        receiveTimeout: AppConstants.apiTimeout,
-        contentType: 'application/json',
-      ),
-    );
+  void _initializeDio() {
+    _dio = _createDio(AppConstants.apiTimeout);
+    _uploadDio = _createDio(AppConstants.uploadTimeout);
+    _refreshDio = _createDio(AppConstants.apiTimeout);
 
     _tokenRefresh = TokenRefreshService(
       refreshDio: _refreshDio,
@@ -81,16 +81,12 @@ class DioClient {
       onSessionExpiredGetter: onSessionExpiredGetter,
     );
 
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: _onRequest,
-        onResponse: _onResponse,
-        onError: _onError,
-      ),
-    );
+    _attachAuthInterceptors(_dio);
+    _attachAuthInterceptors(_uploadDio);
 
     if (kDebugMode) {
       _dio.interceptors.add(SafeLogInterceptor());
+      _uploadDio.interceptors.add(SafeLogInterceptor());
     }
   }
 
@@ -104,6 +100,16 @@ class DioClient {
   };
 
   bool _isPublicPath(String path) => _publicPaths.any((p) => path.endsWith(p));
+
+  void _attachAuthInterceptors(Dio dio) {
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) => _onRequest(options, handler),
+        onResponse: (response, handler) => handler.next(response),
+        onError: (error, handler) => _onError(dio, error, handler),
+      ),
+    );
+  }
 
   Future<String?> _ensureValidAccessToken() async {
     var token = await _secureStorage.getToken();
@@ -139,14 +145,8 @@ class DioClient {
     return handler.next(options);
   }
 
-  Future<void> _onResponse(
-    Response response,
-    ResponseInterceptorHandler handler,
-  ) async {
-    return handler.next(response);
-  }
-
   Future<void> _onError(
+    Dio dio,
     DioException error,
     ErrorInterceptorHandler handler,
   ) async {
@@ -166,7 +166,7 @@ class DioClient {
         final opts = error.requestOptions;
         opts.headers['Authorization'] = 'Bearer ${refreshed.accessToken}';
         try {
-          final retryResponse = await _dio.request<dynamic>(
+          final retryResponse = await dio.request<dynamic>(
             opts.path,
             options: Options(method: opts.method, headers: opts.headers),
             data: opts.data,
@@ -238,14 +238,13 @@ class DioClient {
   Future<Response<T>> postMultipart<T>(
     String path, {
     required FormData data,
-    FormData Function()? rebuildFormData,
+    Future<FormData> Function()? rebuildFormData,
     Map<String, dynamic>? queryParameters,
     Duration? sendTimeout,
     Duration? receiveTimeout,
   }) async {
-    const defaultUploadTimeout = Duration(minutes: 3);
-    final effectiveSend = sendTimeout ?? defaultUploadTimeout;
-    final effectiveReceive = receiveTimeout ?? defaultUploadTimeout;
+    final effectiveSend = sendTimeout ?? AppConstants.uploadTimeout;
+    final effectiveReceive = receiveTimeout ?? AppConstants.uploadTimeout;
 
     await _ensureValidAccessToken();
 
@@ -271,7 +270,7 @@ class DioClient {
       try {
         return await _postMultipartOnce<T>(
           path,
-          data: rebuildFormData(),
+          data: await rebuildFormData(),
           queryParameters: queryParameters,
           effectiveSend: effectiveSend,
           effectiveReceive: effectiveReceive,
@@ -291,19 +290,13 @@ class DioClient {
     required Duration effectiveReceive,
     String? accessToken,
   }) async {
-    final prevReceive = _dio.options.receiveTimeout;
-    final prevSend = _dio.options.sendTimeout;
-    final prevConnect = _dio.options.connectTimeout;
     _cache.clear();
+    final headers = <String, dynamic>{};
+    if (accessToken != null && accessToken.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $accessToken';
+    }
     try {
-      _dio.options.receiveTimeout = effectiveReceive;
-      _dio.options.sendTimeout = effectiveSend;
-      _dio.options.connectTimeout = effectiveReceive;
-      final headers = <String, dynamic>{};
-      if (accessToken != null && accessToken.isNotEmpty) {
-        headers['Authorization'] = 'Bearer $accessToken';
-      }
-      return await _dio.post<T>(
+      return await _uploadDio.post<T>(
         path,
         data: data,
         queryParameters: queryParameters,
@@ -316,10 +309,8 @@ class DioClient {
           headers: headers.isEmpty ? null : headers,
         ),
       );
-    } finally {
-      _dio.options.receiveTimeout = prevReceive;
-      _dio.options.sendTimeout = prevSend;
-      _dio.options.connectTimeout = prevConnect;
+    } on DioException catch (e) {
+      throw _handleException(e);
     }
   }
 

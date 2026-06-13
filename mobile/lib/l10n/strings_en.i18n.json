@@ -745,6 +745,22 @@
       "purchaseComingSoon": "Purchase coming soon",
       "loadFailed": "Could not load subscription."
     },
+    "reports": {
+      "menuDownload": "Download report",
+      "sheetTitle": "PDF report",
+      "typeMonthly": "Monthly summary",
+      "typeAnnual": "Annual summary",
+      "fieldMonth": "Month",
+      "fieldYear": "Year",
+      "download": "Show report",
+      "downloading": "Preparing report…",
+      "previewTitle": "Report preview",
+      "pdfPreviewHint": "Pinch to zoom and scroll to view pages.",
+      "pdfPreviewUnavailable": "PDF could not be opened on this device. Use «Share report» below to open it in another app.",
+      "shareReport": "Share report",
+      "shareFailed": "Could not share the report. Please try again.",
+      "failed": "Could not generate the report. Please try again."
+    },
     "faz2": {
       "sectionTitle": "Phase 2",
       "tickets": "Requests",

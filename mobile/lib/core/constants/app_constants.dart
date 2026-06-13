@@ -18,6 +18,8 @@ class AppConstants {
 
   // Timeouts
   static const Duration apiTimeout = Duration(seconds: 30);
+  /// Dekont / makbuz multipart — ana API timeout'undan ayrı (FAZ 5).
+  static const Duration uploadTimeout = Duration(minutes: 3);
   static const Duration tokenRefreshThreshold = Duration(minutes: 5);
 
   // Invite code

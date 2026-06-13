@@ -28,17 +28,18 @@
 1. `refreshTokenVersion` +1 (eski `rv` içeren access ve refresh JWT'ler geçersiz).
 2. Güncel kullanıcı ile yeni access + refresh üretilir.
 3. `fcmToken` **silinmez** (bu cihaz push almaya devam eder).
+4. WebSocket `force_logout` olayı diğer oturumlara iletilir.
 
 ## `POST /auth/logout` farkı
 
 | | `logout` | `logout-all-devices` |
 |---|----------|----------------------|
 | Bu cihaz | Mobil `clearAuth()` ile çıkar | Yeni token kaydedilir, kalır |
-| Diğer cihazlar | **Etkilenmez** (sunucu `refreshTokenVersion` artırmaz) | Eski `rv` ile tüm oturumlar düşer |
-| Sunucu DB | No-op (yalnızca 200 JSON) | `refreshTokenVersion++` |
-| FCM | Değişmez | Değişmez |
+| Diğer cihazlar | **Etkilenmez** (`refreshTokenVersion` artmaz) | Eski `rv` ile tüm oturumlar düşer |
+| Sunucu DB | `fcmToken: null` | `refreshTokenVersion++` |
+| FCM | **Bu cihazda temizlenir** | Değişmez |
 
-**Ürün notu:** Tüm cihazlardan zorunlu çıkış için `logout-all-devices` veya şifre değişimi (`PUT /me/password` → `refreshTokenVersion++`) kullanılır. Tek cihaz seçimi için ileride `UserDevice` tablosu planlanır.
+**Ürün notu:** Tüm cihazlardan zorunlu çıkış için `logout-all-devices` veya şifre değişimi (`PUT /me/password` → `refreshTokenVersion++`) kullanılır.
 
 ## Manuel test
 
@@ -53,5 +54,3 @@
 - `AuthRemoteDataSource.logoutAllDevices()`
 - `DioClient.beginSessionMutation()` / `endSessionMutation()` — paralel 401 yarışını önler
 - Profil: `LogoutAllDevicesTile` (`profile_details_screen.dart`)
-
-**Kaynak branch:** Backend güncel kodu `origin/mobile/dekont` içindeki `backend/` klasöründen alınır.

@@ -1,5 +1,11 @@
 class ApiConstants {
-  static const String baseUrl = 'https://api.aidatpanel.com';
+  /// Yerel backend: `flutter run --dart-define=API_BASE_URL=http://127.0.0.1:4200`
+  /// Android emülatör: `http://10.0.2.2:4200` · fiziksel cihaz: `http://<PC_IP>:4200`
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://api.aidatpanel.com',
+  );
+
   static const String apiVersion = '/api/v1';
 
   /// `wss://api.aidatpanel.com/api/v1/realtime?token=...`
