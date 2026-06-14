@@ -41,7 +41,7 @@
 
 - [ ] FAZ 5–7 (test, abonelik, store) — FAZ 4 tamamlanınca
 
-**Referanslar:** API → `resources/AIDATPANEL.md` + `backend/README.md` · Bildirim → `resources/bildirim/REALTIME_NOTIFICATIONS.md` · Dev → `flutter run -t lib/main_dev.dart`
+**Referanslar:** API + bildirim → `resources/AIDATPANEL.md` · Backend → `backend/README.md` · Dev → `flutter run -t lib/main_dev.dart`
 
 ---
 

@@ -554,42 +554,72 @@ mobile/lib/
 
 ## 🔔 Bildirim Sistemi
 
-### Firebase FCM (Push Notification)
+Uygulama **açıkken** WebSocket ile anlık rozet/toast; **kapalıyken** FCM tray; **yedek** olarak seyrek HTTP poll.
 
-Kullanım senaryoları:
-- Aylık aidat hatırlatıcısı (yönetici tetikler veya otomatik)
-- Arıza talebi güncellemesi (yönetici not eklediğinde)
-- Duyurular (yöneticiden tüm sakine)
+### Katmanlar
 
-```javascript
-// FCM gönderme servisi (backend)
-// services/notification.service.js
-const sendPushNotification = async (fcmToken, title, body, data = {}) => {
-  const message = {
-    token: fcmToken,
-    notification: { title, body },
-    data,
-    android: { priority: 'high' },
-    apns: { payload: { aps: { sound: 'default' } } }
-  };
-  await admin.messaging().send(message);
-};
+```text
+Olay → notificationService (DB)
+     → notificationDeliveryService
+           ├─ realtimeHub → WebSocket aboneleri
+           └─ FCM push (pushService.js)
+
+Mobil → NotificationDeliveryCoordinator
+           ├─ WebSocketNotificationRealtimeSource  (açık app)
+           ├─ FcmNotificationRealtimeSource         (tray + ön plan)
+           └─ PollingNotificationRealtimeSource     (yedek)
 ```
 
-### WhatsApp (Twilio)
+### Backend
 
-Kullanım senaryoları:
-- Aidat hatırlatma mesajı (yönetici "Hatırlat" butonuna bastığında)
-- Sakin telefon numarası varsa gönderilir
+| Dosya | Rol |
+|-------|-----|
+| `src/constants/realtimeEvents.js` | Olay adları + payload |
+| `src/realtime/realtimeHub.js` | publish/subscribe |
+| `src/realtime/wsGateway.js` | `ws` + JWT `?token=` |
+| `src/utils/verifyAccessToken.js` | WS auth |
+| `src/services/notificationDeliveryService.js` | Hub + FCM |
+| `src/services/pushService.js` | Firebase Admin SDK |
+| `GET /notifications/unread-count` | Hafif rozet |
 
-```javascript
-// Örnek WhatsApp mesaj şablonu
-const message = `Sayın ${residentName}, ${buildingName} apartmanı ${month}/${year} dönemi aidatınız (${amount}₺) henüz ödenmemiştir. Detaylar için AidatPanel uygulamasını açınız.`;
+**Env:** `REALTIME_WS_ENABLED=true`, `FIREBASE_SERVICE_ACCOUNT_JSON`
+
+**WebSocket:** `wss://api.aidatpanel.com/api/v1/realtime?token=ACCESS_JWT`
+
+Sunucu → istemci örnek payload:
+
+```json
+{
+  "event": "notification.created",
+  "notificationId": "uuid",
+  "type": "TICKET_UPDATE",
+  "title": "...",
+  "body": "...",
+  "data": { "ticketId": "...", "route": "/resident-dashboard" }
+}
 ```
 
-### SMS (Twilio — fallback)
+### Mobil
 
-WhatsApp mesajı iletilemezse SMS olarak düşer.
+| Dosya | Rol |
+|-------|-----|
+| `core/notifications/realtime/notification_delivery_config.dart` | `webSocketEnabled` |
+| `core/notifications/realtime/websocket_notification_realtime_source.dart` | `web_socket_channel` |
+| `core/notifications/realtime/notification_delivery_coordinator.dart` | Orchestrator |
+| `core/constants/api_constants.dart` | `realtimeWebSocketUri()` |
+
+### FCM test (canlı)
+
+- `main.dart` kullanın (`main_dev.dart` mock — push çalışmaz)
+- Logcat: `[FCM] PUT /me/fcm-token başarılı`, `[realtime] WebSocket bağlandı`
+- Yönetici + sakin testinde **farklı hesap** kullanın
+- Android 13+: bildirim izni; Play Store imzalı build veya debug + gerçek cihaz
+
+### Canlı deploy notları
+
+1. Backend: `REALTIME_WS_ENABLED=true`, Firebase JSON, `npx prisma migrate deploy`, `pm2 restart aidapanel-api`
+2. Nginx: `/api/v1/realtime` için WebSocket upgrade (`Upgrade`, `Connection "upgrade"`)
+3. Deploy otomasyonu: `backend/scripts/deploy.ps1` (bkz. Deployment bölümü)
 
 ---
 
@@ -657,21 +687,32 @@ await Purchases.configure(configuration);
 
 ## 🚀 Deployment
 
-### Backend (VPS)
+### Backend (VPS — CloudPanel)
+
+| Öğe | Değer |
+|-----|-------|
+| Domain | `api.aidatpanel.com` |
+| Sunucu yolu | `/home/aidatpanel-api/htdocs/api.aidatpanel.com` |
+| PM2 süreç adı | `aidapanel-api` (t harfi yok) |
+| Deploy script | `backend/scripts/deploy.ps1` |
+
+**Yerel makineden deploy:**
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend/scripts/deploy.ps1
+```
+
+İlk kurulum: `backend/scripts/deploy.config.example.json` → `deploy.local.json` (gitignore).
+
+**Sunucuda manuel restart:**
 
 ```bash
-# PM2 ecosystem dosyası
-# backend/ecosystem.config.js
-module.exports = {
-  apps: [{
-    name: 'aidatpanel-api',
-    script: 'index.js',
-    env: {
-      NODE_ENV: 'production',
-      PORT: 4200
-    }
-  }]
-};
+source ~/.nvm/nvm.sh
+cd /home/aidatpanel-api/htdocs/api.aidatpanel.com
+git pull   # veya deploy.ps1 ile sync
+npm ci --omit=dev
+npx prisma migrate deploy
+pm2 restart aidapanel-api
 ```
 
 ### Subdomain Yapısı

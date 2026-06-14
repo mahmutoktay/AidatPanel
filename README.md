@@ -61,7 +61,7 @@ flutter run
 Uygulama içinde anlık bildirim (push) ve gerçek zamanlı rozet güncellemeleri kullanılmaktadır:
 
 - **Push Bildirimleri:** Backend (`pushService.js`) üzerinden Firebase FCM'e iletilir. Mobil cihaz token'ı `PUT /me/fcm-token` ile kaydedilir.
-- **Canlı güncelleme:** WebSocket (`/api/v1/realtime`) + FCM yedek; mimari: [`resources/bildirim/REALTIME_NOTIFICATIONS.md`](resources/bildirim/REALTIME_NOTIFICATIONS.md)
+- **Canlı güncelleme:** WebSocket (`/api/v1/realtime`) + FCM yedek — ayrıntı: [`resources/AIDATPANEL.md`](resources/AIDATPANEL.md) (Bildirim Sistemi)
 
 ---
 
@@ -69,5 +69,6 @@ Uygulama içinde anlık bildirim (push) ve gerçek zamanlı rozet güncellemeler
 
 - **Faz ve Görevler:** [`resources/yol-haritası/FAZ_DURUMU.md`](resources/yol-haritası/FAZ_DURUMU.md)
 - **AI Asistan Kuralları:** [`CLAUDE.md`](CLAUDE.md)
-- **Mimari + API:** [`resources/AIDATPANEL.md`](resources/AIDATPANEL.md)
+- **Mimari + API + Bildirim:** [`resources/AIDATPANEL.md`](resources/AIDATPANEL.md)
 - **Backend API:** [`backend/README.md`](backend/README.md)
+- **Değişiklik geçmişi:** [`CHANGELOG.md`](CHANGELOG.md)

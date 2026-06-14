@@ -1,82 +1,43 @@
 # Changelog
 
-Tüm önemli değişiklikler bu dosyada belgelenir.  
-Format [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) esas alınır.
+Format [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) esas alınır.  
+Faz durumu için: [`resources/yol-haritası/FAZ_DURUMU.md`](resources/yol-haritası/FAZ_DURUMU.md)
 
-## [Unreleased] — 2026-06-13
-
-Bu oturumda tamamlanan işler: **FAZ 4 (Reports + ONAY)**, **FAZ 5 backend sertleştirme** ve ilgili mobil/dokümantasyon güncellemeleri.
+## [Unreleased]
 
 ### Added
 
-#### Backend — PDF Raporlar (FAZ 4)
-
-- `GET /api/v1/buildings/:id/reports?type=monthly|annual` — aylık ve yıllık PDF çıktısı (`pdfkit`)
-- `reportDataService.js` — aidat, gider ve operasyonel veri toplama
-- `reportPdfService.js` — 50+ yaş dostu PDF şablonları (TR)
-- `reportController.js`, `reportSchemas.js`, `reportPeriod.js`, `reportAggregation.js`, `reportLabels.js`
-- Jest: `reportAggregation.test.js` (aidat/gider aggregasyon)
-
-#### Backend — FAZ 5 sertleştirme
-
-- `services/me/` — `meService.js` modüler refactor (profil, şifre, dil, ödeme bilgisi, KVKK, FCM)
-- `expenseOcrService.js` — gider makbuz OCR'ı dekont pipeline kuyruğuna alındı (async, `ocrPending`)
-- `dueBulkService.js`, `dueOverdueService.js`, `dueGeneration.js` — aidat toplu üretim ve OVERDUE job
-- `authService.js` — auth iş mantığı controller'dan servise taşındı
-- `validators/` — Zod şemaları feature bazlı modüllere bölündü
-- `authRateLimitKey.js` — hesap bazlı rate limit anahtarı
-- Prisma migration: `20260613120000_expense_updated_at` (`Expense.updatedAt` kolonu)
-- Jest altyapısı (`npm test`) — 24 unit test:
-  - `meProfileHelpers.test.js`
-  - `expenseOcrService.test.js`
-  - `reportAggregation.test.js`
-  - `dueGeneration.test.js`
-  - `trDueDate.test.js`
-  - `authRateLimitKey.test.js`
-- Dev HTTP istek log middleware (`backend/index.js`)
-
-#### Mobil — Reports (FAZ 4)
-
-- `features/reports/` — Clean Architecture (datasource, repository, provider, sheet, preview)
-- Bina ⋮ menüsünden «Rapor indir» → ay/yıl seçimi → **Raporu göster** → tam ekran PDF önizleme → **Raporu paylaş**
-- i18n: `features.reports` (TR/EN)
-
-#### Mobil — FAZ 5
-
-- `DioClient` — upload işlemleri için ayrı `_uploadDio` instance (3 dk timeout; global timeout yarışı riski giderildi)
-- Gider ve dekont upload datasource'ları `postMultipart` kullanacak şekilde güncellendi
-
-#### Yerel geliştirme
-
-- `API_BASE_URL` — `String.fromEnvironment` ile dart-define desteği (`api_constants.dart`)
-- Android `network_security_config.xml` — localhost / `10.0.2.2` cleartext (yerel backend)
-- `mobile/README.md`, `backend/README.md` — yerel çalıştırma komutları
+- `backend/scripts/deploy.ps1` — SSH + tar ile VPS deploy (Mutagen yerine)
+- `backend/scripts/deploy.sh` — WSL/Linux alternatifi
+- `backend/scripts/deploy.config.example.json` — sunucu ayar şablonu
 
 ### Changed
 
-- `expenseService.js` — makbuz yükleme yanıtı: dosyalar hemen kaydedilir, OCR arka planda (`ocrPending: true`)
-- `reportDataService.js` — `formatMoney` `reportFormat.js` util'ine taşındı
-- `meService.js` — barrel export; geriye dönük uyumluluk korundu
-- `FAZ_DURUMU.md` — FAZ 4 ✅ ONAY (2026-06-13); FAZ 5 backend checklist tamamlandı
-- `resources/AIDATPANEL.md` — reports endpoint dokümantasyonu
+- Bildirim mimarisi tek kaynakta: `resources/AIDATPANEL.md` (§ Bildirim Sistemi)
+- `resources/bildirim/` klasörü kaldırıldı; tüm referanslar güncellendi
 
-### Removed
+---
 
-- `mobile/docs/DEPENDENCY_UPGRADE.md`
-- `resources/PERF_GUVENLIK_ODAK.md`
-- `resources/bildirim/DEPLOY_TEK_SEFER.md`
-- `resources/bildirim/FCM_E2E_CHECKLIST.md`
+## [0.1.0] — 2026-06-13
+
+FAZ 4 (Reports PDF) tamamlandı; FAZ 5 backend sertleştirmesi başlandı.
+
+### Added
+
+- **Backend:** PDF raporlar (`GET /buildings/:id/reports?type=monthly|annual`), `reportDataService`, `reportPdfService`
+- **Backend:** `services/me/` modüler refactor, expense OCR kuyruğu, aidat bulk/overdue job, Jest altyapısı (24 test)
+- **Mobil:** `features/reports/` — PDF önizleme ve paylaşım
+- **Mobil:** Upload için ayrı `_uploadDio` (3 dk timeout)
+- **Dev:** `API_BASE_URL` dart-define, Android cleartext localhost
+
+### Changed
+
+- `meService.js` barrel export; Zod validators feature modüllerine bölündü
+- `FAZ_DURUMU.md` — FAZ 4 ONAY (2026-06-13)
 
 ### Fixed
 
-- Yerel `npm run dev` backend'e istek gitmeme sorunu — production URL varsayılanı yerine `API_BASE_URL` dart-define
-- `main_dev.dart` mock bina ID (`b1`) ile rapor testi yapılamaması — dokümante edildi (`main.dart` + gerçek giriş gerekir)
-
-### Bilinen sınırlar (rapor v1)
-
-- Net = tahsil − gider (kasa bakiyesi yok)
-- Manuel «ödendi» → `DuePayment` oluşmaz; v1 tahsilat kaynağı `Due` tablosu
-- OCR bitmemiş gider (`amount = null`) raporda «hesaplanmadı» olarak işaretlenir
+- Yerel backend testi: production URL varsayılanı yerine `API_BASE_URL` dart-define
 
 ---
 
@@ -84,6 +45,9 @@ Bu oturumda tamamlanan işler: **FAZ 4 (Reports + ONAY)**, **FAZ 5 backend sertl
 
 | Faz | Durum |
 |-----|-------|
-| 0–4 | ✅ Kapalı (FAZ 4 ONAY: 2026-06-13) |
-| 5   | ▶ Aktif — mobil: pagination, testler, certificate pinning |
-| 6–7 | 🔒 Kilitli |
+| 0–4 | Kapalı (FAZ 4 ONAY: 2026-06-13) |
+| 5   | Aktif — pagination, testler, certificate pinning |
+| 6–7 | Kilitli |
+
+[Unreleased]: https://github.com/mahmutoktay/AidatPanel/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/mahmutoktay/AidatPanel/releases/tag/v0.1.0

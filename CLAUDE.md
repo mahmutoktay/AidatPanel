@@ -182,7 +182,36 @@ Kullanıcı **Google Play çıktısı / .aab** istediğinde (ek script veya ara�
 2. Ardından `cd mobile` → `flutter build appbundle --release` (`lib/main.dart`, `main_dev` değil).
 3. Çıktı yolunu bildir: `mobile/build/app/outputs/bundle/release/app-release.aab`.
 
-Play’deki mevcut en büyük sürüm kodundan küçük/eşit kod yükleme reddedilir; bu yüzden adım 1 atlanmaz.
+Play’deki mevcut en büyük sürüm kodundan küçük/eşit kod yeniden yükleme reddedilir; bu yüzden adım 1 atlanmaz.
+
+### Backend VPS Deploy (asistan kuralı — ZORUNLU)
+
+`backend/` altında **herhangi bir dosya değiştirildiğinde** (kullanıcı ayrıca istemese bile) oturum bitmeden sunucuya yükle ve doğrula. Mutagen kullanılmaz.
+
+**Ne zaman deploy edilir**
+
+| Durum | Aksiyon |
+|-------|---------|
+| `backend/` kod, prisma, script değişikliği | Tam deploy (sync + npm + migrate + restart) |
+| Yalnızca yorum / dokümantasyon (`backend/README.md` vb.) | Deploy gerekmez |
+| Kullanıcı "deploy etme" derse | Atla, cevapta belirt |
+
+**Deploy adımları**
+
+1. `backend/scripts/deploy.local.json` mevcut olmalı (yoksa kullanıcıdan `deploy.config.example.json` kopyalayıp doldurmasını iste).
+2. Komut: `powershell -ExecutionPolicy Bypass -File backend/scripts/deploy.ps1`
+3. PM2 süreç adı: **`aidapanel-api`** (t harfi yok — `aidatpanel-api` değil).
+4. Sadece dosya: `-SyncOnly` · Sadece restart: `-RestartOnly` · Log: `-Logs`
+5. `.env`, `uploads/dekonts/`, Firebase JSON **asla** üzerine yazılmaz.
+6. Deploy sonrası doğrula: PM2 `online` + gerekirse `-Logs` veya ilgili endpoint.
+
+**Cevap formatı (dipnot — ZORUNLU)**
+
+Backend deploy yapıldıysa yanıtın **en altına** şu dipnotu ekle (deploy atlandıysa nedenini yaz):
+
+> **Sunucu:** Değişiklikler `api.aidatpanel.com` üzerine yüklendi, `aidapanel-api` yeniden başlatıldı ve doğrulandı.
+
+Deploy başarısızsa dipnotta hatayı özetle; başarılı sanma.
 
 ---
 

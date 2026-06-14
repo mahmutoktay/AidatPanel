@@ -71,6 +71,8 @@ ls -la "$DEKONT_UPLOAD_DIR/{buildingId}/"
 
 ## Production süreç yönetimi (PM2 + nginx)
 
+**Önerilen:** Yerel makineden `powershell -ExecutionPolicy Bypass -File backend/scripts/deploy.ps1` (SSH + sync + migrate + `pm2 restart aidapanel-api`). Ayrıntı: `resources/AIDATPANEL.md` (Deployment).
+
 ### PM2 — API sürekli çalışsın
 
 `npm run dev` (nodemon) SSH oturumu kapanınca durabilir. Üretimde PM2 kullanın:

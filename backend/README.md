@@ -103,8 +103,7 @@ Tam liste: `.env.example`
 
 | Dosya | İçerik |
 |-------|--------|
-| [`../resources/AIDATPANEL.md`](../resources/AIDATPANEL.md) | Master referans (API + mobil mimari) |
+| [`../resources/AIDATPANEL.md`](../resources/AIDATPANEL.md) | Master referans (API + bildirim mimarisi) |
 | [`../resources/yol-haritası/FAZ_DURUMU.md`](../resources/yol-haritası/FAZ_DURUMU.md) | Faz durumu |
-| [`../resources/bildirim/REALTIME_NOTIFICATIONS.md`](../resources/bildirim/REALTIME_NOTIFICATIONS.md) | Bildirim mimarisi |
 | [`../resources/api/DEKONT_FILE_404_TROUBLESHOOTING.md`](../resources/api/DEKONT_FILE_404_TROUBLESHOOTING.md) | Dekont 404/502 |
 | [`../resources/api/AUTH_LOGOUT_ALL_DEVICES.md`](../resources/api/AUTH_LOGOUT_ALL_DEVICES.md) | logout-all-devices sözleşmesi |

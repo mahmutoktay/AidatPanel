@@ -47,7 +47,7 @@ flutter run -t lib/main_dev.dart
 
 ## Push bildirimi (FCM) test
 
-Kapalı uygulamada tray push için Play Store’lu emülatör, `main.dart`, bildirim izni ve sakin hesabında `[FCM] PUT /me/fcm-token başarılı` logu gerekir. Yönetici telefon + sakin emülatör **farklı hesap** olmalı. Mimari: [`resources/bildirim/REALTIME_NOTIFICATIONS.md`](../resources/bildirim/REALTIME_NOTIFICATIONS.md).
+Kapalı uygulamada tray push için Play Store’lu emülatör, `main.dart`, bildirim izni ve sakin hesabında `[FCM] PUT /me/fcm-token başarılı` logu gerekir. Yönetici telefon + sakin emülatör **farklı hesap** olmalı. Mimari: [`resources/AIDATPANEL.md`](../resources/AIDATPANEL.md) (Bildirim Sistemi).
 
 ## Android notları
 

@@ -1,0 +1,11 @@
+{
+  "host": "SUNUCU_IP veya api.aidatpanel.com",
+  "user": "cloudpanel_ssh_kullanicisi",
+  "port": 22,
+  "sshKeyPath": "C:\\Users\\KULLANICI\\.ssh\\id_ed25519",
+  "remotePath": "/home/aidatpanel-api/htdocs/api.aidatpanel.com",
+  "restartMethod": "pm2",
+  "pm2Name": "aidapanel-api",
+  "healthUrl": "",
+  "method": "sync"
+}
