@@ -63,7 +63,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
   }) {
     final q = paginatedQuery(
       cursor: cursor,
-      limit: AppConstants.pageSize,
+      limit: paginated ? AppConstants.pageSize : null,
       paginated: paginated,
       extra: {
         if (status != null && status.isNotEmpty) 'status': status,

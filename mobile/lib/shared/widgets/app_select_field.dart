@@ -79,6 +79,10 @@ class AppSelectField<T> extends StatelessWidget {
             decoration: BoxDecoration(
               color: enabled ? AppColors.fill : AppColors.background,
               borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+              border: Border.all(
+                color: AppColors.borderColor.withValues(alpha: 0.14),
+                width: 0.5,
+              ),
             ),
             child: Row(
               children: [
@@ -246,12 +250,14 @@ class _SelectSheetOption extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primary.withValues(alpha: 0.08)
-                : Colors.transparent,
+                ? AppColors.primary.withValues(alpha: 0.06)
+                : AppColors.fill.withValues(alpha: 0.45),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: isSelected ? AppColors.primary : Colors.transparent,
-              width: isSelected ? 1.5 : 0,
+              color: isSelected
+                  ? AppColors.primary.withValues(alpha: 0.35)
+                  : AppColors.borderColor.withValues(alpha: 0.12),
+              width: isSelected ? 1 : 0.5,
             ),
           ),
           child: Row(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'app_button_styles.dart';
 import 'app_colors.dart';
+import 'app_date_picker_theme.dart';
 import 'app_sizes.dart';
 import 'app_typography.dart';
 
@@ -132,6 +133,8 @@ class AppTheme {
           return AppTypography.caption.copyWith(color: AppColors.textDisabled);
         }),
       ),
+      datePickerTheme: AppDatePickerTheme.data,
+      dialogTheme: AppDatePickerTheme.dialogTheme(const DialogThemeData()),
     );
   }
 }

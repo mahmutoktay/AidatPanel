@@ -64,6 +64,9 @@ class Translations$common$en {
 	/// en: 'Confirm'
 	String get confirm => 'Confirm';
 
+	/// en: 'OK'
+	String get ok => 'OK';
+
 	/// en: 'Save'
 	String get save => 'Save';
 
@@ -197,6 +200,8 @@ class Translations$common$en {
 
 	/// en: 'Try Again'
 	String get tryAgain => 'Try Again';
+
+	late final Translations$common$documentPreview$en documentPreview = Translations$common$documentPreview$en._(_root);
 
 	/// en: 'Home'
 	String get home => 'Home';
@@ -459,8 +464,20 @@ class Translations$common$en {
 	/// en: 'Phone not shared'
 	String get phoneNotShared => 'Phone not shared';
 
-	/// en: 'Details..'
-	String get residentDetailsLink => 'Details..';
+	/// en: 'View Details'
+	String get residentDetailsLink => 'View Details';
+
+	/// en: 'Dues Paid'
+	String get duesPaidStatus => 'Dues Paid';
+
+	/// en: 'Dues Pending'
+	String get duesPendingStatus => 'Dues Pending';
+
+	/// en: 'Dues Overdue'
+	String get duesOverdueStatus => 'Dues Overdue';
+
+	/// en: 'No resident assigned'
+	String get noResidentInApartment => 'No resident assigned';
 
 	/// en: 'Resident information'
 	String get residentDetailsSheetTitle => 'Resident information';
@@ -494,6 +511,12 @@ class Translations$common$en {
 
 	/// en: 'Month'
 	String get month => 'Month';
+
+	/// en: 'Day'
+	String get dayLabel => 'Day';
+
+	/// en: 'Select date'
+	String get pickDate => 'Select date';
 
 	/// en: 'January'
 	String get monthJanuary => 'January';
@@ -1194,6 +1217,27 @@ class Translations$common$api$en {
 	String get noApartmentForPayment => 'You must be assigned to an apartment before viewing payment details.';
 }
 
+// Path: common.documentPreview
+class Translations$common$documentPreview$en {
+	Translations$common$documentPreview$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'View document'
+	String get title => 'View document';
+
+	/// en: 'Share'
+	String get share => 'Share';
+
+	/// en: 'PDF could not be opened on this device. Use Share to open it in another app.'
+	String get pdfUnavailable => 'PDF could not be opened on this device. Use Share to open it in another app.';
+
+	/// en: 'Pinch to zoom and drag to pan'
+	String get pinchHint => 'Pinch to zoom and drag to pan';
+}
+
 // Path: features.buildings
 class Translations$features$buildings$en {
 	Translations$features$buildings$en._(this._root);
@@ -1744,6 +1788,15 @@ class Translations$features$dekont$en {
 	/// en: 'My receipts'
 	String get viewDekonts => 'My receipts';
 
+	/// en: 'Details'
+	String get breakdownDetails => 'Details';
+
+	/// en: 'Base due'
+	String get breakdownBaseDue => 'Base due';
+
+	/// en: 'Total'
+	String get breakdownTotal => 'Total';
+
 	/// en: 'No receipts yet'
 	String get emptyTitle => 'No receipts yet';
 
@@ -1857,6 +1910,111 @@ class Translations$features$dekont$en {
 
 	/// en: 'Could not load receipts'
 	String get loadError => 'Could not load receipts';
+
+	/// en: 'System information'
+	String get systemInfoTitle => 'System information';
+
+	/// en: 'Below is what we read from your receipt. Payment is not approved automatically; your manager will verify the bank account and approve.'
+	String get systemInfoSubtitle => 'Below is what we read from your receipt. Payment is not approved automatically; your manager will verify the bank account and approve.';
+
+	/// en: 'Read from receipt'
+	String get systemReadLabel => 'Read from receipt';
+
+	/// en: 'Your receipt is being processed. Amount, date and bank details will appear here shortly.'
+	String get systemInfoProcessing => 'Your receipt is being processed. Amount, date and bank details will appear here shortly.';
+
+	/// en: 'Read data'
+	String get systemInfoNoData => 'Read data';
+
+	/// en: 'Amount or date could not be read yet. It will still be sent for manager approval.'
+	String get systemInfoNoDataHint => 'Amount or date could not be read yet. It will still be sent for manager approval.';
+
+	/// en: 'Transaction date'
+	String get transactionDateLabel => 'Transaction date';
+
+	/// en: 'Bank'
+	String get bankLabel => 'Bank';
+
+	/// en: 'Recipient IBAN'
+	String get receiverIbanLabel => 'Recipient IBAN';
+
+	/// en: 'Recipient name'
+	String get receiverNameLabel => 'Recipient name';
+
+	/// en: 'Reference no.'
+	String get referenceNumberLabel => 'Reference no.';
+
+	/// en: 'The recipient IBAN could not be read from your dues payment receipt. It will be submitted for manager approval as is.'
+	String get ibanUnreadableNotice => 'The recipient IBAN could not be read from your dues payment receipt. It will be submitted for manager approval as is.';
+
+	/// en: 'The recipient IBAN on the receipt does not match your building's collection account. Your manager will verify the account and decide.'
+	String get ibanMismatchNotice => 'The recipient IBAN on the receipt does not match your building\'s collection account. Your manager will verify the account and decide.';
+
+	/// en: 'The recipient IBAN matches your building's collection account. Payment still requires manager approval.'
+	String get ibanVerifiedNotice => 'The recipient IBAN matches your building\'s collection account. Payment still requires manager approval.';
+
+	/// en: 'Your receipt has been submitted for manager approval. Payment is not approved automatically; your manager will verify the account.'
+	String get residentPendingReviewNotice => 'Your receipt has been submitted for manager approval. Payment is not approved automatically; your manager will verify the account.';
+
+	/// en: 'Check the amount received in your account, then approve or reject.'
+	String get managerApprovalHint => 'Check the amount received in your account, then approve or reject.';
+
+	/// en: '{resident} sent {amount} in dues on {date} via {bank}. Please check your account and approve.'
+	String get managerPaymentSummary => '{resident} sent {amount} in dues on {date} via {bank}. Please check your account and approve.';
+
+	/// en: '{name} (Apt. {apartment})'
+	String get residentWithApartment => '{name} (Apt. {apartment})';
+
+	/// en: 'Apt. {apartment}'
+	String get apartmentOnly => 'Apt. {apartment}';
+
+	/// en: 'Resident'
+	String get residentUnknown => 'Resident';
+
+	/// en: 'the stated amount'
+	String get amountUnknown => 'the stated amount';
+
+	/// en: 'Receipt image'
+	String get receiptPhotoTitle => 'Receipt image';
+
+	/// en: 'Review the system information above first. Open the receipt file whenever you need to.'
+	String get receiptPhotoHint => 'Review the system information above first. Open the receipt file whenever you need to.';
+
+	/// en: 'View receipt'
+	String get viewDekont => 'View receipt';
+
+	/// en: 'Kuveyt Türk'
+	String get bankKuveytTurk => 'Kuveyt Türk';
+
+	/// en: 'Ziraat Bankası'
+	String get bankZiraat => 'Ziraat Bankası';
+
+	/// en: 'İş Bankası'
+	String get bankIsbank => 'İş Bankası';
+
+	/// en: 'Garanti BBVA'
+	String get bankGaranti => 'Garanti BBVA';
+
+	/// en: 'Halkbank'
+	String get bankHalkbank => 'Halkbank';
+
+	/// en: 'VakıfBank'
+	String get bankVakifbank => 'VakıfBank';
+
+	/// en: 'Yapı Kredi'
+	String get bankYapiKredi => 'Yapı Kredi';
+
+	/// en: 'Akbank'
+	String get bankAkbank => 'Akbank';
+
+	/// en: 'QNB Finansbank'
+	String get bankQnb => 'QNB Finansbank';
+
+	/// en: 'Bank (generic)'
+	String get bankGeneric => 'Bank (generic)';
+
+	/// en: 'Bank could not be read'
+	String get bankUnknown => 'Bank could not be read';
 }
 
 // Path: features.expenses
@@ -1894,6 +2052,15 @@ class Translations$features$expenses$en {
 	/// en: 'Enter a valid amount'
 	String get amountInvalid => 'Enter a valid amount';
 
+	/// en: 'Amount is read automatically from receipts.'
+	String get amountFromReceiptsHint => 'Amount is read automatically from receipts.';
+
+	/// en: 'Add at least one receipt photo'
+	String get receiptRequired => 'Add at least one receipt photo';
+
+	/// en: 'Reading receipt amounts. They will appear in the list shortly.'
+	String get amountOcrPending => 'Reading receipt amounts. They will appear in the list shortly.';
+
 	/// en: 'Total'
 	String get total => 'Total';
 
@@ -1924,8 +2091,11 @@ class Translations$features$expenses$en {
 	/// en: 'Other'
 	String get categoryOther => 'Other';
 
-	/// en: 'Date'
-	String get fieldDate => 'Date';
+	/// en: 'Expense date'
+	String get fieldDate => 'Expense date';
+
+	/// en: 'Date on the receipt or invoice'
+	String get fieldDateHint => 'Date on the receipt or invoice';
 
 	/// en: 'Month'
 	String get fieldMonth => 'Month';
@@ -1975,8 +2145,8 @@ class Translations$features$expenses$en {
 	/// en: 'Receipt photo'
 	String get receiptTitle => 'Receipt photo';
 
-	/// en: 'Optional — PDF document or photo (JPEG, PNG) (Max 10 MB)'
-	String get receiptHint => 'Optional — PDF document or photo (JPEG, PNG) (Max 10 MB)';
+	/// en: 'PDF or photo (JPEG, PNG). Amount is read from receipts automatically (Max 10 MB)'
+	String get receiptHint => 'PDF or photo (JPEG, PNG). Amount is read from receipts automatically (Max 10 MB)';
 
 	/// en: 'Add photo'
 	String get receiptAdd => 'Add photo';
@@ -2007,6 +2177,45 @@ class Translations$features$expenses$en {
 
 	/// en: 'No receipt uploaded'
 	String get receiptMissing => 'No receipt uploaded';
+
+	/// en: 'Month applied to dues'
+	String get targetMonthLabel => 'Month applied to dues';
+
+	/// en: 'This month'
+	String get targetThisMonth => 'This month';
+
+	/// en: 'Next month'
+	String get targetNextMonth => 'Next month';
+
+	/// en: 'Pick month'
+	String get targetSpecificMonth => 'Pick month';
+
+	/// en: 'Applies to {month} {year} dues'
+	String get targetPeriodSummary => 'Applies to {month} {year} dues';
+
+	/// en: 'Adding an expense to a past month will update due amounts.'
+	String get pastMonthWarning => 'Adding an expense to a past month will update due amounts.';
+
+	/// en: 'Split across months'
+	String get splitMonthsEnable => 'Split across months';
+
+	/// en: 'Total is divided equally across selected months'
+	String get splitMonthsHint => 'Total is divided equally across selected months';
+
+	/// en: 'Number of months'
+	String get splitMonthsCount => 'Number of months';
+
+	/// en: 'months'
+	String get splitMonthsUnit => 'months';
+
+	/// en: 'Already paid dues'
+	String get carryForwardDialogTitle => 'Already paid dues';
+
+	/// en: 'Add difference to next month'
+	String get carryForwardAuto => 'Add difference to next month';
+
+	/// en: 'I'll handle it manually'
+	String get carryForwardManual => 'I\'ll handle it manually';
 }
 
 // Path: features.notifications
@@ -2142,6 +2351,9 @@ class Translations$features$notifications$en {
 
 	/// en: 'Receipt approved'
 	String get typeDekontPaymentApplied => 'Receipt approved';
+
+	/// en: 'New expense'
+	String get typeExpenseAdded => 'New expense';
 
 	/// en: 'System'
 	String get typeSystem => 'System';
@@ -2317,17 +2529,32 @@ class Translations$features$reports$en {
 	/// en: 'PDF report'
 	String get sheetTitle => 'PDF report';
 
+	/// en: 'Report type'
+	String get reportTypeLabel => 'Report type';
+
 	/// en: 'Monthly summary'
 	String get typeMonthly => 'Monthly summary';
 
 	/// en: 'Annual summary'
 	String get typeAnnual => 'Annual summary';
 
+	/// en: 'Report for {month} {year}'
+	String get periodHintMonthly => 'Report for {month} {year}';
+
+	/// en: 'Annual report for {year}'
+	String get periodHintAnnual => 'Annual report for {year}';
+
 	/// en: 'Month'
 	String get fieldMonth => 'Month';
 
 	/// en: 'Year'
 	String get fieldYear => 'Year';
+
+	/// en: 'Select month'
+	String get selectMonthTitle => 'Select month';
+
+	/// en: 'Select year'
+	String get selectYearTitle => 'Select year';
 
 	/// en: 'Show report'
 	String get download => 'Show report';
@@ -2557,6 +2784,7 @@ extension on Translations {
 			'common.logout' => 'Logout',
 			'common.cancel' => 'Cancel',
 			'common.confirm' => 'Confirm',
+			'common.ok' => 'OK',
 			'common.save' => 'Save',
 			'common.delete' => 'Delete',
 			'common.edit' => 'Edit',
@@ -2634,6 +2862,10 @@ extension on Translations {
 			'common.api.noApartmentForPayment' => 'You must be assigned to an apartment before viewing payment details.',
 			'common.rateLimitHint' => 'The server is currently busy. We\'ll retry shortly.',
 			'common.tryAgain' => 'Try Again',
+			'common.documentPreview.title' => 'View document',
+			'common.documentPreview.share' => 'Share',
+			'common.documentPreview.pdfUnavailable' => 'PDF could not be opened on this device. Use Share to open it in another app.',
+			'common.documentPreview.pinchHint' => 'Pinch to zoom and drag to pan',
 			'common.home' => 'Home',
 			'common.buildings' => 'Buildings',
 			'common.dues' => 'Dues',
@@ -2721,7 +2953,11 @@ extension on Translations {
 			'common.emptyApartmentText' => 'Empty Apartment',
 			'common.vacantBadge' => 'Vacant',
 			'common.phoneNotShared' => 'Phone not shared',
-			'common.residentDetailsLink' => 'Details..',
+			'common.residentDetailsLink' => 'View Details',
+			'common.duesPaidStatus' => 'Dues Paid',
+			'common.duesPendingStatus' => 'Dues Pending',
+			'common.duesOverdueStatus' => 'Dues Overdue',
+			'common.noResidentInApartment' => 'No resident assigned',
 			'common.residentDetailsSheetTitle' => 'Resident information',
 			'common.apartmentDetailsSheetTitle' => 'Apartment information',
 			'common.noResidentAssigned' => 'No resident assigned',
@@ -2733,6 +2969,8 @@ extension on Translations {
 			'common.all' => 'All',
 			'common.status' => 'Status',
 			'common.month' => 'Month',
+			'common.dayLabel' => 'Day',
+			'common.pickDate' => 'Select date',
 			'common.monthJanuary' => 'January',
 			'common.monthFebruary' => 'February',
 			'common.monthMarch' => 'March',
@@ -3055,6 +3293,8 @@ extension on Translations {
 			'features.tickets.noteAdded' => 'Note added',
 			'features.tickets.loadError' => 'Could not load requests',
 			'features.tickets.noteDisabledClosed' => 'Cannot add notes to a closed request',
+			_ => null,
+		} ?? switch (path) {
 			'features.tickets.statusClosedHint' => 'This request is closed; status cannot be changed.',
 			'features.tickets.apartmentRequired' => 'Apartment not linked. Please sign in again.',
 			'features.dekont.makePaymentTitle' => 'Make Payment',
@@ -3066,8 +3306,6 @@ extension on Translations {
 			'features.dekont.collectionNotConfigured' => 'Your manager has not set up collection IBAN yet. You can still upload a receipt.',
 			'features.dekont.ibanLabel' => 'IBAN',
 			'features.dekont.accountTitleLabel' => 'Account title',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.referenceLabel' => 'Transfer reference',
 			'features.dekont.copy' => 'Copy',
 			'features.dekont.copied' => 'Copied to clipboard',
@@ -3100,6 +3338,9 @@ extension on Translations {
 			'features.dekont.invalidExtension' => 'Only PDF, JPEG, or PNG files are allowed',
 			'features.dekont.processing' => 'Processing receipt…',
 			'features.dekont.viewDekonts' => 'My receipts',
+			'features.dekont.breakdownDetails' => 'Details',
+			'features.dekont.breakdownBaseDue' => 'Base due',
+			'features.dekont.breakdownTotal' => 'Total',
 			'features.dekont.emptyTitle' => 'No receipts yet',
 			'features.dekont.emptySubtitleResident' => 'You don\'t have any receipts yet. You can use the upload button on the top right to add a new receipt.',
 			'features.dekont.emptySubtitleManager' => 'There are no receipts uploaded by users.',
@@ -3138,6 +3379,41 @@ extension on Translations {
 			'features.dekont.apartment' => 'Apartment',
 			'features.dekont.amount' => 'Amount',
 			'features.dekont.loadError' => 'Could not load receipts',
+			'features.dekont.systemInfoTitle' => 'System information',
+			'features.dekont.systemInfoSubtitle' => 'Below is what we read from your receipt. Payment is not approved automatically; your manager will verify the bank account and approve.',
+			'features.dekont.systemReadLabel' => 'Read from receipt',
+			'features.dekont.systemInfoProcessing' => 'Your receipt is being processed. Amount, date and bank details will appear here shortly.',
+			'features.dekont.systemInfoNoData' => 'Read data',
+			'features.dekont.systemInfoNoDataHint' => 'Amount or date could not be read yet. It will still be sent for manager approval.',
+			'features.dekont.transactionDateLabel' => 'Transaction date',
+			'features.dekont.bankLabel' => 'Bank',
+			'features.dekont.receiverIbanLabel' => 'Recipient IBAN',
+			'features.dekont.receiverNameLabel' => 'Recipient name',
+			'features.dekont.referenceNumberLabel' => 'Reference no.',
+			'features.dekont.ibanUnreadableNotice' => 'The recipient IBAN could not be read from your dues payment receipt. It will be submitted for manager approval as is.',
+			'features.dekont.ibanMismatchNotice' => 'The recipient IBAN on the receipt does not match your building\'s collection account. Your manager will verify the account and decide.',
+			'features.dekont.ibanVerifiedNotice' => 'The recipient IBAN matches your building\'s collection account. Payment still requires manager approval.',
+			'features.dekont.residentPendingReviewNotice' => 'Your receipt has been submitted for manager approval. Payment is not approved automatically; your manager will verify the account.',
+			'features.dekont.managerApprovalHint' => 'Check the amount received in your account, then approve or reject.',
+			'features.dekont.managerPaymentSummary' => '{resident} sent {amount} in dues on {date} via {bank}. Please check your account and approve.',
+			'features.dekont.residentWithApartment' => '{name} (Apt. {apartment})',
+			'features.dekont.apartmentOnly' => 'Apt. {apartment}',
+			'features.dekont.residentUnknown' => 'Resident',
+			'features.dekont.amountUnknown' => 'the stated amount',
+			'features.dekont.receiptPhotoTitle' => 'Receipt image',
+			'features.dekont.receiptPhotoHint' => 'Review the system information above first. Open the receipt file whenever you need to.',
+			'features.dekont.viewDekont' => 'View receipt',
+			'features.dekont.bankKuveytTurk' => 'Kuveyt Türk',
+			'features.dekont.bankZiraat' => 'Ziraat Bankası',
+			'features.dekont.bankIsbank' => 'İş Bankası',
+			'features.dekont.bankGaranti' => 'Garanti BBVA',
+			'features.dekont.bankHalkbank' => 'Halkbank',
+			'features.dekont.bankVakifbank' => 'VakıfBank',
+			'features.dekont.bankYapiKredi' => 'Yapı Kredi',
+			'features.dekont.bankAkbank' => 'Akbank',
+			'features.dekont.bankQnb' => 'QNB Finansbank',
+			'features.dekont.bankGeneric' => 'Bank (generic)',
+			'features.dekont.bankUnknown' => 'Bank could not be read',
 			'features.expenses.title' => 'Expenses',
 			'features.expenses.createTitle' => 'Add expense',
 			'features.expenses.fieldTitle' => 'Title',
@@ -3147,6 +3423,9 @@ extension on Translations {
 			'features.expenses.submit' => 'Save',
 			'features.expenses.required' => 'Required field',
 			'features.expenses.amountInvalid' => 'Enter a valid amount',
+			'features.expenses.amountFromReceiptsHint' => 'Amount is read automatically from receipts.',
+			'features.expenses.receiptRequired' => 'Add at least one receipt photo',
+			'features.expenses.amountOcrPending' => 'Reading receipt amounts. They will appear in the list shortly.',
 			'features.expenses.total' => 'Total',
 			'features.expenses.createSuccess' => 'Expense saved',
 			'features.expenses.categoryCleaning' => 'Cleaning',
@@ -3157,7 +3436,8 @@ extension on Translations {
 			'features.expenses.categoryRepair' => 'Repair',
 			'features.expenses.categoryGarden' => 'Garden',
 			'features.expenses.categoryOther' => 'Other',
-			'features.expenses.fieldDate' => 'Date',
+			'features.expenses.fieldDate' => 'Expense date',
+			'features.expenses.fieldDateHint' => 'Date on the receipt or invoice',
 			'features.expenses.fieldMonth' => 'Month',
 			'features.expenses.fieldYear' => 'Year',
 			'features.expenses.editTitle' => 'Edit expense',
@@ -3174,7 +3454,7 @@ extension on Translations {
 			'features.expenses.receiptUrlHint' => 'Optional — public URL to the receipt file',
 			'features.expenses.receiptUrlInvalid' => 'URL must start with https://',
 			'features.expenses.receiptTitle' => 'Receipt photo',
-			'features.expenses.receiptHint' => 'Optional — PDF document or photo (JPEG, PNG) (Max 10 MB)',
+			'features.expenses.receiptHint' => 'PDF or photo (JPEG, PNG). Amount is read from receipts automatically (Max 10 MB)',
 			'features.expenses.receiptAdd' => 'Add photo',
 			'features.expenses.receiptChange' => 'Change photo',
 			'features.expenses.receiptRemove' => 'Remove photo',
@@ -3185,6 +3465,19 @@ extension on Translations {
 			'features.expenses.fieldCreatedAt' => 'Created at',
 			'features.expenses.viewReceipt' => 'View receipt',
 			'features.expenses.receiptMissing' => 'No receipt uploaded',
+			'features.expenses.targetMonthLabel' => 'Month applied to dues',
+			'features.expenses.targetThisMonth' => 'This month',
+			'features.expenses.targetNextMonth' => 'Next month',
+			'features.expenses.targetSpecificMonth' => 'Pick month',
+			'features.expenses.targetPeriodSummary' => 'Applies to {month} {year} dues',
+			'features.expenses.pastMonthWarning' => 'Adding an expense to a past month will update due amounts.',
+			'features.expenses.splitMonthsEnable' => 'Split across months',
+			'features.expenses.splitMonthsHint' => 'Total is divided equally across selected months',
+			'features.expenses.splitMonthsCount' => 'Number of months',
+			'features.expenses.splitMonthsUnit' => 'months',
+			'features.expenses.carryForwardDialogTitle' => 'Already paid dues',
+			'features.expenses.carryForwardAuto' => 'Add difference to next month',
+			'features.expenses.carryForwardManual' => 'I\'ll handle it manually',
 			'features.notifications.markAllRead' => 'Mark all read',
 			'features.notifications.markAllReadLong' => 'Mark all as read',
 			'features.notifications.viewRelated' => 'Open related item',
@@ -3227,6 +3520,7 @@ extension on Translations {
 			'features.notifications.typeDekontNeedsReview' => 'Receipt review',
 			'features.notifications.typeDekontMatched' => 'Receipt matched',
 			'features.notifications.typeDekontPaymentApplied' => 'Receipt approved',
+			'features.notifications.typeExpenseAdded' => 'New expense',
 			'features.notifications.typeSystem' => 'System',
 			'features.notifications.typeOther' => 'Notification',
 			'features.notifications.sendTitle' => 'Announcement to residents',
@@ -3276,10 +3570,15 @@ extension on Translations {
 			'features.subscription.loadFailed' => 'Could not load subscription.',
 			'features.reports.menuDownload' => 'Download report',
 			'features.reports.sheetTitle' => 'PDF report',
+			'features.reports.reportTypeLabel' => 'Report type',
 			'features.reports.typeMonthly' => 'Monthly summary',
 			'features.reports.typeAnnual' => 'Annual summary',
+			'features.reports.periodHintMonthly' => 'Report for {month} {year}',
+			'features.reports.periodHintAnnual' => 'Annual report for {year}',
 			'features.reports.fieldMonth' => 'Month',
 			'features.reports.fieldYear' => 'Year',
+			'features.reports.selectMonthTitle' => 'Select month',
+			'features.reports.selectYearTitle' => 'Select year',
 			'features.reports.download' => 'Show report',
 			'features.reports.downloading' => 'Preparing report…',
 			'features.reports.previewTitle' => 'Report preview',

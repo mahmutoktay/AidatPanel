@@ -57,7 +57,7 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
   }) {
     return paginatedQuery(
       cursor: cursor,
-      limit: AppConstants.pageSize,
+      limit: paginated ? AppConstants.pageSize : null,
       paginated: paginated,
       extra: {
         'month': ?month,

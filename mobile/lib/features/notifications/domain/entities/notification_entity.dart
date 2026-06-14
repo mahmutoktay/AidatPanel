@@ -10,6 +10,7 @@ enum NotificationType {
   dekontNeedsReview,
   dekontMatched,
   dekontPaymentApplied,
+  expenseAdded,
   system,
   other,
 }

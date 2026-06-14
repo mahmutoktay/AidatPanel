@@ -14,7 +14,6 @@ import '../../../buildings/data/buildings_store.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../providers/expenses_provider.dart';
 import '../utils/expense_labels.dart';
-import '../widgets/expense_form_sheet.dart';
 
 class ManagerExpensesScreen extends ConsumerStatefulWidget {
   const ManagerExpensesScreen({super.key});
@@ -58,10 +57,9 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
   Future<void> _openForm({ExpenseEntity? expense}) async {
     final id = _buildingId;
     if (id == null) return;
-    final ok = await ExpenseFormSheet.show(
-      context,
-      buildingId: id,
-      expense: expense,
+    final ok = await context.push<bool>(
+      '/manager-dashboard/expenses/form?buildingId=${Uri.encodeComponent(id)}',
+      extra: expense,
     );
     if (ok == true && mounted) _load();
   }

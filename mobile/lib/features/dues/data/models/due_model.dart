@@ -1,4 +1,5 @@
 import '../../domain/entities/due_entity.dart';
+import 'due_breakdown_model.dart';
 
 class DueModel {
   final String id;
@@ -13,6 +14,7 @@ class DueModel {
   final DateTime? paidAt;
   final int overdueDays;
   final String? note;
+  final DueBreakdownModel? breakdown;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -29,6 +31,7 @@ class DueModel {
     this.paidAt,
     this.overdueDays = 0,
     this.note,
+    this.breakdown,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -57,6 +60,11 @@ class DueModel {
       paidAt: _toDateTime(json['paidAt']),
       overdueDays: _toInt(json['overdueDays']),
       note: json['note'] as String?,
+      breakdown: json['breakdown'] is Map
+          ? DueBreakdownModel.fromJson(
+              Map<String, dynamic>.from(json['breakdown'] as Map),
+            )
+          : null,
       createdAt: _toDateTime(json['createdAt']) ?? DateTime.now(),
       updatedAt: _toDateTime(json['updatedAt']) ?? DateTime.now(),
     );
@@ -95,6 +103,7 @@ class DueModel {
       paidAt: paidAt,
       overdueDays: overdueDays,
       note: note,
+      breakdown: breakdown?.toEntity(),
       createdAt: createdAt,
       updatedAt: updatedAt,
     );

@@ -15,6 +15,7 @@ import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
 import '../../domain/entities/due_entity.dart';
 import '../providers/dues_provider.dart';
+import '../widgets/due_status_sheet.dart';
 
 class ManagerDuesTab extends ConsumerStatefulWidget {
   const ManagerDuesTab({super.key});
@@ -1012,7 +1013,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     return SizedBox(
       width: AppSizes.minTouchTargetComfort,
       height: AppSizes.minTouchTargetComfort,
-      child: PopupMenuButton<DueStatus>(
+      child: IconButton(
         tooltip: context.t.common.status,
         padding: EdgeInsets.zero,
         icon: const Icon(
@@ -1020,34 +1021,21 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           size: AppSizes.iconSize,
           color: AppColors.textSecondary,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-          side: AppColors.cardBorderSide,
-        ),
-        color: AppColors.surface,
-        elevation: 4,
-        offset: const Offset(0, AppSizes.spacingXS),
-        constraints: const BoxConstraints(minWidth: 220),
-        onSelected: (status) => _updateStatus(due.id, status),
-        itemBuilder: (_) => [
-          _dueStatusMenuItem(
-            context,
-            value: DueStatus.paid,
-            current: due.status,
-          ),
-          _dueStatusMenuItem(
-            context,
-            value: DueStatus.pending,
-            current: due.status,
-          ),
-          _dueStatusMenuItem(
-            context,
-            value: DueStatus.overdue,
-            current: due.status,
-          ),
-        ],
+        onPressed: () => _openDueStatusSheet(context, due),
       ),
     );
+  }
+
+  Future<void> _openDueStatusSheet(BuildContext context, DueEntity due) async {
+    final monthLabel =
+        '${_monthName(context, due.month)} ${due.year}';
+    final status = await DueStatusSheet.show(
+      context,
+      due: due,
+      monthLabel: monthLabel,
+    );
+    if (!mounted || status == null || status == due.status) return;
+    await _updateStatus(due.id, status);
   }
 
   Widget _buildEmptyState(BuildContext context) {
@@ -1178,50 +1166,6 @@ class _StatusVisual {
     required this.fg,
     required this.bg,
   });
-}
-
-PopupMenuItem<DueStatus> _dueStatusMenuItem(
-  BuildContext context, {
-  required DueStatus value,
-  required DueStatus current,
-}) {
-  final visual = _statusVisual(context, value);
-  final isCurrent = value == current;
-  final icon = switch (value) {
-    DueStatus.paid => Icons.check_circle_outline,
-    DueStatus.pending => Icons.schedule_outlined,
-    DueStatus.overdue => Icons.warning_amber_outlined,
-    DueStatus.waived => Icons.block_outlined,
-  };
-
-  return PopupMenuItem<DueStatus>(
-    value: value,
-    height: AppSizes.minTouchTargetComfort,
-    padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
-    child: Row(
-      children: [
-        Icon(icon, size: AppSizes.listRowIconSize, color: visual.fg),
-        const SizedBox(width: AppSizes.spacingS),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: visual.bg,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            visual.label,
-            style: AppTypography.caption.copyWith(
-              color: visual.fg,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        const Spacer(),
-        if (isCurrent)
-          Icon(Icons.check, size: AppSizes.listRowIconSize, color: visual.fg),
-      ],
-    ),
-  );
 }
 
 _StatusVisual _statusVisual(BuildContext context, DueStatus status) {

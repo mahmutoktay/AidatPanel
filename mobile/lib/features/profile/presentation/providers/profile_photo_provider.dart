@@ -77,3 +77,10 @@ final profilePhotoProvider =
     NotifierProvider<ProfilePhotoNotifier, ProfilePhotoState>(
   ProfilePhotoNotifier.new,
 );
+
+/// Herhangi bir kullanıcının yerel profil fotoğrafı referansı (sakin listesi vb.).
+final userProfilePhotoRefProvider =
+    FutureProvider.family<String?, String>((ref, userId) async {
+  if (userId.isEmpty) return null;
+  return ref.read(secureStorageProvider).getProfilePhotoRef(userId);
+});

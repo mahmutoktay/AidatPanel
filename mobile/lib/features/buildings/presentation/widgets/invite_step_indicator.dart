@@ -14,64 +14,82 @@ class InviteStepIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final steps = [
-      (context.t.common.stepBuilding, Icons.apartment),
+      (context.t.common.stepBuilding, Icons.apartment_rounded),
       (context.t.common.stepApartment, Icons.door_front_door_outlined),
-      (context.t.common.stepCode, Icons.qr_code_2),
+      (context.t.common.stepCode, Icons.qr_code_2_rounded),
     ];
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.dashboardScreenPaddingHorizontal,
-        vertical: AppSizes.spacingM,
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSizes.dashboardScreenPaddingHorizontal,
+        AppSizes.spacingM,
+        AppSizes.dashboardScreenPaddingHorizontal,
+        AppSizes.spacingS,
       ),
-      color: Colors.white,
-      child: Row(
-        children: List.generate(steps.length * 2 - 1, (i) {
-          if (i.isOdd) {
-            final lineActive = currentStep >= (i ~/ 2) + 1;
-            return Expanded(
-              child: Container(
-                height: 2,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                color: lineActive ? AppColors.primary : AppColors.borderColor,
-              ),
-            );
-          }
-          final stepIndex = i ~/ 2;
-          final active = currentStep >= stepIndex;
-          final (label, icon) = steps[stepIndex];
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: active ? AppColors.primary : Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: active ? AppColors.primary : AppColors.borderColor,
-                    width: 2,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.spacingM,
+          vertical: AppSizes.spacingM,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.fill,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: List.generate(steps.length * 2 - 1, (i) {
+            if (i.isOdd) {
+              final lineActive = currentStep >= (i ~/ 2) + 1;
+              return Expanded(
+                child: Container(
+                  height: 2,
+                  margin: const EdgeInsets.only(bottom: 18),
+                  color: lineActive
+                      ? AppColors.primary
+                      : AppColors.borderColor.withValues(alpha: 0.35),
+                ),
+              );
+            }
+            final stepIndex = i ~/ 2;
+            final active = currentStep >= stepIndex;
+            final completed = currentStep > stepIndex;
+            final (label, icon) = steps[stepIndex];
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: active ? AppColors.primary : AppColors.surface,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: active
+                          ? AppColors.primary
+                          : AppColors.borderColor.withValues(alpha: 0.35),
+                      width: 1.5,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    completed ? Icons.check_rounded : icon,
+                    size: 18,
+                    color: active ? Colors.white : AppColors.textSecondary,
                   ),
                 ),
-                alignment: Alignment.center,
-                child: Icon(
-                  icon,
-                  size: 16,
-                  color: active ? Colors.white : AppColors.textSecondary,
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: AppTypography.caption.copyWith(
+                    color: active ? AppColors.primary : AppColors.textSecondary,
+                    fontWeight: active ? FontWeight.w700 : FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                label,
-                style: AppTypography.small.copyWith(
-                  color: active ? AppColors.primary : AppColors.textSecondary,
-                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                ),
-              ),
-            ],
-          );
-        }),
+              ],
+            );
+          }),
+        ),
       ),
     );
   }

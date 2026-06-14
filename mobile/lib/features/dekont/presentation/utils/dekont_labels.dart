@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 
 import '../../../../l10n/strings.g.dart';
 
+import '../../domain/entities/dekont_entity.dart';
 import '../../domain/entities/dekont_status.dart';
 
 
@@ -218,27 +219,30 @@ String _statusLabel(dynamic t, DekontStatus status) {
 
 
 
-String? dekontStatusFilterApi(String? filterKey) {
-
+bool dekontMatchesUiFilter(DekontStatus status, String? filterKey) {
+  if (filterKey == null || filterKey.isEmpty) return true;
   switch (filterKey) {
-
     case 'pending':
-
-      return 'NEEDS_MANAGER_REVIEW';
-
+      return status.needsManagerApproval ||
+          status.isProcessing ||
+          status == DekontStatus.received;
     case 'approved':
-
-      return 'PAYMENT_APPLIED';
-
+      return status == DekontStatus.paymentApplied ||
+          status == DekontStatus.paymentPartial;
     case 'rejected':
-
-      return 'REJECTED';
-
+      return status == DekontStatus.rejected;
     default:
-
-      return null;
-
+      return true;
   }
+}
 
+List<DekontEntity> filterDekontsByUiKey(
+  List<DekontEntity> dekonts,
+  String? filterKey,
+) {
+  if (filterKey == null || filterKey.isEmpty) return dekonts;
+  return dekonts
+      .where((d) => dekontMatchesUiFilter(d.status, filterKey))
+      .toList(growable: false);
 }
 

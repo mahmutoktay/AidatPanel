@@ -56,18 +56,29 @@ export const getExpenseSummary = async (req, res, next) => {
 export const createExpense = async (req, res, next) => {
   try {
     const { id: buildingId } = req.params;
-    // amount ve receiptUrl artık body'den alınmıyor — OCR'dan gelecek
-    const { title, category, date, note } = req.body;
-    const data = await createExpenseService(buildingId, req.user.id, {
-      title,
-      category,
-      date,
-      note,
-    });
+    const result = await createExpenseService(buildingId, req.user.id, req.body);
+
+    if (result.preview) {
+      return res.status(200).json({
+        success: true,
+        data: result.preview,
+      });
+    }
+
+    const message = result.warnings?.length
+      ? result.warnings.join(" ")
+      : "Gider kaydedildi.";
+
     res.status(201).json({
       success: true,
-      message: "Gider kaydedildi.",
-      data,
+      message,
+      data: {
+        expense: result.expense,
+        expenses: result.expenses,
+        warnings: result.warnings ?? [],
+        pastMonthWarning: result.pastMonthWarning ?? false,
+        splitGroupId: result.splitGroupId ?? null,
+      },
     });
   } catch (err) {
     handleHttp(err, res, next);

@@ -8,6 +8,9 @@ class ExpenseModel {
   final double? parsedAmount;
   final String category;
   final DateTime date;
+  final int targetMonth;
+  final int targetYear;
+  final double? perUnitAmount;
   final String? note;
   final String? receiptUrl;
   final List<String> receiptUrls;
@@ -21,6 +24,9 @@ class ExpenseModel {
     this.parsedAmount,
     required this.category,
     required this.date,
+    this.targetMonth = 1,
+    this.targetYear = 2026,
+    this.perUnitAmount,
     this.note,
     this.receiptUrl,
     this.receiptUrls = const [],
@@ -37,6 +43,11 @@ class ExpenseModel {
     final parsedAmount = parsedRaw is num
         ? parsedRaw.toDouble()
         : double.tryParse('$parsedRaw');
+
+    final perUnitRaw = json['perUnitAmount'];
+    final perUnitAmount = perUnitRaw is num
+        ? perUnitRaw.toDouble()
+        : double.tryParse('$perUnitRaw');
 
     final receiptUrlsRaw = json['receiptUrls'];
     final receiptUrls = receiptUrlsRaw is List
@@ -55,6 +66,9 @@ class ExpenseModel {
       parsedAmount: parsedAmount,
       category: (json['category'] ?? 'OTHER') as String,
       date: _parseDate(json['date']),
+      targetMonth: (json['targetMonth'] as num?)?.toInt() ?? _parseDate(json['date']).month,
+      targetYear: (json['targetYear'] as num?)?.toInt() ?? _parseDate(json['date']).year,
+      perUnitAmount: perUnitAmount,
       note: json['note'] as String?,
       receiptUrl: json['receiptUrl'] as String?,
       receiptUrls: fallbackUrls,
@@ -77,6 +91,9 @@ class ExpenseModel {
         parsedAmount: parsedAmount,
         category: _parseCategory(category),
         date: date,
+        targetMonth: targetMonth,
+        targetYear: targetYear,
+        perUnitAmount: perUnitAmount,
         note: note,
         receiptUrl: receiptUrl,
         receiptUrls: receiptUrls,

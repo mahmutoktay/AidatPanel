@@ -4,6 +4,7 @@ import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/expense_remote_datasource.dart';
 import '../../data/repositories/expense_repository_impl.dart';
+import '../../domain/entities/expense_create_outcome.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/repositories/expense_repository.dart';
 
@@ -203,27 +204,52 @@ class ExpensesNotifier extends Notifier<ExpensesState> {
     }
   }
 
-  Future<({bool success, String? receiptWarning, bool receiptUploadDeferred})>
+  Future<({bool success, ExpensePaidImpactPreview? preview, String? receiptWarning, bool receiptUploadDeferred})>
   create({
     required String buildingId,
     required String title,
+    double? amount,
     required ExpenseCategory category,
     required DateTime date,
+    required int targetMonth,
+    required int targetYear,
     String? note,
+    int splitMonths = 1,
+    ExpenseCarryForwardPolicy carryForwardPolicy =
+        ExpenseCarryForwardPolicy.warnOnly,
+    bool confirmPaidImpact = false,
     List<String>? receiptFilePaths,
   }) async {
     try {
-      final entity = await _repository.createExpense(
+      final outcome = await _repository.createExpense(
         buildingId,
         title: title,
+        amount: amount,
         category: category,
         date: date,
+        targetMonth: targetMonth,
+        targetYear: targetYear,
         note: note,
+        splitMonths: splitMonths,
+        carryForwardPolicy: carryForwardPolicy,
+        confirmPaidImpact: confirmPaidImpact,
       );
+
+      if (outcome.requiresConfirmation) {
+        return (
+          success: false,
+          preview: outcome.preview,
+          receiptWarning: null,
+          receiptUploadDeferred: false,
+        );
+      }
+
+      final entity = outcome.expense!;
       final upload = await _tryUploadReceipts(entity.id, receiptFilePaths);
       await load(buildingId, month: state.month, year: state.year);
       return (
         success: true,
+        preview: null,
         receiptWarning: upload.warning,
         receiptUploadDeferred: upload.deferred,
       );
@@ -231,6 +257,7 @@ class ExpensesNotifier extends Notifier<ExpensesState> {
       state = state.copyWith(error: userFacingError(e));
       return (
         success: false,
+        preview: null,
         receiptWarning: null,
         receiptUploadDeferred: false,
       );

@@ -16,6 +16,8 @@ class ExpenseReceiptSection extends StatelessWidget {
   final bool enabled;
   final ValueChanged<List<PlatformFile>> onChanged;
   final VoidCallback? onPickFailed;
+  final String? caption;
+  final String? amountLabel;
 
   const ExpenseReceiptSection({
     super.key,
@@ -24,6 +26,8 @@ class ExpenseReceiptSection extends StatelessWidget {
     required this.enabled,
     required this.onChanged,
     this.onPickFailed,
+    this.caption,
+    this.amountLabel,
   });
 
   Future<void> _pick(BuildContext context) async {
@@ -318,13 +322,39 @@ class ExpenseReceiptSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          t.receiptTitle,
-          style: AppTypography.body1.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Expanded(
+              child: Text(
+                t.receiptTitle,
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            if (amountLabel != null)
+              Text(
+                amountLabel!,
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+          ],
         ),
+        if (caption != null && caption!.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            caption!,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.35,
+            ),
+          ),
+        ],
         const SizedBox(height: AppSizes.spacingS),
         if (!hasLocal && !hasRemote)
           _buildDropzone(context)

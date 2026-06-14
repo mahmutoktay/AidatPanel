@@ -15,6 +15,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/api_user_message.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -25,8 +26,8 @@ import '../../domain/entities/dekont_entity.dart';
 import '../../domain/entities/dekont_status.dart';
 import '../providers/dekont_provider.dart';
 import '../providers/dekont_download_provider.dart';
-import '../utils/dekont_labels.dart';
-import '../widgets/dekont_file_preview.dart';
+import '../../../../shared/widgets/document_preview_screen.dart';
+import '../widgets/dekont_system_info_section.dart';
 
 class DekontDetailScreen extends ConsumerStatefulWidget {
   final String dekontId;
@@ -41,14 +42,6 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
   Uint8List? _fileBytes;
   bool _loadingFile = false;
   String? _fileError;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _loadFile();
-    });
-  }
 
   Future<void> _loadFile({bool forceFromServer = false}) async {
     setState(() {
@@ -114,7 +107,27 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     }
   }
 
+  Future<void> _openDekontPreview(DekontEntity dekont) async {
+    if (_fileBytes == null && !_loadingFile) {
+      await _loadFile();
+    }
+    if (!mounted) return;
+    if (_fileBytes == null) return;
+
+    await DocumentPreviewScreen.open(
+      context,
+      bytes: _fileBytes!,
+      fileName: dekont.originalFilename,
+      mimeType: dekont.mimeType,
+      onShare: () => _shareFile(dekont),
+      onDownload: () => _downloadDekont(dekont),
+    );
+  }
+
   Future<void> _shareFile(DekontEntity dekont) async {
+    if (_fileBytes == null) {
+      await _loadFile();
+    }
     if (_fileBytes == null) return;
     final ext = dekont.mimeType.contains('pdf') ? 'pdf' : 'jpg';
     final file = XFile.fromData(
@@ -130,7 +143,8 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _ManagerReviewSheet(dekont: dekont),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      builder: (sheetContext) => _ManagerReviewSheet(dekont: dekont),
     );
     if (ok == true && mounted) {
       ref.invalidate(dekontDetailProvider(widget.dekontId));
@@ -212,7 +226,6 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
           ),
         ),
         data: (dekont) {
-          final visual = dekontStatusVisual(context, dekont.status);
           final date = DateFormat(
             'd MMMM yyyy, HH:mm',
           ).format(dekont.createdAt);
@@ -221,7 +234,9 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
             onRefresh: () async {
               ref.invalidate(dekontDetailProvider(widget.dekontId));
               await ref.read(dekontDetailProvider(widget.dekontId).future);
-              await _loadFile(forceFromServer: true);
+              if (_fileBytes != null) {
+                await _loadFile(forceFromServer: true);
+              }
             },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -229,145 +244,22 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(AppSizes.spacingL),
-                    decoration: BoxDecoration(
-                      color: AppColors.fill,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    dekont.originalFilename,
-                                    style: AppTypography.h4.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    date,
-                                    style: AppTypography.body2.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: AppSizes.spacingS),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSizes.spacingM,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: visual.background,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                visual.label,
-                                style: AppTypography.body2.copyWith(
-                                  color: visual.color,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (dekont.apartment != null ||
-                            dekont.uploadedBy != null ||
-                            dekont.parsedAmount != null ||
-                            dekont.rejectionReason != null) ...[
-                          const SizedBox(height: AppSizes.spacingM),
-                          Divider(
-                            height: 1,
-                            color: AppColors.border.withValues(alpha: 0.5),
-                          ),
-                          const SizedBox(height: AppSizes.spacingM),
-                        ],
-                        if (dekont.apartment != null) ...[
-                          Text(
-                            '${t.apartment}: ${dekont.apartment!.number}',
-                            style: AppTypography.body1,
-                          ),
-                          const SizedBox(height: 4),
-                        ],
-                        if (dekont.uploadedBy != null) ...[
-                          Text(
-                            '${t.uploadedBy}: ${dekont.uploadedBy!.name}',
-                            style: AppTypography.body1,
-                          ),
-                          const SizedBox(height: 4),
-                        ],
-                        if (dekont.parsedAmount != null) ...[
-                          const SizedBox(height: AppSizes.spacingS),
-                          Text(
-                            '${t.parsedAmount}: ${dekont.parsedAmount}',
-                            style: AppTypography.h4.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                        if (dekont.rejectionReason != null) ...[
-                          const SizedBox(height: AppSizes.spacingS),
-                          Text(
-                            '${t.rejectionReason}: ${dekont.rejectionReason}',
-                            style: AppTypography.body1.copyWith(
-                              color: AppColors.error,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ],
+                  Text(
+                    dekont.originalFilename,
+                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    date,
+                    style: AppTypography.body2.copyWith(
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: AppSizes.spacingL),
-                  if (_loadingFile)
-                    const Center(child: CircularProgressIndicator())
-                  else if (_fileError != null) ...[
-                    Text(
-                      _fileError!,
-                      style: AppTypography.body2.copyWith(
-                        color: AppColors.error,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    OutlinedButton(
-                      onPressed: _loadFile,
-                      style: AppButtonStyles.outlinedPrimary(),
-                      child: Text(context.t.common.tryAgain),
-                    ),
-                    if (!isManager) ...[
-                      const SizedBox(height: AppSizes.spacingM),
-                      SizedBox(
-                        height: AppSizes.buttonHeightPrimary,
-                        child: ElevatedButton(
-                          onPressed: () => context.push('/payment'),
-                          style: AppButtonStyles.elevatedSuccess(),
-                          child: Text(t.reupload),
-                        ),
-                      ),
-                    ],
-                  ] else
-                    _buildFileCard(context, dekont),
-                  if (_fileBytes != null) ...[
-                    const SizedBox(height: AppSizes.spacingM),
-                    OutlinedButton.icon(
-                      onPressed: () => _shareFile(dekont),
-                      style: AppButtonStyles.outlinedPrimary(),
-                      icon: const Icon(Icons.share_outlined),
-                      label: Text(t.shareFile),
-                    ),
-                  ],
+                  DekontSystemInfoSection(
+                    dekont: dekont,
+                    isManager: isManager,
+                  ),
                   if (dekont.status == DekontStatus.rejected) ...[
                     const SizedBox(height: AppSizes.spacingL),
                     SizedBox(
@@ -379,13 +271,30 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
                       ),
                     ),
                   ],
-                  if (isManager && dekont.status.needsManagerAttention) ...[
+                  const SizedBox(height: AppSizes.spacingL),
+                  _buildFileCard(context, dekont),
+                  if (_fileError != null) ...[
+                    const SizedBox(height: AppSizes.spacingM),
+                    Text(
+                      _fileError!,
+                      style: AppTypography.body2.copyWith(color: AppColors.error),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSizes.spacingS),
+                    OutlinedButton(
+                      onPressed: _loadFile,
+                      style: AppButtonStyles.outlinedPrimary(),
+                      child: Text(context.t.common.tryAgain),
+                    ),
+                  ],
+                  if (isManager && dekont.status.needsManagerApproval) ...[
                     const SizedBox(height: AppSizes.spacingL),
                     SizedBox(
                       height: AppSizes.buttonHeightPrimary,
+                      width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () => _openReviewSheet(dekont),
-                        style: AppButtonStyles.elevatedInfo(),
+                        style: AppButtonStyles.elevatedPrimary(fullWidth: true),
                         child: Text('${t.approve} / ${t.reject}'),
                       ),
                     ),
@@ -403,24 +312,16 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     final filename = dekont.originalFilename;
     final ext = filename.split('.').last.toLowerCase();
     final isPdf = ext == 'pdf';
-    final sizeBytes = _fileBytes?.length ?? 0;
+    final sizeBytes = _fileBytes?.length ?? dekont.sizeBytes;
     final t = context.t.features.dekont;
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.borderColor, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        borderRadius: BorderRadius.circular(12),
         child: Row(
           children: [
             _buildFileIcon(
@@ -460,18 +361,41 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(right: AppSizes.spacingS),
-              child: IconButton(
-                onPressed: _fileBytes != null
-                    ? () => _showPreviewDialog(context, dekont)
-                    : null,
-                icon: const Icon(Icons.visibility_outlined),
-                color: AppColors.primary,
-                tooltip: t.filePreview,
-                constraints: const BoxConstraints(
-                  minWidth: AppSizes.minTouchTarget,
-                  minHeight: AppSizes.minTouchTarget,
-                ),
+              padding: const EdgeInsets.only(right: AppSizes.spacingXS),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: _loadingFile
+                        ? null
+                        : () => _openDekontPreview(dekont),
+                    icon: _loadingFile
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.visibility_outlined),
+                    color: AppColors.primary,
+                    tooltip: t.viewDekont,
+                    constraints: const BoxConstraints(
+                      minWidth: AppSizes.minTouchTarget,
+                      minHeight: AppSizes.minTouchTarget,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _loadingFile
+                        ? null
+                        : () => _shareFile(dekont),
+                    icon: const Icon(Icons.share_outlined),
+                    color: AppColors.primary,
+                    tooltip: t.shareFile,
+                    constraints: const BoxConstraints(
+                      minWidth: AppSizes.minTouchTarget,
+                      minHeight: AppSizes.minTouchTarget,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -484,7 +408,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     return Container(
       width: 64,
       height: 64,
-      color: color.withValues(alpha: 0.08),
+      color: AppColors.surface,
       child: Icon(icon, color: color, size: 28),
     );
   }
@@ -493,53 +417,6 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
-  }
-
-  void _showPreviewDialog(BuildContext context, DekontEntity dekont) {
-    showDialog(
-      context: context,
-      useSafeArea: false,
-      builder: (dialogContext) => Scaffold(
-        appBar: AppBar(
-          title: Text(dekont.originalFilename),
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.pop(dialogContext),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.download_rounded),
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                _downloadDekont(dekont);
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.share_outlined),
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                _shareFile(dekont);
-              },
-            ),
-          ],
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSizes.spacingM),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                DekontFilePreview(
-                  bytes: _fileBytes!,
-                  mimeType: dekont.mimeType,
-                  fileName: dekont.originalFilename,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 
@@ -556,7 +433,7 @@ class _ManagerReviewSheet extends ConsumerStatefulWidget {
 class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
   final _noteController = TextEditingController();
   String? _selectedDueId;
-  bool _submitting = false;
+  DekontReviewDecision? _pendingDecision;
 
   @override
   void dispose() {
@@ -575,7 +452,7 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
       return;
     }
 
-    setState(() => _submitting = true);
+    setState(() => _pendingDecision = decision);
     final ok = await ref
         .read(managerDekontsNotifierProvider.notifier)
         .review(
@@ -585,7 +462,7 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
           dueId: dueId,
         );
     if (!mounted) return;
-    setState(() => _submitting = false);
+    setState(() => _pendingDecision = null);
     if (ok) {
       Navigator.of(context).pop(true);
     } else {
@@ -608,62 +485,90 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
           color: Colors.white,
           borderRadius: AppButtonStyles.sheetTop.borderRadius,
         ),
-        padding: const EdgeInsets.all(AppSizes.spacingL),
         child: SafeArea(
           top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(t.detailTitle, style: AppTypography.h2),
-              const SizedBox(height: AppSizes.spacingM),
-              TextField(
-                controller: _noteController,
-                decoration: InputDecoration(labelText: t.reviewNote),
-                maxLines: 3,
-              ),
-              const SizedBox(height: AppSizes.spacingM),
-              _BuildingDuesPicker(
-                buildingId: buildingId,
-                selectedDueId: _selectedDueId ?? widget.dekont.dueId,
-                onChanged: (id) => setState(() => _selectedDueId = id),
-              ),
-              const SizedBox(height: AppSizes.spacingL),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _submitting
-                          ? null
-                          : () => _submit(DekontReviewDecision.reject),
-                      style: AppButtonStyles.outlinedDanger(),
-                      child: Text(t.reject),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.spacingL,
+              AppSizes.spacingM,
+              AppSizes.spacingL,
+              AppSizes.spacingL,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
+                    decoration: BoxDecoration(
+                      color: AppColors.border.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  const SizedBox(width: AppSizes.spacingM),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _submitting
-                          ? null
-                          : () => _submit(DekontReviewDecision.approve),
-                      style: AppButtonStyles.elevatedSuccess(),
-                      child: _submitting
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
-                              ),
-                            )
-                          : Text(t.approve),
-                    ),
+                ),
+                Text(t.reviewAction, style: AppTypography.h2),
+                const SizedBox(height: AppSizes.spacingS),
+                Text(
+                  t.managerApprovalHint,
+                  style: AppTypography.body2.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: AppSizes.spacingL),
+                TextField(
+                  controller: _noteController,
+                  decoration: InputDecoration(labelText: t.reviewNote),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+                _BuildingDuesPicker(
+                  buildingId: buildingId,
+                  apartmentId: widget.dekont.apartmentId,
+                  selectedDueId: _selectedDueId ?? widget.dekont.dueId,
+                  onChanged: (id) => setState(() => _selectedDueId = id),
+                ),
+                const SizedBox(height: AppSizes.spacingL),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: AppSizes.buttonHeightSecondary,
+                        child: OutlinedButton(
+                          onPressed: _pendingDecision != null
+                              ? null
+                              : () => _submit(DekontReviewDecision.reject),
+                          style: AppButtonStyles.outlinedDanger(fullWidth: true),
+                          child: _pendingDecision == DekontReviewDecision.reject
+                              ? const _ReviewButtonSpinner()
+                              : Text(t.reject),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSizes.spacingS),
+                    Expanded(
+                      child: SizedBox(
+                        height: AppSizes.buttonHeightSecondary,
+                        child: ElevatedButton(
+                          onPressed: _pendingDecision != null
+                              ? null
+                              : () => _submit(DekontReviewDecision.approve),
+                          style: AppButtonStyles.elevatedSuccess(fullWidth: true),
+                          child: _pendingDecision == DekontReviewDecision.approve
+                              ? const _ReviewButtonSpinner(
+                                  color: Colors.white,
+                                )
+                              : Text(t.approve),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -673,14 +578,35 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
 
 class _BuildingDuesPicker extends ConsumerWidget {
   final String buildingId;
+  final String? apartmentId;
   final String? selectedDueId;
   final ValueChanged<String?> onChanged;
 
   const _BuildingDuesPicker({
     required this.buildingId,
+    this.apartmentId,
     this.selectedDueId,
     required this.onChanged,
   });
+
+  static String? _resolveDropdownValue(
+    List<DueEntity> dues,
+    String? selectedDueId,
+  ) {
+    if (selectedDueId == null || selectedDueId.isEmpty) return null;
+    final exists = dues.any((d) => d.id == selectedDueId);
+    return exists ? selectedDueId : null;
+  }
+
+  static List<DueEntity> _filterForReview(
+    List<DueEntity> dues,
+    String? apartmentId,
+  ) {
+    if (apartmentId == null || apartmentId.isEmpty) return dues;
+    final forApartment =
+        dues.where((d) => d.apartmentId == apartmentId).toList();
+    return forApartment.isNotEmpty ? forApartment : dues;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -691,22 +617,28 @@ class _BuildingDuesPicker extends ConsumerWidget {
       loading: () => const LinearProgressIndicator(),
       error: (_, _) => Text(t.selectDueForApprove),
       data: (dues) {
-        if (dues.isEmpty) {
+        final reviewDues = _filterForReview(dues, apartmentId);
+        if (reviewDues.isEmpty) {
           return Text(t.noPendingDues);
         }
-        return DropdownButtonFormField<String>(
-          key: ValueKey(selectedDueId),
-          initialValue: selectedDueId,
-          decoration: InputDecoration(labelText: t.selectDueForApprove),
-          items: [
-            for (final d in dues)
-              DropdownMenuItem(
-                value: d.id,
-                child: Text(
+        final effectiveValue = _resolveDropdownValue(reviewDues, selectedDueId);
+        final options = <AppSelectOption<String>>[];
+        final seenIds = <String>{};
+        for (final d in reviewDues) {
+          if (!seenIds.add(d.id)) continue;
+          options.add(
+            AppSelectOption(
+              value: d.id,
+              label:
                   '${d.month}/${d.year} — ${d.apartmentNumber} — ${d.amount}',
-                ),
-              ),
-          ],
+            ),
+          );
+        }
+        return AppSelectField<String>(
+          label: t.selectDueForApprove,
+          sheetTitle: t.selectDueForApprove,
+          value: effectiveValue,
+          options: options,
           onChanged: onChanged,
         );
       },
@@ -716,12 +648,39 @@ class _BuildingDuesPicker extends ConsumerWidget {
 
 final buildingDuesForReviewProvider = FutureProvider.autoDispose
     .family<List<DueEntity>, String>((ref, buildingId) async {
-      final result = await ref
-          .read(duesRepositoryProvider)
-          .getBuildingDues(
-            buildingId,
-            status: DueStatus.pending,
-            paginated: false,
-          );
-      return result.items;
+      final repo = ref.read(duesRepositoryProvider);
+      final all = await repo.getBuildingDues(buildingId, paginated: false);
+      final reviewable = all.items
+          .where(
+            (d) =>
+                d.status == DueStatus.pending ||
+                d.status == DueStatus.overdue,
+          )
+          .toList()
+        ..sort((a, b) {
+          final yearCmp = b.year.compareTo(a.year);
+          if (yearCmp != 0) return yearCmp;
+          return b.month.compareTo(a.month);
+        });
+      return reviewable;
     });
+
+class _ReviewButtonSpinner extends StatelessWidget {
+  const _ReviewButtonSpinner({this.color});
+
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 22,
+      height: 22,
+      child: CircularProgressIndicator(
+        strokeWidth: 2.5,
+        valueColor: AlwaysStoppedAnimation<Color>(
+          color ?? AppColors.error,
+        ),
+      ),
+    );
+  }
+}

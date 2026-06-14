@@ -216,7 +216,7 @@ abstract final class AppButtonStyles {
 
       minimumSize: fullWidth
 
-          ? const Size(double.infinity, AppSizes.minTouchTarget)
+          ? const Size(double.infinity, AppSizes.buttonHeightSecondary)
 
           : const Size(0, AppSizes.minTouchTarget),
 

@@ -5,8 +5,11 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/api_user_message.dart';
+import '../../../../core/utils/month_labels.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/app_select_field.dart';
+import '../../../../shared/widgets/sliding_segmented_control.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
 import '../../domain/entities/report_entity.dart';
 import '../providers/report_provider.dart';
@@ -53,11 +56,22 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
     return [current, current - 1, current - 2];
   }
 
-  String _previewSubtitle() {
+  String _previewSubtitle(BuildContext context) {
     if (_type == ReportType.annual) {
       return '${widget.building.name} · $_year';
     }
-    return '${widget.building.name} · $_month/$_year';
+    final monthLabel = localizedMonthName(context, _month);
+    return '${widget.building.name} · $monthLabel $_year';
+  }
+
+  String _periodSummary(BuildContext context) {
+    final t = context.t.features.reports;
+    if (_type == ReportType.annual) {
+      return t.periodHintAnnual.replaceAll('{year}', '$_year');
+    }
+    return t.periodHintMonthly
+        .replaceAll('{month}', localizedMonthName(context, _month))
+        .replaceAll('{year}', '$_year');
   }
 
   Future<void> _onShowReport() async {
@@ -82,7 +96,7 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
         MaterialPageRoute<void>(
           builder: (_) => ReportPreviewScreen(
             result: result,
-            subtitle: _previewSubtitle(),
+            subtitle: _previewSubtitle(context),
           ),
         ),
       );
@@ -106,13 +120,13 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       padding: EdgeInsets.fromLTRB(
-        AppSizes.spacingM,
+        AppSizes.spacingL,
         AppSizes.spacingS,
-        AppSizes.spacingM,
-        AppSizes.spacingM + bottom,
+        AppSizes.spacingL,
+        AppSizes.spacingL + bottom,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -120,98 +134,163 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
         children: [
           Center(
             child: Container(
-              width: 40,
-              height: 4,
+              width: 44,
+              height: 5,
               decoration: BoxDecoration(
-                color: AppColors.borderColor,
-                borderRadius: BorderRadius.circular(2),
+                color: AppColors.borderColor.withValues(alpha: 0.45),
+                borderRadius: BorderRadius.circular(3),
               ),
             ),
           ),
           const SizedBox(height: AppSizes.spacingM),
-          Text(
-            t.sheetTitle,
-            style: AppTypography.h3.copyWith(
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            widget.building.name,
-            style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: AppSizes.spacingM),
-          SegmentedButton<ReportType>(
-            segments: [
-              ButtonSegment(
-                value: ReportType.monthly,
-                label: Text(t.typeMonthly),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.fill,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.borderColor.withValues(alpha: 0.14),
+                    width: 0.5,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.picture_as_pdf_outlined,
+                  size: 24,
+                  color: AppColors.textPrimary,
+                ),
               ),
-              ButtonSegment(
-                value: ReportType.annual,
-                label: Text(t.typeAnnual),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.sheetTitle,
+                      style: AppTypography.h3.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.building.name,
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              InkResponse(
+                onTap: () => Navigator.of(context).pop(),
+                radius: 24,
+                child: Container(
+                  width: AppSizes.minTouchTarget,
+                  height: AppSizes.minTouchTarget,
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: AppColors.fill,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.borderColor.withValues(alpha: 0.14),
+                        width: 0.5,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.close_rounded,
+                      size: 22,
+                      color: AppColors.textSecondary.withValues(alpha: 0.85),
+                    ),
+                  ),
+                ),
               ),
             ],
-            selected: {_type},
-            onSelectionChanged: (value) {
-              setState(() => _type = value.first);
-            },
+          ),
+          const SizedBox(height: AppSizes.spacingL),
+          Text(
+            t.reportTypeLabel,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingS),
+          SlidingSegmentedControl(
+            segments: [t.typeMonthly, t.typeAnnual],
+            selectedIndex: _type == ReportType.monthly ? 0 : 1,
+            enabled: !_isLoading,
+            onChanged: (index) => setState(
+              () => _type = index == 0 ? ReportType.monthly : ReportType.annual,
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingS),
+          Text(
+            _periodSummary(context),
+            style: AppTypography.body2.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+              fontSize: 15,
+            ),
           ),
           const SizedBox(height: AppSizes.spacingM),
           Row(
             children: [
               if (_type == ReportType.monthly) ...[
                 Expanded(
-                  child: DropdownButtonFormField<int>(
-                    initialValue: _month,
-                    decoration: InputDecoration(
-                      labelText: t.fieldMonth,
-                      isDense: true,
-                    ),
-                    items: List.generate(12, (i) {
-                      final m = i + 1;
-                      return DropdownMenuItem(
-                        value: m,
-                        child: Text('$m'),
-                      );
-                    }),
-                    onChanged: _isLoading
-                        ? null
-                        : (v) {
-                            if (v != null) setState(() => _month = v);
-                          },
+                  child: AppSelectField<int>(
+                    label: t.fieldMonth,
+                    sheetTitle: t.selectMonthTitle,
+                    value: _month,
+                    enabled: !_isLoading,
+                    displayText: (v) =>
+                        v == null ? '' : localizedMonthName(context, v),
+                    options: [
+                      for (var m = 1; m <= 12; m++)
+                        AppSelectOption(
+                          value: m,
+                          label: localizedMonthName(context, m),
+                        ),
+                    ],
+                    onChanged: (v) {
+                      if (v != null) setState(() => _month = v);
+                    },
                   ),
                 ),
                 const SizedBox(width: AppSizes.spacingS),
               ],
               Expanded(
-                child: DropdownButtonFormField<int>(
-                  initialValue: _year,
-                  decoration: InputDecoration(
-                    labelText: t.fieldYear,
-                    isDense: true,
-                  ),
-                  items: _yearOptions
-                      .map(
-                        (y) => DropdownMenuItem(
-                          value: y,
-                          child: Text('$y'),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: _isLoading
-                      ? null
-                      : (v) {
-                          if (v != null) setState(() => _year = v);
-                        },
+                child: AppSelectField<int>(
+                  label: t.fieldYear,
+                  sheetTitle: t.selectYearTitle,
+                  value: _year,
+                  enabled: !_isLoading,
+                  displayText: (v) => v == null ? '' : '$v',
+                  options: [
+                    for (final y in _yearOptions)
+                      AppSelectOption(value: y, label: '$y'),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) setState(() => _year = v);
+                  },
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSizes.spacingM),
+          const SizedBox(height: AppSizes.spacingL),
           SizedBox(
             height: AppSizes.minTouchTargetComfort,
             child: FilledButton.icon(

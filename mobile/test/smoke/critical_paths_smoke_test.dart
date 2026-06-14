@@ -1,5 +1,6 @@
 import 'package:aidatpanel/core/constants/api_constants.dart';
 import 'package:aidatpanel/core/network/paginated_list_result.dart';
+import 'package:aidatpanel/features/expenses/domain/entities/expense_create_outcome.dart';
 import 'package:aidatpanel/features/expenses/data/datasources/expense_remote_datasource.dart';
 import 'package:aidatpanel/features/expenses/data/models/expense_model.dart';
 import 'package:aidatpanel/features/expenses/data/repositories/expense_repository_impl.dart';
@@ -85,12 +86,19 @@ class _SummaryOnlyExpenseDs implements ExpenseDataSource {
   }) => throw UnimplementedError();
 
   @override
-  Future<ExpenseModel> createExpense(
+  Future<ExpenseCreateOutcome> createExpense(
     String buildingId, {
     required String title,
+    double? amount,
     required String category,
     required DateTime date,
+    required int targetMonth,
+    required int targetYear,
     String? note,
+    int splitMonths = 1,
+    ExpenseCarryForwardPolicyApi carryForwardPolicy =
+        ExpenseCarryForwardPolicyApi.warnOnly,
+    bool confirmPaidImpact = false,
   }) => throw UnimplementedError();
 
   @override

@@ -52,3 +52,17 @@ export const DEKONT_REJECTED_RESIDENT = {
     ? `Yöneticiniz dekontunuzu şu gerekçeyle reddetti: "${reason}". Lütfen düzeltip tekrar yükleyiniz.`
     : "Yöneticiniz dekontunuzu reddetti. Detaylar için uygulama içinden inceleyebilirsiniz.",
 };
+
+export const EXPENSE_ADDED_RESIDENT = {
+  title: "Yeni Gider Eklendi",
+  body: ({ title, month, year, amountStr, categoryLabel, splitMonths }) => {
+    const period = `${month}/${year}`;
+    if (splitMonths > 1) {
+      return `Yöneticiniz "${title}" (${categoryLabel}) giderini ${splitMonths} aya böldü. Aidat tutarınız güncellenecektir.`;
+    }
+    if (amountStr) {
+      return `Yöneticiniz ${period} dönemine "${title}" (${categoryLabel}, ${amountStr}) giderini ekledi. Aidat tutarınız güncellendi.`;
+    }
+    return `Yöneticiniz ${period} dönemine "${title}" (${categoryLabel}) giderini ekledi. Tutar belirlenince aidatınız güncellenecek.`;
+  },
+};

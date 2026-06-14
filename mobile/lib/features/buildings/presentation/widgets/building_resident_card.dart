@@ -3,12 +3,11 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/widgets/tint_dashboard_tile.dart';
+import '../../../../shared/widgets/user_profile_avatar.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
 import '../utils/apartment_ui_utils.dart';
 
 class BuildingResidentCard extends StatelessWidget {
-  final int index;
   final ApartmentEntity apt;
   final bool selectionMode;
   final bool selected;
@@ -17,7 +16,6 @@ class BuildingResidentCard extends StatelessWidget {
 
   const BuildingResidentCard({
     super.key,
-    required this.index,
     required this.apt,
     required this.selectionMode,
     required this.selected,
@@ -28,23 +26,27 @@ class BuildingResidentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOccupied = apt.isOccupied;
-    final statusInfo = ApartmentUiUtils.getStatusInfo(context, apt.paymentStatus);
     final showSelection = selectionMode && isOccupied;
+    final duesStatus = isOccupied
+        ? ApartmentUiUtils.getDuesStatusInfo(context, apt.paymentStatus)
+        : null;
+    final apartmentLabel =
+        ApartmentUiUtils.formatApartmentLabel(context, apt.apartmentNumber);
+    final duesText = '₺${apt.monthlyDues.toStringAsFixed(0)}';
 
     const tileRadius = BorderRadius.all(Radius.circular(12));
-    final perMonthLabel = context.t.common.perMonth
-        .trim()
-        .replaceAll('/', '')
-        .trim();
 
     final card = Container(
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       decoration: BoxDecoration(
         color: AppColors.fill,
         borderRadius: tileRadius,
-        border: showSelection && selected
-            ? Border.all(color: AppColors.primary, width: 2)
-            : null,
+        border: Border.all(
+          color: showSelection && selected
+              ? AppColors.primary.withValues(alpha: 0.85)
+              : AppColors.borderColor.withValues(alpha: 0.14),
+          width: showSelection && selected ? 1.5 : 0.5,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.spacingM),
@@ -52,7 +54,7 @@ class BuildingResidentCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (showSelection) ...[
                   SizedBox(
@@ -70,61 +72,36 @@ class BuildingResidentCard extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSizes.spacingS),
                 ],
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isOccupied
-                          ? AppColors.primary.withValues(alpha: 0.18)
-                          : AppColors.borderColor.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: isOccupied
-                      ? Text(
-                          '$index',
-                          style: AppTypography.body1.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 17,
-                          ),
-                        )
-                      : Icon(
-                          Icons.person_off_outlined,
-                          size: 24,
-                          color: AppColors.textSecondary,
-                        ),
+                UserProfileAvatar(
+                  userId: apt.resident?.id,
+                  userName: apt.residentName,
+                  isVacant: !isOccupied,
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        ApartmentUiUtils.formatApartmentLabel(context, apt.apartmentNumber),
-                        style: AppTypography.caption.copyWith(
+                        apartmentLabel,
+                        style: AppTypography.body2.copyWith(
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
-                          fontSize: 13,
+                          fontSize: 15,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         isOccupied
                             ? apt.residentName
-                            : context.t.common.emptyApartmentText,
+                            : context.t.common.noResidentInApartment,
                         style: AppTypography.body1.copyWith(
                           color: isOccupied
                               ? AppColors.textPrimary
                               : AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w800,
                           fontSize: 17,
-                          fontStyle: isOccupied
-                              ? FontStyle.normal
-                              : FontStyle.italic,
+                          height: 1.25,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -132,41 +109,18 @@ class BuildingResidentCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (isOccupied)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      statusInfo.label,
-                      style: AppTypography.caption.copyWith(
-                        color: statusInfo.color,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                const SizedBox(width: 8),
+                if (isOccupied && duesStatus != null)
+                  _StatusChip(
+                    label: duesStatus.label,
+                    color: duesStatus.color,
+                    backgroundColor: duesStatus.bgColor,
                   )
                 else
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      context.t.common.vacantBadge,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                  _StatusChip(
+                    label: context.t.common.vacantBadge,
+                    color: AppColors.textSecondary,
+                    backgroundColor: AppColors.surface,
                   ),
               ],
             ),
@@ -175,7 +129,7 @@ class BuildingResidentCard extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  '₺${apt.monthlyDues.toStringAsFixed(0)} $perMonthLabel',
+                  '$duesText · ${context.t.common.monthlyDues}',
                   style: AppTypography.body2.copyWith(
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w600,
@@ -184,28 +138,11 @@ class BuildingResidentCard extends StatelessWidget {
                 ),
               ),
             ] else ...[
-              const SizedBox(height: AppSizes.spacingS),
-              Container(
-                padding: const EdgeInsets.all(AppSizes.spacingS),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    DashboardMetricTile(
-                      icon: Icons.payments_outlined,
-                      label: context.t.common.monthlyDues,
-                      value: '₺${apt.monthlyDues.toStringAsFixed(0)}',
-                      animateValue: false,
-                    ),
-                    if (isOccupied) ...[
-                      const SizedBox(height: AppSizes.spacingS),
-                      _buildApartmentDetailsAction(context, onTap: onShowDetails),
-                    ],
-                  ],
-                ),
+              const SizedBox(height: AppSizes.spacingM),
+              _DuesActionRow(
+                duesText: duesText,
+                monthlyDuesLabel: context.t.common.monthlyDues,
+                detailsLabel: context.t.common.details,
               ),
             ],
           ],
@@ -225,70 +162,122 @@ class BuildingResidentCard extends StatelessWidget {
         ),
       );
     }
-    return card;
-  }
-
-  Widget _buildApartmentDetailsAction(
-    BuildContext context, {
-    required VoidCallback onTap,
-  }) {
-    const actionRadius = BorderRadius.all(Radius.circular(12));
 
     return Material(
-      color: AppColors.fill,
-      borderRadius: actionRadius,
-      clipBehavior: Clip.antiAlias,
+      color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
-        borderRadius: actionRadius,
+        borderRadius: tileRadius,
         splashColor: AppColors.border.withValues(alpha: 0.4),
         highlightColor: AppColors.border.withValues(alpha: 0.25),
-        child: SizedBox(
-          height: AppSizes.minTouchTargetComfort,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.18),
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.info_outline_rounded,
-                    size: 22,
-                    color: AppColors.primary,
-                  ),
+        onTap: onShowDetails,
+        child: card,
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({
+    required this.label,
+    required this.color,
+    required this.backgroundColor,
+  });
+
+  final String label;
+  final Color color;
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 120),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: AppTypography.caption.copyWith(
+          color: color,
+          fontWeight: FontWeight.w700,
+          fontSize: 13,
+          height: 1.2,
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
+class _DuesActionRow extends StatelessWidget {
+  const _DuesActionRow({
+    required this.duesText,
+    required this.monthlyDuesLabel,
+    required this.detailsLabel,
+  });
+
+  final String duesText;
+  final String monthlyDuesLabel;
+  final String detailsLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                duesText,
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 17,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    context.t.common.residentDetailsLink,
-                    style: AppTypography.body1.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                monthlyDuesLabel,
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  size: 22,
-                  color: AppColors.textSecondary.withValues(alpha: 0.7),
-                ),
-              ],
-            ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
         ),
-      ),
+        SizedBox(
+          height: AppSizes.minTouchTarget,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                detailsLabel,
+                style: AppTypography.body2.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(width: 2),
+              Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: AppColors.textSecondary.withValues(alpha: 0.85),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -6,6 +6,16 @@ import '../../../../core/network/dio_client.dart';
 import '../../../../core/network/paginated_list_result.dart';
 import '../../../../core/network/pagination_parse.dart';
 import '../models/expense_model.dart';
+import '../../domain/entities/expense_create_outcome.dart';
+
+enum ExpenseCarryForwardPolicyApi { carryToNextMonth, warnOnly }
+
+extension ExpenseCarryForwardPolicyApiX on ExpenseCarryForwardPolicyApi {
+  String get apiValue => switch (this) {
+        ExpenseCarryForwardPolicyApi.carryToNextMonth => 'CARRY_TO_NEXT_MONTH',
+        ExpenseCarryForwardPolicyApi.warnOnly => 'WARN_ONLY',
+      };
+}
 
 abstract class ExpenseDataSource {
   Future<PaginatedListResult<ExpenseModel>> getBuildingExpenses(
@@ -31,12 +41,19 @@ abstract class ExpenseDataSource {
     required int year,
   });
 
-  Future<ExpenseModel> createExpense(
+  Future<ExpenseCreateOutcome> createExpense(
     String buildingId, {
     required String title,
+    double? amount,
     required String category,
     required DateTime date,
+    required int targetMonth,
+    required int targetYear,
     String? note,
+    int splitMonths = 1,
+    ExpenseCarryForwardPolicyApi carryForwardPolicy =
+        ExpenseCarryForwardPolicyApi.warnOnly,
+    bool confirmPaidImpact = false,
   });
 
   Future<ExpenseModel> updateExpense(
@@ -128,23 +145,71 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
   }
 
   @override
-  Future<ExpenseModel> createExpense(
+  Future<ExpenseCreateOutcome> createExpense(
     String buildingId, {
     required String title,
+    double? amount,
     required String category,
     required DateTime date,
+    required int targetMonth,
+    required int targetYear,
     String? note,
+    int splitMonths = 1,
+    ExpenseCarryForwardPolicyApi carryForwardPolicy =
+        ExpenseCarryForwardPolicyApi.warnOnly,
+    bool confirmPaidImpact = false,
   }) async {
     final response = await _dioClient.post(
       ApiConstants.buildingExpenses(buildingId),
       data: {
         'title': title,
+        'amount': ?amount,
         'category': category,
         'date': date.toUtc().toIso8601String(),
+        'targetMonth': targetMonth,
+        'targetYear': targetYear,
         if (note != null && note.isNotEmpty) 'note': note,
+        'splitMonths': splitMonths,
+        'carryForwardPolicy': carryForwardPolicy.apiValue,
+        'confirmPaidImpact': confirmPaidImpact,
       },
     );
-    return ExpenseModel.fromJson(response.data['data'] as Map<String, dynamic>);
+
+    final data = response.data['data'];
+    if (data is! Map<String, dynamic>) {
+      throw StateError('Geçersiz gider yanıtı');
+    }
+
+    if (data['requiresConfirmation'] == true) {
+      final next = data['nextPeriod'];
+      return ExpenseCreateOutcome(
+        preview: ExpensePaidImpactPreview(
+          message: (data['message'] ?? '') as String,
+          paidApartmentCount: (data['paidApartmentCount'] as num?)?.toInt() ?? 0,
+          perUnitAmount: '${data['perUnitAmount'] ?? '0'}',
+          totalUnpaidShare: '${data['totalUnpaidShare'] ?? '0'}',
+          nextMonth: next is Map ? (next['month'] as num?)?.toInt() ?? 1 : 1,
+          nextYear: next is Map ? (next['year'] as num?)?.toInt() ?? DateTime.now().year : DateTime.now().year,
+          pastMonthWarning: data['pastMonthWarning'] == true,
+        ),
+      );
+    }
+
+    final expenseJson = data['expense'] ?? data;
+    if (expenseJson is! Map<String, dynamic>) {
+      throw StateError('Geçersiz gider yanıtı');
+    }
+
+    final warningsRaw = data['warnings'];
+    final warnings = warningsRaw is List
+        ? warningsRaw.map((e) => '$e').toList()
+        : const <String>[];
+
+    return ExpenseCreateOutcome(
+      expense: ExpenseModel.fromJson(expenseJson).toEntity(),
+      warnings: warnings,
+      pastMonthWarning: data['pastMonthWarning'] == true,
+    );
   }
 
   @override

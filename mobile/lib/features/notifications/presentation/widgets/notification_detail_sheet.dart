@@ -66,6 +66,7 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
         return t.actionViewDekont;
       case NotificationType.dueReminder:
       case NotificationType.duePaid:
+      case NotificationType.expenseAdded:
         return t.actionViewDue;
       default:
         return t.viewRelated;
@@ -268,6 +269,7 @@ class _DetailSection extends ConsumerWidget {
         );
       case NotificationType.dueReminder:
       case NotificationType.duePaid:
+      case NotificationType.expenseAdded:
         return _DueDetailSection(
           dueId: payload.dueId,
           fallbackBody: n.body,

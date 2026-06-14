@@ -54,6 +54,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get logout => 'Çıkış Yap';
 	@override String get cancel => 'İptal';
 	@override String get confirm => 'Onayla';
+	@override String get ok => 'Tamam';
 	@override String get save => 'Kaydet';
 	@override String get delete => 'Sil';
 	@override String get edit => 'Düzenle';
@@ -99,6 +100,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override late final _Translations$common$api$tr api = _Translations$common$api$tr._(_root);
 	@override String get rateLimitHint => 'Sunucu şu an yoğun görünüyor. Kısa süre sonra yeniden denenecek.';
 	@override String get tryAgain => 'Tekrar Dene';
+	@override late final _Translations$common$documentPreview$tr documentPreview = _Translations$common$documentPreview$tr._(_root);
 	@override String get home => 'Ana Sayfa';
 	@override String get buildings => 'Binalar';
 	@override String get dues => 'Aidatlar';
@@ -186,7 +188,11 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get emptyApartmentText => 'Boş Daire';
 	@override String get vacantBadge => 'Boş';
 	@override String get phoneNotShared => 'Telefon paylaşılmadı';
-	@override String get residentDetailsLink => 'Detaylar..';
+	@override String get residentDetailsLink => 'Detayları Gör';
+	@override String get duesPaidStatus => 'Aidat Ödendi';
+	@override String get duesPendingStatus => 'Aidat Bekliyor';
+	@override String get duesOverdueStatus => 'Aidat Gecikmiş';
+	@override String get noResidentInApartment => 'Sakin atanmadı';
 	@override String get residentDetailsSheetTitle => 'Sakin bilgileri';
 	@override String get apartmentDetailsSheetTitle => 'Daire bilgileri';
 	@override String get noResidentAssigned => 'Sakin atanmamış';
@@ -198,6 +204,8 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get all => 'Tümü';
 	@override String get status => 'Durum';
 	@override String get month => 'Ay';
+	@override String get dayLabel => 'Gün';
+	@override String get pickDate => 'Tarih seçin';
 	@override String get monthJanuary => 'Ocak';
 	@override String get monthFebruary => 'Şubat';
 	@override String get monthMarch => 'Mart';
@@ -470,6 +478,19 @@ class _Translations$common$api$tr implements Translations$common$api$en {
 	@override String get noApartmentForPayment => 'Ödeme bilgisi için önce bir daireye atanmanız gerekir.';
 }
 
+// Path: common.documentPreview
+class _Translations$common$documentPreview$tr implements Translations$common$documentPreview$en {
+	_Translations$common$documentPreview$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Belge görüntüle';
+	@override String get share => 'Paylaş';
+	@override String get pdfUnavailable => 'PDF bu cihazda açılamadı. Paylaş ile başka bir uygulamada açabilirsiniz.';
+	@override String get pinchHint => 'İki parmakla yakınlaştırıp kaydırın';
+}
+
 // Path: features.buildings
 class _Translations$features$buildings$tr implements Translations$features$buildings$en {
 	_Translations$features$buildings$tr._(this._root);
@@ -682,6 +703,9 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 	@override String get invalidExtension => 'Yalnızca PDF, JPEG veya PNG yükleyebilirsiniz';
 	@override String get processing => 'Dekont işleniyor…';
 	@override String get viewDekonts => 'Dekontlarım';
+	@override String get breakdownDetails => 'Detaylar';
+	@override String get breakdownBaseDue => 'Baz aidat';
+	@override String get breakdownTotal => 'Toplam';
 	@override String get emptyTitle => 'Henüz dekont yok';
 	@override String get emptySubtitleResident => 'Henüz bir dekontunuz bulunmuyor. Yeni dekont eklemek için sağ üst köşedeki yükleme butonunu kullanabilirsiniz.';
 	@override String get emptySubtitleManager => 'Kullanıcılar tarafından yüklenmiş herhangi bir dekont bulunmamaktadır.';
@@ -720,6 +744,41 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 	@override String get apartment => 'Daire';
 	@override String get amount => 'Tutar';
 	@override String get loadError => 'Dekontlar yüklenemedi';
+	@override String get systemInfoTitle => 'Sistem bilgileri';
+	@override String get systemInfoSubtitle => 'Dekontunuzdan okuduğumuz bilgiler aşağıdadır. Ödeme otomatik onaylanmaz; yönetici hesabını kontrol ederek onaylar.';
+	@override String get systemReadLabel => 'Dekonttan okunanlar';
+	@override String get systemInfoProcessing => 'Dekontunuz işleniyor. Okunan tutar, tarih ve banka bilgileri birkaç dakika içinde burada görünecek.';
+	@override String get systemInfoNoData => 'Okunan bilgi';
+	@override String get systemInfoNoDataHint => 'Dekonttan henüz tutar veya tarih okunamadı. Yine de yönetici onayına sunulacaktır.';
+	@override String get transactionDateLabel => 'İşlem tarihi';
+	@override String get bankLabel => 'Banka';
+	@override String get receiverIbanLabel => 'Alıcı IBAN';
+	@override String get receiverNameLabel => 'Alıcı unvanı';
+	@override String get referenceNumberLabel => 'Referans no';
+	@override String get ibanUnreadableNotice => 'Yüklediğiniz aidat ödeme dekontunda alıcı IBAN bilgisi okunamamıştır. Bu haliyle yönetici onayına sunulacaktır.';
+	@override String get ibanMismatchNotice => 'Dekonttaki alıcı IBAN, binanızın tahsilat hesabıyla eşleşmiyor. Yönetici hesabını kontrol ederek karar verecektir.';
+	@override String get ibanVerifiedNotice => 'Alıcı IBAN, binanızın tahsilat hesabıyla eşleşiyor. Yine de ödeme yönetici onayı olmadan işlenmez.';
+	@override String get residentPendingReviewNotice => 'Dekontunuz yönetici onayına sunuldu. Ödeme otomatik onaylanmaz; yöneticiniz hesabını kontrol ederek onaylayacaktır.';
+	@override String get managerApprovalHint => 'Hesabınıza gelen tutarı kontrol ederek onaylayın veya gerekirse reddedin.';
+	@override String get managerPaymentSummary => '{resident}, {date} tarihinde {bank} aracılığıyla {amount} aidat gönderdi. Hesabınızı kontrol ederek onaylayınız.';
+	@override String get residentWithApartment => '{name} (Daire {apartment})';
+	@override String get apartmentOnly => 'Daire {apartment}';
+	@override String get residentUnknown => 'Sakin';
+	@override String get amountUnknown => 'belirtilen tutarda';
+	@override String get receiptPhotoTitle => 'Dekont görüntüsü';
+	@override String get receiptPhotoHint => 'Önce yukarıdaki sistem bilgilerini inceleyin. Dekont dosyasını istediğiniz zaman açabilirsiniz.';
+	@override String get viewDekont => 'Dekontu görüntüle';
+	@override String get bankKuveytTurk => 'Kuveyt Türk';
+	@override String get bankZiraat => 'Ziraat Bankası';
+	@override String get bankIsbank => 'İş Bankası';
+	@override String get bankGaranti => 'Garanti BBVA';
+	@override String get bankHalkbank => 'Halkbank';
+	@override String get bankVakifbank => 'VakıfBank';
+	@override String get bankYapiKredi => 'Yapı Kredi';
+	@override String get bankAkbank => 'Akbank';
+	@override String get bankQnb => 'QNB Finansbank';
+	@override String get bankGeneric => 'Banka (genel)';
+	@override String get bankUnknown => 'Banka bilgisi okunamadı';
 }
 
 // Path: features.expenses
@@ -738,6 +797,9 @@ class _Translations$features$expenses$tr implements Translations$features$expens
 	@override String get submit => 'Kaydet';
 	@override String get required => 'Zorunlu alan';
 	@override String get amountInvalid => 'Geçerli tutar girin';
+	@override String get amountFromReceiptsHint => 'Tutar makbuzlardan otomatik okunur.';
+	@override String get receiptRequired => 'En az bir makbuz fotoğrafı ekleyin';
+	@override String get amountOcrPending => 'Makbuz tutarları okunuyor. Birkaç saniye sonra listede görünür.';
 	@override String get total => 'Toplam';
 	@override String get createSuccess => 'Gider kaydedildi';
 	@override String get categoryCleaning => 'Temizlik';
@@ -748,7 +810,8 @@ class _Translations$features$expenses$tr implements Translations$features$expens
 	@override String get categoryRepair => 'Onarım';
 	@override String get categoryGarden => 'Bahçe';
 	@override String get categoryOther => 'Diğer';
-	@override String get fieldDate => 'Tarih';
+	@override String get fieldDate => 'Gider tarihi';
+	@override String get fieldDateHint => 'Makbuz veya fatura üzerindeki tarih';
 	@override String get fieldMonth => 'Ay';
 	@override String get fieldYear => 'Yıl';
 	@override String get editTitle => 'Gideri Düzenle';
@@ -765,7 +828,7 @@ class _Translations$features$expenses$tr implements Translations$features$expens
 	@override String get receiptUrlHint => 'Opsiyonel — internetteki makbuz dosyası adresi';
 	@override String get receiptUrlInvalid => 'Adres https:// ile başlamalıdır';
 	@override String get receiptTitle => 'Makbuz fotoğrafı';
-	@override String get receiptHint => 'İsteğe bağlı — PDF belgesi veya fotoğraf (JPEG, PNG) (Maks. 10 MB)';
+	@override String get receiptHint => 'PDF veya fotoğraf (JPEG, PNG). Tutar makbuzlardan otomatik okunur (Maks. 10 MB)';
 	@override String get receiptAdd => 'Fotoğraf ekle';
 	@override String get receiptChange => 'Fotoğrafı değiştir';
 	@override String get receiptRemove => 'Fotoğrafı kaldır';
@@ -776,6 +839,19 @@ class _Translations$features$expenses$tr implements Translations$features$expens
 	@override String get fieldCreatedAt => 'Eklenme zamanı';
 	@override String get viewReceipt => 'Makbuzu gör';
 	@override String get receiptMissing => 'Makbuz yüklenmemiş';
+	@override String get targetMonthLabel => 'Aidata yansıyacağı ay';
+	@override String get targetThisMonth => 'Bu ay';
+	@override String get targetNextMonth => 'Sonraki ay';
+	@override String get targetSpecificMonth => 'Belirli ay';
+	@override String get targetPeriodSummary => '{month} {year} aidatına yansır';
+	@override String get pastMonthWarning => 'Geçmiş aya gider eklendiğinde aidat tutarları güncellenir.';
+	@override String get splitMonthsEnable => 'Birden fazla aya böl';
+	@override String get splitMonthsHint => 'Toplam tutar seçilen aylara eşit dağıtılır';
+	@override String get splitMonthsCount => 'Ay sayısı';
+	@override String get splitMonthsUnit => 'ay';
+	@override String get carryForwardDialogTitle => 'Ödenmiş aidatlar';
+	@override String get carryForwardAuto => 'Farkı sonraki aya ekle';
+	@override String get carryForwardManual => 'Manuel halledeceğim';
 }
 
 // Path: features.notifications
@@ -827,6 +903,7 @@ class _Translations$features$notifications$tr implements Translations$features$n
 	@override String get typeDekontNeedsReview => 'Dekont inceleme';
 	@override String get typeDekontMatched => 'Dekont eşleşti';
 	@override String get typeDekontPaymentApplied => 'Dekont onaylandı';
+	@override String get typeExpenseAdded => 'Yeni gider';
 	@override String get typeSystem => 'Sistem';
 	@override String get typeOther => 'Bildirim';
 	@override String get sendTitle => 'Sakinlere Duyuru';
@@ -903,10 +980,15 @@ class _Translations$features$reports$tr implements Translations$features$reports
 	// Translations
 	@override String get menuDownload => 'Rapor indir';
 	@override String get sheetTitle => 'PDF rapor';
+	@override String get reportTypeLabel => 'Rapor türü';
 	@override String get typeMonthly => 'Aylık özet';
 	@override String get typeAnnual => 'Yıllık özet';
+	@override String get periodHintMonthly => '{month} {year} dönemi için rapor';
+	@override String get periodHintAnnual => '{year} yılı için yıllık rapor';
 	@override String get fieldMonth => 'Ay';
 	@override String get fieldYear => 'Yıl';
+	@override String get selectMonthTitle => 'Ay seçin';
+	@override String get selectYearTitle => 'Yıl seçin';
 	@override String get download => 'Raporu göster';
 	@override String get downloading => 'Rapor hazırlanıyor…';
 	@override String get previewTitle => 'Rapor önizleme';
@@ -1004,6 +1086,7 @@ extension on TranslationsTr {
 			'common.logout' => 'Çıkış Yap',
 			'common.cancel' => 'İptal',
 			'common.confirm' => 'Onayla',
+			'common.ok' => 'Tamam',
 			'common.save' => 'Kaydet',
 			'common.delete' => 'Sil',
 			'common.edit' => 'Düzenle',
@@ -1081,6 +1164,10 @@ extension on TranslationsTr {
 			'common.api.noApartmentForPayment' => 'Ödeme bilgisi için önce bir daireye atanmanız gerekir.',
 			'common.rateLimitHint' => 'Sunucu şu an yoğun görünüyor. Kısa süre sonra yeniden denenecek.',
 			'common.tryAgain' => 'Tekrar Dene',
+			'common.documentPreview.title' => 'Belge görüntüle',
+			'common.documentPreview.share' => 'Paylaş',
+			'common.documentPreview.pdfUnavailable' => 'PDF bu cihazda açılamadı. Paylaş ile başka bir uygulamada açabilirsiniz.',
+			'common.documentPreview.pinchHint' => 'İki parmakla yakınlaştırıp kaydırın',
 			'common.home' => 'Ana Sayfa',
 			'common.buildings' => 'Binalar',
 			'common.dues' => 'Aidatlar',
@@ -1168,7 +1255,11 @@ extension on TranslationsTr {
 			'common.emptyApartmentText' => 'Boş Daire',
 			'common.vacantBadge' => 'Boş',
 			'common.phoneNotShared' => 'Telefon paylaşılmadı',
-			'common.residentDetailsLink' => 'Detaylar..',
+			'common.residentDetailsLink' => 'Detayları Gör',
+			'common.duesPaidStatus' => 'Aidat Ödendi',
+			'common.duesPendingStatus' => 'Aidat Bekliyor',
+			'common.duesOverdueStatus' => 'Aidat Gecikmiş',
+			'common.noResidentInApartment' => 'Sakin atanmadı',
 			'common.residentDetailsSheetTitle' => 'Sakin bilgileri',
 			'common.apartmentDetailsSheetTitle' => 'Daire bilgileri',
 			'common.noResidentAssigned' => 'Sakin atanmamış',
@@ -1180,6 +1271,8 @@ extension on TranslationsTr {
 			'common.all' => 'Tümü',
 			'common.status' => 'Durum',
 			'common.month' => 'Ay',
+			'common.dayLabel' => 'Gün',
+			'common.pickDate' => 'Tarih seçin',
 			'common.monthJanuary' => 'Ocak',
 			'common.monthFebruary' => 'Şubat',
 			'common.monthMarch' => 'Mart',
@@ -1502,6 +1595,8 @@ extension on TranslationsTr {
 			'features.tickets.noteAdded' => 'Not eklendi',
 			'features.tickets.loadError' => 'Talepler yüklenemedi',
 			'features.tickets.noteDisabledClosed' => 'Kapalı talebe not eklenemez',
+			_ => null,
+		} ?? switch (path) {
 			'features.tickets.statusClosedHint' => 'Bu talep kapatıldı; durum değiştirilemez.',
 			'features.tickets.apartmentRequired' => 'Daire bilgisi bulunamadı. Lütfen tekrar giriş yapın.',
 			'features.dekont.makePaymentTitle' => 'Ödeme Yap',
@@ -1513,8 +1608,6 @@ extension on TranslationsTr {
 			'features.dekont.collectionNotConfigured' => 'Yöneticiniz henüz tahsilat IBAN bilgisini tanımlamadı. Yine de dekont yükleyebilirsiniz.',
 			'features.dekont.ibanLabel' => 'IBAN',
 			'features.dekont.accountTitleLabel' => 'Alıcı unvanı',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.referenceLabel' => 'Havale açıklaması',
 			'features.dekont.copy' => 'Kopyala',
 			'features.dekont.copied' => 'Panoya kopyalandı',
@@ -1547,6 +1640,9 @@ extension on TranslationsTr {
 			'features.dekont.invalidExtension' => 'Yalnızca PDF, JPEG veya PNG yükleyebilirsiniz',
 			'features.dekont.processing' => 'Dekont işleniyor…',
 			'features.dekont.viewDekonts' => 'Dekontlarım',
+			'features.dekont.breakdownDetails' => 'Detaylar',
+			'features.dekont.breakdownBaseDue' => 'Baz aidat',
+			'features.dekont.breakdownTotal' => 'Toplam',
 			'features.dekont.emptyTitle' => 'Henüz dekont yok',
 			'features.dekont.emptySubtitleResident' => 'Henüz bir dekontunuz bulunmuyor. Yeni dekont eklemek için sağ üst köşedeki yükleme butonunu kullanabilirsiniz.',
 			'features.dekont.emptySubtitleManager' => 'Kullanıcılar tarafından yüklenmiş herhangi bir dekont bulunmamaktadır.',
@@ -1585,6 +1681,41 @@ extension on TranslationsTr {
 			'features.dekont.apartment' => 'Daire',
 			'features.dekont.amount' => 'Tutar',
 			'features.dekont.loadError' => 'Dekontlar yüklenemedi',
+			'features.dekont.systemInfoTitle' => 'Sistem bilgileri',
+			'features.dekont.systemInfoSubtitle' => 'Dekontunuzdan okuduğumuz bilgiler aşağıdadır. Ödeme otomatik onaylanmaz; yönetici hesabını kontrol ederek onaylar.',
+			'features.dekont.systemReadLabel' => 'Dekonttan okunanlar',
+			'features.dekont.systemInfoProcessing' => 'Dekontunuz işleniyor. Okunan tutar, tarih ve banka bilgileri birkaç dakika içinde burada görünecek.',
+			'features.dekont.systemInfoNoData' => 'Okunan bilgi',
+			'features.dekont.systemInfoNoDataHint' => 'Dekonttan henüz tutar veya tarih okunamadı. Yine de yönetici onayına sunulacaktır.',
+			'features.dekont.transactionDateLabel' => 'İşlem tarihi',
+			'features.dekont.bankLabel' => 'Banka',
+			'features.dekont.receiverIbanLabel' => 'Alıcı IBAN',
+			'features.dekont.receiverNameLabel' => 'Alıcı unvanı',
+			'features.dekont.referenceNumberLabel' => 'Referans no',
+			'features.dekont.ibanUnreadableNotice' => 'Yüklediğiniz aidat ödeme dekontunda alıcı IBAN bilgisi okunamamıştır. Bu haliyle yönetici onayına sunulacaktır.',
+			'features.dekont.ibanMismatchNotice' => 'Dekonttaki alıcı IBAN, binanızın tahsilat hesabıyla eşleşmiyor. Yönetici hesabını kontrol ederek karar verecektir.',
+			'features.dekont.ibanVerifiedNotice' => 'Alıcı IBAN, binanızın tahsilat hesabıyla eşleşiyor. Yine de ödeme yönetici onayı olmadan işlenmez.',
+			'features.dekont.residentPendingReviewNotice' => 'Dekontunuz yönetici onayına sunuldu. Ödeme otomatik onaylanmaz; yöneticiniz hesabını kontrol ederek onaylayacaktır.',
+			'features.dekont.managerApprovalHint' => 'Hesabınıza gelen tutarı kontrol ederek onaylayın veya gerekirse reddedin.',
+			'features.dekont.managerPaymentSummary' => '{resident}, {date} tarihinde {bank} aracılığıyla {amount} aidat gönderdi. Hesabınızı kontrol ederek onaylayınız.',
+			'features.dekont.residentWithApartment' => '{name} (Daire {apartment})',
+			'features.dekont.apartmentOnly' => 'Daire {apartment}',
+			'features.dekont.residentUnknown' => 'Sakin',
+			'features.dekont.amountUnknown' => 'belirtilen tutarda',
+			'features.dekont.receiptPhotoTitle' => 'Dekont görüntüsü',
+			'features.dekont.receiptPhotoHint' => 'Önce yukarıdaki sistem bilgilerini inceleyin. Dekont dosyasını istediğiniz zaman açabilirsiniz.',
+			'features.dekont.viewDekont' => 'Dekontu görüntüle',
+			'features.dekont.bankKuveytTurk' => 'Kuveyt Türk',
+			'features.dekont.bankZiraat' => 'Ziraat Bankası',
+			'features.dekont.bankIsbank' => 'İş Bankası',
+			'features.dekont.bankGaranti' => 'Garanti BBVA',
+			'features.dekont.bankHalkbank' => 'Halkbank',
+			'features.dekont.bankVakifbank' => 'VakıfBank',
+			'features.dekont.bankYapiKredi' => 'Yapı Kredi',
+			'features.dekont.bankAkbank' => 'Akbank',
+			'features.dekont.bankQnb' => 'QNB Finansbank',
+			'features.dekont.bankGeneric' => 'Banka (genel)',
+			'features.dekont.bankUnknown' => 'Banka bilgisi okunamadı',
 			'features.expenses.title' => 'Giderler',
 			'features.expenses.createTitle' => 'Gider Ekle',
 			'features.expenses.fieldTitle' => 'Başlık',
@@ -1594,6 +1725,9 @@ extension on TranslationsTr {
 			'features.expenses.submit' => 'Kaydet',
 			'features.expenses.required' => 'Zorunlu alan',
 			'features.expenses.amountInvalid' => 'Geçerli tutar girin',
+			'features.expenses.amountFromReceiptsHint' => 'Tutar makbuzlardan otomatik okunur.',
+			'features.expenses.receiptRequired' => 'En az bir makbuz fotoğrafı ekleyin',
+			'features.expenses.amountOcrPending' => 'Makbuz tutarları okunuyor. Birkaç saniye sonra listede görünür.',
 			'features.expenses.total' => 'Toplam',
 			'features.expenses.createSuccess' => 'Gider kaydedildi',
 			'features.expenses.categoryCleaning' => 'Temizlik',
@@ -1604,7 +1738,8 @@ extension on TranslationsTr {
 			'features.expenses.categoryRepair' => 'Onarım',
 			'features.expenses.categoryGarden' => 'Bahçe',
 			'features.expenses.categoryOther' => 'Diğer',
-			'features.expenses.fieldDate' => 'Tarih',
+			'features.expenses.fieldDate' => 'Gider tarihi',
+			'features.expenses.fieldDateHint' => 'Makbuz veya fatura üzerindeki tarih',
 			'features.expenses.fieldMonth' => 'Ay',
 			'features.expenses.fieldYear' => 'Yıl',
 			'features.expenses.editTitle' => 'Gideri Düzenle',
@@ -1621,7 +1756,7 @@ extension on TranslationsTr {
 			'features.expenses.receiptUrlHint' => 'Opsiyonel — internetteki makbuz dosyası adresi',
 			'features.expenses.receiptUrlInvalid' => 'Adres https:// ile başlamalıdır',
 			'features.expenses.receiptTitle' => 'Makbuz fotoğrafı',
-			'features.expenses.receiptHint' => 'İsteğe bağlı — PDF belgesi veya fotoğraf (JPEG, PNG) (Maks. 10 MB)',
+			'features.expenses.receiptHint' => 'PDF veya fotoğraf (JPEG, PNG). Tutar makbuzlardan otomatik okunur (Maks. 10 MB)',
 			'features.expenses.receiptAdd' => 'Fotoğraf ekle',
 			'features.expenses.receiptChange' => 'Fotoğrafı değiştir',
 			'features.expenses.receiptRemove' => 'Fotoğrafı kaldır',
@@ -1632,6 +1767,19 @@ extension on TranslationsTr {
 			'features.expenses.fieldCreatedAt' => 'Eklenme zamanı',
 			'features.expenses.viewReceipt' => 'Makbuzu gör',
 			'features.expenses.receiptMissing' => 'Makbuz yüklenmemiş',
+			'features.expenses.targetMonthLabel' => 'Aidata yansıyacağı ay',
+			'features.expenses.targetThisMonth' => 'Bu ay',
+			'features.expenses.targetNextMonth' => 'Sonraki ay',
+			'features.expenses.targetSpecificMonth' => 'Belirli ay',
+			'features.expenses.targetPeriodSummary' => '{month} {year} aidatına yansır',
+			'features.expenses.pastMonthWarning' => 'Geçmiş aya gider eklendiğinde aidat tutarları güncellenir.',
+			'features.expenses.splitMonthsEnable' => 'Birden fazla aya böl',
+			'features.expenses.splitMonthsHint' => 'Toplam tutar seçilen aylara eşit dağıtılır',
+			'features.expenses.splitMonthsCount' => 'Ay sayısı',
+			'features.expenses.splitMonthsUnit' => 'ay',
+			'features.expenses.carryForwardDialogTitle' => 'Ödenmiş aidatlar',
+			'features.expenses.carryForwardAuto' => 'Farkı sonraki aya ekle',
+			'features.expenses.carryForwardManual' => 'Manuel halledeceğim',
 			'features.notifications.markAllRead' => 'Tümünü oku',
 			'features.notifications.markAllReadLong' => 'Tümünü okundu işaretle',
 			'features.notifications.viewRelated' => 'İlgili kayda git',
@@ -1674,6 +1822,7 @@ extension on TranslationsTr {
 			'features.notifications.typeDekontNeedsReview' => 'Dekont inceleme',
 			'features.notifications.typeDekontMatched' => 'Dekont eşleşti',
 			'features.notifications.typeDekontPaymentApplied' => 'Dekont onaylandı',
+			'features.notifications.typeExpenseAdded' => 'Yeni gider',
 			'features.notifications.typeSystem' => 'Sistem',
 			'features.notifications.typeOther' => 'Bildirim',
 			'features.notifications.sendTitle' => 'Sakinlere Duyuru',
@@ -1723,10 +1872,15 @@ extension on TranslationsTr {
 			'features.subscription.loadFailed' => 'Abonelik bilgisi alınamadı.',
 			'features.reports.menuDownload' => 'Rapor indir',
 			'features.reports.sheetTitle' => 'PDF rapor',
+			'features.reports.reportTypeLabel' => 'Rapor türü',
 			'features.reports.typeMonthly' => 'Aylık özet',
 			'features.reports.typeAnnual' => 'Yıllık özet',
+			'features.reports.periodHintMonthly' => '{month} {year} dönemi için rapor',
+			'features.reports.periodHintAnnual' => '{year} yılı için yıllık rapor',
 			'features.reports.fieldMonth' => 'Ay',
 			'features.reports.fieldYear' => 'Yıl',
+			'features.reports.selectMonthTitle' => 'Ay seçin',
+			'features.reports.selectYearTitle' => 'Yıl seçin',
 			'features.reports.download' => 'Raporu göster',
 			'features.reports.downloading' => 'Rapor hazırlanıyor…',
 			'features.reports.previewTitle' => 'Rapor önizleme',

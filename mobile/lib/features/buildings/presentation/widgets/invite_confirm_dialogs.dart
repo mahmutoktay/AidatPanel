@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
-import '../../utils/invite_code_helpers.dart';
+import '../utils/apartment_ui_utils.dart';
 import '../../../../l10n/strings.g.dart';
 
 /// Dolu daireye yine de yeni kod üretilmek istendiğinde gösterilen onay dialogu.
@@ -20,13 +21,29 @@ class OccupiedApartmentConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final apartmentLabel = ApartmentUiUtils.formatApartmentLabel(
+      context,
+      apartment.apartmentNumber,
+    );
+
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.dialogRadius),
+      ),
       title: Row(
         children: [
-          Icon(Icons.warning_amber_rounded, color: AppColors.warning),
-          const SizedBox(width: 8),
-          Text(context.t.features.buildings.apartmentOccupied),
+          const Icon(Icons.warning_amber_rounded, color: AppColors.warning),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              context.t.features.buildings.apartmentOccupied,
+              style: AppTypography.h3.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+              ),
+            ),
+          ),
         ],
       ),
       content: Column(
@@ -34,14 +51,20 @@ class OccupiedApartmentConfirmDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${InviteCodeHelpers.formatApartmentLabel(apartment.apartmentNumber)} dairesinde "${apartment.residentName}" kayıtlı.',
-            style: AppTypography.body1.copyWith(color: AppColors.textPrimary),
+            '$apartmentLabel dairesinde "${apartment.residentName}" kayıtlı.',
+            style: AppTypography.body1.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+            ),
           ),
           const SizedBox(height: AppSizes.spacingS),
           Text.rich(
             TextSpan(
               style: AppTypography.body2.copyWith(
                 color: AppColors.textSecondary,
+                fontSize: 15,
+                height: 1.35,
               ),
               children: [
                 TextSpan(text: context.t.features.buildings.newCodePrefix),
@@ -50,6 +73,7 @@ class OccupiedApartmentConfirmDialog extends StatelessWidget {
                   style: AppTypography.body2.copyWith(
                     color: AppColors.error,
                     fontWeight: FontWeight.w700,
+                    fontSize: 15,
                   ),
                 ),
                 TextSpan(text: context.t.common.confirmMessage),
@@ -67,7 +91,7 @@ class OccupiedApartmentConfirmDialog extends StatelessWidget {
       actions: [
         _DialogActionRow(
           confirmLabel: context.t.features.buildings.produceAnyway,
-          confirmColor: AppColors.primary,
+          confirmStyle: AppButtonStyles.elevatedPrimary(fullWidth: true),
           onConfirm: () {
             Navigator.pop(context);
             onConfirm();
@@ -87,24 +111,40 @@ class RevokeInviteCodeDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.dialogRadius),
+      ),
       title: Row(
         children: [
-          Icon(Icons.cancel_outlined, color: AppColors.error),
-          const SizedBox(width: 8),
-          Text(context.t.features.buildings.cancelCode),
+          const Icon(Icons.cancel_outlined, color: AppColors.error),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              context.t.features.buildings.cancelCode,
+              style: AppTypography.h3.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+              ),
+            ),
+          ),
         ],
       ),
       content: Text.rich(
         TextSpan(
-          style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
+          style: AppTypography.body1.copyWith(
+            color: AppColors.textSecondary,
+            fontSize: 16,
+            height: 1.35,
+          ),
           children: [
             TextSpan(text: context.t.features.buildings.currentCodePrefix),
             TextSpan(
               text: context.t.features.buildings.codeInvalid,
-              style: AppTypography.body2.copyWith(
+              style: AppTypography.body1.copyWith(
                 color: AppColors.error,
                 fontWeight: FontWeight.w700,
+                fontSize: 16,
               ),
             ),
             TextSpan(text: context.t.common.confirmMessage),
@@ -120,7 +160,7 @@ class RevokeInviteCodeDialog extends StatelessWidget {
       actions: [
         _DialogActionRow(
           confirmLabel: context.t.features.buildings.cancelCode,
-          confirmColor: AppColors.error,
+          confirmStyle: AppButtonStyles.filledDanger(fullWidth: true),
           onConfirm: () {
             Navigator.pop(context);
             onConfirm();
@@ -134,12 +174,12 @@ class RevokeInviteCodeDialog extends StatelessWidget {
 /// Vazgeç + onay butonlu yatay aksiyon satırı (dialoglarda kullanılır).
 class _DialogActionRow extends StatelessWidget {
   final String confirmLabel;
-  final Color confirmColor;
+  final ButtonStyle confirmStyle;
   final VoidCallback onConfirm;
 
   const _DialogActionRow({
     required this.confirmLabel,
-    required this.confirmColor,
+    required this.confirmStyle,
     required this.onConfirm,
   });
 
@@ -152,17 +192,8 @@ class _DialogActionRow extends StatelessWidget {
             height: AppSizes.buttonHeightSecondary,
             child: OutlinedButton(
               onPressed: () => Navigator.pop(context),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: AppColors.cardBorderSide,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(
-                context.t.common.cancelBtn,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
+              style: AppButtonStyles.outlinedNeutral(fullWidth: true),
+              child: Text(context.t.common.cancelBtn),
             ),
           ),
         ),
@@ -171,18 +202,9 @@ class _DialogActionRow extends StatelessWidget {
           child: SizedBox(
             height: AppSizes.buttonHeightSecondary,
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: confirmColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+              style: confirmStyle,
               onPressed: onConfirm,
-              child: Text(
-                confirmLabel,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
+              child: Text(confirmLabel),
             ),
           ),
         ),

@@ -17,6 +17,7 @@ import '../../features/notifications/presentation/screens/notifications_screen.d
 import '../../features/tickets/presentation/screens/create_ticket_screen.dart';
 import '../../features/tickets/presentation/screens/manager_tickets_screen.dart';
 import '../../features/tickets/presentation/screens/ticket_detail_screen.dart';
+import '../../features/expenses/presentation/screens/expense_form_screen.dart';
 import '../../features/expenses/presentation/screens/manager_expenses_screen.dart';
 import '../../features/expenses/domain/entities/expense_entity.dart';
 import '../../features/expenses/presentation/screens/expense_detail_screen.dart';
@@ -55,6 +56,16 @@ List<RouteBase> _managerDashboardChildRoutes() => [
     name: 'manager_dashboard_expenses',
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) => const ManagerExpensesScreen(),
+  ),
+  GoRoute(
+    path: 'expenses/form',
+    name: 'manager_expense_form',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) {
+      final buildingId = state.uri.queryParameters['buildingId'] ?? '';
+      final expense = state.extra as ExpenseEntity?;
+      return ExpenseFormScreen(buildingId: buildingId, expense: expense);
+    },
   ),
   GoRoute(
     path: 'dekonts',

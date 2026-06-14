@@ -1,3 +1,4 @@
+import 'package:aidatpanel/features/expenses/domain/entities/expense_create_outcome.dart';
 import 'package:aidatpanel/features/expenses/data/datasources/expense_remote_datasource.dart';
 import 'package:aidatpanel/features/expenses/data/models/expense_model.dart';
 import 'package:aidatpanel/features/expenses/data/repositories/expense_repository_impl.dart';
@@ -34,23 +35,34 @@ class _FakeExpenseDs implements ExpenseDataSource {
   List<String>? lastUploadFilePaths;
 
   @override
-  Future<ExpenseModel> createExpense(
+  Future<ExpenseCreateOutcome> createExpense(
     String buildingId, {
     required String title,
+    double? amount,
     required String category,
     required DateTime date,
+    required int targetMonth,
+    required int targetYear,
     String? note,
+    int splitMonths = 1,
+    ExpenseCarryForwardPolicyApi carryForwardPolicy =
+        ExpenseCarryForwardPolicyApi.warnOnly,
+    bool confirmPaidImpact = false,
   }) async {
-    return ExpenseModel(
-      id: 'e1',
-      buildingId: buildingId,
-      title: title,
-      amount: null,
-      category: category,
-      date: date,
-      note: note,
-      receiptUrl: null,
-      createdAt: DateTime.now(),
+    return ExpenseCreateOutcome(
+      expense: ExpenseModel(
+        id: 'e1',
+        buildingId: buildingId,
+        title: title,
+        amount: amount,
+        category: category,
+        date: date,
+        targetMonth: targetMonth,
+        targetYear: targetYear,
+        perUnitAmount: amount != null ? amount / 3 : null,
+        note: note,
+        createdAt: DateTime.now(),
+      ).toEntity(),
     );
   }
 

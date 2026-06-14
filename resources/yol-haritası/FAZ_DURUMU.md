@@ -223,6 +223,18 @@ GET /api/v1/buildings/:id/reports?type=annual&year=2026
 
 ---
 
+## Gider–Aidat Hesaplama (FAZ 7 öncesi özellik)
+
+**Hedef:** Aylık gider → aidat dağıtımı + sakin ödeme breakdown
+
+- [x] Expense `targetMonth/Year`, `perUnitAmount`, carryforward tablosu (migration)
+- [x] `dueExpenseRecalcService` — recalc, breakdown, carry-forward
+- [x] Gider CRUD preview/confirm + aidat API breakdown
+- [x] Mobil: gider formu (tutar, ay, split) + ödeme breakdown UI
+- [x] i18n, testler, backend deploy
+
+---
+
 ## 🔒 FAZ 7 — v1.0.0 Lansman (kilitli)
 
 **Hedef:** ~2026-07-14 · FAZ 6 bitmeden açılamaz

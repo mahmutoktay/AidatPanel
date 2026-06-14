@@ -83,6 +83,7 @@ class NotificationPayload {
         return route ?? '/notifications';
       case 'DUE_PAID':
       case 'DUE_REMINDER':
+      case 'EXPENSE_ADDED':
         if (role == UserRole.manager) {
           return _dashboardPath(
             basePath: '/manager-dashboard',

@@ -26,6 +26,8 @@ extension NotificationTypeLabels on NotificationType {
         return t.typeDekontMatched;
       case NotificationType.dekontPaymentApplied:
         return t.typeDekontPaymentApplied;
+      case NotificationType.expenseAdded:
+        return t.typeExpenseAdded;
       case NotificationType.system:
         return t.typeSystem;
       case NotificationType.other:
@@ -54,6 +56,8 @@ extension NotificationTypeLabels on NotificationType {
         return 'DEKONT_MATCHED';
       case NotificationType.dekontPaymentApplied:
         return 'DEKONT_PAYMENT_APPLIED';
+      case NotificationType.expenseAdded:
+        return 'EXPENSE_ADDED';
       case NotificationType.system:
         return 'SYSTEM';
       case NotificationType.other:

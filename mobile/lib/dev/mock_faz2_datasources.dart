@@ -4,6 +4,7 @@ library;
 import '../core/network/paginated_list_result.dart';
 import '../features/expenses/data/datasources/expense_remote_datasource.dart';
 import '../features/expenses/data/models/expense_model.dart';
+import '../features/expenses/domain/entities/expense_create_outcome.dart';
 import '../features/notifications/data/datasources/notification_remote_datasource.dart';
 import '../features/notifications/domain/entities/notification_entity.dart';
 
@@ -23,6 +24,9 @@ class MockExpenseDataSource implements ExpenseDataSource {
         amount: 4500,
         category: 'ELEVATOR',
         date: DateTime(now.year, now.month, 5),
+        targetMonth: now.month,
+        targetYear: now.year,
+        perUnitAmount: 1125,
         note: 'Yıllık sözleşme',
         createdAt: now.subtract(const Duration(days: 3)),
       ),
@@ -33,6 +37,9 @@ class MockExpenseDataSource implements ExpenseDataSource {
         amount: 1200,
         category: 'CLEANING',
         date: DateTime(now.year, now.month, 12),
+        targetMonth: now.month,
+        targetYear: now.year,
+        perUnitAmount: 300,
         createdAt: now.subtract(const Duration(days: 1)),
       ),
     ];
@@ -44,6 +51,9 @@ class MockExpenseDataSource implements ExpenseDataSource {
         amount: 3200.5,
         category: 'ELECTRICITY',
         date: DateTime(now.year, now.month, 8),
+        targetMonth: now.month,
+        targetYear: now.year,
+        perUnitAmount: 800.13,
         createdAt: now,
       ),
     ];
@@ -61,10 +71,10 @@ class MockExpenseDataSource implements ExpenseDataSource {
     await Future.delayed(_delay);
     var list = List<ExpenseModel>.from(_byBuilding[buildingId] ?? []);
     if (month != null) {
-      list = list.where((e) => e.date.month == month).toList();
+      list = list.where((e) => e.targetMonth == month).toList();
     }
     if (year != null) {
-      list = list.where((e) => e.date.year == year).toList();
+      list = list.where((e) => e.targetYear == year).toList();
     }
     if (category != null) {
       list = list.where((e) => e.category == category).toList();
@@ -83,10 +93,10 @@ class MockExpenseDataSource implements ExpenseDataSource {
     await Future.delayed(_delay);
     var list = List<ExpenseModel>.from(_byBuilding['b1'] ?? []);
     if (month != null) {
-      list = list.where((e) => e.date.month == month).toList();
+      list = list.where((e) => e.targetMonth == month).toList();
     }
     if (year != null) {
-      list = list.where((e) => e.date.year == year).toList();
+      list = list.where((e) => e.targetYear == year).toList();
     }
     if (category != null) {
       list = list.where((e) => e.category == category).toList();
@@ -137,27 +147,37 @@ class MockExpenseDataSource implements ExpenseDataSource {
   }
 
   @override
-  Future<ExpenseModel> createExpense(
+  Future<ExpenseCreateOutcome> createExpense(
     String buildingId, {
     required String title,
+    double? amount,
     required String category,
     required DateTime date,
+    required int targetMonth,
+    required int targetYear,
     String? note,
+    int splitMonths = 1,
+    ExpenseCarryForwardPolicyApi carryForwardPolicy =
+        ExpenseCarryForwardPolicyApi.warnOnly,
+    bool confirmPaidImpact = false,
   }) async {
     await Future.delayed(_delay);
     final model = ExpenseModel(
       id: 'exp_${DateTime.now().millisecondsSinceEpoch}',
       buildingId: buildingId,
       title: title,
-      amount: null,
+      amount: amount,
       category: category,
       date: date,
+      targetMonth: targetMonth,
+      targetYear: targetYear,
+      perUnitAmount: amount != null ? amount / 4 : null,
       note: note,
       receiptUrl: null,
       createdAt: DateTime.now(),
     );
     _byBuilding.putIfAbsent(buildingId, () => []).insert(0, model);
-    return model;
+    return ExpenseCreateOutcome(expense: model.toEntity());
   }
 
   @override

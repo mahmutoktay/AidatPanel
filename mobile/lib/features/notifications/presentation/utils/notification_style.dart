@@ -134,6 +134,18 @@ NotificationVisual notificationVisual(NotificationType type) {
 
       );
 
+    case NotificationType.expenseAdded:
+
+      return const NotificationVisual(
+
+        icon: Icons.receipt_outlined,
+
+        color: AppColors.warning,
+
+        background: AppColors.warningBg,
+
+      );
+
     case NotificationType.system:
 
       return const NotificationVisual(

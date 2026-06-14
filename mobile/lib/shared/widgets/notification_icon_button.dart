@@ -68,12 +68,12 @@ class DashboardRoleBar extends StatelessWidget {
 
   const DashboardRoleBar({super.key, required this.title});
 
-  /// Rol başlığı — Archivo Black: geniş, kare hatlı, kalın manşet stili.
-  /// `archivoBlack` tek bir 900-ağırlık varyantta gelir.
-  static TextStyle get _titleStyle => GoogleFonts.archivoBlack(
-    fontSize: 38,
+  /// Rol başlığı — Archivo Bold, dashboard üst şerit.
+  static TextStyle get _titleStyle => GoogleFonts.archivo(
+    fontSize: 32,
+    fontWeight: FontWeight.w700,
     height: 1.0,
-    letterSpacing: 2.0,
+    letterSpacing: 1.5,
     color: AppColors.textPrimary,
   );
 

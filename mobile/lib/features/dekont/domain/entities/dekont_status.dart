@@ -70,4 +70,22 @@ enum DekontStatus {
       this == DekontStatus.recipientMismatch ||
       this == DekontStatus.matchAmbiguous ||
       this == DekontStatus.extractFailed;
+
+  /// OCR eşleşse bile ödeme yönetici onayı olmadan uygulanmaz (auto-apply kapalı).
+  bool get needsManagerApproval {
+    if (isTerminal || isProcessing) return false;
+    switch (this) {
+      case DekontStatus.matched:
+      case DekontStatus.parsed:
+      case DekontStatus.needsManagerReview:
+      case DekontStatus.parseLowConfidence:
+      case DekontStatus.unmatched:
+      case DekontStatus.recipientMismatch:
+      case DekontStatus.matchAmbiguous:
+      case DekontStatus.extractFailed:
+        return true;
+      default:
+        return false;
+    }
+  }
 }

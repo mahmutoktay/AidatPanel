@@ -10,7 +10,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../dekont/presentation/widgets/dekont_file_preview.dart';
+import '../../../../shared/widgets/document_preview_screen.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../providers/expenses_provider.dart';
 import '../utils/expense_labels.dart';
@@ -116,46 +116,24 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     await SharePlus.instance.share(ShareParams(files: [file]));
   }
 
-  void _showPreviewDialog(BuildContext context, ExpenseEntity expense, String url) {
+  Future<void> _openReceiptPreview(
+    BuildContext context,
+    ExpenseEntity expense,
+    String url,
+  ) async {
     final bytes = _filesBytes[url];
     if (bytes == null) return;
-    
-    final t = context.t.features.expenses;
+
     final ext = url.toLowerCase().contains('.pdf') ? 'pdf' : 'jpg';
     final mimeType = ext == 'pdf' ? 'application/pdf' : 'image/jpeg';
-    final filename = 'expense_${expense.id}_${url.split('/').last}';
+    final filename = url.split('/').last;
 
-    showDialog(
-      context: context,
-      useSafeArea: false,
-      builder: (dialogContext) => Scaffold(
-        appBar: AppBar(
-          title: Text(t.detailTitle),
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.pop(dialogContext),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.share_outlined),
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                _shareFile(expense, url);
-              },
-            ),
-          ],
-        ),
-        body: Center(
-          child: InteractiveViewer(
-            maxScale: 4.0,
-            child: DekontFilePreview(
-              bytes: bytes,
-              mimeType: mimeType,
-              fileName: filename,
-            ),
-          ),
-        ),
-      ),
+    await DocumentPreviewScreen.open(
+      context,
+      bytes: bytes,
+      fileName: filename.isNotEmpty ? filename : '${expense.title}.$ext',
+      mimeType: mimeType,
+      onShare: () => _shareFile(expense, url),
     );
   }
 
@@ -292,7 +270,9 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
             Padding(
               padding: const EdgeInsets.only(right: AppSizes.spacingS),
               child: IconButton(
-                onPressed: bytes != null ? () => _showPreviewDialog(context, expense, url) : null,
+                onPressed: bytes != null
+                    ? () => _openReceiptPreview(context, expense, url)
+                    : null,
                 icon: const Icon(Icons.visibility_outlined),
                 color: AppColors.primary,
                 tooltip: t.viewReceipt,

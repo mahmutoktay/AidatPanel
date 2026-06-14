@@ -1,6 +1,11 @@
 import { prisma } from "../config/db.js";
 import { extractDekontTextForPipeline } from "./dekontOcrRunner.js";
 import { enqueueDekontPipeline } from "./dekontPipelineQueue.js";
+import {
+  computePerUnitAmount,
+  getApartmentCount,
+  recalculateBuildingDuesForMonth,
+} from "./dueExpenseRecalcService.js";
 
 const ALLOWED_OCR_MIMES = new Set([
   "image/jpeg",
@@ -83,14 +88,41 @@ export async function runExpenseOcrPipeline(expenseId, files) {
 
   const { totalParsedAmount, hasAnyAmount } = aggregateOcrAmounts(ocrResults);
 
-  await prisma.expense.update({
+  const expense = await prisma.expense.findUnique({
     where: { id: expenseId },
-    data: {
-      amount: hasAnyAmount ? totalParsedAmount : null,
-      parsedAmount: hasAnyAmount ? totalParsedAmount : null,
-      ocrReceiptsJson: ocrResults,
+    select: {
+      amount: true,
+      buildingId: true,
+      targetMonth: true,
+      targetYear: true,
     },
   });
+
+  if (!expense) return;
+
+  const updateData = {
+    parsedAmount: hasAnyAmount ? totalParsedAmount : null,
+    ocrReceiptsJson: ocrResults,
+  };
+
+  if (hasAnyAmount) {
+    const apartmentCount = await getApartmentCount(expense.buildingId);
+    updateData.amount = totalParsedAmount;
+    updateData.perUnitAmount = computePerUnitAmount(totalParsedAmount, apartmentCount);
+  }
+
+  await prisma.expense.update({
+    where: { id: expenseId },
+    data: updateData,
+  });
+
+  if (hasAnyAmount) {
+    await recalculateBuildingDuesForMonth(
+      expense.buildingId,
+      expense.targetMonth,
+      expense.targetYear
+    );
+  }
 }
 
 /**

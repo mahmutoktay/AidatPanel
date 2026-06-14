@@ -11,6 +11,11 @@ import {
   buildListResponse,
   mergeCreatedAtCursorWhere,
 } from "../utils/listQuery.js";
+import {
+  computeDueBreakdown,
+  recalculateBuildingDuesForMonth,
+  serializeBreakdownForDue,
+} from "./dueExpenseRecalcService.js";
 
 function mapDueRow(due) {
   const { apartment, ...rest } = due;
@@ -23,6 +28,24 @@ function mapDueRow(due) {
       floor: apartment.floor,
     },
     resident: apartment.resident ?? null,
+  };
+}
+
+async function attachBreakdownToDue(due, buildingId) {
+  const row = due.apartment ? mapDueRow(due) : due;
+  const apartmentId = due.apartmentId ?? due.apartment?.id;
+  if (!apartmentId || !buildingId) return row;
+
+  const breakdown = await computeDueBreakdown(
+    apartmentId,
+    due.month,
+    due.year,
+    buildingId
+  );
+
+  return {
+    ...row,
+    breakdown: serializeBreakdownForDue(breakdown),
   };
 }
 
@@ -83,7 +106,14 @@ export const getDuesByBuildingService = async (buildingId, managerId, filters = 
     take,
   });
 
-  return buildListResponse(filters, dues, mapDueRow);
+  const mapped = buildListResponse(filters, dues, mapDueRow);
+  if (paginated) {
+    const items = await Promise.all(
+      mapped.items.map((due) => attachBreakdownToDue(due, buildingId))
+    );
+    return { ...mapped, items };
+  }
+  return Promise.all(mapped.map((due) => attachBreakdownToDue(due, buildingId)));
 };
 
 /**
@@ -225,8 +255,9 @@ export const getMyDuesService = async (userId, filters = {}) => {
   });
 
   const building = user.apartment.building;
+  const buildingId = user.apartment.buildingId;
 
-  return buildListResponse(filters, dues, (due) => ({
+  const mapped = buildListResponse(filters, dues, (due) => ({
     ...due,
     apartmentId: user.apartment.id,
     apartmentNumber: user.apartment.number,
@@ -236,6 +267,14 @@ export const getMyDuesService = async (userId, filters = {}) => {
     },
     building,
   }));
+
+  if (paginated) {
+    const items = await Promise.all(
+      mapped.items.map((due) => attachBreakdownToDue(due, buildingId))
+    );
+    return { ...mapped, items };
+  }
+  return Promise.all(mapped.map((due) => attachBreakdownToDue(due, buildingId)));
 };
 
 /**
@@ -251,7 +290,6 @@ export const updateBuildingDueAmountService = async (buildingId, managerId, { du
   if (!building) return null;
 
   return await prisma.$transaction(async (tx) => {
-    // Building'i güncelle
     const updated = await tx.building.update({
       where: { id: buildingId },
       data: {
@@ -261,18 +299,21 @@ export const updateBuildingDueAmountService = async (buildingId, managerId, { du
       },
     });
 
-    // Mevcut PENDING aidatları da güncelle (isteğe bağlı)
+    return updated;
+  }).then(async (updated) => {
     if (affectCurrent && dueAmount) {
-      await tx.due.updateMany({
+      const openPeriods = await prisma.due.findMany({
         where: {
           apartment: { buildingId },
-          status: "PENDING",
+          status: { in: ["PENDING", "OVERDUE"] },
         },
-        data: {
-          amount: dueAmount,
-          ...(currency && { currency }),
-        },
+        select: { month: true, year: true },
+        distinct: ["month", "year"],
       });
+
+      for (const { month, year } of openPeriods) {
+        await recalculateBuildingDuesForMonth(buildingId, month, year);
+      }
     }
 
     return updated;

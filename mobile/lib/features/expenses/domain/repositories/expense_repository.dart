@@ -1,4 +1,5 @@
 import '../../../../core/network/paginated_list_result.dart';
+import '../entities/expense_create_outcome.dart';
 import '../entities/expense_entity.dart';
 
 abstract class ExpenseRepository {
@@ -32,12 +33,19 @@ abstract class ExpenseRepository {
     required int year,
   });
 
-  Future<ExpenseEntity> createExpense(
+  Future<ExpenseCreateOutcome> createExpense(
     String buildingId, {
     required String title,
+    double? amount,
     required ExpenseCategory category,
     required DateTime date,
+    required int targetMonth,
+    required int targetYear,
     String? note,
+    int splitMonths = 1,
+    ExpenseCarryForwardPolicy carryForwardPolicy =
+        ExpenseCarryForwardPolicy.warnOnly,
+    bool confirmPaidImpact = false,
   });
 
   Future<ExpenseEntity> updateExpense(

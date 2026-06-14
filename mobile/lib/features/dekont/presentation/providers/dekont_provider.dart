@@ -11,6 +11,7 @@ import '../../domain/errors/duplicate_dekont_exception.dart';
 import '../../domain/entities/dekont_entity.dart';
 import '../../domain/entities/payment_collection_entity.dart';
 import '../../domain/repositories/dekont_repository.dart';
+import '../utils/dekont_labels.dart';
 import '../../data/datasources/dekont_remote_datasource.dart';
 import '../../data/dekont_preview_cache.dart';
 import '../../data/repositories/dekont_repository_impl.dart';
@@ -285,6 +286,7 @@ class MyDekontsState {
   });
 
   bool get canLoadMore =>
+      (statusFilter == null || statusFilter!.isEmpty) &&
       nextCursor != null &&
       nextCursor!.isNotEmpty &&
       !isLoading &&
@@ -316,31 +318,34 @@ class MyDekontsNotifier extends Notifier<MyDekontsState> {
 
   @override
   MyDekontsState build() => const MyDekontsState();
-  Future<void> load({String? status, bool refresh = true}) async {
-    final effectiveRefresh = refresh || state.statusFilter != status;
+  Future<void> load({String? filterKey, bool refresh = true}) async {
+    final effectiveRefresh = refresh || state.statusFilter != filterKey;
     if (!effectiveRefresh && !state.canLoadMore) return;
-    dekontDebugLog('provider.myDekonts.load', 'status=$status');
+    final useClientFilter = filterKey != null && filterKey.isNotEmpty;
+    dekontDebugLog('provider.myDekonts.load', 'filterKey=$filterKey');
     state = state.copyWith(
       isLoading: effectiveRefresh,
       isLoadingMore: !effectiveRefresh,
-      statusFilter: status,
+      statusFilter: filterKey,
       clearError: true,
       clearNextCursor: effectiveRefresh,
     );
     try {
       final result = await _repository.getMyDekonts(
-        status: status,
-        cursor: effectiveRefresh ? null : state.nextCursor,
+        cursor: useClientFilter || effectiveRefresh ? null : state.nextCursor,
+        paginated: !useClientFilter,
       );
       final merged = effectiveRefresh
           ? result.items
           : [...state.dekonts, ...result.items];
-      dekontDebugLog('provider.myDekonts.ok', 'count=${merged.length}');
+      final visible = filterDekontsByUiKey(merged, filterKey);
+      dekontDebugLog('provider.myDekonts.ok', 'count=${visible.length}');
       state = state.copyWith(
         isLoading: false,
         isLoadingMore: false,
-        dekonts: merged,
-        nextCursor: result.nextCursor,
+        dekonts: visible,
+        nextCursor: useClientFilter ? null : result.nextCursor,
+        clearNextCursor: useClientFilter,
       );
     } catch (e, st) {
       dekontDebugLog('provider.myDekonts.fail', '$e\n$st');
@@ -352,7 +357,7 @@ class MyDekontsNotifier extends Notifier<MyDekontsState> {
     }
   }
 
-  Future<void> loadMore() => load(status: state.statusFilter, refresh: false);
+  Future<void> loadMore() => load(filterKey: state.statusFilter, refresh: false);
 }
 
 final myDekontsNotifierProvider =
@@ -379,6 +384,7 @@ class ManagerDekontsState {
   });
 
   bool get canLoadMore =>
+      (statusFilter == null || statusFilter!.isEmpty) &&
       nextCursor != null &&
       nextCursor!.isNotEmpty &&
       !isLoading &&
@@ -419,7 +425,7 @@ class ManagerDekontsNotifier extends Notifier<ManagerDekontsState> {
   ManagerDekontsState build() => const ManagerDekontsState();
   Future<void> loadBuilding(
     String buildingId, {
-    String? status,
+    String? filterKey,
     String? apartmentId,
     bool refresh = true,
   }) async {
@@ -427,37 +433,40 @@ class ManagerDekontsNotifier extends Notifier<ManagerDekontsState> {
         refresh ||
         _buildingId != buildingId ||
         _apartmentId != apartmentId ||
-        state.statusFilter != status;
+        state.statusFilter != filterKey;
     if (!effectiveRefresh && !state.canLoadMore) return;
+    final useClientFilter = filterKey != null && filterKey.isNotEmpty;
     _buildingId = buildingId;
     _apartmentId = apartmentId;
     dekontDebugLog('provider.managerDekonts.load', {
       'buildingId': buildingId,
-      'status': status,
+      'filterKey': filterKey,
     });
     state = state.copyWith(
       isLoading: effectiveRefresh,
       isLoadingMore: !effectiveRefresh,
-      statusFilter: status,
+      statusFilter: filterKey,
       clearError: true,
       clearNextCursor: effectiveRefresh,
     );
     try {
       final result = await _repository.getBuildingDekonts(
         buildingId,
-        status: status,
         apartmentId: apartmentId,
-        cursor: effectiveRefresh ? null : state.nextCursor,
+        cursor: useClientFilter || effectiveRefresh ? null : state.nextCursor,
+        paginated: !useClientFilter,
       );
       final merged = effectiveRefresh
           ? result.items
           : [...state.dekonts, ...result.items];
-      dekontDebugLog('provider.managerDekonts.ok', 'count=${merged.length}');
+      final visible = filterDekontsByUiKey(merged, filterKey);
+      dekontDebugLog('provider.managerDekonts.ok', 'count=${visible.length}');
       state = state.copyWith(
         isLoading: false,
         isLoadingMore: false,
-        dekonts: merged,
-        nextCursor: result.nextCursor,
+        dekonts: visible,
+        nextCursor: useClientFilter ? null : result.nextCursor,
+        clearNextCursor: useClientFilter,
       );
     } catch (e, st) {
       dekontDebugLog('provider.managerDekonts.fail', '$e\n$st');
@@ -474,7 +483,7 @@ class ManagerDekontsNotifier extends Notifier<ManagerDekontsState> {
     if (id == null || id.isEmpty) return Future.value();
     return loadBuilding(
       id,
-      status: state.statusFilter,
+      filterKey: state.statusFilter,
       apartmentId: _apartmentId,
       refresh: false,
     );

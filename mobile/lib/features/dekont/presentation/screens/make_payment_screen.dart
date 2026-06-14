@@ -1,11 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-
+import '../../../../core/utils/month_labels.dart';
 import '../../../../core/utils/upload_file_utils.dart';
 import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -14,9 +14,11 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/api_user_message.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/document_preview_screen.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
+import '../../../dues/presentation/widgets/due_breakdown_section.dart';
 import '../providers/dekont_provider.dart';
 import '../providers/share_intent_provider.dart';
 import '../widgets/copy_payment_field.dart';
@@ -396,6 +398,26 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
     );
   }
 
+  Future<void> _openPickedPreview(MakePaymentState state) async {
+    final bytes = state.pickedFileBytes;
+    final filename = state.pickedFileName;
+    if (bytes == null || filename == null) return;
+
+    final ext = filename.split('.').last.toLowerCase();
+    final mimeType = ext == 'pdf'
+        ? 'application/pdf'
+        : ext == 'png'
+        ? 'image/png'
+        : 'image/jpeg';
+
+    await DocumentPreviewScreen.open(
+      context,
+      bytes: Uint8List.fromList(bytes),
+      fileName: filename,
+      mimeType: mimeType,
+    );
+  }
+
   Widget _buildPickedFileItem(BuildContext context, MakePaymentState state, bool busy) {
     final filename = state.pickedFileName!;
     final ext = filename.split('.').last.toLowerCase();
@@ -469,6 +491,19 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
               ),
             ),
             
+            IconButton(
+              onPressed: busy || state.pickedFileBytes == null
+                  ? null
+                  : () => _openPickedPreview(state),
+              icon: const Icon(Icons.visibility_outlined),
+              color: AppColors.primary,
+              tooltip: context.t.features.dekont.viewDekont,
+              constraints: const BoxConstraints(
+                minWidth: AppSizes.minTouchTarget,
+                minHeight: AppSizes.minTouchTarget,
+              ),
+            ),
+
             // Delete button
             Material(
               color: Colors.transparent,
@@ -527,9 +562,7 @@ class _DueRadioTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final monthLabel = DateFormat.MMMM().format(
-      DateTime(due.year, due.month),
-    );
+    final monthLabel = localizedMonthName(context, due.month);
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.spacingS),
       decoration: BoxDecoration(
@@ -547,9 +580,18 @@ class _DueRadioTile extends StatelessWidget {
           '$monthLabel ${due.year}',
           style: AppTypography.body1.copyWith(fontWeight: FontWeight.w600),
         ),
-        subtitle: Text(
-          '${due.amount.toStringAsFixed(2)} ${due.currency}',
-          style: AppTypography.body2,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${due.amount.toStringAsFixed(2)} ${due.currency}',
+              style: AppTypography.body2,
+            ),
+            DueBreakdownSection(
+              breakdown: due.breakdown,
+              currency: due.currency,
+            ),
+          ],
         ),
       ),
     );

@@ -203,6 +203,7 @@ String? notificationTypeToApiString(NotificationType type) {
     NotificationType.dekontNeedsReview => 'DEKONT_NEEDS_REVIEW',
     NotificationType.dekontMatched => 'DEKONT_MATCHED',
     NotificationType.dekontPaymentApplied => 'DEKONT_PAYMENT_APPLIED',
+    NotificationType.expenseAdded => 'EXPENSE_ADDED',
     NotificationType.system => 'SYSTEM',
     NotificationType.other => 'SYSTEM',
   };

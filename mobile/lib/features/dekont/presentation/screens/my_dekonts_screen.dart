@@ -10,7 +10,6 @@ import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../providers/dekont_provider.dart';
-import '../utils/dekont_labels.dart';
 import '../widgets/dekont_list_card.dart';
 
 class MyDekontsScreen extends ConsumerStatefulWidget {
@@ -42,7 +41,7 @@ class _MyDekontsScreenState extends ConsumerState<MyDekontsScreen> {
   Future<void> _load() async {
     await ref
         .read(myDekontsNotifierProvider.notifier)
-        .load(status: dekontStatusFilterApi(_filterKey), refresh: true);
+        .load(filterKey: _filterKey, refresh: true);
   }
 
   @override

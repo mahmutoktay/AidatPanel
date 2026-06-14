@@ -22,10 +22,22 @@ import {
   resolveDekontAbsolutePath,
 } from "./dekontStorageService.js";
 import { enqueueExpenseOcrPipeline } from "./expenseOcrService.js";
+import { notifyResidentsOfNewExpense } from "./expenseNotificationService.js";
+import {
+  addMonthsFrom,
+  applyCarryForwardForExpense,
+  computePerUnitAmount,
+  getApartmentCount,
+  isPastTargetMonth,
+  previewPaidImpact,
+  recalculateBuildingDuesForMonth,
+  removeCarryforwardsForExpense,
+  splitAmount,
+} from "./dueExpenseRecalcService.js";
 
 function serializeExpense(expense) {
   const receiptUrls = Array.isArray(expense.storedPaths)
-    ? expense.storedPaths.map(p => `/api/v1/expenses/${expense.id}/file/${p.split('/').pop()}`)
+    ? expense.storedPaths.map((p) => `/api/v1/expenses/${expense.id}/file/${p.split("/").pop()}`)
     : [];
 
   return {
@@ -33,13 +45,125 @@ function serializeExpense(expense) {
     amount: expense.amount != null
       ? (expense.amount?.toString?.() ?? String(expense.amount))
       : null,
+    perUnitAmount: expense.perUnitAmount != null
+      ? (expense.perUnitAmount?.toString?.() ?? String(expense.perUnitAmount))
+      : null,
     parsedAmount: expense.parsedAmount != null
       ? (expense.parsedAmount?.toString?.() ?? String(expense.parsedAmount))
       : null,
     receiptUrl: expense.receiptUrl
-      ? `/api/v1/expenses/${expense.id}/file/${expense.receiptUrl.split('/').pop()}`
+      ? `/api/v1/expenses/${expense.id}/file/${expense.receiptUrl.split("/").pop()}`
       : null,
     receiptUrls,
+  };
+}
+
+function buildListWhere(buildingId, filters) {
+  const where = { buildingId };
+  const { month, year, category } = filters;
+
+  if (month && year) {
+    where.targetMonth = parseInt(String(month), 10);
+    where.targetYear = parseInt(String(year), 10);
+  } else if (year) {
+    where.targetYear = parseInt(String(year), 10);
+  }
+
+  if (category) {
+    where.category = category;
+  }
+
+  return where;
+}
+
+function buildSplitTargets(targetMonth, targetYear, splitMonths) {
+  const parts = Math.max(1, Math.min(12, parseInt(String(splitMonths), 10) || 1));
+  const targets = [];
+  for (let i = 0; i < parts; i += 1) {
+    targets.push(addMonthsFrom(targetMonth, targetYear, i));
+  }
+  return targets;
+}
+
+async function createSingleExpenseWithRecalc(
+  buildingId,
+  managerId,
+  payload,
+  { carryForwardPolicy, confirmPaidImpact, apartmentCount, splitGroupId, sourceExpenseId }
+) {
+  const {
+    title,
+    amount,
+    category,
+    date,
+    note,
+    targetMonth,
+    targetYear,
+  } = payload;
+
+  const hasAmount =
+    amount != null && !Number.isNaN(Number(amount)) && Number(amount) > 0;
+  const perUnitAmount = hasAmount
+    ? computePerUnitAmount(amount, apartmentCount)
+    : null;
+
+  if (!confirmPaidImpact && hasAmount) {
+    const preview = await previewPaidImpact(buildingId, targetMonth, targetYear, perUnitAmount);
+    if (preview) {
+      return {
+        preview: {
+          ...preview,
+          pastMonthWarning: isPastTargetMonth(targetMonth, targetYear),
+        },
+      };
+    }
+  }
+
+  const expense = await prisma.expense.create({
+    data: {
+      buildingId,
+      title,
+      amount: hasAmount ? amount : null,
+      category,
+      date: new Date(date),
+      note: note ?? null,
+      targetMonth,
+      targetYear,
+      perUnitAmount,
+      splitGroupId: splitGroupId ?? null,
+      sourceExpenseId: sourceExpenseId ?? null,
+      storedPaths: [],
+    },
+  });
+
+  if (hasAmount) {
+    await recalculateBuildingDuesForMonth(buildingId, targetMonth, targetYear);
+  }
+
+  const carryResult = hasAmount
+    ? await applyCarryForwardForExpense(expense, carryForwardPolicy)
+    : { carryForwardCount: 0 };
+
+  const warnings = [];
+  if (hasAmount && isPastTargetMonth(targetMonth, targetYear)) {
+    warnings.push("Geçmiş bir aya gider eklendi. Aidat tutarları güncellendi.");
+  }
+  if (
+    hasAmount &&
+    carryForwardPolicy === "WARN_ONLY" &&
+    carryResult.carryForwardCount === 0
+  ) {
+    const paidPreview = await previewPaidImpact(buildingId, targetMonth, targetYear, perUnitAmount);
+    if (paidPreview) {
+      warnings.push(paidPreview.message);
+    }
+  }
+
+  return {
+    expense: serializeExpense(expense),
+    warnings,
+    carryForwardCount: carryResult.carryForwardCount,
+    pastMonthWarning: isPastTargetMonth(targetMonth, targetYear),
   };
 }
 
@@ -80,9 +204,9 @@ export async function getExpenseFileService(expenseId, userId, userRole) {
   else if (ext === ".jpg" || ext === ".jpeg") mimeType = "image/jpeg";
   else if (ext === ".png") mimeType = "image/png";
 
-  const filename = expense.receiptUrl.split('/').pop();
+  const filename = expense.receiptUrl.split("/").pop();
   const absolutePath = resolveDekontAbsolutePath(expense.receiptUrl);
-  
+
   let sizeBytes = null;
   try {
     const stats = await fs.promises.stat(absolutePath);
@@ -95,39 +219,6 @@ export async function getExpenseFileService(expenseId, userId, userRole) {
     filename,
     sizeBytes,
   };
-}
-
-function monthYearRange(year, month) {
-  const y = parseInt(String(year), 10);
-  const m = parseInt(String(month), 10);
-  if (m < 1 || m > 12) {
-    throw new HttpError(400, "Ay 1-12 arasında olmalıdır.");
-  }
-  const start = new Date(Date.UTC(y, m - 1, 1, 0, 0, 0, 0));
-  const end = new Date(Date.UTC(y, m, 0, 23, 59, 59, 999));
-  return { start, end };
-}
-
-function buildListWhere(buildingId, filters) {
-  const where = { buildingId };
-  const { month, year, category } = filters;
-
-  if (month && year) {
-    const { start, end } = monthYearRange(year, month);
-    where.date = { gte: start, lte: end };
-  } else if (year) {
-    const y = parseInt(String(year), 10);
-    where.date = {
-      gte: new Date(Date.UTC(y, 0, 1)),
-      lte: new Date(Date.UTC(y, 11, 31, 23, 59, 59, 999)),
-    };
-  }
-
-  if (category) {
-    where.category = category;
-  }
-
-  return where;
 }
 
 export async function listExpensesByBuildingService(buildingId, managerId, filters = {}) {
@@ -150,7 +241,7 @@ export async function listExpensesByBuildingService(buildingId, managerId, filte
 
   const orderBy = paginated
     ? [{ createdAt: "desc" }, { id: "desc" }]
-    : { date: "desc" };
+    : [{ targetYear: "desc" }, { targetMonth: "desc" }];
 
   const expenses = await prisma.expense.findMany({
     where,
@@ -163,13 +254,15 @@ export async function listExpensesByBuildingService(buildingId, managerId, filte
 
 export async function getExpenseSummaryService(buildingId, managerId, { month, year }) {
   const building = await assertManagerOwnsBuilding(buildingId, managerId);
-  const { start, end } = monthYearRange(year, month);
+  const m = parseInt(String(month), 10);
+  const y = parseInt(String(year), 10);
 
   const groups = await prisma.expense.groupBy({
     by: ["category"],
     where: {
       buildingId,
-      date: { gte: start, lte: end },
+      targetMonth: m,
+      targetYear: y,
     },
     _sum: { amount: true },
     _count: { _all: true },
@@ -187,41 +280,122 @@ export async function getExpenseSummaryService(buildingId, managerId, { month, y
   });
 
   return {
-    month: parseInt(String(month), 10),
-    year: parseInt(String(year), 10),
+    month: m,
+    year: y,
     totalAmount: total.toFixed(2),
     currency: building.currency ?? "TRY",
     byCategory,
   };
 }
 
-/**
- * Gider oluşturur — tutar OCR'dan gelecek; şimdilik null.
- */
-export async function createExpenseService(
-  buildingId,
-  managerId,
-  { title, category, date, note }
-) {
+export async function createExpenseService(buildingId, managerId, body) {
   await assertManagerOwnsBuilding(buildingId, managerId);
 
-  const expense = await prisma.expense.create({
-    data: {
+  const {
+    title,
+    amount,
+    category,
+    date,
+    note,
+    targetMonth,
+    targetYear,
+    splitMonths = 1,
+    carryForwardPolicy = "WARN_ONLY",
+    confirmPaidImpact = false,
+  } = body;
+
+  const apartmentCount = await getApartmentCount(buildingId);
+  if (apartmentCount === 0) {
+    throw new HttpError(400, "Binada daire bulunmuyor. Önce daire ekleyin.");
+  }
+
+  const hasAmount =
+    amount != null && !Number.isNaN(Number(amount)) && Number(amount) > 0;
+
+  const targets = buildSplitTargets(targetMonth, targetYear, splitMonths);
+  if (targets.length > 1 && !hasAmount) {
+    throw new HttpError(
+      400,
+      "Makbuzlardan tutar okunmadan gider aylara bölünemez. Önce makbuz yükleyin."
+    );
+  }
+
+  const splitAmounts = hasAmount ? splitAmount(amount, targets.length) : [null];
+  const splitGroupId = targets.length > 1 ? randomUUID() : null;
+
+  if (!confirmPaidImpact && targets.length === 1 && hasAmount) {
+    const perUnit = computePerUnitAmount(amount, apartmentCount);
+    const preview = await previewPaidImpact(buildingId, targetMonth, targetYear, perUnit);
+    if (preview) {
+      return {
+        preview: {
+          ...preview,
+          pastMonthWarning: isPastTargetMonth(targetMonth, targetYear),
+        },
+      };
+    }
+  }
+
+  const created = [];
+  const allWarnings = [];
+
+  for (let i = 0; i < targets.length; i += 1) {
+    const target = targets[i];
+    const partAmount = splitAmounts[i];
+    const partTitle = targets.length > 1 ? `${title} (${i + 1}/${targets.length})` : title;
+
+    const result = await createSingleExpenseWithRecalc(
       buildingId,
-      title,
-      amount: null,    // OCR tamamlanınca güncellenecek
-      category,
-      date: new Date(date),
-      note: note ?? null,
-      storedPaths: [],
-    },
+      managerId,
+      {
+        title: partTitle,
+        amount: partAmount,
+        category,
+        date,
+        note,
+        targetMonth: target.month,
+        targetYear: target.year,
+      },
+      {
+        carryForwardPolicy,
+        confirmPaidImpact: true,
+        apartmentCount,
+        splitGroupId,
+        sourceExpenseId: i === 0 ? null : created[0]?.id,
+      }
+    );
+
+    if (result.preview) {
+      return result;
+    }
+
+    created.push(result.expense);
+    if (result.warnings?.length) {
+      allWarnings.push(...result.warnings);
+    }
+  }
+
+  await notifyResidentsOfNewExpense(buildingId, {
+    expenseId: created[0].id,
+    title,
+    amount: hasAmount ? amount : null,
+    category,
+    targetMonth,
+    targetYear,
+    splitMonths: targets.length,
   });
 
-  return serializeExpense(expense);
+  return {
+    expenses: created,
+    expense: created[0],
+    warnings: allWarnings,
+    pastMonthWarning: isPastTargetMonth(targetMonth, targetYear),
+    splitGroupId,
+  };
 }
 
 export async function updateExpenseService(expenseId, managerId, data) {
-  await assertManagerOwnsExpense(expenseId, managerId);
+  const existing = await assertManagerOwnsExpense(expenseId, managerId);
 
   const updateData = {};
   if (data.title !== undefined) updateData.title = data.title;
@@ -229,11 +403,27 @@ export async function updateExpenseService(expenseId, managerId, data) {
   if (data.category !== undefined) updateData.category = data.category;
   if (data.date !== undefined) updateData.date = new Date(data.date);
   if (data.note !== undefined) updateData.note = data.note;
+  if (data.targetMonth !== undefined) updateData.targetMonth = data.targetMonth;
+  if (data.targetYear !== undefined) updateData.targetYear = data.targetYear;
+
+  const apartmentCount = await getApartmentCount(existing.buildingId);
+  const nextAmount = data.amount !== undefined ? data.amount : Number(existing.amount);
+  if (nextAmount != null && !Number.isNaN(nextAmount)) {
+    updateData.perUnitAmount = computePerUnitAmount(nextAmount, apartmentCount);
+  }
+
+  const oldMonth = existing.targetMonth;
+  const oldYear = existing.targetYear;
 
   const expense = await prisma.expense.update({
     where: { id: expenseId },
     data: updateData,
   });
+
+  await recalculateBuildingDuesForMonth(existing.buildingId, expense.targetMonth, expense.targetYear);
+  if (expense.targetMonth !== oldMonth || expense.targetYear !== oldYear) {
+    await recalculateBuildingDuesForMonth(existing.buildingId, oldMonth, oldYear);
+  }
 
   return serializeExpense(expense);
 }
@@ -241,23 +431,24 @@ export async function updateExpenseService(expenseId, managerId, data) {
 export async function deleteExpenseService(expenseId, managerId) {
   const expense = await assertManagerOwnsExpense(expenseId, managerId);
 
-  // Kayıtlı tüm dosyaları sil
   const paths = Array.isArray(expense.storedPaths) ? expense.storedPaths : [];
   for (const p of paths) {
     await deleteDekontFile(p).catch(() => {});
   }
 
+  const { targetMonth, targetYear, buildingId } = expense;
+
+  await removeCarryforwardsForExpense(expenseId);
+
   await prisma.expense.delete({
     where: { id: expenseId },
   });
 
+  await recalculateBuildingDuesForMonth(buildingId, targetMonth, targetYear);
+
   return { id: expenseId };
 }
 
-/**
- * Çoklu makbuz (proof) yükleme + OCR toplama.
- * files: multer req.files[] (her biri disk'e yazılmış)
- */
 export async function uploadExpenseProofsService(expenseId, managerId, files) {
   const expense = await assertManagerOwnsExpense(expenseId, managerId);
 
@@ -311,15 +502,18 @@ export async function uploadExpenseProofsService(expenseId, managerId, files) {
       await deleteDekontFile(oldPath).catch(() => {});
     }
 
+    const ocrUpdateData = {
+      storedPaths: savedPaths,
+      parsedAmount: null,
+      ocrReceiptsJson: null,
+      receiptUrl: savedPaths.length > 0 ? savedPaths[0] : null,
+      amount: null,
+      perUnitAmount: null,
+    };
+
     const updatedExpense = await prisma.expense.update({
       where: { id: expenseId },
-      data: {
-        storedPaths: savedPaths,
-        amount: null,
-        parsedAmount: null,
-        ocrReceiptsJson: null,
-        receiptUrl: savedPaths.length > 0 ? savedPaths[0] : null,
-      },
+      data: ocrUpdateData,
     });
 
     enqueueExpenseOcrPipeline(expenseId, ocrQueueFiles);
@@ -338,13 +532,11 @@ export async function uploadExpenseProofsService(expenseId, managerId, files) {
 
     return result;
   } catch (err) {
-    // Başarıyla kaydedilmiş dosyaları temizle
     for (const sp of savedPaths) {
       await deleteDekontFile(sp).catch(() => {});
     }
     throw err;
   } finally {
-    // Multer geçici dosyalarını temizle
     for (const file of files) {
       await cleanupMulterTempFile(file).catch(() => {});
     }
@@ -378,7 +570,7 @@ export async function listExpensesForResidentService(userId, filters = {}) {
 
   const orderBy = paginated
     ? [{ createdAt: "desc" }, { id: "desc" }]
-    : { date: "desc" };
+    : [{ targetYear: "desc" }, { targetMonth: "desc" }];
 
   const expenses = await prisma.expense.findMany({
     where,

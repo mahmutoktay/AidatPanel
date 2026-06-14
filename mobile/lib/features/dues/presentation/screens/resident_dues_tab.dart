@@ -14,6 +14,8 @@ import '../providers/dues_provider.dart';
 import '../../../expenses/presentation/providers/expenses_provider.dart';
 import '../../../expenses/domain/entities/expense_entity.dart';
 import '../../../expenses/presentation/utils/expense_labels.dart';
+import '../widgets/due_breakdown_section.dart';
+import '../../../../shared/widgets/sliding_segmented_control.dart';
 
 class ResidentDuesTab extends ConsumerStatefulWidget {
   const ResidentDuesTab({super.key});
@@ -144,13 +146,13 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
             );
           }
           if (item is _SegmentedControlItem) {
-            return _SegmentedControl(
+            return SlidingSegmentedControl(
+              segments: [
+                context.t.common.dues,
+                context.t.features.expenses.title,
+              ],
               selectedIndex: _selectedSegment,
-              onChanged: (val) {
-                setState(() {
-                  _selectedSegment = val;
-                });
-              },
+              onChanged: (val) => setState(() => _selectedSegment = val),
             );
           }
           if (item is _SectionHeaderItem) {
@@ -384,6 +386,10 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
             style: (highlighted ? AppTypography.h3 : AppTypography.bodyLarge)
                 .copyWith(color: AppColors.textPrimary),
           ),
+          DueBreakdownSection(
+            breakdown: due.breakdown,
+            currency: due.currency,
+          ),
         ],
       ),
     );
@@ -525,89 +531,6 @@ class _StatusVisual {
     required this.fg,
     required this.bg,
   });
-}
-
-class _SegmentedControl extends StatelessWidget {
-  final int selectedIndex;
-  final ValueChanged<int> onChanged;
-
-  const _SegmentedControl({
-    required this.selectedIndex,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _SegmentItem(
-              label: context.t.common.dues,
-              selected: selectedIndex == 0,
-              onTap: () => onChanged(0),
-            ),
-          ),
-          Expanded(
-            child: _SegmentItem(
-              label: context.t.features.expenses.title,
-              selected: selectedIndex == 1,
-              onTap: () => onChanged(1),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SegmentItem extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _SegmentItem({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: AppTypography.body1.copyWith(
-              fontWeight: FontWeight.w700,
-              color: selected ? AppColors.primary : AppColors.textSecondary,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 sealed class _ResidentDuesRowItem {

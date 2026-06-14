@@ -6,7 +6,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../domain/entities/building_entity.dart';
 
-enum BuildingMenuAction { edit, collection, report, delete }
+enum BuildingMenuAction { edit, collection, delete }
 
 /// Bina kartı ⋮ menüsü — alt sayfa olarak açılır (PopupMenu yerine).
 class BuildingActionsSheet extends StatelessWidget {
@@ -93,12 +93,6 @@ class BuildingActionsSheet extends StatelessWidget {
                     color: AppColors.warning,
                   ),
             onTap: () => Navigator.pop(context, BuildingMenuAction.collection),
-          ),
-          const SizedBox(height: AppSizes.spacingS),
-          _ActionRow(
-            icon: Icons.picture_as_pdf_outlined,
-            label: t.features.reports.menuDownload,
-            onTap: () => Navigator.pop(context, BuildingMenuAction.report),
           ),
           const SizedBox(height: AppSizes.spacingM),
           Divider(height: 1, color: AppColors.borderColor),

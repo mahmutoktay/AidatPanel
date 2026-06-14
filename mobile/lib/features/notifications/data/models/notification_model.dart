@@ -78,6 +78,8 @@ class NotificationModel {
         return NotificationType.dekontMatched;
       case 'DEKONT_PAYMENT_APPLIED':
         return NotificationType.dekontPaymentApplied;
+      case 'EXPENSE_ADDED':
+        return NotificationType.expenseAdded;
       case 'SYSTEM':
         return NotificationType.system;
       default:

@@ -65,12 +65,15 @@ async function loadDuesForPeriod(buildingId, month, year) {
   });
 }
 
-async function loadExpenseSummary(buildingId, start, end, currency) {
+async function loadExpenseSummary(buildingId, month, year, currency) {
+  const y = parseInt(String(year), 10);
+  const where = { buildingId, targetYear: y };
+  if (month != null) {
+    where.targetMonth = parseInt(String(month), 10);
+  }
+
   const expenses = await prisma.expense.findMany({
-    where: {
-      buildingId,
-      date: { gte: start, lte: end },
-    },
+    where,
     orderBy: { date: "desc" },
   });
 
@@ -226,7 +229,7 @@ export async function getMonthlyReportData(buildingId, managerId, { month, year 
 
   const [dues, expenses, operational] = await Promise.all([
     loadDuesForPeriod(buildingId, month, year),
-    loadExpenseSummary(buildingId, start, end, ctx.currency),
+    loadExpenseSummary(buildingId, month, year, ctx.currency),
     loadOperationalSummary(buildingId, start, end),
   ]);
 
@@ -282,10 +285,9 @@ export async function getAnnualReportData(buildingId, managerId, { year }) {
   let yearExpenses = 0;
 
   for (let m = 1; m <= 12; m += 1) {
-    const { start: mStart, end: mEnd } = monthYearRange(y, m);
     const [dues, expenseBlock] = await Promise.all([
       loadDuesForPeriod(buildingId, m, y),
-      loadExpenseSummary(buildingId, mStart, mEnd, ctx.currency),
+      loadExpenseSummary(buildingId, m, y, ctx.currency),
     ]);
     const dueSummary = summarizeDues(dues);
     const net = computeNet(dueSummary.collected, expenseBlock.totalAmount);
@@ -309,7 +311,7 @@ export async function getAnnualReportData(buildingId, managerId, { year }) {
   }
 
   const [yearExpenseSummary, operational] = await Promise.all([
-    loadExpenseSummary(buildingId, start, end, ctx.currency),
+    loadExpenseSummary(buildingId, null, y, ctx.currency),
     loadOperationalSummary(buildingId, start, end),
   ]);
 

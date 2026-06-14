@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
 import '../../domain/entities/building_entity.dart';
 import '../../utils/invite_code_helpers.dart';
+import '../utils/apartment_ui_utils.dart';
 import '../../../../l10n/strings.g.dart';
 
 /// Adım 3: Üretilen davet kodunu gösteren ve aksiyonları sunan görünüm.
@@ -58,30 +60,30 @@ class InviteCodeResultView extends StatelessWidget {
   }
 
   Widget _buildSuccessBanner(BuildContext context) {
+    final apartmentLabel = ApartmentUiUtils.formatApartmentLabel(
+      context,
+      apartment.apartmentNumber,
+    );
+
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.spacingM,
-        vertical: AppSizes.spacingL,
-      ),
+      padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
         color: AppColors.fill,
-        borderRadius: BorderRadius.circular(14),
-        border: AppColors.cardBorder,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: AppColors.success.withValues(alpha: 0.12),
               shape: BoxShape.circle,
-              border: AppColors.cardBorder,
             ),
             child: const Icon(
-              Icons.check_circle,
-              color: AppColors.textPrimary,
-              size: 36,
+              Icons.check_circle_rounded,
+              color: AppColors.success,
+              size: 32,
             ),
           ),
           const SizedBox(height: AppSizes.spacingM),
@@ -89,13 +91,19 @@ class InviteCodeResultView extends StatelessWidget {
             context.t.features.buildings.codeReady,
             style: AppTypography.h3.copyWith(
               color: AppColors.textPrimary,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
-            '${building.name} • ${InviteCodeHelpers.formatApartmentLabel(apartment.apartmentNumber)}',
-            style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
+            '${building.name} • $apartmentLabel',
+            style: AppTypography.body2.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -105,14 +113,10 @@ class InviteCodeResultView extends StatelessWidget {
 
   Widget _buildCodeCard(BuildContext context, Duration remaining) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.spacingM,
-        vertical: AppSizes.spacingL,
-      ),
+      padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: AppColors.cardBorder,
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
@@ -122,24 +126,40 @@ class InviteCodeResultView extends StatelessWidget {
               color: AppColors.textSecondary,
               letterSpacing: 2,
               fontWeight: FontWeight.w700,
+              fontSize: 13,
             ),
           ),
           const SizedBox(height: AppSizes.spacingS),
-          SelectableText(
-            code,
-            style: AppTypography.h1.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 4,
-              fontFamily: 'monospace',
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.spacingM,
+              vertical: AppSizes.spacingM,
             ),
-            textAlign: TextAlign.center,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.12),
+              ),
+            ),
+            child: SelectableText(
+              code,
+              style: AppTypography.h2.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 3,
+                fontFamily: 'monospace',
+                fontSize: 24,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(height: AppSizes.spacingM),
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSizes.spacingM,
-              vertical: 6,
+              vertical: 8,
             ),
             decoration: BoxDecoration(
               color: AppColors.warning.withValues(alpha: 0.12),
@@ -148,13 +168,14 @@ class InviteCodeResultView extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.schedule, size: 14, color: AppColors.warning),
+                const Icon(Icons.schedule, size: 16, color: AppColors.warning),
                 const SizedBox(width: 6),
                 Text(
                   context.t.features.buildings.validFor7Days,
                   style: AppTypography.caption.copyWith(
                     color: AppColors.warning,
                     fontWeight: FontWeight.w700,
+                    fontSize: 13,
                   ),
                 ),
               ],
@@ -166,6 +187,7 @@ class InviteCodeResultView extends StatelessWidget {
             style: AppTypography.caption.copyWith(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w600,
+              fontSize: 14,
             ),
             textAlign: TextAlign.center,
           ),
@@ -175,6 +197,7 @@ class InviteCodeResultView extends StatelessWidget {
             style: AppTypography.caption.copyWith(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w600,
+              fontSize: 14,
             ),
             textAlign: TextAlign.center,
           ),
@@ -191,14 +214,8 @@ class InviteCodeResultView extends StatelessWidget {
             height: AppSizes.buttonHeightPrimary,
             child: ElevatedButton.icon(
               onPressed: onCopy,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.copy),
+              style: AppButtonStyles.elevatedPrimary(fullWidth: true),
+              icon: const Icon(Icons.copy_rounded),
               label: Text(context.t.features.buildings.copy),
             ),
           ),
@@ -209,14 +226,8 @@ class InviteCodeResultView extends StatelessWidget {
             height: AppSizes.buttonHeightPrimary,
             child: OutlinedButton.icon(
               onPressed: onShare,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: BorderSide(color: AppColors.primary, width: 2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.share),
+              style: AppButtonStyles.outlinedPrimary(fullWidth: true),
+              icon: const Icon(Icons.share_rounded),
               label: Text(context.t.features.buildings.share),
             ),
           ),
@@ -231,18 +242,21 @@ class InviteCodeResultView extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.info.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.info.withValues(alpha: 0.25)),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline, size: 18, color: AppColors.info),
-          const SizedBox(width: 8),
+          const Icon(Icons.info_outline, size: 20, color: AppColors.info),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               context.t.features.buildings.activeCodeNote,
-              style: AppTypography.caption.copyWith(
+              style: AppTypography.body2.copyWith(
                 color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+                height: 1.35,
               ),
             ),
           ),
@@ -259,14 +273,8 @@ class InviteCodeResultView extends StatelessWidget {
             height: AppSizes.buttonHeightSecondary,
             child: OutlinedButton.icon(
               onPressed: onPickAnother,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: AppColors.cardBorderSide,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              icon: const Icon(Icons.list_alt),
+              style: AppButtonStyles.outlinedNeutral(fullWidth: true),
+              icon: const Icon(Icons.list_alt_rounded),
               label: Text(context.t.features.buildings.anotherApartment),
             ),
           ),
@@ -277,13 +285,7 @@ class InviteCodeResultView extends StatelessWidget {
             height: AppSizes.buttonHeightSecondary,
             child: OutlinedButton.icon(
               onPressed: onRevoke,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error,
-                side: BorderSide(color: AppColors.error, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+              style: AppButtonStyles.outlinedDanger(fullWidth: true),
               icon: const Icon(Icons.cancel_outlined),
               label: Text(context.t.features.buildings.cancelCode),
             ),
@@ -296,20 +298,12 @@ class InviteCodeResultView extends StatelessWidget {
   Widget _buildHomeButton(BuildContext context) {
     return SizedBox(
       height: AppSizes.buttonHeightPrimary,
+      width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: onGoHome,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        icon: const Icon(Icons.home),
-        label: Text(
-          context.t.features.buildings.backToMainMenu,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
+        style: AppButtonStyles.elevatedPrimary(fullWidth: true),
+        icon: const Icon(Icons.home_rounded),
+        label: Text(context.t.features.buildings.backToMainMenu),
       ),
     );
   }

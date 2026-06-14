@@ -24,6 +24,18 @@ class InviteCodeHelpers {
     return '$d.$m.${date.year}';
   }
 
+  /// Liste kartları: üst satır kod, alt satır kalan süre.
+  static ({String primary, String remaining}) activeCodeListSubtitle({
+    required String activeCodeLabel,
+    required String code,
+    required Duration remaining,
+  }) {
+    return (
+      primary: '$activeCodeLabel: $code •',
+      remaining: remainingText(remaining),
+    );
+  }
+
   /// Süre: "5 gün 3 saat", "12 saat 30 dk", "45 dk", "Süresi doldu"
   static String remainingText(Duration d) {
     if (d.isNegative) return 'Süresi doldu';

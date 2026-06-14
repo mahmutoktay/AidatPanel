@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'due_breakdown_entity.dart';
+
 enum DueStatus { pending, paid, overdue, waived }
 
 class DueEntity extends Equatable {
@@ -15,6 +17,7 @@ class DueEntity extends Equatable {
   final DateTime? paidAt;
   final int overdueDays;
   final String? note;
+  final DueBreakdownEntity? breakdown;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -31,6 +34,7 @@ class DueEntity extends Equatable {
     this.paidAt,
     this.overdueDays = 0,
     this.note,
+    this.breakdown,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -49,6 +53,7 @@ class DueEntity extends Equatable {
         paidAt,
         overdueDays,
         note,
+        breakdown,
         createdAt,
         updatedAt,
       ];

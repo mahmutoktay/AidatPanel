@@ -9,6 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/async_error_widget.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../apartments/data/apartments_store.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
@@ -16,6 +17,7 @@ import '../../data/buildings_store.dart';
 import '../../data/invite_code_store.dart';
 import '../../domain/entities/building_entity.dart';
 import '../../utils/invite_code_helpers.dart';
+import '../utils/apartment_ui_utils.dart';
 import '../widgets/invite_code_result_view.dart';
 import '../widgets/invite_confirm_dialogs.dart';
 import '../widgets/invite_selectable_tile.dart';
@@ -38,26 +40,35 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: Text(context.t.common.createInviteCode),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: _onBackPressed,
-        ),
-      ),
-      body: Column(
-        children: [
-          InviteStepIndicator(currentStep: _step),
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              child: _buildStepContent(),
-            ),
+    return PopScope(
+      canPop: _step == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _onBackPressed();
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.surface,
+        appBar: AppBar(
+          title: Text(context.t.common.createInviteCode),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _onBackPressed,
           ),
-        ],
+        ),
+        body: Column(
+          children: [
+            InviteStepIndicator(currentStep: _step),
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                child: _buildStepContent(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -71,9 +82,10 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
             key: ValueKey('step-0-loading'),
             child: CircularProgressIndicator(),
           ),
-          error: (e, _) => Center(
+          error: (e, _) => AsyncErrorWidget(
             key: const ValueKey('step-0-error'),
-            child: Text(userFacingError(e)),
+            message: userFacingError(e),
+            onRetry: () => ref.read(buildingsStoreProvider.notifier).loadBuildings(),
           ),
           data: (buildings) => _BuildingPickerStep(
             key: const ValueKey('step-0'),
@@ -85,11 +97,16 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
         final asyncApts =
             ref.watch(apartmentsStoreProvider(_selectedBuilding!.id));
         return asyncApts.when(
-          loading: () =>
-              const Center(key: ValueKey('step-1-loading'), child: CircularProgressIndicator()),
-          error: (e, _) => Center(
+          loading: () => const Center(
+            key: ValueKey('step-1-loading'),
+            child: CircularProgressIndicator(),
+          ),
+          error: (e, _) => AsyncErrorWidget(
             key: const ValueKey('step-1-error'),
-            child: Text(userFacingError(e)),
+            message: userFacingError(e),
+            onRetry: () => ref
+                .read(apartmentsStoreProvider(_selectedBuilding!.id).notifier)
+                .loadApartments(),
           ),
           data: (apartments) => _ApartmentPickerStep(
             key: const ValueKey('step-1'),
@@ -162,7 +179,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
     if (!mounted) return;
     if (active == null) {
       ref.read(toastProvider.notifier).show(
-            'Davet kodu oluşturulamadı',
+            context.t.common.loadFailed,
             type: ToastType.error,
           );
       return;
@@ -272,8 +289,6 @@ class _BuildingPickerStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // OPTIMIZATION: ListView.builder kullanılıyor (lazy loading)
-    // Büyük bina listelerinde memory efficient, scroll performance artar
     return ListView.builder(
       padding: AppSizes.screenBodyScrollPadding,
       itemCount: buildings.length + 1,
@@ -283,13 +298,16 @@ class _BuildingPickerStep extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
             child: Text(
               context.t.common.whichBuildingForCode,
-              style: AppTypography.h4.copyWith(color: AppColors.textPrimary),
+              style: AppTypography.h4.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           );
         }
         final b = buildings[index - 1];
         return InviteSelectableTile(
-          icon: Icons.apartment,
+          icon: Icons.apartment_rounded,
           iconColor: AppColors.primary,
           title: b.name,
           subtitle: b.displayAddress,
@@ -319,19 +337,19 @@ class _ApartmentPickerStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // OPTIMIZATION: ListView.builder kullanılıyor (lazy loading)
-    // 50+ daireli binalarda scroll lag ve memory spike'ı önler
-    // 50+ yaş kullanıcılar için kritik performans iyileştirmesi
     if (apartments.isEmpty) {
       final emptyItems = <Widget>[
-        _buildBuildingBanner(),
+        _InviteBuildingBanner(building: building),
         const SizedBox(height: AppSizes.spacingL),
         Text(
           context.t.common.whichApartmentForCode,
-          style: AppTypography.h4.copyWith(color: AppColors.textPrimary),
+          style: AppTypography.h4.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         const SizedBox(height: AppSizes.spacingM),
-        _buildEmptyState(context),
+        _InviteEmptyApartmentsState(message: context.t.common.noApartmentsInBuilding),
       ];
       return ListView.builder(
         padding: AppSizes.screenBodyScrollPadding,
@@ -340,8 +358,6 @@ class _ApartmentPickerStep extends StatelessWidget {
       );
     }
 
-    // Header: banner + başlık (2 sabit item)
-    // Items: apartments
     const headerCount = 3;
     return ListView.builder(
       padding: AppSizes.screenBodyScrollPadding,
@@ -350,13 +366,16 @@ class _ApartmentPickerStep extends StatelessWidget {
         if (index == 0) {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSizes.spacingL),
-            child: _buildBuildingBanner(),
+            child: _InviteBuildingBanner(building: building),
           );
         }
         if (index == 1) {
           return Text(
             context.t.common.whichApartmentForCode,
-            style: AppTypography.h4.copyWith(color: AppColors.textPrimary),
+            style: AppTypography.h4.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
+            ),
           );
         }
         if (index == 2) {
@@ -368,80 +387,146 @@ class _ApartmentPickerStep extends StatelessWidget {
     );
   }
 
-  Widget _buildBuildingBanner() {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.primaryLight.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.apartment, color: AppColors.primary),
-          const SizedBox(width: AppSizes.spacingS),
-          Expanded(
-            child: Text(
-              building.name,
-              style: AppTypography.body1.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildApartmentTile(BuildContext context, ApartmentEntity apt) {
     final isOccupied = apt.isOccupied;
     final activeCode = activeCodes[apt.id];
     final hasActiveCode = activeCode != null && !activeCode.isExpired;
+    final apartmentLabel = ApartmentUiUtils.formatApartmentLabel(
+      context,
+      apt.apartmentNumber,
+    );
 
     final tileIcon = hasActiveCode
-        ? Icons.qr_code_2
+        ? Icons.qr_code_2_rounded
         : Icons.door_front_door_outlined;
     final tileColor = hasActiveCode
         ? AppColors.accent
-        : (isOccupied ? AppColors.textSecondary : AppColors.success);
-    final subtitle = hasActiveCode
-        ? '${context.t.common.activeCodePrefix}: ${activeCode.code} • ${InviteCodeHelpers.remainingText(activeCode.remaining)}'
-        : (isOccupied
-              ? '${context.t.common.residentPrefix}: ${apt.residentName}'
-              : context.t.common.emptyApartment);
+        : (isOccupied ? AppColors.warning : AppColors.success);
+    final String subtitle;
+    final String? subtitleLine2;
+    if (hasActiveCode) {
+      final lines = InviteCodeHelpers.activeCodeListSubtitle(
+        activeCodeLabel: context.t.common.activeCodePrefix,
+        code: activeCode.code,
+        remaining: activeCode.remaining,
+      );
+      subtitle = lines.primary;
+      subtitleLine2 = lines.remaining;
+    } else {
+      subtitle = isOccupied
+          ? '${context.t.common.residentPrefix}: ${apt.residentName}'
+          : context.t.common.emptyApartment;
+      subtitleLine2 = null;
+    }
 
     return InviteSelectableTile(
       icon: tileIcon,
       iconColor: tileColor,
-      title: InviteCodeHelpers.formatApartmentLabel(apt.apartmentNumber),
+      title: apartmentLabel,
       subtitle: subtitle,
-      trailing: _StatusBadge(
+      subtitleLine2: subtitleLine2,
+      trailing: _InviteStatusBadge(
         hasActiveCode: hasActiveCode,
         isOccupied: isOccupied,
       ),
       onTap: () => onPick(apt),
     );
   }
+}
 
-  Widget _buildEmptyState(BuildContext context) {
+class _InviteBuildingBanner extends StatelessWidget {
+  final BuildingEntity building;
+
+  const _InviteBuildingBanner({required this.building});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.spacingM),
+      decoration: BoxDecoration(
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.apartment_rounded,
+              color: AppColors.textPrimary,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  building.name,
+                  style: AppTypography.h3.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (building.displayAddress.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    building.displayAddress,
+                    style: AppTypography.body2.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InviteEmptyApartmentsState extends StatelessWidget {
+  final String message;
+
+  const _InviteEmptyApartmentsState({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingXL),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: AppColors.cardBorder,
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
           Icon(
             Icons.door_back_door_outlined,
             size: 56,
-            color: AppColors.textSecondary,
+            color: AppColors.textSecondary.withValues(alpha: 0.85),
           ),
           const SizedBox(height: AppSizes.spacingM),
           Text(
-            context.t.common.noApartmentsInBuilding,
-            style: AppTypography.body1.copyWith(color: AppColors.textSecondary),
+            message,
+            style: AppTypography.body1.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -450,19 +535,23 @@ class _ApartmentPickerStep extends StatelessWidget {
   }
 }
 
-class _StatusBadge extends StatelessWidget {
+class _InviteStatusBadge extends StatelessWidget {
   final bool hasActiveCode;
   final bool isOccupied;
 
-  const _StatusBadge({required this.hasActiveCode, required this.isOccupied});
+  const _InviteStatusBadge({
+    required this.hasActiveCode,
+    required this.isOccupied,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final (label, color) = _resolveBadge(context);
+    final (label, color, backgroundColor) = _resolveBadge(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      constraints: const BoxConstraints(maxWidth: 96),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -470,16 +559,35 @@ class _StatusBadge extends StatelessWidget {
         style: AppTypography.caption.copyWith(
           color: color,
           fontWeight: FontWeight.w700,
+          fontSize: 13,
+          height: 1.2,
         ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
       ),
     );
   }
 
-  (String, Color) _resolveBadge(BuildContext context) {
+  (String, Color, Color) _resolveBadge(BuildContext context) {
     if (hasActiveCode) {
-      return (context.t.common.activeCodeBadge, AppColors.accent);
+      return (
+        context.t.common.activeCodeBadge,
+        AppColors.accent,
+        AppColors.accent.withValues(alpha: 0.12),
+      );
     }
-    if (isOccupied) return (context.t.common.occupiedBadge, AppColors.warning);
-    return (context.t.common.emptyBadge, AppColors.success);
+    if (isOccupied) {
+      return (
+        context.t.common.occupiedBadge,
+        AppColors.warning,
+        AppColors.warning.withValues(alpha: 0.12),
+      );
+    }
+    return (
+      context.t.common.emptyBadge,
+      AppColors.success,
+      AppColors.success.withValues(alpha: 0.12),
+    );
   }
 }

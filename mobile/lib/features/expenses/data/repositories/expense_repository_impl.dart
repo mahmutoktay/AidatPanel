@@ -3,6 +3,7 @@ import '../../../../core/network/paginated_list_result.dart';
 import '../../data/datasources/expense_remote_datasource.dart';
 import '../../data/models/expense_model.dart';
 import '../../domain/entities/expense_entity.dart';
+import '../../domain/entities/expense_create_outcome.dart';
 import '../../domain/repositories/expense_repository.dart';
 
 class ExpenseRepositoryImpl implements ExpenseRepository {
@@ -96,23 +97,44 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     return summary.byCategory.fold<int>(0, (sum, c) => sum + c.count);
   }
 
+  ExpenseCarryForwardPolicyApi _mapPolicy(ExpenseCarryForwardPolicy policy) {
+    switch (policy) {
+      case ExpenseCarryForwardPolicy.carryToNextMonth:
+        return ExpenseCarryForwardPolicyApi.carryToNextMonth;
+      case ExpenseCarryForwardPolicy.warnOnly:
+        return ExpenseCarryForwardPolicyApi.warnOnly;
+    }
+  }
+
   @override
-  Future<ExpenseEntity> createExpense(
+  Future<ExpenseCreateOutcome> createExpense(
     String buildingId, {
     required String title,
+    double? amount,
     required ExpenseCategory category,
     required DateTime date,
+    required int targetMonth,
+    required int targetYear,
     String? note,
+    int splitMonths = 1,
+    ExpenseCarryForwardPolicy carryForwardPolicy =
+        ExpenseCarryForwardPolicy.warnOnly,
+    bool confirmPaidImpact = false,
   }) async {
     try {
-      final model = await _remote.createExpense(
+      return await _remote.createExpense(
         buildingId,
         title: title,
+        amount: amount,
         category: ExpenseModel.categoryToApi(category),
         date: date,
+        targetMonth: targetMonth,
+        targetYear: targetYear,
         note: note,
+        splitMonths: splitMonths,
+        carryForwardPolicy: _mapPolicy(carryForwardPolicy),
+        confirmPaidImpact: confirmPaidImpact,
       );
-      return model.toEntity();
     } on ApiException {
       rethrow;
     } catch (_) {

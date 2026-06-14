@@ -12,7 +12,6 @@ import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/notification_icon_button.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../providers/dekont_provider.dart';
-import '../utils/dekont_labels.dart';
 import '../widgets/dekont_list_card.dart';
 
 class ManagerDekontsScreen extends ConsumerStatefulWidget {
@@ -47,7 +46,7 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
     if (id == null) return;
     await ref
         .read(managerDekontsNotifierProvider.notifier)
-        .loadBuilding(id, status: dekontStatusFilterApi(_filterKey));
+        .loadBuilding(id, filterKey: _filterKey);
   }
 
   @override

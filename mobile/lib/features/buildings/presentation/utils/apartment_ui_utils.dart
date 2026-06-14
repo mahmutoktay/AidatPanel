@@ -58,6 +58,30 @@ class ApartmentUiUtils {
     }
   }
 
+  /// Sakin listesi kartları — aidat bağlamı net olsun diye açıklayıcı etiketler.
+  static StatusInfo getDuesStatusInfo(BuildContext context, PaymentStatus status) {
+    switch (status) {
+      case PaymentStatus.paid:
+        return StatusInfo(
+          label: context.t.common.duesPaidStatus,
+          color: AppColors.success,
+          bgColor: AppColors.success.withValues(alpha: 0.12),
+        );
+      case PaymentStatus.pending:
+        return StatusInfo(
+          label: context.t.common.duesPendingStatus,
+          color: AppColors.paymentCtaForeground,
+          bgColor: AppColors.paymentCta,
+        );
+      case PaymentStatus.overdue:
+        return StatusInfo(
+          label: context.t.common.duesOverdueStatus,
+          color: AppColors.error,
+          bgColor: AppColors.error.withValues(alpha: 0.12),
+        );
+    }
+  }
+
   static String initialsFromName(String name) {
     final parts = name.trim().split(' ').where((p) => p.isNotEmpty).toList();
     if (parts.length >= 2) {

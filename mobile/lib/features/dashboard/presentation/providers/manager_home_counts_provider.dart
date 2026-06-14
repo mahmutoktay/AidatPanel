@@ -62,7 +62,7 @@ final managerPendingDekontsCountProvider = FutureProvider.autoDispose<int>((
         paginated: false,
       );
       count += dekonts.items
-          .where((d) => d.status.needsManagerAttention)
+          .where((d) => d.status.needsManagerApproval)
           .length;
     } catch (_) {
       // Tek bina hatası tüm sayacı düşürmez.

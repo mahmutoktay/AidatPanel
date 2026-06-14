@@ -16,7 +16,6 @@ import '../../../buildings/presentation/widgets/building_actions_sheet.dart';
 import '../../../buildings/presentation/widgets/delete_building_dialog.dart';
 import '../../../buildings/presentation/widgets/edit_building_bottom_sheet.dart';
 import '../../../buildings/presentation/widgets/edit_building_collection_bottom_sheet.dart';
-import '../../../reports/presentation/widgets/report_download_sheet.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 
 // manager_dashboard_screen.dart içinden gelen _BuildingsAsyncSection'ı burada kullanamayız
@@ -228,7 +227,7 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
                       fontWeight: FontWeight.w500,
                       fontSize: 15,
                     ),
-                    maxLines: reserveMenuSlot ? 2 : 1,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -269,106 +268,103 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
           reserveMenuSlot: reserveMenuSlot,
         ),
         Padding(
-          padding: EdgeInsets.fromLTRB(
+          padding: const EdgeInsets.fromLTRB(
             AppSizes.spacingM,
             0,
             AppSizes.spacingM,
             AppSizes.spacingM,
           ),
-          child: Container(
-            padding: const EdgeInsets.all(AppSizes.spacingS),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  height: DashboardMetricTile.kTileHeight,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: DashboardMetricTile.kTileHeight,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: DashboardMetricTile(
+                        icon: Icons.door_front_door_outlined,
+                        label: context.t.common.apartment,
+                        value:
+                            '${building.occupiedApartments}/${building.totalApartments}',
+                        backgroundColor: AppColors.surface,
+                        animateValue: false,
+                      ),
+                    ),
+                    const SizedBox(width: AppSizes.spacingS),
+                    Expanded(
+                      child: DashboardMetricTile(
+                        icon: Icons.trending_up,
+                        label: context.t.common.collection,
+                        animatedValue: collectionRate.round(),
+                        valuePrefix: '%',
+                        valueColor: AppColors.success,
+                        backgroundColor: AppColors.surface,
+                        animateValue: false,
+                      ),
+                    ),
+                    const SizedBox(width: AppSizes.spacingS),
+                    Expanded(
+                      child: DashboardMetricTile(
+                        icon: Icons.payments_outlined,
+                        label: context.t.common.monthlyDues,
+                        value:
+                            '₺${building.totalMonthlyDues.toStringAsFixed(0)}',
+                        backgroundColor: AppColors.surface,
+                        animateValue: false,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (showPerApartmentDues) ...[
+                const SizedBox(height: AppSizes.spacingS),
+                Container(
+                  height: AppSizes.minTouchTargetComfort,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.spacingM,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.center,
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: DashboardMetricTile(
-                          icon: Icons.door_front_door_outlined,
-                          label: context.t.common.apartment,
-                          value:
-                              '${building.occupiedApartments}/${building.totalApartments}',
-                          animateValue: false,
-                        ),
+                      Icon(
+                        Icons.receipt_long_outlined,
+                        size: 18,
+                        color:
+                            AppColors.textSecondary.withValues(alpha: 0.85),
                       ),
                       const SizedBox(width: AppSizes.spacingS),
                       Expanded(
-                        child: DashboardMetricTile(
-                          icon: Icons.trending_up,
-                          label: context.t.common.collection,
-                          animatedValue: collectionRate.round(),
-                          valuePrefix: '%',
-                          valueColor: AppColors.success,
-                          animateValue: false,
+                        child: Text(
+                          context.t.common.monthlyDuesPerApartment,
+                          style: AppTypography.body2.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: AppSizes.spacingS),
-                      Expanded(
-                        child: DashboardMetricTile(
-                          icon: Icons.payments_outlined,
-                          label: context.t.common.monthlyDues,
-                          value:
-                              '₺${building.totalMonthlyDues.toStringAsFixed(0)}',
-                          animateValue: false,
+                      Text(
+                        '₺${building.dueAmount!.toStringAsFixed(0)}',
+                        style: AppTypography.body1.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 17,
                         ),
                       ),
                     ],
                   ),
                 ),
-                if (showPerApartmentDues) ...[
-                  const SizedBox(height: AppSizes.spacingS),
-                  Container(
-                    height: AppSizes.minTouchTargetComfort,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.spacingM,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.fill,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    alignment: Alignment.center,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.receipt_long_outlined,
-                          size: 18,
-                          color: AppColors.textSecondary.withValues(alpha: 0.85),
-                        ),
-                        const SizedBox(width: AppSizes.spacingS),
-                        Expanded(
-                          child: Text(
-                            context.t.common.monthlyDuesPerApartment,
-                            style: AppTypography.body2.copyWith(
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: AppSizes.spacingS),
-                        Text(
-                          '₺${building.dueAmount!.toStringAsFixed(0)}',
-                          style: AppTypography.body1.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 17,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
               ],
-            ),
+            ],
           ),
         ),
       ],
@@ -410,9 +406,6 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
           break;
         case BuildingMenuAction.collection:
           EditBuildingCollectionBottomSheet.show(context, building: building);
-          break;
-        case BuildingMenuAction.report:
-          ReportDownloadSheet.show(context, building: building);
           break;
         case BuildingMenuAction.delete:
           unawaited(DeleteBuildingDialog.show(context, building: building));

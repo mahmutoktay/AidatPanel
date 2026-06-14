@@ -127,6 +127,7 @@ model Apartment {
   inviteCodes InviteCode[]
   tickets     Ticket[]
   dekonts     Dekont[]
+  expenseCarryforwards DueExpenseCarryforward[]
   createdAt   DateTime     @default(now())
 
   @@index([buildingId])
@@ -181,10 +182,20 @@ model Expense {
   buildingId String
   building   Building        @relation(fields: [buildingId], references: [id])
   title      String
-  /// OCR'dan otomatik hesaplanan toplam tutar; henüz OCR tamamlanmamışsa null.
+  /// Toplam gider tutarı (manuel veya OCR)
   amount     Decimal?        @db.Decimal(10, 2)
   category   ExpenseCategory
   date       DateTime
+  /// Aidata yansıyacağı ay (1-12)
+  targetMonth Int            @default(1)
+  /// Aidata yansıyacağı yıl
+  targetYear  Int            @default(2026)
+  /// Daire başına pay (amount / daire sayısı)
+  perUnitAmount Decimal?    @db.Decimal(10, 2)
+  /// Çoklu aya bölünen giderlerde ortak grup
+  splitGroupId  String?
+  /// Bölünme kaynağı gider ID
+  sourceExpenseId String?
   note       String?
   /// @deprecated Artık storedPaths kullanılıyor; eski kayıtlar için korundu.
   receiptUrl String?
@@ -200,11 +211,31 @@ model Expense {
   /// Her fişin OCR detayı: [{path, parsedAmount, confidence, rawText}]
   ocrReceiptsJson Json?
 
+  carryforwards DueExpenseCarryforward[]
+
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
 
   @@index([buildingId])
   @@index([buildingId, date])
+  @@index([buildingId, targetYear, targetMonth])
+}
+
+model DueExpenseCarryforward {
+  id          String    @id @default(uuid())
+  expenseId   String
+  expense     Expense   @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  apartmentId String
+  apartment   Apartment @relation(fields: [apartmentId], references: [id])
+  fromMonth   Int
+  fromYear    Int
+  toMonth     Int
+  toYear      Int
+  amount      Decimal   @db.Decimal(10, 2)
+  createdAt   DateTime  @default(now())
+
+  @@unique([expenseId, apartmentId])
+  @@index([apartmentId, toYear, toMonth])
 }
 
 enum ExpenseCategory {
@@ -287,6 +318,7 @@ enum NotificationType {
   DEKONT_MATCHED
   DEKONT_PAYMENT_APPLIED
   DEKONT_NEEDS_REVIEW
+  EXPENSE_ADDED
 }
 
 enum DekontStatus {

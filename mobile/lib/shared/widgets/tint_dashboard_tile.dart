@@ -12,8 +12,8 @@ abstract final class _DashboardTileStyle {
       EdgeInsets.symmetric(horizontal: 12, vertical: 12);
 
 
-  static BoxDecoration decoration() => BoxDecoration(
-        color: AppColors.fill,
+  static BoxDecoration decoration({Color? backgroundColor}) => BoxDecoration(
+        color: backgroundColor ?? AppColors.fill,
         borderRadius: BorderRadius.circular(radius),
       );
 }
@@ -58,6 +58,7 @@ class DashboardMetricTile extends StatelessWidget {
   final String value;
   final Color? valueColor;
   final bool animateValue;
+  final Color? backgroundColor;
 
   const DashboardMetricTile({
     super.key,
@@ -68,6 +69,7 @@ class DashboardMetricTile extends StatelessWidget {
     this.valuePrefix,
     this.valueColor,
     this.animateValue = true,
+    this.backgroundColor,
   });
 
   static TextStyle _metricValueStyle(Color valueTint) {
@@ -87,7 +89,9 @@ class DashboardMetricTile extends StatelessWidget {
       height: kTileHeight,
       width: double.infinity,
       child: Container(
-        decoration: _DashboardTileStyle.decoration(),
+        decoration: _DashboardTileStyle.decoration(
+          backgroundColor: backgroundColor,
+        ),
         padding: _DashboardTileStyle.padding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
