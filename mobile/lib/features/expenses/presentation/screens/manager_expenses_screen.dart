@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
@@ -24,6 +25,7 @@ class ManagerExpensesScreen extends ConsumerStatefulWidget {
 }
 
 class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
+  final ScrollController _scrollController = ScrollController();
   String? _buildingId;
   late int _month;
   late int _year;
@@ -34,12 +36,23 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     final now = DateTime.now();
     _month = now.month;
     _year = now.year;
+    attachPaginationScroll(_scrollController, () {
+      ref.read(expensesNotifierProvider.notifier).loadMore();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _load() {
     final id = _buildingId;
     if (id == null) return;
-    ref.read(expensesNotifierProvider.notifier).load(id, month: _month, year: _year);
+    ref
+        .read(expensesNotifierProvider.notifier)
+        .load(id, month: _month, year: _year);
   }
 
   Future<void> _openForm({ExpenseEntity? expense}) async {
@@ -78,10 +91,9 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
         .delete(expense.id);
     if (!mounted) return;
     if (ok) {
-      ref.read(toastProvider.notifier).show(
-            t.deleteSuccess,
-            type: ToastType.success,
-          );
+      ref
+          .read(toastProvider.notifier)
+          .show(t.deleteSuccess, type: ToastType.success);
     }
   }
 
@@ -238,10 +250,17 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     }
 
     return ListView.builder(
+      controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: AppSizes.screenBodyScrollPadding,
-      itemCount: state.expenses.length,
+      itemCount: state.expenses.length + (state.isLoadingMore ? 1 : 0),
       itemBuilder: (context, i) {
+        if (i >= state.expenses.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSizes.spacingM),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
         final e = state.expenses[i];
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
@@ -292,7 +311,10 @@ class _SummaryCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
                     label: Text(
                       '${c.category.label(context)}: ${c.amount.toStringAsFixed(0)} ₺ (${c.count})',
                       style: AppTypography.caption.copyWith(
@@ -339,74 +361,76 @@ class _ExpenseCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.cardPadding),
           child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  expense.title,
-                  style: AppTypography.h4.copyWith(color: AppColors.textPrimary),
-                ),
-                const SizedBox(height: AppSizes.spacingXS),
-                Text(
-                  '${expense.category.label(context)} · $date',
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                if (expense.note != null && expense.note!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: AppSizes.spacingXS),
-                    child: Text(
-                      expense.note!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.body2.copyWith(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      expense.title,
+                      style: AppTypography.h4.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.spacingXS),
+                    Text(
+                      '${expense.category.label(context)} · $date',
+                      style: AppTypography.caption.copyWith(
                         color: AppColors.textSecondary,
                       ),
                     ),
-                  ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${expense.amount?.toStringAsFixed(2) ?? "0.00"} ₺',
-                style: AppTypography.body1.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                    if (expense.note != null && expense.note!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSizes.spacingXS),
+                        child: Text(
+                          expense.note!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.body2.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              if (expense.parsedAmount != null &&
-                  expense.parsedAmount != expense.amount)
-                Text(
-                  '(OCR: ${expense.parsedAmount!.toStringAsFixed(2)} ₺)',
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.primary,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${expense.amount?.toStringAsFixed(2) ?? "0.00"} ₺',
+                    style: AppTypography.body1.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-            ],
-          ),
-          PopupMenuButton<String>(
-            onSelected: (v) {
-              if (v == 'edit') onEdit();
-              if (v == 'delete') onDelete();
-            },
-            itemBuilder: (ctx) => [
-              PopupMenuItem(
-                value: 'edit',
-                child: Text(context.t.features.expenses.editAction),
+                  if (expense.parsedAmount != null &&
+                      expense.parsedAmount != expense.amount)
+                    Text(
+                      '(OCR: ${expense.parsedAmount!.toStringAsFixed(2)} ₺)',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                ],
               ),
-              PopupMenuItem(
-                value: 'delete',
-                child: Text(context.t.features.expenses.deleteAction),
+              PopupMenuButton<String>(
+                onSelected: (v) {
+                  if (v == 'edit') onEdit();
+                  if (v == 'delete') onDelete();
+                },
+                itemBuilder: (ctx) => [
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Text(context.t.features.expenses.editAction),
+                  ),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Text(context.t.features.expenses.deleteAction),
+                  ),
+                ],
               ),
-            ],
-          ),
             ],
           ),
         ),

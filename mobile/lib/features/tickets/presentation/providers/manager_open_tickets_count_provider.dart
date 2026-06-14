@@ -5,7 +5,9 @@ import '../../domain/entities/ticket_entity.dart';
 import 'tickets_provider.dart';
 
 /// Yönetici ana sayfa — açık + işlemde talep sayısı (tüm binalar).
-final managerOpenTicketsCountProvider = FutureProvider.autoDispose<int>((ref) async {
+final managerOpenTicketsCountProvider = FutureProvider.autoDispose<int>((
+  ref,
+) async {
   final buildings = ref.watch(buildingsStoreProvider).value;
   if (buildings == null || buildings.isEmpty) return 0;
 
@@ -14,8 +16,11 @@ final managerOpenTicketsCountProvider = FutureProvider.autoDispose<int>((ref) as
 
   for (final building in buildings) {
     try {
-      final tickets = await repo.getBuildingTickets(building.id);
-      count += tickets
+      final tickets = await repo.getBuildingTickets(
+        building.id,
+        paginated: false,
+      );
+      count += tickets.items
           .where(
             (t) =>
                 t.status == TicketStatus.open ||

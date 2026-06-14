@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../features/auth/presentation/providers/auth_provider.dart';
 import 'datasources/invite_code_remote_datasource.dart';
@@ -36,11 +35,11 @@ final inviteCodeRepositoryProvider = Provider<InviteCodeRepository>((ref) {
   );
 });
 
-class InviteCodeNotifier
-    extends StateNotifier<Map<String, ActiveInviteCode>> {
-  final InviteCodeRepository _repository;
+class InviteCodeNotifier extends Notifier<Map<String, ActiveInviteCode>> {
+  InviteCodeRepository get _repository => ref.read(inviteCodeRepositoryProvider);
 
-  InviteCodeNotifier(this._repository) : super(const {});
+  @override
+  Map<String, ActiveInviteCode> build() => const {};
 
   ActiveInviteCode? activeFor(String apartmentId) {
     final entry = state[apartmentId];
@@ -81,6 +80,6 @@ class InviteCodeNotifier
 }
 
 final inviteCodeStoreProvider =
-    StateNotifierProvider<InviteCodeNotifier, Map<String, ActiveInviteCode>>(
-  (ref) => InviteCodeNotifier(ref.watch(inviteCodeRepositoryProvider)),
+    NotifierProvider<InviteCodeNotifier, Map<String, ActiveInviteCode>>(
+  InviteCodeNotifier.new,
 );

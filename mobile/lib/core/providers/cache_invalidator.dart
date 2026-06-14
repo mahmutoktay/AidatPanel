@@ -12,7 +12,7 @@ import '../../features/subscription/presentation/providers/subscription_provider
 import '../../features/tickets/presentation/providers/tickets_provider.dart';
 import '../../features/dekont/presentation/providers/share_intent_provider.dart';
 
-/// Kullanıcı değiştiğinde (login/logout) tüm cached StateNotifierProvider'ları
+/// Kullanıcı değiştiğinde (login/logout) tüm cached NotifierProvider'ları
 /// [ref.invalidate] ile geçersiz kılarak yeni kullanıcının verilerinin
 /// sıfırdan yüklenmesini sağlar.
 ///
@@ -54,7 +54,7 @@ void invalidateAllCachedProviders(WidgetRef ref) {
 }
 
 Future<void> _clearDekontFilePreviews(WidgetRef ref) async {
-  ref.read(dekontLocalPreviewProvider.notifier).state = {};
+  ref.read(dekontLocalPreviewProvider.notifier).clearAll();
   await DekontPreviewCache.clearAll();
 }
 

@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/user_error_message.dart';
+import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../providers/dekont_provider.dart';
@@ -20,18 +21,28 @@ class MyDekontsScreen extends ConsumerStatefulWidget {
 }
 
 class _MyDekontsScreenState extends ConsumerState<MyDekontsScreen> {
+  final ScrollController _scrollController = ScrollController();
   String? _filterKey;
 
   @override
   void initState() {
     super.initState();
+    attachPaginationScroll(_scrollController, () {
+      ref.read(myDekontsNotifierProvider.notifier).loadMore();
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
     await ref
         .read(myDekontsNotifierProvider.notifier)
-        .load(status: dekontStatusFilterApi(_filterKey));
+        .load(status: dekontStatusFilterApi(_filterKey), refresh: true);
   }
 
   @override
@@ -103,41 +114,50 @@ class _MyDekontsScreenState extends ConsumerState<MyDekontsScreen> {
               child: state.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : state.error != null
-                      ? ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            Padding(
-                              padding: AppSizes.screenBodyScrollPadding,
-                              child: Text(
-                                userFacingError(state.error!),
-                                textAlign: TextAlign.center,
-                              ),
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        Padding(
+                          padding: AppSizes.screenBodyScrollPadding,
+                          child: Text(
+                            userFacingError(state.error!),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    )
+                  : state.dekonts.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        EmptyStateWidget(
+                          icon: Icons.receipt_long_outlined,
+                          title: t.emptyTitle,
+                          subtitle: t.emptySubtitleResident,
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: AppSizes.screenBodyScrollPadding,
+                      itemCount:
+                          state.dekonts.length + (state.isLoadingMore ? 1 : 0),
+                      itemBuilder: (_, i) {
+                        if (i >= state.dekonts.length) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSizes.spacingM,
                             ),
-                          ],
-                        )
-                      : state.dekonts.isEmpty
-                          ? ListView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              children: [
-                                EmptyStateWidget(
-                                  icon: Icons.receipt_long_outlined,
-                                  title: t.emptyTitle,
-                                  subtitle: t.emptySubtitleResident,
-                                ),
-                              ],
-                            )
-                          : ListView.builder(
-                              padding: AppSizes.screenBodyScrollPadding,
-                              itemCount: state.dekonts.length,
-                              itemBuilder: (_, i) {
-                                final d = state.dekonts[i];
-                                return DekontListCard(
-                                  dekont: d,
-                                  onTap: () =>
-                                      context.push('/dekonts/${d.id}'),
-                                );
-                              },
-                            ),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                        final d = state.dekonts[i];
+                        return DekontListCard(
+                          dekont: d,
+                          onTap: () => context.push('/dekonts/${d.id}'),
+                        );
+                      },
+                    ),
             ),
           ),
         ],

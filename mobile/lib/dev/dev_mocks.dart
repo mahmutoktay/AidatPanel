@@ -14,6 +14,7 @@
 library;
 
 import '../core/network/api_exception.dart';
+import '../core/network/paginated_list_result.dart';
 import '../features/apartments/data/repositories/apartment_repository.dart';
 import '../features/apartments/domain/entities/apartment_entity.dart';
 import '../features/apartments/domain/entities/resident_info.dart';
@@ -100,13 +101,22 @@ class MockAuthRepository implements AuthRepository {
 
   @override
   Future<void> register(
-      String email, String password, String name, String? phone) async {
+    String email,
+    String password,
+    String name,
+    String? phone,
+  ) async {
     await Future.delayed(_delay);
   }
 
   @override
-  Future<UserEntity> join(String inviteCode, String email, String password,
-      String name, String? phone) async {
+  Future<UserEntity> join(
+    String inviteCode,
+    String email,
+    String password,
+    String name,
+    String? phone,
+  ) async {
     await Future.delayed(_delay);
     return _devManager;
   }
@@ -146,10 +156,7 @@ class MockAuthRepository implements AuthRepository {
   Future<void> resetPassword(String token, String password) async {
     await Future.delayed(_delay);
     if (token.toUpperCase() != 'ABCDEF') {
-      throw ApiException(
-        message: 'Invalid or expired token',
-        statusCode: 400,
-      );
+      throw ApiException(message: 'Invalid or expired token', statusCode: 400);
     }
   }
 }
@@ -214,7 +221,9 @@ class MockProfileRepository implements ProfileRepository {
     }
     final updated = UserEntity(
       id: user.id,
-      email: email != null && email.trim().isNotEmpty ? email.trim() : user.email,
+      email: email != null && email.trim().isNotEmpty
+          ? email.trim()
+          : user.email,
       name: name.trim(),
       phone: phone?.trim().isEmpty == true ? null : phone?.trim(),
       role: user.role,
@@ -411,10 +420,9 @@ class MockBuildingRepository implements BuildingRepository {
       collectionAccountTitle: collectionAccountTitle?.trim().isEmpty ?? true
           ? null
           : collectionAccountTitle!.trim(),
-      paymentReferenceTemplate:
-          paymentReferenceTemplate?.trim().isEmpty ?? true
-              ? null
-              : paymentReferenceTemplate!.trim(),
+      paymentReferenceTemplate: paymentReferenceTemplate?.trim().isEmpty ?? true
+          ? null
+          : paymentReferenceTemplate!.trim(),
       buildingCount: 0,
     );
     return true;
@@ -519,10 +527,9 @@ class MockBuildingRepository implements BuildingRepository {
       collectionAccountTitle: collectionAccountTitle?.trim().isEmpty ?? true
           ? null
           : collectionAccountTitle!.trim(),
-      paymentReferenceTemplate:
-          paymentReferenceTemplate?.trim().isEmpty ?? true
-              ? null
-              : paymentReferenceTemplate!.trim(),
+      paymentReferenceTemplate: paymentReferenceTemplate?.trim().isEmpty ?? true
+          ? null
+          : paymentReferenceTemplate!.trim(),
     );
     _buildings[idx] = updated;
     return updated;
@@ -547,10 +554,9 @@ class MockBuildingRepository implements BuildingRepository {
       collectionAccountTitle: collectionAccountTitle?.trim().isEmpty ?? true
           ? null
           : collectionAccountTitle!.trim(),
-      paymentReferenceTemplate:
-          paymentReferenceTemplate?.trim().isEmpty ?? true
-              ? null
-              : paymentReferenceTemplate!.trim(),
+      paymentReferenceTemplate: paymentReferenceTemplate?.trim().isEmpty ?? true
+          ? null
+          : paymentReferenceTemplate!.trim(),
       buildingCount: 0,
     );
     _extraPresets.add(entity);
@@ -663,8 +669,7 @@ class MockBuildingRepository implements BuildingRepository {
   @override
   Future<void> deleteBuilding(String id) async {
     await Future.delayed(_delay);
-    final hasApartments =
-        (apartments._byBuilding[id]?.isNotEmpty ?? false);
+    final hasApartments = (apartments._byBuilding[id]?.isNotEmpty ?? false);
     if (hasApartments) {
       // Belge §5: bina sakin/aidat varsa silinemez. UI bu hatayı insanlaştırır.
       throw ApiException(
@@ -770,13 +775,15 @@ class MockApartmentRepository implements ApartmentRepository {
         final letter = unit < 26
             ? String.fromCharCode(65 + unit)
             : '${String.fromCharCode(65 + (unit ~/ 26) - 1)}${String.fromCharCode(65 + unit % 26)}';
-        list.add(ApartmentEntity(
-          id: MockState.nextId('a'),
-          buildingId: buildingId,
-          apartmentNumber: '$floor$letter',
-          floor: floor,
-          monthlyDues: monthlyDues,
-        ));
+        list.add(
+          ApartmentEntity(
+            id: MockState.nextId('a'),
+            buildingId: buildingId,
+            apartmentNumber: '$floor$letter',
+            floor: floor,
+            monthlyDues: monthlyDues,
+          ),
+        );
       }
     }
     _byBuilding[buildingId] = list;
@@ -825,10 +832,7 @@ class MockApartmentRepository implements ApartmentRepository {
     if (idx == -1) {
       throw ApiException(message: 'Daire bulunamadı', statusCode: 404);
     }
-    final updated = list[idx].copyWith(
-      apartmentNumber: number,
-      floor: floor,
-    );
+    final updated = list[idx].copyWith(apartmentNumber: number, floor: floor);
     list[idx] = updated;
     return updated;
   }
@@ -843,10 +847,8 @@ class MockApartmentRepository implements ApartmentRepository {
     if (list == null) return;
     final apt = list.firstWhere(
       (a) => a.id == id,
-      orElse: () => throw ApiException(
-        message: 'Daire bulunamadı',
-        statusCode: 404,
-      ),
+      orElse: () =>
+          throw ApiException(message: 'Daire bulunamadı', statusCode: 404),
     );
     if (apt.resident != null) {
       // Belge §6: sakin atanmış daire silinince FK ihlali (dues vs.) gelebilir.
@@ -898,10 +900,7 @@ class MockDuesRepository implements DuesRepository {
   late final Map<String, List<DueEntity>> _byBuilding;
 
   MockDuesRepository() {
-    _byBuilding = {
-      'b1': _generateB1Dues(),
-      'b2': _generateB2Dues(),
-    };
+    _byBuilding = {'b1': _generateB1Dues(), 'b2': _generateB2Dues()};
   }
 
   /// Aylık aidat üretici — verilen dairenin son `monthsBack` ay için
@@ -922,26 +921,29 @@ class MockDuesRepository implements DuesRepository {
       // Backend tipik olarak ayın 5'ini due day yapıyor (b1) veya 1'i (b2)
       final dueDay = buildingId == 'b1' ? 5 : 1;
       final dueDate = DateTime(dt.year, dt.month, dueDay);
-      final overdueDays =
-          status == DueStatus.overdue ? now.difference(dueDate).inDays : 0;
+      final overdueDays = status == DueStatus.overdue
+          ? now.difference(dueDate).inDays
+          : 0;
       final paidAt = status == DueStatus.paid
           ? DateTime(dt.year, dt.month, dueDay + 2)
           : null;
-      list.add(DueEntity(
-        id: '${apartmentId}_${dt.year}_${dt.month}',
-        apartmentId: apartmentId,
-        apartmentNumber: apartmentNumber,
-        amount: amount,
-        currency: 'TRY',
-        month: dt.month,
-        year: dt.year,
-        dueDate: dueDate,
-        status: status,
-        paidAt: paidAt,
-        overdueDays: overdueDays > 0 ? overdueDays : 0,
-        createdAt: DateTime(dt.year, dt.month, 1),
-        updatedAt: paidAt ?? DateTime(dt.year, dt.month, 1),
-      ));
+      list.add(
+        DueEntity(
+          id: '${apartmentId}_${dt.year}_${dt.month}',
+          apartmentId: apartmentId,
+          apartmentNumber: apartmentNumber,
+          amount: amount,
+          currency: 'TRY',
+          month: dt.month,
+          year: dt.year,
+          dueDate: dueDate,
+          status: status,
+          paidAt: paidAt,
+          overdueDays: overdueDays > 0 ? overdueDays : 0,
+          createdAt: DateTime(dt.year, dt.month, 1),
+          updatedAt: paidAt ?? DateTime(dt.year, dt.month, 1),
+        ),
+      );
     }
     return list;
   }
@@ -1026,32 +1028,39 @@ class MockDuesRepository implements DuesRepository {
   /// `dueController.getDuesByBuildingController` aynı parametreleri
   /// uyguladığı için mock da burada client-side filtre yapar.
   @override
-  Future<List<DueEntity>> getBuildingDues(
+  Future<PaginatedListResult<DueEntity>> getBuildingDues(
     String buildingId, {
     int? month,
     int? year,
     DueStatus? status,
+    String? cursor,
+    bool paginated = true,
   }) async {
     await Future.delayed(_delay);
     final source = _byBuilding[buildingId] ?? const <DueEntity>[];
-    return List.unmodifiable(source.where((d) {
-      if (month != null && d.month != month) return false;
-      if (year != null && d.year != year) return false;
-      if (status != null && d.status != status) return false;
-      return true;
-    }));
+    final filtered = List<DueEntity>.unmodifiable(
+      source.where((d) {
+        if (month != null && d.month != month) return false;
+        if (year != null && d.year != year) return false;
+        if (status != null && d.status != status) return false;
+        return true;
+      }),
+    );
+    return PaginatedListResult(items: filtered);
   }
 
   @override
-  Future<List<DueEntity>> getMyDues({
+  Future<PaginatedListResult<DueEntity>> getMyDues({
     int? month,
     int? year,
     DueStatus? status,
+    String? cursor,
+    bool paginated = true,
   }) async {
     // Dev preview otomatik manager girişi yapıyor; sakin akışı test
     // edilmeyeceği için boş döner.
     await Future.delayed(_delay);
-    return const [];
+    return const PaginatedListResult(items: []);
   }
 
   @override
@@ -1151,9 +1160,11 @@ class MockTicketRepository implements TicketRepository {
   }
 
   @override
-  Future<List<TicketEntity>> getMyTickets({
+  Future<PaginatedListResult<TicketEntity>> getMyTickets({
     TicketStatus? status,
     TicketCategory? category,
+    String? cursor,
+    bool paginated = true,
   }) async {
     await Future.delayed(_delay);
     var list = List<TicketEntity>.from(_tickets);
@@ -1162,17 +1173,24 @@ class MockTicketRepository implements TicketRepository {
       list = list.where((t) => t.category == category).toList();
     }
     list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return list;
+    return PaginatedListResult(items: list);
   }
 
   @override
-  Future<List<TicketEntity>> getBuildingTickets(
+  Future<PaginatedListResult<TicketEntity>> getBuildingTickets(
     String buildingId, {
     TicketStatus? status,
     TicketCategory? category,
+    String? cursor,
+    bool paginated = true,
   }) async {
     await Future.delayed(_delay);
-    return getMyTickets(status: status, category: category);
+    return getMyTickets(
+      status: status,
+      category: category,
+      cursor: cursor,
+      paginated: paginated,
+    );
   }
 
   @override

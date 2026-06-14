@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../providers/tickets_provider.dart';
@@ -18,7 +19,22 @@ class ResidentTicketsTab extends ConsumerStatefulWidget {
 }
 
 class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
+  final ScrollController _scrollController = ScrollController();
   bool _requested = false;
+
+  @override
+  void initState() {
+    super.initState();
+    attachPaginationScroll(_scrollController, () {
+      ref.read(ticketsNotifierProvider.notifier).loadMore();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +57,17 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
         icon: const Icon(Icons.add, color: Colors.white),
         label: Text(
           t.newTicket,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(ticketsNotifierProvider.notifier).loadMyTickets(),
+        onRefresh: () =>
+            ref.read(ticketsNotifierProvider.notifier).loadMyTickets(),
         child: CustomScrollView(
+          controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverPadding(
@@ -62,7 +83,9 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
                         children: [
                           Text(
                             t.myTickets,
-                            style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+                            style: AppTypography.h3.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                           const SizedBox(height: AppSizes.spacingM),
                         ],
@@ -71,7 +94,8 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
 
                     final adjustedIndex = index - 1;
 
-                    if (ticketsState.isLoading && ticketsState.tickets.isEmpty) {
+                    if (ticketsState.isLoading &&
+                        ticketsState.tickets.isEmpty) {
                       if (adjustedIndex == 0) {
                         return const Padding(
                           padding: EdgeInsets.only(top: AppSizes.spacingXL),
@@ -95,7 +119,9 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
                     if (adjustedIndex < ticketsState.tickets.length) {
                       final ticket = ticketsState.tickets[adjustedIndex];
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
+                        padding: const EdgeInsets.only(
+                          bottom: AppSizes.spacingM,
+                        ),
                         child: TicketListCard(
                           ticket: ticket,
                           showSubtitleMeta: false,
@@ -112,14 +138,25 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
                       );
                     }
 
+                    if (adjustedIndex == ticketsState.tickets.length &&
+                        ticketsState.isLoadingMore) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: AppSizes.spacingM,
+                        ),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
                     return null;
                   },
-                  childCount: 1 +
+                  childCount:
+                      1 +
                       (ticketsState.isLoading && ticketsState.tickets.isEmpty
                           ? 1
                           : ticketsState.tickets.isEmpty
-                              ? 1
-                              : ticketsState.tickets.length),
+                          ? 1
+                          : ticketsState.tickets.length +
+                                (ticketsState.isLoadingMore ? 1 : 0)),
                 ),
               ),
             ),

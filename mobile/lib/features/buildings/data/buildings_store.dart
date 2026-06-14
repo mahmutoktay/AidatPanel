@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../core/utils/user_error_message.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
@@ -34,27 +33,22 @@ final collectionPresetsProvider =
   return ref.watch(buildingRepositoryProvider).fetchCollectionPresets();
 });
 
-class BuildingsNotifier
-    extends StateNotifier<AsyncValue<List<BuildingEntity>>> {
-  final BuildingRepository _repository;
+class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
+  BuildingRepository get _repository => ref.read(buildingRepositoryProvider);
 
   /// Submit anında butona art arda basılırsa (50+ kullanıcı için yaygın)
   /// aynı bina N kez oluşturulmasın diye in-flight guard. UI tarafında
   /// da buton disable ediliyor; bu defansif katman.
   bool _isCreating = false;
 
-  BuildingsNotifier(this._repository) : super(const AsyncValue.loading()) {
-    loadBuildings();
+  @override
+  Future<List<BuildingEntity>> build() async {
+    return _repository.fetchBuildings();
   }
 
   Future<void> loadBuildings() async {
     state = const AsyncValue.loading();
-    try {
-      final buildings = await _repository.fetchBuildings();
-      state = AsyncValue.data(buildings);
-    } catch (e, st) {
-      state = AsyncValue.error(wrapAsyncStateError(e), st);
-    }
+    state = await AsyncValue.guard(_repository.fetchBuildings);
   }
 
   /// PATCH aidat tutarı / gün sonrası vb.: `AsyncValue.loading` atlamadan
@@ -159,7 +153,7 @@ class BuildingsNotifier
   }
 }
 
-final buildingsStoreProvider = StateNotifierProvider<BuildingsNotifier,
-    AsyncValue<List<BuildingEntity>>>(
-  (ref) => BuildingsNotifier(ref.watch(buildingRepositoryProvider)),
+final buildingsStoreProvider =
+    AsyncNotifierProvider<BuildingsNotifier, List<BuildingEntity>>(
+  BuildingsNotifier.new,
 );

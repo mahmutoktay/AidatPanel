@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
@@ -22,7 +23,22 @@ class ManagerTicketsScreen extends ConsumerStatefulWidget {
 }
 
 class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
+  final ScrollController _scrollController = ScrollController();
   String? _buildingId;
+
+  @override
+  void initState() {
+    super.initState();
+    attachPaginationScroll(_scrollController, () {
+      ref.read(ticketsNotifierProvider.notifier).loadMore();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   Future<void> _load(String buildingId) {
     return ref
@@ -114,10 +130,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
               padding: AppSizes.screenBodyScrollPadding,
               child: Column(
                 children: [
-                  Text(
-                    state.error ?? t.loadError,
-                    textAlign: TextAlign.center,
-                  ),
+                  Text(state.error ?? t.loadError, textAlign: TextAlign.center),
                   const SizedBox(height: AppSizes.spacingM),
                   FilledButton(
                     onPressed: () {
@@ -148,10 +161,17 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     }
 
     return ListView.builder(
+      controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: AppSizes.screenBodyScrollPadding,
-      itemCount: state.tickets.length,
+      itemCount: state.tickets.length + (state.isLoadingMore ? 1 : 0),
       itemBuilder: (context, i) {
+        if (i >= state.tickets.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSizes.spacingM),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
         final ticket = state.tickets[i];
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSizes.spacingM),

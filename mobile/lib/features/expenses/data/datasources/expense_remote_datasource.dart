@@ -1,21 +1,28 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/network/paginated_list_result.dart';
+import '../../../../core/network/pagination_parse.dart';
 import '../models/expense_model.dart';
 
 abstract class ExpenseDataSource {
-  Future<List<ExpenseModel>> getBuildingExpenses(
+  Future<PaginatedListResult<ExpenseModel>> getBuildingExpenses(
     String buildingId, {
     int? month,
     int? year,
     String? category,
+    String? cursor,
+    bool paginated = true,
   });
 
-  Future<List<ExpenseModel>> getMyExpenses({
+  Future<PaginatedListResult<ExpenseModel>> getMyExpenses({
     int? month,
     int? year,
     String? category,
+    String? cursor,
+    bool paginated = true,
   });
 
   Future<Map<String, dynamic>> getSummary(
@@ -52,49 +59,59 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
   final DioClient _dioClient;
 
   ExpenseRemoteDataSource({required DioClient dioClient})
-      : _dioClient = dioClient;
+    : _dioClient = dioClient;
 
   @override
-  Future<List<ExpenseModel>> getBuildingExpenses(
+  Future<PaginatedListResult<ExpenseModel>> getBuildingExpenses(
     String buildingId, {
     int? month,
     int? year,
     String? category,
+    String? cursor,
+    bool paginated = true,
   }) async {
-    final query = <String, dynamic>{};
-    if (month != null) query['month'] = month;
-    if (year != null) query['year'] = year;
-    if (category != null) query['category'] = category;
+    final query = paginatedQuery(
+      cursor: cursor,
+      limit: AppConstants.pageSize,
+      paginated: paginated,
+      extra: {
+        'month': ?month,
+        'year': ?year,
+        'category': ?category,
+      },
+    );
 
     final response = await _dioClient.get(
       ApiConstants.buildingExpenses(buildingId),
-      queryParameters: query.isEmpty ? null : query,
+      queryParameters: query,
     );
-    final data = response.data['data'] as List;
-    return data
-        .map((j) => ExpenseModel.fromJson(j as Map<String, dynamic>))
-        .toList();
+    return parsePaginatedList(response.data['data'], ExpenseModel.fromJson);
   }
 
   @override
-  Future<List<ExpenseModel>> getMyExpenses({
+  Future<PaginatedListResult<ExpenseModel>> getMyExpenses({
     int? month,
     int? year,
     String? category,
+    String? cursor,
+    bool paginated = true,
   }) async {
-    final query = <String, dynamic>{};
-    if (month != null) query['month'] = month;
-    if (year != null) query['year'] = year;
-    if (category != null) query['category'] = category;
+    final query = paginatedQuery(
+      cursor: cursor,
+      limit: AppConstants.pageSize,
+      paginated: paginated,
+      extra: {
+        'month': ?month,
+        'year': ?year,
+        'category': ?category,
+      },
+    );
 
     final response = await _dioClient.get(
       ApiConstants.myExpenses,
-      queryParameters: query.isEmpty ? null : query,
+      queryParameters: query,
     );
-    final data = response.data['data'] as List;
-    return data
-        .map((j) => ExpenseModel.fromJson(j as Map<String, dynamic>))
-        .toList();
+    return parsePaginatedList(response.data['data'], ExpenseModel.fromJson);
   }
 
   @override
@@ -163,16 +180,21 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
   }
 
   @override
-  Future<ExpenseModel> uploadReceipts(String expenseId, List<String> filePaths) async {
+  Future<ExpenseModel> uploadReceipts(
+    String expenseId,
+    List<String> filePaths,
+  ) async {
     Future<FormData> buildForm() async {
       final form = FormData();
       for (final path in filePaths) {
         final segments = path.replaceAll('\\', '/').split('/');
         final fileName = segments.isNotEmpty ? segments.last : 'receipt.jpg';
-        form.files.add(MapEntry(
-          'files',
-          await MultipartFile.fromFile(path, filename: fileName),
-        ));
+        form.files.add(
+          MapEntry(
+            'files',
+            await MultipartFile.fromFile(path, filename: fileName),
+          ),
+        );
       }
       return form;
     }

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -68,10 +67,10 @@ class NotificationsState {
   }
 }
 
-class NotificationsNotifier extends StateNotifier<NotificationsState> {
-  NotificationsNotifier(this._repository) : super(const NotificationsState());
+class NotificationsNotifier extends Notifier<NotificationsState> {
+  NotificationRepository get _repository =>
+      ref.read(notificationRepositoryProvider);
 
-  final NotificationRepository _repository;
   Timer? _badgeSyncDebounce;
 
   final Set<String> _toastedNotificationIds = {};
@@ -90,9 +89,11 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   DateTime? _lastPollAt;
 
   @override
-  void dispose() {
-    _badgeSyncDebounce?.cancel();
-    super.dispose();
+  NotificationsState build() {
+    ref.onDispose(() {
+      _badgeSyncDebounce?.cancel();
+    });
+    return const NotificationsState();
   }
 
   /// Oturum kapanınca / kullanıcı değişince toast tekrarını sıfırlar.
@@ -316,6 +317,6 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
 }
 
 final notificationsNotifierProvider =
-    StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
-  return NotificationsNotifier(ref.watch(notificationRepositoryProvider));
-});
+    NotifierProvider<NotificationsNotifier, NotificationsState>(
+  NotificationsNotifier.new,
+);

@@ -1,4 +1,5 @@
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/network/paginated_list_result.dart';
 import '../../data/datasources/expense_remote_datasource.dart';
 import '../../data/models/expense_model.dart';
 import '../../domain/entities/expense_entity.dart';
@@ -10,20 +11,27 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   ExpenseRepositoryImpl({required ExpenseDataSource remote}) : _remote = remote;
 
   @override
-  Future<List<ExpenseEntity>> getBuildingExpenses(
+  Future<PaginatedListResult<ExpenseEntity>> getBuildingExpenses(
     String buildingId, {
     int? month,
     int? year,
     String? category,
+    String? cursor,
+    bool paginated = true,
   }) async {
     try {
-      final models = await _remote.getBuildingExpenses(
+      final result = await _remote.getBuildingExpenses(
         buildingId,
         month: month,
         year: year,
         category: category,
+        cursor: cursor,
+        paginated: paginated,
       );
-      return models.map((m) => m.toEntity()).toList();
+      return PaginatedListResult(
+        items: result.items.map((m) => m.toEntity()).toList(),
+        nextCursor: result.nextCursor,
+      );
     } on ApiException {
       rethrow;
     } catch (_) {
@@ -32,18 +40,25 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
-  Future<List<ExpenseEntity>> getMyExpenses({
+  Future<PaginatedListResult<ExpenseEntity>> getMyExpenses({
     int? month,
     int? year,
     String? category,
+    String? cursor,
+    bool paginated = true,
   }) async {
     try {
-      final models = await _remote.getMyExpenses(
+      final result = await _remote.getMyExpenses(
         month: month,
         year: year,
         category: category,
+        cursor: cursor,
+        paginated: paginated,
       );
-      return models.map((m) => m.toEntity()).toList();
+      return PaginatedListResult(
+        items: result.items.map((m) => m.toEntity()).toList(),
+        nextCursor: result.nextCursor,
+      );
     } on ApiException {
       rethrow;
     } catch (_) {
@@ -77,11 +92,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     required int month,
     required int year,
   }) async {
-    final summary = await getSummary(
-      buildingId,
-      month: month,
-      year: year,
-    );
+    final summary = await getSummary(buildingId, month: month, year: year);
     return summary.byCategory.fold<int>(0, (sum, c) => sum + c.count);
   }
 
@@ -124,8 +135,9 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         expenseId,
         title: title,
         amount: amount,
-        category:
-            category != null ? ExpenseModel.categoryToApi(category) : null,
+        category: category != null
+            ? ExpenseModel.categoryToApi(category)
+            : null,
         date: date,
         note: note,
         receiptUrl: receiptUrl,
@@ -150,7 +162,10 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
-  Future<ExpenseEntity> uploadReceipts(String expenseId, List<String> filePaths) async {
+  Future<ExpenseEntity> uploadReceipts(
+    String expenseId,
+    List<String> filePaths,
+  ) async {
     try {
       final model = await _remote.uploadReceipts(expenseId, filePaths);
       return model.toEntity();
@@ -168,11 +183,13 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     if (list is List) {
       for (final item in list) {
         if (item is! Map) continue;
-        byCat.add(ExpenseCategorySummary(
-          category: ExpenseModel.parseCategoryApi('${item['category']}'),
-          amount: double.tryParse('${item['amount']}') ?? 0,
-          count: (item['count'] as num?)?.toInt() ?? 0,
-        ));
+        byCat.add(
+          ExpenseCategorySummary(
+            category: ExpenseModel.parseCategoryApi('${item['category']}'),
+            amount: double.tryParse('${item['amount']}') ?? 0,
+            count: (item['count'] as num?)?.toInt() ?? 0,
+          ),
+        );
       }
     }
     return ExpenseSummaryEntity(

@@ -1,4 +1,5 @@
 import 'package:aidatpanel/core/constants/api_constants.dart';
+import 'package:aidatpanel/core/network/paginated_list_result.dart';
 import 'package:aidatpanel/features/expenses/data/datasources/expense_remote_datasource.dart';
 import 'package:aidatpanel/features/expenses/data/models/expense_model.dart';
 import 'package:aidatpanel/features/expenses/data/repositories/expense_repository_impl.dart';
@@ -39,11 +40,7 @@ void main() {
   group('Smoke — gider özeti sayacı', () {
     test('countExpensesInMonth byCategory count toplar', () async {
       final repo = ExpenseRepositoryImpl(remote: _SummaryOnlyExpenseDs());
-      final count = await repo.countExpensesInMonth(
-        'b1',
-        month: 5,
-        year: 2026,
-      );
+      final count = await repo.countExpensesInMonth('b1', month: 5, year: 2026);
       expect(count, 3);
     });
   });
@@ -69,21 +66,23 @@ class _SummaryOnlyExpenseDs implements ExpenseDataSource {
   }
 
   @override
-  Future<List<ExpenseModel>> getBuildingExpenses(
+  Future<PaginatedListResult<ExpenseModel>> getBuildingExpenses(
     String buildingId, {
     int? month,
     int? year,
     String? category,
-  }) =>
-      throw UnimplementedError();
+    String? cursor,
+    bool paginated = true,
+  }) => throw UnimplementedError();
 
   @override
-  Future<List<ExpenseModel>> getMyExpenses({
+  Future<PaginatedListResult<ExpenseModel>> getMyExpenses({
     int? month,
     int? year,
     String? category,
-  }) =>
-      throw UnimplementedError();
+    String? cursor,
+    bool paginated = true,
+  }) => throw UnimplementedError();
 
   @override
   Future<ExpenseModel> createExpense(
@@ -92,15 +91,16 @@ class _SummaryOnlyExpenseDs implements ExpenseDataSource {
     required String category,
     required DateTime date,
     String? note,
-  }) =>
-      throw UnimplementedError();
+  }) => throw UnimplementedError();
 
   @override
   Future<void> deleteExpense(String expenseId) => throw UnimplementedError();
 
   @override
-  Future<ExpenseModel> uploadReceipts(String expenseId, List<String> filePaths) async =>
-      throw UnimplementedError();
+  Future<ExpenseModel> uploadReceipts(
+    String expenseId,
+    List<String> filePaths,
+  ) async => throw UnimplementedError();
 
   @override
   Future<ExpenseModel> updateExpense(
@@ -111,6 +111,5 @@ class _SummaryOnlyExpenseDs implements ExpenseDataSource {
     DateTime? date,
     String? note,
     String? receiptUrl,
-  }) =>
-      throw UnimplementedError();
+  }) => throw UnimplementedError();
 }

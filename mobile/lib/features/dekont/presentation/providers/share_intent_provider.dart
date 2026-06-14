@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../../../core/router/app_router.dart';
@@ -19,12 +18,20 @@ class ShareIntentState {
   const ShareIntentState();
 }
 
+class PendingDekontFileNotifier extends Notifier<Map<String, dynamic>?> {
+  @override
+  Map<String, dynamic>? build() => null;
+
+  void update(Map<String, dynamic>? file) => state = file;
+}
+
 /// Bekleyen dekont dosyasını tutan provider.
 /// Cold start'ta ShareIntentNotifier dosyayı buraya yazar,
 /// SplashScreen yönlendirmeden hemen önce kontrol eder.
 /// Warm resume'da ShareIntentNotifier hem yazar hem navigate eder.
-final pendingDekontFileProvider = StateProvider<Map<String, dynamic>?>(
-  (ref) => null,
+final pendingDekontFileProvider =
+    NotifierProvider<PendingDekontFileNotifier, Map<String, dynamic>?>(
+  PendingDekontFileNotifier.new,
 );
 
 // ---------------------------------------------------------------------------
@@ -48,12 +55,16 @@ final pendingDekontFileProvider = StateProvider<Map<String, dynamic>?>(
 ///
 /// Bu ayrım, splash'ın context.go() çağrısının push'u ezmesi sorununu
 /// kökten ortadan kaldırır.
-class ShareIntentNotifier extends StateNotifier<ShareIntentState> {
-  final Ref _ref;
+class ShareIntentNotifier extends Notifier<ShareIntentState> {
   StreamSubscription? _intentDataStreamSubscription;
 
-  ShareIntentNotifier(this._ref) : super(const ShareIntentState()) {
-    _init();
+  @override
+  ShareIntentState build() {
+    ref.onDispose(() {
+      _intentDataStreamSubscription?.cancel();
+    });
+    Future.microtask(_init);
+    return const ShareIntentState();
   }
 
   void _init() {
@@ -98,7 +109,7 @@ class ShareIntentNotifier extends StateNotifier<ShareIntentState> {
     final fileData = await _readFileToMap(files);
     if (fileData == null) return;
 
-    _ref.read(pendingDekontFileProvider.notifier).state = fileData;
+    ref.read(pendingDekontFileProvider.notifier).update(fileData);
     debugPrint(
       '[share_intent] Cold start: dosya pendingDekontFileProvider\'a '
       'yazıldı. Navigation SplashScreen\'e bırakıldı.',
@@ -113,30 +124,30 @@ class ShareIntentNotifier extends StateNotifier<ShareIntentState> {
     if (fileData == null) return;
 
     // 1. Dosyayı state'e yaz
-    _ref.read(pendingDekontFileProvider.notifier).state = fileData;
+    ref.read(pendingDekontFileProvider.notifier).update(fileData);
     debugPrint('[share_intent] Warm resume: dosya state\'e yazıldı');
 
     // 2. Auth ve rol kontrolü
-    final authState = _ref.read(authStateProvider);
+    final authState = ref.read(authStateProvider);
     if (!authState.isAuthenticated || authState.user == null) {
       debugPrint('[share_intent] Warm resume: kullanıcı giriş yapmamış.');
-      _ref.read(pendingDekontFileProvider.notifier).state = null;
+      ref.read(pendingDekontFileProvider.notifier).update(null);
       return;
     }
 
     if (authState.user!.role != UserRole.resident) {
       debugPrint('[share_intent] Warm resume: kullanıcı resident değil.');
-      _ref.read(pendingDekontFileProvider.notifier).state = null;
+      ref.read(pendingDekontFileProvider.notifier).update(null);
       return;
     }
 
     // 3. Router hazır mı kontrol et
-    final router = _ref.read(appRouterProvider);
+    final router = ref.read(appRouterProvider);
     int routerRetries = 0;
     while (router.routerDelegate.navigatorKey.currentContext == null &&
         routerRetries < 30) {
       await Future.delayed(const Duration(milliseconds: 100));
-      if (!mounted) return;
+      if (!ref.mounted) return;
       routerRetries++;
     }
 
@@ -217,16 +228,10 @@ class ShareIntentNotifier extends StateNotifier<ShareIntentState> {
       return null;
     }
   }
-
-  @override
-  void dispose() {
-    _intentDataStreamSubscription?.cancel();
-    super.dispose();
-  }
 }
 
 /// Global provider. Uygulama açılışında watch edilmeli ki dinleyici başlasın.
 final shareIntentProvider =
-    StateNotifierProvider<ShareIntentNotifier, ShareIntentState>((ref) {
-      return ShareIntentNotifier(ref);
-    });
+    NotifierProvider<ShareIntentNotifier, ShareIntentState>(
+  ShareIntentNotifier.new,
+);

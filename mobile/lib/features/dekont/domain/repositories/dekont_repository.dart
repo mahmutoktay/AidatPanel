@@ -1,3 +1,4 @@
+import '../../../../core/network/paginated_list_result.dart';
 import '../entities/dekont_entity.dart';
 import '../entities/dekont_upload_result.dart';
 import '../entities/payment_collection_entity.dart';
@@ -14,12 +15,18 @@ abstract class DekontRepository {
 
   Future<DekontEntity> getDekont(String id);
 
-  Future<List<DekontEntity>> getMyDekonts({String? status});
+  Future<PaginatedListResult<DekontEntity>> getMyDekonts({
+    String? status,
+    String? cursor,
+    bool paginated = true,
+  });
 
-  Future<List<DekontEntity>> getBuildingDekonts(
+  Future<PaginatedListResult<DekontEntity>> getBuildingDekonts(
     String buildingId, {
     String? status,
     String? apartmentId,
+    String? cursor,
+    bool paginated = true,
   });
 
   Future<DekontEntity> reviewDekont({

@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../core/utils/user_error_message.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
@@ -21,28 +20,29 @@ final apartmentRepositoryProvider = Provider<ApartmentRepository>((ref) {
   );
 });
 
-class ApartmentsNotifier
-    extends StateNotifier<AsyncValue<List<ApartmentEntity>>> {
-  final ApartmentRepository _repository;
-  final String buildingId;
+class ApartmentsNotifier extends AsyncNotifier<List<ApartmentEntity>> {
+  ApartmentsNotifier(this._buildingId);
+
+  final String _buildingId;
+
+  ApartmentRepository get _repository => ref.read(apartmentRepositoryProvider);
+
+  String get buildingId => _buildingId;
 
   /// Aynı submit'in art arda tetiklenmesini engelleyen in-flight bayrağı.
   /// UI butonu disable ediyor; bu defansif katman.
   bool _isCreating = false;
 
-  ApartmentsNotifier(this._repository, this.buildingId)
-      : super(const AsyncValue.loading()) {
-    loadApartments();
+  @override
+  Future<List<ApartmentEntity>> build() async {
+    return _repository.fetchApartments(_buildingId);
   }
 
   Future<void> loadApartments() async {
     state = const AsyncValue.loading();
-    try {
-      final apartments = await _repository.fetchApartments(buildingId);
-      state = AsyncValue.data(apartments);
-    } catch (e, st) {
-      state = AsyncValue.error(wrapAsyncStateError(e), st);
-    }
+    state = await AsyncValue.guard(
+      () => _repository.fetchApartments(_buildingId),
+    );
   }
 
   Future<void> addApartment({required String number, int? floor}) async {
@@ -50,7 +50,7 @@ class ApartmentsNotifier
     _isCreating = true;
     try {
       final apartment = await _repository.createApartment(
-        buildingId: buildingId,
+        buildingId: _buildingId,
         number: number,
         floor: floor,
       );
@@ -67,7 +67,7 @@ class ApartmentsNotifier
   /// kullanıcı tüm daire listesini kaybeder. UI snackbar gösterir.
   Future<void> removeApartment(String apartmentId) async {
     await _repository.deleteApartment(
-      buildingId: buildingId,
+      buildingId: _buildingId,
       id: apartmentId,
     );
     final current = state.value ?? [];
@@ -85,7 +85,7 @@ class ApartmentsNotifier
     int? floor,
   }) async {
     final updated = await _repository.updateApartment(
-      buildingId: buildingId,
+      buildingId: _buildingId,
       id: apartmentId,
       number: number,
       floor: floor,
@@ -106,7 +106,7 @@ class ApartmentsNotifier
   /// rethrow — UI snackbar gösterir, liste state'i bozulmaz.
   Future<void> removeResidentFromApartment(String apartmentId) async {
     final updated = await _repository.removeResident(
-      buildingId: buildingId,
+      buildingId: _buildingId,
       apartmentId: apartmentId,
     );
     final current = state.value ?? [];
@@ -116,10 +116,7 @@ class ApartmentsNotifier
   }
 }
 
-final apartmentsStoreProvider = StateNotifierProvider.family<ApartmentsNotifier,
-    AsyncValue<List<ApartmentEntity>>, String>(
-  (ref, buildingId) => ApartmentsNotifier(
-    ref.watch(apartmentRepositoryProvider),
-    buildingId,
-  ),
+final apartmentsStoreProvider = AsyncNotifierProvider.family<
+    ApartmentsNotifier, List<ApartmentEntity>, String>(
+  ApartmentsNotifier.new,
 );

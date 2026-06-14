@@ -1,24 +1,31 @@
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/network/paginated_list_result.dart';
+import '../../../../core/network/pagination_parse.dart';
 import '../models/due_model.dart';
 
 abstract class DuesRemoteDataSource {
   /// Tur 5 / §10/3 — backend `dueController.getDuesByBuildingController`
   /// `month`, `year`, `status` query parametrelerini destekler. Tüm
   /// filtreler opsiyonel ve null gelirse sunucu tüm dues'u döner.
-  Future<List<DueModel>> getBuildingDues(
+  Future<PaginatedListResult<DueModel>> getBuildingDues(
     String buildingId, {
     int? month,
     int? year,
     String? status,
+    String? cursor,
+    bool paginated = true,
   });
 
   /// Belge §7: `GET /me/dues?month=&year=&status=` — sakin tarafında
   /// aynı filtre setini kabul eder.
-  Future<List<DueModel>> getMyDues({
+  Future<PaginatedListResult<DueModel>> getMyDues({
     int? month,
     int? year,
     String? status,
+    String? cursor,
+    bool paginated = true,
   });
 
   Future<DueModel> updateDueStatus({
@@ -39,26 +46,35 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
   final DioClient _dioClient;
 
   DuesRemoteDataSourceImpl({required DioClient dioClient})
-      : _dioClient = dioClient;
+    : _dioClient = dioClient;
 
-  Map<String, dynamic>? _buildDuesQuery({
+  Map<String, dynamic> _buildDuesQuery({
     int? month,
     int? year,
     String? status,
+    String? cursor,
+    required bool paginated,
   }) {
-    final query = <String, dynamic>{};
-    if (month != null) query['month'] = month;
-    if (year != null) query['year'] = year;
-    if (status != null) query['status'] = status;
-    return query.isEmpty ? null : query;
+    return paginatedQuery(
+      cursor: cursor,
+      limit: AppConstants.pageSize,
+      paginated: paginated,
+      extra: {
+        'month': ?month,
+        'year': ?year,
+        'status': ?status,
+      },
+    );
   }
 
   @override
-  Future<List<DueModel>> getBuildingDues(
+  Future<PaginatedListResult<DueModel>> getBuildingDues(
     String buildingId, {
     int? month,
     int? year,
     String? status,
+    String? cursor,
+    bool paginated = true,
   }) async {
     final response = await _dioClient.get(
       ApiConstants.buildingDues(buildingId),
@@ -66,19 +82,20 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
         month: month,
         year: year,
         status: status,
+        cursor: cursor,
+        paginated: paginated,
       ),
     );
-    final data = response.data['data'] as List;
-    return data
-        .map((json) => DueModel.fromJson(json as Map<String, dynamic>))
-        .toList();
+    return parsePaginatedList(response.data['data'], DueModel.fromJson);
   }
 
   @override
-  Future<List<DueModel>> getMyDues({
+  Future<PaginatedListResult<DueModel>> getMyDues({
     int? month,
     int? year,
     String? status,
+    String? cursor,
+    bool paginated = true,
   }) async {
     final response = await _dioClient.get(
       ApiConstants.myDues,
@@ -86,12 +103,11 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
         month: month,
         year: year,
         status: status,
+        cursor: cursor,
+        paginated: paginated,
       ),
     );
-    final data = response.data['data'] as List;
-    return data
-        .map((json) => DueModel.fromJson(json as Map<String, dynamic>))
-        .toList();
+    return parsePaginatedList(response.data['data'], DueModel.fromJson);
   }
 
   @override

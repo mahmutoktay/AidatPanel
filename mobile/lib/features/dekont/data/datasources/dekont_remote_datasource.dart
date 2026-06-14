@@ -4,8 +4,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/network/paginated_list_result.dart';
+import '../../../../core/network/pagination_parse.dart';
 import '../../../../core/utils/upload_file_utils.dart';
 import '../../debug/dekont_debug_log.dart';
 import '../models/dekont_model.dart';
@@ -22,12 +25,18 @@ abstract class DekontRemoteDataSource {
 
   Future<DekontModel> getDekont(String id);
 
-  Future<List<DekontModel>> getMyDekonts({String? status});
+  Future<PaginatedListResult<DekontModel>> getMyDekonts({
+    String? status,
+    String? cursor,
+    bool paginated = true,
+  });
 
-  Future<List<DekontModel>> getBuildingDekonts(
+  Future<PaginatedListResult<DekontModel>> getBuildingDekonts(
     String buildingId, {
     String? status,
     String? apartmentId,
+    String? cursor,
+    bool paginated = true,
   });
 
   Future<DekontModel> reviewDekont({
@@ -44,17 +53,24 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
   final DioClient _dioClient;
 
   DekontRemoteDataSourceImpl({required DioClient dioClient})
-      : _dioClient = dioClient;
+    : _dioClient = dioClient;
 
   Map<String, dynamic>? _query({
     String? status,
     String? apartmentId,
+    String? cursor,
+    bool paginated = true,
   }) {
-    final q = <String, dynamic>{};
-    if (status != null && status.isNotEmpty) q['status'] = status;
-    if (apartmentId != null && apartmentId.isNotEmpty) {
-      q['apartmentId'] = apartmentId;
-    }
+    final q = paginatedQuery(
+      cursor: cursor,
+      limit: AppConstants.pageSize,
+      paginated: paginated,
+      extra: {
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (apartmentId != null && apartmentId.isNotEmpty)
+          'apartmentId': apartmentId,
+      },
+    );
     return q.isEmpty ? null : q;
   }
 
@@ -87,7 +103,10 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
       throw ApiException(message: 'Dosya boş');
     }
 
-    final safeName = UploadFileUtils.safeFileName(fileName, fallback: 'dekont.pdf');
+    final safeName = UploadFileUtils.safeFileName(
+      fileName,
+      fallback: 'dekont.pdf',
+    );
     final ext = UploadFileUtils.extensionFromPath(safeName);
     final mime = UploadFileUtils.mimeTypeForExtension(ext);
     if (mime == null) {
@@ -100,7 +119,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
         filename: safeName,
         contentType: DioMediaType.parse(mime),
       );
-      
+
       final formFields = <String, dynamic>{'file': filePart};
       if (dueId != null && dueId.isNotEmpty) {
         formFields['dueId'] = dueId;
@@ -147,9 +166,8 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
         return model;
       } on ApiException catch (e) {
         lastError = e;
-        final retryable = e.statusCode == 502 ||
-            e.statusCode == 503 ||
-            e is NetworkException;
+        final retryable =
+            e.statusCode == 502 || e.statusCode == 503 || e is NetworkException;
         if (!retryable || attempt >= 2) {
           dekontDebugLog(
             'datasource.uploadDekont fail',
@@ -221,10 +239,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
   }
 
   /// Upload yanıtı: `{ success, data }` veya doğrudan dekont nesnesi olabilir.
-  DekontModel _parseDekontUploadPayload(
-    dynamic raw, {
-    int? statusCode,
-  }) {
+  DekontModel _parseDekontUploadPayload(dynamic raw, {int? statusCode}) {
     final body = _decodeBody(raw);
 
     if (body['success'] == false) {
@@ -266,9 +281,9 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
     return DekontModel.fromJson(_decodeDataField(response.data));
   }
 
-  List<DekontModel> _parseDekontListResponse(dynamic raw) {
+  PaginatedListResult<DekontModel> _parseDekontListResponse(dynamic raw) {
     final body = _decodeBody(raw);
-    return DekontModel.parseList(body['data']);
+    return parsePaginatedList(body['data'], DekontModel.fromJson);
   }
 
   @override
@@ -286,16 +301,27 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
   }
 
   @override
-  Future<List<DekontModel>> getMyDekonts({String? status}) async {
+  Future<PaginatedListResult<DekontModel>> getMyDekonts({
+    String? status,
+    String? cursor,
+    bool paginated = true,
+  }) async {
     dekontDebugLog('datasource.getMyDekonts start', 'status=$status');
     try {
       final response = await _dioClient.get(
         ApiConstants.myDekonts,
-        queryParameters: _query(status: status),
+        queryParameters: _query(
+          status: status,
+          cursor: cursor,
+          paginated: paginated,
+        ),
       );
-      final list = _parseDekontListResponse(response.data);
-      dekontDebugLog('datasource.getMyDekonts ok', 'count=${list.length}');
-      return list;
+      final result = _parseDekontListResponse(response.data);
+      dekontDebugLog(
+        'datasource.getMyDekonts ok',
+        'count=${result.items.length}',
+      );
+      return result;
     } catch (e, st) {
       dekontDebugLog('datasource.getMyDekonts fail', '$e\n$st');
       rethrow;
@@ -303,10 +329,12 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
   }
 
   @override
-  Future<List<DekontModel>> getBuildingDekonts(
+  Future<PaginatedListResult<DekontModel>> getBuildingDekonts(
     String buildingId, {
     String? status,
     String? apartmentId,
+    String? cursor,
+    bool paginated = true,
   }) async {
     dekontDebugLog('datasource.getBuildingDekonts start', {
       'buildingId': buildingId,
@@ -316,11 +344,19 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
     try {
       final response = await _dioClient.get(
         ApiConstants.buildingDekonts(buildingId),
-        queryParameters: _query(status: status, apartmentId: apartmentId),
+        queryParameters: _query(
+          status: status,
+          apartmentId: apartmentId,
+          cursor: cursor,
+          paginated: paginated,
+        ),
       );
-      final list = _parseDekontListResponse(response.data);
-      dekontDebugLog('datasource.getBuildingDekonts ok', 'count=${list.length}');
-      return list;
+      final result = _parseDekontListResponse(response.data);
+      dekontDebugLog(
+        'datasource.getBuildingDekonts ok',
+        'count=${result.items.length}',
+      );
+      return result;
     } catch (e, st) {
       dekontDebugLog('datasource.getBuildingDekonts fail', '$e\n$st');
       rethrow;
@@ -349,7 +385,10 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
         data: body,
       );
       final model = _parseDekontModel(response);
-      dekontDebugLog('datasource.reviewDekont ok', '${model.id} ${model.status}');
+      dekontDebugLog(
+        'datasource.reviewDekont ok',
+        '${model.id} ${model.status}',
+      );
       return model;
     } catch (e, st) {
       dekontDebugLog('datasource.reviewDekont fail', '$e\n$st');
@@ -358,7 +397,10 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
   }
 
   @override
-  Future<List<int>> getDekontFileBytes(String id, {bool download = false}) async {
+  Future<List<int>> getDekontFileBytes(
+    String id, {
+    bool download = false,
+  }) async {
     dekontDebugLog('datasource.getDekontFileBytes start', {
       'id': id,
       'download': download,
@@ -387,10 +429,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
         }
         final asJson = _tryParseJsonErrorBytes(bytes);
         if (asJson != null) {
-          throw ApiException(
-            message: asJson,
-            statusCode: response.statusCode,
-          );
+          throw ApiException(message: asJson, statusCode: response.statusCode);
         }
         dekontDebugLog(
           'datasource.getDekontFileBytes ok',
@@ -399,9 +438,9 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
         return bytes;
       } on ApiException catch (e) {
         lastError = e;
-        final retryable = e.statusCode == 503 ||
-            (e.statusCode == 404 &&
-                _hasFilePendingMessage(e.message));
+        final retryable =
+            e.statusCode == 503 ||
+            (e.statusCode == 404 && _hasFilePendingMessage(e.message));
         if (!retryable || attempt >= 2) {
           dekontDebugLog('datasource.getDekontFileBytes fail', e.message);
           rethrow;

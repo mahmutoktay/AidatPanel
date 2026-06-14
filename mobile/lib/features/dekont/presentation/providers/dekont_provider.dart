@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
-
 import '../../../../core/utils/api_user_message.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
@@ -18,9 +16,7 @@ import '../../data/dekont_preview_cache.dart';
 import '../../data/repositories/dekont_repository_impl.dart';
 
 final dekontRemoteDataSourceProvider = Provider<DekontRemoteDataSource>((ref) {
-  return DekontRemoteDataSourceImpl(
-    dioClient: ref.watch(dioClientProvider),
-  );
+  return DekontRemoteDataSourceImpl(dioClient: ref.watch(dioClientProvider));
 });
 
 final dekontRepositoryProvider = Provider<DekontRepository>((ref) {
@@ -31,18 +27,30 @@ final dekontRepositoryProvider = Provider<DekontRepository>((ref) {
 
 /// Yükleme sonrası yerel önizleme — sunucu dosyası henüz hazır değilse kullanılır.
 /// autoDispose kullanılmaz; detay ekranına geçince önbellek silinmesin.
-final dekontLocalPreviewProvider =
-    StateProvider<Map<String, Uint8List>>((ref) => {});
+class DekontLocalPreviewNotifier extends Notifier<Map<String, Uint8List>> {
+  @override
+  Map<String, Uint8List> build() => {};
 
+  void upsert(String dekontId, Uint8List bytes) {
+    state = {...state, dekontId: bytes};
+  }
+
+  void clearAll() => state = {};
+}
+
+final dekontLocalPreviewProvider =
+    NotifierProvider<DekontLocalPreviewNotifier, Map<String, Uint8List>>(
+  DekontLocalPreviewNotifier.new,
+);
 final paymentCollectionProvider =
     FutureProvider.autoDispose<PaymentCollectionEntity>((ref) async {
-  return ref.watch(dekontRepositoryProvider).getPaymentCollection();
-});
+      return ref.watch(dekontRepositoryProvider).getPaymentCollection();
+    });
 
-final dekontDetailProvider =
-    FutureProvider.autoDispose.family<DekontEntity, String>((ref, id) async {
-  return ref.watch(dekontRepositoryProvider).getDekont(id);
-});
+final dekontDetailProvider = FutureProvider.autoDispose
+    .family<DekontEntity, String>((ref, id) async {
+      return ref.watch(dekontRepositoryProvider).getDekont(id);
+    });
 
 class MakePaymentState {
   final bool isLoadingInfo;
@@ -91,9 +99,15 @@ class MakePaymentState {
       isUploading: isUploading ?? this.isUploading,
       collection: collection ?? this.collection,
       selectedDueId: selectedDueId ?? this.selectedDueId,
-      pickedFileName: clearFile ? null : (pickedFileName ?? this.pickedFileName),
-      pickedFileBytes: clearFile ? null : (pickedFileBytes ?? this.pickedFileBytes),
-      pickedFilePath: clearFile ? null : (pickedFilePath ?? this.pickedFilePath),
+      pickedFileName: clearFile
+          ? null
+          : (pickedFileName ?? this.pickedFileName),
+      pickedFileBytes: clearFile
+          ? null
+          : (pickedFileBytes ?? this.pickedFileBytes),
+      pickedFilePath: clearFile
+          ? null
+          : (pickedFilePath ?? this.pickedFilePath),
       uploadedDekont: uploadedDekont ?? this.uploadedDekont,
       uploadWasDuplicate: uploadWasDuplicate ?? this.uploadWasDuplicate,
       uploadWasRecovered: uploadWasRecovered ?? this.uploadWasRecovered,
@@ -108,23 +122,17 @@ Future<void> _cacheLocalPreview(
   List<int> bytes,
 ) async {
   final copy = Uint8List.fromList(bytes);
-  ref.read(dekontLocalPreviewProvider.notifier).update(
-        (cache) => {
-          ...cache,
-          dekontId: copy,
-        },
-      );
+  ref.read(dekontLocalPreviewProvider.notifier).upsert(dekontId, copy);
   await DekontPreviewCache.save(dekontId, copy);
 }
 
-class MakePaymentNotifier extends StateNotifier<MakePaymentState> {
-  final DekontRepository _repository;
-  final Ref _ref;
+class MakePaymentNotifier extends Notifier<MakePaymentState> {
+  DekontRepository get _repository => ref.read(dekontRepositoryProvider);
+
   bool _isUploading = false;
 
-  MakePaymentNotifier(this._repository, this._ref)
-      : super(const MakePaymentState());
-
+  @override
+  MakePaymentState build() => const MakePaymentState();
   /// Detay ekranına geçildiğinde veya ödeme ekranına dönüldüğünde yükleme kilidini kaldırır.
   void endUploadSession() {
     _isUploading = false;
@@ -190,7 +198,11 @@ class MakePaymentNotifier extends StateNotifier<MakePaymentState> {
     if (bytes == null || bytes.isEmpty || name == null) {
       state = state.copyWith(
         error: LocaleSettings
-            .instance.currentTranslations.features.dekont.errorNoFileSelected,
+            .instance
+            .currentTranslations
+            .features
+            .dekont
+            .errorNoFileSelected,
       );
       return null;
     }
@@ -213,8 +225,8 @@ class MakePaymentNotifier extends StateNotifier<MakePaymentState> {
         dueId: state.selectedDueId,
       );
       final dekont = result.dekont;
-      await _cacheLocalPreview(_ref, dekont.id, bytes);
-      _ref.invalidate(myDekontsNotifierProvider);
+      await _cacheLocalPreview(ref, dekont.id, bytes);
+      ref.invalidate(myDekontsNotifierProvider);
       state = state.copyWith(
         isUploading: false,
         uploadedDekont: dekont,
@@ -227,8 +239,8 @@ class MakePaymentNotifier extends StateNotifier<MakePaymentState> {
       return dekont;
     } on DuplicateDekontException catch (e) {
       dekontDebugLog('provider.upload duplicate', e.dekont.id);
-      await _cacheLocalPreview(_ref, e.dekont.id, bytes);
-      _ref.invalidate(myDekontsNotifierProvider);
+      await _cacheLocalPreview(ref, e.dekont.id, bytes);
+      ref.invalidate(myDekontsNotifierProvider);
       state = state.copyWith(
         isUploading: false,
         uploadedDekont: e.dekont,
@@ -252,141 +264,220 @@ class MakePaymentNotifier extends StateNotifier<MakePaymentState> {
 }
 
 final makePaymentNotifierProvider =
-    StateNotifierProvider.autoDispose<MakePaymentNotifier, MakePaymentState>(
-  (ref) => MakePaymentNotifier(ref.watch(dekontRepositoryProvider), ref),
+    NotifierProvider.autoDispose<MakePaymentNotifier, MakePaymentState>(
+  MakePaymentNotifier.new,
 );
-
 class MyDekontsState {
   final bool isLoading;
+  final bool isLoadingMore;
   final List<DekontEntity> dekonts;
   final String? statusFilter;
+  final String? nextCursor;
   final String? error;
 
   const MyDekontsState({
     this.isLoading = false,
+    this.isLoadingMore = false,
     this.dekonts = const [],
     this.statusFilter,
+    this.nextCursor,
     this.error,
   });
 
+  bool get canLoadMore =>
+      nextCursor != null &&
+      nextCursor!.isNotEmpty &&
+      !isLoading &&
+      !isLoadingMore;
+
   MyDekontsState copyWith({
     bool? isLoading,
+    bool? isLoadingMore,
     List<DekontEntity>? dekonts,
     String? statusFilter,
+    String? nextCursor,
     String? error,
     bool clearError = false,
+    bool clearNextCursor = false,
   }) {
     return MyDekontsState(
       isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       dekonts: dekonts ?? this.dekonts,
       statusFilter: statusFilter ?? this.statusFilter,
+      nextCursor: clearNextCursor ? null : (nextCursor ?? this.nextCursor),
       error: clearError ? null : (error ?? this.error),
     );
   }
 }
 
-class MyDekontsNotifier extends StateNotifier<MyDekontsState> {
-  final DekontRepository _repository;
+class MyDekontsNotifier extends Notifier<MyDekontsState> {
+  DekontRepository get _repository => ref.read(dekontRepositoryProvider);
 
-  MyDekontsNotifier(this._repository) : super(const MyDekontsState());
-
-  Future<void> load({String? status}) async {
+  @override
+  MyDekontsState build() => const MyDekontsState();
+  Future<void> load({String? status, bool refresh = true}) async {
+    final effectiveRefresh = refresh || state.statusFilter != status;
+    if (!effectiveRefresh && !state.canLoadMore) return;
     dekontDebugLog('provider.myDekonts.load', 'status=$status');
     state = state.copyWith(
-      isLoading: true,
+      isLoading: effectiveRefresh,
+      isLoadingMore: !effectiveRefresh,
       statusFilter: status,
       clearError: true,
+      clearNextCursor: effectiveRefresh,
     );
     try {
-      final list = await _repository.getMyDekonts(status: status);
-      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      dekontDebugLog('provider.myDekonts.ok', 'count=${list.length}');
-      state = state.copyWith(isLoading: false, dekonts: list);
+      final result = await _repository.getMyDekonts(
+        status: status,
+        cursor: effectiveRefresh ? null : state.nextCursor,
+      );
+      final merged = effectiveRefresh
+          ? result.items
+          : [...state.dekonts, ...result.items];
+      dekontDebugLog('provider.myDekonts.ok', 'count=${merged.length}');
+      state = state.copyWith(
+        isLoading: false,
+        isLoadingMore: false,
+        dekonts: merged,
+        nextCursor: result.nextCursor,
+      );
     } catch (e, st) {
       dekontDebugLog('provider.myDekonts.fail', '$e\n$st');
       state = state.copyWith(
         isLoading: false,
+        isLoadingMore: false,
         error: userFacingError(e, context: ApiMessageContext.dekont),
       );
     }
   }
+
+  Future<void> loadMore() => load(status: state.statusFilter, refresh: false);
 }
 
 final myDekontsNotifierProvider =
-    StateNotifierProvider.autoDispose<MyDekontsNotifier, MyDekontsState>(
-  (ref) => MyDekontsNotifier(ref.watch(dekontRepositoryProvider)),
+    NotifierProvider.autoDispose<MyDekontsNotifier, MyDekontsState>(
+  MyDekontsNotifier.new,
 );
-
 class ManagerDekontsState {
   final bool isLoading;
+  final bool isLoadingMore;
   final List<DekontEntity> dekonts;
   final String? statusFilter;
+  final String? nextCursor;
   final String? error;
   final String? reviewError;
 
   const ManagerDekontsState({
     this.isLoading = false,
+    this.isLoadingMore = false,
     this.dekonts = const [],
     this.statusFilter,
+    this.nextCursor,
     this.error,
     this.reviewError,
   });
 
+  bool get canLoadMore =>
+      nextCursor != null &&
+      nextCursor!.isNotEmpty &&
+      !isLoading &&
+      !isLoadingMore;
+
   ManagerDekontsState copyWith({
     bool? isLoading,
+    bool? isLoadingMore,
     List<DekontEntity>? dekonts,
     String? statusFilter,
+    String? nextCursor,
     String? error,
     String? reviewError,
     bool clearError = false,
     bool clearReviewError = false,
+    bool clearNextCursor = false,
   }) {
     return ManagerDekontsState(
       isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       dekonts: dekonts ?? this.dekonts,
       statusFilter: statusFilter ?? this.statusFilter,
+      nextCursor: clearNextCursor ? null : (nextCursor ?? this.nextCursor),
       error: clearError ? null : (error ?? this.error),
       reviewError: clearReviewError ? null : (reviewError ?? this.reviewError),
     );
   }
 }
 
-class ManagerDekontsNotifier extends StateNotifier<ManagerDekontsState> {
-  final DekontRepository _repository;
+class ManagerDekontsNotifier extends Notifier<ManagerDekontsState> {
+  DekontRepository get _repository => ref.read(dekontRepositoryProvider);
+
   bool _isReviewing = false;
+  String? _buildingId;
+  String? _apartmentId;
 
-  ManagerDekontsNotifier(this._repository) : super(const ManagerDekontsState());
-
+  @override
+  ManagerDekontsState build() => const ManagerDekontsState();
   Future<void> loadBuilding(
     String buildingId, {
     String? status,
     String? apartmentId,
+    bool refresh = true,
   }) async {
+    final effectiveRefresh =
+        refresh ||
+        _buildingId != buildingId ||
+        _apartmentId != apartmentId ||
+        state.statusFilter != status;
+    if (!effectiveRefresh && !state.canLoadMore) return;
+    _buildingId = buildingId;
+    _apartmentId = apartmentId;
     dekontDebugLog('provider.managerDekonts.load', {
       'buildingId': buildingId,
       'status': status,
     });
     state = state.copyWith(
-      isLoading: true,
+      isLoading: effectiveRefresh,
+      isLoadingMore: !effectiveRefresh,
       statusFilter: status,
       clearError: true,
+      clearNextCursor: effectiveRefresh,
     );
     try {
-      final list = await _repository.getBuildingDekonts(
+      final result = await _repository.getBuildingDekonts(
         buildingId,
         status: status,
         apartmentId: apartmentId,
+        cursor: effectiveRefresh ? null : state.nextCursor,
       );
-      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      dekontDebugLog('provider.managerDekonts.ok', 'count=${list.length}');
-      state = state.copyWith(isLoading: false, dekonts: list);
+      final merged = effectiveRefresh
+          ? result.items
+          : [...state.dekonts, ...result.items];
+      dekontDebugLog('provider.managerDekonts.ok', 'count=${merged.length}');
+      state = state.copyWith(
+        isLoading: false,
+        isLoadingMore: false,
+        dekonts: merged,
+        nextCursor: result.nextCursor,
+      );
     } catch (e, st) {
       dekontDebugLog('provider.managerDekonts.fail', '$e\n$st');
       state = state.copyWith(
         isLoading: false,
+        isLoadingMore: false,
         error: userFacingError(e, context: ApiMessageContext.dekont),
       );
     }
+  }
+
+  Future<void> loadMore() {
+    final id = _buildingId;
+    if (id == null || id.isEmpty) return Future.value();
+    return loadBuilding(
+      id,
+      status: state.statusFilter,
+      apartmentId: _apartmentId,
+      refresh: false,
+    );
   }
 
   Future<bool> review({
@@ -428,6 +519,6 @@ class ManagerDekontsNotifier extends StateNotifier<ManagerDekontsState> {
 }
 
 final managerDekontsNotifierProvider =
-    StateNotifierProvider.autoDispose<ManagerDekontsNotifier, ManagerDekontsState>(
-  (ref) => ManagerDekontsNotifier(ref.watch(dekontRepositoryProvider)),
+    NotifierProvider.autoDispose<ManagerDekontsNotifier, ManagerDekontsState>(
+  ManagerDekontsNotifier.new,
 );

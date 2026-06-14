@@ -41,6 +41,20 @@ android {
         versionName = flutter.versionName
     }
 
+    flavorDimensions += "env"
+    productFlavors {
+        // Çalıştırma: flutter run --flavor dev -t lib/main_dev.dart
+        create("dev") {
+            dimension = "env"
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "Aidat Paneli Dev")
+        }
+        create("prod") {
+            dimension = "env"
+            resValue("string", "app_name", "Aidat Paneli")
+        }
+    }
+
     signingConfigs {
         if (keystorePropertiesFile.exists()) {
             create("release") {
@@ -65,6 +79,7 @@ android {
 
             // Release çökme (R8 + reflection): minify kapalı. APK ve appbundle aynı release tipi.
             // Minify tekrar açılacaksa proguard-rules.pro + check_plugin_registrant + cihaz smoke zorunlu.
+            // Obfuscation notu: flutter build appbundle --release --obfuscate --split-debug-info=build/debug-info
             isMinifyEnabled = false
             isShrinkResources = false
         }

@@ -1,190 +1,91 @@
 # AidatPanel — Yol Haritası ve Faz Durumu
 
-**Tek kaynak:** Tüm fazlar, checklist, onaylar, eksikler ve mimari özeti (Mobil + Backend) bu dosyada.  
-**Güncelleme:** 2026-06-13 (Reports → FAZ 4) · **Branch:** `mobile/app` & `backend` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
+**Tek kaynak:** Fazlar, checklist, onaylar ve eksikler (Mobil + Backend).  
+**Güncelleme:** 2026-06-14 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
 
 **AI asistanlar** her oturumda bu dosyayı okur; yalnızca **AKTİF** fazda kod yazar (`CLAUDE.md` faz kapısı).
-
----
-
-## MEVCUT DURUM (özet)
-
-| Faz | Konu                            | Durum       | Hedef      | ONAY          |
-| --- | ------------------------------- | ----------- | ---------- | ------------- |
-| 0   | Foundation                      | ✅ Tamam    | —          | ✅            |
-| 1   | Aidat + Dashboard + Tur 5       | ✅ Tamam    | 2026-05-15 | ✅ 2026-05-10 |
-| 2   | Bildirimler + Giderler          | ✅ Tamam    | 2026-06-05 | ✅ 2026-05-29 |
-| 3   | Tickets + Dekont/IBAN           | ✅ Tamam    | —          | ✅ 2026-06-02 |
-| 4   | Profil + Reports (PDF)          | ✅ Tamam    | 2026-07-03 | ✅ 2026-06-13 |
-| 5   | Test + Sertleştirme (Fullstack) | ▶ **AKTİF** | 2026-07-10 | —             |
-| 6   | Subscription (Lansman Öncesi)   | 🔒 Kilitli  | 2026-07-12 | —             |
-| 7   | v1.0.0 Lansman                  | 🔒 Kilitli  | 2026-07-14 | —             |
-
-```
-▶ AKTİF ÇALIŞMA: FAZ 5 — Test + Sertleştirme (upload Dio ✅ sıradaki: pagination / testler)
-▶ FAZ 4: kapalı (ONAY ✅ 2026-06-13)
-▶ FAZ 0–4: kapalı
-```
-
-**Sıradaki işler (FAZ 5):**
-
-- [x] Upload için ayrı Dio instance (`_uploadDio`, 3 dk timeout)
-- [ ] Pagination (büyük listeler)
-- [ ] Mobil unit/widget testleri
-- [ ] Certificate pinning
-
-**Tamamlanan (FAZ 4):**
-
-- [x] Gider makbuz **dosya** upload (`POST /expenses/{id}/proof`) — FAZ 2 kalıntısı
-- [x] **FAZ 4 (Backend)** — `logout` endpoint'inde FCM token temizleme
-- [x] **FAZ 4 (Mobil)** — Canlı E2E + ONAY (profil/dil/abonelik okuma)
-
-- [ ] FAZ 5–7 (test, abonelik, store) — FAZ 4 tamamlanınca
 
 **Referanslar:** API + bildirim → `resources/AIDATPANEL.md` · Backend → `backend/README.md` · Dev → `flutter run -t lib/main_dev.dart`
 
 ---
 
-## FAZ 0 — Foundation
+## Faz özeti
 
-**Durum:** TAMAMLANDI ✅  
-**ONAY: Furkan ✅**
+| Faz | Konu | Durum | Hedef | ONAY |
+| --- | --- | --- | --- | --- |
+| 0 | Foundation | ✅ | — | ✅ |
+| 1 | Aidat + Dashboard + Tur 5 | ✅ | 2026-05-15 | ✅ 2026-05-10 |
+| 2 | Bildirimler + Giderler | ✅ | 2026-06-05 | ✅ 2026-05-29 |
+| 3 | Tickets + Dekont/IBAN | ✅ | — | ✅ 2026-06-02 |
+| 4 | Profil + Reports (PDF) | ✅ | 2026-07-03 | ✅ 2026-06-13 |
+| 5 | Test + Sertleştirme | ✅ | 2026-07-10 | ✅ 2026-06-14 |
+| **6** | **Subscription** | **▶ AKTİF** | 2026-07-12 | — |
+| 7 | v1.0.0 Lansman | 🔒 | 2026-07-14 | — |
 
-### Auth (Mobil + Backend)
-
-- [x] Login (email + şifre, JWT token alma)
-- [x] SignUp — birleşik kayıt (`sign_up_screen.dart`: yönetici + sakin davet kodu; `/sign-up`, `/register`, `/join`)
-- [x] Register (yönetici kaydı) — SignUp ile birleşik
-- [x] Join (davet koduyla sakin kaydı) — SignUp ile birleşik
-- [x] Şifremi unuttum + sıfırlama (`forgot_password_screen`, `reset_password_screen`)
-- [x] Token refresh (otomatik, 401'de devreye girer)
-- [x] Logout (token temizleme + FCM token sıfırlama)
-- [x] Splash screen (role-based routing: manager / resident)
-
-### Buildings & Apartments
-
-- [x] Bina listeleme, oluşturma (AddBuildingScreen)
-- [x] Davet kodu üretme ve görüntüleme (InviteCodeScreen)
-- [x] Sakin listesi görüntüleme (BuildingResidentsScreen)
-- [x] Daire listeleme, oluşturma ve silme, sakin atama
-- [x] Manager / Resident Dashboard ekranları
-
-### Güvenlik (Mobil + Backend)
-
-- [x] JWT access + refresh token yönetimi (`refreshTokenVersion` tabanlı)
-- [x] flutter_secure_storage (Android: EncryptedSharedPreferences, iOS: Keychain)
-- [x] KVKK Soft Delete (DB `deletedAt` alanı)
-- [x] HTTPS zorlaması & LogInterceptor (kDebugMode)
-- [x] Input validation (Zod backend, Flutter validatorler)
-- [x] Rate Limiting (4 katmanlı API koruması)
-
-### i18n & Core Altyapı
-
-- [x] Slang (TR + EN), Runtime dil değiştirme, SecureStorage kalıcılığı
-- [x] Clean Architecture (domain / data / presentation) (Mobil)
-- [x] Service-Controller ayrımı (Backend)
-- [x] Riverpod 2.5 (StateNotifier pattern)
-- [x] GoRouter 13 (auth guard, role-based redirect)
-- [x] Prisma Schema (15 model, 17+ index, PostgreSQL/Neon)
+```
+▶ ŞU AN: FAZ 6 — Subscription (RevenueCat webhook + satın alma)
+▶ FAZ 0–5: kapalı (onaylı)
+▶ FAZ 7: kilitli
+```
 
 ---
 
-## FAZ 1 — Dues (Aidat) + Dashboard ✅ TAMAMLANDI
+## ✅ FAZ 5 — Hardening + Testing (TAMAMLANDI)
 
-**Durum:** TAMAMLANDI ✅
-**Tamamlanma:** 2026-05-10
-**ONAY: Furkan ✅** (Tur 1 + Tur 2 + Tur 3 + Tur 4 dahil)
+**ONAY: Furkan ✅** (2026-06-14)
 
-### Dues (features/dues/)
+### Sıradaki işler
 
-- [x] DueEntity tanımı, DueModel (JSON serialization)
-- [x] DuesRemoteDataSource (GET bina aidat listesi, GET sakin kendi aidatları, PATCH ödeme durumu, PATCH aidat tutarı güncelleme)
-- [x] DuesRepository + impl, DuesNotifier (Riverpod StateNotifier)
-- [x] Yönetici & Sakin ekranları (filtreleme, manuel durum güncelleme, geçmiş)
-- [x] Dashboard summary card'ları tam ekran taşıması
+| # | Görev | Platform | Durum |
+| --- | --- | --- | --- |
+| 1 | Upload ayrı Dio (`_uploadDio`, 3 dk timeout) | Mobil | [x] |
+| 2 | Pagination (dues, tickets, expenses, dekonts) | Fullstack | [x] |
+| 3 | Mobil testler (auth, Dio, widget, integration iskelet) | Mobil | [x] |
+| 4 | Certificate pinning (`api.aidatpanel.com` SHA-256) | Mobil | [x] |
+| 5 | Build flavors (`dev` / `prod`) + obfuscation notu | Mobil | [x] |
 
-### Faz 2 Öncesi Kritik Düzeltmeler & Tur Notları
+### Mobil
 
-- [x] Oturum kalıcılığı (cold start restoreSession)
-- [x] Geri tuşu uygulamayı kapatmaz (Android moveTaskToBack)
-- [x] Tur 1: `PATCH /buildings/{buildingId}/dues/{dueId}/status` migrasyonu
-- [x] Tur 2: `ApartmentModel` resident alanının parse edilmesi (isOccupied)
-- [x] Tur 3: Bina ve daire CRUD UI tamamlanması (EditBuilding, EditApartment, DeleteDialog)
-- [x] Tur 4: Submit Guard (rapid-tap koruması)
-- [x] Tur 5 (Backend Uyum): Sakin çıkarma UI, Bina formu uyumu, Server-side dues filter, Şifre değiştir UI, Hesabı kapat UI (KVKK), Şifremi unuttum akışı.
+- [x] Certificate pinning (`certificate_pinning.dart` + DioClient)
+- [x] Build flavors (`dev` / `prod`) — `--flavor dev` · release: `--obfuscate --split-debug-info`
+- [x] Unit testleri (Auth provider, DioClient)
+- [x] Widget test (LoginScreen smoke)
+- [x] Integration test iskeleti (`integration_test/login_dashboard_test.dart`)
+- [x] `StateNotifier` → `Notifier` migration (Riverpod 3.x — FAZ 6 öncesi plan)
+- [x] Upload ayrı Dio instance
+- [x] Pagination (dues, tickets, expenses, dekonts + notifications)
 
----
+### Backend (tamamlandı)
 
-## ✅ FAZ 2 — Notifications + Expenses (TAMAMLANDI)
-
-**Durum:** TAMAMLANDI ✅ — bildirimler + gider CRUD + özet + `receiptUrl` (E2E 2026-05-29)  
-**Tamamlanma:** 2026-05-29  
-**Hedef:** ~2026-06-05
-
-### Backend bağımlılık
-
-| Uç                                             | Durum        |
-| ---------------------------------------------- | ------------ |
-| `PUT /me/fcm-token`                            | ✅ canlı     |
-| `GET /notifications`, `PATCH read`, `read-all` | ✅ canlı E2E |
-| Gider CRUD + `receiptUrl` (HTTPS)              | ✅ canlı E2E |
-| `POST /expenses/{id}/proof` (dosya)            | ✅ canlı E2E |
-
-### Notifications (`features/notifications/`)
-
-- [x] NotificationEntity, listesi, detay sheet
-- [x] FCM + `notification_payload` deep-link
-- [x] **Backend API** — `GET/PATCH /notifications` + push servisi
-
-### Expenses (`features/expenses/`)
-
-- [x] ExpenseEntity, gider listesi + form (kategori, tutar, tarih, not)
-- [x] **Makbuz `receiptUrl`** — HTTPS URL ile create/update
-- [x] **Makbuz dosya upload** — `POST /expenses/{id}/proof` (multipart, OCR)
+- [x] `validate.js` feature bazlı modüllere bölündü (`src/validators/`)
+- [x] `authControllers.js` → `authService.js` taşındı
+- [x] Rate limit (`authLimiter`) hesap bazlı key
+- [x] Backend Jest unit test altyapısı (`npm test` — 24 test)
+- [x] Aidat yaşam döngüsü: yeni daire aidatı, `POST /dues/bulk`, otomatik OVERDUE job
+- [x] `meService.js` refactor (236 satır → `services/me/` modülleri)
+- [x] `Expense.updatedAt` — migration (`20260613120000_expense_updated_at`)
+- [x] OCR ölçekleme — gider makbuz OCR dekont pipeline kuyruğuna alındı (`expenseOcrService.js`)
+- [x] Jest kapsamı genişletildi (`meProfileHelpers`, `expenseOcrService`, `reportAggregation` vb.)
+- [x] VPS deploy scriptleri (`backend/scripts/deploy.ps1`)
 
 ---
 
-## ✅ FAZ 3 — Tickets + Dekont/IBAN (TAMAMLANDI)
+## FAZ 4 — Profil + Reports (PDF) ✅
 
-**Durum:** TAMAMLANDI ✅ (2026-06-02)  
-**ONAY: Furkan ✅** (2026-06-02)
-
-> **Reports:** FAZ 3'te ertelendi (2026-06-02) → **FAZ 4'e taşındı** (2026-06-13).
-
-### Tickets (features/tickets/)
-
-- [x] Tüm Ticket uçları (canlı E2E)
-- [x] Ticket listesi, detay, oluşturma formu
-
-### Dekont + tahsilat IBAN
-
-- **Backend Pipeline**: Dosya yükleme → Hash duplicate koruması → Validation → Tesseract OCR → Business Rules → Auto-apply (veya Needs Review). Çok iyi entegre edilmiş, sağlam altyapı.
-- [x] **M3** Tahsilat / IBAN tanımlama (Yönetici)
-- [x] **M4** Ödeme yap + dekont yükle (Sakin) — `file_picker`, multipart POST
-- [x] **M5** Dekontlarım (Sakin) — durum detayları (`MATCHED`, `REJECTED`, vs.)
-- [x] **M6** Dekont inceleme (Yönetici) — `PATCH /dekonts/:id/review` `APPROVE` / `REJECT`
-- [x] **FCM** push bildirimleri (dekont durumları)
-
----
-
-## ▶ FAZ 4 — Profil + Reports (PDF) ✅ TAMAMLANDI
-
-**Durum:** TAMAMLANDI ✅  
-**Tamamlanma:** 2026-06-13  
 **ONAY: Furkan ✅** (2026-06-13)
 
-### Profil & Diğer Eksikler ✅
+### Profil
 
 - [x] Profil bilgileri ekranı (`GET /me`, `PUT /me` name/email/phone)
 - [x] `PUT /me/language` (Dil seçimi sunucu senkronu)
 - [x] "Diğer cihazlardan çıkış" (`POST /auth/logout-all-devices` + WebSocket `force_logout`)
-- [x] **Backend Bug Fix**: `POST /auth/logout` FCM token'ını silecek şekilde güncellendi
-- [x] Gider makbuz **dosya** upload (`POST /expenses/{id}/proof`) — Tamamlandı
+- [x] `POST /auth/logout` FCM token temizliği
+- [x] Gider makbuz dosya upload (`POST /expenses/{id}/proof`)
 - [x] Canlı E2E — profil güncelleme + dil senkronu
 
-### Reports (`features/reports/` + backend) — öncelik sırası
+### Reports (`features/reports/` + backend)
 
-**API sözleşmesi:**
+**API:**
 
 ```
 GET /api/v1/buildings/:id/reports?type=monthly&month=6&year=2026
@@ -192,128 +93,185 @@ GET /api/v1/buildings/:id/reports?type=annual&year=2026
 → Content-Type: application/pdf
 ```
 
-**Veri kaynakları:** `Building`, `Apartment`, `User`, `Due`, `Expense` (+ mevcut `expenses/summary`), `Ticket`, `Dekont`, `Notification`(ANNOUNCEMENT sayısı).
+| Öncelik | Görev | Platform | Durum |
+| --- | --- | --- | --- |
+| P1 | `reportDataService.js` — aidat/gider/doluluk özeti | Backend | [x] |
+| P2 | `reportPdfService.js` — aylık PDF (50+ yaş TR) | Backend | [x] |
+| P2 | Route + controller + Zod; yönetici bina sahipliği | Backend | [x] |
+| P3 | `features/reports/` — indirme + paylaşma | Mobil | [x] |
+| P3 | Bina menüsünden «Rapor indir» (ay seçici) | Mobil | [x] |
+| P4 | Yıllık PDF — 12 aylık tablo | Backend | [x] |
+| P5 | Operasyonel ek (ticket, dekont, duyuru sayıları) | Backend | [x] |
+| P5 | Jest: `reportAggregation` testleri | Backend | [x] |
+| P5 | Canlı E2E — aylık + yıllık PDF önizleme + paylaş | Fullstack | [x] |
 
-| Öncelik | Görev                                                                                                                                             | Platform  | Durum |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----- |
-| **P1**  | `reportDataService.js` — dönem aidat özeti (beklenen/tahsil/geciken/muaf), daire satır listesi, gider özeti (`expenses/summary` mantığı), doluluk | Backend   | [x]   |
-| **P2**  | `reportPdfService.js` — aylık PDF şablonu (kapak özeti + aidat tablosu + gider dökümü); 50+ yaş: büyük punto, sade TR                             | Backend   | [x]   |
-| **P2**  | Route + controller + Zod (`type`, `month`, `year`); yönetici bina sahipliği kontrolü                                                              | Backend   | [x]   |
-| **P3**  | `features/reports/` — datasource/repository/provider; PDF binary indirme + paylaşma                                                               | Mobil     | [x]   |
-| **P3**  | Giriş noktası: bina detayı veya gider ekranından «Aylık rapor indir» (ay seçici)                                                                  | Mobil     | [x]   |
-| **P4**  | Yıllık PDF — 12 aylık tahsil/gider/net tablosu + yıllık kategori özeti                                                                            | Backend   | [x]   |
-| **P5**  | Operasyonel ek: ticket sayıları, dekont özeti, duyuru sayısı (kısa tablo)                                                                         | Backend   | [x]   |
-| **P5**  | Jest: `reportDataService` aggregasyon testleri                                                                                                    | Backend   | [x]   |
-| **P5**  | Canlı E2E — aylık + yıllık PDF önizleme + paylaş                                                                                                  | Fullstack | [x]   |
+**Bilinen sınırlar (v1):** Net = tahsil − gider (kasa yok) · Manuel «ödendi» → `DuePayment` oluşmaz · OCR bitmemiş gider raporda «henüz hesaplanmadı»
 
-**Ürün onayı (2026-06-13):** Furkan rapor akışını onayladı (önizleme + paylaş).
-
-**ONAY: Furkan ✅** (2026-06-13)
-
-**MVP kapsamı (P1–P3):** Aylık PDF — özet kutusu, aidat detay tablosu, kategori gider özeti.  
-**v1.1 (P4–P5):** Yıllık tablo + operasyonel ekler.
-
-**Bilinen sınırlar (dokümante et, bug değil):**
-
-- Bina kasası / banka bakiyesi yok → «net» = tahsil − gider (dönem içi akış).
-- Manuel «ödendi» işareti `DuePayment` oluşturmaz → v1 tahsilat kaynağı `Due` tablosu.
-- OCR bitmemiş gider (`amount = null`) özette «henüz hesaplanmadı» olarak işaretlenir.
+> Reports FAZ 3'te ertelenmişti → FAZ 4'e taşındı (2026-06-13).
 
 ---
 
-## ▶ FAZ 5 — Hardening + Testing (Fullstack)
+## FAZ 3 — Tickets + Dekont/IBAN ✅
 
-**Durum:** **AKTİF** — FAZ 4 kapandı (2026-06-13)  
-**Hedef:** ~2026-07-10
+**ONAY: Furkan ✅** (2026-06-02)
 
-### Mobil Görevleri
+### Tickets (`features/tickets/`)
 
-- [ ] Certificate pinning aktifleştirme
-- [ ] Build flavors (dev / staging / prod) & Obfuscation
-- [ ] Unit testleri (Auth provider, DioClient interceptor, vb.)
-- [ ] Widget testleri & Integration test (login → dashboard)
-- [ ] `StateNotifier` → `Notifier` migration planı (Riverpod 3.x hazırlığı)
-- [x] Upload işlemleri için ayrı Dio instance (Timeout yarış koşulu riskine karşı)
-- [ ] Pagination implementasyonu
+- [x] Tüm Ticket uçları (canlı E2E)
+- [x] Ticket listesi, detay, oluşturma formu
 
-### Backend Görevleri
+### Dekont + tahsilat IBAN
 
-- [x] `validate.js` feature bazlı modüllere bölündü (`src/validators/`)
-- [x] `authControllers.js` → `authService.js` taşındı
-- [x] Rate limit (`authLimiter`) hesap bazlı key
-- [x] Backend Jest unit test altyapısı (`npm test`)
-- [x] Aidat yaşam döngüsü: yeni daire aidatı, `POST /dues/bulk`, otomatik OVERDUE job
-- [x] `meService.js` refactor (236 satır → `services/me/` modülleri)
-- [x] `Expense.updatedAt` — migration eklendi (`20260613120000_expense_updated_at`)
-- [x] OCR ölçekleme — gider makbuz OCR dekont pipeline kuyruğuna alındı (`expenseOcrService.js`)
-- [x] Jest kapsamı genişletildi (`meProfileHelpers`, `expenseOcrService`, `reportFormat` — 24 test)
+- [x] **M3** Tahsilat / IBAN tanımlama (Yönetici)
+- [x] **M4** Ödeme yap + dekont yükle (Sakin) — multipart POST
+- [x] **M5** Dekontlarım (Sakin) — `MATCHED`, `REJECTED` vb.
+- [x] **M6** Dekont inceleme (Yönetici) — `PATCH /dekonts/:id/review`
+- [x] **FCM** push bildirimleri (dekont durumları)
+- Pipeline: upload → hash duplicate → validation → Tesseract OCR → business rules → auto-apply / needs review
 
 ---
 
-## 🔒 FAZ 6 — Subscription (Lansman Öncesi)
+## FAZ 2 — Notifications + Expenses ✅
 
-**Durum:** KİLİTLİ — Faz 5 tamamlanmadan açılamaz  
+**ONAY: Furkan ✅** (2026-05-29) · **Hedef:** ~2026-06-05
+
+### Backend uçları
+
+| Uç | Durum |
+| --- | --- |
+| `PUT /me/fcm-token` | ✅ |
+| `GET /notifications`, `PATCH read`, `read-all` | ✅ |
+| Gider CRUD + `receiptUrl` | ✅ |
+| `POST /expenses/{id}/proof` (dosya) | ✅ |
+
+### Mobil
+
+**Notifications (`features/notifications/`):**
+
+- [x] NotificationEntity, listesi, detay sheet
+- [x] FCM + `notification_payload` deep-link
+- [x] Backend API — `GET/PATCH /notifications` + push servisi
+
+**Expenses (`features/expenses/`):**
+
+- [x] ExpenseEntity, gider listesi + form (kategori, tutar, tarih, not)
+- [x] Makbuz `receiptUrl` — HTTPS URL ile create/update
+- [x] Makbuz dosya upload — `POST /expenses/{id}/proof` (multipart, OCR)
+
+---
+
+## FAZ 1 — Dues + Dashboard ✅
+
+**ONAY: Furkan ✅** (2026-05-10) — Tur 1–5 dahil
+
+### Dues (`features/dues/`)
+
+- [x] DueEntity, DueModel, DuesRemoteDataSource, Repository, DuesNotifier
+- [x] Yönetici & Sakin ekranları (filtreleme, manuel durum, geçmiş)
+- [x] Dashboard summary card'ları
+
+### Tur notları (Faz 2 öncesi düzeltmeler)
+
+- [x] Oturum kalıcılığı (cold start restoreSession)
+- [x] Geri tuşu uygulamayı kapatmaz (Android moveTaskToBack)
+- [x] Tur 1: `PATCH /buildings/{buildingId}/dues/{dueId}/status`
+- [x] Tur 2: `ApartmentModel` resident parse (isOccupied)
+- [x] Tur 3: Bina/daire CRUD UI (EditBuilding, EditApartment, DeleteDialog)
+- [x] Tur 4: Submit Guard (rapid-tap koruması)
+- [x] Tur 5: Sakin çıkarma, bina formu uyumu, server-side dues filter, şifre/KVKK UI, şifremi unuttum
+
+---
+
+## FAZ 0 — Foundation ✅
+
+**ONAY: Furkan ✅**
+
+### Auth
+
+- [x] Login, SignUp (yönetici + sakin davet), Register/Join birleşik
+- [x] Şifremi unuttum + sıfırlama
+- [x] Token refresh (401'de otomatik)
+- [x] Logout (token + FCM sıfırlama)
+- [x] Splash (role-based routing: manager / resident)
+
+### Buildings & Apartments
+
+- [x] Bina CRUD, davet kodu, sakin listesi
+- [x] Daire CRUD, sakin atama
+- [x] Manager / Resident Dashboard
+
+### Güvenlik & altyapı
+
+- [x] JWT access + refresh (`refreshTokenVersion`)
+- [x] flutter_secure_storage
+- [x] KVKK Soft Delete (`deletedAt`)
+- [x] HTTPS, LogInterceptor (kDebugMode), Zod + Flutter validators
+- [x] Rate Limiting (4 katmanlı)
+- [x] Slang TR/EN, Clean Architecture, Riverpod, GoRouter
+- [x] Prisma Schema (15 model, PostgreSQL/Neon)
+
+---
+
+## ▶ FAZ 6 — Subscription (AKTİF)
+
 **Hedef:** ~2026-07-12
 
-### Subscription (features/subscription/)
-
-- [ ] **Backend Görevi**: RevenueCat webhook (`POST /subscription/webhook/revenuecat`)
-- [ ] **Mobil Görevi**: RevenueCat SDK + satın alma
+- [ ] RevenueCat webhook (`POST /subscription/webhook/revenuecat`)
+- [ ] RevenueCat SDK + satın alma (Mobil)
 - [x] Abonelik okuma ekranı (`GET /me/subscription`); satın alma butonu devre dışı
-- [ ] Canlı E2E — Abonelik akışı testleri
+- [ ] Canlı E2E — Abonelik akışı
 
 ---
 
-## 🔒 FAZ 7 — v1.0.0 Lansman
+## 🔒 FAZ 7 — v1.0.0 Lansman (kilitli)
 
-**Durum:** KİLİTLİ — Faz 6 tamamlanmadan açılamaz  
-**Hedef:** ~2026-07-14
+**Hedef:** ~2026-07-14 · FAZ 6 bitmeden açılamaz
 
-- [ ] App Store (iOS) & Google Play Store submit
+- [ ] App Store & Google Play submit
 - [ ] Landing page güncelleme
-- [ ] Firebase Analytics & Crashlytics entegrasyonu
+- [ ] Firebase Analytics & Crashlytics
 - [ ] v1.0.0 release tag
 
 ---
 
-## Teknik borç ve bilinen eksikler (Fullstack Backlog)
+## Teknik borç ve bilinen eksikler
 
-| #   | Konu                                     | Platform  | Durum        | Not                                         |
-| --- | ---------------------------------------- | --------- | ------------ | ------------------------------------------- |
-| 1   | `ListView.children` → `builder`          | Mobil     | ✅           | FAZ 1                                       |
-| 2   | Certificate pinning                      | Mobil     | ⏳           | FAZ 5                                       |
-| 3   | Test coverage %30+                       | Mobil     | ⏳           | FAZ 5                                       |
-| 4   | Pagination (büyük listeler)              | Mobil     | ⏳           | FAZ 5                                       |
-| 5   | Bina kartı dolu daire `0/N`              | Backend   | ✅           | API’de `occupiedApartments` eklendi         |
-| 6   | Profil / Dil / Şifre uçları              | Fullstack | ✅           | FAZ 4                                       |
-| 7   | RevenueCat satın alma + webhook          | Fullstack | 🔴 Ertelendi | FAZ 6 — okuma ekranı var; webhook bekliyor  |
-| 8   | Gider makbuz dosya `/proof`              | Backend   | ✅           | FAZ 2 Kalıntısı tamamlandı                  |
-| 9   | **Reports** (aylık/yıllık PDF)           | Fullstack | ✅           | E2E onaylandı; VPS deploy bekliyor          |
-| 10  | `logout` FCM token temizliği             | Backend   | ✅           | FAZ 4 — Çıkışta fcmToken sıfırlandı         |
-| 11  | Upload için ayrı Dio instance            | Mobil     | ✅           | FAZ 5 — `_uploadDio` + gider proof migrate  |
-| 12  | `validate.js` modülerleştirme            | Backend   | ✅           | `src/validators/*.js`                       |
-| 13  | OCR performans iyileştirmesi             | Backend   | ⏳           | Worker thread kısmen; kuyruk var            |
-| 14  | Aidat yaşam döngüsü (daire/bulk/OVERDUE) | Backend   | ✅           | `dueBulkService`, `dueOverdueService`, job  |
-| 15  | `authService` refactor                   | Backend   | ✅           | FAZ 5 öncesi tamamlandı                     |
-| 16  | Backend unit test (Jest)                 | Backend   | ⏳           | 14 test; kapsam genişletilecek              |
+| # | Konu | Platform | Durum | Not |
+| --- | --- | --- | --- | --- |
+| 1 | `ListView.children` → `builder` | Mobil | ✅ | FAZ 1 |
+| 2 | Certificate pinning | Mobil | ✅ | FAZ 5 |
+| 3 | Test coverage %30+ | Mobil | ⏳ | Auth/Dio/widget eklendi; genişletilecek |
+| 4 | Pagination | Fullstack | ✅ | 4 liste + notifications |
+| 5 | Bina kartı dolu daire `0/N` | Backend | ✅ | `occupiedApartments` |
+| 6 | Profil / Dil / Şifre uçları | Fullstack | ✅ | FAZ 4 |
+| 7 | RevenueCat satın alma + webhook | Fullstack | 🔴 | FAZ 6 — okuma ekranı var |
+| 8 | Gider makbuz `/proof` | Backend | ✅ | FAZ 2 kalıntısı |
+| 9 | Reports (aylık/yıllık PDF) | Fullstack | ✅ | E2E onaylandı |
+| 10 | `logout` FCM token temizliği | Backend | ✅ | FAZ 4 |
+| 11 | Upload ayrı Dio instance | Mobil | ✅ | `_uploadDio` |
+| 12 | `validate.js` modülerleştirme | Backend | ✅ | `src/validators/*.js` |
+| 13 | OCR performans iyileştirmesi | Backend | ⏳ | Worker thread kısmen; kuyruk var |
+| 14 | Aidat yaşam döngüsü | Backend | ✅ | bulk + OVERDUE job |
+| 15 | `authService` refactor | Backend | ✅ | FAZ 5 |
+| 16 | Backend unit test (Jest) | Backend | ✅ | 24 test (`npm test`) |
+| 17 | VPS deploy scriptleri | Backend | ✅ | `deploy.ps1` / `deploy.sh` |
 
 ---
 
-## Tasarım kısıtları (ZORUNLU — 50+ yaş)
+## Tasarım kısıtları (50+ yaş — ZORUNLU)
 
 - Minimum font: **16sp** (`AppTypography`)
 - Minimum dokunma: **48×48dp**
 - **Bottom Navigation** (hamburger yasak)
-- Hata mesajları: sade Türkçe, teknik terim yok
+- Hata mesajları: sade Türkçe
 - Loading: her async işte görünür gösterge
 - Animasyon: max **200ms**, `Curves.easeInOut`
 
 ---
 
-## Nasıl Kullanılır
+## Nasıl kullanılır
 
-1. **AI asistan** her oturumda bu dosyayı okur; **MEVCUT DURUM** tablosuna ve **sıradaki işler** listesine bakar.
-2. **Sadece izin verilen / aktif** fazın görevlerini yapar; **kilitli** fazlara dokunmaz (`CLAUDE.md`).
-3. Bir fazın tüm checklist `[x]` olunca onay: `ONAY: Furkan ✅` (tarih ile).
-4. Görev bitince bu dosyada ilgili `[ ]` → `[x]` güncelle; üst tabloyu senkron tut.
-5. API sözleşmesi: `resources/AIDATPANEL.md` + `backend/README.md`.
+1. **Faz özeti** tablosuna ve **FAZ 5 sıradaki işler**e bak.
+2. Yalnızca **aktif** fazda kod yaz; kilitli fazlara dokunma (`CLAUDE.md`).
+3. Görev bitince ilgili `[ ]` → `[x]`; onay: `ONAY: Furkan ✅` (tarih ile).
+4. API sözleşmesi: `resources/AIDATPANEL.md` + `backend/README.md`.

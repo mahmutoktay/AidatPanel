@@ -1,6 +1,7 @@
 import 'package:aidatpanel/features/expenses/data/datasources/expense_remote_datasource.dart';
 import 'package:aidatpanel/features/expenses/data/models/expense_model.dart';
 import 'package:aidatpanel/features/expenses/data/repositories/expense_repository_impl.dart';
+import 'package:aidatpanel/core/network/paginated_list_result.dart';
 import 'package:aidatpanel/l10n/strings.g.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -21,10 +22,7 @@ void main() {
     test('uploadReceipts makbuzları gönderir', () async {
       final ds = _FakeExpenseDs();
       final repo = ExpenseRepositoryImpl(remote: ds);
-      await repo.uploadReceipts(
-        'e1',
-        ['/path/to/receipt.jpg'],
-      );
+      await repo.uploadReceipts('e1', ['/path/to/receipt.jpg']);
       expect(ds.lastUploadExpenseId, 'e1');
       expect(ds.lastUploadFilePaths, ['/path/to/receipt.jpg']);
     });
@@ -74,21 +72,23 @@ class _FakeExpenseDs implements ExpenseDataSource {
   }
 
   @override
-  Future<List<ExpenseModel>> getBuildingExpenses(
+  Future<PaginatedListResult<ExpenseModel>> getBuildingExpenses(
     String buildingId, {
     int? month,
     int? year,
     String? category,
-  }) =>
-      Future.value([]);
+    String? cursor,
+    bool paginated = true,
+  }) => Future.value(const PaginatedListResult(items: []));
 
   @override
-  Future<List<ExpenseModel>> getMyExpenses({
+  Future<PaginatedListResult<ExpenseModel>> getMyExpenses({
     int? month,
     int? year,
     String? category,
-  }) =>
-      Future.value([]);
+    String? cursor,
+    bool paginated = true,
+  }) => Future.value(const PaginatedListResult(items: []));
 
   @override
   Future<ExpenseModel> updateExpense(
@@ -99,14 +99,16 @@ class _FakeExpenseDs implements ExpenseDataSource {
     DateTime? date,
     String? note,
     String? receiptUrl,
-  }) =>
-      throw UnimplementedError();
+  }) => throw UnimplementedError();
 
   @override
   Future<void> deleteExpense(String expenseId) => throw UnimplementedError();
 
   @override
-  Future<ExpenseModel> uploadReceipts(String expenseId, List<String> filePaths) async {
+  Future<ExpenseModel> uploadReceipts(
+    String expenseId,
+    List<String> filePaths,
+  ) async {
     lastUploadExpenseId = expenseId;
     lastUploadFilePaths = filePaths;
     return ExpenseModel(

@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import '../../../../core/providers/cache_invalidator.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/network/dio_client.dart';
@@ -39,9 +38,9 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   );
 });
 
-final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(ref.watch(authRepositoryProvider));
-});
+final authStateProvider = NotifierProvider<AuthNotifier, AuthState>(
+  AuthNotifier.new,
+);
 
 enum LogoutReason { manual, otherDevices }
 
@@ -87,10 +86,11 @@ class AuthState {
   }
 }
 
-class AuthNotifier extends StateNotifier<AuthState> {
-  final AuthRepository _authRepository;
+class AuthNotifier extends Notifier<AuthState> {
+  AuthRepository get _authRepository => ref.read(authRepositoryProvider);
 
-  AuthNotifier(this._authRepository) : super(AuthState()) {
+  @override
+  AuthState build() {
     // Oturum sonlanınca (başka cihazdan çıkış, refresh başarısız vb.)
     // state'i sıfırla ve hata mesajı koy (UI bildirim gösterecek).
     // Not: Dil bağımsız mesaj l10n dosyasında; burada yedek olarak İngilizce
@@ -102,6 +102,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isManualLogout: false,
       );
     };
+    return const AuthState();
   }
 
   Future<void> submitLogin(

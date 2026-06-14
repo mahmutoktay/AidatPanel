@@ -43,7 +43,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     );
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
-      ref.read(managerTabIndexProvider.notifier).state = _tabController.index;
+      ref.read(managerTabIndexProvider.notifier).update(_tabController.index);
       prefetchNotifications(ref);
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -77,7 +77,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
       currentTabIndex: _tabController.index,
       exitHintMessage: context.t.common.pressBackAgainToExit,
       goToHomeTab: () {
-        ref.read(managerTabIndexProvider.notifier).state = 0;
+        ref.read(managerTabIndexProvider.notifier).reset();
         _tabController.animateTo(0);
       },
       onExitHint: (message) => ref
@@ -136,7 +136,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
           ],
           selectedIndex: ref.watch(managerTabIndexProvider),
           onDestinationSelected: (index) {
-            ref.read(managerTabIndexProvider.notifier).state = index;
+            ref.read(managerTabIndexProvider.notifier).update(index);
             _tabController.animateTo(index);
           },
         ),

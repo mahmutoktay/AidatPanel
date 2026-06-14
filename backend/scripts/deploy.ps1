@@ -62,6 +62,8 @@ function Get-SshBaseArgs {
 
 function Invoke-Ssh {
     param([string]$RemoteCommand)
+    # Windows CRLF bash'i bozar — LF'e cevir.
+    $RemoteCommand = ($RemoteCommand -replace "`r`n", "`n") -replace "`r", ""
     $base = Get-SshBaseArgs
     & ssh @base $sshTarget $RemoteCommand
     if ($LASTEXITCODE -ne 0) {

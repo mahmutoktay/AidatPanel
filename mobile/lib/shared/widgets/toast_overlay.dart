@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
@@ -36,8 +35,9 @@ class ToastMessage {
   }
 }
 
-class ToastNotifier extends StateNotifier<List<ToastMessage>> {
-  ToastNotifier() : super([]);
+class ToastNotifier extends Notifier<List<ToastMessage>> {
+  @override
+  List<ToastMessage> build() => [];
 
   static const int maxVisible = 3;
   static const Duration displayDuration = Duration(seconds: 3);
@@ -133,9 +133,7 @@ class ToastNotifier extends StateNotifier<List<ToastMessage>> {
 }
 
 final toastProvider =
-    StateNotifierProvider<ToastNotifier, List<ToastMessage>>(
-      (ref) => ToastNotifier(),
-    );
+    NotifierProvider<ToastNotifier, List<ToastMessage>>(ToastNotifier.new);
 
 class ToastOverlay extends ConsumerWidget {
   final Widget child;

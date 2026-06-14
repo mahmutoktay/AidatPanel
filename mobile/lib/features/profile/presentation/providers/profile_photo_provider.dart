@@ -1,4 +1,6 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../core/storage/secure_storage.dart';
@@ -31,10 +33,19 @@ class ProfilePhotoState {
   }
 }
 
-class ProfilePhotoNotifier extends StateNotifier<ProfilePhotoState> {
-  ProfilePhotoNotifier(this._storage) : super(const ProfilePhotoState());
+class ProfilePhotoNotifier extends Notifier<ProfilePhotoState> {
+  SecureStorage get _storage => ref.read(secureStorageProvider);
 
-  final SecureStorage _storage;
+  @override
+  ProfilePhotoState build() {
+    ref.listen(authStateProvider, (previous, next) {
+      if (previous?.user?.id != next.user?.id) {
+        unawaited(syncForUser(next.user?.id));
+      }
+    });
+    Future.microtask(() => syncForUser(ref.read(authStateProvider).user?.id));
+    return const ProfilePhotoState();
+  }
 
   Future<void> syncForUser(String? userId) async {
     if (userId == null || userId.isEmpty) {
@@ -63,15 +74,6 @@ class ProfilePhotoNotifier extends StateNotifier<ProfilePhotoState> {
 }
 
 final profilePhotoProvider =
-    StateNotifierProvider<ProfilePhotoNotifier, ProfilePhotoState>((ref) {
-  final notifier = ProfilePhotoNotifier(ref.watch(secureStorageProvider));
-  ref.listen(authStateProvider, (previous, next) {
-    if (previous?.user?.id != next.user?.id) {
-      notifier.syncForUser(next.user?.id);
-    }
-  });
-  Future.microtask(() {
-    notifier.syncForUser(ref.read(authStateProvider).user?.id);
-  });
-  return notifier;
-});
+    NotifierProvider<ProfilePhotoNotifier, ProfilePhotoState>(
+  ProfilePhotoNotifier.new,
+);

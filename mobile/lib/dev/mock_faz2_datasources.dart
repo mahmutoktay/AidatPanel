@@ -1,6 +1,7 @@
 /// Dev preview: gider ve bildirim API'si olmadan Faz 2 ekranlarını gezmek için.
 library;
 
+import '../core/network/paginated_list_result.dart';
 import '../features/expenses/data/datasources/expense_remote_datasource.dart';
 import '../features/expenses/data/models/expense_model.dart';
 import '../features/notifications/data/datasources/notification_remote_datasource.dart';
@@ -49,11 +50,13 @@ class MockExpenseDataSource implements ExpenseDataSource {
   }
 
   @override
-  Future<List<ExpenseModel>> getBuildingExpenses(
+  Future<PaginatedListResult<ExpenseModel>> getBuildingExpenses(
     String buildingId, {
     int? month,
     int? year,
     String? category,
+    String? cursor,
+    bool paginated = true,
   }) async {
     await Future.delayed(_delay);
     var list = List<ExpenseModel>.from(_byBuilding[buildingId] ?? []);
@@ -66,14 +69,16 @@ class MockExpenseDataSource implements ExpenseDataSource {
     if (category != null) {
       list = list.where((e) => e.category == category).toList();
     }
-    return list;
+    return PaginatedListResult(items: list);
   }
 
   @override
-  Future<List<ExpenseModel>> getMyExpenses({
+  Future<PaginatedListResult<ExpenseModel>> getMyExpenses({
     int? month,
     int? year,
     String? category,
+    String? cursor,
+    bool paginated = true,
   }) async {
     await Future.delayed(_delay);
     var list = List<ExpenseModel>.from(_byBuilding['b1'] ?? []);
@@ -86,7 +91,7 @@ class MockExpenseDataSource implements ExpenseDataSource {
     if (category != null) {
       list = list.where((e) => e.category == category).toList();
     }
-    return list;
+    return PaginatedListResult(items: list);
   }
 
   @override
@@ -103,10 +108,13 @@ class MockExpenseDataSource implements ExpenseDataSource {
     );
     final byCat = <String, Map<String, dynamic>>{};
     var total = 0.0;
-    for (final e in list) {
+    for (final e in list.items) {
       total += e.amount ?? 0;
       final cat = e.category;
-      byCat.putIfAbsent(cat, () => {'category': cat, 'amount': 0.0, 'count': 0});
+      byCat.putIfAbsent(
+        cat,
+        () => {'category': cat, 'amount': 0.0, 'count': 0},
+      );
       byCat[cat]!['amount'] =
           (byCat[cat]!['amount'] as double) + (e.amount ?? 0);
       byCat[cat]!['count'] = (byCat[cat]!['count'] as int) + 1;
@@ -193,13 +201,18 @@ class MockExpenseDataSource implements ExpenseDataSource {
   }
 
   @override
-  Future<ExpenseModel> uploadReceipts(String expenseId, List<String> filePaths) async {
+  Future<ExpenseModel> uploadReceipts(
+    String expenseId,
+    List<String> filePaths,
+  ) async {
     await Future.delayed(_delay);
     for (final list in _byBuilding.values) {
       final idx = list.indexWhere((e) => e.id == expenseId);
       if (idx < 0) continue;
       final old = list[idx];
-      final url = filePaths.isNotEmpty ? 'mock://receipt/${filePaths.first}' : 'mock://receipt/default';
+      final url = filePaths.isNotEmpty
+          ? 'mock://receipt/${filePaths.first}'
+          : 'mock://receipt/default';
       final updated = ExpenseModel(
         id: old.id,
         buildingId: old.buildingId,

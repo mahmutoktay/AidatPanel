@@ -1,15 +1,20 @@
+import '../../../../core/network/paginated_list_result.dart';
 import '../entities/ticket_entity.dart';
 
 abstract class TicketRepository {
-  Future<List<TicketEntity>> getMyTickets({
+  Future<PaginatedListResult<TicketEntity>> getMyTickets({
     TicketStatus? status,
     TicketCategory? category,
+    String? cursor,
+    bool paginated = true,
   });
 
-  Future<List<TicketEntity>> getBuildingTickets(
+  Future<PaginatedListResult<TicketEntity>> getBuildingTickets(
     String buildingId, {
     TicketStatus? status,
     TicketCategory? category,
+    String? cursor,
+    bool paginated = true,
   });
 
   Future<TicketEntity> getTicketById(String ticketId);

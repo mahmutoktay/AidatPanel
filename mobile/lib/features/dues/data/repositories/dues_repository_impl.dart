@@ -1,4 +1,5 @@
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/network/paginated_list_result.dart';
 import '../../domain/entities/due_entity.dart';
 import '../../domain/repositories/dues_repository.dart';
 import '../datasources/dues_remote_datasource.dart';
@@ -7,23 +8,30 @@ class DuesRepositoryImpl implements DuesRepository {
   final DuesRemoteDataSource _remoteDataSource;
 
   DuesRepositoryImpl({required DuesRemoteDataSource remoteDataSource})
-      : _remoteDataSource = remoteDataSource;
+    : _remoteDataSource = remoteDataSource;
 
   @override
-  Future<List<DueEntity>> getBuildingDues(
+  Future<PaginatedListResult<DueEntity>> getBuildingDues(
     String buildingId, {
     int? month,
     int? year,
     DueStatus? status,
+    String? cursor,
+    bool paginated = true,
   }) async {
     try {
-      final models = await _remoteDataSource.getBuildingDues(
+      final result = await _remoteDataSource.getBuildingDues(
         buildingId,
         month: month,
         year: year,
         status: status != null ? _toApiStatus(status) : null,
+        cursor: cursor,
+        paginated: paginated,
       );
-      return models.map((model) => model.toEntity()).toList();
+      return PaginatedListResult(
+        items: result.items.map((model) => model.toEntity()).toList(),
+        nextCursor: result.nextCursor,
+      );
     } on ApiException {
       rethrow;
     } catch (_) {
@@ -32,18 +40,25 @@ class DuesRepositoryImpl implements DuesRepository {
   }
 
   @override
-  Future<List<DueEntity>> getMyDues({
+  Future<PaginatedListResult<DueEntity>> getMyDues({
     int? month,
     int? year,
     DueStatus? status,
+    String? cursor,
+    bool paginated = true,
   }) async {
     try {
-      final models = await _remoteDataSource.getMyDues(
+      final result = await _remoteDataSource.getMyDues(
         month: month,
         year: year,
         status: status != null ? _toApiStatus(status) : null,
+        cursor: cursor,
+        paginated: paginated,
       );
-      return models.map((model) => model.toEntity()).toList();
+      return PaginatedListResult(
+        items: result.items.map((model) => model.toEntity()).toList(),
+        nextCursor: result.nextCursor,
+      );
     } on ApiException {
       rethrow;
     } catch (_) {
@@ -67,7 +82,9 @@ class DuesRepositoryImpl implements DuesRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Aidat durumu güncellenirken bir hata oluştu');
+      throw ApiException(
+        message: 'Aidat durumu güncellenirken bir hata oluştu',
+      );
     }
   }
 
@@ -90,7 +107,9 @@ class DuesRepositoryImpl implements DuesRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Aidat tutarı güncellenirken bir hata oluştu');
+      throw ApiException(
+        message: 'Aidat tutarı güncellenirken bir hata oluştu',
+      );
     }
   }
 

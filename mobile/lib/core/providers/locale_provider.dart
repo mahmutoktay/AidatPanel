@@ -1,12 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/profile/presentation/providers/profile_provider.dart';
 import '../../l10n/strings.g.dart';
-final localeProvider = StateProvider<AppLocale>((ref) {
-  return LocaleSettings.currentLocale;
-});
+
+class LocaleNotifier extends Notifier<AppLocale> {
+  @override
+  AppLocale build() => LocaleSettings.currentLocale;
+
+  void update(AppLocale locale) => state = locale;
+}
+
+final localeProvider = NotifierProvider<LocaleNotifier, AppLocale>(
+  LocaleNotifier.new,
+);
 
 /// Dil değişimi: önce sunucu (`PUT /me/language`), başarılıysa lokal + SecureStorage.
 /// Oturum yoksa yalnızca lokal kayıt.
@@ -24,7 +31,7 @@ Future<bool> changeLocale(WidgetRef ref, AppLocale locale) async {
   }
 
   LocaleSettings.setLocale(locale);
-  ref.read(localeProvider.notifier).state = locale;
+  ref.read(localeProvider.notifier).update(locale);
   await ref.read(secureStorageProvider).saveLanguage(locale.languageCode);
   return true;
 }

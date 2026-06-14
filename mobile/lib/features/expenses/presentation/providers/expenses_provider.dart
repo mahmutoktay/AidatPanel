@@ -1,6 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
-
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -25,8 +23,10 @@ final expenseDataSourceProvider = expenseRemoteDataSourceProvider;
 
 class ExpensesState {
   final bool isLoading;
+  final bool isLoadingMore;
   final List<ExpenseEntity> expenses;
   final ExpenseSummaryEntity? summary;
+  final String? nextCursor;
   final String? error;
   final String? buildingId;
   final int? month;
@@ -34,29 +34,42 @@ class ExpensesState {
 
   const ExpensesState({
     this.isLoading = false,
+    this.isLoadingMore = false,
     this.expenses = const [],
     this.summary,
+    this.nextCursor,
     this.error,
     this.buildingId,
     this.month,
     this.year,
   });
 
+  bool get canLoadMore =>
+      nextCursor != null &&
+      nextCursor!.isNotEmpty &&
+      !isLoading &&
+      !isLoadingMore;
+
   ExpensesState copyWith({
     bool? isLoading,
+    bool? isLoadingMore,
     List<ExpenseEntity>? expenses,
     ExpenseSummaryEntity? summary,
+    String? nextCursor,
     String? error,
     String? buildingId,
     int? month,
     int? year,
     bool clearError = false,
     bool clearSummary = false,
+    bool clearNextCursor = false,
   }) {
     return ExpensesState(
       isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       expenses: expenses ?? this.expenses,
       summary: clearSummary ? null : (summary ?? this.summary),
+      nextCursor: clearNextCursor ? null : (nextCursor ?? this.nextCursor),
       error: clearError ? null : (error ?? this.error),
       buildingId: buildingId ?? this.buildingId,
       month: month ?? this.month,
@@ -65,76 +78,120 @@ class ExpensesState {
   }
 }
 
-class ExpensesNotifier extends StateNotifier<ExpensesState> {
-  final ExpenseRepository _repository;
+class ExpensesNotifier extends Notifier<ExpensesState> {
+  ExpenseRepository get _repository => ref.read(expenseRepositoryProvider);
 
-  ExpensesNotifier(this._repository) : super(const ExpensesState());
-
+  @override
+  ExpensesState build() => const ExpensesState();
   Future<void> load(
     String buildingId, {
+    bool refresh = true,
     int? month,
     int? year,
   }) async {
+    final filtersChanged =
+        state.buildingId != buildingId ||
+        state.month != month ||
+        state.year != year;
+    final effectiveRefresh = refresh || filtersChanged;
+    if (!effectiveRefresh && !state.canLoadMore) return;
     state = state.copyWith(
-      isLoading: true,
+      isLoading: effectiveRefresh,
+      isLoadingMore: !effectiveRefresh,
       clearError: true,
       buildingId: buildingId,
       month: month,
       year: year,
+      clearNextCursor: effectiveRefresh,
     );
     try {
-      final expenses = await _repository.getBuildingExpenses(
+      final result = await _repository.getBuildingExpenses(
         buildingId,
         month: month,
         year: year,
+        cursor: effectiveRefresh ? null : state.nextCursor,
       );
       ExpenseSummaryEntity? summary;
-      if (month != null && year != null) {
+      if (effectiveRefresh && month != null && year != null) {
         summary = await _repository.getSummary(
           buildingId,
           month: month,
           year: year,
         );
       }
+      final merged = effectiveRefresh
+          ? result.items
+          : [...state.expenses, ...result.items];
       state = state.copyWith(
         isLoading: false,
-        expenses: expenses,
+        isLoadingMore: false,
+        expenses: merged,
         summary: summary,
+        nextCursor: result.nextCursor,
       );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
+        isLoadingMore: false,
         error: userFacingError(e),
       );
     }
   }
 
   Future<void> loadMyExpenses({
+    bool refresh = true,
     int? month,
     int? year,
   }) async {
+    final filtersChanged =
+        state.buildingId != null || state.month != month || state.year != year;
+    final effectiveRefresh = refresh || filtersChanged;
+    if (!effectiveRefresh && !state.canLoadMore) return;
     state = state.copyWith(
-      isLoading: true,
+      isLoading: effectiveRefresh,
+      isLoadingMore: !effectiveRefresh,
       clearError: true,
+      buildingId: null,
       month: month,
       year: year,
+      clearNextCursor: effectiveRefresh,
     );
     try {
-      final expenses = await _repository.getMyExpenses(
+      final result = await _repository.getMyExpenses(
         month: month,
         year: year,
+        cursor: effectiveRefresh ? null : state.nextCursor,
       );
+      final merged = effectiveRefresh
+          ? result.items
+          : [...state.expenses, ...result.items];
       state = state.copyWith(
         isLoading: false,
-        expenses: expenses,
+        isLoadingMore: false,
+        expenses: merged,
         clearSummary: true,
+        nextCursor: result.nextCursor,
       );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
+        isLoadingMore: false,
         error: userFacingError(e),
       );
     }
+  }
+
+  Future<void> loadMore() async {
+    final id = state.buildingId;
+    if (id == null) {
+      await loadMyExpenses(
+        refresh: false,
+        month: state.month,
+        year: state.year,
+      );
+      return;
+    }
+    await load(id, refresh: false, month: state.month, year: state.year);
   }
 
   Future<void> reload() async {
@@ -147,7 +204,7 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
   }
 
   Future<({bool success, String? receiptWarning, bool receiptUploadDeferred})>
-      create({
+  create({
     required String buildingId,
     required String title,
     required ExpenseCategory category,
@@ -163,10 +220,7 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
         date: date,
         note: note,
       );
-      final upload = await _tryUploadReceipts(
-        entity.id,
-        receiptFilePaths,
-      );
+      final upload = await _tryUploadReceipts(entity.id, receiptFilePaths);
       await load(buildingId, month: state.month, year: state.year);
       return (
         success: true,
@@ -175,12 +229,16 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
       );
     } catch (e) {
       state = state.copyWith(error: userFacingError(e));
-      return (success: false, receiptWarning: null, receiptUploadDeferred: false);
+      return (
+        success: false,
+        receiptWarning: null,
+        receiptUploadDeferred: false,
+      );
     }
   }
 
   Future<({bool success, String? receiptWarning, bool receiptUploadDeferred})>
-      update({
+  update({
     required String expenseId,
     String? title,
     double? amount,
@@ -200,10 +258,7 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
         note: note,
         receiptUrl: receiptUrl,
       );
-      final upload = await _tryUploadReceipts(
-        expenseId,
-        receiptFilePaths,
-      );
+      final upload = await _tryUploadReceipts(expenseId, receiptFilePaths);
       await reload();
       return (
         success: true,
@@ -212,7 +267,11 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
       );
     } catch (e) {
       state = state.copyWith(error: userFacingError(e));
-      return (success: false, receiptWarning: null, receiptUploadDeferred: false);
+      return (
+        success: false,
+        receiptWarning: null,
+        receiptUploadDeferred: false,
+      );
     }
   }
 
@@ -250,6 +309,4 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
 }
 
 final expensesNotifierProvider =
-    StateNotifierProvider<ExpensesNotifier, ExpensesState>((ref) {
-  return ExpensesNotifier(ref.watch(expenseRepositoryProvider));
-});
+    NotifierProvider<ExpensesNotifier, ExpensesState>(ExpensesNotifier.new);

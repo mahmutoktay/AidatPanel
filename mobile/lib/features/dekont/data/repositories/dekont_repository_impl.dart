@@ -1,4 +1,5 @@
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/network/paginated_list_result.dart';
 import '../../../../core/utils/api_user_message.dart';
 import '../../domain/errors/duplicate_dekont_exception.dart';
 import '../../../../l10n/strings.g.dart';
@@ -15,7 +16,7 @@ class DekontRepositoryImpl implements DekontRepository {
   final DekontRemoteDataSource _remote;
 
   DekontRepositoryImpl({required DekontRemoteDataSource remote})
-      : _remote = remote;
+    : _remote = remote;
 
   @override
   Future<PaymentCollectionEntity> getPaymentCollection() async {
@@ -29,7 +30,11 @@ class DekontRepositoryImpl implements DekontRepository {
       dekontDebugLog('repository.getPaymentCollection fail', '$e\n$st');
       throw ApiException(
         message: LocaleSettings
-            .instance.currentTranslations.features.dekont.errorPaymentInfo,
+            .instance
+            .currentTranslations
+            .features
+            .dekont
+            .errorPaymentInfo,
       );
     }
   }
@@ -52,9 +57,11 @@ class DekontRepositoryImpl implements DekontRepository {
         fileBytes: fileBytes,
         filePath: filePath,
         dueId: dueId,
-      ))
-          .toEntity();
-      dekontDebugLog('repository.uploadDekont ok', '${entity.id} ${entity.status.apiValue}');
+      )).toEntity();
+      dekontDebugLog(
+        'repository.uploadDekont ok',
+        '${entity.id} ${entity.status.apiValue}',
+      );
       return DekontUploadResult(dekont: entity);
     } on ApiException catch (e) {
       dekontDebugLog(
@@ -103,7 +110,10 @@ class DekontRepositoryImpl implements DekontRepository {
           dueId: dueId,
         );
         if (recovered != null) {
-          dekontDebugLog('repository.uploadDekont recovered-after-timeout', recovered.id);
+          dekontDebugLog(
+            'repository.uploadDekont recovered-after-timeout',
+            recovered.id,
+          );
           return DekontUploadResult(dekont: recovered, recovered: true);
         }
       }
@@ -112,10 +122,7 @@ class DekontRepositoryImpl implements DekontRepository {
           ? e
           : ApiException(message: e.toString(), originalException: e);
       throw ApiException(
-        message: mapApiUserMessage(
-          wrapped,
-          context: ApiMessageContext.dekont,
-        ),
+        message: mapApiUserMessage(wrapped, context: ApiMessageContext.dekont),
         statusCode: wrapped.statusCode,
         originalException: e,
       );
@@ -147,8 +154,9 @@ class DekontRepositoryImpl implements DekontRepository {
     final dekontJson = map['dekont'];
     if (dekontJson is Map) {
       try {
-        return DekontModel.fromJson(Map<String, dynamic>.from(dekontJson))
-            .toEntity();
+        return DekontModel.fromJson(
+          Map<String, dynamic>.from(dekontJson),
+        ).toEntity();
       } catch (_) {
         return null;
       }
@@ -171,7 +179,11 @@ class DekontRepositoryImpl implements DekontRepository {
     String? dueId,
   }) async {
     dekontDebugLog('repository.recover-upload start');
-    const delays = [Duration.zero, Duration(milliseconds: 800), Duration(seconds: 2)];
+    const delays = [
+      Duration.zero,
+      Duration(milliseconds: 800),
+      Duration(seconds: 2),
+    ];
     for (var attempt = 0; attempt < delays.length; attempt++) {
       if (delays[attempt] > Duration.zero) {
         await Future.delayed(delays[attempt]);
@@ -202,13 +214,16 @@ class DekontRepositoryImpl implements DekontRepository {
     required int sizeBytes,
     String? dueId,
   }) async {
-    final safeName = UploadFileUtils.safeFileName(fileName, fallback: 'dekont.pdf');
-    final list = await _remote.getMyDekonts();
-    if (list.isEmpty) return null;
+    final safeName = UploadFileUtils.safeFileName(
+      fileName,
+      fallback: 'dekont.pdf',
+    );
+    final result = await _remote.getMyDekonts(paginated: false);
+    if (result.items.isEmpty) return null;
 
     DekontModel? best;
 
-    for (final m in list) {
+    for (final m in result.items) {
       final nameMatch =
           m.originalFilename == safeName || m.originalFilename == fileName;
       final sizeMatch = m.sizeBytes == sizeBytes;
@@ -232,45 +247,75 @@ class DekontRepositoryImpl implements DekontRepository {
     } catch (e) {
       throw ApiException(
         message: LocaleSettings
-            .instance.currentTranslations.features.dekont.errorDetailLoad,
+            .instance
+            .currentTranslations
+            .features
+            .dekont
+            .errorDetailLoad,
       );
     }
   }
 
   @override
-  Future<List<DekontEntity>> getMyDekonts({String? status}) async {
+  Future<PaginatedListResult<DekontEntity>> getMyDekonts({
+    String? status,
+    String? cursor,
+    bool paginated = true,
+  }) async {
     try {
-      final list = await _remote.getMyDekonts(status: status);
-      return list.map((m) => m.toEntity()).toList();
+      final result = await _remote.getMyDekonts(
+        status: status,
+        cursor: cursor,
+        paginated: paginated,
+      );
+      return PaginatedListResult(
+        items: result.items.map((m) => m.toEntity()).toList(),
+        nextCursor: result.nextCursor,
+      );
     } on ApiException {
       rethrow;
     } catch (e) {
       throw ApiException(
         message: LocaleSettings
-            .instance.currentTranslations.features.dekont.errorListLoad,
+            .instance
+            .currentTranslations
+            .features
+            .dekont
+            .errorListLoad,
       );
     }
   }
 
   @override
-  Future<List<DekontEntity>> getBuildingDekonts(
+  Future<PaginatedListResult<DekontEntity>> getBuildingDekonts(
     String buildingId, {
     String? status,
     String? apartmentId,
+    String? cursor,
+    bool paginated = true,
   }) async {
     try {
-      final list = await _remote.getBuildingDekonts(
+      final result = await _remote.getBuildingDekonts(
         buildingId,
         status: status,
         apartmentId: apartmentId,
+        cursor: cursor,
+        paginated: paginated,
       );
-      return list.map((m) => m.toEntity()).toList();
+      return PaginatedListResult(
+        items: result.items.map((m) => m.toEntity()).toList(),
+        nextCursor: result.nextCursor,
+      );
     } on ApiException {
       rethrow;
     } catch (e) {
       throw ApiException(
         message: LocaleSettings
-            .instance.currentTranslations.features.dekont.errorListLoad,
+            .instance
+            .currentTranslations
+            .features
+            .dekont
+            .errorListLoad,
       );
     }
   }
@@ -288,15 +333,15 @@ class DekontRepositoryImpl implements DekontRepository {
       'dueId': dueId,
     });
     try {
-      final apiDecision =
-          decision == DekontReviewDecision.approve ? 'APPROVE' : 'REJECT';
+      final apiDecision = decision == DekontReviewDecision.approve
+          ? 'APPROVE'
+          : 'REJECT';
       final entity = (await _remote.reviewDekont(
         id: id,
         decision: apiDecision,
         note: note,
         dueId: dueId,
-      ))
-          .toEntity();
+      )).toEntity();
       dekontDebugLog('repository.reviewDekont ok', entity.status.apiValue);
       return entity;
     } on ApiException catch (e) {
@@ -309,13 +354,20 @@ class DekontRepositoryImpl implements DekontRepository {
       dekontDebugLog('repository.reviewDekont fail', '$e\n$st');
       throw ApiException(
         message: LocaleSettings
-            .instance.currentTranslations.features.dekont.reviewFailed,
+            .instance
+            .currentTranslations
+            .features
+            .dekont
+            .reviewFailed,
       );
     }
   }
 
   @override
-  Future<List<int>> getDekontFileBytes(String id, {bool download = false}) async {
+  Future<List<int>> getDekontFileBytes(
+    String id, {
+    bool download = false,
+  }) async {
     try {
       return await _remote.getDekontFileBytes(id, download: download);
     } on ApiException {
@@ -323,7 +375,11 @@ class DekontRepositoryImpl implements DekontRepository {
     } catch (e) {
       throw ApiException(
         message: LocaleSettings
-            .instance.currentTranslations.features.dekont.errorFileDownload,
+            .instance
+            .currentTranslations
+            .features
+            .dekont
+            .errorFileDownload,
       );
     }
   }

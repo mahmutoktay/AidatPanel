@@ -15,10 +15,17 @@ import { HttpError } from "../utils/httpError.js";
 export const getDuesByBuilding = async (req, res, next) => {
   try {
     const { id: buildingId } = req.params;
-    const { month, year, status } = req.query;
+    const { month, year, status, cursor, limit, paginated } = req.query;
     const managerId = req.user.id;
 
-    const dues = await getDuesByBuildingService(buildingId, managerId, { month, year, status });
+    const dues = await getDuesByBuildingService(buildingId, managerId, {
+      month,
+      year,
+      status,
+      cursor,
+      limit,
+      paginated,
+    });
 
     if (dues === null) {
       return res.status(404).json({
@@ -83,10 +90,17 @@ export const updateDueStatus = async (req, res, next) => {
  */
 export const getMyDues = async (req, res, next) => {
   try {
-    const { status, year, month } = req.query;
+    const { status, year, month, cursor, limit, paginated } = req.query;
     const userId = req.user.id;
 
-    const dues = await getMyDuesService(userId, { status, year, month });
+    const dues = await getMyDuesService(userId, {
+      status,
+      year,
+      month,
+      cursor,
+      limit,
+      paginated,
+    });
 
     res.json({
       success: true,

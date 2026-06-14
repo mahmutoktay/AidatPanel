@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -52,10 +51,11 @@ class SubscriptionState {
   }
 }
 
-class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
-  SubscriptionNotifier(this._repository) : super(const SubscriptionState());
+class SubscriptionNotifier extends Notifier<SubscriptionState> {
+  SubscriptionRepository get _repository => ref.read(subscriptionRepositoryProvider);
 
-  final SubscriptionRepository _repository;
+  @override
+  SubscriptionState build() => const SubscriptionState();
 
   Future<void> load() async {
     if (state.isLoading) return;
@@ -79,6 +79,6 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 }
 
 final subscriptionNotifierProvider =
-    StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
-  return SubscriptionNotifier(ref.watch(subscriptionRepositoryProvider));
-});
+    NotifierProvider<SubscriptionNotifier, SubscriptionState>(
+  SubscriptionNotifier.new,
+);

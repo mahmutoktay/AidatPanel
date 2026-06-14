@@ -1,25 +1,53 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 /// Manager dashboard için tab index state provider
 /// TabController ile sync edilir, BottomNavigationBar'ın currentIndex'ini yönetir
-final managerTabIndexProvider = StateProvider<int>((ref) => 0);
+class ManagerTabIndexNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
 
-/// Resident dashboard için tab index state provider
-final residentTabIndexProvider = StateProvider<int>((ref) => 0);
+  void update(int index) => state = index;
+
+  void reset() => state = 0;
+}
+
+final managerTabIndexProvider =
+    NotifierProvider<ManagerTabIndexNotifier, int>(ManagerTabIndexNotifier.new);
+
+class ResidentTabIndexNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void update(int index) => state = index;
+
+  void reset() => state = 0;
+}
+
+final residentTabIndexProvider =
+    NotifierProvider<ResidentTabIndexNotifier, int>(ResidentTabIndexNotifier.new);
 
 /// Manager dashboard tab index'ini sıfırlar (logout/login için)
 void resetManagerTabIndex(WidgetRef ref) {
-  ref.read(managerTabIndexProvider.notifier).state = 0;
+  ref.read(managerTabIndexProvider.notifier).reset();
 }
 
 /// Resident dashboard tab index'ini sıfırlar (logout/login için)
 void resetResidentTabIndex(WidgetRef ref) {
-  ref.read(residentTabIndexProvider.notifier).state = 0;
+  ref.read(residentTabIndexProvider.notifier).reset();
+}
+
+class ResidentDueHighlightNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void update(String? dueId) => state = dueId;
 }
 
 /// Bildirimden aidat kaydına geçişte vurgulanacak due id (sakin).
-final residentDueHighlightIdProvider = StateProvider<String?>((ref) => null);
+final residentDueHighlightIdProvider =
+    NotifierProvider<ResidentDueHighlightNotifier, String?>(
+  ResidentDueHighlightNotifier.new,
+);
 
 /// Bildirimden aidat kaydına geçişte bina + due (yönetici).
 class ManagerDueNavigationIntent {
@@ -28,8 +56,29 @@ class ManagerDueNavigationIntent {
   const ManagerDueNavigationIntent({this.buildingId});
 }
 
+class ManagerDueNavigationIntentNotifier
+    extends Notifier<ManagerDueNavigationIntent?> {
+  @override
+  ManagerDueNavigationIntent? build() => null;
+
+  void update(ManagerDueNavigationIntent? intent) => state = intent;
+}
+
 final managerDueNavigationIntentProvider =
-    StateProvider<ManagerDueNavigationIntent?>((ref) => null);
+    NotifierProvider<ManagerDueNavigationIntentNotifier,
+        ManagerDueNavigationIntent?>(
+  ManagerDueNavigationIntentNotifier.new,
+);
+
+class ManagerDueHighlightNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void update(String? dueId) => state = dueId;
+}
 
 /// Bildirimden aidat kaydına geçişte vurgulanacak due id (yönetici).
-final managerDueHighlightIdProvider = StateProvider<String?>((ref) => null);
+final managerDueHighlightIdProvider =
+    NotifierProvider<ManagerDueHighlightNotifier, String?>(
+  ManagerDueHighlightNotifier.new,
+);

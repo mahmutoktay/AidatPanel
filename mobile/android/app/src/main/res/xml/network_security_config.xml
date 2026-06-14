@@ -15,11 +15,6 @@
         <domain includeSubdomains="true">api.aidatpanel.com</domain>
     </domain-config>
 
-    <!-- Certificate pinning (optional, for future hardening) -->
-    <!-- <domain-config>
-        <domain includeSubdomains="true">api.aidatpanel.com</domain>
-        <pin-set expiration="2027-12-31">
-            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
-        </pin-set>
-    </domain-config> -->
+    <!-- Certificate pinning runtime'da DioClient + certificate_pinning.dart ile yapılır.
+         CERT_PIN_SHA256 boş bırakılırsa pin kontrolü atlanır. -->
 </network-security-config>

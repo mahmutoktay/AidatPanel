@@ -1,4 +1,5 @@
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/network/paginated_list_result.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../../domain/repositories/ticket_repository.dart';
 import '../datasources/ticket_remote_datasource.dart';
@@ -9,20 +10,26 @@ class TicketRepositoryImpl implements TicketRepository {
   final TicketRemoteDataSource _remoteDataSource;
 
   TicketRepositoryImpl({required TicketRemoteDataSource remoteDataSource})
-      : _remoteDataSource = remoteDataSource;
+    : _remoteDataSource = remoteDataSource;
 
   @override
-  Future<List<TicketEntity>> getMyTickets({
+  Future<PaginatedListResult<TicketEntity>> getMyTickets({
     TicketStatus? status,
     TicketCategory? category,
+    String? cursor,
+    bool paginated = true,
   }) async {
     try {
-      final models = await _remoteDataSource.getMyTickets(
+      final result = await _remoteDataSource.getMyTickets(
         status: status != null ? TicketModel.statusToApi(status) : null,
-        category:
-            category != null ? TicketModel.categoryToApi(category) : null,
+        category: category != null ? TicketModel.categoryToApi(category) : null,
+        cursor: cursor,
+        paginated: paginated,
       );
-      return models.map((m) => m.toEntity()).toList();
+      return PaginatedListResult(
+        items: result.items.map((m) => m.toEntity()).toList(),
+        nextCursor: result.nextCursor,
+      );
     } on ApiException {
       rethrow;
     } catch (_) {
@@ -31,19 +38,25 @@ class TicketRepositoryImpl implements TicketRepository {
   }
 
   @override
-  Future<List<TicketEntity>> getBuildingTickets(
+  Future<PaginatedListResult<TicketEntity>> getBuildingTickets(
     String buildingId, {
     TicketStatus? status,
     TicketCategory? category,
+    String? cursor,
+    bool paginated = true,
   }) async {
     try {
-      final models = await _remoteDataSource.getBuildingTickets(
+      final result = await _remoteDataSource.getBuildingTickets(
         buildingId,
         status: status != null ? TicketModel.statusToApi(status) : null,
-        category:
-            category != null ? TicketModel.categoryToApi(category) : null,
+        category: category != null ? TicketModel.categoryToApi(category) : null,
+        cursor: cursor,
+        paginated: paginated,
       );
-      return models.map((m) => m.toEntity()).toList();
+      return PaginatedListResult(
+        items: result.items.map((m) => m.toEntity()).toList(),
+        nextCursor: result.nextCursor,
+      );
     } on ApiException {
       rethrow;
     } catch (_) {
@@ -116,7 +129,9 @@ class TicketRepositoryImpl implements TicketRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Talep durumu güncellenirken bir hata oluştu');
+      throw ApiException(
+        message: 'Talep durumu güncellenirken bir hata oluştu',
+      );
     }
   }
 }

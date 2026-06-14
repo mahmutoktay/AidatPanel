@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/user_error_message.dart';
+import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
@@ -23,16 +24,30 @@ class ManagerDekontsScreen extends ConsumerStatefulWidget {
 }
 
 class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
+  final ScrollController _scrollController = ScrollController();
   String? _buildingId;
   String? _filterKey;
+
+  @override
+  void initState() {
+    super.initState();
+    attachPaginationScroll(_scrollController, () {
+      ref.read(managerDekontsNotifierProvider.notifier).loadMore();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   Future<void> _load() async {
     final id = _buildingId;
     if (id == null) return;
-    await ref.read(managerDekontsNotifierProvider.notifier).loadBuilding(
-          id,
-          status: dekontStatusFilterApi(_filterKey),
-        );
+    await ref
+        .read(managerDekontsNotifierProvider.notifier)
+        .loadBuilding(id, status: dekontStatusFilterApi(_filterKey));
   }
 
   @override
@@ -132,52 +147,60 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
                       ],
                     )
                   : state.isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : state.error != null
-                          ? ListView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              children: [
-                                Padding(
-                                  padding: AppSizes.screenBodyScrollPadding,
-                                  child: Text(
-                                    userFacingError(state.error!),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : state.dekonts.isEmpty
-                              ? ListView(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  children: [
-                                    EmptyStateWidget(
-                                      icon: Icons.receipt_long_outlined,
-                                      title: t.emptyTitle,
-                                      subtitle: t.emptySubtitleManager,
-                                    ),
-                                  ],
-                                )
-                              : ListView.builder(
-                                  padding: AppSizes.screenBodyScrollPadding,
-                                  itemCount: state.dekonts.length,
-                                  itemBuilder: (_, i) {
-                                    final d = state.dekonts[i];
-                                    final apt = d.apartment != null
-                                        ? '${t.apartment}: ${d.apartment!.number}'
-                                        : null;
-                                    final uploader = d.uploadedBy != null
-                                        ? '${t.uploadedBy}: ${d.uploadedBy!.name}'
-                                        : null;
-                                    return DekontListCard(
-                                      dekont: d,
-                                      apartmentLabel: apt,
-                                      uploaderLabel: uploader,
-                                      onTap: () =>
-                                          context.push('/dekonts/${d.id}'),
-                                    );
-                                  },
-                                ),
+                  ? const Center(child: CircularProgressIndicator())
+                  : state.error != null
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        Padding(
+                          padding: AppSizes.screenBodyScrollPadding,
+                          child: Text(
+                            userFacingError(state.error!),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    )
+                  : state.dekonts.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        EmptyStateWidget(
+                          icon: Icons.receipt_long_outlined,
+                          title: t.emptyTitle,
+                          subtitle: t.emptySubtitleManager,
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: AppSizes.screenBodyScrollPadding,
+                      itemCount:
+                          state.dekonts.length + (state.isLoadingMore ? 1 : 0),
+                      itemBuilder: (_, i) {
+                        if (i >= state.dekonts.length) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSizes.spacingM,
+                            ),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                        final d = state.dekonts[i];
+                        final apt = d.apartment != null
+                            ? '${t.apartment}: ${d.apartment!.number}'
+                            : null;
+                        final uploader = d.uploadedBy != null
+                            ? '${t.uploadedBy}: ${d.uploadedBy!.name}'
+                            : null;
+                        return DekontListCard(
+                          dekont: d,
+                          apartmentLabel: apt,
+                          uploaderLabel: uploader,
+                          onTap: () => context.push('/dekonts/${d.id}'),
+                        );
+                      },
+                    ),
             ),
           ),
         ],

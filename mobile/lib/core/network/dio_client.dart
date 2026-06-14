@@ -8,11 +8,13 @@ import '../constants/app_constants.dart';
 import '../storage/secure_storage.dart';
 import '../utils/jwt_utils.dart';
 import 'api_exception.dart';
+import 'certificate_pinning.dart';
 import 'safe_log_interceptor.dart';
 import 'token_refresh_service.dart';
 
 class DioClient {
   late Dio _dio;
+
   /// Uzun süren multipart yüklemeler — `_dio` timeout'larını ezmez.
   late Dio _uploadDio;
   late Dio _refreshDio;
@@ -20,7 +22,8 @@ class DioClient {
   final SecureStorage _secureStorage;
   final SessionExpiredCallback? Function()? onSessionExpiredGetter;
 
-  final Map<String, ({Response<dynamic> response, DateTime expiry})> _cache = {};
+  final Map<String, ({Response<dynamic> response, DateTime expiry})> _cache =
+      {};
 
   /// `logout-all-devices` vb. sırasında paralel 401'lerin eski refresh ile
   /// clearAuth tetiklemesini engeller.
@@ -59,7 +62,7 @@ class DioClient {
   }
 
   Dio _createDio(Duration timeout) {
-    return Dio(
+    final dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
         connectTimeout: timeout,
@@ -68,6 +71,8 @@ class DioClient {
         contentType: 'application/json',
       ),
     );
+    CertificatePinning.configureDio(dio, baseUrl: ApiConstants.baseUrl);
+    return dio;
   }
 
   void _initializeDio() {
@@ -100,6 +105,12 @@ class DioClient {
   };
 
   bool _isPublicPath(String path) => _publicPaths.any((p) => path.endsWith(p));
+
+  @visibleForTesting
+  bool isPublicPathForTest(String path) => _isPublicPath(path);
+
+  @visibleForTesting
+  bool get isRefreshBlockedForTest => _blockRefreshOn401;
 
   void _attachAuthInterceptors(Dio dio) {
     dio.interceptors.add(
@@ -257,7 +268,8 @@ class DioClient {
         effectiveReceive: effectiveReceive,
       );
     } on DioException catch (e) {
-      final canRetry401 = e.response?.statusCode == 401 &&
+      final canRetry401 =
+          e.response?.statusCode == 401 &&
           !_blockRefreshOn401 &&
           rebuildFormData != null;
       if (!canRetry401) {

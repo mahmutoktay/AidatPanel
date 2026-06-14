@@ -94,8 +94,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   void _resetNavigationForFreshEntry() {
-    ref.read(managerTabIndexProvider.notifier).state = 0;
-    ref.read(residentTabIndexProvider.notifier).state = 0;
+    ref.read(managerTabIndexProvider.notifier).reset();
+    ref.read(residentTabIndexProvider.notifier).reset();
   }
 
   /// Bootstrap timeout veya beklenmedik bir hata olduğunda gösterilen

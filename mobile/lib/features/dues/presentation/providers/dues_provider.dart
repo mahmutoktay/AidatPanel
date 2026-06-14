@@ -1,6 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
-
 import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../buildings/data/buildings_store.dart';
@@ -11,9 +9,7 @@ import '../../domain/repositories/dues_repository.dart';
 import '../../domain/resident_dues_list.dart';
 
 final duesRemoteDataSourceProvider = Provider<DuesRemoteDataSource>((ref) {
-  return DuesRemoteDataSourceImpl(
-    dioClient: ref.watch(dioClientProvider),
-  );
+  return DuesRemoteDataSourceImpl(dioClient: ref.watch(dioClientProvider));
 });
 
 final duesRepositoryProvider = Provider<DuesRepository>((ref) {
@@ -24,32 +20,46 @@ final duesRepositoryProvider = Provider<DuesRepository>((ref) {
 
 class DuesState {
   final bool isLoading;
+  final bool isLoadingMore;
   final List<DueEntity> dues;
+  final String? nextCursor;
   final String? error;
 
   const DuesState({
     this.isLoading = false,
+    this.isLoadingMore = false,
     this.dues = const [],
+    this.nextCursor,
     this.error,
   });
 
+  bool get canLoadMore =>
+      nextCursor != null &&
+      nextCursor!.isNotEmpty &&
+      !isLoading &&
+      !isLoadingMore;
+
   DuesState copyWith({
     bool? isLoading,
+    bool? isLoadingMore,
     List<DueEntity>? dues,
+    String? nextCursor,
     String? error,
     bool clearError = false,
+    bool clearNextCursor = false,
   }) {
     return DuesState(
       isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       dues: dues ?? this.dues,
+      nextCursor: clearNextCursor ? null : (nextCursor ?? this.nextCursor),
       error: clearError ? null : (error ?? this.error),
     );
   }
 }
 
-class DuesNotifier extends StateNotifier<DuesState> {
-  final DuesRepository _repository;
-
+class DuesNotifier extends Notifier<DuesState> {
+  DuesRepository get _repository => ref.read(duesRepositoryProvider);
   /// Submit edilen async işlemlerin (status update / due-amount update) art
   /// arda tetiklenmesini engelleyen bayraklar. UI da butonu disable ediyor;
   /// bu defansif katman.
@@ -63,18 +73,30 @@ class DuesNotifier extends StateNotifier<DuesState> {
   int? _lastYear;
   DueStatus? _lastStatus;
   String? _loadedBuildingId;
+  bool _isResidentList = false;
 
-  DuesNotifier(this._repository) : super(const DuesState());
-
+  @override
+  DuesState build() => const DuesState();
   Future<void> loadBuildingDues(
     String buildingId, {
+    bool refresh = true,
     int? month,
     int? year,
     DueStatus? status,
   }) async {
+    final filtersChanged =
+        _loadedBuildingId != buildingId ||
+        _lastMonth != month ||
+        _lastYear != year ||
+        _lastStatus != status ||
+        _isResidentList;
+    final effectiveRefresh = refresh || filtersChanged;
+    if (!effectiveRefresh && !state.canLoadMore) return;
+
     final buildingChanged =
         _loadedBuildingId != null && _loadedBuildingId != buildingId;
     _loadedBuildingId = buildingId;
+    _isResidentList = false;
     _lastMonth = month;
     _lastYear = year;
     _lastStatus = status;
@@ -82,47 +104,108 @@ class DuesNotifier extends StateNotifier<DuesState> {
     // göstermek için veriyi silmiyoruz; bina değişince yanlış veri
     // göstermemek için listeyi temizleriz.
     state = state.copyWith(
-      isLoading: true,
+      isLoading: effectiveRefresh,
+      isLoadingMore: !effectiveRefresh,
       clearError: true,
       dues: buildingChanged ? const [] : state.dues,
+      clearNextCursor: effectiveRefresh,
     );
     try {
-      final dues = await _repository.getBuildingDues(
+      final result = await _repository.getBuildingDues(
         buildingId,
         month: month,
         year: year,
         status: status,
+        cursor: effectiveRefresh ? null : state.nextCursor,
       );
-      state = state.copyWith(isLoading: false, dues: dues);
+      final merged = effectiveRefresh
+          ? result.items
+          : [...state.dues, ...result.items];
+      state = state.copyWith(
+        isLoading: false,
+        isLoadingMore: false,
+        dues: merged,
+        nextCursor: result.nextCursor,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
+        isLoadingMore: false,
         error: userFacingError(e),
       );
     }
   }
 
   Future<void> loadMyDues({
+    bool refresh = true,
     int? month,
     int? year,
     DueStatus? status,
   }) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    final filtersChanged =
+        _lastMonth != month ||
+        _lastYear != year ||
+        _lastStatus != status ||
+        !_isResidentList;
+    final effectiveRefresh = refresh || filtersChanged;
+    if (!effectiveRefresh && !state.canLoadMore) return;
+
+    _isResidentList = true;
+    _loadedBuildingId = null;
+    _lastMonth = month;
+    _lastYear = year;
+    _lastStatus = status;
+
+    state = state.copyWith(
+      isLoading: effectiveRefresh,
+      isLoadingMore: !effectiveRefresh,
+      clearError: true,
+      clearNextCursor: effectiveRefresh,
+    );
     try {
-      final raw = await _repository.getMyDues(
+      final result = await _repository.getMyDues(
         month: month,
         year: year,
         status: status,
+        cursor: effectiveRefresh ? null : state.nextCursor,
       );
-      final dues = prepareResidentDuesList(raw);
-      state = state.copyWith(isLoading: false, dues: dues);
+      final merged = effectiveRefresh
+          ? result.items
+          : [...state.dues, ...result.items];
+      final dues = prepareResidentDuesList(merged);
+      state = state.copyWith(
+        isLoading: false,
+        isLoadingMore: false,
+        dues: dues,
+        nextCursor: result.nextCursor,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
+        isLoadingMore: false,
         error: userFacingError(e),
       );
     }
   }
+
+  Future<void> loadMoreBuildingDues() {
+    final id = _loadedBuildingId;
+    if (id == null || id.isEmpty) return Future.value();
+    return loadBuildingDues(
+      id,
+      refresh: false,
+      month: _lastMonth,
+      year: _lastYear,
+      status: _lastStatus,
+    );
+  }
+
+  Future<void> loadMoreMyDues() => loadMyDues(
+    refresh: false,
+    month: _lastMonth,
+    year: _lastYear,
+    status: _lastStatus,
+  );
 
   Future<void> updateStatus({
     required String buildingId,
@@ -138,13 +221,13 @@ class DuesNotifier extends StateNotifier<DuesState> {
         dueId: dueId,
         status: status,
       );
-      final dues = await _repository.getBuildingDues(
+      await loadBuildingDues(
         buildingId,
+        refresh: true,
         month: _lastMonth,
         year: _lastYear,
         status: _lastStatus,
       );
-      state = state.copyWith(dues: dues);
     } catch (e) {
       state = state.copyWith(error: userFacingError(e));
     } finally {
@@ -172,19 +255,16 @@ class DuesNotifier extends StateNotifier<DuesState> {
       );
       // affectCurrent false olsa bile sunucu tutar / gün günceller; liste
       // her zaman aynı filtreyle yenilenir (UI bayat kalmasın).
-      final dues = await _repository.getBuildingDues(
+      await loadBuildingDues(
         buildingId,
+        refresh: true,
         month: _lastMonth,
         year: _lastYear,
         status: _lastStatus,
       );
-      state = state.copyWith(isLoading: false, dues: dues);
       return true;
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: userFacingError(e),
-      );
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
       return false;
     } finally {
       _isUpdatingDueAmount = false;
@@ -192,10 +272,9 @@ class DuesNotifier extends StateNotifier<DuesState> {
   }
 }
 
-final duesNotifierProvider = StateNotifierProvider<DuesNotifier, DuesState>(
-  (ref) => DuesNotifier(ref.watch(duesRepositoryProvider)),
+final duesNotifierProvider = NotifierProvider<DuesNotifier, DuesState>(
+  DuesNotifier.new,
 );
-
 /// Manager dashboard hero card için kullanılan tüm binaların dues toplamı.
 /// `Map<buildingId, List<DueEntity>>` döner; bina başına filtreleme için
 /// alttaki [buildingCollectionRate] / [buildingOverdueCount] helper'ları
@@ -207,22 +286,25 @@ final duesNotifierProvider = StateNotifierProvider<DuesNotifier, DuesState>(
 ///
 /// `buildingsStoreProvider` değişince otomatik yeniden hesaplanır
 /// (yeni bina eklenince ya da silinince provider tetiklenir).
-final allBuildingsDuesProvider =
-    FutureProvider<Map<String, List<DueEntity>>>((ref) async {
+final allBuildingsDuesProvider = FutureProvider<Map<String, List<DueEntity>>>((
+  ref,
+) async {
   final buildingsAsync = ref.watch(buildingsStoreProvider);
   final buildings = buildingsAsync.value ?? const [];
   if (buildings.isEmpty) return const {};
   final repo = ref.watch(duesRepositoryProvider);
   // Paralel çek; bir bina yüklenmese bile diğerlerinin durmaması için
   // her future'ı ayrı try/catch içinde sarıyoruz.
-  final results = await Future.wait(buildings.map((b) async {
-    try {
-      final dues = await repo.getBuildingDues(b.id);
-      return MapEntry(b.id, dues);
-    } catch (_) {
-      return MapEntry(b.id, const <DueEntity>[]);
-    }
-  }));
+  final results = await Future.wait(
+    buildings.map((b) async {
+      try {
+        final dues = await repo.getBuildingDues(b.id, paginated: false);
+        return MapEntry(b.id, dues.items);
+      } catch (_) {
+        return MapEntry(b.id, const <DueEntity>[]);
+      }
+    }),
+  );
   return Map.fromEntries(results);
 });
 
@@ -246,7 +328,9 @@ int globalOverdueCount(Map<String, List<DueEntity>> map) {
 /// Tek bir binanın ödeme oranı. Bina kartlarında "Tahsilat" sütununda
 /// kullanılır. Bina için dues yoksa 0 döner.
 double buildingCollectionRate(
-    Map<String, List<DueEntity>> map, String buildingId) {
+  Map<String, List<DueEntity>> map,
+  String buildingId,
+) {
   final dues = map[buildingId] ?? const [];
   if (dues.isEmpty) return 0;
   final paid = dues.where((d) => d.status == DueStatus.paid).length;
@@ -254,8 +338,7 @@ double buildingCollectionRate(
 }
 
 /// Tek bir binanın gecikmiş aidat sayısı.
-int buildingOverdueCount(
-    Map<String, List<DueEntity>> map, String buildingId) {
+int buildingOverdueCount(Map<String, List<DueEntity>> map, String buildingId) {
   return (map[buildingId] ?? const [])
       .where((d) => d.status == DueStatus.overdue)
       .length;

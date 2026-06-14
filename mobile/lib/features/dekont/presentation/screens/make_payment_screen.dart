@@ -53,7 +53,7 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
               fileBytes: pendingFile['fileBytes'],
               filePath: pendingFile['filePath'],
             );
-        ref.read(pendingDekontFileProvider.notifier).state = null;
+        ref.read(pendingDekontFileProvider.notifier).update(null);
       }
     });
   }

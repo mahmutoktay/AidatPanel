@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../core/network/paginated_list_result.dart';
 import '../features/dekont/domain/entities/dekont_entity.dart';
 import '../features/dekont/domain/entities/dekont_upload_result.dart';
 import '../features/dekont/domain/entities/dekont_status.dart';
@@ -119,17 +120,25 @@ class MockDekontRepository implements DekontRepository {
   }
 
   @override
-  Future<List<DekontEntity>> getMyDekonts({String? status}) async {
+  Future<PaginatedListResult<DekontEntity>> getMyDekonts({
+    String? status,
+    String? cursor,
+    bool paginated = true,
+  }) async {
     await Future<void>.delayed(const Duration(milliseconds: 200));
-    if (status == null) return List.from(_dekonts);
-    return _dekonts.where((d) => d.status.apiValue == status).toList();
+    final filtered = status == null
+        ? List<DekontEntity>.from(_dekonts)
+        : _dekonts.where((d) => d.status.apiValue == status).toList();
+    return PaginatedListResult(items: filtered);
   }
 
   @override
-  Future<List<DekontEntity>> getBuildingDekonts(
+  Future<PaginatedListResult<DekontEntity>> getBuildingDekonts(
     String buildingId, {
     String? status,
     String? apartmentId,
+    String? cursor,
+    bool paginated = true,
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 200));
     var list = _dekonts.where((d) => d.buildingId == buildingId);
@@ -139,7 +148,7 @@ class MockDekontRepository implements DekontRepository {
     if (apartmentId != null) {
       list = list.where((d) => d.apartmentId == apartmentId);
     }
-    return list.toList();
+    return PaginatedListResult(items: list.toList());
   }
 
   @override
@@ -156,8 +165,7 @@ class MockDekontRepository implements DekontRepository {
           ? DekontStatus.paymentApplied
           : DekontStatus.rejected,
       reviewNote: note,
-      rejectionReason:
-          decision == DekontReviewDecision.reject ? note : null,
+      rejectionReason: decision == DekontReviewDecision.reject ? note : null,
       dueId: dueId ?? current.dueId,
     );
     _replace(updated);
@@ -165,14 +173,80 @@ class MockDekontRepository implements DekontRepository {
   }
 
   @override
-  Future<List<int>> getDekontFileBytes(String id, {bool download = false}) async {
+  Future<List<int>> getDekontFileBytes(
+    String id, {
+    bool download = false,
+  }) async {
     await Future<void>.delayed(const Duration(milliseconds: 200));
     // 1x1 PNG
     return Uint8List.fromList([
-      137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0,
-      0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 10, 73,
-      68, 65, 84, 120, 156, 99, 0, 1, 0, 0, 5, 0, 1, 13, 10, 45, 180, 0, 0,
-      0, 0, 73, 69, 78, 68, 174, 66, 96, 130,
+      137,
+      80,
+      78,
+      71,
+      13,
+      10,
+      26,
+      10,
+      0,
+      0,
+      0,
+      13,
+      73,
+      72,
+      68,
+      82,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      8,
+      6,
+      0,
+      0,
+      0,
+      31,
+      21,
+      196,
+      137,
+      0,
+      0,
+      0,
+      10,
+      73,
+      68,
+      65,
+      84,
+      120,
+      156,
+      99,
+      0,
+      1,
+      0,
+      0,
+      5,
+      0,
+      1,
+      13,
+      10,
+      45,
+      180,
+      0,
+      0,
+      0,
+      0,
+      73,
+      69,
+      78,
+      68,
+      174,
+      66,
+      96,
+      130,
     ]);
   }
 

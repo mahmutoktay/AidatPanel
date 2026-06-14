@@ -57,8 +57,9 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     });
     try {
       if (!forceFromServer) {
-        final memoryCached =
-            ref.read(dekontLocalPreviewProvider)[widget.dekontId];
+        final memoryCached = ref.read(
+          dekontLocalPreviewProvider,
+        )[widget.dekontId];
         if (memoryCached != null && memoryCached.isNotEmpty) {
           if (mounted) {
             setState(() {
@@ -76,9 +77,9 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
               _fileBytes = diskCached;
               _fileError = null;
             });
-            ref.read(dekontLocalPreviewProvider.notifier).update(
-                  (m) => {...m, widget.dekontId: diskCached},
-                );
+            ref
+                .read(dekontLocalPreviewProvider.notifier)
+                .upsert(widget.dekontId, diskCached);
           }
           return;
         }
@@ -93,9 +94,9 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
           _fileBytes = copy;
           _fileError = null;
         });
-        ref.read(dekontLocalPreviewProvider.notifier).update(
-              (m) => {...m, widget.dekontId: copy},
-            );
+        ref
+            .read(dekontLocalPreviewProvider.notifier)
+            .upsert(widget.dekontId, copy);
         await DekontPreviewCache.save(widget.dekontId, copy);
       }
     } catch (e) {
@@ -106,10 +107,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
         }
         final msg = userFacingError(e, context: ApiMessageContext.dekont);
         setState(() => _fileError = msg);
-        ref.read(toastProvider.notifier).show(
-              msg,
-              type: ToastType.error,
-            );
+        ref.read(toastProvider.notifier).show(msg, type: ToastType.error);
       }
     } finally {
       if (mounted) setState(() => _loadingFile = false);
@@ -136,7 +134,9 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     );
     if (ok == true && mounted) {
       ref.invalidate(dekontDetailProvider(widget.dekontId));
-      ref.read(toastProvider.notifier).show(
+      ref
+          .read(toastProvider.notifier)
+          .show(
             context.t.features.dekont.reviewSuccess,
             type: ToastType.success,
           );
@@ -144,20 +144,28 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
   }
 
   Future<void> _downloadDekont(DekontEntity dekont) async {
-    ref.read(toastProvider.notifier).show('İndirme başlatıldı...', type: ToastType.info);
-    
+    ref
+        .read(toastProvider.notifier)
+        .show('İndirme başlatıldı...', type: ToastType.info);
+
     try {
-      final message = await ref.read(dekontDownloadProvider).downloadAndSave(
-        dekont.id,
-        dekont.mimeType,
-        dekont.originalFilename,
-      );
-      
+      final message = await ref
+          .read(dekontDownloadProvider)
+          .downloadAndSave(dekont.id, dekont.mimeType, dekont.originalFilename);
+
       if (!mounted) return;
-      ref.read(toastProvider.notifier).show(message, type: ToastType.success, duration: const Duration(seconds: 4));
+      ref
+          .read(toastProvider.notifier)
+          .show(
+            message,
+            type: ToastType.success,
+            duration: const Duration(seconds: 4),
+          );
     } catch (e) {
       if (!mounted) return;
-      ref.read(toastProvider.notifier).show(e.toString(), type: ToastType.error);
+      ref
+          .read(toastProvider.notifier)
+          .show(e.toString(), type: ToastType.error);
     }
   }
 
@@ -205,8 +213,9 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
         ),
         data: (dekont) {
           final visual = dekontStatusVisual(context, dekont.status);
-          final date =
-              DateFormat('d MMMM yyyy, HH:mm').format(dekont.createdAt);
+          final date = DateFormat(
+            'd MMMM yyyy, HH:mm',
+          ).format(dekont.createdAt);
 
           return RefreshIndicator(
             onRefresh: () async {
@@ -278,7 +287,10 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
                             dekont.parsedAmount != null ||
                             dekont.rejectionReason != null) ...[
                           const SizedBox(height: AppSizes.spacingM),
-                          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
+                          Divider(
+                            height: 1,
+                            color: AppColors.border.withValues(alpha: 0.5),
+                          ),
                           const SizedBox(height: AppSizes.spacingM),
                         ],
                         if (dekont.apartment != null) ...[
@@ -398,10 +410,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(
-          color: AppColors.borderColor,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.borderColor, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -421,7 +430,9 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
             const SizedBox(width: AppSizes.spacingM),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingS),
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSizes.spacingS,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -451,7 +462,9 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
             Padding(
               padding: const EdgeInsets.only(right: AppSizes.spacingS),
               child: IconButton(
-                onPressed: _fileBytes != null ? () => _showPreviewDialog(context, dekont) : null,
+                onPressed: _fileBytes != null
+                    ? () => _showPreviewDialog(context, dekont)
+                    : null,
                 icon: const Icon(Icons.visibility_outlined),
                 color: AppColors.primary,
                 tooltip: t.filePreview,
@@ -472,11 +485,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
       width: 64,
       height: 64,
       color: color.withValues(alpha: 0.08),
-      child: Icon(
-        icon,
-        color: color,
-        size: 28,
-      ),
+      child: Icon(icon, color: color, size: 28),
     );
   }
 
@@ -560,15 +569,16 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
     final dueId = _selectedDueId ?? widget.dekont.dueId;
     if (decision == DekontReviewDecision.approve &&
         (dueId == null || dueId.isEmpty)) {
-      ref.read(toastProvider.notifier).show(
-            t.selectDueForApprove,
-            type: ToastType.info,
-          );
+      ref
+          .read(toastProvider.notifier)
+          .show(t.selectDueForApprove, type: ToastType.info);
       return;
     }
 
     setState(() => _submitting = true);
-    final ok = await ref.read(managerDekontsNotifierProvider.notifier).review(
+    final ok = await ref
+        .read(managerDekontsNotifierProvider.notifier)
+        .review(
           id: widget.dekont.id,
           decision: decision,
           note: _noteController.text,
@@ -579,10 +589,9 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
     if (ok) {
       Navigator.of(context).pop(true);
     } else {
-      ref.read(toastProvider.notifier).show(
-            t.reviewFailed,
-            type: ToastType.error,
-          );
+      ref
+          .read(toastProvider.notifier)
+          .show(t.reviewFailed, type: ToastType.error);
     }
   }
 
@@ -610,9 +619,7 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
               const SizedBox(height: AppSizes.spacingM),
               TextField(
                 controller: _noteController,
-                decoration: InputDecoration(
-                  labelText: t.reviewNote,
-                ),
+                decoration: InputDecoration(labelText: t.reviewNote),
                 maxLines: 3,
               ),
               const SizedBox(height: AppSizes.spacingM),
@@ -678,9 +685,7 @@ class _BuildingDuesPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.t.features.dekont;
-    final duesAsync = ref.watch(
-      buildingDuesForReviewProvider(buildingId),
-    );
+    final duesAsync = ref.watch(buildingDuesForReviewProvider(buildingId));
 
     return duesAsync.when(
       loading: () => const LinearProgressIndicator(),
@@ -711,8 +716,12 @@ class _BuildingDuesPicker extends ConsumerWidget {
 
 final buildingDuesForReviewProvider = FutureProvider.autoDispose
     .family<List<DueEntity>, String>((ref, buildingId) async {
-  return ref.read(duesRepositoryProvider).getBuildingDues(
-        buildingId,
-        status: DueStatus.pending,
-      );
-});
+      final result = await ref
+          .read(duesRepositoryProvider)
+          .getBuildingDues(
+            buildingId,
+            status: DueStatus.pending,
+            paginated: false,
+          );
+      return result.items;
+    });

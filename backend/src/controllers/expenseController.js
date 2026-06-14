@@ -24,11 +24,14 @@ const handleHttp = (err, res, next) => {
 export const getExpensesByBuilding = async (req, res, next) => {
   try {
     const { id: buildingId } = req.params;
-    const { month, year, category } = req.query;
+    const { month, year, category, cursor, limit, paginated } = req.query;
     const data = await listExpensesByBuildingService(buildingId, req.user.id, {
       month,
       year,
       category,
+      cursor,
+      limit,
+      paginated,
     });
     res.status(200).json({ success: true, data });
   } catch (err) {
@@ -175,11 +178,14 @@ export const getExpenseFile = async (req, res, next) => {
 
 export const getMyExpenses = async (req, res, next) => {
   try {
-    const { month, year, category } = req.query;
+    const { month, year, category, cursor, limit, paginated } = req.query;
     const data = await listExpensesForResidentService(req.user.id, {
       month,
       year,
       category,
+      cursor,
+      limit,
+      paginated,
     });
     res.status(200).json({ success: true, data });
   } catch (err) {

@@ -21,10 +21,13 @@ const handleHttp = (err, res, next) => {
 export const getTicketsByBuilding = async (req, res, next) => {
   try {
     const { id: buildingId } = req.params;
-    const { status, category } = req.query;
+    const { status, category, cursor, limit, paginated } = req.query;
     const data = await listTicketsByBuildingService(buildingId, req.user.id, {
       status,
       category,
+      cursor,
+      limit,
+      paginated,
     });
     res.status(200).json({ success: true, data });
   } catch (err) {
@@ -34,8 +37,14 @@ export const getTicketsByBuilding = async (req, res, next) => {
 
 export const getMyTickets = async (req, res, next) => {
   try {
-    const { status, category } = req.query;
-    const data = await listMyTicketsService(req.user.id, { status, category });
+    const { status, category, cursor, limit, paginated } = req.query;
+    const data = await listMyTicketsService(req.user.id, {
+      status,
+      category,
+      cursor,
+      limit,
+      paginated,
+    });
     res.status(200).json({ success: true, data });
   } catch (err) {
     handleHttp(err, res, next);

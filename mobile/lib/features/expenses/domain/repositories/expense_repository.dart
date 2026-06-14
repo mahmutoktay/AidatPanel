@@ -1,17 +1,22 @@
+import '../../../../core/network/paginated_list_result.dart';
 import '../entities/expense_entity.dart';
 
 abstract class ExpenseRepository {
-  Future<List<ExpenseEntity>> getBuildingExpenses(
+  Future<PaginatedListResult<ExpenseEntity>> getBuildingExpenses(
     String buildingId, {
     int? month,
     int? year,
     String? category,
+    String? cursor,
+    bool paginated = true,
   });
 
-  Future<List<ExpenseEntity>> getMyExpenses({
+  Future<PaginatedListResult<ExpenseEntity>> getMyExpenses({
     int? month,
     int? year,
     String? category,
+    String? cursor,
+    bool paginated = true,
   });
 
   Future<ExpenseSummaryEntity> getSummary(
@@ -47,5 +52,8 @@ abstract class ExpenseRepository {
 
   Future<void> deleteExpense(String expenseId);
 
-  Future<ExpenseEntity> uploadReceipts(String expenseId, List<String> filePaths);
+  Future<ExpenseEntity> uploadReceipts(
+    String expenseId,
+    List<String> filePaths,
+  );
 }

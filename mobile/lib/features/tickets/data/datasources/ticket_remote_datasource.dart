@@ -1,18 +1,25 @@
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/network/paginated_list_result.dart';
+import '../../../../core/network/pagination_parse.dart';
 import '../models/create_ticket_request.dart';
 import '../models/ticket_model.dart';
 
 abstract class TicketRemoteDataSource {
-  Future<List<TicketModel>> getMyTickets({
+  Future<PaginatedListResult<TicketModel>> getMyTickets({
     String? status,
     String? category,
+    String? cursor,
+    bool paginated = true,
   });
 
-  Future<List<TicketModel>> getBuildingTickets(
+  Future<PaginatedListResult<TicketModel>> getBuildingTickets(
     String buildingId, {
     String? status,
     String? category,
+    String? cursor,
+    bool paginated = true,
   });
 
   Future<TicketModel> getTicketById(String ticketId);
@@ -31,45 +38,62 @@ class TicketRemoteDataSourceImpl implements TicketRemoteDataSource {
   final DioClient _dioClient;
 
   TicketRemoteDataSourceImpl({required DioClient dioClient})
-      : _dioClient = dioClient;
+    : _dioClient = dioClient;
 
-  Map<String, dynamic>? _query({String? status, String? category}) {
-    final q = <String, dynamic>{};
-    if (status != null) q['status'] = status;
-    if (category != null) q['category'] = category;
-    return q.isEmpty ? null : q;
-  }
-
-  List<TicketModel> _parseList(dynamic data) {
-    final list = data as List;
-    return list
-        .map((json) => TicketModel.fromJson(json as Map<String, dynamic>))
-        .toList();
+  Map<String, dynamic> _query({
+    String? status,
+    String? category,
+    String? cursor,
+    required bool paginated,
+  }) {
+    return paginatedQuery(
+      cursor: cursor,
+      limit: AppConstants.pageSize,
+      paginated: paginated,
+      extra: {
+        'status': ?status,
+        'category': ?category,
+      },
+    );
   }
 
   @override
-  Future<List<TicketModel>> getMyTickets({
+  Future<PaginatedListResult<TicketModel>> getMyTickets({
     String? status,
     String? category,
+    String? cursor,
+    bool paginated = true,
   }) async {
     final response = await _dioClient.get(
       ApiConstants.myTickets,
-      queryParameters: _query(status: status, category: category),
+      queryParameters: _query(
+        status: status,
+        category: category,
+        cursor: cursor,
+        paginated: paginated,
+      ),
     );
-    return _parseList(response.data['data']);
+    return parsePaginatedList(response.data['data'], TicketModel.fromJson);
   }
 
   @override
-  Future<List<TicketModel>> getBuildingTickets(
+  Future<PaginatedListResult<TicketModel>> getBuildingTickets(
     String buildingId, {
     String? status,
     String? category,
+    String? cursor,
+    bool paginated = true,
   }) async {
     final response = await _dioClient.get(
       ApiConstants.buildingTickets(buildingId),
-      queryParameters: _query(status: status, category: category),
+      queryParameters: _query(
+        status: status,
+        category: category,
+        cursor: cursor,
+        paginated: paginated,
+      ),
     );
-    return _parseList(response.data['data']);
+    return parsePaginatedList(response.data['data'], TicketModel.fromJson);
   }
 
   @override
@@ -87,9 +111,7 @@ class TicketRemoteDataSourceImpl implements TicketRemoteDataSource {
       ApiConstants.apartmentTickets(apartmentId),
       data: request.toJson(),
     );
-    return TicketModel.fromJson(
-      response.data['data'] as Map<String, dynamic>,
-    );
+    return TicketModel.fromJson(response.data['data'] as Map<String, dynamic>);
   }
 
   @override
@@ -101,10 +123,7 @@ class TicketRemoteDataSourceImpl implements TicketRemoteDataSource {
   }
 
   @override
-  Future<TicketModel> patchTicketStatus(
-    String ticketId,
-    String status,
-  ) async {
+  Future<TicketModel> patchTicketStatus(String ticketId, String status) async {
     final response = await _dioClient.patch(
       ApiConstants.ticketStatus(ticketId),
       data: {'status': status},

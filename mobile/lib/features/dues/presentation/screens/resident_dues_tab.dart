@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../domain/entities/due_entity.dart';
@@ -22,9 +23,28 @@ class ResidentDuesTab extends ConsumerStatefulWidget {
 }
 
 class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
+  final ScrollController _scrollController = ScrollController();
   bool _requestedDues = false;
   bool _requestedExpenses = false;
   int _selectedSegment = 0; // 0: Aidatlar, 1: Giderler
+
+  @override
+  void initState() {
+    super.initState();
+    attachPaginationScroll(_scrollController, () {
+      if (_selectedSegment == 0) {
+        ref.read(duesNotifierProvider.notifier).loadMoreMyDues();
+      } else {
+        ref.read(expensesNotifierProvider.notifier).loadMore();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +68,12 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
       });
     }
 
-    final items = _buildBodyItems(context, duesState, expensesState, highlightDueId);
+    final items = _buildBodyItems(
+      context,
+      duesState,
+      expensesState,
+      highlightDueId,
+    );
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -59,6 +84,7 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
         }
       },
       child: ListView.builder(
+        controller: _scrollController,
         padding: AppSizes.screenBodyScrollPadding,
         itemCount: items.length,
         itemBuilder: (context, index) {
@@ -77,7 +103,9 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
                   item.isDue
                       ? context.t.common.noDuesYet
                       : context.t.features.expenses.emptyTitle,
-                  style: AppTypography.body1.copyWith(color: AppColors.textSecondary),
+                  style: AppTypography.body1.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             );
@@ -90,7 +118,9 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
                   children: [
                     Text(
                       item.message,
-                      style: AppTypography.body1.copyWith(color: AppColors.error),
+                      style: AppTypography.body1.copyWith(
+                        color: AppColors.error,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSizes.spacingM),
@@ -142,6 +172,12 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
           if (item is _SpacingItem) {
             return SizedBox(height: item.height);
           }
+          if (item is _LoadingMoreItem) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSizes.spacingM),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
           return const SizedBox.shrink();
         },
       ),
@@ -176,10 +212,12 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
         items.add(_SectionHeaderItem(context.t.common.currentPeriodDue));
         items.add(const _SpacingItem(AppSizes.spacingM));
         for (final due in split.current) {
-          items.add(_DueCardItem(
-            due,
-            highlighted: highlightDueId == null || highlightDueId == due.id,
-          ));
+          items.add(
+            _DueCardItem(
+              due,
+              highlighted: highlightDueId == null || highlightDueId == due.id,
+            ),
+          );
         }
       }
 
@@ -190,11 +228,11 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
         items.add(_SectionHeaderItem(context.t.common.myPastDues));
         items.add(const _SpacingItem(AppSizes.spacingM));
         for (final due in split.past) {
-          items.add(_DueCardItem(
-            due,
-            highlighted: highlightDueId == due.id,
-          ));
+          items.add(_DueCardItem(due, highlighted: highlightDueId == due.id));
         }
+      }
+      if (duesState.isLoadingMore) {
+        items.add(const _LoadingMoreItem());
       }
     } else {
       if (expensesState.isLoading) {
@@ -214,6 +252,9 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
 
       for (final expense in expensesState.expenses) {
         items.add(_ExpenseCardItem(expense));
+      }
+      if (expensesState.isLoadingMore) {
+        items.add(const _LoadingMoreItem());
       }
     }
 
@@ -236,11 +277,16 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Column(
                     children: [
-                      const Icon(Icons.payment_outlined, color: AppColors.primary),
+                      const Icon(
+                        Icons.payment_outlined,
+                        color: AppColors.primary,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         t.makePaymentTitle,
-                        style: AppTypography.button.copyWith(color: AppColors.primary),
+                        style: AppTypography.button.copyWith(
+                          color: AppColors.primary,
+                        ),
                       ),
                     ],
                   ),
@@ -260,11 +306,16 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Column(
                     children: [
-                      const Icon(Icons.receipt_long_outlined, color: AppColors.textPrimary),
+                      const Icon(
+                        Icons.receipt_long_outlined,
+                        color: AppColors.textPrimary,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         t.myDekontsTitle,
-                        style: AppTypography.button.copyWith(color: AppColors.textPrimary),
+                        style: AppTypography.button.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ],
                   ),
@@ -291,7 +342,9 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       padding: const EdgeInsets.all(AppSizes.cardPadding),
       decoration: BoxDecoration(
-        color: highlighted ? AppColors.primary.withValues(alpha: 0.08) : AppColors.fill,
+        color: highlighted
+            ? AppColors.primary.withValues(alpha: 0.08)
+            : AppColors.fill,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -307,7 +360,10 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: statusVisual.bg,
                   borderRadius: BorderRadius.circular(20),
@@ -356,7 +412,9 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab> {
                   children: [
                     Text(
                       expense.title,
-                      style: AppTypography.h4.copyWith(color: AppColors.textPrimary),
+                      style: AppTypography.h4.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: AppSizes.spacingXS),
                     Text(
@@ -597,4 +655,8 @@ class _ExpenseCardItem extends _ResidentDuesRowItem {
 class _SpacingItem extends _ResidentDuesRowItem {
   final double height;
   const _SpacingItem(this.height);
+}
+
+class _LoadingMoreItem extends _ResidentDuesRowItem {
+  const _LoadingMoreItem();
 }

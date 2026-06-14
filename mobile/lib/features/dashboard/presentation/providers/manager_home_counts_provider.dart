@@ -7,8 +7,9 @@ import '../../../notifications/presentation/providers/notifications_provider.dar
 
 /// Yönetici ana sayfa — bu ay tüm binalardaki gider kayıt sayısı.
 /// Özet endpoint + paralel istek (tam liste çekilmez).
-final managerMonthExpensesCountProvider =
-    FutureProvider.autoDispose<int>((ref) async {
+final managerMonthExpensesCountProvider = FutureProvider.autoDispose<int>((
+  ref,
+) async {
   final buildings = ref.watch(buildingsStoreProvider).value;
   if (buildings == null || buildings.isEmpty) return 0;
 
@@ -33,8 +34,9 @@ final managerMonthExpensesCountProvider =
 });
 
 /// Yönetici ana sayfa — bu ay gönderilen duyuru bildirimi sayısı.
-final managerMonthAnnouncementsCountProvider =
-    FutureProvider.autoDispose<int>((ref) async {
+final managerMonthAnnouncementsCountProvider = FutureProvider.autoDispose<int>((
+  ref,
+) async {
   final repo = ref.watch(notificationRepositoryProvider);
   try {
     return await repo.countAnnouncementsInMonth();
@@ -44,8 +46,9 @@ final managerMonthAnnouncementsCountProvider =
 });
 
 /// Yönetici ana sayfa — inceleme bekleyen dekont sayısı (tüm binalar).
-final managerPendingDekontsCountProvider =
-    FutureProvider.autoDispose<int>((ref) async {
+final managerPendingDekontsCountProvider = FutureProvider.autoDispose<int>((
+  ref,
+) async {
   final buildings = ref.watch(buildingsStoreProvider).value;
   if (buildings == null || buildings.isEmpty) return 0;
 
@@ -54,8 +57,13 @@ final managerPendingDekontsCountProvider =
 
   for (final building in buildings) {
     try {
-      final dekonts = await repo.getBuildingDekonts(building.id);
-      count += dekonts.where((d) => d.status.needsManagerAttention).length;
+      final dekonts = await repo.getBuildingDekonts(
+        building.id,
+        paginated: false,
+      );
+      count += dekonts.items
+          .where((d) => d.status.needsManagerAttention)
+          .length;
     } catch (_) {
       // Tek bina hatası tüm sayacı düşürmez.
     }

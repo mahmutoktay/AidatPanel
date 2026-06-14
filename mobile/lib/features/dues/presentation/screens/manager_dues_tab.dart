@@ -5,6 +5,7 @@ import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/app_select_field.dart';
@@ -24,6 +25,7 @@ class ManagerDuesTab extends ConsumerStatefulWidget {
 
 class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   final TextEditingController _amountController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   String? _selectedBuildingId;
   int? _selectedDueDay;
@@ -35,7 +37,16 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   bool _showAmountCard = false;
 
   @override
+  void initState() {
+    super.initState();
+    attachPaginationScroll(_scrollController, () {
+      ref.read(duesNotifierProvider.notifier).loadMoreBuildingDues();
+    });
+  }
+
+  @override
   void dispose() {
+    _scrollController.dispose();
     _amountController.dispose();
     super.dispose();
   }
@@ -59,7 +70,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
             setState(() => _selectedBuildingId = buildingId);
             await _reloadDues();
           }
-          ref.read(managerDueNavigationIntentProvider.notifier).state = null;
+          ref.read(managerDueNavigationIntentProvider.notifier).update(null);
         });
       },
     );
@@ -76,6 +87,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
       onRefresh: _reloadDues,
       color: AppColors.primary,
       child: CustomScrollView(
+        controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverPadding(
@@ -162,6 +174,13 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                   ),
                   childCount: dues.length,
                 ),
+              ),
+            ),
+          if (duesState.isLoadingMore)
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: AppSizes.spacingL),
+                child: Center(child: CircularProgressIndicator()),
               ),
             ),
         ],

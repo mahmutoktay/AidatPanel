@@ -1,19 +1,24 @@
+import '../../../../core/network/paginated_list_result.dart';
 import '../entities/due_entity.dart';
 
 abstract class DuesRepository {
   /// Tur 5 / §10/3 — server-side filtreleme.
   /// Tüm parametreler opsiyonel; null geçilirse sunucu tüm dues'u döner.
-  Future<List<DueEntity>> getBuildingDues(
+  Future<PaginatedListResult<DueEntity>> getBuildingDues(
     String buildingId, {
     int? month,
     int? year,
     DueStatus? status,
+    String? cursor,
+    bool paginated = true,
   });
 
-  Future<List<DueEntity>> getMyDues({
+  Future<PaginatedListResult<DueEntity>> getMyDues({
     int? month,
     int? year,
     DueStatus? status,
+    String? cursor,
+    bool paginated = true,
   });
 
   Future<DueEntity> updateDueStatus({

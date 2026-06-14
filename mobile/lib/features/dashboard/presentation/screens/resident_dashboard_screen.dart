@@ -49,7 +49,7 @@ class _ResidentDashboardScreenState
     );
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
-      ref.read(residentTabIndexProvider.notifier).state = _tabController.index;
+      ref.read(residentTabIndexProvider.notifier).update(_tabController.index);
       prefetchNotifications(ref);
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -92,7 +92,7 @@ class _ResidentDashboardScreenState
       currentTabIndex: _tabController.index,
       exitHintMessage: context.t.common.pressBackAgainToExit,
       goToHomeTab: () {
-        ref.read(residentTabIndexProvider.notifier).state = 0;
+        ref.read(residentTabIndexProvider.notifier).reset();
         _tabController.animateTo(0);
       },
       onExitHint: (message) => ref
@@ -147,7 +147,7 @@ class _ResidentDashboardScreenState
           ],
           selectedIndex: ref.watch(residentTabIndexProvider),
           onDestinationSelected: (index) {
-            ref.read(residentTabIndexProvider.notifier).state = index;
+            ref.read(residentTabIndexProvider.notifier).update(index);
             _tabController.animateTo(index);
           },
         ),
@@ -227,12 +227,12 @@ class _ResidentDashboardScreenState
   }
 
   void _goToDuesTab() {
-    ref.read(residentTabIndexProvider.notifier).state = 1;
+    ref.read(residentTabIndexProvider.notifier).update(1);
     _tabController.animateTo(1);
   }
 
   void _goToIssuesTab() {
-    ref.read(residentTabIndexProvider.notifier).state = 2;
+    ref.read(residentTabIndexProvider.notifier).update(2);
     _tabController.animateTo(2);
   }
 

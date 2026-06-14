@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
@@ -38,17 +37,18 @@ class ProfileState {
   }
 }
 
-class ProfileNotifier extends StateNotifier<ProfileState> {
-  ProfileNotifier(this._repository, this._ref) : super(const ProfileState());
+class ProfileNotifier extends Notifier<ProfileState> {
+  ProfileRepository get _repository => ref.read(profileRepositoryProvider);
 
-  final ProfileRepository _repository;
-  final Ref _ref;
   bool _loadInFlight = false;
+
+  @override
+  ProfileState build() => const ProfileState();
 
   Future<void> loadProfile() async {
     if (_loadInFlight) return;
 
-    final cachedUser = _ref.read(authStateProvider).user;
+    final cachedUser = ref.read(authStateProvider).user;
     final hasDisplayUser = state.user != null || cachedUser != null;
 
     _loadInFlight = true;
@@ -59,7 +59,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     );
     try {
       final user = await _repository.getProfile();
-      await _ref.read(authStateProvider.notifier).syncCachedUser(user);
+      await ref.read(authStateProvider.notifier).syncCachedUser(user);
       state = state.copyWith(isLoading: false, user: user, clearError: true);
     } on ApiException catch (e) {
       state = state.copyWith(
@@ -91,7 +91,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         phone: phone,
         currentPassword: currentPassword,
       );
-      await _ref.read(authStateProvider.notifier).syncCachedUser(user);
+      await ref.read(authStateProvider.notifier).syncCachedUser(user);
       state = state.copyWith(isSaving: false, user: user, clearError: true);
       return true;
     } on ApiException catch (e) {
@@ -111,9 +111,4 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 }
 
 final profileNotifierProvider =
-    StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
-  return ProfileNotifier(
-    ref.watch(profileRepositoryProvider),
-    ref,
-  );
-});
+    NotifierProvider<ProfileNotifier, ProfileState>(ProfileNotifier.new);
