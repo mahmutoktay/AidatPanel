@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/network/api_exception.dart';
@@ -15,7 +14,8 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/api_user_message.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/theme/dashboard_screen_style.dart';
+import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -29,6 +29,7 @@ import '../../domain/entities/dekont_status.dart';
 import '../providers/dekont_provider.dart';
 import '../providers/dekont_download_provider.dart';
 import '../../../../shared/widgets/document_preview_screen.dart';
+import '../widgets/dekont_detail_file_row.dart';
 import '../widgets/dekont_system_info_section.dart';
 
 class DekontDetailScreen extends ConsumerStatefulWidget {
@@ -195,15 +196,6 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     ];
   }
 
-  Widget _dashboardInfoCard({required Widget child}) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: DashboardScreenStyle.whiteCard(),
-      child: child,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final detail = ref.watch(dekontDetailProvider(widget.dekontId));
@@ -235,10 +227,6 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
         ),
       ),
       data: (dekont) {
-        final date = DateFormat(
-          'd MMMM yyyy, HH:mm',
-        ).format(dekont.createdAt);
-
         return RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(dekontDetailProvider(widget.dekontId));
@@ -253,51 +241,17 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _dashboardInfoCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        dekont.originalFilename,
-                        style: AppTypography.h4.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        date,
-                        style: AppTypography.body2.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
+                DekontSystemInfoSection(
+                  dekont: dekont,
+                  isManager: isManager,
                 ),
                 const SizedBox(height: AppSizes.spacingM),
-                _dashboardInfoCard(
-                  child: DekontSystemInfoSection(
-                    dekont: dekont,
-                    isManager: isManager,
-                  ),
-                ),
-                if (dekont.status == DekontStatus.rejected) ...[
-                  const SizedBox(height: AppSizes.spacingM),
-                  SizedBox(
-                    height: AppSizes.buttonHeightPrimary,
-                    child: ElevatedButton(
-                      onPressed: () => context.push('/payment'),
-                      style: AppButtonStyles.elevatedSuccess(),
-                      child: Text(t.reupload),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: AppSizes.spacingM),
-                _dashboardInfoCard(
-                  child: _buildFileCard(
-                    context,
-                    dekont,
-                    dashboardStyle: true,
-                  ),
+                DekontDetailFileRow(
+                  dekont: dekont,
+                  sizeBytes: _fileBytes?.length,
+                  loadingFile: _loadingFile,
+                  onPreview: () => _openDekontPreview(dekont),
+                  onShare: () => _shareFile(dekont),
                 ),
                 if (_fileError != null) ...[
                   const SizedBox(height: AppSizes.spacingM),
@@ -313,14 +267,24 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
                     child: Text(context.t.common.tryAgain),
                   ),
                 ],
-                if (isManager && dekont.status.needsManagerApproval) ...[
-                  const SizedBox(height: AppSizes.spacingL),
+                if (dekont.status == DekontStatus.rejected) ...[
+                  const SizedBox(height: AppSizes.spacingM),
                   SizedBox(
-                    height: AppSizes.buttonHeightPrimary,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => context.push('/payment'),
+                      style: AppButtonStyles.elevatedSuccess(),
+                      child: Text(t.reupload),
+                    ),
+                  ),
+                ],
+                if (isManager && dekont.status.needsManagerApproval) ...[
+                  const SizedBox(height: AppSizes.spacingM),
+                  SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () => _openReviewSheet(dekont),
-                      style: AppButtonStyles.elevatedPrimary(fullWidth: true),
+                      style: ProfileSettingsUi.primaryButton,
                       child: Text('${t.approve} / ${t.reject}'),
                     ),
                   ),
@@ -337,126 +301,6 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
       actions: downloadActions,
       body: body,
     );
-  }
-
-  Widget _buildFileCard(
-    BuildContext context,
-    DekontEntity dekont, {
-    bool dashboardStyle = false,
-  }) {
-    final filename = dekont.originalFilename;
-    final ext = filename.split('.').last.toLowerCase();
-    final isPdf = ext == 'pdf';
-    final sizeBytes = _fileBytes?.length ?? dekont.sizeBytes;
-    final t = context.t.features.dekont;
-    final borderRadius = BorderRadius.circular(
-      dashboardStyle ? DashboardScreenStyle.cardRadius : 12,
-    );
-
-    return Container(
-      decoration: dashboardStyle
-          ? null
-          : BoxDecoration(
-              color: AppColors.fill,
-              borderRadius: borderRadius,
-            ),
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: Row(
-          children: [
-            _buildFileIcon(
-              isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
-              isPdf ? Colors.red[700]! : AppColors.primary,
-            ),
-            const SizedBox(width: AppSizes.spacingM),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppSizes.spacingS,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      filename,
-                      style: AppTypography.body1.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (sizeBytes > 0) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        _formatFileSize(sizeBytes),
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: AppSizes.spacingXS),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    onPressed: _loadingFile
-                        ? null
-                        : () => _openDekontPreview(dekont),
-                    icon: _loadingFile
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.visibility_outlined),
-                    color: AppColors.primary,
-                    tooltip: t.viewDekont,
-                    constraints: const BoxConstraints(
-                      minWidth: AppSizes.minTouchTarget,
-                      minHeight: AppSizes.minTouchTarget,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: _loadingFile
-                        ? null
-                        : () => _shareFile(dekont),
-                    icon: const Icon(Icons.share_outlined),
-                    color: AppColors.primary,
-                    tooltip: t.shareFile,
-                    constraints: const BoxConstraints(
-                      minWidth: AppSizes.minTouchTarget,
-                      minHeight: AppSizes.minTouchTarget,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFileIcon(IconData icon, Color color) {
-    return Container(
-      width: 64,
-      height: 64,
-      color: AppColors.surface,
-      child: Icon(icon, color: color, size: 28),
-    );
-  }
-
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
   }
 }
 
@@ -559,9 +403,10 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
                   ),
                 ),
                 const SizedBox(height: AppSizes.spacingL),
-                TextField(
+                MinimalTextField(
                   controller: _noteController,
-                  decoration: InputDecoration(labelText: t.reviewNote),
+                  label: t.reviewNote,
+                  icon: Icons.notes_outlined,
                   maxLines: 3,
                 ),
                 const SizedBox(height: AppSizes.spacingM),
@@ -575,34 +420,28 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
                 Row(
                   children: [
                     Expanded(
-                      child: SizedBox(
-                        height: AppSizes.buttonHeightSecondary,
-                        child: OutlinedButton(
-                          onPressed: _pendingDecision != null
-                              ? null
-                              : () => _submit(DekontReviewDecision.reject),
-                          style: AppButtonStyles.outlinedDanger(fullWidth: true),
-                          child: _pendingDecision == DekontReviewDecision.reject
-                              ? const _ReviewButtonSpinner()
-                              : Text(t.reject),
-                        ),
+                      child: OutlinedButton(
+                        onPressed: _pendingDecision != null
+                            ? null
+                            : () => _submit(DekontReviewDecision.reject),
+                        style: ProfileSettingsUi.dangerOutlinedButton,
+                        child: _pendingDecision == DekontReviewDecision.reject
+                            ? const _ReviewButtonSpinner()
+                            : Text(t.reject),
                       ),
                     ),
                     const SizedBox(width: AppSizes.spacingS),
                     Expanded(
-                      child: SizedBox(
-                        height: AppSizes.buttonHeightSecondary,
-                        child: ElevatedButton(
-                          onPressed: _pendingDecision != null
-                              ? null
-                              : () => _submit(DekontReviewDecision.approve),
-                          style: AppButtonStyles.elevatedSuccess(fullWidth: true),
-                          child: _pendingDecision == DekontReviewDecision.approve
-                              ? const _ReviewButtonSpinner(
-                                  color: Colors.white,
-                                )
-                              : Text(t.approve),
-                        ),
+                      child: ElevatedButton(
+                        onPressed: _pendingDecision != null
+                            ? null
+                            : () => _submit(DekontReviewDecision.approve),
+                        style: AppButtonStyles.elevatedSuccess(fullWidth: true),
+                        child: _pendingDecision == DekontReviewDecision.approve
+                            ? const _ReviewButtonSpinner(
+                                color: Colors.white,
+                              )
+                            : Text(t.approve),
                       ),
                     ),
                   ],

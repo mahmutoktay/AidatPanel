@@ -51,7 +51,16 @@ abstract final class ProfileSettingsUi {
 
   static const double radiusPill = 999;
 
+  /// Minimal form alanları (Yeni Bina Ekle vb.)
+  static const double fieldRadius = 14;
+  static const Color fieldFill = AppColors.fill;
+  static const double fieldFocusBorderWidth = 1.5;
+  static const double fieldIconSize = 22;
+  static const double fieldDisabledOpacity = 0.5;
+  static const double primaryButtonRadius = 16;
 
+  static const EdgeInsets screenHorizontalPadding =
+      AppSizes.screenBodyScrollPadding;
 
   static const EdgeInsets screenPadding = EdgeInsets.symmetric(
 
@@ -143,7 +152,16 @@ abstract final class ProfileSettingsUi {
 
       );
 
+  static TextStyle get fieldPlaceholder => fieldValue.copyWith(
+        color: AppColors.mutedText,
+        fontWeight: FontWeight.w600,
+      );
 
+  static TextStyle get fieldLabelUppercase => sectionLabel.copyWith(
+        fontSize: 11,
+        letterSpacing: 1.1,
+        fontWeight: FontWeight.w600,
+      );
 
   static TextStyle get buttonLabel => AppTypography.button.copyWith(
 
@@ -173,7 +191,7 @@ abstract final class ProfileSettingsUi {
 
   static ButtonStyle get primaryButton => ElevatedButton.styleFrom(
 
-        backgroundColor: ink,
+        backgroundColor: AppColors.inkDark,
 
         foregroundColor: Colors.white,
 
@@ -189,7 +207,7 @@ abstract final class ProfileSettingsUi {
 
         shape: RoundedRectangleBorder(
 
-          borderRadius: BorderRadius.circular(radiusMd),
+          borderRadius: BorderRadius.circular(primaryButtonRadius),
 
         ),
 

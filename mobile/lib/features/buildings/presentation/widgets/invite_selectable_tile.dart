@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 
 /// Davet kodu akışında bina/daire seçimi için kullanılan kart.
 class InviteSelectableTile extends StatelessWidget {
@@ -35,17 +36,13 @@ class InviteSelectableTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const tileRadius = BorderRadius.all(Radius.circular(12));
+    final tileRadius =
+        BorderRadius.circular(DashboardScreenStyle.cardRadius);
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.fill,
+      decoration: DashboardScreenStyle.whiteCard().copyWith(
         borderRadius: tileRadius,
-        border: Border.all(
-          color: AppColors.borderColor.withValues(alpha: 0.14),
-          width: 0.5,
-        ),
       ),
       child: Material(
         color: Colors.transparent,
@@ -68,11 +65,8 @@ class InviteSelectableTile extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: iconColor.withValues(alpha: 0.18),
-                      ),
+                      color: iconColor.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
                     child: Icon(icon, color: iconColor, size: 24),

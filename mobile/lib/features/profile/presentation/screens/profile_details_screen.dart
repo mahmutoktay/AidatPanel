@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-
+import '../../../../core/utils/app_date_format.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -573,7 +572,6 @@ class _ProfileHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.t;
-    final localeName = Localizations.localeOf(context).toLanguageTag();
 
     return Padding(
       padding: const EdgeInsets.only(
@@ -622,7 +620,6 @@ class _ProfileHero extends StatelessWidget {
                   subscription: subscription,
                   subscriptionLoading: subscriptionLoading,
                   createdAt: createdAt,
-                  localeName: localeName,
                 ),
               ),
             ],
@@ -645,14 +642,12 @@ class _ProfileHeroMeta extends StatelessWidget {
   final SubscriptionEntity? subscription;
   final bool subscriptionLoading;
   final DateTime? createdAt;
-  final String localeName;
 
   const _ProfileHeroMeta({
     required this.showSubscription,
     required this.subscription,
     required this.subscriptionLoading,
     required this.createdAt,
-    required this.localeName,
   });
 
   @override
@@ -702,7 +697,7 @@ class _ProfileHeroMeta extends StatelessWidget {
           Text(
             t.features.profile.accountCreatedAt.replaceAll(
               '{date}',
-              _formatAccountDate(createdAt!, localeName),
+              _formatAccountDate(createdAt!),
             ),
             style: ProfileSettingsUi.fieldLabel.copyWith(
               color: AppColors.textSecondary,
@@ -714,8 +709,8 @@ class _ProfileHeroMeta extends StatelessWidget {
     );
   }
 
-  String _formatAccountDate(DateTime date, String localeName) {
-    final formatted = DateFormat.yMMMMd(localeName).format(date.toLocal());
+  String _formatAccountDate(DateTime date) {
+    final formatted = AppDateFormat.yearMonthDay(date);
     if (formatted.isEmpty) return formatted;
     return formatted.replaceRange(0, 1, formatted.substring(0, 1).toUpperCase());
   }

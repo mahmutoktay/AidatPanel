@@ -5,8 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-
+import '../../../../core/utils/app_currency_format.dart';
 import '../../../../core/utils/month_labels.dart';
 import '../../../../core/utils/upload_file_utils.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -518,18 +517,14 @@ class _DueSelectableCard extends StatelessWidget {
     required this.onTap,
   });
 
-  String _currencySymbol(String currency) =>
-      currency == 'TRY' ? '₺' : currency;
-
   @override
   Widget build(BuildContext context) {
     final monthLabel = localizedMonthName(context, due.month);
     final isOverdue = due.status == DueStatus.overdue;
-    final amountText = NumberFormat.currency(
-      locale: 'tr_TR',
-      symbol: _currencySymbol(due.currency),
+    final amountText = AppCurrencyFormat.format(
+      due.amount,
       decimalDigits: 2,
-    ).format(due.amount);
+    );
 
     final apartmentLabel = dueApartmentLabel(context, due);
     final subtitle = isOverdue

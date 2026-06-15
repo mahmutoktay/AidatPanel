@@ -435,17 +435,17 @@ class _InviteBuildingBanner extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: AppColors.dashboardBackground,
-              borderRadius: BorderRadius.circular(10),
+              color: AppColors.primary.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
             child: const Icon(
               Icons.apartment_rounded,
-              color: ProfileSettingsUi.ink,
-              size: 22,
+              color: AppColors.primary,
+              size: 24,
             ),
           ),
           const SizedBox(width: 12),

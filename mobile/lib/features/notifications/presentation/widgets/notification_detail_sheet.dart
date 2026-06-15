@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-
+import '../../../../core/utils/app_date_format.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -78,9 +77,7 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final n = notification;
     final visual = notificationVisual(n.type);
-    final locale = Localizations.localeOf(context).toString();
-    final dateStr =
-        DateFormat('d MMMM yyyy, HH:mm', locale).format(n.createdAt);
+    final dateStr = AppDateFormat.dateTimeMedium(n.createdAt);
     final t = context.t.features.notifications;
     final role = ref.read(authStateProvider).user?.role;
     final path = n.toPayload().resolveNavigationPath(role: role);
@@ -185,7 +182,7 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSizes.spacingM),
-              _DetailSection(notification: n, locale: locale),
+              _DetailSection(notification: n),
               const SizedBox(height: AppSizes.spacingXL),
               if (canNavigate)
                 SizedBox(
@@ -235,9 +232,8 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
 /// gövdesine düşer (kullanıcı asla boş ekranla kalmaz).
 class _DetailSection extends ConsumerWidget {
   final NotificationEntity notification;
-  final String locale;
 
-  const _DetailSection({required this.notification, required this.locale});
+  const _DetailSection({required this.notification});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -252,7 +248,6 @@ class _DetailSection extends ConsumerWidget {
         return _TicketDetailSection(
           ticketId: ticketId,
           fallbackBody: n.body,
-          locale: locale,
         );
       case NotificationType.dekontReceived:
       case NotificationType.dekontNeedsReview:
@@ -263,7 +258,6 @@ class _DetailSection extends ConsumerWidget {
         return _DekontDetailSection(
           dekontId: dekontId,
           fallbackBody: n.body,
-          locale: locale,
         );
       case NotificationType.dueReminder:
       case NotificationType.duePaid:
@@ -271,7 +265,6 @@ class _DetailSection extends ConsumerWidget {
         return _DueDetailSection(
           dueId: payload.dueId,
           fallbackBody: n.body,
-          locale: locale,
         );
       case NotificationType.announcement:
       case NotificationType.system:
@@ -288,12 +281,10 @@ class _DetailSection extends ConsumerWidget {
 class _TicketDetailSection extends ConsumerWidget {
   final String ticketId;
   final String fallbackBody;
-  final String locale;
 
   const _TicketDetailSection({
     required this.ticketId,
     required this.fallbackBody,
-    required this.locale,
   });
 
   Color _statusColor(TicketStatus status) {
@@ -349,8 +340,7 @@ class _TicketDetailSection extends ConsumerWidget {
               ),
             _InfoRow(
               label: t.fieldCreatedAt,
-              value: DateFormat('d MMMM yyyy, HH:mm', locale)
-                  .format(ticket.createdAt),
+              value: AppDateFormat.dateTimeMedium(ticket.createdAt),
             ),
             const SizedBox(height: AppSizes.spacingS),
             _SectionLabel(t.fieldDescription),
@@ -379,8 +369,9 @@ class _TicketDetailSection extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      DateFormat('d MMM, HH:mm', locale)
-                          .format(ticket.updates.last.createdAt),
+                      AppDateFormat.dateShortNoYear(
+                        ticket.updates.last.createdAt,
+                      ),
                       style: AppTypography.caption.copyWith(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
@@ -404,12 +395,10 @@ class _TicketDetailSection extends ConsumerWidget {
 class _DekontDetailSection extends ConsumerWidget {
   final String dekontId;
   final String fallbackBody;
-  final String locale;
 
   const _DekontDetailSection({
     required this.dekontId,
     required this.fallbackBody,
-    required this.locale,
   });
 
   @override
@@ -442,8 +431,7 @@ class _DekontDetailSection extends ConsumerWidget {
               ),
             _InfoRow(
               label: t.fieldCreatedAt,
-              value: DateFormat('d MMMM yyyy, HH:mm', locale)
-                  .format(dekont.createdAt),
+              value: AppDateFormat.dateTimeMedium(dekont.createdAt),
             ),
             if (dekont.rejectionReason != null &&
                 dekont.rejectionReason!.isNotEmpty) ...[
@@ -488,12 +476,10 @@ class _DekontDetailSection extends ConsumerWidget {
 class _DueDetailSection extends ConsumerWidget {
   final String? dueId;
   final String fallbackBody;
-  final String locale;
 
   const _DueDetailSection({
     required this.dueId,
     required this.fallbackBody,
-    required this.locale,
   });
 
   ({String label, Color color, Color background}) _statusVisual(
@@ -548,8 +534,7 @@ class _DueDetailSection extends ConsumerWidget {
     final amount = due.amount == due.amount.roundToDouble()
         ? due.amount.toStringAsFixed(0)
         : due.amount.toStringAsFixed(2);
-    final period =
-        DateFormat('MMMM yyyy', locale).format(DateTime(due.year, due.month));
+    final period = AppDateFormat.monthYear(DateTime(due.year, due.month));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

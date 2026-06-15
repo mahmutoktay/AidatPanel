@@ -6,6 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/utils/app_currency_format.dart';
+import '../../../../core/utils/app_date_format.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -381,14 +384,9 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
       );
     }
 
-    final currencyFormat = NumberFormat.currency(
-      locale: 'tr_TR',
-      symbol: '₺',
-      decimalDigits: 2,
-    );
-    final createdAtDate =
-        DateFormat('d MMMM yyyy, HH:mm').format(expense.createdAt);
-    final expenseDate = DateFormat('d MMMM yyyy').format(expense.date);
+    final currencyFormat = AppCurrencyFormat.standard();
+    final createdAtDate = AppDateFormat.dateTimeMedium(expense.createdAt);
+    final expenseDate = AppDateFormat.dateMedium(expense.date);
 
     return DashboardSecondaryScaffold(
       title: t.detailTitle,

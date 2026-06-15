@@ -3,14 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/theme/dashboard_screen_style.dart';
-import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../data/cities_data.dart';
@@ -19,8 +16,6 @@ import '../widgets/building_collection_fields.dart';
 /// Backend `buildingService.createBuildingService` Zod aralıkları (Tur 5 §10/2):
 ///  - totalFloors: 1..200
 ///  - apartmentsPerFloor: 1..50
-/// Backend bu aralıklar dışında 400 döner; mobile aynı kontrolü öne çekerek
-/// kullanıcıya sunucu round-trip beklemeden form içi hata gösterir.
 const int _kFloorsMin = 1;
 const int _kFloorsMax = 200;
 const int _kApartmentsPerFloorMin = 1;
@@ -46,11 +41,6 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
 
   String? _selectedCity;
   String? _selectedDistrict;
-
-  /// Submit edildiğinde buton disable'lanır + loading gösterilir.
-  /// Aynı submit boyunca PopScope geri tuşunu da bastırır; aksi halde
-  /// 50+ kullanıcı kazara back basınca create yarıda kalıp yarım state
-  /// oluşur (bina yaratıldı ama daireler seed edilmedi gibi).
   bool _submitting = false;
 
   @override
@@ -70,10 +60,30 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: !_submitting,
-      child: DashboardSecondaryScaffold(
-        title: context.t.common.addBuildingNew,
-        onBack: _submitting ? () {} : () => context.pop(),
-        bottomNavigationBar: _buildSaveBar(context),
+      child: Scaffold(
+        backgroundColor: AppColors.dashboardBackground,
+        appBar: AppBar(
+          backgroundColor: AppColors.dashboardBackground,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          centerTitle: false,
+          titleSpacing: 0,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: MinimalBackButton(
+              onPressed: _submitting ? null : () => context.pop(),
+            ),
+          ),
+          title: Text(
+            context.t.common.addBuildingNew,
+            style: ProfileSettingsUi.title,
+          ),
+        ),
+        bottomNavigationBar: MinimalStickyActionBar(
+          label: context.t.common.createBuilding,
+          loading: _submitting,
+          onPressed: _onSubmit,
+        ),
         body: SafeArea(
           child: AbsorbPointer(
             absorbing: _submitting,
@@ -86,118 +96,134 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
                   bottom: AppSizes.spacingXL,
                 ),
                 children: [
-                  DashboardSectionTitle(title: context.t.common.basicInfo),
+                  MinimalSectionLabel(title: context.t.common.basicInfo),
                   const SizedBox(height: AppSizes.spacingS),
-                  _FormSectionCard(
-                    child: _buildTextField(
-                      controller: _nameController,
-                      label: context.t.common.buildingName,
-                      hint: context.t.common.buildingNameHint,
-                      icon: Icons.apartment,
-                      required: true,
-                    ),
+                  MinimalTextField(
+                    controller: _nameController,
+                    label: context.t.common.buildingName,
+                    hint: context.t.common.buildingNameHint,
+                    icon: Icons.apartment_outlined,
+                    required: true,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? context.t.common.fieldRequired
+                        : null,
                   ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  DashboardSectionTitle(title: context.t.common.location),
+                  const SizedBox(height: AppSizes.spacingFieldSpacing),
+                  MinimalSectionLabel(title: context.t.common.location),
                   const SizedBox(height: AppSizes.spacingS),
-                  _FormSectionCard(
-                    child: Column(
+                  MinimalPickerField(
+                    label: context.t.common.cityRequired.replaceAll(' *', ''),
+                    value: _selectedCity,
+                    hint: context.t.common.selectCity,
+                    icon: Icons.location_on_outlined,
+                    iconColor: AppColors.info,
+                    required: true,
+                    onTap: _showCityPicker,
+                  ),
+                  const SizedBox(height: AppSizes.spacingFieldSpacing),
+                  MinimalPickerField(
+                    label:
+                        context.t.common.districtRequired.replaceAll(' *', ''),
+                    value: _selectedDistrict,
+                    hint: _selectedCity != null
+                        ? context.t.common.selectDistrict
+                        : context.t.common.selectCityFirst,
+                    icon: Icons.map_outlined,
+                    required: true,
+                    enabled: _selectedCity != null,
+                    onTap: _selectedCity != null ? _showDistrictPicker : null,
+                  ),
+                  const SizedBox(height: AppSizes.spacingFieldSpacing),
+                  MinimalTextField(
+                    controller: _addressController,
+                    label: context.t.common.streetAddress,
+                    hint: context.t.common.streetAddressHint,
+                    icon: Icons.home_outlined,
+                    required: true,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? context.t.common.fieldRequired
+                        : null,
+                  ),
+                  const SizedBox(height: AppSizes.spacingFieldSpacing),
+                  MinimalSectionLabel(title: context.t.common.details),
+                  const SizedBox(height: AppSizes.spacingS),
+                  IntrinsicHeight(
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _buildCityPicker(),
-                        const SizedBox(height: AppSizes.spacingM),
-                        _buildDistrictPicker(),
-                        const SizedBox(height: AppSizes.spacingM),
-                        _buildTextField(
-                          controller: _addressController,
-                          label: context.t.common.streetAddress,
-                          hint: context.t.common.streetAddressHint,
-                          icon: Icons.home_outlined,
-                          required: true,
-                          maxLines: 2,
+                        Expanded(
+                          child: MinimalTextField(
+                            controller: _floorsController,
+                            label: context.t.common.floorCount,
+                            hint: context.t.common.floorCountHint,
+                            icon: Icons.apartment_outlined,
+                            iconColor: AppColors.statusBlue,
+                            required: true,
+                            labelMinLines: 2,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            validator: (v) => _validateRange(
+                              v,
+                              min: _kFloorsMin,
+                              max: _kFloorsMax,
+                              rangeError: context.t.common.floorRangeError,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSizes.spacingS),
+                        Expanded(
+                          child: MinimalTextField(
+                            controller: _apartmentsPerFloorController,
+                            label: context.t.common.apartmentsPerFloor,
+                            hint: context.t.common.apartmentsPerFloorHint,
+                            icon: Icons.door_front_door_outlined,
+                            iconColor: AppColors.statusGreen,
+                            required: true,
+                            labelMinLines: 2,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            validator: (v) => _validateRange(
+                              v,
+                              min: _kApartmentsPerFloorMin,
+                              max: _kApartmentsPerFloorMax,
+                              rangeError:
+                                  context.t.common.apartmentsPerFloorRangeError,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  DashboardSectionTitle(title: context.t.common.details),
-                  const SizedBox(height: AppSizes.spacingS),
-                  _FormSectionCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: _buildTextField(
-                                controller: _floorsController,
-                                label: context.t.common.floorCount,
-                                hint: context.t.common.floorCountHint,
-                                icon: Icons.stairs_outlined,
-                                required: true,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                                validator: (v) => _validateRange(
-                                  v,
-                                  min: _kFloorsMin,
-                                  max: _kFloorsMax,
-                                  rangeError: context.t.common.floorRangeError,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: AppSizes.spacingM),
-                            Expanded(
-                              child: _buildTextField(
-                                controller: _apartmentsPerFloorController,
-                                label: context.t.common.apartmentsPerFloor,
-                                hint: context.t.common.apartmentsPerFloorHint,
-                                icon: Icons.door_front_door_outlined,
-                                required: true,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                                validator: (v) => _validateRange(
-                                  v,
-                                  min: _kApartmentsPerFloorMin,
-                                  max: _kApartmentsPerFloorMax,
-                                  rangeError: context
-                                      .t.common.apartmentsPerFloorRangeError,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSizes.spacingM),
-                        _buildTextField(
-                          controller: _monthlyDuesController,
-                          label: context.t.common.monthlyDuesLabel,
-                          hint: context.t.common.monthlyDuesHint,
-                          icon: Icons.payments_outlined,
-                          required: true,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                        ),
-                      ],
+                  const SizedBox(height: AppSizes.spacingFieldSpacing),
+                  MinimalTextField(
+                    controller: _monthlyDuesController,
+                    label: context.t.common.monthlyDuesLabel,
+                    hint: context.t.common.monthlyDuesHint,
+                    icon: Icons.payments_outlined,
+                    iconColor: AppColors.warning,
+                    required: true,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    suffix: Text(
+                      '₺',
+                      style: ProfileSettingsUi.fieldValue.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? context.t.common.fieldRequired
+                        : null,
                   ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  DashboardSectionTitle(
-                    title: context.t.features.buildings.collection.sectionTitle,
-                  ),
-                  const SizedBox(height: AppSizes.spacingS),
-                  _FormSectionCard(
-                    child: BuildingCollectionFields(
-                      ibanController: _collectionIbanController,
-                      accountTitleController: _collectionAccountTitleController,
-                      referenceTemplateController:
-                          _collectionReferenceTemplateController,
-                    ),
+                  const SizedBox(height: AppSizes.spacingFieldSpacing),
+                  BuildingCollectionFields(
+                    ibanController: _collectionIbanController,
+                    accountTitleController: _collectionAccountTitleController,
+                    referenceTemplateController:
+                        _collectionReferenceTemplateController,
                   ),
                 ],
               ),
@@ -208,91 +234,6 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
     );
   }
 
-  Widget _buildSaveBar(BuildContext context) {
-    return ColoredBox(
-      color: AppColors.dashboardBackground,
-      child: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-        child: SizedBox(
-          height: ProfileSettingsUi.buttonHeight,
-          child: ElevatedButton(
-            onPressed: _submitting ? null : _onSubmit,
-            style: ProfileSettingsUi.primaryButton,
-            child: _submitting
-                ? const SizedBox(
-                    height: 22,
-                    width: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.4,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(context.t.common.createBuilding),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    required IconData icon,
-    bool required = false,
-    int maxLines = 1,
-    TextInputType? keyboardType,
-    List<TextInputFormatter>? inputFormatters,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      style: ProfileSettingsUi.fieldValue,
-      decoration: InputDecoration(
-        labelText: required ? '$label *' : label,
-        labelStyle: ProfileSettingsUi.fieldLabel,
-        hintText: hint,
-        hintStyle: ProfileSettingsUi.fieldLabel,
-        prefixIcon: Icon(icon, color: ProfileSettingsUi.ink),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: AppColors.cardBorderSide,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: AppColors.cardBorderSide,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.error, width: 2),
-        ),
-      ),
-      validator: validator ??
-          (required
-              ? (v) => (v == null || v.trim().isEmpty)
-                  ? context.t.common.fieldRequired
-                  : null
-              : null),
-    );
-  }
-
-  /// Sayısal alan için zorunlu + aralık kontrolü.
-  /// Boş ise [fieldRequired], parse edilemez veya aralık dışıysa [rangeError]
-  /// döndürür. Backend Zod kuralları ile birebir uyumlu olsun diye
-  /// kullanılır.
   String? _validateRange(
     String? value, {
     required int min,
@@ -306,87 +247,14 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
     return null;
   }
 
-  Widget _buildCityPicker() {
-    return _buildDropdownField(
-      label: context.t.common.cityRequired,
-      value: _selectedCity,
-      hint: context.t.common.selectCity,
-      icon: Icons.location_city,
-      onTap: _showCityPicker,
-    );
-  }
-
-  Widget _buildDistrictPicker() {
-    final hasCity = _selectedCity != null;
-    return _buildDropdownField(
-      label: context.t.common.districtRequired,
-      value: _selectedDistrict,
-      hint: hasCity
-          ? context.t.common.selectDistrict
-          : context.t.common.selectCityFirst,
-      icon: Icons.map_outlined,
-      enabled: hasCity,
-      onTap: hasCity ? _showDistrictPicker : null,
-    );
-  }
-
-  Widget _buildDropdownField({
-    required String label,
-    required String? value,
-    required String hint,
-    required IconData icon,
-    required VoidCallback? onTap,
-    bool enabled = true,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: label,
-            prefixIcon: Icon(
-              icon,
-              color: enabled ? ProfileSettingsUi.ink : AppColors.textDisabled,
-            ),
-            suffixIcon: Icon(
-              Icons.arrow_drop_down,
-              color: enabled ? AppColors.textPrimary : AppColors.textDisabled,
-            ),
-            filled: true,
-            fillColor: enabled
-                ? Colors.white
-                : AppColors.textDisabled.withValues(alpha: 0.12),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: AppColors.cardBorderSide,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: AppColors.cardBorderSide,
-            ),
-          ),
-          child: Text(
-            value ?? hint,
-            style: ProfileSettingsUi.fieldValue.copyWith(
-              color: value != null
-                  ? ProfileSettingsUi.ink
-                  : ProfileSettingsUi.muted,
-              fontWeight: value != null ? FontWeight.w600 : FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showCityPicker() {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: AppButtonStyles.sheetTop,
+      backgroundColor: AppColors.dashboardBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) => _SearchablePicker(
         title: context.t.common.selectCityTitle,
         items: sortedCityNames,
@@ -394,7 +262,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
         onSelected: (city) {
           setState(() {
             _selectedCity = city;
-            _selectedDistrict = null; // şehir değiştiğinde ilçe sıfırlanır
+            _selectedDistrict = null;
           });
         },
       ),
@@ -406,8 +274,10 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: AppButtonStyles.sheetTop,
+      backgroundColor: AppColors.dashboardBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) => _SearchablePicker(
         title: context.t.common.selectDistrictTitle,
         items: districts,
@@ -420,9 +290,6 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   }
 
   Future<void> _onSubmit() async {
-    // Hızlı dürtüklenme + yarı yarıya işlenmiş submit'e karşı koruma.
-    // Notifier seviyesinde de aynı guard var (BuildingsNotifier._isCreating);
-    // bu UI guard'ı kullanıcıya görsel feedback sağlar (buton disable + spinner).
     if (_submitting) return;
 
     final formValid = _formKey.currentState?.validate() ?? false;
@@ -439,9 +306,6 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       return;
     }
 
-    // Form validator zaten range + parse kontrolü yaptığı için burada
-    // tryParse'lar güvenli (null gelmez). Yine de defansif fallback'le
-    // okuyup runtime patlamasını önlüyoruz.
     final floors = int.tryParse(_floorsController.text.trim()) ?? 0;
     final apartmentsPerFloor =
         int.tryParse(_apartmentsPerFloorController.text.trim()) ?? 0;
@@ -461,14 +325,6 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       final address =
           '${_addressController.text.trim()}, $_selectedDistrict';
 
-      // Backend `buildingService.createBuildingService` (commit 8cc2152)
-      // tek transaction içinde:
-      //   1. Building kaydı oluşturur
-      //   2. totalFloors × apartmentsPerFloor adet daire (1A, 1B, 2A …) seed eder
-      //   3. dueAmount > 0 ise her daire için içinde bulunulan aydan yıl
-      //      sonuna kadar PENDING due üretir
-      // Bu yüzden mobile artık ekstra "fallback seed loop" çalıştırmaz —
-      // eski Tur 1-3 sürümünde yapılan _seedApartmentsIfNeeded kaldırıldı.
       final collection = BuildingCollectionInput.fromControllers(
         iban: _collectionIbanController,
         accountTitle: _collectionAccountTitleController,
@@ -508,23 +364,6 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   }
 }
 
-class _FormSectionCard extends StatelessWidget {
-  final Widget child;
-
-  const _FormSectionCard({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: DashboardScreenStyle.whiteCard(),
-      child: child,
-    );
-  }
-}
-
-/// Aranabilir liste seçici (şehir veya ilçe için)
 class _SearchablePicker extends StatefulWidget {
   final String title;
   final List<String> items;
@@ -550,92 +389,123 @@ class _SearchablePickerState extends State<_SearchablePicker> {
     final filtered = widget.items
         .where((s) => s.toLowerCase().contains(_query.toLowerCase()))
         .toList();
+
     return DraggableScrollableSheet(
       initialChildSize: 0.75,
       minChildSize: 0.5,
       maxChildSize: 0.95,
       expand: false,
       builder: (_, scrollController) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Drag handle
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.borderColor,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          // Title
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.dashboardScreenPaddingHorizontal,
-              vertical: AppSizes.spacingS,
-            ),
-            child: Text(
-              widget.title,
-              style: AppTypography.h3.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
+          const SizedBox(height: AppSizes.spacingS),
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.lineLight,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
-          // Search
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.dashboardScreenPaddingHorizontal,
+              AppSizes.spacingM,
+              AppSizes.dashboardScreenPaddingHorizontal,
+              AppSizes.spacingS,
+            ),
+            child: Text(widget.title, style: ProfileSettingsUi.title),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSizes.dashboardScreenPaddingHorizontal,
-              vertical: AppSizes.spacingS,
             ),
-            child: TextField(
-              autofocus: false,
-              decoration: InputDecoration(
-                hintText: context.t.common.search,
-                prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
-                filled: true,
-                fillColor: AppColors.dashboardBackground,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
+            child: MinimalSearchField(
+              hint: context.t.common.search,
               onChanged: (v) => setState(() => _query = v),
             ),
           ),
-          // List
+          const SizedBox(height: AppSizes.spacingS),
           Expanded(
             child: filtered.isEmpty
                 ? Center(
                     child: Text(
                       context.t.common.noResults,
-                      style: AppTypography.body1.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                      style: ProfileSettingsUi.handle,
                     ),
                   )
                 : ListView.builder(
                     controller: scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.dashboardScreenPaddingHorizontal,
+                    ),
                     itemCount: filtered.length,
                     itemBuilder: (_, index) {
                       final item = filtered[index];
                       final isSelected = item == widget.selected;
-                      return ListTile(
-                        title: Text(
-                          item,
-                          style: AppTypography.body1.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
+                      return Padding(
+                        padding: const EdgeInsets.only(
+                          bottom: AppSizes.spacingXS,
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              widget.onSelected(item);
+                              context.pop();
+                            },
+                            borderRadius: BorderRadius.circular(
+                              ProfileSettingsUi.fieldRadius,
+                            ),
+                            child: Container(
+                              constraints: const BoxConstraints(
+                                minHeight: AppSizes.minTouchTarget,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSizes.spacingM,
+                                vertical: AppSizes.spacingS,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? ProfileSettingsUi.background
+                                    : ProfileSettingsUi.fieldFill,
+                                borderRadius: BorderRadius.circular(
+                                  ProfileSettingsUi.fieldRadius,
+                                ),
+                                border: isSelected
+                                    ? Border.all(
+                                        color: ProfileSettingsUi.ink,
+                                        width:
+                                            ProfileSettingsUi.fieldFocusBorderWidth,
+                                      )
+                                    : null,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      item,
+                                      style: ProfileSettingsUi.fieldValue
+                                          .copyWith(
+                                        fontWeight: isSelected
+                                            ? FontWeight.w700
+                                            : FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  if (isSelected)
+                                    const Icon(
+                                      Icons.check_rounded,
+                                      color: AppColors.statusGreen,
+                                      size: 22,
+                                    ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                        trailing: isSelected
-                            ? Icon(Icons.check_circle, color: AppColors.success)
-                            : null,
-                        onTap: () {
-                          widget.onSelected(item);
-                          context.pop();
-                        },
                       );
                     },
                   ),

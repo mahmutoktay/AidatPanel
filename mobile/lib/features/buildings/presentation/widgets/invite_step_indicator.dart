@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 
 /// Davet kodu akışı için 3 adımlı görsel adım göstergesi.
 class InviteStepIndicator extends StatelessWidget {
@@ -31,10 +32,7 @@ class InviteStepIndicator extends StatelessWidget {
           horizontal: AppSizes.spacingM,
           vertical: AppSizes.spacingM,
         ),
-        decoration: BoxDecoration(
-          color: AppColors.fill,
-          borderRadius: BorderRadius.circular(12),
-        ),
+        decoration: DashboardScreenStyle.whiteCard(),
         child: Row(
           children: List.generate(steps.length * 2 - 1, (i) {
             if (i.isOdd) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
+import '../../../../core/utils/app_date_format.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
@@ -110,7 +110,7 @@ class _ActiveSubscriptionCard extends StatelessWidget {
     final planLabel = _planLabel(t, subscription.plan);
     final end = subscription.currentPeriodEnd;
     final dateStr =
-        end != null ? DateFormat.yMMMMd().format(end.toLocal()) : null;
+        end != null ? AppDateFormat.yearMonthDay(end) : null;
     final statusColors = _statusColors(subscription.status);
 
     final metrics = <_SubscriptionMetric>[

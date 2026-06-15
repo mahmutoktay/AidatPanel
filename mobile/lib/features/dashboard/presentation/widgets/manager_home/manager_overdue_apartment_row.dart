@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
+import '../../../../../core/utils/app_currency_format.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -22,12 +21,10 @@ class ManagerOverdueApartmentRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.dashboard;
-    final currency = item.currency == 'TRY' ? '₺' : item.currency;
-    final amountText = NumberFormat.currency(
-      locale: 'tr_TR',
-      symbol: currency,
+    final amountText = AppCurrencyFormat.format(
+      item.amount,
       decimalDigits: 0,
-    ).format(item.amount);
+    );
 
     final apartmentLabel = item.floor != null
         ? t.apartmentWithFloor

@@ -9,6 +9,7 @@ import '../../domain/entities/building_entity.dart';
 import '../../utils/invite_code_helpers.dart';
 import '../utils/apartment_ui_utils.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 
 /// Adım 3: Üretilen davet kodunu gösteren ve aksiyonları sunan görünüm.
 class InviteCodeResultView extends StatelessWidget {
@@ -67,10 +68,7 @@ class InviteCodeResultView extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: DashboardScreenStyle.whiteCard(),
       child: Column(
         children: [
           Container(
@@ -114,10 +112,7 @@ class InviteCodeResultView extends StatelessWidget {
   Widget _buildCodeCard(BuildContext context, Duration remaining) {
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: DashboardScreenStyle.whiteCard(),
       child: Column(
         children: [
           Text(
@@ -241,7 +236,7 @@ class InviteCodeResultView extends StatelessWidget {
       padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
         color: AppColors.info.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
         border: Border.all(color: AppColors.info.withValues(alpha: 0.2)),
       ),
       child: Row(

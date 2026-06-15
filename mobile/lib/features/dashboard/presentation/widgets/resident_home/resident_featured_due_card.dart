@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
+import '../../../../../core/utils/app_currency_format.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -22,18 +21,11 @@ class ResidentFeaturedDueCard extends StatelessWidget {
     required this.onPay,
   });
 
-  String _currencySymbol(String currency) =>
-      currency == 'TRY' ? '₺' : currency;
-
   @override
   Widget build(BuildContext context) {
     final t = context.t;
     final dashT = t.features.dashboard;
-    final amountText = NumberFormat.currency(
-      locale: 'tr_TR',
-      symbol: _currencySymbol(due.currency),
-      decimalDigits: 2,
-    ).format(due.amount);
+    final amountText = AppCurrencyFormat.format(due.amount);
 
     final periodLabel = dashT.featuredDuePeriod
         .replaceAll('{month}', monthName(context, due.month))

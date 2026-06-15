@@ -10,6 +10,7 @@ import 'core/notifications/fcm_scope.dart';
 import 'core/notifications/firebase_bootstrap.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/utils/init_date_formatting.dart';
 import 'core/storage/secure_storage.dart';
 import 'features/dekont/presentation/providers/share_intent_provider.dart';
 import 'shared/widgets/friendly_error_screen.dart';
@@ -34,6 +35,16 @@ void main() async {
   } catch (e, st) {
     developer.log('initLocale başarısız', name: 'main', error: e, stackTrace: st);
     LocaleSettings.setLocale(AppLocale.tr);
+  }
+  try {
+    await initDateFormatting();
+  } catch (e, st) {
+    developer.log(
+      'initDateFormatting başarısız',
+      name: 'main',
+      error: e,
+      stackTrace: st,
+    );
   }
   runApp(const ProviderScope(child: MyApp()));
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
 
+import '../../../../core/utils/app_date_format.dart';
 import '../../../../l10n/strings.g.dart';
 
 /// Bildirimler için tarih bölümleri (50+ kullanıcı: kronolojik tarama kolaylığı).
@@ -40,7 +40,7 @@ NotificationDateSection notificationSectionFor(DateTime createdAt) {
 String notificationRelativeTime(
   BuildContext context,
   DateTime createdAt, {
-  required String locale,
+  String? languageCode,
 }) {
   final t = context.t.features.notifications;
   final now = DateTime.now();
@@ -54,12 +54,14 @@ String notificationRelativeTime(
     case NotificationDateSection.today:
       return '${diff.inHours} ${t.timeHourShort}';
     case NotificationDateSection.yesterday:
-      return '${t.sectionYesterday}, ${DateFormat('HH:mm', locale).format(createdAt)}';
+      return '${t.sectionYesterday}, ${AppDateFormat.timeOnly(createdAt, languageCode: languageCode)}';
     case NotificationDateSection.thisWeek:
-      return DateFormat('EEEE, HH:mm', locale).format(createdAt);
+      return AppDateFormat.weekdayTime(createdAt, languageCode: languageCode);
     case NotificationDateSection.earlier:
-      final sameYear = createdAt.year == now.year;
-      final pattern = sameYear ? 'd MMM, HH:mm' : 'd MMM yyyy';
-      return DateFormat(pattern, locale).format(createdAt);
+      return AppDateFormat.relativeListDate(
+        createdAt,
+        sameYear: createdAt.year == now.year,
+        languageCode: languageCode,
+      );
   }
 }

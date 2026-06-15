@@ -1,5 +1,7 @@
 import 'package:intl/intl.dart';
 
+import '../../../../core/utils/app_intl_locale.dart';
+
 import '../../../../core/utils/iban_utils.dart';
 import '../../domain/entities/dekont_entity.dart';
 import '../../domain/entities/dekont_status.dart';
@@ -85,7 +87,10 @@ class DekontParsedFields {
   }) {
     final date = dekont.transactionDate;
     if (date == null) return null;
-    return DateFormat('d MMMM yyyy', locale).format(date.toLocal());
+    return DateFormat(
+      'd MMMM yyyy',
+      AppIntlLocale.resolve(locale),
+    ).format(date.toLocal());
   }
 
   static bool isIbanUnreadable(DekontEntity dekont) {

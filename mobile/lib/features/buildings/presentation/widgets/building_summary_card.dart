@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import '../../../../core/utils/app_currency_format.dart';
+import '../../../../core/utils/compact_number_format.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -45,18 +46,13 @@ class BuildingSummaryCard extends StatelessWidget {
       overdueCount: item.overdueCount,
       pendingCount: item.pendingCount,
     );
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final monthlyText = NumberFormat.compactCurrency(
-      locale: locale,
-      symbol: '₺',
-      decimalDigits: 0,
-    ).format(item.monthlyDues);
+    final locale = LocaleSettings.currentLocale.languageCode;
+    final monthlyText = CompactNumberFormat.currency(
+      item.monthlyDues,
+      languageCode: locale,
+    );
     final perUnitText = item.perUnitDues != null
-        ? NumberFormat.currency(
-            locale: locale,
-            symbol: '₺',
-            decimalDigits: 0,
-          ).format(item.perUnitDues)
+        ? AppCurrencyFormat.format(item.perUnitDues!, decimalDigits: 0)
         : '—';
 
     return Container(

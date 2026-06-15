@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import '../../../../../core/utils/compact_number_format.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
 import '../../../../../l10n/strings.g.dart';
@@ -20,12 +20,10 @@ class ManagerSummaryStatsGrid extends StatelessWidget {
     final t = context.t.features.dashboard;
     final currency =
         stats.expenseCurrency == 'TRY' ? '₺' : stats.expenseCurrency;
-    final expenseFormatter = NumberFormat.compactCurrency(
-      locale: 'tr_TR',
+    final expenseText = CompactNumberFormat.currency(
+      stats.monthTotalExpense,
       symbol: currency,
-      decimalDigits: 0,
     );
-    final expenseText = expenseFormatter.format(stats.monthTotalExpense);
 
     final items = [
       DashboardStatTile(
@@ -75,7 +73,7 @@ class ManagerSummaryStatsGrid extends StatelessWidget {
         value: expenseText,
         rollingValue: stats.monthTotalExpense,
         rollingDelay: _stagger * 4,
-        rollingFormatter: (n) => expenseFormatter.format(n),
+        rollingFormatter: (n) => CompactNumberFormat.currency(n, symbol: currency),
         label: t.monthTotalExpense,
       ),
       DashboardStatTile(

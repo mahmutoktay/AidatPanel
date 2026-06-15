@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/app_date_format.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../domain/entities/dekont_entity.dart';
 import '../utils/dekont_labels.dart';
@@ -25,7 +25,7 @@ class DekontListCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visual = dekontStatusVisual(context, dekont.status);
-    final date = DateFormat('d MMM yyyy, HH:mm').format(dekont.createdAt);
+    final date = AppDateFormat.dateShort(dekont.createdAt);
 
     return Material(
       color: Colors.transparent,

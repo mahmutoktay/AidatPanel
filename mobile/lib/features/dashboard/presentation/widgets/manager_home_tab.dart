@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-
+import '../../../../core/utils/app_date_format.dart';
+import '../../../../core/utils/app_intl_locale.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/notifications/notification_toast.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -88,7 +88,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
       monthAnnouncementsAsync,
     ]);
 
-    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final languageCode = AppIntlLocale.fromContext(context);
     final now = DateTime.now();
     final currentMonthDues = ManagerDashboardMapper.filterDuesForMonth(
       filteredDues,
@@ -107,7 +107,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
       dues: filteredDues,
       expenseTotalsByMonth: expenseTotals,
       anchor: DateTime.now(),
-      localeName: localeName,
+      localeName: languageCode,
     );
 
     final buildingNames = {
@@ -133,15 +133,11 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
       pendingDekontCount: pendingDekontCount,
     );
 
-    final periodLabel = DateFormat('MMMM yyyy', localeName)
-        .format(DateTime.now())
+    final periodLabel = AppDateFormat.monthYear(DateTime.now())
         .replaceRange(
           0,
           1,
-          DateFormat('MMMM yyyy', localeName)
-              .format(DateTime.now())
-              .substring(0, 1)
-              .toUpperCase(),
+          AppDateFormat.monthYear(DateTime.now()).substring(0, 1).toUpperCase(),
         );
 
     final isRefreshing = widget.buildingsAsync.isLoading ||

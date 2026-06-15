@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-
+import '../../../../core/utils/app_date_format.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -393,14 +392,11 @@ class _UpdatesTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).toString();
-
     return Column(
       children: [
         for (var i = 0; i < updates.length; i++)
           _TimelineEntry(
             update: updates[i],
-            locale: locale,
             isLast: i == updates.length - 1,
           ),
       ],
@@ -410,19 +406,16 @@ class _UpdatesTimeline extends StatelessWidget {
 
 class _TimelineEntry extends StatelessWidget {
   final TicketUpdateEntity update;
-  final String locale;
   final bool isLast;
 
   const _TimelineEntry({
     required this.update,
-    required this.locale,
     required this.isLast,
   });
 
   @override
   Widget build(BuildContext context) {
-    final dateStr =
-        DateFormat('d MMM yyyy, HH:mm', locale).format(update.createdAt);
+    final dateStr = AppDateFormat.dateShort(update.createdAt);
 
     return IntrinsicHeight(
       child: Row(

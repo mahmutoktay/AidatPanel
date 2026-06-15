@@ -12,13 +12,11 @@ import '../utils/notification_time.dart';
 /// Tek bildirim kartı — dashboard beyaz kart stili.
 class NotificationListTile extends StatelessWidget {
   final NotificationEntity notification;
-  final String locale;
   final VoidCallback onTap;
 
   const NotificationListTile({
     super.key,
     required this.notification,
-    required this.locale,
     required this.onTap,
   });
 
@@ -27,7 +25,7 @@ class NotificationListTile extends StatelessWidget {
     final n = notification;
     final visual = notificationVisual(n.type);
     final unread = !n.isRead;
-    final timeStr = notificationRelativeTime(context, n.createdAt, locale: locale);
+    final timeStr = notificationRelativeTime(context, n.createdAt);
     final typeLabel = n.type.label(context).trim();
     final title = n.title.trim();
     final showTypeLabel =

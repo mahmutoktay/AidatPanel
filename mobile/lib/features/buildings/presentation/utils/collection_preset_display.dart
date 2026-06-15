@@ -34,6 +34,35 @@ class CollectionPresetDisplay {
     return lines;
   }
 
+  /// Kart satırları: gri etiket + kalın değer aynı satırda.
+  static List<({String label, String value})> inlineDetailRows(
+    BuildContext context,
+    CollectionPresetEntity preset,
+  ) {
+    final t = context.t.features.buildings.collection;
+    final rows = <({String label, String value})>[];
+
+    final accountTitle = preset.collectionAccountTitle?.trim();
+    if (accountTitle != null && accountTitle.isNotEmpty) {
+      rows.add((label: '${t.detailAccountHolder}:', value: accountTitle));
+    }
+
+    final reference = _referenceDetailLine(t, preset.paymentReferenceTemplate);
+    if (reference != null) {
+      final colon = reference.indexOf(':');
+      if (colon >= 0) {
+        rows.add((
+          label: reference.substring(0, colon + 1),
+          value: reference.substring(colon + 1).trim(),
+        ));
+      } else {
+        rows.add((label: '${t.detailReference}:', value: reference));
+      }
+    }
+
+    return rows;
+  }
+
   static String? _referenceDetailLine(
     // ignore: avoid_unused_parameters — slang nested type is library-private
     dynamic t,

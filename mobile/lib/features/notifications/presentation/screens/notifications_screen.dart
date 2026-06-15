@@ -113,7 +113,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(notificationsNotifierProvider);
-    final locale = Localizations.localeOf(context).toString();
     final t = context.t.features.notifications;
 
     final visible = _filter == _NotificationFilter.unread
@@ -175,7 +174,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
         list: RefreshIndicator(
           onRefresh: _reload,
           color: AppColors.primary,
-          child: _buildList(context, state, visible, locale),
+          child: _buildList(context, state, visible),
         ),
       ),
     );
@@ -185,7 +184,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
     BuildContext context,
     NotificationsState state,
     List<NotificationEntity> visible,
-    String locale,
   ) {
     if (state.isLoading && state.items.isEmpty) {
       return ListView(
@@ -282,7 +280,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
           padding: DashboardScreenStyle.listItemPadding,
           child: NotificationListTile(
             notification: n,
-            locale: locale,
             onTap: () => _openNotification(n),
           ),
         );

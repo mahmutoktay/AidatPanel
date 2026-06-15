@@ -741,6 +741,8 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 	@override String get reupload => 'Yeniden yükle';
 	@override String get rejectionReason => 'Red nedeni';
 	@override String get parsedAmount => 'Okunan tutar';
+	@override String get paymentDetailsSection => 'Ödeme bilgileri';
+	@override String get fileSection => 'Dosya';
 	@override String get filePreview => 'Dosya önizleme';
 	@override String get pdfPreviewHint => 'İki parmakla yakınlaştırıp kaydırabilirsiniz.';
 	@override String get pdfPreviewUnavailable => 'PDF bu cihazda açılamadı. Aşağıdaki «Dosyayı paylaş» ile başka bir uygulamada açabilirsiniz.';
@@ -1082,6 +1084,7 @@ class _Translations$features$buildings$collection$tr implements Translations$fea
 	@override String get modeSaved => 'Kayıtlı IBAN';
 	@override String get modeNew => 'Yeni IBAN';
 	@override String get savedListTitle => 'Daha önce kullandıklarınız';
+	@override String get savedListSectionLabel => 'Kayıtlı IBAN\'lar';
 	@override String get pickSavedIban => 'Kayıtlı IBAN seçin';
 	@override String get changeSavedIban => 'Başka IBAN seçmek için dokunun';
 	@override String get searchSavedIban => 'IBAN veya unvan ara';
@@ -1538,6 +1541,7 @@ extension on TranslationsTr {
 			'features.buildings.collection.modeSaved' => 'Kayıtlı IBAN',
 			'features.buildings.collection.modeNew' => 'Yeni IBAN',
 			'features.buildings.collection.savedListTitle' => 'Daha önce kullandıklarınız',
+			'features.buildings.collection.savedListSectionLabel' => 'Kayıtlı IBAN\'lar',
 			'features.buildings.collection.pickSavedIban' => 'Kayıtlı IBAN seçin',
 			'features.buildings.collection.changeSavedIban' => 'Başka IBAN seçmek için dokunun',
 			'features.buildings.collection.searchSavedIban' => 'IBAN veya unvan ara',
@@ -1675,9 +1679,9 @@ extension on TranslationsTr {
 			'features.tickets.emptySubtitle' => 'Arıza veya talebinizi buradan bildirebilirsiniz',
 			'features.tickets.titleTooShort' => 'Başlık en az 3 karakter olmalı',
 			'features.tickets.descriptionTooShort' => 'Açıklama en az 10 karakter olmalı',
-			'features.tickets.statusOpen' => 'Açık',
 			_ => null,
 		} ?? switch (path) {
+			'features.tickets.statusOpen' => 'Açık',
 			'features.tickets.statusInProgress' => 'İşlemde',
 			'features.tickets.statusResolved' => 'Çözüldü',
 			'features.tickets.statusClosed' => 'Kapalı',
@@ -1771,6 +1775,8 @@ extension on TranslationsTr {
 			'features.dekont.reupload' => 'Yeniden yükle',
 			'features.dekont.rejectionReason' => 'Red nedeni',
 			'features.dekont.parsedAmount' => 'Okunan tutar',
+			'features.dekont.paymentDetailsSection' => 'Ödeme bilgileri',
+			'features.dekont.fileSection' => 'Dosya',
 			'features.dekont.filePreview' => 'Dosya önizleme',
 			'features.dekont.pdfPreviewHint' => 'İki parmakla yakınlaştırıp kaydırabilirsiniz.',
 			'features.dekont.pdfPreviewUnavailable' => 'PDF bu cihazda açılamadı. Aşağıdaki «Dosyayı paylaş» ile başka bir uygulamada açabilirsiniz.',

@@ -1,5 +1,4 @@
-import 'package:intl/intl.dart';
-
+import '../../../../core/utils/app_date_format.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../tickets/domain/entities/ticket_entity.dart';
@@ -127,7 +126,6 @@ abstract final class ManagerDashboardMapper {
     required DateTime anchor,
     required String localeName,
   }) {
-    final monthFormatter = DateFormat('MMM', localeName);
     final points = <ManagerMonthlyFinancePoint>[];
 
     for (var i = 5; i >= 0; i--) {
@@ -150,7 +148,9 @@ abstract final class ManagerDashboardMapper {
         ManagerMonthlyFinancePoint(
           month: month,
           year: year,
-          monthLabel: _capitalize(monthFormatter.format(date)),
+          monthLabel: _capitalize(
+            AppDateFormat.monthShort(date, languageCode: localeName),
+          ),
           collectedDues: collected,
           totalExpenses: expenses,
         ),

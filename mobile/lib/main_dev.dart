@@ -29,6 +29,7 @@ import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/secure_storage.dart';
+import 'core/utils/init_date_formatting.dart';
 import 'dev/dev_mocks.dart';
 import 'dev/mock_faz2_datasources.dart';
 import 'features/expenses/presentation/providers/expenses_provider.dart';
@@ -51,6 +52,7 @@ void main() async {
   _installGlobalErrorHandlers();
   await _initAppInfo();
   await _initLocale();
+  await initDateFormatting();
 
   // Apartment repository'yi önce kur — building repository FK kontrolü için
   // ona referans alıyor. (Mock dünya: bina silmek istendiğinde "daire varsa

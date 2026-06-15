@@ -329,14 +329,14 @@ class Translations$common$en {
 	/// en: 'Floor Count'
 	String get floorCount => 'Floor Count';
 
-	/// en: 'Between 1 and 200'
-	String get floorCountHint => 'Between 1 and 200';
+	/// en: '1–200'
+	String get floorCountHint => '1–200';
 
-	/// en: 'Apartments Per Floor'
-	String get apartmentsPerFloor => 'Apartments Per Floor';
+	/// en: 'Units per Floor'
+	String get apartmentsPerFloor => 'Units per Floor';
 
-	/// en: 'Between 1 and 50'
-	String get apartmentsPerFloorHint => 'Between 1 and 50';
+	/// en: '1–50'
+	String get apartmentsPerFloorHint => '1–50';
 
 	/// en: 'Floor count must be between 1 and 200'
 	String get floorRangeError => 'Floor count must be between 1 and 200';
@@ -1898,6 +1898,12 @@ class Translations$features$dekont$en {
 	/// en: 'Parsed amount'
 	String get parsedAmount => 'Parsed amount';
 
+	/// en: 'Payment details'
+	String get paymentDetailsSection => 'Payment details';
+
+	/// en: 'File'
+	String get fileSection => 'File';
+
 	/// en: 'File preview'
 	String get filePreview => 'File preview';
 
@@ -2777,6 +2783,9 @@ class Translations$features$buildings$collection$en {
 	/// en: 'Previously used'
 	String get savedListTitle => 'Previously used';
 
+	/// en: 'Saved IBANs'
+	String get savedListSectionLabel => 'Saved IBANs';
+
 	/// en: 'Choose saved IBAN'
 	String get pickSavedIban => 'Choose saved IBAN';
 
@@ -3111,9 +3120,9 @@ extension on Translations {
 			'common.streetAddressHint' => 'Ex: Bağdat Cad. No: 123',
 			'common.details' => 'Details',
 			'common.floorCount' => 'Floor Count',
-			'common.floorCountHint' => 'Between 1 and 200',
-			'common.apartmentsPerFloor' => 'Apartments Per Floor',
-			'common.apartmentsPerFloorHint' => 'Between 1 and 50',
+			'common.floorCountHint' => '1–200',
+			'common.apartmentsPerFloor' => 'Units per Floor',
+			'common.apartmentsPerFloorHint' => '1–50',
 			'common.floorRangeError' => 'Floor count must be between 1 and 200',
 			'common.apartmentsPerFloorRangeError' => 'Apartments per floor must be between 1 and 50',
 			'common.buildingAddFailed' => 'Could not add building. Please try again.',
@@ -3358,6 +3367,7 @@ extension on Translations {
 			'features.buildings.collection.modeSaved' => 'Saved IBAN',
 			'features.buildings.collection.modeNew' => 'New IBAN',
 			'features.buildings.collection.savedListTitle' => 'Previously used',
+			'features.buildings.collection.savedListSectionLabel' => 'Saved IBANs',
 			'features.buildings.collection.pickSavedIban' => 'Choose saved IBAN',
 			'features.buildings.collection.changeSavedIban' => 'Tap to choose another IBAN',
 			'features.buildings.collection.searchSavedIban' => 'Search IBAN or account name',
@@ -3495,9 +3505,9 @@ extension on Translations {
 			'features.tickets.emptySubtitle' => 'Report an issue or request from here',
 			'features.tickets.titleTooShort' => 'Title must be at least 3 characters',
 			'features.tickets.descriptionTooShort' => 'Description must be at least 10 characters',
-			'features.tickets.statusOpen' => 'Open',
 			_ => null,
 		} ?? switch (path) {
+			'features.tickets.statusOpen' => 'Open',
 			'features.tickets.statusInProgress' => 'In progress',
 			'features.tickets.statusResolved' => 'Resolved',
 			'features.tickets.statusClosed' => 'Closed',
@@ -3591,6 +3601,8 @@ extension on Translations {
 			'features.dekont.reupload' => 'Upload again',
 			'features.dekont.rejectionReason' => 'Rejection reason',
 			'features.dekont.parsedAmount' => 'Parsed amount',
+			'features.dekont.paymentDetailsSection' => 'Payment details',
+			'features.dekont.fileSection' => 'File',
 			'features.dekont.filePreview' => 'File preview',
 			'features.dekont.pdfPreviewHint' => 'Pinch to zoom and scroll to view pages.',
 			'features.dekont.pdfPreviewUnavailable' => 'PDF could not be opened on this device. Use «Share file» below to open it in another app.',

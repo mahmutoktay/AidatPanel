@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-
+import '../../../../core/utils/app_currency_format.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -18,20 +17,13 @@ class ResidentDueListCard extends StatelessWidget {
     required this.due,
   });
 
-  String _currencySymbol(String currency) =>
-      currency == 'TRY' ? '₺' : currency;
-
   @override
   Widget build(BuildContext context) {
     final visual = duesStatusVisual(context, due.status);
     final periodLabel =
         '${monthName(context, due.month)} ${due.year}';
     final subtitle = residentDueCardSubtitle(context, due);
-    final amountText = NumberFormat.currency(
-      locale: 'tr_TR',
-      symbol: _currencySymbol(due.currency),
-      decimalDigits: 2,
-    ).format(due.amount);
+    final amountText = AppCurrencyFormat.format(due.amount);
     final isPaid = due.status == DueStatus.paid;
 
     return Padding(

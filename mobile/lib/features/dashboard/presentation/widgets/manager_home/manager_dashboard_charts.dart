@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import '../../../../../core/utils/compact_number_format.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -251,8 +251,7 @@ class ManagerFinanceBarChart extends StatelessWidget {
                             return const SizedBox.shrink();
                           }
                           return Text(
-                            NumberFormat.compact(locale: 'tr_TR')
-                                .format(value),
+                            CompactNumberFormat.number(value),
                             style: AppTypography.caption.copyWith(
                               color: AppColors.textSecondary,
                               fontSize: 11,
