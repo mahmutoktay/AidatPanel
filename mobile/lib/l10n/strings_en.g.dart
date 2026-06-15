@@ -2549,6 +2549,21 @@ class Translations$features$subscription$en {
 	/// en: 'Purchase coming soon'
 	String get purchaseComingSoon => 'Purchase coming soon';
 
+	/// en: 'Subscribe monthly'
+	String get purchaseMonthly => 'Subscribe monthly';
+
+	/// en: 'Subscribe annually'
+	String get purchaseAnnual => 'Subscribe annually';
+
+	/// en: 'Purchase completed. Your subscription will update within a few minutes.'
+	String get purchaseSuccess => 'Purchase completed. Your subscription will update within a few minutes.';
+
+	/// en: 'Purchase was cancelled.'
+	String get purchaseCancelled => 'Purchase was cancelled.';
+
+	/// en: 'Purchases are not enabled in this build yet.'
+	String get purchasesUnavailable => 'Purchases are not enabled in this build yet.';
+
 	/// en: 'Could not load subscription.'
 	String get loadFailed => 'Could not load subscription.';
 }
@@ -3806,6 +3821,11 @@ extension on Translations {
 			'features.subscription.noSubscription' => 'No subscription on file yet.',
 			'features.subscription.backendPending' => 'Subscription is not connected to the server yet. Purchases coming soon.',
 			'features.subscription.purchaseComingSoon' => 'Purchase coming soon',
+			'features.subscription.purchaseMonthly' => 'Subscribe monthly',
+			'features.subscription.purchaseAnnual' => 'Subscribe annually',
+			'features.subscription.purchaseSuccess' => 'Purchase completed. Your subscription will update within a few minutes.',
+			'features.subscription.purchaseCancelled' => 'Purchase was cancelled.',
+			'features.subscription.purchasesUnavailable' => 'Purchases are not enabled in this build yet.',
 			'features.subscription.loadFailed' => 'Could not load subscription.',
 			'features.reports.menuDownload' => 'Download report',
 			'features.reports.sheetTitle' => 'PDF report',

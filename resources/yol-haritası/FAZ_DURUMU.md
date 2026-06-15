@@ -216,8 +216,8 @@ GET /api/v1/buildings/:id/reports?type=annual&year=2026
 
 **Hedef:** ~2026-07-12
 
-- [ ] RevenueCat webhook (`POST /subscription/webhook/revenuecat`)
-- [ ] RevenueCat SDK + satın alma (Mobil)
+- [x] RevenueCat webhook (`POST /subscription/webhook/revenuecat`)
+- [x] RevenueCat SDK + satın alma (Mobil)
 - [x] Abonelik okuma ekranı (`GET /me/subscription`); satın alma butonu devre dışı
 - [ ] Canlı E2E — Abonelik akışı
 
@@ -256,7 +256,7 @@ GET /api/v1/buildings/:id/reports?type=annual&year=2026
 | 4 | Pagination | Fullstack | ✅ | 4 liste + notifications |
 | 5 | Bina kartı dolu daire `0/N` | Backend | ✅ | `occupiedApartments` |
 | 6 | Profil / Dil / Şifre uçları | Fullstack | ✅ | FAZ 4 |
-| 7 | RevenueCat satın alma + webhook | Fullstack | 🔴 | FAZ 6 — okuma ekranı var |
+| 7 | RevenueCat satın alma + webhook | Fullstack | 🟡 | FAZ 6 — webhook + SDK; E2E bekliyor |
 | 8 | Gider makbuz `/proof` | Backend | ✅ | FAZ 2 kalıntısı |
 | 9 | Reports (aylık/yıllık PDF) | Fullstack | ✅ | E2E onaylandı |
 | 10 | `logout` FCM token temizliği | Backend | ✅ | FAZ 4 |

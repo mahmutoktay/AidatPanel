@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/app_date_format.dart';
+import '../../../../core/subscription/revenue_cat_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
@@ -73,28 +74,87 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 icon: Icons.info_outline,
                 iconBg: AppColors.infoBg,
                 iconColor: AppColors.chartBlue,
-                message: state.backendUnavailable
-                    ? t.features.subscription.backendPending
-                    : t.features.subscription.noSubscription,
+                message: t.features.subscription.noSubscription,
               ),
+            if (state.successMessage != null) ...[
+              const SizedBox(height: AppSizes.spacingM),
+              _InfoCard(
+                icon: Icons.check_circle_outline,
+                iconBg: AppColors.successBg,
+                iconColor: AppColors.chartGreen,
+                message: _resolveMessage(t, state.successMessage!),
+              ),
+            ],
             const SizedBox(height: AppSizes.spacingL),
-            SizedBox(
-              height: AppSizes.minTouchTarget,
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: null,
-                style: ProfileSettingsUi.primaryButton.copyWith(
-                  backgroundColor: WidgetStateProperty.all(
-                    ProfileSettingsUi.muted,
-                  ),
+            if (!RevenueCatService.isConfigured)
+              _InfoCard(
+                icon: Icons.store_outlined,
+                iconBg: AppColors.warningBg,
+                iconColor: AppColors.chartOrange,
+                message: t.features.subscription.purchasesUnavailable,
+              )
+            else ...[
+              SizedBox(
+                height: AppSizes.minTouchTarget,
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: state.purchasesEnabled
+                      ? () => ref
+                          .read(subscriptionNotifierProvider.notifier)
+                          .purchaseMonthly()
+                      : null,
+                  style: ProfileSettingsUi.primaryButton,
+                  child: state.isPurchasing
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(t.features.subscription.purchaseMonthly),
                 ),
-                child: Text(t.features.subscription.purchaseComingSoon),
               ),
-            ),
+              const SizedBox(height: AppSizes.spacingS),
+              SizedBox(
+                height: AppSizes.minTouchTarget,
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: state.purchasesEnabled
+                      ? () => ref
+                          .read(subscriptionNotifierProvider.notifier)
+                          .purchaseAnnual()
+                      : null,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: ProfileSettingsUi.ink,
+                    side: const BorderSide(color: AppColors.border),
+                    minimumSize: const Size(double.infinity, AppSizes.minTouchTarget),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        ProfileSettingsUi.primaryButtonRadius,
+                      ),
+                    ),
+                    textStyle: ProfileSettingsUi.buttonLabel,
+                  ),
+                  child: Text(t.features.subscription.purchaseAnnual),
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
+  }
+}
+
+String _resolveMessage(Translations t, String key) {
+  switch (key) {
+    case 'purchase_success':
+      return t.features.subscription.purchaseSuccess;
+    case 'purchase_cancelled':
+      return t.features.subscription.purchaseCancelled;
+    case 'purchases_unavailable':
+      return t.features.subscription.purchasesUnavailable;
+    default:
+      return key;
   }
 }
 

@@ -14,6 +14,7 @@ import {
   uploadProfilePicture,
   deleteProfilePicture,
 } from "../controllers/meController.js";
+import { getMySubscription } from "../controllers/subscriptionController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireRoles } from "../middlewares/roleMiddleware.js";
 import { validate, dueSchemas, meSchemas, ticketSchemas, dekontSchemas } from "../middlewares/validate.js";
@@ -43,6 +44,9 @@ router.delete("/", deleteMe);
 router.put("/password", validate(meSchemas.updatePassword), updatePassword);
 router.put("/language", validate(meSchemas.updateLanguage), updateLanguage);
 router.put("/fcm-token", validate(meSchemas.updateFcmToken), updateFcmToken);
+
+/** GET /api/v1/me/subscription — yönetici abonelik durumu (FAZ 6) */
+router.get("/subscription", requireRoles("MANAGER"), getMySubscription);
 
 /** GET /api/v1/me/payment-collection — sakin ödeme ekranı (IBAN, açıklama) */
 router.get("/payment-collection", requireRoles("RESIDENT"), getMyPaymentCollection);

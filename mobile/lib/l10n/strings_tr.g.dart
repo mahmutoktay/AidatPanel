@@ -982,6 +982,11 @@ class _Translations$features$subscription$tr implements Translations$features$su
 	@override String get noSubscription => 'Henüz abonelik kaydı yok.';
 	@override String get backendPending => 'Abonelik sunucuya henüz bağlanmadı. Satın alma yakında açılacak.';
 	@override String get purchaseComingSoon => 'Satın alma yakında';
+	@override String get purchaseMonthly => 'Aylık abone ol';
+	@override String get purchaseAnnual => 'Yıllık abone ol';
+	@override String get purchaseSuccess => 'Satın alma tamamlandı. Abonelik birkaç dakika içinde güncellenir.';
+	@override String get purchaseCancelled => 'Satın alma iptal edildi.';
+	@override String get purchasesUnavailable => 'Satın alma bu sürümde henüz etkin değil.';
 	@override String get loadFailed => 'Abonelik bilgisi alınamadı.';
 }
 
@@ -1980,6 +1985,11 @@ extension on TranslationsTr {
 			'features.subscription.noSubscription' => 'Henüz abonelik kaydı yok.',
 			'features.subscription.backendPending' => 'Abonelik sunucuya henüz bağlanmadı. Satın alma yakında açılacak.',
 			'features.subscription.purchaseComingSoon' => 'Satın alma yakında',
+			'features.subscription.purchaseMonthly' => 'Aylık abone ol',
+			'features.subscription.purchaseAnnual' => 'Yıllık abone ol',
+			'features.subscription.purchaseSuccess' => 'Satın alma tamamlandı. Abonelik birkaç dakika içinde güncellenir.',
+			'features.subscription.purchaseCancelled' => 'Satın alma iptal edildi.',
+			'features.subscription.purchasesUnavailable' => 'Satın alma bu sürümde henüz etkin değil.',
 			'features.subscription.loadFailed' => 'Abonelik bilgisi alınamadı.',
 			'features.reports.menuDownload' => 'Rapor indir',
 			'features.reports.sheetTitle' => 'PDF rapor',

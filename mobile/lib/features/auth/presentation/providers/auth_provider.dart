@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/cache_invalidator.dart';
+import '../../../../core/subscription/revenue_cat_service.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/storage/secure_storage.dart';
@@ -240,6 +241,9 @@ class AuthNotifier extends Notifier<AuthState> {
       await clearDekontPreviewsOnUserSwitch(ref);
     }
     invalidateAllCachedProviders(ref);
+    if (user.role == UserRole.manager) {
+      await RevenueCatService.logIn(user.id);
+    }
     // Pre-emptively load the profile to fetch the latest avatar and user details.
     ref.read(profileNotifierProvider.notifier).loadProfile();
   }
@@ -260,6 +264,9 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       final user = await _authRepository.restoreSession();
       if (user != null) {
+        if (user.role == UserRole.manager) {
+          await RevenueCatService.logIn(user.id);
+        }
         state = state.copyWith(
           user: user,
           isAuthenticated: true,
@@ -285,6 +292,7 @@ class AuthNotifier extends Notifier<AuthState> {
       resetResidentTabIndex(ref);
       ref.read(dioClientProvider).clearResponseCache();
       await invalidateCachesOnLogout(ref);
+      await RevenueCatService.logOut();
       await _authRepository.logout();
       await Future.delayed(const Duration(milliseconds: 500));
       state = AuthState(isManualLogout: true, logoutReason: LogoutReason.manual);
@@ -298,6 +306,7 @@ class AuthNotifier extends Notifier<AuthState> {
     resetResidentTabIndex(ref);
     ref.read(dioClientProvider).clearResponseCache();
     await invalidateCachesOnLogout(ref);
+    await RevenueCatService.logOut();
     await _authRepository.logout();
     await Future.delayed(const Duration(milliseconds: 300));
     state = const AuthState(isManualLogout: true, logoutReason: LogoutReason.manual);

@@ -17,6 +17,7 @@ import ticketRoutes from "./src/routes/ticketRoutes.js";
 import apartmentTicketRoutes from "./src/routes/apartmentTicketRoutes.js";
 import expenseRoutes from "./src/routes/expenseRoutes.js";
 import dekontRoutes from "./src/routes/dekontRoutes.js";
+import subscriptionRoutes from "./src/routes/subscriptionRoutes.js";
 import { apiLimiter } from "./src/middlewares/rateLimitMiddleware.js";
 import { errorHandler, notFoundHandler } from "./src/middlewares/errorHandler.js";
 import { attachWebSocketServer } from "./src/realtime/wsGateway.js";
@@ -71,6 +72,7 @@ app.use("/api/v1/buildings", buildingRoutes);
 app.use("/api/v1/buildings/:buildingId/apartments", apartmentRoutes);
 app.use("/api/v1/apartments/:apartmentId/invite-code", inviteCodeRoutes);
 app.use("/api/v1/me", meRoutes);
+app.use("/api/v1/subscription", subscriptionRoutes);
 
 app.use("/uploads/avatars", express.static("uploads/avatars"));
 

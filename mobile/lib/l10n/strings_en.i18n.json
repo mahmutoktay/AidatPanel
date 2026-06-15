@@ -841,6 +841,11 @@
       "noSubscription": "No subscription on file yet.",
       "backendPending": "Subscription is not connected to the server yet. Purchases coming soon.",
       "purchaseComingSoon": "Purchase coming soon",
+      "purchaseMonthly": "Subscribe monthly",
+      "purchaseAnnual": "Subscribe annually",
+      "purchaseSuccess": "Purchase completed. Your subscription will update within a few minutes.",
+      "purchaseCancelled": "Purchase was cancelled.",
+      "purchasesUnavailable": "Purchases are not enabled in this build yet.",
       "loadFailed": "Could not load subscription."
     },
     "reports": {

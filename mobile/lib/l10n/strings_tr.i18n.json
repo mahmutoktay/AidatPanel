@@ -841,6 +841,11 @@
       "noSubscription": "Henüz abonelik kaydı yok.",
       "backendPending": "Abonelik sunucuya henüz bağlanmadı. Satın alma yakında açılacak.",
       "purchaseComingSoon": "Satın alma yakında",
+      "purchaseMonthly": "Aylık abone ol",
+      "purchaseAnnual": "Yıllık abone ol",
+      "purchaseSuccess": "Satın alma tamamlandı. Abonelik birkaç dakika içinde güncellenir.",
+      "purchaseCancelled": "Satın alma iptal edildi.",
+      "purchasesUnavailable": "Satın alma bu sürümde henüz etkin değil.",
       "loadFailed": "Abonelik bilgisi alınamadı."
     },
     "reports": {

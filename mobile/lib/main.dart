@@ -9,6 +9,7 @@ import 'core/constants/app_constants.dart';
 import 'core/notifications/fcm_scope.dart';
 import 'core/notifications/firebase_bootstrap.dart';
 import 'core/router/app_router.dart';
+import 'core/subscription/revenue_cat_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/init_date_formatting.dart';
 import 'core/storage/secure_storage.dart';
@@ -41,6 +42,16 @@ void main() async {
   } catch (e, st) {
     developer.log(
       'initDateFormatting başarısız',
+      name: 'main',
+      error: e,
+      stackTrace: st,
+    );
+  }
+  try {
+    await RevenueCatService.configure();
+  } catch (e, st) {
+    developer.log(
+      'RevenueCat configure başarısız',
       name: 'main',
       error: e,
       stackTrace: st,
