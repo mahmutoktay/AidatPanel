@@ -108,6 +108,52 @@ class ProfileNotifier extends Notifier<ProfileState> {
       return false;
     }
   }
+
+  Future<bool> uploadAvatar(String filePath) async {
+    if (state.isSaving) return false;
+    state = state.copyWith(isSaving: true, clearError: true);
+    try {
+      final user = await _repository.uploadProfilePicture(filePath);
+      await ref.read(authStateProvider.notifier).syncCachedUser(user);
+      state = state.copyWith(isSaving: false, user: user, clearError: true);
+      return true;
+    } on ApiException catch (e) {
+      state = state.copyWith(
+        isSaving: false,
+        error: userFacingError(e),
+      );
+      return false;
+    } catch (e) {
+      state = state.copyWith(
+        isSaving: false,
+        error: userFacingError(e),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> deleteAvatar() async {
+    if (state.isSaving) return false;
+    state = state.copyWith(isSaving: true, clearError: true);
+    try {
+      final user = await _repository.deleteProfilePicture();
+      await ref.read(authStateProvider.notifier).syncCachedUser(user);
+      state = state.copyWith(isSaving: false, user: user, clearError: true);
+      return true;
+    } on ApiException catch (e) {
+      state = state.copyWith(
+        isSaving: false,
+        error: userFacingError(e),
+      );
+      return false;
+    } catch (e) {
+      state = state.copyWith(
+        isSaving: false,
+        error: userFacingError(e),
+      );
+      return false;
+    }
+  }
 }
 
 final profileNotifierProvider =

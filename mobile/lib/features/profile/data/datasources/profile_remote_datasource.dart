@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../auth/data/models/user_data.dart';
@@ -31,6 +32,10 @@ abstract class ProfileRemoteDataSource {
   ///  - 200: hesap kapatıldı (PII maskelendi, refreshTokenVersion++)
   ///  - 409: yöneticide bina var → "Önce binaları silin/devredin"
   Future<void> deleteAccount();
+
+  Future<UserData> uploadProfilePicture(String filePath);
+
+  Future<UserData> deleteProfilePicture();
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -111,5 +116,27 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<void> deleteAccount() async {
     await _dioClient.delete(ApiConstants.profile);
+  }
+
+  @override
+  Future<UserData> uploadProfilePicture(String filePath) async {
+    Future<FormData> buildFormData() async {
+      return FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath),
+      });
+    }
+
+    final response = await _dioClient.postMultipart(
+      ApiConstants.profilePicture,
+      data: await buildFormData(),
+      rebuildFormData: buildFormData,
+    );
+    return _parseUserPayload(response.data['data']);
+  }
+
+  @override
+  Future<UserData> deleteProfilePicture() async {
+    final response = await _dioClient.delete(ApiConstants.profilePicture);
+    return _parseUserPayload(response.data['data']);
   }
 }

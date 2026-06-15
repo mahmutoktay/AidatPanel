@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 
 /// Gider formu — çoklu makbuz seçimi.
 class ExpenseReceiptSection extends StatelessWidget {
@@ -90,7 +91,7 @@ class ExpenseReceiptSection extends StatelessWidget {
     final t = context.t.features.expenses;
     return InkWell(
       onTap: enabled ? () => _pick(context) : null,
-      borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+      borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(
@@ -99,7 +100,7 @@ class ExpenseReceiptSection extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: AppColors.primary.withValues(alpha: 0.04),
-          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+          borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
           border: Border.all(
             color: AppColors.primary.withValues(alpha: 0.25),
             width: 1.5,
@@ -154,42 +155,27 @@ class ExpenseReceiptSection extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.spacingS),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(
-          color: AppColors.borderColor,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: DashboardScreenStyle.whiteCard(),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
         child: Row(
           children: [
-            // Preview thumbnail
             if (isImage && file.path != null && !kIsWeb)
               Image.file(
                 File(file.path!),
                 width: 64,
                 height: 64,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => _buildFileIcon(Icons.image_outlined, AppColors.textSecondary),
+                errorBuilder: (_, _, _) => _buildFileIcon(
+                  Icons.image_outlined,
+                  AppColors.textSecondary,
+                ),
               )
             else if (ext == 'pdf')
               _buildFileIcon(Icons.picture_as_pdf_outlined, Colors.red[700]!)
             else
               _buildFileIcon(Icons.description_outlined, AppColors.primary),
-            
             const SizedBox(width: AppSizes.spacingM),
-            
-            // File Info
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingS),
@@ -217,15 +203,10 @@ class ExpenseReceiptSection extends StatelessWidget {
                 ),
               ),
             ),
-            
-            // Delete button
             Material(
               color: Colors.transparent,
               child: InkWell(
                 onTap: enabled ? () => _removeFile(file) : null,
-                borderRadius: const BorderRadius.horizontal(
-                  right: Radius.circular(AppSizes.cardRadius),
-                ),
                 child: Container(
                   width: AppSizes.minTouchTarget,
                   height: 64,
@@ -249,16 +230,9 @@ class ExpenseReceiptSection extends StatelessWidget {
     final isPdf = ext == 'pdf';
 
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(
-          color: AppColors.borderColor,
-          width: 1,
-        ),
-      ),
+      decoration: DashboardScreenStyle.whiteCard(),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
         child: Row(
           children: [
             _buildFileIcon(
@@ -293,7 +267,6 @@ class ExpenseReceiptSection extends StatelessWidget {
                 ),
               ),
             ),
-            // Change button
             Padding(
               padding: const EdgeInsets.only(right: AppSizes.spacingS),
               child: TextButton.icon(
@@ -303,7 +276,9 @@ class ExpenseReceiptSection extends StatelessWidget {
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.primary,
                   minimumSize: const Size(60, 40),
-                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingS),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.spacingS,
+                  ),
                 ),
               ),
             ),
@@ -313,11 +288,22 @@ class ExpenseReceiptSection extends StatelessWidget {
     );
   }
 
+  int get _contentItemCount {
+    final hasLocal = pickedFiles.isNotEmpty && !kIsWeb;
+    final hasRemote =
+        existingReceiptUrl != null && existingReceiptUrl!.isNotEmpty;
+
+    if (!hasLocal && !hasRemote) return 1; // dropzone
+    if (hasLocal) return pickedFiles.length + 1; // files + add button
+    return 1; // remote file
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.expenses;
     final hasLocal = pickedFiles.isNotEmpty && !kIsWeb;
-    final hasRemote = existingReceiptUrl != null && existingReceiptUrl!.isNotEmpty;
+    final hasRemote =
+        existingReceiptUrl != null && existingReceiptUrl!.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -331,7 +317,8 @@ class ExpenseReceiptSection extends StatelessWidget {
                 t.receiptTitle,
                 style: AppTypography.body1.copyWith(
                   color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
                 ),
               ),
             ),
@@ -356,30 +343,39 @@ class ExpenseReceiptSection extends StatelessWidget {
           ),
         ],
         const SizedBox(height: AppSizes.spacingS),
-        if (!hasLocal && !hasRemote)
-          _buildDropzone(context)
-        else ...[
-          if (hasLocal) ...[
-            ...pickedFiles.map((file) => _buildLocalFileItem(context, file)),
-            const SizedBox(height: AppSizes.spacingXS),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: enabled ? () => _pick(context) : null,
-                icon: const Icon(Icons.add, size: 20),
-                label: Text(t.receiptAdd),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.spacingS,
-                    vertical: AppSizes.spacingXS,
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _contentItemCount,
+          itemBuilder: (context, index) {
+            if (!hasLocal && !hasRemote) {
+              return _buildDropzone(context);
+            }
+
+            if (hasLocal) {
+              if (index < pickedFiles.length) {
+                return _buildLocalFileItem(context, pickedFiles[index]);
+              }
+              return Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: enabled ? () => _pick(context) : null,
+                  icon: const Icon(Icons.add, size: 20),
+                  label: Text(t.receiptAdd),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.spacingS,
+                      vertical: AppSizes.spacingXS,
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ] else if (hasRemote)
-            _buildRemoteFileItem(context),
-        ],
+              );
+            }
+
+            return _buildRemoteFileItem(context);
+          },
+        ),
       ],
     );
   }

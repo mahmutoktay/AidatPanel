@@ -8,7 +8,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
+import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/auth_screen_shell.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../providers/auth_provider.dart';
 
@@ -88,120 +90,108 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     final t = context.t;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(t.common.forgotPasswordTitle),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
+    return AuthScreenShell(
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: ProfileSettingsUi.ink),
+        onPressed: _submitting ? null : () => context.pop(),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: AppSizes.screenBodyScrollPadding,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  width: 72,
-                  height: 72,
-                  margin: const EdgeInsets.only(top: AppSizes.spacingL),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.lock_reset,
-                    color: AppColors.primary,
-                    size: 36,
-                  ),
-                ),
-                const SizedBox(height: AppSizes.spacingL),
-                Text(
-                  t.common.forgotPasswordTitle,
-                  style: AppTypography.h2.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSizes.spacingS),
-                Text(
-                  t.common.forgotPasswordSubtitle,
-                  style: AppTypography.body2.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSizes.spacingXL),
-                TextFormField(
-                  controller: _emailController,
-                  enabled: !_submitting,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.done,
-                  autofillHints: const [AutofillHints.email],
-                  onFieldSubmitted: (_) => _submit(),
-                  decoration: InputDecoration(
-                    labelText: t.features.auth.email,
-                    hintText: t.features.auth.emailHint,
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSizes.inputRadius),
-                    ),
-                  ),
-                  validator: _validateEmail,
-                ),
-                const SizedBox(height: AppSizes.spacingL),
-                ElevatedButton(
-                  onPressed: _submitting ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(
-                      double.infinity,
-                      AppSizes.buttonHeightPrimary,
-                    ),
-                  ),
-                  child: _submitting
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(t.common.sendResetCode),
-                ),
-                const SizedBox(height: AppSizes.spacingM),
-                SizedBox(
-                  width: double.infinity,
-                  height: AppSizes.buttonHeightSecondary,
-                  child: OutlinedButton(
-                    onPressed: _submitting
-                        ? null
-                        : () => context.push(
-                              '/reset-password',
-                              extra: _emailController.text.trim(),
-                            ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textPrimary,
-                      side: const BorderSide(
-                        color: AppColors.borderColor,
-                        width: 1.5,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      t.common.iHaveACode,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              margin: const EdgeInsets.only(top: AppSizes.spacingS),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.fill,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.lock_reset,
+                color: AppColors.inkDark,
+                size: 36,
+              ),
             ),
-          ),
+            const SizedBox(height: AppSizes.spacingL),
+            Text(
+              t.common.forgotPasswordTitle,
+              style: AppTypography.h2.copyWith(
+                color: AppColors.inkDark,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSizes.spacingS),
+            Text(
+              t.common.forgotPasswordSubtitle,
+              style: AppTypography.body2.copyWith(
+                color: AppColors.mutedText,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSizes.spacingXL),
+            TextFormField(
+              controller: _emailController,
+              enabled: !_submitting,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.email],
+              onFieldSubmitted: (_) => _submit(),
+              decoration: InputDecoration(
+                labelText: t.features.auth.email,
+                hintText: t.features.auth.emailHint,
+                prefixIcon: const Icon(Icons.email_outlined),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                ),
+              ),
+              validator: _validateEmail,
+            ),
+            const SizedBox(height: AppSizes.spacingL),
+            ElevatedButton(
+              onPressed: _submitting ? null : _submit,
+              style: ProfileSettingsUi.primaryButton,
+              child: _submitting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(t.common.sendResetCode),
+            ),
+            const SizedBox(height: AppSizes.spacingM),
+            SizedBox(
+              width: double.infinity,
+              height: AppSizes.buttonHeightSecondary,
+              child: OutlinedButton(
+                onPressed: _submitting
+                    ? null
+                    : () => context.push(
+                          '/reset-password',
+                          extra: _emailController.text.trim(),
+                        ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.inkDark,
+                  side: const BorderSide(
+                    color: AppColors.line,
+                    width: 1.5,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  t.common.iHaveACode,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/apartments_store.dart';
 import '../../domain/entities/apartment_entity.dart';
@@ -115,7 +116,9 @@ class _EditApartmentBottomSheetState
       child: Container(
         decoration: const BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(DashboardScreenStyle.cardRadius),
+          ),
         ),
         child: SafeArea(
           top: false,
@@ -203,7 +206,7 @@ class _EditApartmentBottomSheetState
                     children: [
                       Expanded(
                         child: SizedBox(
-                          height: AppSizes.buttonHeightPrimary,
+                          height: AppSizes.minTouchTarget,
                           child: OutlinedButton(
                             onPressed:
                                 _saving ? null : () => Navigator.of(context).pop(),
@@ -214,7 +217,9 @@ class _EditApartmentBottomSheetState
                                 width: 1.5,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(
+                                  DashboardScreenStyle.pillRadius,
+                                ),
                               ),
                             ),
                             child: Text(
@@ -227,12 +232,17 @@ class _EditApartmentBottomSheetState
                       const SizedBox(width: AppSizes.spacingM),
                       Expanded(
                         child: SizedBox(
-                          height: AppSizes.buttonHeightPrimary,
+                          height: AppSizes.minTouchTarget,
                           child: ElevatedButton.icon(
                             onPressed: _saving ? null : _save,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  DashboardScreenStyle.pillRadius,
+                                ),
+                              ),
                             ),
                             icon: _saving
                                 ? const SizedBox(

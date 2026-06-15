@@ -7,6 +7,7 @@ class ResidentModel {
   final String? phone;
   final String role;
   final String language;
+  final String? profilePicture;
 
   ResidentModel({
     required this.id,
@@ -15,6 +16,7 @@ class ResidentModel {
     this.phone,
     required this.role,
     this.language = 'tr',
+    this.profilePicture,
   });
 
   factory ResidentModel.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,7 @@ class ResidentModel {
       phone: json['phone'] as String?,
       role: json['role'] as String? ?? 'RESIDENT',
       language: json['language'] as String? ?? 'tr',
+      profilePicture: json['profilePicture'] as String?,
     );
   }
 
@@ -36,6 +39,7 @@ class ResidentModel {
       phone: phone,
       role: role,
       language: language,
+      profilePicture: profilePicture,
     );
   }
 }

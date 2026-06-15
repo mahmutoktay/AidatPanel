@@ -12,6 +12,7 @@ import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/sign_up_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/dashboard/presentation/screens/manager_dashboard_screen.dart';
+import '../../features/dashboard/presentation/screens/manager_overdue_apartments_screen.dart';
 import '../../features/dashboard/presentation/screens/resident_dashboard_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/tickets/presentation/screens/create_ticket_screen.dart';
@@ -110,6 +111,14 @@ List<RouteBase> _managerDashboardChildRoutes() => [
     name: 'manager_profile',
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) => const ProfileDetailsScreen(),
+  ),
+  GoRoute(
+    path: 'overdue-apartments',
+    name: 'manager_overdue_apartments',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => ManagerOverdueApartmentsScreen(
+      initialBuildingId: state.uri.queryParameters['buildingId'],
+    ),
   ),
   GoRoute(
     path: 'subscription',

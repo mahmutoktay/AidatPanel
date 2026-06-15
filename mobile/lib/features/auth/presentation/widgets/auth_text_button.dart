@@ -33,7 +33,10 @@ class AuthTextButton extends StatelessWidget {
                 label,
                 textAlign: TextAlign.center,
                 style: AppTypography.body2.copyWith(
-                  color: onTap == null ? AppColors.textDisabled : AppColors.primary,
+                  color: onTap == null
+                      ? AppColors.mutedText
+                      : AppColors.inkDark,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),

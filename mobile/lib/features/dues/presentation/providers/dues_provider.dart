@@ -343,3 +343,17 @@ int buildingOverdueCount(Map<String, List<DueEntity>> map, String buildingId) {
       .where((d) => d.status == DueStatus.overdue)
       .length;
 }
+
+/// Tek bir binanın bekleyen aidat sayısı.
+int buildingPendingCount(Map<String, List<DueEntity>> map, String buildingId) {
+  return (map[buildingId] ?? const [])
+      .where((d) => d.status == DueStatus.pending)
+      .length;
+}
+
+/// Tek bir binanın ödenmiş aidat sayısı.
+int buildingPaidCount(Map<String, List<DueEntity>> map, String buildingId) {
+  return (map[buildingId] ?? const [])
+      .where((d) => d.status == DueStatus.paid)
+      .length;
+}

@@ -9,6 +9,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
@@ -146,7 +147,9 @@ class _ChangePasswordBottomSheetState
         child: Container(
           decoration: const BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(DashboardScreenStyle.cardRadius),
+            ),
           ),
           padding: EdgeInsets.fromLTRB(
             AppSizes.spacingL,
@@ -166,7 +169,7 @@ class _ChangePasswordBottomSheetState
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppColors.border,
+                        color: AppColors.borderColor,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -286,7 +289,7 @@ class _ChangePasswordBottomSheetState
                     children: [
                       Expanded(
                         child: SizedBox(
-                          height: AppSizes.buttonHeightSecondary,
+                          height: AppSizes.minTouchTarget,
                           child: OutlinedButton(
                             onPressed: _submitting
                                 ? null
@@ -298,7 +301,9 @@ class _ChangePasswordBottomSheetState
                                 width: 1.5,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(
+                                  DashboardScreenStyle.pillRadius,
+                                ),
                               ),
                             ),
                             child: Text(
@@ -311,7 +316,7 @@ class _ChangePasswordBottomSheetState
                       const SizedBox(width: AppSizes.spacingM),
                       Expanded(
                         child: SizedBox(
-                          height: AppSizes.buttonHeightSecondary,
+                          height: AppSizes.minTouchTarget,
                           child: ElevatedButton(
                             onPressed: _submitting ? null : _submit,
                             style: ElevatedButton.styleFrom(
@@ -319,7 +324,7 @@ class _ChangePasswordBottomSheetState
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(
-                                  AppSizes.buttonRadius,
+                                  DashboardScreenStyle.pillRadius,
                                 ),
                               ),
                             ),

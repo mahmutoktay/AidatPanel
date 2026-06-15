@@ -8,6 +8,7 @@ import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart'
     show AuthRepository, AuthRepositoryImpl;
 import '../../domain/entities/user_entity.dart';
+import '../../../profile/presentation/providers/profile_notifier.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../core/utils/input_validators.dart';
 
@@ -239,6 +240,8 @@ class AuthNotifier extends Notifier<AuthState> {
       await clearDekontPreviewsOnUserSwitch(ref);
     }
     invalidateAllCachedProviders(ref);
+    // Pre-emptively load the profile to fetch the latest avatar and user details.
+    ref.read(profileNotifierProvider.notifier).loadProfile();
   }
 
   /// Uygulama açılışında SecureStorage'daki oturumu geri yükler.
@@ -263,6 +266,8 @@ class AuthNotifier extends Notifier<AuthState> {
           isLoading: false,
           clearError: true,
         );
+        // Pre-emptively load the profile to fetch the latest avatar and user details.
+        ref.read(profileNotifierProvider.notifier).loadProfile();
       } else {
         state = AuthState();
       }

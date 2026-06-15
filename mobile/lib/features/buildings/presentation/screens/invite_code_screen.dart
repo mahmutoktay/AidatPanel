@@ -8,8 +8,11 @@ import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/async_error_widget.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../apartments/data/apartments_store.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
@@ -46,16 +49,9 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
         if (didPop) return;
         _onBackPressed();
       },
-      child: Scaffold(
-        backgroundColor: AppColors.surface,
-        appBar: AppBar(
-          title: Text(context.t.common.createInviteCode),
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: _onBackPressed,
-          ),
-        ),
+      child: DashboardSecondaryScaffold(
+        title: context.t.common.createInviteCode,
+        onBack: _onBackPressed,
         body: Column(
           children: [
             InviteStepIndicator(currentStep: _step),
@@ -290,18 +286,16 @@ class _BuildingPickerStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: AppSizes.screenBodyScrollPadding,
+      padding: AppSizes.screenBodyScrollPadding.copyWith(
+        top: AppSizes.spacingM,
+      ),
       itemCount: buildings.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
-            child: Text(
-              context.t.common.whichBuildingForCode,
-              style: AppTypography.h4.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w800,
-              ),
+            child: DashboardSectionTitle(
+              title: context.t.common.whichBuildingForCode,
             ),
           );
         }
@@ -341,18 +335,14 @@ class _ApartmentPickerStep extends StatelessWidget {
       final emptyItems = <Widget>[
         _InviteBuildingBanner(building: building),
         const SizedBox(height: AppSizes.spacingL),
-        Text(
-          context.t.common.whichApartmentForCode,
-          style: AppTypography.h4.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+        DashboardSectionTitle(title: context.t.common.whichApartmentForCode),
         const SizedBox(height: AppSizes.spacingM),
         _InviteEmptyApartmentsState(message: context.t.common.noApartmentsInBuilding),
       ];
       return ListView.builder(
-        padding: AppSizes.screenBodyScrollPadding,
+        padding: AppSizes.screenBodyScrollPadding.copyWith(
+          top: AppSizes.spacingM,
+        ),
         itemCount: emptyItems.length,
         itemBuilder: (_, i) => emptyItems[i],
       );
@@ -360,7 +350,9 @@ class _ApartmentPickerStep extends StatelessWidget {
 
     const headerCount = 3;
     return ListView.builder(
-      padding: AppSizes.screenBodyScrollPadding,
+      padding: AppSizes.screenBodyScrollPadding.copyWith(
+        top: AppSizes.spacingM,
+      ),
       itemCount: apartments.length + headerCount,
       itemBuilder: (context, index) {
         if (index == 0) {
@@ -370,12 +362,8 @@ class _ApartmentPickerStep extends StatelessWidget {
           );
         }
         if (index == 1) {
-          return Text(
-            context.t.common.whichApartmentForCode,
-            style: AppTypography.h4.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w800,
-            ),
+          return DashboardSectionTitle(
+            title: context.t.common.whichApartmentForCode,
           );
         }
         if (index == 2) {
@@ -443,23 +431,20 @@ class _InviteBuildingBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: DashboardScreenStyle.whiteCard(),
       child: Row(
         children: [
           Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: AppColors.dashboardBackground,
               borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
             child: const Icon(
               Icons.apartment_rounded,
-              color: AppColors.textPrimary,
+              color: ProfileSettingsUi.ink,
               size: 22,
             ),
           ),
@@ -470,10 +455,9 @@ class _InviteBuildingBanner extends StatelessWidget {
               children: [
                 Text(
                   building.name,
-                  style: AppTypography.h3.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w800,
+                  style: ProfileSettingsUi.fieldValue.copyWith(
                     fontSize: 18,
+                    fontWeight: FontWeight.w800,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -482,10 +466,9 @@ class _InviteBuildingBanner extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     building.displayAddress,
-                    style: AppTypography.body2.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
+                    style: ProfileSettingsUi.fieldLabel.copyWith(
                       fontSize: 14,
+                      fontWeight: FontWeight.w600,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -509,22 +492,18 @@ class _InviteEmptyApartmentsState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingXL),
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: DashboardScreenStyle.whiteCard(),
       child: Column(
         children: [
           Icon(
             Icons.door_back_door_outlined,
             size: 56,
-            color: AppColors.textSecondary.withValues(alpha: 0.85),
+            color: ProfileSettingsUi.muted.withValues(alpha: 0.85),
           ),
           const SizedBox(height: AppSizes.spacingM),
           Text(
             message,
-            style: AppTypography.body1.copyWith(
-              color: AppColors.textSecondary,
+            style: ProfileSettingsUi.handle.copyWith(
               fontWeight: FontWeight.w600,
             ),
             textAlign: TextAlign.center,

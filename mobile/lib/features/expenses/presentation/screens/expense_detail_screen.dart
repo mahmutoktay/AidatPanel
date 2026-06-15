@@ -10,6 +10,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/document_preview_screen.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../providers/expenses_provider.dart';
@@ -27,7 +29,8 @@ class ExpenseDetailScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ExpenseDetailScreen> createState() => _ExpenseDetailScreenState();
+  ConsumerState<ExpenseDetailScreen> createState() =>
+      _ExpenseDetailScreenState();
 }
 
 class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
@@ -70,7 +73,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
 
     try {
       final isAbsolute = Uri.parse(url).isAbsolute;
-      
+
       Response<List<int>> response;
       if (isAbsolute) {
         final dio = Dio();
@@ -85,7 +88,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
           options: Options(responseType: ResponseType.bytes),
         );
       }
-      
+
       if (mounted && response.data != null) {
         setState(() {
           _filesBytes[url] = Uint8List.fromList(response.data!);
@@ -95,7 +98,9 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     } catch (e) {
       debugPrint('Receipt download error ($url): $e');
       if (mounted) {
-        setState(() => _filesErrors[url] = context.t.features.dekont.errorFileDownload);
+        setState(
+          () => _filesErrors[url] = context.t.features.dekont.errorFileDownload,
+        );
       }
     } finally {
       if (mounted) {
@@ -156,21 +161,19 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     );
   }
 
-  Widget _buildFileCard(BuildContext context, ExpenseEntity expense, String url, int index) {
+  Widget _buildFileCard(
+    BuildContext context,
+    ExpenseEntity expense,
+    String url,
+    int index,
+  ) {
     final t = context.t.features.expenses;
     final bytes = _filesBytes[url];
     final isLoading = _loadingFiles[url] == true;
     final error = _filesErrors[url];
 
     if (isLoading) {
-      return Container(
-        margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
-        padding: const EdgeInsets.all(AppSizes.spacingM),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-          border: Border.all(color: AppColors.borderColor),
-        ),
+      return DashboardSurfaceCard(
         child: const Center(
           child: SizedBox(
             width: 24,
@@ -182,14 +185,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     }
 
     if (error != null) {
-      return Container(
-        margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
-        padding: const EdgeInsets.all(AppSizes.spacingM),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-          border: Border.all(color: AppColors.borderColor),
-        ),
+      return DashboardSurfaceCard(
         child: Row(
           children: [
             Expanded(
@@ -212,93 +208,163 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     final isPdf = ext == 'pdf';
     final sizeBytes = bytes?.length ?? 0;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(
-          color: AppColors.borderColor,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+    return DashboardSurfaceCard(
+      child: Row(
+        children: [
+          _buildFileIcon(
+            isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
+            isPdf ? Colors.red[700]! : AppColors.primary,
+          ),
+          const SizedBox(width: AppSizes.spacingM),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '${t.receiptTitle} ${index + 1}',
+                  style: AppTypography.body1.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (sizeBytes > 0) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    _formatFileSize(sizeBytes),
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: bytes != null
+                ? () => _openReceiptPreview(context, expense, url)
+                : null,
+            icon: const Icon(Icons.visibility_outlined),
+            color: AppColors.primary,
+            tooltip: t.viewReceipt,
+            constraints: const BoxConstraints(
+              minWidth: AppSizes.minTouchTarget,
+              minHeight: AppSizes.minTouchTarget,
+            ),
+          ),
+          IconButton(
+            onPressed: bytes != null ? () => _shareFile(expense, url) : null,
+            icon: const Icon(Icons.share_outlined),
+            color: AppColors.primary,
+            tooltip: context.t.features.dekont.shareFile,
+            constraints: const BoxConstraints(
+              minWidth: AppSizes.minTouchTarget,
+              minHeight: AppSizes.minTouchTarget,
+            ),
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        child: Row(
-          children: [
-            _buildFileIcon(
-              isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
-              isPdf ? Colors.red[700]! : AppColors.primary,
-            ),
-            const SizedBox(width: AppSizes.spacingM),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingS),
+    );
+  }
+
+  Widget _buildHeaderCard(
+    BuildContext context,
+    ExpenseEntity expense,
+    NumberFormat currencyFormat,
+    String createdAtDate,
+    String expenseDate,
+  ) {
+    final t = context.t.features.expenses;
+
+    return DashboardSurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '${t.receiptTitle} ${index + 1}',
-                      style: AppTypography.body1.copyWith(
+                      expense.title,
+                      style: AppTypography.h4.copyWith(
+                        fontWeight: FontWeight.w800,
                         color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    if (sizeBytes > 0) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        _formatFileSize(sizeBytes),
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                    const SizedBox(height: 4),
+                    Text(
+                      expenseDate,
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.textSecondary,
                       ),
-                    ],
+                    ),
                   ],
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: AppSizes.spacingS),
-              child: IconButton(
-                onPressed: bytes != null
-                    ? () => _openReceiptPreview(context, expense, url)
-                    : null,
-                icon: const Icon(Icons.visibility_outlined),
-                color: AppColors.primary,
-                tooltip: t.viewReceipt,
-                constraints: const BoxConstraints(
-                  minWidth: AppSizes.minTouchTarget,
-                  minHeight: AppSizes.minTouchTarget,
+              const SizedBox(width: AppSizes.spacingS),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.spacingM,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(
+                    DashboardScreenStyle.pillRadius,
+                  ),
+                ),
+                child: Text(
+                  expense.category.label(context),
+                  style: AppTypography.body2.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
+          const SizedBox(height: AppSizes.spacingM),
+          Text(
+            '${context.t.features.dekont.amount}: ${currencyFormat.format(expense.amount)}',
+            style: AppTypography.h3.copyWith(
+              fontWeight: FontWeight.w700,
+              color: AppColors.error,
             ),
-            Padding(
-              padding: const EdgeInsets.only(right: AppSizes.spacingS),
-              child: IconButton(
-                onPressed: bytes != null ? () => _shareFile(expense, url) : null,
-                icon: const Icon(Icons.share_outlined),
-                color: AppColors.primary,
-                tooltip: context.t.features.dekont.shareFile,
-                constraints: const BoxConstraints(
-                  minWidth: AppSizes.minTouchTarget,
-                  minHeight: AppSizes.minTouchTarget,
-                ),
-              ),
+          ),
+          const SizedBox(height: AppSizes.spacingS),
+          Text(
+            '${t.fieldCreatedAt}: $createdAtDate',
+            style: AppTypography.body1,
+          ),
+          if (expense.note != null && expense.note!.isNotEmpty) ...[
+            const SizedBox(height: AppSizes.spacingM),
+            Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
+            const SizedBox(height: AppSizes.spacingM),
+            Text(
+              '${t.fieldNote}:',
+              style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              expense.note!,
+              style: AppTypography.body1,
             ),
           ],
-        ),
+        ],
       ),
     );
+  }
+
+  int _listItemCount(ExpenseEntity expense) {
+    if (expense.receiptUrls.isEmpty) return 2; // header + empty receipts
+    return 1 + expense.receiptUrls.length; // header + receipts
   }
 
   @override
@@ -307,8 +373,8 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     final expense = _getExpense();
 
     if (expense == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text(t.detailTitle)),
+      return DashboardSecondaryScaffold(
+        title: t.detailTitle,
         body: Center(
           child: Text(context.t.common.api.expenseNotFound),
         ),
@@ -320,129 +386,49 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
       symbol: '₺',
       decimalDigits: 2,
     );
-    final createdAtDate = DateFormat('d MMMM yyyy, HH:mm').format(expense.createdAt);
+    final createdAtDate =
+        DateFormat('d MMMM yyyy, HH:mm').format(expense.createdAt);
     final expenseDate = DateFormat('d MMMM yyyy').format(expense.date);
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: Text(t.detailTitle),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
+    return DashboardSecondaryScaffold(
+      title: t.detailTitle,
+      body: ListView.builder(
         padding: AppSizes.screenBodyScrollPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppSizes.spacingL),
-              decoration: BoxDecoration(
-                color: AppColors.fill,
-                borderRadius: BorderRadius.circular(20),
+        itemCount: _listItemCount(expense),
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return Padding(
+              padding: DashboardScreenStyle.listItemPadding,
+              child: _buildHeaderCard(
+                context,
+                expense,
+                currencyFormat,
+                createdAtDate,
+                expenseDate,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              expense.title,
-                              style: AppTypography.h4.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              expenseDate,
-                              style: AppTypography.body2.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: AppSizes.spacingS),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.spacingM,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          expense.category.label(context),
-                          style: AppTypography.body2.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
-                  const SizedBox(height: AppSizes.spacingM),
-                  Text(
-                    '${context.t.features.dekont.amount}: ${currencyFormat.format(expense.amount)}',
-                    style: AppTypography.h3.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.error,
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.spacingS),
-                  Text(
-                    '${t.fieldCreatedAt}: $createdAtDate',
-                    style: AppTypography.body1,
-                  ),
-                  if (expense.note != null && expense.note!.isNotEmpty) ...[
-                    const SizedBox(height: AppSizes.spacingM),
-                    Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
-                    const SizedBox(height: AppSizes.spacingM),
-                    Text(
-                      '${t.fieldNote}:',
-                      style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      expense.note!,
-                      style: AppTypography.body1,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSizes.spacingL),
-            if (expense.receiptUrls.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(AppSizes.spacingL),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-                  border: Border.all(color: AppColors.borderColor),
-                ),
-                child: Center(
-                  child: Text(
-                    t.receiptMissing,
-                    style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
+            );
+          }
+
+          if (expense.receiptUrls.isEmpty) {
+            return DashboardSurfaceCard(
+              child: Center(
+                child: Text(
+                  t.receiptMissing,
+                  style: AppTypography.body2.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                 ),
-              )
-            else
-              ...expense.receiptUrls.asMap().entries.map((entry) {
-                final idx = entry.key;
-                final url = entry.value;
-                return _buildFileCard(context, expense, url, idx);
-              }),
-          ],
-        ),
+              ),
+            );
+          }
+
+          final receiptIndex = index - 1;
+          final url = expense.receiptUrls[receiptIndex];
+          return Padding(
+            padding: DashboardScreenStyle.listItemPadding,
+            child: _buildFileCard(context, expense, url, receiptIndex),
+          );
+        },
       ),
     );
   }

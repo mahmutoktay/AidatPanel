@@ -32,7 +32,7 @@ function mapDueRow(due) {
 }
 
 async function attachBreakdownToDue(due, buildingId) {
-  const row = due.apartment ? mapDueRow(due) : due;
+  const row = (due.apartment && !due.apartmentNumber) ? mapDueRow(due) : due;
   const apartmentId = due.apartmentId ?? due.apartment?.id;
   if (!apartmentId || !buildingId) return row;
 
@@ -146,6 +146,17 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
   const updateData = { status };
 
   if (status === "PAID") {
+    const resident = await prisma.user.findFirst({
+      where: {
+        apartmentId: due.apartmentId,
+        deletedAt: null,
+        role: "RESIDENT",
+      },
+      select: { id: true },
+    });
+    if (!resident) {
+      return { invalidResident: true };
+    }
     updateData.paidAt = paidAt ? new Date(paidAt) : new Date();
     updateData.overdueDays = 0;
   } else if (status === "WAIVED") {

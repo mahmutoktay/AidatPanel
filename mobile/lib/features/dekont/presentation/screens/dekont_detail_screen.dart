@@ -15,7 +15,9 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/api_user_message.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/app_select_field.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -183,145 +185,183 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     }
   }
 
+  List<Widget>? _downloadActions(AsyncValue<DekontEntity> detail) {
+    if (detail.asData?.value == null) return null;
+    return [
+      IconButton(
+        icon: const Icon(Icons.download_rounded),
+        onPressed: () => _downloadDekont(detail.asData!.value),
+      ),
+    ];
+  }
+
+  Widget _dashboardInfoCard({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSizes.spacingM),
+      decoration: DashboardScreenStyle.whiteCard(),
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final detail = ref.watch(dekontDetailProvider(widget.dekontId));
     final isManager =
         ref.watch(authStateProvider).user?.role == UserRole.manager;
     final t = context.t.features.dekont;
+    final downloadActions = _downloadActions(detail);
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: Text(t.detailTitle),
-        centerTitle: true,
-        actions: [
-          if (detail.asData?.value != null)
-            IconButton(
-              icon: const Icon(Icons.download_rounded),
-              onPressed: () => _downloadDekont(detail.asData!.value),
-            ),
-        ],
-      ),
-      body: detail.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: AppSizes.screenBodyScrollPadding,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  userFacingError(e, context: ApiMessageContext.dekont),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSizes.spacingM),
-                FilledButton(
-                  onPressed: () =>
-                      ref.invalidate(dekontDetailProvider(widget.dekontId)),
-                  child: Text(context.t.common.tryAgain),
-                ),
-              ],
-            ),
+    final body = detail.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(
+        child: Padding(
+          padding: AppSizes.screenBodyScrollPadding,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                userFacingError(e, context: ApiMessageContext.dekont),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSizes.spacingM),
+              FilledButton(
+                onPressed: () =>
+                    ref.invalidate(dekontDetailProvider(widget.dekontId)),
+                child: Text(context.t.common.tryAgain),
+              ),
+            ],
           ),
         ),
-        data: (dekont) {
-          final date = DateFormat(
-            'd MMMM yyyy, HH:mm',
-          ).format(dekont.createdAt);
+      ),
+      data: (dekont) {
+        final date = DateFormat(
+          'd MMMM yyyy, HH:mm',
+        ).format(dekont.createdAt);
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(dekontDetailProvider(widget.dekontId));
-              await ref.read(dekontDetailProvider(widget.dekontId).future);
-              if (_fileBytes != null) {
-                await _loadFile(forceFromServer: true);
-              }
-            },
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: AppSizes.screenBodyScrollPadding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    dekont.originalFilename,
-                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w700),
+        return RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(dekontDetailProvider(widget.dekontId));
+            await ref.read(dekontDetailProvider(widget.dekontId).future);
+            if (_fileBytes != null) {
+              await _loadFile(forceFromServer: true);
+            }
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: AppSizes.screenBodyScrollPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _dashboardInfoCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        dekont.originalFilename,
+                        style: AppTypography.h4.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        date,
+                        style: AppTypography.body2.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    date,
-                    style: AppTypography.body2.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.spacingL),
-                  DekontSystemInfoSection(
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+                _dashboardInfoCard(
+                  child: DekontSystemInfoSection(
                     dekont: dekont,
                     isManager: isManager,
                   ),
-                  if (dekont.status == DekontStatus.rejected) ...[
-                    const SizedBox(height: AppSizes.spacingL),
-                    SizedBox(
-                      height: AppSizes.buttonHeightPrimary,
-                      child: ElevatedButton(
-                        onPressed: () => context.push('/payment'),
-                        style: AppButtonStyles.elevatedSuccess(),
-                        child: Text(t.reupload),
-                      ),
+                ),
+                if (dekont.status == DekontStatus.rejected) ...[
+                  const SizedBox(height: AppSizes.spacingM),
+                  SizedBox(
+                    height: AppSizes.buttonHeightPrimary,
+                    child: ElevatedButton(
+                      onPressed: () => context.push('/payment'),
+                      style: AppButtonStyles.elevatedSuccess(),
+                      child: Text(t.reupload),
                     ),
-                  ],
-                  const SizedBox(height: AppSizes.spacingL),
-                  _buildFileCard(context, dekont),
-                  if (_fileError != null) ...[
-                    const SizedBox(height: AppSizes.spacingM),
-                    Text(
-                      _fileError!,
-                      style: AppTypography.body2.copyWith(color: AppColors.error),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSizes.spacingS),
-                    OutlinedButton(
-                      onPressed: _loadFile,
-                      style: AppButtonStyles.outlinedPrimary(),
-                      child: Text(context.t.common.tryAgain),
-                    ),
-                  ],
-                  if (isManager && dekont.status.needsManagerApproval) ...[
-                    const SizedBox(height: AppSizes.spacingL),
-                    SizedBox(
-                      height: AppSizes.buttonHeightPrimary,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => _openReviewSheet(dekont),
-                        style: AppButtonStyles.elevatedPrimary(fullWidth: true),
-                        child: Text('${t.approve} / ${t.reject}'),
-                      ),
-                    ),
-                  ],
+                  ),
                 ],
-              ),
+                const SizedBox(height: AppSizes.spacingM),
+                _dashboardInfoCard(
+                  child: _buildFileCard(
+                    context,
+                    dekont,
+                    dashboardStyle: true,
+                  ),
+                ),
+                if (_fileError != null) ...[
+                  const SizedBox(height: AppSizes.spacingM),
+                  Text(
+                    _fileError!,
+                    style: AppTypography.body2.copyWith(color: AppColors.error),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSizes.spacingS),
+                  OutlinedButton(
+                    onPressed: _loadFile,
+                    style: AppButtonStyles.outlinedPrimary(),
+                    child: Text(context.t.common.tryAgain),
+                  ),
+                ],
+                if (isManager && dekont.status.needsManagerApproval) ...[
+                  const SizedBox(height: AppSizes.spacingL),
+                  SizedBox(
+                    height: AppSizes.buttonHeightPrimary,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _openReviewSheet(dekont),
+                      style: AppButtonStyles.elevatedPrimary(fullWidth: true),
+                      child: Text('${t.approve} / ${t.reject}'),
+                    ),
+                  ),
+                ],
+              ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
+    );
+
+    return DashboardSecondaryScaffold(
+      title: t.detailTitle,
+      actions: downloadActions,
+      body: body,
     );
   }
 
-  Widget _buildFileCard(BuildContext context, DekontEntity dekont) {
+  Widget _buildFileCard(
+    BuildContext context,
+    DekontEntity dekont, {
+    bool dashboardStyle = false,
+  }) {
     final filename = dekont.originalFilename;
     final ext = filename.split('.').last.toLowerCase();
     final isPdf = ext == 'pdf';
     final sizeBytes = _fileBytes?.length ?? dekont.sizeBytes;
     final t = context.t.features.dekont;
+    final borderRadius = BorderRadius.circular(
+      dashboardStyle ? DashboardScreenStyle.cardRadius : 12,
+    );
 
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: dashboardStyle
+          ? null
+          : BoxDecoration(
+              color: AppColors.fill,
+              borderRadius: borderRadius,
+            ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadius,
         child: Row(
           children: [
             _buildFileIcon(

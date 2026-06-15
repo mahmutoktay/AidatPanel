@@ -5,3 +5,5 @@ export { changePasswordService } from "./passwordService.js";
 export { updateLanguageService } from "./languageService.js";
 export { updateFcmTokenService } from "./fcmService.js";
 export { softDeleteAccountService } from "./accountService.js";
+export { uploadProfilePictureService, deleteProfilePictureService } from "./profilePictureService.js";
+

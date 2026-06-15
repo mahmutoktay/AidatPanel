@@ -8,6 +8,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -50,12 +52,8 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
         ref.watch(authStateProvider).user?.role == UserRole.manager;
     final t = context.t.features.tickets;
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: Text(t.detailTitle),
-        centerTitle: true,
-      ),
+    return DashboardSecondaryScaffold(
+      title: t.detailTitle,
       body: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -243,10 +241,7 @@ class _TicketHeaderCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(AppSizes.cardPadding),
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: DashboardScreenStyle.whiteCard(),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -362,10 +357,7 @@ class _SurfaceSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: DashboardScreenStyle.whiteCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -520,10 +512,7 @@ class _ManagerActions extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: DashboardScreenStyle.whiteCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dekont/domain/entities/dekont_entity.dart';
@@ -91,14 +92,10 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
       constraints: BoxConstraints(maxHeight: maxSheetHeight),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            blurRadius: 24,
-            offset: const Offset(0, -4),
-          ),
-        ],
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(DashboardScreenStyle.cardRadius),
+        ),
+        boxShadow: DashboardScreenStyle.cardShadow,
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
@@ -111,16 +108,17 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(top: AppSizes.spacingXS),
+                decoration: BoxDecoration(
+                  color: AppColors.lineLight,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
+            ),
               const SizedBox(height: AppSizes.spacingM),
               Row(
                 children: [
@@ -716,12 +714,13 @@ class _SectionBox extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: BoxDecoration(
-        color: background ?? AppColors.fill,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+      decoration: (background != null
+              ? DashboardScreenStyle.whiteCard(color: background)
+              : DashboardScreenStyle.whiteCard())
+          .copyWith(
         border: borderColor != null
             ? Border.all(color: borderColor!)
-            : AppColors.cardBorder,
+            : Border.all(color: AppColors.lineLight),
       ),
       child: child,
     );

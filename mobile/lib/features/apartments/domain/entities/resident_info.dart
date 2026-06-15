@@ -14,6 +14,7 @@ class ResidentInfo extends Equatable {
   final String? phone;
   final String role;
   final String language;
+  final String? profilePicture;
 
   const ResidentInfo({
     required this.id,
@@ -22,8 +23,9 @@ class ResidentInfo extends Equatable {
     this.phone,
     required this.role,
     this.language = 'tr',
+    this.profilePicture,
   });
 
   @override
-  List<Object?> get props => [id, name, email, phone, role, language];
+  List<Object?> get props => [id, name, email, phone, role, language, profilePicture];
 }

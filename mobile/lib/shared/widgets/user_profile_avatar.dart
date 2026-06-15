@@ -1,13 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/api_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
-import '../../features/profile/domain/profile_photo_ref.dart';
-import '../../features/profile/presentation/providers/profile_photo_provider.dart';
 
 String _initialsFromName(String name) {
   final parts = name.trim().split(' ').where((p) => p.isNotEmpty).toList();
@@ -24,6 +21,7 @@ class UserProfileAvatar extends ConsumerWidget {
   final double size;
   final double borderWidth;
   final bool isVacant;
+  final String? profilePicture;
 
   const UserProfileAvatar({
     super.key,
@@ -32,20 +30,41 @@ class UserProfileAvatar extends ConsumerWidget {
     this.size = 48,
     this.borderWidth = AppSizes.cardBorderWidth,
     this.isVacant = false,
+    this.profilePicture,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (isVacant || userId == null || userId!.isEmpty) {
+    if (isVacant || userName.trim().isEmpty) {
       return _VacantAvatar(size: size, borderWidth: borderWidth);
     }
 
-    final photoAsync = ref.watch(userProfilePhotoRefProvider(userId!));
-    final photoRef = photoAsync.value;
-
     Widget body;
-    if (photoRef != null && photoRef.isNotEmpty) {
-      body = _PhotoContent(photoRef: photoRef, userName: userName, size: size);
+    if (profilePicture != null && profilePicture!.isNotEmpty) {
+      body = Image.network(
+        '${ApiConstants.baseUrl}/uploads/avatars/$profilePicture',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            _InitialsContent(userName: userName, size: size),
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: SizedBox(
+              width: size * 0.35,
+              height: size * 0.35,
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+                strokeWidth: 2,
+              ),
+            ),
+          );
+        },
+      );
     } else {
       body = _InitialsContent(userName: userName, size: size);
     }
@@ -126,46 +145,5 @@ class _InitialsContent extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _PhotoContent extends StatelessWidget {
-  const _PhotoContent({
-    required this.photoRef,
-    required this.userName,
-    required this.size,
-  });
-
-  final String photoRef;
-  final String userName;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    if (ProfilePhotoRef.isAsset(photoRef)) {
-      return Image.asset(
-        ProfilePhotoRef.assetPath(photoRef),
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) =>
-            _InitialsContent(userName: userName, size: size),
-      );
-    }
-    if (ProfilePhotoRef.isFile(photoRef)) {
-      final file = File(ProfilePhotoRef.filePath(photoRef));
-      if (!file.existsSync()) {
-        return _InitialsContent(userName: userName, size: size);
-      }
-      return Image.file(
-        file,
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) =>
-            _InitialsContent(userName: userName, size: size),
-      );
-    }
-    return _InitialsContent(userName: userName, size: size);
   }
 }

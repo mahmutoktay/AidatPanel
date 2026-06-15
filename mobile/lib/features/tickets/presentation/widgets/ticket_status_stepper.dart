@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -29,10 +30,7 @@ class TicketStatusStepper extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: DashboardScreenStyle.whiteCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

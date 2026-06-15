@@ -18,4 +18,8 @@ abstract class ProfileRepository {
   });
 
   Future<void> deleteAccount();
+
+  Future<UserEntity> uploadProfilePicture(String filePath);
+
+  Future<UserEntity> deleteProfilePicture();
 }

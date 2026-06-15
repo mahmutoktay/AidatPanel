@@ -40,6 +40,10 @@ abstract class DuesRemoteDataSource {
     String? currency,
     bool affectCurrent = false,
   });
+  Future<int> remindBuildingDues(
+    String buildingId, {
+    List<String>? dueIds,
+  });
 }
 
 class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
@@ -140,5 +144,28 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
         'affectCurrent': affectCurrent,
       },
     );
+  }
+
+  @override
+  Future<int> remindBuildingDues(
+    String buildingId, {
+    List<String>? dueIds,
+  }) async {
+    final response = await _dioClient.post(
+      ApiConstants.buildingDuesRemind(buildingId),
+      data: dueIds != null && dueIds.isNotEmpty ? {'dueIds': dueIds} : {},
+    );
+    final data = response.data['data'];
+    if (data is Map && data['reminded'] != null) {
+      return _toInt(data['reminded']);
+    }
+    return 0;
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
   }
 }

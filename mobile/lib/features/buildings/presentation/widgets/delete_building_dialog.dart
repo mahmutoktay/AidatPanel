@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../domain/entities/building_entity.dart';
@@ -88,7 +89,7 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
       ),
       titlePadding: const EdgeInsets.fromLTRB(
         AppSizes.spacingL,
@@ -146,7 +147,7 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
             ),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+              borderRadius: BorderRadius.circular(DashboardScreenStyle.pillRadius),
               border: AppColors.cardBorder,
             ),
             child: SelectableText(
@@ -188,9 +189,9 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
             foregroundColor: AppColors.textPrimary,
             side: AppColors.cardBorderSide,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(DashboardScreenStyle.pillRadius),
             ),
-            minimumSize: const Size(48, 48),
+            minimumSize: const Size(48, AppSizes.minTouchTarget),
           ),
           child: Text(
             context.t.common.cancelBtn,
@@ -208,7 +209,10 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
             disabledBackgroundColor:
                 AppColors.error.withValues(alpha: 0.35),
             disabledForegroundColor: Colors.white,
-            minimumSize: const Size(48, 48),
+            minimumSize: const Size(48, AppSizes.minTouchTarget),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(DashboardScreenStyle.pillRadius),
+            ),
             padding: const EdgeInsets.symmetric(
               horizontal: AppSizes.spacingL,
               vertical: AppSizes.spacingS,

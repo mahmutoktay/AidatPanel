@@ -8,6 +8,8 @@ class UserData {
   final String role;
   final String language;
   final String? apartmentId;
+  final String? profilePicture;
+  final DateTime? createdAt;
 
   UserData({
     required this.id,
@@ -17,7 +19,15 @@ class UserData {
     required this.role,
     this.language = 'tr',
     this.apartmentId,
+    this.profilePicture,
+    this.createdAt,
   });
+
+  static DateTime? _parseCreatedAt(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
+  }
 
   factory UserData.fromJson(Map<String, dynamic> json) {
     return UserData(
@@ -28,6 +38,8 @@ class UserData {
       role: json['role'] as String,
       language: json['language'] as String? ?? 'tr',
       apartmentId: json['apartmentId'] as String?,
+      profilePicture: json['profilePicture'] as String?,
+      createdAt: _parseCreatedAt(json['createdAt']),
     );
   }
 
@@ -40,6 +52,8 @@ class UserData {
       'role': role,
       'language': language,
       'apartmentId': apartmentId,
+      'profilePicture': profilePicture,
+      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
     };
   }
 
@@ -52,6 +66,8 @@ class UserData {
       role: role == 'MANAGER' ? UserRole.manager : UserRole.resident,
       language: language,
       apartmentId: apartmentId,
+      profilePicture: profilePicture,
+      createdAt: createdAt,
     );
   }
 }

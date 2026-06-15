@@ -11,10 +11,26 @@ import {
   updatePassword,
   updateLanguage,
   updateFcmToken,
+  uploadProfilePicture,
+  deleteProfilePicture,
 } from "../controllers/meController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireRoles } from "../middlewares/roleMiddleware.js";
 import { validate, dueSchemas, meSchemas, ticketSchemas, dekontSchemas } from "../middlewares/validate.js";
+import multer from "multer";
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (_req, file, cb) => {
+    const allowedMimes = ["image/jpeg", "image/png", "image/gif"];
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Desteklenmeyen dosya türü. Sadece JPG, PNG veya GIF yükleyebilirsiniz."));
+    }
+  }
+});
 
 const router = express.Router();
 
@@ -42,5 +58,21 @@ router.get("/tickets", requireRoles("RESIDENT"), validate(ticketSchemas.myTicket
 
 /** GET /api/v1/me/dekonts — yalnızca sakin */
 router.get("/dekonts", requireRoles("RESIDENT"), validate(dekontSchemas.myList), getMyDekonts);
+
+/** Profil Fotoğrafı Yükleme / Silme */
+router.post(
+  "/profile-picture",
+  (req, res, next) => {
+    upload.single("file")(req, res, (err) => {
+      if (err) {
+        return res.status(400).json({ success: false, message: err.message });
+      }
+      next();
+    });
+  },
+  uploadProfilePicture
+);
+
+router.delete("/profile-picture", deleteProfilePicture);
 
 export default router;

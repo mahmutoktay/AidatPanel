@@ -82,4 +82,28 @@ class ProfileRepositoryImpl implements ProfileRepository {
       throw ApiException(message: 'Hesap kapatılamadı: $e');
     }
   }
+
+  @override
+  Future<UserEntity> uploadProfilePicture(String filePath) async {
+    try {
+      final data = await _remoteDataSource.uploadProfilePicture(filePath);
+      return data.toEntity();
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'Profil fotoğrafı yüklenemedi');
+    }
+  }
+
+  @override
+  Future<UserEntity> deleteProfilePicture() async {
+    try {
+      final data = await _remoteDataSource.deleteProfilePicture();
+      return data.toEntity();
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'Profil fotoğrafı silinemedi');
+    }
+  }
 }

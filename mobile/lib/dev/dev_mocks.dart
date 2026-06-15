@@ -255,6 +255,52 @@ class MockProfileRepository implements ProfileRepository {
     MockAuthRepository.updateSessionUser(updated);
     return updated;
   }
+
+  @override
+  Future<UserEntity> uploadProfilePicture(String filePath) async {
+    await Future.delayed(_delay);
+    final user = MockAuthRepository.sessionUser;
+    if (user == null) {
+      throw ApiException(message: 'Unauthorized', statusCode: 401);
+    }
+    final updated = UserEntity(
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: user.role,
+      fcmToken: user.fcmToken,
+      language: user.language,
+      apartmentId: user.apartmentId,
+      profilePicture: 'avatar-${user.id}-mock.jpg',
+      createdAt: user.createdAt,
+    );
+    MockAuthRepository.updateSessionUser(updated);
+    return updated;
+  }
+
+  @override
+  Future<UserEntity> deleteProfilePicture() async {
+    await Future.delayed(_delay);
+    final user = MockAuthRepository.sessionUser;
+    if (user == null) {
+      throw ApiException(message: 'Unauthorized', statusCode: 401);
+    }
+    final updated = UserEntity(
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: user.role,
+      fcmToken: user.fcmToken,
+      language: user.language,
+      apartmentId: user.apartmentId,
+      profilePicture: null,
+      createdAt: user.createdAt,
+    );
+    MockAuthRepository.updateSessionUser(updated);
+    return updated;
+  }
 }
 
 class MockSubscriptionRepository implements SubscriptionRepository {
@@ -912,6 +958,8 @@ class MockDuesRepository implements DuesRepository {
     required String apartmentNumber,
     required double amount,
     required List<DueStatus> pattern, // index 0 = bu ay (en yeni)
+    ResidentInfo? resident,
+    int? apartmentFloor,
   }) {
     final now = DateTime.now();
     final list = <DueEntity>[];
@@ -932,6 +980,8 @@ class MockDuesRepository implements DuesRepository {
           id: '${apartmentId}_${dt.year}_${dt.month}',
           apartmentId: apartmentId,
           apartmentNumber: apartmentNumber,
+          apartmentFloor: apartmentFloor,
+          resident: resident,
           amount: amount,
           currency: 'TRY',
           month: dt.month,
@@ -961,6 +1011,14 @@ class MockDuesRepository implements DuesRepository {
         apartmentId: 'a1_1',
         apartmentNumber: '1A',
         amount: 600,
+        apartmentFloor: 1,
+        resident: const ResidentInfo(
+          id: 'r1',
+          name: 'Ayşe Yılmaz',
+          email: 'ayse@example.com',
+          phone: '+905551112201',
+          role: 'RESIDENT',
+        ),
         pattern: List.filled(6, DueStatus.paid),
       ),
       ..._generateForApartment(
@@ -968,6 +1026,13 @@ class MockDuesRepository implements DuesRepository {
         apartmentId: 'a1_2',
         apartmentNumber: '1B',
         amount: 600,
+        apartmentFloor: 1,
+        resident: const ResidentInfo(
+          id: 'r2',
+          name: 'Mehmet Demir',
+          email: 'mehmet@example.com',
+          role: 'RESIDENT',
+        ),
         pattern: const [
           DueStatus.pending, // bu ay
           DueStatus.pending, // 1 ay önce
@@ -1005,6 +1070,14 @@ class MockDuesRepository implements DuesRepository {
         apartmentId: 'a2_1',
         apartmentNumber: '1',
         amount: 750,
+        apartmentFloor: 1,
+        resident: const ResidentInfo(
+          id: 'r3',
+          name: 'Zeynep Kaya',
+          email: 'zeynep@example.com',
+          phone: '+905551112202',
+          role: 'RESIDENT',
+        ),
         pattern: const [
           DueStatus.overdue, // bu ay
           DueStatus.overdue, // 1 ay önce
@@ -1084,6 +1157,8 @@ class MockDuesRepository implements DuesRepository {
       id: old.id,
       apartmentId: old.apartmentId,
       apartmentNumber: old.apartmentNumber,
+      apartmentFloor: old.apartmentFloor,
+      resident: old.resident,
       amount: old.amount,
       currency: old.currency,
       month: old.month,
@@ -1122,6 +1197,8 @@ class MockDuesRepository implements DuesRepository {
           id: old.id,
           apartmentId: old.apartmentId,
           apartmentNumber: old.apartmentNumber,
+          apartmentFloor: old.apartmentFloor,
+          resident: old.resident,
           amount: dueAmount,
           currency: currency ?? old.currency,
           month: old.month,
@@ -1136,6 +1213,29 @@ class MockDuesRepository implements DuesRepository {
         );
       }
     }
+  }
+
+  @override
+  Future<int> remindBuildingDues(
+    String buildingId, {
+    List<String>? dueIds,
+  }) async {
+    await Future.delayed(_delay);
+    final list = _byBuilding[buildingId] ?? const <DueEntity>[];
+    if (dueIds == null || dueIds.isEmpty) {
+      return list
+          .where(
+            (d) =>
+                d.resident != null &&
+                (d.status == DueStatus.pending ||
+                    d.status == DueStatus.overdue),
+          )
+          .map((d) => d.resident!.id)
+          .toSet()
+          .length;
+    }
+    final matches = list.where((d) => dueIds.contains(d.id));
+    return matches.where((d) => d.resident != null).length;
   }
 }
 

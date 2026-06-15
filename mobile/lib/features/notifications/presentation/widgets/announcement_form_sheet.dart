@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -70,7 +71,9 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
       child: Container(
         decoration: const BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(DashboardScreenStyle.cardRadius),
+          ),
         ),
         child: SafeArea(
           top: false,
@@ -200,17 +203,22 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
                       },
                     ),
                     const SizedBox(height: AppSizes.spacingXL),
-                    ElevatedButton(
-                      onPressed: _submitting ? null : _submit,
-                      child: _submitting
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(t.sendButton),
+                    SizedBox(
+                      height: AppSizes.minTouchTarget,
+                      child: ElevatedButton(
+                        onPressed: _submitting ? null : _submit,
+                        style: AppButtonStyles.elevatedPrimary(fullWidth: true),
+                        child: _submitting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(t.sendButton),
+                      ),
                     ),
                   ],
                 ],

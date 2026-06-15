@@ -12,4 +12,6 @@ export {
   updateLanguageService,
   updateFcmTokenService,
   softDeleteAccountService,
+  uploadProfilePictureService,
+  deleteProfilePictureService,
 } from "./me/index.js";

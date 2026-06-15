@@ -9,6 +9,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
+import '../../../../shared/widgets/auth_screen_shell.dart';
 import '../../../dekont/presentation/providers/share_intent_provider.dart';
 import '../../presentation/providers/auth_provider.dart';
 import '../../domain/entities/user_entity.dart' show UserRole;
@@ -214,54 +215,54 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         if (didPop) return;
         await SystemNavigatorBridge.moveAppToBackground();
       },
-      child: Scaffold(
-        backgroundColor: AppColors.surface,
-        body: Container(
-          color: AppColors.surface,
-          child: Center(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/brand/app_logo.png',
-                    width: 140,
-                    height: 140,
-                    fit: BoxFit.contain,
-                  ),
-                  const SizedBox(height: AppSizes.spacingL),
-                  Text(
-                    context.t.features.auth.appTitle,
-                    style: AppTypography.h1.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.spacingS),
-                  Text(
-                    context.t.features.auth.appSubtitle,
-                    style: AppTypography.body1.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.spacingXL),
-                  if (_hasBootError)
-                    _buildRetrySection(context)
-                  else
-                    const SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primary,
-                        ),
-                      ),
-                    ),
-                ],
+      child: AuthScreenShell(
+        centerBody: true,
+        cardPadding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.spacingXL,
+          vertical: AppSizes.spacingXL,
+        ),
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/brand/app_logo.png',
+                width: 140,
+                height: 140,
+                fit: BoxFit.contain,
               ),
-            ),
+              const SizedBox(height: AppSizes.spacingL),
+              Text(
+                context.t.features.auth.appTitle,
+                style: AppTypography.h1.copyWith(
+                  color: AppColors.inkDark,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: AppSizes.spacingS),
+              Text(
+                context.t.features.auth.appSubtitle,
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.mutedText,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSizes.spacingXL),
+              if (_hasBootError)
+                _buildRetrySection(context)
+              else
+                const SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.inkDark,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),

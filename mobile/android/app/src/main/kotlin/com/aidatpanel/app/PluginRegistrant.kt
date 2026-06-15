@@ -104,6 +104,16 @@ object PluginRegistrant {
 
         )
 
+        addPluginReflective(
+
+            flutterEngine,
+
+            "vn.hunghd.flutter.plugins.imagecropper.ImageCropperPlugin",
+
+            "image_cropper",
+
+        )
+
     }
 
 

@@ -7,6 +7,7 @@ export const userPublicSelect = {
   phone: true,
   language: true,
   apartmentId: true,
+  profilePicture: true,
   createdAt: true,
   updatedAt: true,
 };
@@ -21,6 +22,7 @@ export function toPublicUser(user) {
     phone: user.phone,
     language: user.language,
     apartmentId: user.apartmentId,
+    profilePicture: user.profilePicture,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

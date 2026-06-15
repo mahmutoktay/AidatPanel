@@ -4,21 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/navigation/dashboard_back_handler.dart';
 import '../../../../core/navigation/app_back_navigation.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
+import '../../../../shared/widgets/dashboard/dashboard_bottom_nav_bar.dart';
+import '../../../../shared/widgets/dashboard/dashboard_welcome_header.dart';
 import '../../../../shared/widgets/notification_icon_button.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/manager_home_counts_provider.dart';
-import '../../../tickets/presentation/providers/manager_open_tickets_count_provider.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../dues/presentation/screens/manager_dues_tab.dart';
 import '../../../../shared/widgets/settings_tab.dart';
 
 import '../widgets/manager_home_tab.dart';
 import '../widgets/manager_buildings_tab.dart';
-import '../../../buildings/domain/entities/building_entity.dart';
-import '../../../../core/theme/app_sizes.dart';
-import 'package:go_router/go_router.dart';
 
 class ManagerDashboardScreen extends ConsumerStatefulWidget {
   const ManagerDashboardScreen({super.key});
@@ -49,7 +49,6 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       prefetchNotifications(ref);
-      ref.invalidate(managerOpenTicketsCountProvider);
       ref.invalidate(managerMonthExpensesCountProvider);
       ref.invalidate(managerMonthAnnouncementsCountProvider);
       ref.invalidate(managerPendingDekontsCountProvider);
@@ -66,11 +65,20 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
   Widget build(BuildContext context) {
     ref.listen<int>(managerTabIndexProvider, (previous, next) {
       if (_tabController.index != next) {
-        _tabController.animateTo(next);
+        _tabController.animateTo(
+          next,
+          duration: DashboardNavAnimation.duration,
+          curve: DashboardNavAnimation.curve,
+        );
       }
     });
 
     final buildingsAsync = ref.watch(buildingsStoreProvider);
+    final userName =
+        ref.watch(authStateProvider).user?.name ?? context.t.common.user;
+    final selectedTab = ref.watch(managerTabIndexProvider);
+    final isSettings = selectedTab == 3;
+    final title = isSettings ? context.t.common.settings : context.t.common.manager;
 
     return DashboardBackHandler(
       dashboardRootPath: '/manager-dashboard',
@@ -78,7 +86,11 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
       exitHintMessage: context.t.common.pressBackAgainToExit,
       goToHomeTab: () {
         ref.read(managerTabIndexProvider.notifier).reset();
-        _tabController.animateTo(0);
+        _tabController.animateTo(
+          0,
+          duration: DashboardNavAnimation.duration,
+          curve: DashboardNavAnimation.curve,
+        );
       },
       onExitHint: (message) => ref
           .read(toastProvider.notifier)
@@ -88,11 +100,24 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
             duration: AppBackNavigation.exitGracePeriod,
           ),
       child: Scaffold(
-        backgroundColor: AppColors.surface,
+        backgroundColor: AppColors.dashboardBackground,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            DashboardRoleBar(title: context.t.common.manager),
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: AppSizes.screenBodyScrollPadding.copyWith(
+                  top: AppSizes.spacingS,
+                  bottom: AppSizes.spacingM,
+                ),
+                child: DashboardPageHeader(
+                  title: title,
+                  userName: userName,
+                  showWelcome: !isSettings,
+                ),
+              ),
+            ),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -100,8 +125,8 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                 children: [
                   ManagerHomeTab(
                     buildingsAsync: buildingsAsync,
-                    onRetryBuildings: () => ref.read(buildingsStoreProvider.notifier).loadBuildings(),
-                    buildBuildingCards: _buildBuildingCards,
+                    onRetryBuildings: () =>
+                        ref.read(buildingsStoreProvider.notifier).loadBuildings(),
                   ),
                   ManagerBuildingsTab(buildingsAsync: buildingsAsync),
                   const ManagerDuesTab(),
@@ -111,76 +136,40 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
             ),
           ],
         ),
-        bottomNavigationBar: NavigationBar(
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: const Icon(Icons.home),
-              label: context.t.common.home,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.apartment_outlined),
-              selectedIcon: const Icon(Icons.apartment),
-              label: context.t.common.buildings,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.receipt_outlined),
-              selectedIcon: const Icon(Icons.receipt),
-              label: context.t.common.dues,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.settings_outlined),
-              selectedIcon: const Icon(Icons.settings),
-              label: context.t.common.settings,
-            ),
-          ],
+        bottomNavigationBar: DashboardBottomNavBar(
           selectedIndex: ref.watch(managerTabIndexProvider),
           onDestinationSelected: (index) {
             ref.read(managerTabIndexProvider.notifier).update(index);
-            _tabController.animateTo(index);
+            _tabController.animateTo(
+              index,
+              duration: DashboardNavAnimation.duration,
+              curve: DashboardNavAnimation.curve,
+            );
           },
+          destinations: [
+            DashboardNavDestination(
+              icon: Icons.home_outlined,
+              selectedIcon: Icons.home,
+              label: context.t.common.home,
+            ),
+            DashboardNavDestination(
+              icon: Icons.apartment_outlined,
+              selectedIcon: Icons.apartment,
+              label: context.t.common.buildings,
+            ),
+            DashboardNavDestination(
+              icon: Icons.receipt_outlined,
+              selectedIcon: Icons.receipt,
+              label: context.t.common.dues,
+            ),
+            DashboardNavDestination(
+              icon: Icons.settings_outlined,
+              selectedIcon: Icons.settings,
+              label: context.t.common.settings,
+            ),
+          ],
         ),
       ),
     );
-  }
-  
-  List<Widget> _buildBuildingCards(List<BuildingEntity> buildings) {
-    const tileRadius = BorderRadius.all(Radius.circular(12));
-
-    return buildings
-        .map(
-          (building) => Padding(
-            padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
-            child: Container(
-              decoration: const BoxDecoration(
-                color: AppColors.fill,
-                borderRadius: tileRadius,
-              ),
-              child: Material(
-                color: Colors.transparent,
-                borderRadius: tileRadius,
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  borderRadius: tileRadius,
-                  onTap: () => context.push('/manager-dashboard/buildings/${building.id}'),
-                  splashColor: AppColors.border.withValues(alpha: 0.4),
-                  highlightColor: AppColors.border.withValues(alpha: 0.25),
-                  child: Padding(
-                     padding: const EdgeInsets.all(AppSizes.spacingM),
-                     child: Row(
-                        children: [
-                           const Icon(Icons.apartment, color: AppColors.primary),
-                           const SizedBox(width: AppSizes.spacingM),
-                           Expanded(child: Text(building.name)),
-                           const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-                        ]
-                     )
-                  )
-                ),
-              ),
-            ),
-          ),
-        )
-        .toList();
   }
 }

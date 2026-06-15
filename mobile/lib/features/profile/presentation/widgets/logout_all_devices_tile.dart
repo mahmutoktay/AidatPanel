@@ -16,15 +16,15 @@ class LogoutAllDevicesTile extends ConsumerWidget {
     final t = context.t;
 
     return Material(
-      color: ProfileSettingsUi.background,
+      color: Colors.transparent,
       child: InkWell(
         onTap: authState.isLoading
             ? null
             : () => LogoutAllDevicesConfirmSheet.show(context),
-        child: SizedBox(
-          height: ProfileSettingsUi.rowHeight,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: ProfileSettingsUi.rowHeight),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Row(
               children: [
                 Icon(

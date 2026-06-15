@@ -8,7 +8,10 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/api_user_message.dart';
 import '../../../../core/utils/user_error_message.dart';
+import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../domain/entities/report_entity.dart';
 import '../providers/report_provider.dart';
 
@@ -115,75 +118,87 @@ class _ReportPreviewScreenState extends ConsumerState<ReportPreviewScreen> {
     }
   }
 
+  Widget _buildShareBar(BuildContext context) {
+    final t = context.t.features.reports;
+
+    return ColoredBox(
+      color: AppColors.dashboardBackground,
+      child: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+        child: SizedBox(
+          height: ProfileSettingsUi.buttonHeight,
+          child: ElevatedButton.icon(
+            onPressed: _sharing ? null : _onShare,
+            style: ProfileSettingsUi.primaryButton,
+            icon: _sharing
+                ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.4,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.share_outlined, size: 22),
+            label: Text(t.shareReport),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.reports;
-    final bottom = MediaQuery.paddingOf(context).bottom;
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return DashboardSecondaryScaffold(
+      title: t.previewTitle,
+      bottomNavigationBar: _buildShareBar(context),
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSizes.dashboardScreenPaddingHorizontal,
+          AppSizes.spacingM,
+          AppSizes.dashboardScreenPaddingHorizontal,
+          AppSizes.spacingM,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              t.previewTitle,
-              style: AppTypography.h3.copyWith(fontSize: 18),
-            ),
-            Text(
               widget.subtitle,
-              style: AppTypography.caption.copyWith(
+              style: AppTypography.body2.copyWith(
                 color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
               ),
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
+            const SizedBox(height: AppSizes.spacingS),
+            Expanded(child: _buildPreviewBody()),
           ],
         ),
-        centerTitle: false,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(child: _buildPreviewBody()),
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              AppSizes.spacingM,
-              AppSizes.spacingS,
-              AppSizes.spacingM,
-              AppSizes.spacingM + bottom,
-            ),
-            child: SizedBox(
-              height: AppSizes.minTouchTargetComfort,
-              child: FilledButton.icon(
-                onPressed: _sharing ? null : _onShare,
-                icon: _sharing
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.share_outlined),
-                label: Text(t.shareReport),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
 
   Widget _buildPreviewBody() {
     final t = context.t.features.reports;
+
     if (_pdfLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Container(
+        decoration: DashboardScreenStyle.whiteCard(),
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(),
+      );
     }
 
     if (_pdfFailed || _pdfController == null) {
-      return Padding(
-        padding: AppSizes.screenBodyScrollPadding,
+      return Container(
+        decoration: DashboardScreenStyle.whiteCard(),
+        padding: const EdgeInsets.all(AppSizes.spacingL),
+        alignment: Alignment.center,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
               Icons.picture_as_pdf_outlined,
@@ -199,7 +214,9 @@ class _ReportPreviewScreenState extends ConsumerState<ReportPreviewScreen> {
             const SizedBox(height: AppSizes.spacingS),
             Text(
               t.pdfPreviewUnavailable,
-              style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
+              style: AppTypography.body2.copyWith(
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -210,25 +227,20 @@ class _ReportPreviewScreenState extends ConsumerState<ReportPreviewScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSizes.spacingM,
-            AppSizes.spacingS,
-            AppSizes.spacingM,
-            0,
-          ),
-          child: Text(
-            t.pdfPreviewHint,
-            style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
-          ),
+        Text(
+          t.pdfPreviewHint,
+          style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: AppSizes.spacingS),
         Expanded(
-          child: ColoredBox(
-            color: Colors.white,
-            child: PdfViewPinch(
-              controller: _pdfController!,
-              scrollDirection: Axis.vertical,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
+            child: Container(
+              decoration: DashboardScreenStyle.whiteCard(),
+              child: PdfViewPinch(
+                controller: _pdfController!,
+                scrollDirection: Axis.vertical,
+              ),
             ),
           ),
         ),

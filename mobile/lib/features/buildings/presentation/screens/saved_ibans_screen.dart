@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/iban_utils.dart';
 import '../../../../core/utils/user_error_message.dart';
+import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/selection_mode_widgets.dart';
 import '../../../../shared/widgets/async_error_widget.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../domain/entities/saved_iban_item.dart';
@@ -111,44 +113,34 @@ class _SavedIbansScreenState extends ConsumerState<SavedIbansScreen> {
         if (didPop) return;
         _exitSelectionMode();
       },
-      child: Scaffold(
-        backgroundColor: AppColors.surface,
-        appBar: AppBar(
-          title: Text(
-            _selectionMode
-                ? '$selectedCount ${context.t.common.selectedCountLabel}'
-                : t.savedIbansTitle,
-          ),
-          centerTitle: true,
-          leading: IconButton(
-            tooltip: _selectionMode ? context.t.common.cancelBtn : null,
-            icon: Icon(_selectionMode ? Icons.close_rounded : Icons.arrow_back),
-            onPressed: () {
-              if (_selectionMode) {
-                _exitSelectionMode();
-              } else {
-                Navigator.of(context).pop();
-              }
-            },
-          ),
-          actions: [
-            if (!_selectionMode && hasItems)
-              IconButton(
-                tooltip: t.savedIbansSelectMode,
-                icon: const Icon(Icons.checklist_rounded),
-                onPressed: () => setState(() {
-                  _selectionMode = true;
-                  _selectedIbanKeys.clear();
-                }),
-              ),
-          ],
-        ),
-        floatingActionButtonLocation: selectionActionFabLocation,
+      child: DashboardSecondaryScaffold(
+        title: _selectionMode
+            ? '$selectedCount ${context.t.common.selectedCountLabel}'
+            : t.savedIbansTitle,
+        onBack: () {
+          if (_selectionMode) {
+            _exitSelectionMode();
+          } else {
+            Navigator.of(context).pop();
+          }
+        },
+        actions: [
+          if (!_selectionMode && hasItems)
+            IconButton(
+              tooltip: t.savedIbansSelectMode,
+              icon: const Icon(Icons.checklist_rounded),
+              onPressed: () => setState(() {
+                _selectionMode = true;
+                _selectedIbanKeys.clear();
+              }),
+            ),
+        ],
         floatingActionButton: _buildFloatingActionButton(
           context,
           selectedCount: selectedCount,
           allItems: items ?? const [],
         ),
+        floatingActionButtonLocation: selectionActionFabLocation,
         body: async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => AsyncErrorWidget(
@@ -227,8 +219,6 @@ class _SavedIbansScreenState extends ConsumerState<SavedIbansScreen> {
       ),
     );
   }
-
-  /// Idle: sağ-alt "IBAN ekle" FAB. Seçim modu: aynı yerde "Sil" FAB.
   Widget? _buildFloatingActionButton(
     BuildContext context, {
     required int selectedCount,
@@ -265,12 +255,17 @@ class _SavedIbansEmptyBody extends StatelessWidget {
     return Center(
       child: Padding(
         padding: AppSizes.screenBodyScrollPadding,
-        child: Text(
-          message,
-          style: AppTypography.body1.copyWith(
-            color: AppColors.textSecondary,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSizes.spacingXL),
+          decoration: DashboardScreenStyle.whiteCard(),
+          child: Text(
+            message,
+            style: ProfileSettingsUi.handle.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -297,8 +292,7 @@ class _SavedIbanListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.buildings.collection;
-    final detailStyle = AppTypography.caption.copyWith(
-      color: AppColors.textSecondary,
+    final detailStyle = ProfileSettingsUi.fieldLabel.copyWith(
       height: 1.35,
     );
     final details = CollectionPresetDisplay.detailLines(context, item.preset);
@@ -309,25 +303,28 @@ class _SavedIbanListTile extends StatelessWidget {
             item.buildings.map((b) => b.name).join(', '),
           );
 
-    return Material(
+    final cardRadius = BorderRadius.circular(DashboardScreenStyle.cardRadius);
+    final cardDecoration = BoxDecoration(
       color: selected
           ? AppColors.primary.withValues(alpha: 0.08)
-          : Colors.white,
-      borderRadius: BorderRadius.circular(12),
+          : AppColors.surface,
+      borderRadius: cardRadius,
+      boxShadow: DashboardScreenStyle.cardShadow,
+      border: selected
+          ? Border.all(color: AppColors.primary, width: 2)
+          : null,
+    );
+
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: cardRadius,
         child: Container(
           constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
           padding: const EdgeInsets.all(AppSizes.spacingM),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: selected ? AppColors.primary : AppColors.borderColor,
-              width: selected ? 2 : 1,
-            ),
-          ),
+          decoration: cardDecoration,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -345,7 +342,7 @@ class _SavedIbanListTile extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         IbanUtils.formatDisplay(item.preset.collectionIban),
-                        style: AppTypography.body1.copyWith(
+                        style: ProfileSettingsUi.fieldValue.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                         maxLines: 1,

@@ -22,6 +22,14 @@ export async function applyDekontPayment({ dekontId, managerId, dueId, note }) {
   if (dekont.status === "PAYMENT_APPLIED") {
     throw new HttpError(409, "Bu dekont için ödeme zaten işlenmiş.");
   }
+
+  // Prevent duplicate payment records for the same receipt
+  const existingPayment = await prisma.duePayment.findFirst({
+    where: { dekontId },
+  });
+  if (existingPayment) {
+    throw new HttpError(409, "Bu dekont için ödeme zaten işlenmiş.");
+  }
   if (dekont.status === "REJECTED") {
     throw new HttpError(409, "Reddedilmiş dekont onaylanamaz.");
   }

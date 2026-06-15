@@ -14,6 +14,10 @@ class UserEntity extends Equatable {
   /// Sakin için bağlı olduğu daire id'si. Yönetici hesaplarında null'dır.
   /// Belge §2.1: `User.apartmentId` (null veya uuid).
   final String? apartmentId;
+  final String? profilePicture;
+
+  /// `GET /me` — hesap oluşturulma zamanı.
+  final DateTime? createdAt;
 
   const UserEntity({
     required this.id,
@@ -24,9 +28,21 @@ class UserEntity extends Equatable {
     this.fcmToken,
     this.language = 'tr',
     this.apartmentId,
+    this.profilePicture,
+    this.createdAt,
   });
 
   @override
-  List<Object?> get props =>
-      [id, email, name, phone, role, fcmToken, language, apartmentId];
+  List<Object?> get props => [
+        id,
+        email,
+        name,
+        phone,
+        role,
+        fcmToken,
+        language,
+        apartmentId,
+        profilePicture,
+        createdAt,
+      ];
 }

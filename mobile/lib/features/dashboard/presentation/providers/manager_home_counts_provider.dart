@@ -4,6 +4,7 @@ import '../../../buildings/data/buildings_store.dart';
 import '../../../dekont/presentation/providers/dekont_provider.dart';
 import '../../../expenses/presentation/providers/expenses_provider.dart';
 import '../../../notifications/presentation/providers/notifications_provider.dart';
+import '../utils/manager_dashboard_mapper.dart';
 
 /// Yönetici ana sayfa — bu ay tüm binalardaki gider kayıt sayısı.
 /// Özet endpoint + paralel istek (tam liste çekilmez).
@@ -56,6 +57,38 @@ final managerPendingDekontsCountProvider = FutureProvider.autoDispose<int>((
   var count = 0;
 
   for (final building in buildings) {
+    try {
+      final dekonts = await repo.getBuildingDekonts(
+        building.id,
+        paginated: false,
+      );
+      count += dekonts.items
+          .where((d) => d.status.needsManagerApproval)
+          .length;
+    } catch (_) {
+      // Tek bina hatası tüm sayacı düşürmez.
+    }
+  }
+
+  return count;
+});
+
+/// Seçili bina için bekleyen dekont sayısı (`null` = tüm binalar).
+final managerPendingDekontsForBuildingProvider =
+    FutureProvider.autoDispose.family<int, String?>((ref, buildingId) async {
+  final buildings = ref.watch(buildingsStoreProvider).value ?? const [];
+  if (buildings.isEmpty) return 0;
+
+  final targetBuildings = ManagerDashboardMapper.filterBuildings(
+    buildings,
+    buildingId,
+  );
+  if (targetBuildings.isEmpty) return 0;
+
+  final repo = ref.watch(dekontRepositoryProvider);
+  var count = 0;
+
+  for (final building in targetBuildings) {
     try {
       final dekonts = await repo.getBuildingDekonts(
         building.id,

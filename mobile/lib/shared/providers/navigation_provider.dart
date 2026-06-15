@@ -49,11 +49,17 @@ final residentDueHighlightIdProvider =
   ResidentDueHighlightNotifier.new,
 );
 
-/// Bildirimden aidat kaydına geçişte bina + due (yönetici).
+/// Bildirimden aidat kaydına geçişte bina + filtre (yönetici).
 class ManagerDueNavigationIntent {
   final String? buildingId;
 
-  const ManagerDueNavigationIntent({this.buildingId});
+  /// `overdue`, `paid`, `pending`, `waived` — Aidatlar sekmesi durum filtresi.
+  final String? statusFilter;
+
+  const ManagerDueNavigationIntent({
+    this.buildingId,
+    this.statusFilter,
+  });
 }
 
 class ManagerDueNavigationIntentNotifier

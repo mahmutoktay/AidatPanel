@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../theme/profile_settings_ui.dart';
 
 /// Ayarlar → Gizlilik / KVKK / Yardım (placeholder) statik metin ekranı.
@@ -38,119 +39,102 @@ class LegalDocumentScreen extends StatelessWidget {
       ],
     };
 
-    return Scaffold(
-      backgroundColor: ProfileSettingsUi.background,
-      appBar: AppBar(
-        backgroundColor: ProfileSettingsUi.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: true,
-        title: Text(title, style: ProfileSettingsUi.title),
-      ),
-      body: ListView(
-        padding: ProfileSettingsUi.screenPadding.copyWith(
+    return DashboardSecondaryScaffold(
+      title: title,
+      body: SingleChildScrollView(
+        padding: AppSizes.screenBodyScrollPadding.copyWith(
           bottom: AppSizes.spacingXL + MediaQuery.paddingOf(context).bottom,
         ),
-        children: [
-          if (kind != LegalDocumentKind.help) ...[
-            Text(
-              '${legal.updatedLabel}: ${legal.updatedDate}',
-              style: AppTypography.caption.copyWith(
-                color: AppColors.textSecondary,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: AppSizes.spacingM),
-          ],
-          Text(
-            intro,
-            style: AppTypography.body1.copyWith(
-              color: AppColors.textPrimary,
-              height: 1.55,
-            ),
-          ),
-          if (kind != LegalDocumentKind.help) ...[
-            const SizedBox(height: AppSizes.spacingL),
-            for (final section in sections) ...[
-              Text(
-                section.title,
-                style: AppTypography.h4.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w700,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSizes.spacingM),
+          decoration: DashboardScreenStyle.whiteCard(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (kind != LegalDocumentKind.help) ...[
+                Text(
+                  '${legal.updatedLabel}: ${legal.updatedDate}',
+                  style: ProfileSettingsUi.fieldLabel,
                 ),
-              ),
-              const SizedBox(height: AppSizes.spacingS),
+                const SizedBox(height: AppSizes.spacingM),
+              ],
               Text(
-                section.body,
-                style: AppTypography.body1.copyWith(
-                  color: AppColors.textSecondary,
+                intro,
+                style: ProfileSettingsUi.fieldValue.copyWith(
+                  fontWeight: FontWeight.w500,
                   height: 1.55,
                 ),
               ),
-              const SizedBox(height: AppSizes.spacingL),
-            ],
-          ] else ...[
-            const SizedBox(height: AppSizes.spacingL),
-            Container(
-              padding: const EdgeInsets.all(AppSizes.spacingM),
-              decoration: BoxDecoration(
-                color: AppColors.fill,
-                borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
-                border: ProfileSettingsUi.cardBorder,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.schedule_outlined,
-                    color: AppColors.textSecondary.withValues(alpha: 0.9),
-                    size: 22,
-                  ),
-                  const SizedBox(width: AppSizes.spacingM),
-                  Expanded(
-                    child: Text(
-                      sections.first.body,
-                      style: AppTypography.body1.copyWith(
-                        color: AppColors.textPrimary,
-                        height: 1.55,
-                      ),
+              if (kind != LegalDocumentKind.help) ...[
+                const SizedBox(height: AppSizes.spacingL),
+                for (final section in sections) ...[
+                  Text(
+                    section.title,
+                    style: ProfileSettingsUi.title.copyWith(
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
+                  const SizedBox(height: AppSizes.spacingS),
+                  Text(
+                    section.body,
+                    style: ProfileSettingsUi.handle.copyWith(
+                      color: ProfileSettingsUi.muted,
+                      height: 1.55,
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.spacingL),
                 ],
-              ),
-            ),
-          ],
-          const SizedBox(height: AppSizes.spacingM),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(AppSizes.spacingM),
-            decoration: BoxDecoration(
-              color: AppColors.fill,
-              borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
-              border: ProfileSettingsUi.cardBorder,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  legal.companyName,
-                  style: AppTypography.body1.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: AppSizes.spacingXS),
-                SelectableText(
-                  legal.contactEmail,
-                  style: AppTypography.body1.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
+              ] else ...[
+                const SizedBox(height: AppSizes.spacingL),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.infoBg,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.schedule_outlined,
+                        color: AppColors.chartBlue,
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(width: AppSizes.spacingM),
+                    Expanded(
+                      child: Text(
+                        sections.first.body,
+                        style: ProfileSettingsUi.fieldValue.copyWith(
+                          fontWeight: FontWeight.w500,
+                          height: 1.55,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ),
+              const Divider(height: AppSizes.spacingXL, color: ProfileSettingsUi.line),
+              Text(
+                legal.companyName,
+                style: ProfileSettingsUi.fieldValue.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: AppSizes.spacingXS),
+              SelectableText(
+                legal.contactEmail,
+                style: ProfileSettingsUi.fieldValue.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

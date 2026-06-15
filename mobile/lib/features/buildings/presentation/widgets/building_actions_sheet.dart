@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../domain/entities/building_entity.dart';
 
 enum BuildingMenuAction { edit, collection, delete }
@@ -35,7 +36,9 @@ class BuildingActionsSheet extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(DashboardScreenStyle.cardRadius),
+        ),
       ),
       padding: EdgeInsets.fromLTRB(
         AppSizes.spacingM,
@@ -149,7 +152,9 @@ class _ActionRow extends StatelessWidget {
     final accent = destructive
         ? AppColors.error
         : (iconTint ?? AppColors.textPrimary);
-    const radius = BorderRadius.all(Radius.circular(12));
+    const radius = BorderRadius.all(
+      Radius.circular(DashboardScreenStyle.pillRadius),
+    );
 
     return Material(
       color: AppColors.fill,
@@ -171,7 +176,9 @@ class _ActionRow extends StatelessWidget {
                   height: 40,
                   decoration: BoxDecoration(
                     color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(
+                      DashboardScreenStyle.pillRadius,
+                    ),
                     border: Border.all(color: accent.withValues(alpha: 0.18)),
                   ),
                   alignment: Alignment.center,

@@ -4,6 +4,7 @@ config();
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import fs from "fs";
 import { connectDB, disconnectDB } from "./src/config/db.js";
 import { initFirebase } from "./src/config/firebase.js";
 import authRouter from "./src/routes/authRoutes.js";
@@ -71,6 +72,8 @@ app.use("/api/v1/buildings/:buildingId/apartments", apartmentRoutes);
 app.use("/api/v1/apartments/:apartmentId/invite-code", inviteCodeRoutes);
 app.use("/api/v1/me", meRoutes);
 
+app.use("/uploads/avatars", express.static("uploads/avatars"));
+
 // 404 Handler - Tanımlanmamış route'lar
 app.use(notFoundHandler);
 
@@ -83,6 +86,7 @@ async function bootstrap() {
   await connectDB();
   initFirebase();
   await ensureDekontStorageDirs();
+  await fs.promises.mkdir("uploads/avatars", { recursive: true });
   server = app.listen(port, () => {
     console.log("Server is running on port: ", port);
   });

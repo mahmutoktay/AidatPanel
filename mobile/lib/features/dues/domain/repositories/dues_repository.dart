@@ -33,4 +33,8 @@ abstract class DuesRepository {
     String? currency,
     bool affectCurrent = false,
   });
+  Future<int> remindBuildingDues(
+    String buildingId, {
+    List<String>? dueIds,
+  });
 }

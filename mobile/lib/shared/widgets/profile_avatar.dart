@@ -1,15 +1,13 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/api_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
-import '../../features/profile/domain/profile_photo_ref.dart';
-import '../../features/profile/presentation/providers/profile_photo_provider.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/profile/presentation/providers/profile_notifier.dart';
 
-/// Profil fotoğrafı — backend yokken kullanıcıya özel yerel kayıt.
 class ProfileAvatar extends ConsumerWidget {
   final String userName;
   final double size;
@@ -35,11 +33,13 @@ class ProfileAvatar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final photoState = ref.watch(profilePhotoProvider);
+    final user = ref.watch(authStateProvider).user;
+    final profileState = ref.watch(profileNotifierProvider);
     final fontSize = size * 0.34;
 
     Widget avatarBody;
-    if (photoState.isLoading) {
+
+    if (profileState.isSaving) {
       avatarBody = Center(
         child: SizedBox(
           width: size * 0.35,
@@ -47,8 +47,41 @@ class ProfileAvatar extends ConsumerWidget {
           child: const CircularProgressIndicator(strokeWidth: 2),
         ),
       );
-    } else if (photoState.hasPhoto) {
-      avatarBody = _buildPhoto(photoState.photoRef!);
+    } else if (user != null &&
+        user.profilePicture != null &&
+        user.profilePicture!.isNotEmpty) {
+      avatarBody = Image.network(
+        '${ApiConstants.baseUrl}/uploads/avatars/${user.profilePicture}',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Center(
+          child: Text(
+            _initials,
+            style: AppTypography.h3.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: fontSize,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: SizedBox(
+              width: size * 0.35,
+              height: size * 0.35,
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+                strokeWidth: 2,
+              ),
+            ),
+          );
+        },
+      );
     } else {
       avatarBody = Center(
         child: Text(
@@ -86,38 +119,5 @@ class ProfileAvatar extends ConsumerWidget {
         child: avatar,
       ),
     );
-  }
-
-  Widget _buildPhoto(String photoRef) {
-    if (ProfilePhotoRef.isAsset(photoRef)) {
-      return Image.asset(
-        ProfilePhotoRef.assetPath(photoRef),
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-      );
-    }
-    if (ProfilePhotoRef.isFile(photoRef)) {
-      final file = File(ProfilePhotoRef.filePath(photoRef));
-      if (!file.existsSync()) {
-        return Center(
-          child: Text(
-            _initials,
-            style: AppTypography.h3.copyWith(
-              color: AppColors.textPrimary,
-              fontSize: size * 0.34,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        );
-      }
-      return Image.file(
-        file,
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-      );
-    }
-    return const SizedBox.shrink();
   }
 }

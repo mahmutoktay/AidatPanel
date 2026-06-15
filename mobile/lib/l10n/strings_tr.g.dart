@@ -242,6 +242,14 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get dueDayOutOfRange => 'Aidat günü 1 ile 28 arasında olmalıdır.';
 	@override String get update => 'Güncelle';
 	@override String get overdueDays => 'gün gecikmiş';
+	@override String get dueMetaOverdueDelay => '{days} gün gecikme';
+	@override String get dueMetaPaidInMonth => '{month} {year}\'de ödendi';
+	@override String get dueMetaPaidOnDay => '{day} {month}\'ta ödendi';
+	@override String get dueMetaPendingDueDate => 'son ödeme {day} {month}';
+	@override String get payShort => 'Öde';
+	@override String get dekontShort => 'Dekont';
+	@override String get monthChipLabel => 'AY';
+	@override String get yearChipLabel => 'YIL';
 	@override String get dueDateLabel => 'Son ödeme';
 	@override String get perMonth => '/ ay';
 	@override String get floorLabel => 'KAT';
@@ -297,6 +305,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get removeSelectedResidentsAffectedListTitle => 'Etkilenecek daireler';
 	@override String get removeSelectedResidentsListUnavailable => 'Daire listesi şu an gösterilemiyor. Seçilen daire sayısı aşağıda; onaylarsanız işlem yine de uygulanır.';
 	@override String get pickResidentsFirst => 'Önce listeden en az bir dolu daire seçin';
+	@override String get noResidentsToRemoveInBuilding => 'Bu binada çıkarılacak sakin bulunmuyor.';
 	@override String get removeSelectedProgress => 'İşlem yapılıyor…';
 	@override String get removeSelectedSuccess => 'Seçilen sakinler dairelerden çıkarıldı';
 	@override String get removeSelectedFailed => 'Seçilenleri çıkarma tamamlanamadı';
@@ -377,6 +386,7 @@ class _Translations$features$tr implements Translations$features$en {
 	@override late final _Translations$features$profile$tr profile = _Translations$features$profile$tr._(_root);
 	@override late final _Translations$features$subscription$tr subscription = _Translations$features$subscription$tr._(_root);
 	@override late final _Translations$features$reports$tr reports = _Translations$features$reports$tr._(_root);
+	@override late final _Translations$features$dashboard$tr dashboard = _Translations$features$dashboard$tr._(_root);
 	@override late final _Translations$features$faz2$tr faz2 = _Translations$features$faz2$tr._(_root);
 }
 
@@ -526,6 +536,7 @@ class _Translations$features$buildings$tr implements Translations$features$build
 	@override String get backToMainMenu => 'Ana Menüye Dön';
 	@override String get tekrarDene => 'Tekrar Dene';
 	@override late final _Translations$features$buildings$collection$tr collection = _Translations$features$buildings$collection$tr._(_root);
+	@override late final _Translations$features$buildings$list$tr list = _Translations$features$buildings$list$tr._(_root);
 }
 
 // Path: features.auth
@@ -946,6 +957,7 @@ class _Translations$features$profile$tr implements Translations$features$profile
 	@override String get photoSaved => 'Profil fotoğrafı bu hesap için kaydedildi.';
 	@override String get photoRemoved => 'Profil fotoğrafı kaldırıldı.';
 	@override String get removePhoto => 'Profil fotoğrafını kaldır';
+	@override String get accountCreatedAt => 'Hesap oluşturulma: {date}';
 }
 
 // Path: features.subscription
@@ -997,6 +1009,52 @@ class _Translations$features$reports$tr implements Translations$features$reports
 	@override String get shareReport => 'Raporu paylaş';
 	@override String get shareFailed => 'Rapor paylaşılamadı. Lütfen tekrar deneyin.';
 	@override String get failed => 'Rapor oluşturulamadı. Lütfen tekrar deneyin.';
+}
+
+// Path: features.dashboard
+class _Translations$features$dashboard$tr implements Translations$features$dashboard$en {
+	_Translations$features$dashboard$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get allBuildings => 'Tüm Binalar';
+	@override String get selectBuilding => 'Bina seç';
+	@override String get searchBuildings => 'Bina adı veya adres ara';
+	@override String get buildingPickerTapHint => 'Dokunarak bina arayın ve seçin';
+	@override String get allBuildingsSummary => '{count} bina';
+	@override String get buildingUnitsSummary => '{apartments} daire';
+	@override String get collectionRate => 'Tahsilat Oranı';
+	@override String get overduePayments => 'Geciken Ödeme';
+	@override String get openTicketRequests => 'Açık Arıza Talebi';
+	@override String get monthTotalExpense => 'Bu Ay Toplam Gider';
+	@override String get pendingDekonts => 'Bekleyen Dekont';
+	@override String get duesCollectionStatus => 'Aidat Tahsilat Durumu';
+	@override String get incomeExpenseComparison => 'Gelir / Gider Karşılaştırması';
+	@override String get last6Months => 'Son 6 Ay';
+	@override String get collectedDues => 'Toplanan Aidat';
+	@override String get totalExpense => 'Toplam Gider';
+	@override String get ticketStatusTitle => 'Arıza Talepleri Durumu';
+	@override String get ticketOpen => 'Açık';
+	@override String get ticketInProgress => 'İşlemde';
+	@override String get ticketResolved => 'Çözüldü';
+	@override String get overdueApartments => 'Ödemesi Geciken Daireler';
+	@override String get apartmentCountBadge => '{count} daire';
+	@override String get legendPaid => 'Ödendi';
+	@override String get legendOverdue => 'Gecikmiş';
+	@override String get legendPending => 'Bekliyor';
+	@override String get legendUnit => '{count} aidat';
+	@override String get remind => 'Hatırlat';
+	@override String get remindSent => 'Hatırlatma gönderildi';
+	@override String get remindNoRecipient => 'Bu dairede hatırlatma gönderilecek sakin bulunamadı.';
+	@override String get apartmentTitle => 'Daire {number}';
+	@override String get apartmentWithFloor => 'Daire {number} · {floor}. Kat';
+	@override String get noOverdueApartments => 'Geciken ödeme bulunmuyor';
+	@override String get noChartData => 'Henüz yeterli veri yok';
+	@override String get seeMoreOverdue => 'Daha fazlası (+{count})';
+	@override String get payNow => 'Şimdi Öde';
+	@override String get overduePaymentsBadge => '{count} gecikmiş ödeme';
+	@override String get featuredDuePeriod => '{month} {year} aidatı';
 }
 
 // Path: features.faz2
@@ -1073,6 +1131,29 @@ class _Translations$features$buildings$collection$tr implements Translations$fea
 	@override String get savedIbansDeleteBulkSuccess => '{count} IBAN silindi';
 	@override String get ibanNotConfigured => 'Tahsilat IBAN tanımlı değil';
 	@override String get ibanAlreadyExists => 'Bu IBAN numarası zaten sistemde kayıtlı. Lütfen farklı bir IBAN kontrol edip tekrar deneyiniz.';
+}
+
+// Path: features.buildings.list
+class _Translations$features$buildings$list$tr implements Translations$features$buildings$list$en {
+	_Translations$features$buildings$list$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get buildingCount => 'Bina';
+	@override String get unitCount => 'Daire';
+	@override String get overdueShort => 'Geciken';
+	@override String get collectionShort => 'Tahsilat';
+	@override String get sort => 'Sırala';
+	@override String get sortByOverdue => 'Gecikmişe Göre';
+	@override String get sortByCollectionRate => 'Tahsilat Oranına Göre';
+	@override String get sortByName => 'İsme Göre';
+	@override String get paidUnitsProgress => '{paid} / {total} daire ödedi';
+	@override String get perUnitDues => '{amount} / daire';
+	@override String get unitsOverdue => '{count} daire gecikmiş';
+	@override String get unitsWaiting => '{count} daire bekliyor';
+	@override String get allPaymentsComplete => 'Tüm ödemeler tamam';
+	@override String get monthlyDuesShort => 'Aylık Aidat';
 }
 
 /// The flat map containing all translations for locale <tr>.
@@ -1309,6 +1390,14 @@ extension on TranslationsTr {
 			'common.dueDayOutOfRange' => 'Aidat günü 1 ile 28 arasında olmalıdır.',
 			'common.update' => 'Güncelle',
 			'common.overdueDays' => 'gün gecikmiş',
+			'common.dueMetaOverdueDelay' => '{days} gün gecikme',
+			'common.dueMetaPaidInMonth' => '{month} {year}\'de ödendi',
+			'common.dueMetaPaidOnDay' => '{day} {month}\'ta ödendi',
+			'common.dueMetaPendingDueDate' => 'son ödeme {day} {month}',
+			'common.payShort' => 'Öde',
+			'common.dekontShort' => 'Dekont',
+			'common.monthChipLabel' => 'AY',
+			'common.yearChipLabel' => 'YIL',
 			'common.dueDateLabel' => 'Son ödeme',
 			'common.perMonth' => '/ ay',
 			'common.floorLabel' => 'KAT',
@@ -1364,6 +1453,7 @@ extension on TranslationsTr {
 			'common.removeSelectedResidentsAffectedListTitle' => 'Etkilenecek daireler',
 			'common.removeSelectedResidentsListUnavailable' => 'Daire listesi şu an gösterilemiyor. Seçilen daire sayısı aşağıda; onaylarsanız işlem yine de uygulanır.',
 			'common.pickResidentsFirst' => 'Önce listeden en az bir dolu daire seçin',
+			'common.noResidentsToRemoveInBuilding' => 'Bu binada çıkarılacak sakin bulunmuyor.',
 			'common.removeSelectedProgress' => 'İşlem yapılıyor…',
 			'common.removeSelectedSuccess' => 'Seçilen sakinler dairelerden çıkarıldı',
 			'common.removeSelectedFailed' => 'Seçilenleri çıkarma tamamlanamadı',
@@ -1497,6 +1587,20 @@ extension on TranslationsTr {
 			'features.buildings.collection.savedIbansDeleteBulkSuccess' => '{count} IBAN silindi',
 			'features.buildings.collection.ibanNotConfigured' => 'Tahsilat IBAN tanımlı değil',
 			'features.buildings.collection.ibanAlreadyExists' => 'Bu IBAN numarası zaten sistemde kayıtlı. Lütfen farklı bir IBAN kontrol edip tekrar deneyiniz.',
+			'features.buildings.list.buildingCount' => 'Bina',
+			'features.buildings.list.unitCount' => 'Daire',
+			'features.buildings.list.overdueShort' => 'Geciken',
+			'features.buildings.list.collectionShort' => 'Tahsilat',
+			'features.buildings.list.sort' => 'Sırala',
+			'features.buildings.list.sortByOverdue' => 'Gecikmişe Göre',
+			'features.buildings.list.sortByCollectionRate' => 'Tahsilat Oranına Göre',
+			'features.buildings.list.sortByName' => 'İsme Göre',
+			'features.buildings.list.paidUnitsProgress' => '{paid} / {total} daire ödedi',
+			'features.buildings.list.perUnitDues' => '{amount} / daire',
+			'features.buildings.list.unitsOverdue' => '{count} daire gecikmiş',
+			'features.buildings.list.unitsWaiting' => '{count} daire bekliyor',
+			'features.buildings.list.allPaymentsComplete' => 'Tüm ödemeler tamam',
+			'features.buildings.list.monthlyDuesShort' => 'Aylık Aidat',
 			'features.auth.register' => 'Kaydol',
 			'features.auth.login' => 'Giriş Yap',
 			'features.auth.join' => 'Katıl',
@@ -1572,6 +1676,8 @@ extension on TranslationsTr {
 			'features.tickets.titleTooShort' => 'Başlık en az 3 karakter olmalı',
 			'features.tickets.descriptionTooShort' => 'Açıklama en az 10 karakter olmalı',
 			'features.tickets.statusOpen' => 'Açık',
+			_ => null,
+		} ?? switch (path) {
 			'features.tickets.statusInProgress' => 'İşlemde',
 			'features.tickets.statusResolved' => 'Çözüldü',
 			'features.tickets.statusClosed' => 'Kapalı',
@@ -1595,8 +1701,6 @@ extension on TranslationsTr {
 			'features.tickets.noteAdded' => 'Not eklendi',
 			'features.tickets.loadError' => 'Talepler yüklenemedi',
 			'features.tickets.noteDisabledClosed' => 'Kapalı talebe not eklenemez',
-			_ => null,
-		} ?? switch (path) {
 			'features.tickets.statusClosedHint' => 'Bu talep kapatıldı; durum değiştirilemez.',
 			'features.tickets.apartmentRequired' => 'Daire bilgisi bulunamadı. Lütfen tekrar giriş yapın.',
 			'features.dekont.makePaymentTitle' => 'Ödeme Yap',
@@ -1856,6 +1960,7 @@ extension on TranslationsTr {
 			'features.profile.photoSaved' => 'Profil fotoğrafı bu hesap için kaydedildi.',
 			'features.profile.photoRemoved' => 'Profil fotoğrafı kaldırıldı.',
 			'features.profile.removePhoto' => 'Profil fotoğrafını kaldır',
+			'features.profile.accountCreatedAt' => 'Hesap oluşturulma: {date}',
 			'features.subscription.title' => 'Abonelik',
 			'features.subscription.statusActive' => 'Aktif',
 			'features.subscription.statusExpired' => 'Süresi doldu',
@@ -1889,6 +1994,43 @@ extension on TranslationsTr {
 			'features.reports.shareReport' => 'Raporu paylaş',
 			'features.reports.shareFailed' => 'Rapor paylaşılamadı. Lütfen tekrar deneyin.',
 			'features.reports.failed' => 'Rapor oluşturulamadı. Lütfen tekrar deneyin.',
+			'features.dashboard.allBuildings' => 'Tüm Binalar',
+			'features.dashboard.selectBuilding' => 'Bina seç',
+			'features.dashboard.searchBuildings' => 'Bina adı veya adres ara',
+			'features.dashboard.buildingPickerTapHint' => 'Dokunarak bina arayın ve seçin',
+			'features.dashboard.allBuildingsSummary' => '{count} bina',
+			'features.dashboard.buildingUnitsSummary' => '{apartments} daire',
+			'features.dashboard.collectionRate' => 'Tahsilat Oranı',
+			'features.dashboard.overduePayments' => 'Geciken Ödeme',
+			'features.dashboard.openTicketRequests' => 'Açık Arıza Talebi',
+			'features.dashboard.monthTotalExpense' => 'Bu Ay Toplam Gider',
+			'features.dashboard.pendingDekonts' => 'Bekleyen Dekont',
+			'features.dashboard.duesCollectionStatus' => 'Aidat Tahsilat Durumu',
+			'features.dashboard.incomeExpenseComparison' => 'Gelir / Gider Karşılaştırması',
+			'features.dashboard.last6Months' => 'Son 6 Ay',
+			'features.dashboard.collectedDues' => 'Toplanan Aidat',
+			'features.dashboard.totalExpense' => 'Toplam Gider',
+			'features.dashboard.ticketStatusTitle' => 'Arıza Talepleri Durumu',
+			'features.dashboard.ticketOpen' => 'Açık',
+			'features.dashboard.ticketInProgress' => 'İşlemde',
+			'features.dashboard.ticketResolved' => 'Çözüldü',
+			'features.dashboard.overdueApartments' => 'Ödemesi Geciken Daireler',
+			'features.dashboard.apartmentCountBadge' => '{count} daire',
+			'features.dashboard.legendPaid' => 'Ödendi',
+			'features.dashboard.legendOverdue' => 'Gecikmiş',
+			'features.dashboard.legendPending' => 'Bekliyor',
+			'features.dashboard.legendUnit' => '{count} aidat',
+			'features.dashboard.remind' => 'Hatırlat',
+			'features.dashboard.remindSent' => 'Hatırlatma gönderildi',
+			'features.dashboard.remindNoRecipient' => 'Bu dairede hatırlatma gönderilecek sakin bulunamadı.',
+			'features.dashboard.apartmentTitle' => 'Daire {number}',
+			'features.dashboard.apartmentWithFloor' => 'Daire {number} · {floor}. Kat',
+			'features.dashboard.noOverdueApartments' => 'Geciken ödeme bulunmuyor',
+			'features.dashboard.noChartData' => 'Henüz yeterli veri yok',
+			'features.dashboard.seeMoreOverdue' => 'Daha fazlası (+{count})',
+			'features.dashboard.payNow' => 'Şimdi Öde',
+			'features.dashboard.overduePaymentsBadge' => '{count} gecikmiş ödeme',
+			'features.dashboard.featuredDuePeriod' => '{month} {year} aidatı',
 			'features.faz2.sectionTitle' => 'Faz 2',
 			'features.faz2.tickets' => 'Talepler',
 			'features.faz2.expenses' => 'Giderler',

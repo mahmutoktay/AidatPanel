@@ -8,14 +8,17 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
+import '../../../../shared/widgets/dashboard_filter_chips_row.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../providers/notifications_provider.dart';
 import '../utils/notification_labels.dart';
-import '../utils/notification_style.dart';
 import '../utils/notification_time.dart';
 import '../widgets/notification_detail_sheet.dart';
+import '../widgets/notification_list_tile.dart';
 
 enum _NotificationFilter { all, unread }
 
@@ -101,450 +104,192 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
     );
   }
 
+  String _unreadChipLabel(BuildContext context, int unreadCount) {
+    final label = context.t.features.notifications.filterUnread;
+    if (unreadCount <= 0) return label;
+    return '$label ($unreadCount)';
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(notificationsNotifierProvider);
     final locale = Localizations.localeOf(context).toString();
+    final t = context.t.features.notifications;
 
     final visible = _filter == _NotificationFilter.unread
         ? state.items.where((n) => !n.isRead).toList()
         : state.items;
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: Text(
-          context.t.common.notifications,
-          style: AppTypography.h3.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        actions: [
-          if (state.unreadCount > 0)
-            IconButton(
-              tooltip: context.t.features.notifications.markAllRead,
-              onPressed: state.isLoading
-                  ? null
-                  : () => ref
-                        .read(notificationsNotifierProvider.notifier)
-                        .markAllRead(),
-              icon: const Icon(Icons.done_all_rounded),
-            ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: _reload,
-        color: AppColors.primary,
-        child: CustomScrollView(
-          controller: _scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSizes.dashboardScreenPaddingHorizontal,
-                AppSizes.spacingM,
-                AppSizes.dashboardScreenPaddingHorizontal,
-                0,
-              ),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  // Filtre segment butonları
-                  _buildFilterSegments(state.unreadCount),
-                  const SizedBox(height: AppSizes.spacingL),
-
-                  // Başlık + sayı rozeti
-                  _buildListHeader(visible.length),
-                  const SizedBox(height: AppSizes.spacingM),
-
-                  // Yükleme göstergesi
-                  if (state.isLoading && state.items.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: const LinearProgressIndicator(minHeight: 3),
-                      ),
-                    ),
-                ]),
-              ),
-            ),
-
-            // Body durumları
-            if (state.isLoading && state.items.isEmpty)
-              const SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (state.error != null && state.items.isEmpty)
-              _buildErrorSliver()
-            else if (visible.isEmpty)
-              _buildEmptySliver()
-            else
-              _buildNotificationList(visible, locale),
-
-            // Load more
-            if (state.isLoadingMore)
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(AppSizes.spacingL),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // Filtre segment butonları (fill zemin dashboard stili)
-  // ─────────────────────────────────────────────────────────────────────
-  Widget _buildFilterSegments(int unreadCount) {
-    final t = context.t.features.notifications;
-
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _SegmentPill(
-              label: t.filterUnread,
-              badge: unreadCount > 0 ? unreadCount : null,
-              selected: _filter == _NotificationFilter.unread,
-              onTap: () => setState(() => _filter = _NotificationFilter.unread),
-            ),
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: _SegmentPill(
-              label: t.filterAll,
-              selected: _filter == _NotificationFilter.all,
-              onTap: () => setState(() => _filter = _NotificationFilter.all),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // Başlık + sayı rozeti
-  // ─────────────────────────────────────────────────────────────────────
-  Widget _buildListHeader(int count) {
-    final t = context.t.features.notifications;
-    final label = _filter == _NotificationFilter.unread
+    final filterLabel = _filter == _NotificationFilter.unread
         ? t.filterUnread
         : t.filterAll;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: AppTypography.h3.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w800,
+    return DashboardSecondaryScaffold(
+      title: context.t.common.notifications,
+      actions: [
+        if (state.unreadCount > 0)
+          IconButton(
+            tooltip: t.markAllRead,
+            onPressed: state.isLoading
+                ? null
+                : () => ref
+                      .read(notificationsNotifierProvider.notifier)
+                      .markAllRead(),
+            icon: const Icon(Icons.done_all_rounded, color: AppColors.inkDark),
           ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.spacingS,
-            vertical: 6,
-          ),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(20),
-            border: AppColors.cardBorder,
-          ),
-          child: Text(
-            count.toString(),
-            style: AppTypography.caption.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
       ],
+      body: DashboardListScreenBody(
+        header: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            DashboardFilterChipsRow(
+              chips: [
+                DashboardFilterChipItem(
+                  label: _unreadChipLabel(context, state.unreadCount),
+                  selected: _filter == _NotificationFilter.unread,
+                  onTap: () =>
+                      setState(() => _filter = _NotificationFilter.unread),
+                ),
+                DashboardFilterChipItem(
+                  label: t.filterAll,
+                  selected: _filter == _NotificationFilter.all,
+                  onTap: () =>
+                      setState(() => _filter = _NotificationFilter.all),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSizes.spacingM),
+            DashboardSectionTitle(
+              title: filterLabel,
+              trailing: _CountBadge(count: visible.length),
+            ),
+            if (state.isLoading && state.items.isNotEmpty) ...[
+              const SizedBox(height: AppSizes.spacingS),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: const LinearProgressIndicator(minHeight: 3),
+              ),
+            ],
+          ],
+        ),
+        list: RefreshIndicator(
+          onRefresh: _reload,
+          color: AppColors.primary,
+          child: _buildList(context, state, visible, locale),
+        ),
+      ),
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────
-  // Bildirim listesi
-  // ─────────────────────────────────────────────────────────────────────
-  Widget _buildNotificationList(
+  Widget _buildList(
+    BuildContext context,
+    NotificationsState state,
     List<NotificationEntity> visible,
     String locale,
   ) {
-    final rows = _buildRows(visible);
+    if (state.isLoading && state.items.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
+          SizedBox(height: 200),
+          Center(child: CircularProgressIndicator()),
+        ],
+      );
+    }
 
-    return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSizes.dashboardScreenPaddingHorizontal,
-        0,
-        AppSizes.dashboardScreenPaddingHorizontal,
-        AppSizes.spacingL,
-      ),
-      sliver: SliverList(
-        delegate: SliverChildBuilderDelegate((context, i) {
-          final row = rows[i];
-          if (row is _SectionRow) {
-            return _SectionHeaderLabel(
-              label: row.section.label(context),
-              isFirst: i == 0,
-            );
-          }
-
-          final n = (row as _ItemRow).notification;
-          return _buildNotificationCard(context, n, locale);
-        }, childCount: rows.length),
-      ),
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // Bildirim kartı — fill zemin dashboard stili
-  // ─────────────────────────────────────────────────────────────────────
-  Widget _buildNotificationCard(
-    BuildContext context,
-    NotificationEntity n,
-    String locale,
-  ) {
-    final visual = notificationVisual(n.type);
-    final unread = !n.isRead;
-    final timeStr = notificationRelativeTime(
-      context,
-      n.createdAt,
-      locale: locale,
-    );
-    final typeLabel = n.type.label(context).trim();
-    final title = n.title.trim();
-    final showTypeLabel =
-        typeLabel.isNotEmpty &&
-        title.isNotEmpty &&
-        typeLabel.toLowerCase() != title.toLowerCase();
-    const tileRadius = BorderRadius.all(Radius.circular(12));
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: tileRadius,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => _openNotification(n),
-          borderRadius: tileRadius,
-          splashColor: AppColors.border.withValues(alpha: 0.4),
-          highlightColor: AppColors.border.withValues(alpha: 0.25),
-          child: Container(
-            decoration: BoxDecoration(
-              color: unread ? AppColors.surface : AppColors.fill,
-              borderRadius: tileRadius,
-              border: unread
-                  ? Border.all(color: visual.color.withValues(alpha: 0.3))
-                  : null,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSizes.spacingM),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Üst satır: ikon + tip etiketi + zaman
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: visual.background,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: visual.color.withValues(alpha: 0.25),
-                          ),
-                        ),
-                        alignment: Alignment.center,
-                        child: Icon(visual.icon, color: visual.color, size: 24),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (showTypeLabel) ...[
-                              Row(
-                                children: [
-                                  Text(
-                                    typeLabel,
-                                    style: AppTypography.caption.copyWith(
-                                      color: visual.color,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    timeStr,
-                                    style: AppTypography.caption.copyWith(
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  if (unread) ...[
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: visual.color,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                            ],
-                            Text(
-                              title,
-                              style: AppTypography.body1.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: unread
-                                    ? FontWeight.w700
-                                    : FontWeight.w600,
-                                fontSize: 17,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSizes.spacingS),
-                  // Alt içerik: body + zaman (tip etiketi yoksa)
-                  Container(
-                    padding: const EdgeInsets.all(AppSizes.spacingS),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            n.body,
-                            style: AppTypography.body2.copyWith(
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 15,
-                              height: 1.4,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (!showTypeLabel) ...[
-                          const SizedBox(width: AppSizes.spacingS),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                timeStr,
-                                style: AppTypography.caption.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              if (unread) ...[
-                                const SizedBox(width: 6),
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: visual.color,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+    if (state.error != null && state.items.isEmpty) {
+      final t = context.t.features.notifications;
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(height: MediaQuery.sizeOf(context).height * 0.12),
+          Padding(
+            padding: AppSizes.screenBodyScrollPadding,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  t.loadError,
+                  style: AppTypography.body1,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+                FilledButton(
+                  onPressed: () => ref
+                      .read(notificationsNotifierProvider.notifier)
+                      .load(refresh: true),
+                  child: Text(context.t.common.tryAgain),
+                ),
+              ],
             ),
           ),
-        ),
-      ),
-    );
-  }
+        ],
+      );
+    }
 
-  // ─────────────────────────────────────────────────────────────────────
-  // Hata durumu
-  // ─────────────────────────────────────────────────────────────────────
-  Widget _buildErrorSliver() {
-    final t = context.t.features.notifications;
-    return SliverFillRemaining(
-      hasScrollBody: false,
-      child: Padding(
-        padding: AppSizes.screenBodyScrollPadding,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: MediaQuery.sizeOf(context).height * 0.12),
-            Text(
-              t.loadError,
-              style: AppTypography.body1,
-              textAlign: TextAlign.center,
+    if (visible.isEmpty) {
+      final unreadFilter = _filter == _NotificationFilter.unread;
+      final t = context.t.features.notifications;
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          EmptyStateWidget(
+            icon: unreadFilter
+                ? Icons.mark_email_read_outlined
+                : Icons.notifications_none_outlined,
+            title: unreadFilter ? t.emptyUnreadTitle : t.emptyTitle,
+            subtitle: unreadFilter ? t.emptyUnreadSubtitle : t.emptySubtitle,
+          ),
+        ],
+      );
+    }
+
+    final rows = _buildRows(visible);
+    final itemCount = rows.length + (state.isLoadingMore ? 1 : 0);
+
+    return ListView.builder(
+      controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: AppSizes.screenBodyScrollPadding,
+      itemCount: itemCount,
+      itemBuilder: (context, i) {
+        if (i >= rows.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSizes.spacingM),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final row = rows[i];
+        if (row is _SectionRow) {
+          return Padding(
+            padding: EdgeInsets.only(
+              top: i == 0 ? 0 : AppSizes.spacingM,
+              bottom: AppSizes.spacingS,
             ),
-            const SizedBox(height: AppSizes.spacingM),
-            FilledButton(
-              onPressed: () => ref
-                  .read(notificationsNotifierProvider.notifier)
-                  .load(refresh: true),
-              child: Text(context.t.common.tryAgain),
+            child: Text(
+              row.section.label(context),
+              style: AppTypography.caption.copyWith(
+                color: AppColors.mutedText,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-          ],
-        ),
-      ),
+          );
+        }
+
+        final n = (row as _ItemRow).notification;
+        return Padding(
+          padding: DashboardScreenStyle.listItemPadding,
+          child: NotificationListTile(
+            notification: n,
+            locale: locale,
+            onTap: () => _openNotification(n),
+          ),
+        );
+      },
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────
-  // Boş durum
-  // ─────────────────────────────────────────────────────────────────────
-  Widget _buildEmptySliver() {
-    final unreadFilter = _filter == _NotificationFilter.unread;
-    final t = context.t.features.notifications;
-    return SliverFillRemaining(
-      hasScrollBody: false,
-      child: EmptyStateWidget(
-        icon: unreadFilter
-            ? Icons.mark_email_read_outlined
-            : Icons.notifications_none_outlined,
-        title: unreadFilter ? t.emptyUnreadTitle : t.emptyTitle,
-        subtitle: unreadFilter ? t.emptyUnreadSubtitle : t.emptySubtitle,
-      ),
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // Section + item sıralama
-  // ─────────────────────────────────────────────────────────────────────
   List<_Row> _buildRows(List<NotificationEntity> items) {
     final rows = <_Row>[];
     NotificationDateSection? current;
@@ -560,10 +305,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// Alt widget'lar
-// ─────────────────────────────────────────────────────────────────────
-
 sealed class _Row {
   const _Row();
 }
@@ -578,111 +319,28 @@ class _ItemRow extends _Row {
   const _ItemRow(this.notification);
 }
 
-class _SectionHeaderLabel extends StatelessWidget {
-  final String label;
-  final bool isFirst;
+class _CountBadge extends StatelessWidget {
+  final int count;
 
-  const _SectionHeaderLabel({required this.label, required this.isFirst});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        top: isFirst ? 0 : AppSizes.spacingM,
-        bottom: AppSizes.spacingS,
-        left: 2,
-      ),
-      child: Text(
-        label,
-        style: AppTypography.label.copyWith(
-          color: AppColors.textSecondary,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
-  }
-}
-
-/// Dashboard stili segment buton (iç içe fill zemin)
-class _SegmentPill extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  final int? badge;
-
-  const _SegmentPill({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-    this.badge,
-  });
+  const _CountBadge({required this.count});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: selected ? AppColors.surface : Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: selected
-            ? [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  blurRadius: 4,
-                  offset: const Offset(0, 1),
-                ),
-              ]
-            : null,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingS,
+        vertical: 6,
       ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            height: AppSizes.minTouchTarget,
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingS),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    label,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.button.copyWith(
-                      color: selected
-                          ? AppColors.textPrimary
-                          : AppColors.textSecondary,
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                    ),
-                  ),
-                ),
-                if (badge != null) ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 7,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppColors.primary.withValues(alpha: 0.12)
-                          : AppColors.error.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      '$badge',
-                      style: AppTypography.caption.copyWith(
-                        color: selected ? AppColors.primary : AppColors.error,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.lineLight),
+      ),
+      child: Text(
+        count.toString(),
+        style: AppTypography.caption.copyWith(
+          color: AppColors.primary,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

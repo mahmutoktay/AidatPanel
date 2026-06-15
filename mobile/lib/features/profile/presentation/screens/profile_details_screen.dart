@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/profile_avatar.dart';
@@ -10,6 +13,8 @@ import '../../../../shared/widgets/profile_avatar_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../subscription/domain/entities/subscription_entity.dart';
+import '../../../subscription/presentation/providers/subscription_provider.dart';
 import '../providers/profile_notifier.dart';
 import '../theme/profile_settings_ui.dart';
 import '../widgets/delete_account_sheet.dart';
@@ -18,11 +23,7 @@ import '../widgets/logout_all_devices_tile.dart';
 /// Ayarlar → Profil bilgileri.
 ///
 /// FAZ 4: `GET /me` ile yükleme, `PUT /me` ile ad + telefon güncelleme.
-/// Stil: Ayarlar sekmesi ile birebir aynı dil — çerçevesiz satırlar,
-/// gruplar arasında ince ayraç, ortak hero blok. Düzenleme aksiyonu
-/// ayrı bir sheet açmaz; "Düzenle"ye basılınca aynı ekrandaki ad ve
-/// telefon satırları inline TextField'a dönüşür, altta sabit "Kaydet"
-/// butonu görünür.
+/// Görünüm: Ayarlar sekmesi ile aynı kart tabanlı dashboard dili.
 class ProfileDetailsScreen extends ConsumerStatefulWidget {
   const ProfileDetailsScreen({super.key});
 
@@ -44,6 +45,10 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(profileNotifierProvider.notifier).loadProfile();
+      final user = ref.read(authStateProvider).user;
+      if (user?.role == UserRole.manager) {
+        ref.read(subscriptionNotifierProvider.notifier).load();
+      }
     });
   }
 
@@ -193,13 +198,14 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     final profileState = ref.watch(profileNotifierProvider);
     final authUser = ref.watch(authStateProvider).user;
     final user = profileState.user ?? authUser;
+    final subscriptionState = ref.watch(subscriptionNotifierProvider);
 
     return PopScope(
       canPop: !profileState.isSaving,
       child: Scaffold(
-        backgroundColor: ProfileSettingsUi.background,
+        backgroundColor: AppColors.dashboardBackground,
         appBar: _buildAppBar(context, user, profileState),
-        body: _buildBody(context, profileState, user),
+        body: _buildBody(context, profileState, user, subscriptionState),
         bottomNavigationBar: _editing && user != null
             ? _buildSaveBar(context, profileState)
             : null,
@@ -217,7 +223,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
         user != null && !_editing && !profileState.isSaving;
 
     return AppBar(
-      backgroundColor: ProfileSettingsUi.background,
+      backgroundColor: AppColors.dashboardBackground,
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: true,
@@ -261,6 +267,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     BuildContext context,
     ProfileState profileState,
     UserEntity? user,
+    SubscriptionState subscriptionState,
   ) {
     final t = context.t;
 
@@ -304,125 +311,138 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
       key: _formKey,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: ProfileSettingsUi.screenPadding,
+        padding: AppSizes.screenBodyScrollPadding.copyWith(
+          top: AppSizes.spacingS,
+          bottom: AppSizes.spacingXL,
+        ),
         children: [
           _ProfileHero(
-            user: user,
             editing: _editing,
             onAvatarTap: () => handleProfileAvatarTap(context, ref),
+            userName: user.name,
+            createdAt: user.createdAt,
+            showSubscription: user.role == UserRole.manager,
+            subscription: subscriptionState.subscription,
+            subscriptionLoading: subscriptionState.isLoading,
           ),
-          const SizedBox(height: 20),
-          const _GroupDivider(),
-          const SizedBox(height: 4),
-
-          // Kişisel — düzenlenebilir alanlar
-          if (_editing) ...[
-            _InlineField(
-              icon: Icons.person_outline,
-              label: t.features.profile.fullName,
-              controller: _nameController,
-              enabled: !profileState.isSaving,
-              textCapitalization: TextCapitalization.words,
-              textInputAction: TextInputAction.next,
-              autofillHints: const [AutofillHints.name],
-              validator: (value) => InputValidators.validateName(value),
-            ),
-            _InlineField(
-              icon: Icons.email_outlined,
-              label: t.features.profile.email,
-              controller: _emailController,
-              enabled: !profileState.isSaving,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              autofillHints: const [AutofillHints.email],
-              validator: (value) {
-                final raw = value?.trim() ?? '';
-                if (raw.isEmpty) return null;
-                final key = InputValidators.validateEmail(raw);
-                if (key == 'email_required') return null;
-                if (key == null) return null;
-                return 'Geçerli bir e-posta adresi giriniz';
-              },
-              showClearSuffix: true,
-              onChanged: (_) => setState(() {}),
-            ),
-            _InlineField(
-              icon: Icons.phone_outlined,
-              label: t.features.profile.phone,
-              controller: _phoneController,
-              enabled: !profileState.isSaving,
-              keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.done,
-              autofillHints: const [AutofillHints.telephoneNumberNational],
-              maxLength: 10,
-              prefixText: '+90 ',
-              helperText: t.features.profile.phoneOptionalHint,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              showClearSuffix: true,
-              onChanged: (_) => setState(() {}),
-              onSubmitted: (_) => _save(),
-              validator: (value) {
-                final raw = value?.trim() ?? '';
-                if (raw.isEmpty) return null;
-                final key = InputValidators.validatePhone(raw);
-                if (key == null) return null;
-                return t.validation.phoneInvalid;
-              },
-            ),
-          ] else ...[
-            _InfoTile(
-              icon: Icons.person_outline,
-              label: t.features.profile.fullName,
-              value: user.name,
-            ),
-            _InfoTile(
-              icon: Icons.email_outlined,
-              label: t.features.profile.email,
-              value: (user.email != null && user.email!.isNotEmpty)
-                  ? user.email!
-                  : t.features.profile.notProvided,
-              isEmpty: user.email == null || user.email!.isEmpty,
-            ),
-            _InfoTile(
-              icon: Icons.phone_outlined,
-              label: t.features.profile.phone,
-              value: (user.phone != null && user.phone!.isNotEmpty)
-                  ? _formatPhone(user.phone!)
-                  : t.features.profile.notProvided,
-              isEmpty: user.phone == null || user.phone!.isEmpty,
-            ),
-          ],
-
-          const SizedBox(height: 4),
-          const _GroupDivider(),
-          const SizedBox(height: 4),
-
-          // Hesap — sadece okunabilir alanlar
-          _InfoTile(
-            icon: Icons.badge_outlined,
-            label: t.features.profile.role,
-            value: roleLabel,
-            locked: true,
+          const SizedBox(height: AppSizes.spacingM),
+          _ProfileSectionHeader(title: t.features.profile.sectionPersonal),
+          const SizedBox(height: AppSizes.spacingS),
+          _ProfileSurfaceCard(
+            children: _editing
+                ? [
+                    _InlineField(
+                      icon: Icons.person_outline,
+                      label: t.features.profile.fullName,
+                      controller: _nameController,
+                      enabled: !profileState.isSaving,
+                      textCapitalization: TextCapitalization.words,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.name],
+                      validator: (value) => InputValidators.validateName(value),
+                    ),
+                    _InlineField(
+                      icon: Icons.email_outlined,
+                      label: t.features.profile.email,
+                      controller: _emailController,
+                      enabled: !profileState.isSaving,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.email],
+                      validator: (value) {
+                        final raw = value?.trim() ?? '';
+                        if (raw.isEmpty) return null;
+                        final key = InputValidators.validateEmail(raw);
+                        if (key == 'email_required') return null;
+                        if (key == null) return null;
+                        return 'Geçerli bir e-posta adresi giriniz';
+                      },
+                      showClearSuffix: true,
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    _InlineField(
+                      icon: Icons.phone_outlined,
+                      label: t.features.profile.phone,
+                      controller: _phoneController,
+                      enabled: !profileState.isSaving,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.done,
+                      autofillHints: const [AutofillHints.telephoneNumberNational],
+                      maxLength: 10,
+                      prefixText: '+90 ',
+                      helperText: t.features.profile.phoneOptionalHint,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      showClearSuffix: true,
+                      onChanged: (_) => setState(() {}),
+                      onSubmitted: (_) => _save(),
+                      validator: (value) {
+                        final raw = value?.trim() ?? '';
+                        if (raw.isEmpty) return null;
+                        final key = InputValidators.validatePhone(raw);
+                        if (key == null) return null;
+                        return t.validation.phoneInvalid;
+                      },
+                    ),
+                  ]
+                : [
+                    _InfoTile(
+                      icon: Icons.person_outline,
+                      label: t.features.profile.fullName,
+                      value: user.name,
+                    ),
+                    _InfoTile(
+                      icon: Icons.email_outlined,
+                      label: t.features.profile.email,
+                      value: (user.email != null && user.email!.isNotEmpty)
+                          ? user.email!
+                          : t.features.profile.notProvided,
+                      isEmpty: user.email == null || user.email!.isEmpty,
+                    ),
+                    _InfoTile(
+                      icon: Icons.phone_outlined,
+                      label: t.features.profile.phone,
+                      value: (user.phone != null && user.phone!.isNotEmpty)
+                          ? _formatPhone(user.phone!)
+                          : t.features.profile.notProvided,
+                      isEmpty: user.phone == null || user.phone!.isEmpty,
+                    ),
+                  ],
           ),
-          _InfoTile(
-            icon: Icons.language_outlined,
-            label: t.features.profile.languagePref,
-            value: languageLabel,
-            locked: true,
+          const SizedBox(height: AppSizes.spacingM),
+          _ProfileSectionHeader(title: t.features.profile.sectionAccount),
+          const SizedBox(height: AppSizes.spacingS),
+          _ProfileSurfaceCard(
+            children: [
+              _InfoTile(
+                icon: Icons.badge_outlined,
+                label: t.features.profile.role,
+                value: roleLabel,
+                locked: true,
+              ),
+              _InfoTile(
+                icon: Icons.language_outlined,
+                label: t.features.profile.languagePref,
+                value: languageLabel,
+                locked: true,
+              ),
+            ],
           ),
-
           if (!_editing) ...[
-            const SizedBox(height: 4),
-            const _GroupDivider(),
-            const SizedBox(height: 4),
-            const LogoutAllDevicesTile(),
-            _DangerTile(
-              icon: Icons.delete_outline,
-              label: t.common.deleteAccount,
-              onTap: () => DeleteAccountSheet.show(context),
+            const SizedBox(height: AppSizes.spacingM),
+            _ProfileSurfaceCard(
+              children: const [LogoutAllDevicesTile()],
+            ),
+            const SizedBox(height: AppSizes.spacingM),
+            _ProfileSurfaceCard(
+              children: [
+                _DangerTile(
+                  icon: Icons.delete_outline,
+                  label: t.common.deleteAccount,
+                  onTap: () => DeleteAccountSheet.show(context),
+                ),
+              ],
             ),
           ],
-          const SizedBox(height: 16),
         ],
       ),
     );
@@ -430,7 +450,12 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     if (_editing) return content;
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(profileNotifierProvider.notifier).loadProfile(),
+      onRefresh: () async {
+        await ref.read(profileNotifierProvider.notifier).loadProfile();
+        if (user.role == UserRole.manager) {
+          await ref.read(subscriptionNotifierProvider.notifier).load();
+        }
+      },
       child: content,
     );
   }
@@ -439,24 +464,75 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     final t = context.t;
     final saving = profileState.isSaving;
 
-    return SafeArea(
-      minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-      child: SizedBox(
-        height: ProfileSettingsUi.buttonHeight,
-        child: ElevatedButton(
-          onPressed: saving ? null : _save,
-          style: ProfileSettingsUi.primaryButton,
-          child: saving
-              ? const SizedBox(
-                  height: 22,
-                  width: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.4,
-                    color: Colors.white,
-                  ),
-                )
-              : Text(t.common.save),
+    return ColoredBox(
+      color: AppColors.dashboardBackground,
+      child: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+        child: SizedBox(
+          height: ProfileSettingsUi.buttonHeight,
+          child: ElevatedButton(
+            onPressed: saving ? null : _save,
+            style: ProfileSettingsUi.primaryButton,
+            child: saving
+                ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.4,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(t.common.save),
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileSectionHeader extends StatelessWidget {
+  final String title;
+
+  const _ProfileSectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: AppTypography.h4.copyWith(
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.w800,
+        fontSize: 18,
+      ),
+    );
+  }
+}
+
+class _ProfileSurfaceCard extends StatelessWidget {
+  final List<Widget> children;
+
+  const _ProfileSurfaceCard({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
       ),
     );
   }
@@ -474,101 +550,199 @@ String _formatPhone(String phone) {
       '${p.substring(6, 8)} ${p.substring(8, 10)}';
 }
 
-/// Ayarlar sekmesindekiyle birebir hero — avatar + isim + handle.
+/// Avatar solda; sağda abonelik özeti ve hesap oluşturulma tarihi.
 class _ProfileHero extends StatelessWidget {
-  final UserEntity user;
+  final String userName;
   final bool editing;
   final VoidCallback onAvatarTap;
+  final DateTime? createdAt;
+  final bool showSubscription;
+  final SubscriptionEntity? subscription;
+  final bool subscriptionLoading;
 
   const _ProfileHero({
-    required this.user,
+    required this.userName,
     required this.editing,
     required this.onAvatarTap,
+    this.createdAt,
+    this.showSubscription = false,
+    this.subscription,
+    this.subscriptionLoading = false,
   });
-
-  String _handle() {
-    if (user.email != null && user.email!.isNotEmpty) {
-      return user.email!;
-    }
-    if (user.phone != null && user.phone!.isNotEmpty) {
-      return _formatPhone(user.phone!);
-    }
-    return '';
-  }
 
   @override
   Widget build(BuildContext context) {
     final t = context.t;
-    final handle = _handle();
+    final localeName = Localizations.localeOf(context).toLanguageTag();
 
-    return Column(
-      children: [
-        Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            ProfileAvatar(
-              size: ProfileSettingsUi.avatarSize,
-              userName: user.name,
-              onTap: onAvatarTap,
-            ),
-            Material(
-              color: ProfileSettingsUi.ink,
-              shape: const CircleBorder(),
-              child: InkWell(
-                onTap: onAvatarTap,
-                customBorder: const CircleBorder(),
-                child: const Padding(
-                  padding: EdgeInsets.all(6),
-                  child: Icon(
-                    Icons.photo_camera_outlined,
-                    size: 14,
-                    color: Colors.white,
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: AppSizes.spacingXS,
+        right: AppSizes.spacingM,
+        top: AppSizes.spacingS,
+        bottom: AppSizes.spacingM,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.bottomRight,
+                children: [
+                  ProfileAvatar(
+                    size: ProfileSettingsUi.avatarSize,
+                    userName: userName,
+                    onTap: onAvatarTap,
                   ),
+                  Material(
+                    color: ProfileSettingsUi.ink,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      onTap: onAvatarTap,
+                      customBorder: const CircleBorder(),
+                      child: const Padding(
+                        padding: EdgeInsets.all(6),
+                        child: Icon(
+                          Icons.photo_camera_outlined,
+                          size: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: AppSizes.spacingM),
+              Expanded(
+                child: _ProfileHeroMeta(
+                  showSubscription: showSubscription,
+                  subscription: subscription,
+                  subscriptionLoading: subscriptionLoading,
+                  createdAt: createdAt,
+                  localeName: localeName,
                 ),
               ),
+            ],
+          ),
+          if (editing) ...[
+            const SizedBox(height: 10),
+            Text(
+              t.features.profile.editPhotoHint,
+              style: ProfileSettingsUi.handle.copyWith(fontSize: 13),
             ),
           ],
-        ),
-        const SizedBox(height: 14),
-        Text(
-          user.name,
-          style: ProfileSettingsUi.name,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        if (handle.isNotEmpty) ...[
-          const SizedBox(height: 4),
-          Text(
-            handle,
-            style: ProfileSettingsUi.handle,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-          ),
         ],
-        if (editing) ...[
-          const SizedBox(height: 6),
-          Text(
-            t.features.profile.editPhotoHint,
-            style: ProfileSettingsUi.handle.copyWith(fontSize: 13),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ],
+      ),
     );
   }
 }
 
-/// Ayarlar sekmesindeki gruplar arası ince ayraç ile aynı.
-class _GroupDivider extends StatelessWidget {
-  const _GroupDivider();
+class _ProfileHeroMeta extends StatelessWidget {
+  final bool showSubscription;
+  final SubscriptionEntity? subscription;
+  final bool subscriptionLoading;
+  final DateTime? createdAt;
+  final String localeName;
+
+  const _ProfileHeroMeta({
+    required this.showSubscription,
+    required this.subscription,
+    required this.subscriptionLoading,
+    required this.createdAt,
+    required this.localeName,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      child: Divider(height: 1, color: ProfileSettingsUi.line),
+    final t = context.t;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (showSubscription) ...[
+          if (subscriptionLoading)
+            const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else if (subscription != null && subscription!.hasRecord) ...[
+            Text(
+              _planLabel(t, subscription!.plan),
+              style: ProfileSettingsUi.fieldValue.copyWith(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _statusLabel(t, subscription!.status),
+              style: ProfileSettingsUi.fieldLabel.copyWith(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+          ] else
+            Text(
+              t.features.subscription.noSubscription,
+              style: ProfileSettingsUi.fieldValue.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          if (createdAt != null) const SizedBox(height: 10),
+        ],
+        if (createdAt != null)
+          Text(
+            t.features.profile.accountCreatedAt.replaceAll(
+              '{date}',
+              _formatAccountDate(createdAt!, localeName),
+            ),
+            style: ProfileSettingsUi.fieldLabel.copyWith(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+              height: 1.3,
+            ),
+          ),
+      ],
     );
+  }
+
+  String _formatAccountDate(DateTime date, String localeName) {
+    final formatted = DateFormat.yMMMMd(localeName).format(date.toLocal());
+    if (formatted.isEmpty) return formatted;
+    return formatted.replaceRange(0, 1, formatted.substring(0, 1).toUpperCase());
+  }
+
+  String _statusLabel(Translations t, SubscriptionStatus status) {
+    switch (status) {
+      case SubscriptionStatus.active:
+        return t.features.subscription.statusActive;
+      case SubscriptionStatus.expired:
+        return t.features.subscription.statusExpired;
+      case SubscriptionStatus.cancelled:
+        return t.features.subscription.statusCancelled;
+      case SubscriptionStatus.trial:
+        return t.features.subscription.statusTrial;
+      case SubscriptionStatus.unknown:
+        return t.features.subscription.statusUnknown;
+    }
+  }
+
+  String _planLabel(Translations t, String plan) {
+    final p = plan.toLowerCase();
+    if (p.contains('month')) return t.features.subscription.planMonthly;
+    if (p.contains('annual') || p.contains('year')) {
+      return t.features.subscription.planAnnual;
+    }
+    if (plan.isEmpty) return t.features.subscription.planUnknown;
+    return plan;
   }
 }
 
@@ -593,7 +767,10 @@ class _InfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingM,
+        vertical: 12,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -655,13 +832,16 @@ class _DangerTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: ProfileSettingsUi.background,
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        child: SizedBox(
-          height: ProfileSettingsUi.rowHeight,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: ProfileSettingsUi.rowHeight),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.spacingM,
+              vertical: 10,
+            ),
             child: Row(
               children: [
                 Icon(
@@ -692,9 +872,7 @@ class _DangerTile extends StatelessWidget {
   }
 }
 
-/// Düzenleme modunda `_InfoTile` ile aynı yerleşimde inline alan —
-/// leading icon + label (üstte) + TextField (altta). Çerçeve yok;
-/// ayarlar dilini koruyacak şekilde altta yalnız ince ayırıcı.
+/// Düzenleme modunda `_InfoTile` ile aynı yerleşim — gri dolgu/çizgi yok.
 class _InlineField extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -734,18 +912,20 @@ class _InlineField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const borderless = InputBorder.none;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingM,
+        vertical: 12,
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 22),
-            child: Icon(
-              icon,
-              size: ProfileSettingsUi.iconSize,
-              color: ProfileSettingsUi.ink,
-            ),
+          Icon(
+            icon,
+            size: ProfileSettingsUi.iconSize,
+            color: ProfileSettingsUi.ink,
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -769,9 +949,15 @@ class _InlineField extends StatelessWidget {
                   style: ProfileSettingsUi.fieldValue,
                   cursorColor: ProfileSettingsUi.ink,
                   decoration: InputDecoration(
+                    filled: false,
+                    fillColor: Colors.transparent,
                     isDense: true,
                     prefixText: prefixText,
+                    prefixStyle: ProfileSettingsUi.fieldValue,
                     helperText: helperText,
+                    helperStyle: ProfileSettingsUi.fieldLabel.copyWith(
+                      fontSize: 12,
+                    ),
                     counterText: '',
                     suffixIcon: showClearSuffix &&
                             enabled &&
@@ -798,22 +984,13 @@ class _InlineField extends StatelessWidget {
                       minWidth: 40,
                       minHeight: 40,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 0,
-                    ),
-                    border: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: ProfileSettingsUi.line),
-                    ),
-                    enabledBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: ProfileSettingsUi.line),
-                    ),
-                    focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: ProfileSettingsUi.ink,
-                        width: 1.4,
-                      ),
-                    ),
+                    contentPadding: EdgeInsets.zero,
+                    border: borderless,
+                    enabledBorder: borderless,
+                    disabledBorder: borderless,
+                    focusedBorder: borderless,
+                    errorBorder: borderless,
+                    focusedErrorBorder: borderless,
                   ),
                 ),
               ],

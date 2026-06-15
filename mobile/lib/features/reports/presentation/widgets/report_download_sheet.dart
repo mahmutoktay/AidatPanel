@@ -7,7 +7,9 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/api_user_message.dart';
 import '../../../../core/utils/month_labels.dart';
 import '../../../../core/utils/user_error_message.dart';
+import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/sliding_segmented_control.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
@@ -118,9 +120,11 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
     final bottom = MediaQuery.paddingOf(context).bottom;
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(DashboardScreenStyle.cardRadius),
+        ),
       ),
       padding: EdgeInsets.fromLTRB(
         AppSizes.spacingL,
@@ -132,16 +136,7 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(
-              width: 44,
-              height: 5,
-              decoration: BoxDecoration(
-                color: AppColors.borderColor.withValues(alpha: 0.45),
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-          ),
+          const _SheetHandle(),
           const SizedBox(height: AppSizes.spacingM),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,20 +287,42 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
           ),
           const SizedBox(height: AppSizes.spacingL),
           SizedBox(
-            height: AppSizes.minTouchTargetComfort,
-            child: FilledButton.icon(
+            height: ProfileSettingsUi.buttonHeight,
+            child: ElevatedButton.icon(
               onPressed: _isLoading ? null : _onShowReport,
+              style: ProfileSettingsUi.primaryButton,
               icon: _isLoading
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.4,
+                        color: Colors.white,
+                      ),
                     )
-                  : const Icon(Icons.picture_as_pdf_outlined),
+                  : const Icon(Icons.picture_as_pdf_outlined, size: 22),
               label: Text(_isLoading ? t.downloading : t.download),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SheetHandle extends StatelessWidget {
+  const _SheetHandle();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: AppColors.borderColor,
+          borderRadius: BorderRadius.circular(2),
+        ),
       ),
     );
   }

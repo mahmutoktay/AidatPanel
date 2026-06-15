@@ -8,10 +8,13 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/month_labels.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/app_date_field.dart';
 import '../../../../shared/widgets/app_select_field.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/sliding_segmented_control.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
+import '../../../profile/presentation/theme/profile_settings_ui.dart';
 import '../../domain/entities/expense_create_outcome.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../providers/expenses_provider.dart';
@@ -48,6 +51,13 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   List<PlatformFile> _receiptFiles = [];
 
   bool get _isEdit => widget.expense != null;
+
+  int get _sectionCount {
+    var count = 3; // basic info, note, receipt
+    if (!_isEdit) count += 1; // target month
+    count += 1; // submit button
+    return count;
+  }
 
   @override
   void initState() {
@@ -95,6 +105,36 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     return false;
   }
 
+  InputDecoration _fieldDecoration(String label) => InputDecoration(
+        labelText: label,
+        labelStyle: ProfileSettingsUi.fieldLabel,
+        floatingLabelStyle: ProfileSettingsUi.fieldLabel.copyWith(
+          color: ProfileSettingsUi.ink,
+        ),
+        filled: true,
+        fillColor: AppColors.fill,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
+          borderSide: const BorderSide(color: ProfileSettingsUi.ink, width: 1.4),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
+          borderSide: const BorderSide(color: ProfileSettingsUi.danger),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.spacingM,
+          vertical: AppSizes.spacingM,
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.expenses;
@@ -102,227 +142,279 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
 
     return PopScope(
       canPop: !_submitting,
-      child: Scaffold(
-        backgroundColor: AppColors.surface,
-        appBar: AppBar(
-          title: Text(_isEdit ? t.editTitle : t.createTitle),
-          centerTitle: true,
-        ),
-        body: SingleChildScrollView(
-          padding: AppSizes.screenBodyScrollPadding,
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(labelText: t.fieldTitle),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? t.required : null,
-                ),
-                const SizedBox(height: AppSizes.spacingM),
-                AppSelectField<ExpenseCategory>(
-                  label: t.fieldCategory,
-                  value: _category,
-                  displayText: (v) => v?.label(context) ?? '',
-                  options: [
-                    for (final c in ExpenseCategory.values)
-                      AppSelectOption(value: c, label: c.label(context)),
-                  ],
-                  onChanged: (v) {
-                    if (v != null) setState(() => _category = v);
-                  },
-                ),
-                const SizedBox(height: AppSizes.spacingM),
-                AppDateField(
-                  label: t.fieldDate,
-                  value: _date,
-                  enabled: !_submitting,
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                  onChanged: (picked) => setState(() => _date = picked),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: AppSizes.spacingXS,
-                    left: AppSizes.spacingXS,
-                  ),
-                  child: Text(
-                    t.fieldDateHint,
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-                if (!_isEdit) ...[
-                  const SizedBox(height: AppSizes.spacingL),
-                  Text(
-                    t.targetMonthLabel,
-                    style: AppTypography.body2.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.spacingS),
-                  SlidingSegmentedControl(
-                    segments: [
-                      t.targetThisMonth,
-                      t.targetNextMonth,
-                      t.targetSpecificMonth,
-                    ],
-                    selectedIndex: _targetMode.index,
-                    onChanged: (index) {
-                      setState(() {
-                        _targetMode = _TargetMonthMode.values[index];
-                      });
-                    },
-                  ),
-                  if (_targetMode == _TargetMonthMode.specific) ...[
-                    const SizedBox(height: AppSizes.spacingM),
-                    Row(
+      child: DashboardSecondaryScaffold(
+        title: _isEdit ? t.editTitle : t.createTitle,
+        body: Form(
+          key: _formKey,
+          child: ListView.builder(
+            padding: AppSizes.screenBodyScrollPadding,
+            itemCount: _sectionCount,
+            itemBuilder: (context, index) {
+              var sectionIndex = index;
+              if (sectionIndex == 0) {
+                return Padding(
+                  padding: DashboardScreenStyle.listItemPadding,
+                  child: DashboardSurfaceCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          child: AppSelectField<int>(
-                            label: t.fieldMonth,
-                            value: _targetMonth,
-                            enabled: !_submitting,
-                            displayText: (v) => v == null
-                                ? ''
-                                : localizedMonthName(context, v),
-                            options: [
-                              for (var m = 1; m <= 12; m++)
-                                AppSelectOption(
-                                  value: m,
-                                  label: localizedMonthName(context, m),
-                                ),
-                            ],
-                            onChanged: !_submitting
-                                ? (v) {
-                                    if (v != null) {
-                                      setState(() => _targetMonth = v);
-                                    }
-                                  }
-                                : null,
-                          ),
+                        TextFormField(
+                          controller: _titleController,
+                          enabled: !_submitting,
+                          style: ProfileSettingsUi.fieldValue,
+                          cursorColor: ProfileSettingsUi.ink,
+                          decoration: _fieldDecoration(t.fieldTitle),
+                          validator: (v) =>
+                              (v == null || v.trim().isEmpty) ? t.required : null,
                         ),
-                        const SizedBox(width: AppSizes.spacingS),
-                        Expanded(
-                          child: AppSelectField<int>(
-                            label: t.fieldYear,
-                            value: _targetYear,
-                            enabled: !_submitting,
-                            displayText: (v) => v == null ? '' : '$v',
-                            options: [
-                              for (final y in _targetYearOptions)
-                                AppSelectOption(value: y, label: '$y'),
-                            ],
-                            onChanged: !_submitting
-                                ? (v) {
-                                    if (v != null) {
-                                      setState(() => _targetYear = v);
-                                    }
-                                  }
-                                : null,
+                        const SizedBox(height: AppSizes.spacingM),
+                        AppSelectField<ExpenseCategory>(
+                          label: t.fieldCategory,
+                          value: _category,
+                          enabled: !_submitting,
+                          displayText: (v) => v?.label(context) ?? '',
+                          options: [
+                            for (final c in ExpenseCategory.values)
+                              AppSelectOption(
+                                value: c,
+                                label: c.label(context),
+                              ),
+                          ],
+                          onChanged: (v) {
+                            if (v != null) setState(() => _category = v);
+                          },
+                        ),
+                        const SizedBox(height: AppSizes.spacingM),
+                        AppDateField(
+                          label: t.fieldDate,
+                          value: _date,
+                          enabled: !_submitting,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                          onChanged: (picked) => setState(() => _date = picked),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: AppSizes.spacingXS,
+                            left: AppSizes.spacingXS,
+                          ),
+                          child: Text(
+                            t.fieldDateHint,
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ] else ...[
-                    const SizedBox(height: AppSizes.spacingS),
+                  ),
+                );
+              }
+              sectionIndex -= 1;
+
+              if (!_isEdit) {
+                if (sectionIndex == 0) {
+                  return Padding(
+                    padding: DashboardScreenStyle.listItemPadding,
+                    child: DashboardSurfaceCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            t.targetMonthLabel,
+                            style: ProfileSettingsUi.sectionLabel,
+                          ),
+                          const SizedBox(height: AppSizes.spacingS),
+                          SlidingSegmentedControl(
+                            segments: [
+                              t.targetThisMonth,
+                              t.targetNextMonth,
+                              t.targetSpecificMonth,
+                            ],
+                            selectedIndex: _targetMode.index,
+                            onChanged: (index) {
+                              setState(() {
+                                _targetMode = _TargetMonthMode.values[index];
+                              });
+                            },
+                          ),
+                          if (_targetMode == _TargetMonthMode.specific) ...[
+                            const SizedBox(height: AppSizes.spacingM),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: AppSelectField<int>(
+                                    label: t.fieldMonth,
+                                    value: _targetMonth,
+                                    enabled: !_submitting,
+                                    displayText: (v) => v == null
+                                        ? ''
+                                        : localizedMonthName(context, v),
+                                    options: [
+                                      for (var m = 1; m <= 12; m++)
+                                        AppSelectOption(
+                                          value: m,
+                                          label: localizedMonthName(context, m),
+                                        ),
+                                    ],
+                                    onChanged: !_submitting
+                                        ? (v) {
+                                            if (v != null) {
+                                              setState(() => _targetMonth = v);
+                                            }
+                                          }
+                                        : null,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSizes.spacingS),
+                                Expanded(
+                                  child: AppSelectField<int>(
+                                    label: t.fieldYear,
+                                    value: _targetYear,
+                                    enabled: !_submitting,
+                                    displayText: (v) => v == null ? '' : '$v',
+                                    options: [
+                                      for (final y in _targetYearOptions)
+                                        AppSelectOption(value: y, label: '$y'),
+                                    ],
+                                    onChanged: !_submitting
+                                        ? (v) {
+                                            if (v != null) {
+                                              setState(() => _targetYear = v);
+                                            }
+                                          }
+                                        : null,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            const SizedBox(height: AppSizes.spacingS),
+                            Text(
+                              t.targetPeriodSummary
+                                  .replaceAll(
+                                    '{month}',
+                                    localizedMonthName(
+                                      context,
+                                      _resolvedTargetPeriod.month,
+                                    ),
+                                  )
+                                  .replaceAll(
+                                    '{year}',
+                                    '${_resolvedTargetPeriod.year}',
+                                  ),
+                              style: AppTypography.caption.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                          if (_isPastTarget) ...[
+                            const SizedBox(height: AppSizes.spacingM),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSizes.spacingM,
+                                vertical: AppSizes.spacingS,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.warning.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.warning),
+                              ),
+                              child: Text(
+                                t.pastMonthWarning,
+                                style: AppTypography.caption.copyWith(
+                                  color: AppColors.textPrimary,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.35,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                sectionIndex -= 1;
+              }
+
+              if (sectionIndex == 0) {
+                return Padding(
+                  padding: DashboardScreenStyle.listItemPadding,
+                  child: DashboardSurfaceCard(
+                    child: TextFormField(
+                      controller: _noteController,
+                      enabled: !_submitting,
+                      maxLines: 3,
+                      style: ProfileSettingsUi.fieldValue,
+                      cursorColor: ProfileSettingsUi.ink,
+                      decoration: _fieldDecoration(t.fieldNote),
+                    ),
+                  ),
+                );
+              }
+              sectionIndex -= 1;
+
+              if (sectionIndex == 0) {
+                return Padding(
+                  padding: DashboardScreenStyle.listItemPadding,
+                  child: DashboardSurfaceCard(
+                    child: ExpenseReceiptSection(
+                      pickedFiles: _receiptFiles,
+                      existingReceiptUrl: widget.expense?.receiptUrl,
+                      enabled: !_submitting,
+                      caption: t.amountFromReceiptsHint,
+                      amountLabel: _isEdit && expense?.amount != null
+                          ? '${expense!.amount!.toStringAsFixed(2)} ₺'
+                          : null,
+                      onChanged: (files) =>
+                          setState(() => _receiptFiles = files),
+                      onPickFailed: () {
+                        ref.read(toastProvider.notifier).show(
+                              t.receiptPickFailed,
+                              type: ToastType.error,
+                            );
+                      },
+                    ),
+                  ),
+                );
+              }
+              sectionIndex -= 1;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (!_isEdit && _receiptFiles.isEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(left: AppSizes.spacingXS),
+                      padding: const EdgeInsets.only(bottom: AppSizes.spacingS),
                       child: Text(
-                        t.targetPeriodSummary
-                            .replaceAll(
-                              '{month}',
-                              localizedMonthName(
-                                context,
-                                _resolvedTargetPeriod.month,
+                        t.receiptRequired,
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ),
+                  SizedBox(
+                    height: ProfileSettingsUi.buttonHeight,
+                    child: ElevatedButton(
+                      onPressed: _submitting ? null : _submit,
+                      style: ProfileSettingsUi.primaryButton,
+                      child: _submitting
+                          ? const SizedBox(
+                              height: 22,
+                              width: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
                               ),
                             )
-                            .replaceAll(
-                              '{year}',
-                              '${_resolvedTargetPeriod.year}',
-                            ),
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
+                          : Text(t.submit),
                     ),
-                  ],
-                  if (_isPastTarget) ...[
-                    const SizedBox(height: AppSizes.spacingM),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.spacingM,
-                        vertical: AppSizes.spacingS,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.warning.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.warning),
-                      ),
-                      child: Text(
-                        t.pastMonthWarning,
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                          height: 1.35,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
+                  const SizedBox(height: AppSizes.spacingM),
                 ],
-                const SizedBox(height: AppSizes.spacingM),
-                TextFormField(
-                  controller: _noteController,
-                  maxLines: 2,
-                  decoration: InputDecoration(labelText: t.fieldNote),
-                ),
-                const SizedBox(height: AppSizes.spacingL),
-                ExpenseReceiptSection(
-                  pickedFiles: _receiptFiles,
-                  existingReceiptUrl: widget.expense?.receiptUrl,
-                  enabled: !_submitting,
-                  caption: t.amountFromReceiptsHint,
-                  amountLabel: _isEdit && expense?.amount != null
-                      ? '${expense!.amount!.toStringAsFixed(2)} ₺'
-                      : null,
-                  onChanged: (files) => setState(() => _receiptFiles = files),
-                  onPickFailed: () {
-                    ref.read(toastProvider.notifier).show(
-                          t.receiptPickFailed,
-                          type: ToastType.error,
-                        );
-                  },
-                ),
-                if (!_isEdit && _receiptFiles.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: AppSizes.spacingXS),
-                    child: Text(
-                      t.receiptRequired,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.error,
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: AppSizes.spacingXL),
-                SizedBox(
-                  height: AppSizes.buttonHeightPrimary,
-                  child: ElevatedButton(
-                    onPressed: _submitting ? null : _submit,
-                    child: _submitting
-                        ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2.5),
-                          )
-                        : Text(t.submit),
-                  ),
-                ),
-                const SizedBox(height: AppSizes.spacingM),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../apartments/domain/entities/resident_info.dart';
 import 'due_breakdown_entity.dart';
 
 enum DueStatus { pending, paid, overdue, waived }
@@ -8,6 +9,8 @@ class DueEntity extends Equatable {
   final String id;
   final String apartmentId;
   final String apartmentNumber;
+  final int? apartmentFloor;
+  final ResidentInfo? resident;
   final double amount;
   final String currency;
   final int month;
@@ -25,6 +28,8 @@ class DueEntity extends Equatable {
     required this.id,
     required this.apartmentId,
     required this.apartmentNumber,
+    this.apartmentFloor,
+    this.resident,
     required this.amount,
     required this.currency,
     required this.month,
@@ -44,6 +49,8 @@ class DueEntity extends Equatable {
         id,
         apartmentId,
         apartmentNumber,
+        apartmentFloor,
+        resident,
         amount,
         currency,
         month,

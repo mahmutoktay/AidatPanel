@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../domain/entities/due_entity.dart';
 
 /// Aidat kartı ⋮ menüsü — durum seçimi alt sayfa olarak açılır.
@@ -39,11 +40,16 @@ class DueStatusSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.paddingOf(context).bottom;
+    final allowedStatuses = due.resident == null
+        ? _selectableStatuses.where((s) => s != DueStatus.paid).toList()
+        : _selectableStatuses;
 
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(DashboardScreenStyle.cardRadius),
+        ),
       ),
       padding: EdgeInsets.fromLTRB(
         AppSizes.spacingM,
@@ -76,12 +82,12 @@ class DueStatusSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSizes.spacingM),
-          for (var i = 0; i < _selectableStatuses.length; i++) ...[
+          for (var i = 0; i < allowedStatuses.length; i++) ...[
             if (i > 0) const SizedBox(height: AppSizes.spacingS),
             _StatusRow(
-              status: _selectableStatuses[i],
-              isCurrent: due.status == _selectableStatuses[i],
-              onTap: () => Navigator.pop(context, _selectableStatuses[i]),
+              status: allowedStatuses[i],
+              isCurrent: due.status == allowedStatuses[i],
+              onTap: () => Navigator.pop(context, allowedStatuses[i]),
             ),
           ],
         ],
@@ -128,7 +134,9 @@ class _StatusRow extends StatelessWidget {
       DueStatus.overdue => Icons.warning_amber_outlined,
       DueStatus.waived => Icons.block_outlined,
     };
-    const radius = BorderRadius.all(Radius.circular(12));
+    const radius = BorderRadius.all(
+      Radius.circular(DashboardScreenStyle.pillRadius),
+    );
 
     return Material(
       color: isCurrent ? visual.bg : AppColors.fill,
@@ -150,7 +158,9 @@ class _StatusRow extends StatelessWidget {
                   height: 40,
                   decoration: BoxDecoration(
                     color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(
+                      DashboardScreenStyle.pillRadius,
+                    ),
                     border: Border.all(color: visual.fg.withValues(alpha: 0.18)),
                   ),
                   alignment: Alignment.center,

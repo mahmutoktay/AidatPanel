@@ -7,6 +7,8 @@ import {
   updateLanguageService,
   updateFcmTokenService,
   softDeleteAccountService,
+  uploadProfilePictureService,
+  deleteProfilePictureService,
 } from "../services/meService.js";
 import { HttpError } from "../utils/httpError.js";
 
@@ -92,6 +94,32 @@ export const deleteMe = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Hesabınız kapatıldı ve kişisel veriler maskelendi.",
+    });
+  } catch (err) {
+    handleHttp(err, res, next);
+  }
+};
+
+export const uploadProfilePicture = async (req, res, next) => {
+  try {
+    const data = await uploadProfilePictureService(req.user.id, req.file);
+    res.status(200).json({
+      success: true,
+      message: "Profil fotoğrafı güncellendi.",
+      data,
+    });
+  } catch (err) {
+    handleHttp(err, res, next);
+  }
+};
+
+export const deleteProfilePicture = async (req, res, next) => {
+  try {
+    const data = await deleteProfilePictureService(req.user.id);
+    res.status(200).json({
+      success: true,
+      message: "Profil fotoğrafı silindi.",
+      data,
     });
   } catch (err) {
     handleHttp(err, res, next);

@@ -6,7 +6,10 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
+import '../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../l10n/strings.g.dart';
+import '../theme/dashboard_screen_style.dart';
+import 'dashboard_secondary_scaffold.dart';
 
 /// Tam ekran belge önizlemesi — dekont, makbuz ve diğer dosyalar için ortak ekran.
 class DocumentPreviewScreen extends StatefulWidget {
@@ -74,8 +77,6 @@ class DocumentPreviewScreen extends StatefulWidget {
 }
 
 class _DocumentPreviewScreenState extends State<DocumentPreviewScreen> {
-  static const _viewerBackground = Color(0xFF121212);
-
   PdfControllerPinch? _pdfController;
   bool _pdfLoading = false;
   bool _pdfFailed = false;
@@ -159,103 +160,106 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildActionBar(BuildContext context) {
     final t = context.t.common.documentPreview;
-    final bottom = MediaQuery.paddingOf(context).bottom;
+    final hasDownload = widget.onDownload != null;
 
-    return Theme(
-      data: Theme.of(context).copyWith(
-        appBarTheme: const AppBarTheme(
-          backgroundColor: _viewerBackground,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      child: Scaffold(
-        backgroundColor: _viewerBackground,
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.close_rounded),
-            tooltip: context.t.common.close,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                t.title,
-                style: AppTypography.body1.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                widget.fileName,
-                style: AppTypography.caption.copyWith(
-                  color: Colors.white70,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-          actions: [
-            if (widget.onDownload != null)
-              IconButton(
-                icon: const Icon(Icons.download_rounded),
-                tooltip: context.t.common.save,
-                onPressed: widget.onDownload,
-              ),
-            IconButton(
-              icon: _sharing
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.share_outlined),
-              tooltip: t.share,
-              onPressed: _sharing ? null : _handleShare,
-            ),
-          ],
-        ),
-        body: Stack(
-          fit: StackFit.expand,
+    return ColoredBox(
+      color: AppColors.dashboardBackground,
+      child: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+        child: Row(
           children: [
-            _buildBody(),
-            if (_showPinchHint)
-              Positioned(
-                left: AppSizes.spacingL,
-                right: AppSizes.spacingL,
-                bottom: AppSizes.spacingM + bottom,
-                child: IgnorePointer(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.55),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.spacingM,
-                        vertical: AppSizes.spacingS,
+            if (hasDownload) ...[
+              Expanded(
+                child: SizedBox(
+                  height: ProfileSettingsUi.buttonHeight,
+                  child: OutlinedButton.icon(
+                    onPressed: widget.onDownload,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: ProfileSettingsUi.ink,
+                      side: const BorderSide(color: AppColors.borderColor),
+                      minimumSize: const Size.fromHeight(
+                        ProfileSettingsUi.buttonHeight,
                       ),
-                      child: Text(
-                        t.pinchHint,
-                        style: AppTypography.caption.copyWith(
-                          color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          ProfileSettingsUi.radiusMd,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ),
+                    icon: const Icon(Icons.download_rounded, size: 22),
+                    label: Text(context.t.common.save),
                   ),
                 ),
               ),
+              const SizedBox(width: AppSizes.spacingS),
+            ],
+            Expanded(
+              flex: hasDownload ? 1 : 2,
+              child: SizedBox(
+                height: ProfileSettingsUi.buttonHeight,
+                child: ElevatedButton.icon(
+                  onPressed: _sharing ? null : _handleShare,
+                  style: ProfileSettingsUi.primaryButton,
+                  icon: _sharing
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.4,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.share_outlined, size: 22),
+                  label: Text(t.share),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t.common.documentPreview;
+
+    return DashboardSecondaryScaffold(
+      title: t.title,
+      bottomNavigationBar: _buildActionBar(context),
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSizes.dashboardScreenPaddingHorizontal,
+          AppSizes.spacingM,
+          AppSizes.dashboardScreenPaddingHorizontal,
+          AppSizes.spacingM,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              widget.fileName,
+              style: AppTypography.body2.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (_showPinchHint) ...[
+              const SizedBox(height: AppSizes.spacingS),
+              Text(
+                t.pinchHint,
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            const SizedBox(height: AppSizes.spacingS),
+            Expanded(child: _buildBody()),
           ],
         ),
       ),
@@ -270,19 +274,30 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen> {
     return false;
   }
 
+  Widget _buildPreviewCard({required Widget child}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
+      child: Container(
+        width: double.infinity,
+        decoration: DashboardScreenStyle.whiteCard(),
+        child: child,
+      ),
+    );
+  }
+
   Widget _buildBody() {
     final t = context.t.common.documentPreview;
 
     if (_isImage) {
-      return InteractiveViewer(
-        minScale: 0.8,
-        maxScale: 5,
-        child: Center(
-          child: Image.memory(
-            widget.bytes,
-            fit: BoxFit.contain,
-            width: double.infinity,
-            height: double.infinity,
+      return _buildPreviewCard(
+        child: InteractiveViewer(
+          minScale: 0.8,
+          maxScale: 5,
+          child: Center(
+            child: Image.memory(
+              widget.bytes,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
       );
@@ -290,8 +305,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen> {
 
     if (_isPdf) {
       if (_pdfLoading) {
-        return const Center(
-          child: CircularProgressIndicator(color: Colors.white),
+        return _buildPreviewCard(
+          child: const Center(child: CircularProgressIndicator()),
         );
       }
       if (_pdfFailed || _pdfController == null) {
@@ -299,12 +314,9 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen> {
           fileName: widget.fileName,
           message: t.pdfUnavailable,
           isPdf: true,
-          onShare: _sharing ? null : _handleShare,
-          shareLabel: t.share,
         );
       }
-      return ColoredBox(
-        color: Colors.white,
+      return _buildPreviewCard(
         child: PdfViewPinch(
           controller: _pdfController!,
           scrollDirection: Axis.vertical,
@@ -316,8 +328,6 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen> {
       fileName: widget.fileName,
       message: t.pdfUnavailable,
       isPdf: false,
-      onShare: _sharing ? null : _handleShare,
-      shareLabel: t.share,
     );
   }
 }
@@ -327,55 +337,41 @@ class _UnavailableBody extends StatelessWidget {
     required this.fileName,
     required this.message,
     required this.isPdf,
-    required this.onShare,
-    required this.shareLabel,
   });
 
   final String fileName;
   final String message;
   final bool isPdf;
-  final VoidCallback? onShare;
-  final String shareLabel;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: AppSizes.screenBodyScrollPadding,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isPdf ? Icons.picture_as_pdf_outlined : Icons.insert_drive_file_outlined,
-              size: 72,
-              color: Colors.white54,
-            ),
-            const SizedBox(height: AppSizes.spacingM),
-            Text(
-              fileName,
-              style: AppTypography.body1.copyWith(color: Colors.white),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSizes.spacingS),
-            Text(
-              message,
-              style: AppTypography.body2.copyWith(color: Colors.white70),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSizes.spacingL),
-            if (onShare != null)
-              FilledButton.icon(
-                onPressed: onShare,
-                icon: const Icon(Icons.share_outlined),
-                label: Text(shareLabel),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(AppSizes.minTouchTargetComfort),
-                ),
-              ),
-          ],
-        ),
+    return Container(
+      decoration: DashboardScreenStyle.whiteCard(),
+      padding: const EdgeInsets.all(AppSizes.spacingL),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isPdf
+                ? Icons.picture_as_pdf_outlined
+                : Icons.insert_drive_file_outlined,
+            size: 72,
+            color: AppColors.textSecondary,
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          Text(
+            fileName,
+            style: AppTypography.body1,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSizes.spacingS),
+          Text(
+            message,
+            style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

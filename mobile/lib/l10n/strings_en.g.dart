@@ -626,6 +626,30 @@ class Translations$common$en {
 	/// en: 'days overdue'
 	String get overdueDays => 'days overdue';
 
+	/// en: '{days} days overdue'
+	String get dueMetaOverdueDelay => '{days} days overdue';
+
+	/// en: 'paid in {month} {year}'
+	String get dueMetaPaidInMonth => 'paid in {month} {year}';
+
+	/// en: 'paid on {day} {month}'
+	String get dueMetaPaidOnDay => 'paid on {day} {month}';
+
+	/// en: 'due by {day} {month}'
+	String get dueMetaPendingDueDate => 'due by {day} {month}';
+
+	/// en: 'Pay'
+	String get payShort => 'Pay';
+
+	/// en: 'Receipt'
+	String get dekontShort => 'Receipt';
+
+	/// en: 'MONTH'
+	String get monthChipLabel => 'MONTH';
+
+	/// en: 'YEAR'
+	String get yearChipLabel => 'YEAR';
+
 	/// en: 'Due date'
 	String get dueDateLabel => 'Due date';
 
@@ -790,6 +814,9 @@ class Translations$common$en {
 
 	/// en: 'Select at least one occupied apartment from the list first'
 	String get pickResidentsFirst => 'Select at least one occupied apartment from the list first';
+
+	/// en: 'There are no residents to remove in this building.'
+	String get noResidentsToRemoveInBuilding => 'There are no residents to remove in this building.';
 
 	/// en: 'Working…'
 	String get removeSelectedProgress => 'Working…';
@@ -974,6 +1001,7 @@ class Translations$features$en {
 	late final Translations$features$profile$en profile = Translations$features$profile$en._(_root);
 	late final Translations$features$subscription$en subscription = Translations$features$subscription$en._(_root);
 	late final Translations$features$reports$en reports = Translations$features$reports$en._(_root);
+	late final Translations$features$dashboard$en dashboard = Translations$features$dashboard$en._(_root);
 	late final Translations$features$faz2$en faz2 = Translations$features$faz2$en._(_root);
 }
 
@@ -1328,6 +1356,7 @@ class Translations$features$buildings$en {
 	String get tekrarDene => 'Try Again';
 
 	late final Translations$features$buildings$collection$en collection = Translations$features$buildings$collection$en._(_root);
+	late final Translations$features$buildings$list$en list = Translations$features$buildings$list$en._(_root);
 }
 
 // Path: features.auth
@@ -2462,6 +2491,9 @@ class Translations$features$profile$en {
 
 	/// en: 'Remove profile photo'
 	String get removePhoto => 'Remove profile photo';
+
+	/// en: 'Account created: {date}'
+	String get accountCreatedAt => 'Account created: {date}';
 }
 
 // Path: features.subscription
@@ -2579,6 +2611,126 @@ class Translations$features$reports$en {
 
 	/// en: 'Could not generate the report. Please try again.'
 	String get failed => 'Could not generate the report. Please try again.';
+}
+
+// Path: features.dashboard
+class Translations$features$dashboard$en {
+	Translations$features$dashboard$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'All Buildings'
+	String get allBuildings => 'All Buildings';
+
+	/// en: 'Select building'
+	String get selectBuilding => 'Select building';
+
+	/// en: 'Search by name or address'
+	String get searchBuildings => 'Search by name or address';
+
+	/// en: 'Tap to search and select a building'
+	String get buildingPickerTapHint => 'Tap to search and select a building';
+
+	/// en: '{count} buildings'
+	String get allBuildingsSummary => '{count} buildings';
+
+	/// en: '{apartments} units'
+	String get buildingUnitsSummary => '{apartments} units';
+
+	/// en: 'Collection Rate'
+	String get collectionRate => 'Collection Rate';
+
+	/// en: 'Overdue Payments'
+	String get overduePayments => 'Overdue Payments';
+
+	/// en: 'Open Maintenance Requests'
+	String get openTicketRequests => 'Open Maintenance Requests';
+
+	/// en: 'This Month's Expenses'
+	String get monthTotalExpense => 'This Month\'s Expenses';
+
+	/// en: 'Pending Receipts'
+	String get pendingDekonts => 'Pending Receipts';
+
+	/// en: 'Dues Collection Status'
+	String get duesCollectionStatus => 'Dues Collection Status';
+
+	/// en: 'Income / Expense Comparison'
+	String get incomeExpenseComparison => 'Income / Expense Comparison';
+
+	/// en: 'Last 6 Months'
+	String get last6Months => 'Last 6 Months';
+
+	/// en: 'Collected Dues'
+	String get collectedDues => 'Collected Dues';
+
+	/// en: 'Total Expenses'
+	String get totalExpense => 'Total Expenses';
+
+	/// en: 'Maintenance Request Status'
+	String get ticketStatusTitle => 'Maintenance Request Status';
+
+	/// en: 'Open'
+	String get ticketOpen => 'Open';
+
+	/// en: 'In Progress'
+	String get ticketInProgress => 'In Progress';
+
+	/// en: 'Resolved'
+	String get ticketResolved => 'Resolved';
+
+	/// en: 'Apartments with Overdue Payments'
+	String get overdueApartments => 'Apartments with Overdue Payments';
+
+	/// en: '{count} apartments'
+	String get apartmentCountBadge => '{count} apartments';
+
+	/// en: 'Paid'
+	String get legendPaid => 'Paid';
+
+	/// en: 'Overdue'
+	String get legendOverdue => 'Overdue';
+
+	/// en: 'Pending'
+	String get legendPending => 'Pending';
+
+	/// en: '{count} due(s)'
+	String get legendUnit => '{count} due(s)';
+
+	/// en: 'Remind'
+	String get remind => 'Remind';
+
+	/// en: 'Reminder sent'
+	String get remindSent => 'Reminder sent';
+
+	/// en: 'No resident found to send a reminder for this apartment.'
+	String get remindNoRecipient => 'No resident found to send a reminder for this apartment.';
+
+	/// en: 'Apt. {number}'
+	String get apartmentTitle => 'Apt. {number}';
+
+	/// en: 'Apt. {number} · Floor {floor}'
+	String get apartmentWithFloor => 'Apt. {number} · Floor {floor}';
+
+	/// en: 'No overdue payments'
+	String get noOverdueApartments => 'No overdue payments';
+
+	/// en: 'Not enough data yet'
+	String get noChartData => 'Not enough data yet';
+
+	/// en: 'See more (+{count})'
+	String get seeMoreOverdue => 'See more (+{count})';
+
+	/// en: 'Pay Now'
+	String get payNow => 'Pay Now';
+
+	/// en: '{count} overdue payment(s)'
+	String get overduePaymentsBadge => '{count} overdue payment(s)';
+
+	/// en: '{month} {year} dues'
+	String get featuredDuePeriod => '{month} {year} dues';
 }
 
 // Path: features.faz2
@@ -2771,6 +2923,57 @@ class Translations$features$buildings$collection$en {
 
 	/// en: 'This IBAN is already registered in the system. Please check and try a different IBAN.'
 	String get ibanAlreadyExists => 'This IBAN is already registered in the system. Please check and try a different IBAN.';
+}
+
+// Path: features.buildings.list
+class Translations$features$buildings$list$en {
+	Translations$features$buildings$list$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Building'
+	String get buildingCount => 'Building';
+
+	/// en: 'Unit'
+	String get unitCount => 'Unit';
+
+	/// en: 'Overdue'
+	String get overdueShort => 'Overdue';
+
+	/// en: 'Collected'
+	String get collectionShort => 'Collected';
+
+	/// en: 'Sort'
+	String get sort => 'Sort';
+
+	/// en: 'By Overdue'
+	String get sortByOverdue => 'By Overdue';
+
+	/// en: 'By Collection Rate'
+	String get sortByCollectionRate => 'By Collection Rate';
+
+	/// en: 'By Name'
+	String get sortByName => 'By Name';
+
+	/// en: '{paid} / {total} units paid'
+	String get paidUnitsProgress => '{paid} / {total} units paid';
+
+	/// en: '{amount} / unit'
+	String get perUnitDues => '{amount} / unit';
+
+	/// en: '{count} units overdue'
+	String get unitsOverdue => '{count} units overdue';
+
+	/// en: '{count} units waiting'
+	String get unitsWaiting => '{count} units waiting';
+
+	/// en: 'All payments complete'
+	String get allPaymentsComplete => 'All payments complete';
+
+	/// en: 'Monthly Dues'
+	String get monthlyDuesShort => 'Monthly Dues';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -3007,6 +3210,14 @@ extension on Translations {
 			'common.dueDayOutOfRange' => 'Due day must be between 1 and 28.',
 			'common.update' => 'Update',
 			'common.overdueDays' => 'days overdue',
+			'common.dueMetaOverdueDelay' => '{days} days overdue',
+			'common.dueMetaPaidInMonth' => 'paid in {month} {year}',
+			'common.dueMetaPaidOnDay' => 'paid on {day} {month}',
+			'common.dueMetaPendingDueDate' => 'due by {day} {month}',
+			'common.payShort' => 'Pay',
+			'common.dekontShort' => 'Receipt',
+			'common.monthChipLabel' => 'MONTH',
+			'common.yearChipLabel' => 'YEAR',
 			'common.dueDateLabel' => 'Due date',
 			'common.perMonth' => '/ month',
 			'common.floorLabel' => 'FLOOR',
@@ -3062,6 +3273,7 @@ extension on Translations {
 			'common.removeSelectedResidentsAffectedListTitle' => 'Apartments affected',
 			'common.removeSelectedResidentsListUnavailable' => 'The apartment list could not be loaded. The count is shown below. If you confirm, removals will still proceed.',
 			'common.pickResidentsFirst' => 'Select at least one occupied apartment from the list first',
+			'common.noResidentsToRemoveInBuilding' => 'There are no residents to remove in this building.',
 			'common.removeSelectedProgress' => 'Working…',
 			'common.removeSelectedSuccess' => 'Selected residents were removed from their apartments',
 			'common.removeSelectedFailed' => 'Could not finish removing the selected residents',
@@ -3195,6 +3407,20 @@ extension on Translations {
 			'features.buildings.collection.savedIbansDeleteBulkSuccess' => '{count} IBAN(s) deleted',
 			'features.buildings.collection.ibanNotConfigured' => 'Collection IBAN not configured',
 			'features.buildings.collection.ibanAlreadyExists' => 'This IBAN is already registered in the system. Please check and try a different IBAN.',
+			'features.buildings.list.buildingCount' => 'Building',
+			'features.buildings.list.unitCount' => 'Unit',
+			'features.buildings.list.overdueShort' => 'Overdue',
+			'features.buildings.list.collectionShort' => 'Collected',
+			'features.buildings.list.sort' => 'Sort',
+			'features.buildings.list.sortByOverdue' => 'By Overdue',
+			'features.buildings.list.sortByCollectionRate' => 'By Collection Rate',
+			'features.buildings.list.sortByName' => 'By Name',
+			'features.buildings.list.paidUnitsProgress' => '{paid} / {total} units paid',
+			'features.buildings.list.perUnitDues' => '{amount} / unit',
+			'features.buildings.list.unitsOverdue' => '{count} units overdue',
+			'features.buildings.list.unitsWaiting' => '{count} units waiting',
+			'features.buildings.list.allPaymentsComplete' => 'All payments complete',
+			'features.buildings.list.monthlyDuesShort' => 'Monthly Dues',
 			'features.auth.register' => 'Register',
 			'features.auth.login' => 'Login',
 			'features.auth.join' => 'Join',
@@ -3270,6 +3496,8 @@ extension on Translations {
 			'features.tickets.titleTooShort' => 'Title must be at least 3 characters',
 			'features.tickets.descriptionTooShort' => 'Description must be at least 10 characters',
 			'features.tickets.statusOpen' => 'Open',
+			_ => null,
+		} ?? switch (path) {
 			'features.tickets.statusInProgress' => 'In progress',
 			'features.tickets.statusResolved' => 'Resolved',
 			'features.tickets.statusClosed' => 'Closed',
@@ -3293,8 +3521,6 @@ extension on Translations {
 			'features.tickets.noteAdded' => 'Note added',
 			'features.tickets.loadError' => 'Could not load requests',
 			'features.tickets.noteDisabledClosed' => 'Cannot add notes to a closed request',
-			_ => null,
-		} ?? switch (path) {
 			'features.tickets.statusClosedHint' => 'This request is closed; status cannot be changed.',
 			'features.tickets.apartmentRequired' => 'Apartment not linked. Please sign in again.',
 			'features.dekont.makePaymentTitle' => 'Make Payment',
@@ -3554,6 +3780,7 @@ extension on Translations {
 			'features.profile.photoSaved' => 'Profile photo saved for this account.',
 			'features.profile.photoRemoved' => 'Profile photo removed.',
 			'features.profile.removePhoto' => 'Remove profile photo',
+			'features.profile.accountCreatedAt' => 'Account created: {date}',
 			'features.subscription.title' => 'Subscription',
 			'features.subscription.statusActive' => 'Active',
 			'features.subscription.statusExpired' => 'Expired',
@@ -3587,6 +3814,43 @@ extension on Translations {
 			'features.reports.shareReport' => 'Share report',
 			'features.reports.shareFailed' => 'Could not share the report. Please try again.',
 			'features.reports.failed' => 'Could not generate the report. Please try again.',
+			'features.dashboard.allBuildings' => 'All Buildings',
+			'features.dashboard.selectBuilding' => 'Select building',
+			'features.dashboard.searchBuildings' => 'Search by name or address',
+			'features.dashboard.buildingPickerTapHint' => 'Tap to search and select a building',
+			'features.dashboard.allBuildingsSummary' => '{count} buildings',
+			'features.dashboard.buildingUnitsSummary' => '{apartments} units',
+			'features.dashboard.collectionRate' => 'Collection Rate',
+			'features.dashboard.overduePayments' => 'Overdue Payments',
+			'features.dashboard.openTicketRequests' => 'Open Maintenance Requests',
+			'features.dashboard.monthTotalExpense' => 'This Month\'s Expenses',
+			'features.dashboard.pendingDekonts' => 'Pending Receipts',
+			'features.dashboard.duesCollectionStatus' => 'Dues Collection Status',
+			'features.dashboard.incomeExpenseComparison' => 'Income / Expense Comparison',
+			'features.dashboard.last6Months' => 'Last 6 Months',
+			'features.dashboard.collectedDues' => 'Collected Dues',
+			'features.dashboard.totalExpense' => 'Total Expenses',
+			'features.dashboard.ticketStatusTitle' => 'Maintenance Request Status',
+			'features.dashboard.ticketOpen' => 'Open',
+			'features.dashboard.ticketInProgress' => 'In Progress',
+			'features.dashboard.ticketResolved' => 'Resolved',
+			'features.dashboard.overdueApartments' => 'Apartments with Overdue Payments',
+			'features.dashboard.apartmentCountBadge' => '{count} apartments',
+			'features.dashboard.legendPaid' => 'Paid',
+			'features.dashboard.legendOverdue' => 'Overdue',
+			'features.dashboard.legendPending' => 'Pending',
+			'features.dashboard.legendUnit' => '{count} due(s)',
+			'features.dashboard.remind' => 'Remind',
+			'features.dashboard.remindSent' => 'Reminder sent',
+			'features.dashboard.remindNoRecipient' => 'No resident found to send a reminder for this apartment.',
+			'features.dashboard.apartmentTitle' => 'Apt. {number}',
+			'features.dashboard.apartmentWithFloor' => 'Apt. {number} · Floor {floor}',
+			'features.dashboard.noOverdueApartments' => 'No overdue payments',
+			'features.dashboard.noChartData' => 'Not enough data yet',
+			'features.dashboard.seeMoreOverdue' => 'See more (+{count})',
+			'features.dashboard.payNow' => 'Pay Now',
+			'features.dashboard.overduePaymentsBadge' => '{count} overdue payment(s)',
+			'features.dashboard.featuredDuePeriod' => '{month} {year} dues',
 			'features.faz2.sectionTitle' => 'Phase 2',
 			'features.faz2.tickets' => 'Requests',
 			'features.faz2.expenses' => 'Expenses',

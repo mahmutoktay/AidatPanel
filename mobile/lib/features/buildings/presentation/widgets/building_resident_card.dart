@@ -6,6 +6,7 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/user_profile_avatar.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
 import '../utils/apartment_ui_utils.dart';
+import 'building_summary_card.dart';
 
 class BuildingResidentCard extends StatelessWidget {
   final ApartmentEntity apt;
@@ -34,19 +35,20 @@ class BuildingResidentCard extends StatelessWidget {
         ApartmentUiUtils.formatApartmentLabel(context, apt.apartmentNumber);
     final duesText = '₺${apt.monthlyDues.toStringAsFixed(0)}';
 
-    const tileRadius = BorderRadius.all(Radius.circular(12));
+    const tileRadius = BorderRadius.all(Radius.circular(20));
 
     final card = Container(
       margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: AppColors.fill,
+        color: AppColors.surface,
         borderRadius: tileRadius,
-        border: Border.all(
-          color: showSelection && selected
-              ? AppColors.primary.withValues(alpha: 0.85)
-              : AppColors.borderColor.withValues(alpha: 0.14),
-          width: showSelection && selected ? 1.5 : 0.5,
-        ),
+        boxShadow: BuildingSummaryCard.cardShadow,
+        border: showSelection && selected
+            ? Border.all(
+                color: AppColors.primary.withValues(alpha: 0.85),
+                width: 1.5,
+              )
+            : null,
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.spacingM),
@@ -75,6 +77,7 @@ class BuildingResidentCard extends StatelessWidget {
                 UserProfileAvatar(
                   userId: apt.resident?.id,
                   userName: apt.residentName,
+                  profilePicture: apt.resident?.profilePicture,
                   isVacant: !isOccupied,
                 ),
                 const SizedBox(width: 12),
@@ -85,9 +88,9 @@ class BuildingResidentCard extends StatelessWidget {
                       Text(
                         apartmentLabel,
                         style: AppTypography.body2.copyWith(
-                          color: AppColors.textSecondary,
+                          color: AppColors.mutedText,
                           fontWeight: FontWeight.w600,
-                          fontSize: 15,
+                          fontSize: 14,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -97,8 +100,8 @@ class BuildingResidentCard extends StatelessWidget {
                             : context.t.common.noResidentInApartment,
                         style: AppTypography.body1.copyWith(
                           color: isOccupied
-                              ? AppColors.textPrimary
-                              : AppColors.textSecondary,
+                              ? AppColors.inkDark
+                              : AppColors.mutedText,
                           fontWeight: FontWeight.w800,
                           fontSize: 17,
                           height: 1.25,
@@ -119,8 +122,8 @@ class BuildingResidentCard extends StatelessWidget {
                 else
                   _StatusChip(
                     label: context.t.common.vacantBadge,
-                    color: AppColors.textSecondary,
-                    backgroundColor: AppColors.surface,
+                    color: AppColors.mutedText,
+                    backgroundColor: AppColors.lineLight,
                   ),
               ],
             ),
@@ -235,7 +238,7 @@ class _DuesActionRow extends StatelessWidget {
               Text(
                 duesText,
                 style: AppTypography.body1.copyWith(
-                  color: AppColors.textPrimary,
+                  color: AppColors.inkDark,
                   fontWeight: FontWeight.w800,
                   fontSize: 17,
                 ),
@@ -245,7 +248,7 @@ class _DuesActionRow extends StatelessWidget {
               Text(
                 monthlyDuesLabel,
                 style: AppTypography.caption.copyWith(
-                  color: AppColors.textSecondary,
+                  color: AppColors.mutedText,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                 ),
@@ -263,7 +266,7 @@ class _DuesActionRow extends StatelessWidget {
               Text(
                 detailsLabel,
                 style: AppTypography.body2.copyWith(
-                  color: AppColors.textPrimary,
+                  color: AppColors.inkDark,
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                 ),
@@ -272,7 +275,7 @@ class _DuesActionRow extends StatelessWidget {
               Icon(
                 Icons.chevron_right,
                 size: 20,
-                color: AppColors.textSecondary.withValues(alpha: 0.85),
+                color: AppColors.mutedText.withValues(alpha: 0.85),
               ),
             ],
           ),

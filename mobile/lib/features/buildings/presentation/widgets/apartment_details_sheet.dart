@@ -312,6 +312,7 @@ class _SheetHero extends ConsumerWidget {
         UserProfileAvatar(
           userId: resident?.id,
           userName: resident?.name ?? '',
+          profilePicture: resident?.profilePicture,
           size: 64,
           isVacant: !isOccupied,
         ),

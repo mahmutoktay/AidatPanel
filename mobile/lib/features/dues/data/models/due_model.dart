@@ -1,3 +1,5 @@
+import '../../../apartments/data/models/resident_model.dart';
+import '../../../apartments/domain/entities/resident_info.dart';
 import '../../domain/entities/due_entity.dart';
 import 'due_breakdown_model.dart';
 
@@ -5,6 +7,8 @@ class DueModel {
   final String id;
   final String apartmentId;
   final String apartmentNumber;
+  final int? apartmentFloor;
+  final ResidentInfo? resident;
   final double amount;
   final String currency;
   final int month;
@@ -22,6 +26,8 @@ class DueModel {
     required this.id,
     required this.apartmentId,
     required this.apartmentNumber,
+    this.apartmentFloor,
+    this.resident,
     required this.amount,
     required this.currency,
     required this.month,
@@ -47,10 +53,28 @@ class DueModel {
       return '';
     }
 
+    int? resolveApartmentFloor() {
+      final apt = json['apartment'];
+      if (apt is Map && apt['floor'] != null) {
+        return _toInt(apt['floor']);
+      }
+      return null;
+    }
+
+    ResidentInfo? resolveResident() {
+      final residentJson = json['resident'];
+      if (residentJson is Map<String, dynamic>) {
+        return ResidentModel.fromJson(residentJson).toEntity();
+      }
+      return null;
+    }
+
     return DueModel(
       id: (json['id'] ?? '') as String,
       apartmentId: (json['apartmentId'] ?? '') as String,
       apartmentNumber: resolveApartmentNumber(),
+      apartmentFloor: resolveApartmentFloor(),
+      resident: resolveResident(),
       amount: _toDouble(json['amount']),
       currency: (json['currency'] ?? 'TRY') as String,
       month: _toInt(json['month']),
@@ -94,6 +118,8 @@ class DueModel {
       id: id,
       apartmentId: apartmentId,
       apartmentNumber: apartmentNumber,
+      apartmentFloor: apartmentFloor,
+      resident: resident,
       amount: amount,
       currency: currency,
       month: month,

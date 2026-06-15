@@ -74,6 +74,13 @@ export const updateDueStatus = async (req, res, next) => {
       });
     }
 
+    if (result.invalidResident) {
+      return res.status(400).json({
+        success: false,
+        message: "Sakin atanmamış dairelerin aidatları 'Ödendi' yapılamaz.",
+      });
+    }
+
     res.json({
       success: true,
       message: "Aidat durumu güncellendi.",

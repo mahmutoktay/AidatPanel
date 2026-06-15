@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../utils/ticket_labels.dart';
 
@@ -39,25 +40,15 @@ class TicketListCard extends StatelessWidget {
         : '';
 
     return Material(
-      color: AppColors.surface,
-      elevation: 0,
-      borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
         child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+          decoration: DashboardScreenStyle.whiteCard().copyWith(
             border: Border.all(
-              color: statusColor.withValues(alpha: 0.2),
+              color: statusColor.withValues(alpha: 0.15),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.textPrimary.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           child: Padding(
             padding: const EdgeInsets.all(AppSizes.cardPadding),

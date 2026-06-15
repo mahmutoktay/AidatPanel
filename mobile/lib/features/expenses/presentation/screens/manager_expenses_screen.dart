@@ -5,15 +5,20 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/month_labels.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/widgets/app_select_field.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
+import '../../../../shared/widgets/dashboard_building_selector.dart';
+import '../../../../shared/widgets/dashboard_filter_chips_row.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../providers/expenses_provider.dart';
 import '../utils/expense_labels.dart';
+import '../widgets/expense_list_item_card.dart';
 
 class ManagerExpensesScreen extends ConsumerStatefulWidget {
   const ManagerExpensesScreen({super.key});
@@ -95,12 +100,14 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     }
   }
 
+  List<int> get _yearOptions =>
+      List.generate(6, (i) => DateTime.now().year - i);
+
   @override
   Widget build(BuildContext context) {
     final buildings = ref.watch(buildingsStoreProvider).value ?? [];
     final state = ref.watch(expensesNotifierProvider);
     final t = context.t.features.expenses;
-    final years = List.generate(6, (i) => DateTime.now().year - i);
 
     if (_buildingId == null && buildings.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -110,90 +117,67 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
       });
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: Text(t.title),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _buildingId == null ? null : () => _openForm(),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          if (buildings.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSizes.spacingM,
-                AppSizes.spacingM,
-                AppSizes.spacingM,
-                0,
-              ),
-              child: AppSelectField<String>(
-                label: context.t.common.buildingName,
-                value: _buildingId,
-                options: [
-                  for (final b in buildings)
-                    AppSelectOption(value: b.id, label: b.name),
+    return DashboardSecondaryScaffold(
+      title: t.title,
+      showNotificationAction: true,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add, color: AppColors.inkDark),
+          onPressed: _buildingId == null ? null : () => _openForm(),
+        ),
+      ],
+      body: DashboardListScreenBody(
+        header: buildings.isEmpty
+            ? null
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DashboardSingleBuildingSelector(
+                    buildings: buildings,
+                    selectedBuildingId: _buildingId,
+                    onSelected: (id) {
+                      setState(() => _buildingId = id);
+                      _load();
+                    },
+                  ),
+                  const SizedBox(height: AppSizes.spacingM),
+                  DashboardFilterChipsRow(
+                    chips: [
+                      for (final y in _yearOptions)
+                        DashboardFilterChipItem(
+                          label: '$y',
+                          selected: _year == y,
+                          onTap: () {
+                            setState(() => _year = y);
+                            _load();
+                          },
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSizes.spacingS),
+                  DashboardFilterChipsRow(
+                    chips: [
+                      for (var m = 1; m <= 12; m++)
+                        DashboardFilterChipItem(
+                          label: localizedMonthName(context, m),
+                          selected: _month == m,
+                          onTap: () {
+                            setState(() => _month = m);
+                            _load();
+                          },
+                        ),
+                    ],
+                  ),
+                  if (state.summary != null) ...[
+                    const SizedBox(height: AppSizes.spacingM),
+                    _SummaryCard(summary: state.summary!),
+                  ],
                 ],
-                onChanged: (id) {
-                  if (id == null) return;
-                  setState(() => _buildingId = id);
-                  _load();
-                },
               ),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(AppSizes.spacingM),
-            child: Row(
-              children: [
-                Expanded(
-                  child: AppSelectField<int>(
-                    label: t.fieldMonth,
-                    value: _month,
-                    displayText: (v) => v == null ? '' : '$v',
-                    options: [
-                      for (var i = 1; i <= 12; i++)
-                        AppSelectOption(value: i, label: '$i'),
-                    ],
-                    onChanged: (m) {
-                      if (m == null) return;
-                      setState(() => _month = m);
-                      _load();
-                    },
-                  ),
-                ),
-                const SizedBox(width: AppSizes.spacingM),
-                Expanded(
-                  child: AppSelectField<int>(
-                    label: t.fieldYear,
-                    value: _year,
-                    displayText: (v) => v == null ? '' : '$v',
-                    options: [
-                      for (final y in years)
-                        AppSelectOption(value: y, label: '$y'),
-                    ],
-                    onChanged: (y) {
-                      if (y == null) return;
-                      setState(() => _year = y);
-                      _load();
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (state.summary != null) _SummaryCard(summary: state.summary!),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async => _load(),
-              child: _buildList(context, state),
-            ),
-          ),
-        ],
+        list: RefreshIndicator(
+          onRefresh: () async => _load(),
+          child: _buildList(context, state),
+        ),
       ),
     );
   }
@@ -203,6 +187,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
 
     if (state.isLoading && state.expenses.isEmpty) {
       return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         children: const [
           SizedBox(height: 200),
           Center(child: CircularProgressIndicator()),
@@ -261,8 +246,8 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
         }
         final e = state.expenses[i];
         return Padding(
-          padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
-          child: _ExpenseCard(
+          padding: DashboardScreenStyle.listItemPadding,
+          child: ExpenseListItemCard(
             expense: e,
             onEdit: () => _openForm(expense: e),
             onDelete: () => _confirmDelete(e),
@@ -281,157 +266,46 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.expenses;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSizes.cardPadding),
-        decoration: BoxDecoration(
-          color: AppColors.fill,
-          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${t.total}: ${summary.totalAmount.toStringAsFixed(2)} ${summary.currency}',
-              style: AppTypography.h4.copyWith(color: AppColors.textPrimary),
+    return DashboardSurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${t.total}: ${summary.totalAmount.toStringAsFixed(2)} ${summary.currency}',
+            style: AppTypography.h4.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
             ),
-            if (summary.byCategory.isNotEmpty) ...[
-              const SizedBox(height: AppSizes.spacingS),
-              Wrap(
-                spacing: AppSizes.spacingS,
-                runSpacing: AppSizes.spacingXS,
-                children: summary.byCategory.map((c) {
-                  return Chip(
-                    backgroundColor: Colors.white,
-                    side: BorderSide.none,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
-                    label: Text(
-                      '${c.category.label(context)}: ${c.amount.toStringAsFixed(0)} ₺ (${c.count})',
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ExpenseCard extends StatelessWidget {
-  final ExpenseEntity expense;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const _ExpenseCard({
-    required this.expense,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final date =
-        '${expense.date.day}.${expense.date.month}.${expense.date.year}';
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: AppColors.fill,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        onTap: () => context.push('/expenses/${expense.id}', extra: expense),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSizes.cardPadding),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      expense.title,
-                      style: AppTypography.h4.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSizes.spacingXS),
-                    Text(
-                      '${expense.category.label(context)} · $date',
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    if (expense.note != null && expense.note!.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: AppSizes.spacingXS),
-                        child: Text(
-                          expense.note!,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.body2.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '${expense.amount?.toStringAsFixed(2) ?? "0.00"} ₺',
-                    style: AppTypography.body1.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  if (expense.parsedAmount != null &&
-                      expense.parsedAmount != expense.amount)
-                    Text(
-                      '(OCR: ${expense.parsedAmount!.toStringAsFixed(2)} ₺)',
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.primary,
-                      ),
-                    ),
-                ],
-              ),
-              PopupMenuButton<String>(
-                onSelected: (v) {
-                  if (v == 'edit') onEdit();
-                  if (v == 'delete') onDelete();
-                },
-                itemBuilder: (ctx) => [
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: Text(context.t.features.expenses.editAction),
-                  ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Text(context.t.features.expenses.deleteAction),
-                  ),
-                ],
-              ),
-            ],
           ),
-        ),
+          if (summary.byCategory.isNotEmpty) ...[
+            const SizedBox(height: AppSizes.spacingS),
+            Wrap(
+              spacing: AppSizes.spacingS,
+              runSpacing: AppSizes.spacingXS,
+              children: summary.byCategory.map((c) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.fill,
+                    borderRadius: BorderRadius.circular(
+                      DashboardScreenStyle.pillRadius,
+                    ),
+                  ),
+                  child: Text(
+                    '${c.category.label(context)}: ${c.amount.toStringAsFixed(0)} ₺ (${c.count})',
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ],
       ),
     );
   }

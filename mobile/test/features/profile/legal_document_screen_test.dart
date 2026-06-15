@@ -26,24 +26,22 @@ void main() {
         (w) => w is SelectableText && w.data == t.legal.contactEmail,
       );
 
-  Future<void> expectContactFooter(WidgetTester tester) async {
-    final email = footerEmailFinder();
-    await tester.scrollUntilVisible(email, 200);
+  void expectContactFooter() {
     expect(find.text(t.legal.companyName), findsOneWidget);
-    expect(email, findsOneWidget);
+    expect(footerEmailFinder(), findsOneWidget);
   }
 
   group('LegalDocumentScreen', () {
     testWidgets('privacy shows company and contact email', (tester) async {
       await pumpLegal(tester, LegalDocumentKind.privacy);
       expect(find.text(t.common.privacyPolicy), findsOneWidget);
-      await expectContactFooter(tester);
+      expectContactFooter();
     });
 
     testWidgets('kvkk shows company and contact email', (tester) async {
       await pumpLegal(tester, LegalDocumentKind.kvkk);
       expect(find.text(t.common.kvkk), findsOneWidget);
-      await expectContactFooter(tester);
+      expectContactFooter();
     });
 
     testWidgets('help placeholder mentions support email', (tester) async {

@@ -7,7 +7,10 @@ import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../data/cities_data.dart';
@@ -67,30 +70,136 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: !_submitting,
-      child: Scaffold(
-        backgroundColor: AppColors.surface,
-        appBar: AppBar(
-          title: Text(context.t.common.addBuildingNew),
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: _submitting ? null : () => context.pop(),
-          ),
-        ),
+      child: DashboardSecondaryScaffold(
+        title: context.t.common.addBuildingNew,
+        onBack: _submitting ? () {} : () => context.pop(),
+        bottomNavigationBar: _buildSaveBar(context),
         body: SafeArea(
           child: AbsorbPointer(
             absorbing: _submitting,
             child: Form(
               key: _formKey,
-              child: Builder(
-                builder: (ctx) {
-                  final items = _buildFormItems(ctx);
-                  return ListView.builder(
-                    padding: AppSizes.screenBodyScrollPadding,
-                    itemCount: items.length,
-                    itemBuilder: (_, i) => items[i],
-                  );
-                },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: AppSizes.screenBodyScrollPadding.copyWith(
+                  top: AppSizes.spacingS,
+                  bottom: AppSizes.spacingXL,
+                ),
+                children: [
+                  DashboardSectionTitle(title: context.t.common.basicInfo),
+                  const SizedBox(height: AppSizes.spacingS),
+                  _FormSectionCard(
+                    child: _buildTextField(
+                      controller: _nameController,
+                      label: context.t.common.buildingName,
+                      hint: context.t.common.buildingNameHint,
+                      icon: Icons.apartment,
+                      required: true,
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.spacingM),
+                  DashboardSectionTitle(title: context.t.common.location),
+                  const SizedBox(height: AppSizes.spacingS),
+                  _FormSectionCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildCityPicker(),
+                        const SizedBox(height: AppSizes.spacingM),
+                        _buildDistrictPicker(),
+                        const SizedBox(height: AppSizes.spacingM),
+                        _buildTextField(
+                          controller: _addressController,
+                          label: context.t.common.streetAddress,
+                          hint: context.t.common.streetAddressHint,
+                          icon: Icons.home_outlined,
+                          required: true,
+                          maxLines: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.spacingM),
+                  DashboardSectionTitle(title: context.t.common.details),
+                  const SizedBox(height: AppSizes.spacingS),
+                  _FormSectionCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: _buildTextField(
+                                controller: _floorsController,
+                                label: context.t.common.floorCount,
+                                hint: context.t.common.floorCountHint,
+                                icon: Icons.stairs_outlined,
+                                required: true,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                validator: (v) => _validateRange(
+                                  v,
+                                  min: _kFloorsMin,
+                                  max: _kFloorsMax,
+                                  rangeError: context.t.common.floorRangeError,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppSizes.spacingM),
+                            Expanded(
+                              child: _buildTextField(
+                                controller: _apartmentsPerFloorController,
+                                label: context.t.common.apartmentsPerFloor,
+                                hint: context.t.common.apartmentsPerFloorHint,
+                                icon: Icons.door_front_door_outlined,
+                                required: true,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                validator: (v) => _validateRange(
+                                  v,
+                                  min: _kApartmentsPerFloorMin,
+                                  max: _kApartmentsPerFloorMax,
+                                  rangeError: context
+                                      .t.common.apartmentsPerFloorRangeError,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSizes.spacingM),
+                        _buildTextField(
+                          controller: _monthlyDuesController,
+                          label: context.t.common.monthlyDuesLabel,
+                          hint: context.t.common.monthlyDuesHint,
+                          icon: Icons.payments_outlined,
+                          required: true,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.spacingM),
+                  DashboardSectionTitle(
+                    title: context.t.features.buildings.collection.sectionTitle,
+                  ),
+                  const SizedBox(height: AppSizes.spacingS),
+                  _FormSectionCard(
+                    child: BuildingCollectionFields(
+                      ibanController: _collectionIbanController,
+                      accountTitleController: _collectionAccountTitleController,
+                      referenceTemplateController:
+                          _collectionReferenceTemplateController,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -99,155 +208,29 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
     );
   }
 
-  List<Widget> _buildFormItems(BuildContext context) => [
-        _buildSectionTitle(context.t.common.basicInfo, Icons.info_outline),
-        const SizedBox(height: AppSizes.spacingM),
-        _buildTextField(
-          controller: _nameController,
-          label: context.t.common.buildingName,
-          hint: context.t.common.buildingNameHint,
-          icon: Icons.apartment,
-          required: true,
-        ),
-        const SizedBox(height: AppSizes.spacingL),
-        _buildSectionTitle(context.t.common.location, Icons.location_on_outlined),
-        const SizedBox(height: AppSizes.spacingM),
-        _buildCityPicker(),
-        const SizedBox(height: AppSizes.spacingM),
-        _buildDistrictPicker(),
-        const SizedBox(height: AppSizes.spacingM),
-        _buildTextField(
-          controller: _addressController,
-          label: context.t.common.streetAddress,
-          hint: context.t.common.streetAddressHint,
-          icon: Icons.home_outlined,
-          required: true,
-          maxLines: 2,
-        ),
-        const SizedBox(height: AppSizes.spacingL),
-        _buildSectionTitle(context.t.common.details, Icons.tune),
-        const SizedBox(height: AppSizes.spacingM),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _buildTextField(
-                controller: _floorsController,
-                label: context.t.common.floorCount,
-                hint: context.t.common.floorCountHint,
-                icon: Icons.stairs_outlined,
-                required: true,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (v) => _validateRange(
-                  v,
-                  min: _kFloorsMin,
-                  max: _kFloorsMax,
-                  rangeError: context.t.common.floorRangeError,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSizes.spacingM),
-            Expanded(
-              child: _buildTextField(
-                controller: _apartmentsPerFloorController,
-                label: context.t.common.apartmentsPerFloor,
-                hint: context.t.common.apartmentsPerFloorHint,
-                icon: Icons.door_front_door_outlined,
-                required: true,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (v) => _validateRange(
-                  v,
-                  min: _kApartmentsPerFloorMin,
-                  max: _kApartmentsPerFloorMax,
-                  rangeError: context.t.common.apartmentsPerFloorRangeError,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSizes.spacingM),
-        _buildTextField(
-          controller: _monthlyDuesController,
-          label: context.t.common.monthlyDuesLabel,
-          hint: context.t.common.monthlyDuesHint,
-          icon: Icons.payments_outlined,
-          required: true,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        ),
-        const SizedBox(height: AppSizes.spacingL),
-        _buildSectionTitle(
-          context.t.features.buildings.collection.sectionTitle,
-          Icons.account_balance_wallet_outlined,
-        ),
-        const SizedBox(height: AppSizes.spacingM),
-        BuildingCollectionFields(
-          ibanController: _collectionIbanController,
-          accountTitleController: _collectionAccountTitleController,
-          referenceTemplateController: _collectionReferenceTemplateController,
-        ),
-        const SizedBox(height: AppSizes.spacingXL),
-        SizedBox(
-          height: AppSizes.buttonHeightPrimary,
-          child: ElevatedButton.icon(
+  Widget _buildSaveBar(BuildContext context) {
+    return ColoredBox(
+      color: AppColors.dashboardBackground,
+      child: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+        child: SizedBox(
+          height: ProfileSettingsUi.buttonHeight,
+          child: ElevatedButton(
             onPressed: _submitting ? null : _onSubmit,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor:
-                  AppColors.primary.withValues(alpha: 0.6),
-              disabledForegroundColor: Colors.white,
-              elevation: 0,
-              shape: AppButtonStyles.shape,
-            ),
-            icon: _submitting
+            style: ProfileSettingsUi.primaryButton,
+            child: _submitting
                 ? const SizedBox(
-                    width: 20,
-                    height: 20,
+                    height: 22,
+                    width: 22,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 2.4,
+                      color: Colors.white,
                     ),
                   )
-                : const Icon(Icons.check_circle_outline),
-            label: Text(
-              _submitting
-                  ? context.t.common.loading
-                  : context.t.common.createBuilding,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
+                : Text(context.t.common.createBuilding),
           ),
         ),
-        const SizedBox(height: AppSizes.spacingM),
-        SizedBox(
-          height: AppSizes.buttonHeightSecondary,
-          child: OutlinedButton(
-            onPressed: _submitting ? null : () => context.pop(),
-            style: AppButtonStyles.outlinedNeutral(),
-            child: Text(
-              context.t.common.cancelBtn,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ),
-      ];
-
-  Widget _buildSectionTitle(String title, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: AppColors.primary),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: AppTypography.h4.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -267,11 +250,13 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       maxLines: maxLines,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
-      style: AppTypography.body1.copyWith(color: AppColors.textPrimary),
+      style: ProfileSettingsUi.fieldValue,
       decoration: InputDecoration(
         labelText: required ? '$label *' : label,
+        labelStyle: ProfileSettingsUi.fieldLabel,
         hintText: hint,
-        prefixIcon: Icon(icon, color: AppColors.primary),
+        hintStyle: ProfileSettingsUi.fieldLabel,
+        prefixIcon: Icon(icon, color: ProfileSettingsUi.ink),
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
@@ -363,7 +348,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
             labelText: label,
             prefixIcon: Icon(
               icon,
-              color: enabled ? AppColors.primary : AppColors.textDisabled,
+              color: enabled ? ProfileSettingsUi.ink : AppColors.textDisabled,
             ),
             suffixIcon: Icon(
               Icons.arrow_drop_down,
@@ -371,7 +356,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
             ),
             filled: true,
             fillColor: enabled
-                ? AppColors.surface
+                ? Colors.white
                 : AppColors.textDisabled.withValues(alpha: 0.12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -384,11 +369,11 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
           ),
           child: Text(
             value ?? hint,
-            style: AppTypography.body1.copyWith(
+            style: ProfileSettingsUi.fieldValue.copyWith(
               color: value != null
-                  ? AppColors.textPrimary
-                  : AppColors.textSecondary,
-              fontWeight: value != null ? FontWeight.w600 : FontWeight.w400,
+                  ? ProfileSettingsUi.ink
+                  : ProfileSettingsUi.muted,
+              fontWeight: value != null ? FontWeight.w600 : FontWeight.w500,
             ),
           ),
         ),
@@ -523,6 +508,22 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   }
 }
 
+class _FormSectionCard extends StatelessWidget {
+  final Widget child;
+
+  const _FormSectionCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSizes.spacingM),
+      decoration: DashboardScreenStyle.whiteCard(),
+      child: child,
+    );
+  }
+}
+
 /// Aranabilir liste seçici (şehir veya ilçe için)
 class _SearchablePicker extends StatefulWidget {
   final String title;
@@ -592,7 +593,7 @@ class _SearchablePickerState extends State<_SearchablePicker> {
                 hintText: context.t.common.search,
                 prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
                 filled: true,
-                fillColor: AppColors.surface,
+                fillColor: AppColors.dashboardBackground,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,

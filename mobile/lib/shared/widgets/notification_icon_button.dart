@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
@@ -58,96 +57,6 @@ class NotificationIconButton extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Dashboard üst şerit — büyük rol başlığı + bildirim (mockup ölçüsü).
-class DashboardRoleBar extends StatelessWidget {
-  final String title;
-
-  const DashboardRoleBar({super.key, required this.title});
-
-  /// Rol başlığı — Archivo Bold, dashboard üst şerit.
-  static TextStyle get _titleStyle => GoogleFonts.archivo(
-    fontSize: 32,
-    fontWeight: FontWeight.w700,
-    height: 1.0,
-    letterSpacing: 1.5,
-    color: AppColors.textPrimary,
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    const barHeight = AppSizes.minTouchTarget;
-
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSizes.screenPadding,
-          AppSizes.spacingM,
-          0,
-          AppSizes.spacingS,
-        ),
-        child: SizedBox(
-          height: barHeight,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    title,
-                    style: _titleStyle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textHeightBehavior: const TextHeightBehavior(
-                      applyHeightToFirstAscent: false,
-                      applyHeightToLastDescent: false,
-                    ),
-                  ),
-                ),
-              ),
-              const NotificationIconButton(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Ana sayfa — hoş geldiniz satırı (rol başlığının hemen altında).
-class DashboardWelcomeLine extends StatelessWidget {
-  final String userName;
-
-  const DashboardWelcomeLine({super.key, required this.userName});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text: '${context.t.common.welcome}, ',
-            style: AppTypography.body1.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          TextSpan(
-            text: userName,
-            style: AppTypography.h4.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
     );
   }
 }

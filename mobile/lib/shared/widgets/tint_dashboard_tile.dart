@@ -162,6 +162,7 @@ class DashboardActionTile extends StatelessWidget {
 
   /// 3 sütun grid hücreleri için `true`.
   final bool compact;
+  final Color? backgroundColor;
 
   /// 3 sütun hızlı işlem satırı yüksekliği (overflow önleme marjı).
   static const double compactRowHeight = 100;
@@ -175,6 +176,7 @@ class DashboardActionTile extends StatelessWidget {
     this.compact = false,
     this.valueColor,
     this.iconColor,
+    this.backgroundColor,
   });
 
   int get _count => int.tryParse(value) ?? 0;
@@ -188,7 +190,9 @@ class DashboardActionTile extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: compact ? double.infinity : null,
-      decoration: _DashboardTileStyle.decoration(),
+      decoration: _DashboardTileStyle.decoration(
+        backgroundColor: backgroundColor,
+      ),
       child: Material(
         color: Colors.transparent,
         borderRadius: radius,

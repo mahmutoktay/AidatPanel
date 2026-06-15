@@ -118,6 +118,7 @@ class ApiConstants {
   static const String profile = '$apiVersion/me';
   static const String changePassword = '$apiVersion/me/password';
   static const String changeLanguage = '$apiVersion/me/language';
+  static const String profilePicture = '$apiVersion/me/profile-picture';
 
   // Subscription endpoints
   static const String subscription = '$apiVersion/me/subscription';

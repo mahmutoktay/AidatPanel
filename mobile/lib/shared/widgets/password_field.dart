@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'auth_form_styles.dart';
+
 /// Password input field with visibility toggle
-/// Reusable widget for password fields in auth screens
 class PasswordField extends StatelessWidget {
   final TextEditingController controller;
   final bool obscureText;
@@ -14,12 +15,10 @@ class PasswordField extends StatelessWidget {
   final Widget? passwordCriteria;
   final String? helperText;
   final Color? borderColor;
-  // Klavye davranışı için ek parametreler — mobil cihazda kullanıcı
-  // klavye sağ alt köşesinden bir sonraki alana geçebilsin / submit
-  // edebilsin.
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
   final Iterable<String>? autofillHints;
+  final bool whiteBackground;
 
   const PasswordField({
     super.key,
@@ -37,6 +36,7 @@ class PasswordField extends StatelessWidget {
     this.textInputAction,
     this.onSubmitted,
     this.autofillHints,
+    this.whiteBackground = false,
   });
 
   @override
@@ -53,38 +53,49 @@ class PasswordField extends StatelessWidget {
           textInputAction: textInputAction,
           onSubmitted: onSubmitted,
           autofillHints: autofillHints,
-          decoration: InputDecoration(
-            labelText: labelText ?? 'Şifre',
-            hintText: hintText ?? '••••••••',
-            prefixIcon: const Icon(Icons.lock_outlined),
-            suffixIcon: IconButton(
-              icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
-              onPressed: onToggleVisibility,
-            ),
-            helperText: helperText,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 17,
-            ),
-            border: borderColor != null
-                ? OutlineInputBorder(
-                    borderSide: BorderSide(color: borderColor!),
-                  )
-                : null,
-            enabledBorder: borderColor != null
-                ? OutlineInputBorder(
-                    borderSide: BorderSide(color: borderColor!),
-                  )
-                : null,
-            focusedBorder: borderColor != null
-                ? OutlineInputBorder(
-                    borderSide: BorderSide(color: borderColor!),
-                  )
-                : null,
-          ),
+          decoration: _buildDecoration(),
         ),
         ...?passwordCriteria != null ? [passwordCriteria!] : null,
       ],
+    );
+  }
+
+  InputDecoration _buildDecoration() {
+    if (whiteBackground) {
+      return AuthFormStyles.whiteField(
+        labelText: labelText ?? 'Şifre',
+        hintText: hintText ?? '••••••••',
+        prefixIcon: const Icon(Icons.lock_outlined),
+        suffixIcon: IconButton(
+          icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
+          onPressed: onToggleVisibility,
+        ),
+        helperText: helperText,
+      );
+    }
+
+    return InputDecoration(
+      labelText: labelText ?? 'Şifre',
+      hintText: hintText ?? '••••••••',
+      prefixIcon: const Icon(Icons.lock_outlined),
+      suffixIcon: IconButton(
+        icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
+        onPressed: onToggleVisibility,
+      ),
+      helperText: helperText,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 17,
+      ),
+      border: borderColor != null
+          ? OutlineInputBorder(borderSide: BorderSide(color: borderColor!))
+          : null,
+      enabledBorder: borderColor != null
+          ? OutlineInputBorder(borderSide: BorderSide(color: borderColor!))
+          : null,
+      focusedBorder: borderColor != null
+          ? OutlineInputBorder(borderSide: BorderSide(color: borderColor!))
+          : null,
     );
   }
 }

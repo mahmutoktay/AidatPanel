@@ -113,6 +113,25 @@ class DuesRepositoryImpl implements DuesRepository {
     }
   }
 
+  @override
+  Future<int> remindBuildingDues(
+    String buildingId, {
+    List<String>? dueIds,
+  }) async {
+    try {
+      return await _remoteDataSource.remindBuildingDues(
+        buildingId,
+        dueIds: dueIds,
+      );
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(
+        message: 'Hatırlatma gönderilirken bir hata oluştu',
+      );
+    }
+  }
+
   String _toApiStatus(DueStatus status) {
     switch (status) {
       case DueStatus.paid:

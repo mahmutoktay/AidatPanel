@@ -6,13 +6,16 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
+import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/utils/auth_validators.dart';
+import '../../../../shared/widgets/auth_form_styles.dart';
+import '../../../../shared/widgets/auth_screen_shell.dart';
+import '../widgets/auth_brand_header.dart';
 import '../../../../shared/widgets/password_criterion.dart';
 import '../../../../shared/widgets/password_field.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../providers/auth_provider.dart';
-import '../widgets/auth_brand_header.dart';
 import '../widgets/sign_up_role_toggle.dart';
 
 /// Birleşik üyelik ekranı: varsayılan sakin (davet kodu), üstten yönetici geçişi.
@@ -290,18 +293,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       textInputAction: TextInputAction.next,
       onSubmitted: (_) => _emailFocusNode.requestFocus(),
       style: AppTypography.body1,
-      decoration: InputDecoration(
+      decoration: AuthFormStyles.whiteField(
         labelText: context.t.features.auth.inviteCode,
         hintText: context.t.features.auth.inviteCodeHint,
         prefixIcon: Icon(Icons.vpn_key_outlined, size: AppSizes.iconSize),
         errorText: _inviteCodeError,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.spacingM,
-          vertical: AppSizes.spacingM,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-        ),
       ),
       onChanged: (value) {
         final normalized = AuthValidators.normalizeInviteCode(value);
@@ -329,17 +325,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       autofillHints: const [AutofillHints.name],
       textCapitalization: TextCapitalization.words,
       style: AppTypography.body1,
-      decoration: InputDecoration(
+      decoration: AuthFormStyles.whiteField(
         labelText: context.t.features.auth.name,
         hintText: context.t.features.auth.nameHint,
         prefixIcon: Icon(Icons.person_outline, size: AppSizes.iconSize),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.spacingM,
-          vertical: AppSizes.spacingM,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-        ),
       ),
     );
   }
@@ -356,7 +345,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           : _nameFocusNode.requestFocus(),
       autofillHints: const [AutofillHints.newUsername, AutofillHints.email],
       style: AppTypography.body1,
-      decoration: InputDecoration(
+      decoration: AuthFormStyles.whiteField(
         labelText: context.t.features.auth.email,
         hintText: context.t.features.auth.emailHint,
         prefixIcon: Icon(Icons.email_outlined, size: AppSizes.iconSize),
@@ -367,13 +356,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             : _emailError == 'email_invalid'
             ? context.t.validation.emailInvalid
             : context.t.validation.emailTooLong,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.spacingM,
-          vertical: AppSizes.spacingM,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-        ),
       ),
       onChanged: (value) {
         setState(() {
@@ -394,7 +376,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       onSubmitted: (_) => _passwordFocusNode.requestFocus(),
       autofillHints: const [AutofillHints.telephoneNumberNational],
       style: AppTypography.body1,
-      decoration: InputDecoration(
+      decoration: AuthFormStyles.whiteField(
         labelText: context.t.features.auth.phoneOptional,
         hintText: context.t.features.auth.phoneHintOptional,
         prefixText: '+90 ',
@@ -403,13 +385,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         errorText: _phoneError == null
             ? null
             : context.t.validation.phoneInvalid,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.spacingM,
-          vertical: AppSizes.spacingM,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-        ),
       ),
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       onChanged: (value) {
@@ -429,6 +404,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         PasswordField(
           controller: _passwordController,
           obscureText: _obscurePassword,
+          whiteBackground: true,
           labelText: context.t.features.auth.password,
           hintText: context.t.features.auth.passwordHint,
           onToggleVisibility: () {
@@ -480,6 +456,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         PasswordField(
           controller: _confirmPasswordController,
           obscureText: _obscureConfirmPassword,
+          whiteBackground: true,
           labelText: context.t.features.auth.confirmPassword,
           hintText: context.t.features.auth.passwordHint,
           onToggleVisibility: () {
@@ -570,93 +547,62 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         ? context.t.features.auth.createAccount
         : context.t.features.auth.joinApartment;
 
-    return Scaffold(
-      body: Stack(
+    return AuthScreenShell(
+      showBrandHeader: true,
+      brandHeaderLayout: AuthBrandHeaderLayout.horizontal,
+      wrapInCard: false,
+      leading: IconButton(
+        icon: const Icon(
+          Icons.arrow_back,
+          color: ProfileSettingsUi.ink,
+        ),
+        onPressed: isLoading ? null : () => context.pop(),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(color: AppColors.surface),
+          SignUpRoleToggle(
+            isManager: _isManager,
+            residentLabel: context.t.common.resident,
+            managerLabel: context.t.common.manager,
+            onResidentTap: _switchToResident,
+            onManagerTap: _switchToManager,
+            enabled: !isLoading,
+          ),
+          const SizedBox(height: AppSizes.spacingL),
+          Text(
+            formTitle,
+            style: AppTypography.h2.copyWith(
+              color: AppColors.inkDark,
             ),
           ),
-          Positioned.fill(
-            child: SafeArea(
-              bottom: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const AuthBrandHeader(),
-                  Expanded(
-                    child: Container(
-                      decoration: const BoxDecoration(color: AppColors.surface),
-                      child: SingleChildScrollView(
-                        padding: AppSizes.screenBodyScrollPadding,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            SignUpRoleToggle(
-                              isManager: _isManager,
-                              residentLabel: context.t.common.resident,
-                              managerLabel: context.t.common.manager,
-                              onResidentTap: _switchToResident,
-                              onManagerTap: _switchToManager,
-                              enabled: !isLoading,
-                            ),
-                            const SizedBox(height: AppSizes.spacingL),
-                            Text(
-                              formTitle,
-                              style: AppTypography.h2.copyWith(
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: AppSizes.spacingL),
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 200),
-                              switchInCurve: Curves.easeInOut,
-                              switchOutCurve: Curves.easeInOut,
-                              child: _isManager
-                                  ? _buildManagerForm(isLoading)
-                                  : _buildResidentForm(isLoading),
-                            ),
-                            const SizedBox(
-                              height: AppSizes.spacingFieldSpacing,
-                            ),
-                            ElevatedButton(
-                              onPressed: isLoading ? null : _onSubmit,
-                              child: isLoading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Text(
-                                      _isManager
-                                          ? context.t.features.auth.register
-                                          : context.t.features.auth.join,
-                                    ),
-                            ),
-                          ],
-                        ),
-                      ),
+          const SizedBox(height: AppSizes.spacingL),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            switchInCurve: Curves.easeInOut,
+            switchOutCurve: Curves.easeInOut,
+            child: _isManager
+                ? _buildManagerForm(isLoading)
+                : _buildResidentForm(isLoading),
+          ),
+          const SizedBox(height: AppSizes.spacingFieldSpacing),
+          ElevatedButton(
+            onPressed: isLoading ? null : _onSubmit,
+            style: ProfileSettingsUi.primaryButton,
+            child: isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
                     ),
+                  )
+                : Text(
+                    _isManager
+                        ? context.t.features.auth.register
+                        : context.t.features.auth.join,
                   ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            child: SafeArea(
-              child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: AppColors.textPrimary,
-                ),
-                onPressed: isLoading ? null : () => context.pop(),
-              ),
-            ),
           ),
         ],
       ),

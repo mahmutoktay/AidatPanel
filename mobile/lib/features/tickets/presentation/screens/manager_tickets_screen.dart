@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/widgets/app_select_field.dart';
+import '../../../../shared/widgets/dashboard_building_selector.dart';
+import '../../../../shared/widgets/dashboard_filter_chips_row.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
-import '../../../../shared/widgets/notification_icon_button.dart';
-import '../providers/manager_open_tickets_count_provider.dart';
 import '../../../buildings/data/buildings_store.dart';
+import '../../domain/entities/ticket_entity.dart';
+import '../providers/manager_open_tickets_count_provider.dart';
 import '../providers/tickets_provider.dart';
+import '../utils/ticket_labels.dart';
 import '../widgets/ticket_list_card.dart';
 
 class ManagerTicketsScreen extends ConsumerStatefulWidget {
@@ -25,6 +27,7 @@ class ManagerTicketsScreen extends ConsumerStatefulWidget {
 class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
   final ScrollController _scrollController = ScrollController();
   String? _buildingId;
+  TicketStatus? _statusFilter;
 
   @override
   void initState() {
@@ -55,11 +58,17 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     }
   }
 
+  List<TicketEntity> _filteredTickets(List<TicketEntity> tickets) {
+    if (_statusFilter == null) return tickets;
+    return tickets.where((t) => t.status == _statusFilter).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final buildings = ref.watch(buildingsStoreProvider).value ?? [];
     final state = ref.watch(ticketsNotifierProvider);
     final t = context.t.features.tickets;
+    final filtered = _filteredTickets(state.tickets);
 
     if (_buildingId == null && buildings.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -69,50 +78,74 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
       });
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: Text(t.managerTitle),
-        centerTitle: true,
-        actions: const [NotificationIconButton()],
-      ),
-      body: Column(
-        children: [
-          if (buildings.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(AppSizes.spacingM),
-              child: AppSelectField<String>(
-                label: context.t.common.buildingName,
-                value: _buildingId,
-                options: [
-                  for (final b in buildings)
-                    AppSelectOption(value: b.id, label: b.name),
+    return DashboardSecondaryScaffold(
+      title: t.managerTitle,
+      showNotificationAction: true,
+      body: DashboardListScreenBody(
+        header: buildings.isEmpty
+            ? null
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DashboardSingleBuildingSelector(
+                    buildings: buildings,
+                    selectedBuildingId: _buildingId,
+                    onSelected: (id) {
+                      setState(() => _buildingId = id);
+                      _load(id);
+                    },
+                  ),
+                  const SizedBox(height: AppSizes.spacingM),
+                  DashboardFilterChipsRow(
+                    chips: [
+                      DashboardFilterChipItem(
+                        label: context.t.common.all,
+                        selected: _statusFilter == null,
+                        onTap: () => setState(() => _statusFilter = null),
+                      ),
+                      DashboardFilterChipItem(
+                        label: TicketStatus.open.label(context),
+                        selected: _statusFilter == TicketStatus.open,
+                        onTap: () =>
+                            setState(() => _statusFilter = TicketStatus.open),
+                      ),
+                      DashboardFilterChipItem(
+                        label: TicketStatus.inProgress.label(context),
+                        selected: _statusFilter == TicketStatus.inProgress,
+                        onTap: () => setState(
+                          () => _statusFilter = TicketStatus.inProgress,
+                        ),
+                      ),
+                      DashboardFilterChipItem(
+                        label: TicketStatus.closed.label(context),
+                        selected: _statusFilter == TicketStatus.closed,
+                        onTap: () =>
+                            setState(() => _statusFilter = TicketStatus.closed),
+                      ),
+                    ],
+                  ),
                 ],
-                onChanged: (id) {
-                  if (id == null) return;
-                  setState(() => _buildingId = id);
-                  _load(id);
-                },
               ),
-            ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                final id = _buildingId;
-                if (id != null) await _load(id);
-              },
-              child: _buildList(context, state),
-            ),
-          ),
-        ],
+        list: RefreshIndicator(
+          onRefresh: () async {
+            final id = _buildingId;
+            if (id != null) await _load(id);
+          },
+          child: _buildList(context, state, filtered),
+        ),
       ),
     );
   }
 
-  Widget _buildList(BuildContext context, TicketsState state) {
+  Widget _buildList(
+    BuildContext context,
+    TicketsState state,
+    List<TicketEntity> tickets,
+  ) {
     final t = context.t.features.tickets;
     if (state.isLoading && state.tickets.isEmpty) {
       return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         children: const [
           SizedBox(height: 200),
           Center(child: CircularProgressIndicator()),
@@ -147,7 +180,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
       );
     }
 
-    if (state.tickets.isEmpty) {
+    if (tickets.isEmpty) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
@@ -164,15 +197,15 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: AppSizes.screenBodyScrollPadding,
-      itemCount: state.tickets.length + (state.isLoadingMore ? 1 : 0),
+      itemCount: tickets.length + (state.isLoadingMore ? 1 : 0),
       itemBuilder: (context, i) {
-        if (i >= state.tickets.length) {
+        if (i >= tickets.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: AppSizes.spacingM),
             child: Center(child: CircularProgressIndicator()),
           );
         }
-        final ticket = state.tickets[i];
+        final ticket = tickets[i];
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
           child: TicketListCard(

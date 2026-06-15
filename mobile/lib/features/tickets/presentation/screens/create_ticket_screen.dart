@@ -6,11 +6,12 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/widgets/app_select_field.dart';
+import '../../../../shared/widgets/dashboard_filter_chips_row.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../profile/presentation/theme/profile_settings_ui.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/tickets_provider.dart';
 import '../utils/ticket_labels.dart';
@@ -36,107 +37,148 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
     super.dispose();
   }
 
+  InputDecoration _fieldDecoration(String label, {String? hint}) =>
+      InputDecoration(
+        labelText: label,
+        hintText: hint,
+        labelStyle: ProfileSettingsUi.fieldLabel,
+        floatingLabelStyle: ProfileSettingsUi.fieldLabel.copyWith(
+          color: ProfileSettingsUi.ink,
+        ),
+        filled: true,
+        fillColor: AppColors.fill,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
+          borderSide: const BorderSide(color: ProfileSettingsUi.ink, width: 1.4),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
+          borderSide: const BorderSide(color: ProfileSettingsUi.danger),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.spacingM,
+          vertical: AppSizes.spacingM,
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.tickets;
 
     return PopScope(
       canPop: !_submitting,
-      child: Scaffold(
-        backgroundColor: AppColors.surface,
-        appBar: AppBar(
-          title: Text(t.createTitle),
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.close_rounded),
-            onPressed: _submitting ? null : () => context.pop(),
-          ),
-        ),
+      child: DashboardSecondaryScaffold(
+        title: t.createTitle,
+        onBack: _submitting ? () {} : () => context.pop(),
+        bottomNavigationBar: _buildSubmitBar(context),
         body: SafeArea(
           child: AbsorbPointer(
             absorbing: _submitting,
             child: Form(
               key: _formKey,
               child: ListView(
-                padding: AppSizes.screenBodyScrollPadding,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: AppSizes.screenBodyScrollPadding.copyWith(
+                  top: AppSizes.spacingS,
+                  bottom: AppSizes.spacingXL,
+                ),
                 children: [
-                  AppSelectField<TicketCategory>(
-                    label: t.fieldCategory,
-                    value: _category,
+                  DashboardSectionTitle(title: t.fieldCategory),
+                  const SizedBox(height: AppSizes.spacingS),
+                  DashboardFilterChipsRow(
                     enabled: !_submitting,
-                    displayText: (v) => v?.label(context) ?? '',
-                    options: [
+                    chips: [
                       for (final c in TicketCategory.values)
-                        AppSelectOption(value: c, label: c.label(context)),
+                        DashboardFilterChipItem(
+                          label: c.label(context),
+                          selected: _category == c,
+                          onTap: () => setState(() => _category = c),
+                        ),
                     ],
-                    onChanged: (v) {
-                      if (v != null) setState(() => _category = v);
-                    },
                   ),
                   const SizedBox(height: AppSizes.spacingM),
-                  _ModernField(
-                    controller: _titleController,
-                    label: t.fieldTitle,
-                    hint: t.fieldTitleHint,
-                    icon: Icons.edit_note_rounded,
-                    validator: (v) {
-                      final raw = v?.trim() ?? '';
-                      if (raw.isEmpty) {
-                        return context.t.common.fieldRequired;
-                      }
-                      if (raw.length < 3) return t.titleTooShort;
-                      return null;
-                    },
+                  DashboardSectionTitle(title: t.fieldTitle),
+                  const SizedBox(height: AppSizes.spacingS),
+                  DashboardSurfaceCard(
+                    child: TextFormField(
+                      controller: _titleController,
+                      style: ProfileSettingsUi.fieldValue,
+                      cursorColor: ProfileSettingsUi.ink,
+                      decoration: _fieldDecoration(
+                        t.fieldTitle,
+                        hint: t.fieldTitleHint,
+                      ),
+                      validator: (v) {
+                        final raw = v?.trim() ?? '';
+                        if (raw.isEmpty) {
+                          return context.t.common.fieldRequired;
+                        }
+                        if (raw.length < 3) return t.titleTooShort;
+                        return null;
+                      },
+                    ),
                   ),
                   const SizedBox(height: AppSizes.spacingM),
-                  _ModernField(
-                    controller: _descriptionController,
-                    label: t.fieldDescription,
-                    hint: t.fieldDescriptionHint,
-                    icon: Icons.subject_rounded,
-                    maxLines: 5,
-                    validator: (v) {
-                      final raw = v?.trim() ?? '';
-                      if (raw.isEmpty) {
-                        return context.t.common.fieldRequired;
-                      }
-                      if (raw.length < 10) return t.descriptionTooShort;
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSizes.spacingXL),
-                  SizedBox(
-                    height: AppSizes.buttonHeightPrimary,
-                    child: FilledButton.icon(
-                      onPressed: _submitting ? null : _submit,
-                      icon: _submitting
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.send_rounded),
-                      label: Text(
-                        t.submit,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
+                  DashboardSectionTitle(title: t.fieldDescription),
+                  const SizedBox(height: AppSizes.spacingS),
+                  DashboardSurfaceCard(
+                    child: TextFormField(
+                      controller: _descriptionController,
+                      maxLines: 5,
+                      style: ProfileSettingsUi.fieldValue,
+                      cursorColor: ProfileSettingsUi.ink,
+                      decoration: _fieldDecoration(
+                        t.fieldDescription,
+                        hint: t.fieldDescriptionHint,
                       ),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
+                      validator: (v) {
+                        final raw = v?.trim() ?? '';
+                        if (raw.isEmpty) {
+                          return context.t.common.fieldRequired;
+                        }
+                        if (raw.length < 10) return t.descriptionTooShort;
+                        return null;
+                      },
                     ),
                   ),
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubmitBar(BuildContext context) {
+    final t = context.t.features.tickets;
+    return ColoredBox(
+      color: AppColors.dashboardBackground,
+      child: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+        child: SizedBox(
+          height: ProfileSettingsUi.buttonHeight,
+          child: ElevatedButton(
+            onPressed: _submitting ? null : _submit,
+            style: ProfileSettingsUi.primaryButton,
+            child: _submitting
+                ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.4,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(t.submit),
           ),
         ),
       ),
@@ -203,56 +245,5 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
       return context.t.features.tickets.createServiceUnavailable;
     }
     return userFacingError(ApiException(message: msg));
-  }
-}
-
-class _ModernField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String hint;
-  final IconData icon;
-  final int maxLines;
-  final String? Function(String?)? validator;
-
-  const _ModernField({
-    required this.controller,
-    required this.label,
-    required this.hint,
-    required this.icon,
-    this.maxLines = 1,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      style: AppTypography.body1.copyWith(color: AppColors.textPrimary),
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(icon, color: AppColors.primary),
-        filled: true,
-        fillColor: AppColors.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: AppColors.cardBorderSide,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: AppColors.cardBorderSide,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.error),
-        ),
-      ),
-      validator: validator,
-    );
   }
 }
