@@ -13,7 +13,7 @@ class CertificatePinning {
   );
   static const String _defaultPin = String.fromEnvironment(
     'CERT_PIN_SHA256',
-    defaultValue: '6oLliMekGbThKbWVFlGN+1ay/PKkw62Ej5ROXu1lYcU=',
+    defaultValue: 'sbmhsbTKB9yczL2ZifgL7++jUOlOINTSG+pcBLX3xmE=',
   );
 
   static bool shouldEnable({

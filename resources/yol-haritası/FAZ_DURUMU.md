@@ -221,6 +221,32 @@ GET /api/v1/buildings/:id/reports?type=annual&year=2026
 - [x] Abonelik okuma ekranı (`GET /me/subscription`); satın alma butonu devre dışı
 - [ ] Canlı E2E — Abonelik akışı
 
+### 📌 Devam noktası (2026-06-15 — Furkan)
+
+**Buradan devam:** Google Play **satıcı hesabı** onaylandığında.
+
+**Tamamlanan (bu oturum):**
+- [x] RevenueCat projesi (AidatPanel) + entitlement (AidatPanel Pro)
+- [x] Play Store app RevenueCat’e bağlandı (`com.aidatpanel.app`, service account JSON)
+- [x] Android SDK API key alındı (`goog_...`)
+- [x] Backend webhook + `GET /me/subscription` deploy edildi
+- [x] Mobil `purchases_flutter` + abonelik ekranı satın alma butonları
+- [x] Fiziksel cihazda giriş çalışıyor (`--flavor prod` + `REVENUECAT_ANDROID_KEY`)
+- [x] Düzeltmeler (commit bekliyor): TLS cert pin güncellemesi, RevenueCat `logIn` girişi engellemesin, JitPack repo
+
+**Bekleyen (sırayla):**
+1. Play Console → **Satıcı hesabı** oluştur + onay bekle
+2. Play Console → **Abonelikler** → `aidatpanel_monthly`, `aidatpanel_annual`
+3. RevenueCat → **Product catalog** → ürünleri entitlement’a bağla, default offering
+4. RevenueCat → **Integrations → Webhooks** → `https://api.aidatpanel.com/api/v1/subscription/webhook/revenuecat` + VPS `REVENUECAT_WEBHOOK_SECRET`
+5. Sandbox satın alma testi → Canlı E2E → Furkan onayı
+
+**Çalıştırma (prod / fiziksel cihaz):**
+```bash
+cd mobile
+flutter run -t lib/main.dart --flavor prod --dart-define=REVENUECAT_ANDROID_KEY=goog_...
+```
+
 ---
 
 ## Gider–Aidat Hesaplama (FAZ 7 öncesi özellik)

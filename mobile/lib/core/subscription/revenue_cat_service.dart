@@ -24,16 +24,29 @@ abstract final class RevenueCatService {
   static Future<void> configure() async {
     if (!isConfigured) return;
 
-    await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.info);
-    final configuration = Platform.isAndroid
-        ? PurchasesConfiguration(androidApiKey)
-        : PurchasesConfiguration(iosApiKey);
-    await Purchases.configure(configuration);
+    try {
+      await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.info);
+      final configuration = Platform.isAndroid
+          ? PurchasesConfiguration(androidApiKey)
+          : PurchasesConfiguration(iosApiKey);
+      await Purchases.configure(configuration);
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('[RevenueCat] configure başarısız: $e\n$st');
+      }
+    }
   }
 
   static Future<void> logIn(String userId) async {
     if (!isConfigured || userId.isEmpty) return;
-    await Purchases.logIn(userId);
+    try {
+      await Purchases.logIn(userId);
+    } catch (e, st) {
+      // Abonelik SDK hatası oturum açmayı engellememeli.
+      if (kDebugMode) {
+        debugPrint('[RevenueCat] logIn başarısız: $e\n$st');
+      }
+    }
   }
 
   static Future<void> logOut() async {
