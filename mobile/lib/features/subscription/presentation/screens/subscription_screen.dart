@@ -55,7 +55,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 icon: Icons.error_outline,
                 iconBg: AppColors.errorBg,
                 iconColor: AppColors.chartRed,
-                message: state.error!,
+                message: _resolveMessage(t, state.error!),
                 child: SizedBox(
                   height: AppSizes.minTouchTarget,
                   width: double.infinity,
@@ -83,6 +83,15 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 iconBg: AppColors.successBg,
                 iconColor: AppColors.chartGreen,
                 message: _resolveMessage(t, state.successMessage!),
+              ),
+            ],
+            if (state.purchaseError != null) ...[
+              const SizedBox(height: AppSizes.spacingM),
+              _InfoCard(
+                icon: Icons.error_outline,
+                iconBg: AppColors.errorBg,
+                iconColor: AppColors.chartRed,
+                message: _resolveMessage(t, state.purchaseError!),
               ),
             ],
             const SizedBox(height: AppSizes.spacingL),
@@ -153,6 +162,14 @@ String _resolveMessage(Translations t, String key) {
       return t.features.subscription.purchaseCancelled;
     case 'purchases_unavailable':
       return t.features.subscription.purchasesUnavailable;
+    case 'subscription_load_failed':
+      return t.features.subscription.loadFailed;
+    case 'purchase_product_not_found':
+      return t.features.subscription.purchaseProductNotFound;
+    case 'purchase_store_error':
+      return t.features.subscription.purchaseStoreError;
+    case 'purchase_failed':
+      return t.features.subscription.purchaseFailed;
     default:
       return key;
   }

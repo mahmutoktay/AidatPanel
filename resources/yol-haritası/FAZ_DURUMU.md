@@ -223,23 +223,25 @@ GET /api/v1/buildings/:id/reports?type=annual&year=2026
 
 ### 📌 Devam noktası (2026-06-15 — Furkan)
 
-**Buradan devam:** Google Play **satıcı hesabı** onaylandığında.
+**Buradan devam:** RevenueCat **webhook** + internal test satın alma.
 
-**Tamamlanan (bu oturum):**
+**Tamamlanan:**
 - [x] RevenueCat projesi (AidatPanel) + entitlement (AidatPanel Pro)
 - [x] Play Store app RevenueCat’e bağlandı (`com.aidatpanel.app`, service account JSON)
+- [x] RevenueCat ↔ Play Store bağlantısı onaylandı (hatasız)
+- [x] Google Play **satıcı hesabı** açıldı / onaylandı
+- [x] Play Console **abonelikler** ayarlandı (`aidatpanel_monthly`, `aidatpanel_annual`)
+- [x] RevenueCat **default offering** → doğru Play ürünleri bağlandı
+- [x] RevenueCat **webhook** kuruldu + VPS `REVENUECAT_WEBHOOK_SECRET` deploy
 - [x] Android SDK API key alındı (`goog_...`)
 - [x] Backend webhook + `GET /me/subscription` deploy edildi
 - [x] Mobil `purchases_flutter` + abonelik ekranı satın alma butonları
-- [x] Fiziksel cihazda giriş çalışıyor (`--flavor prod` + `REVENUECAT_ANDROID_KEY`)
-- [x] Düzeltmeler (commit bekliyor): TLS cert pin güncellemesi, RevenueCat `logIn` girişi engellemesin, JitPack repo
+- [x] Fiziksel cihazda giriş + prod AAB (`0.1.7+1778674180`)
+- [x] TLS cert pin, RevenueCat `logIn` giriş engeli, JitPack repo düzeltmeleri
 
 **Bekleyen (sırayla):**
-1. Play Console → **Satıcı hesabı** oluştur + onay bekle
-2. Play Console → **Abonelikler** → `aidatpanel_monthly`, `aidatpanel_annual`
-3. RevenueCat → **Product catalog** → ürünleri entitlement’a bağla, default offering
-4. RevenueCat → **Integrations → Webhooks** → `https://api.aidatpanel.com/api/v1/subscription/webhook/revenuecat` + VPS `REVENUECAT_WEBHOOK_SECRET`
-5. Sandbox satın alma testi → Canlı E2E → Furkan onayı
+1. Internal test track’e AAB yükle → lisans test kullanıcısı ekle → sandbox satın alma testi
+2. Canlı E2E (satın alma → webhook → `GET /me/subscription`) → Furkan onayı
 
 **Çalıştırma (prod / fiziksel cihaz):**
 ```bash

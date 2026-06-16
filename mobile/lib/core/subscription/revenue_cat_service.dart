@@ -12,6 +12,8 @@ abstract final class RevenueCatService {
   );
   static const String iosApiKey = String.fromEnvironment('REVENUECAT_IOS_KEY');
 
+  static const List<String> _offeringFallbackIds = ['default', 'aidatpanel'];
+
   static bool get isSupportedPlatform =>
       !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
@@ -58,23 +60,92 @@ abstract final class RevenueCatService {
     }
   }
 
+  static bool matchesMonthly(String productId) =>
+      productId == SubscriptionConstants.monthlyProductId ||
+      productId.startsWith('${SubscriptionConstants.monthlyProductId}:') ||
+      productId.toLowerCase().contains('month');
+
+  static bool matchesAnnual(String productId) =>
+      productId == SubscriptionConstants.annualProductId ||
+      productId.startsWith('${SubscriptionConstants.annualProductId}:') ||
+      productId.toLowerCase().contains('annual') ||
+      productId.toLowerCase().contains('year');
+
+  static bool _storeIdMatches(String storeId, String productId) {
+    if (storeId == productId) return true;
+    if (storeId.startsWith('$productId:')) return true;
+    if (matchesMonthly(productId) && matchesMonthly(storeId)) return true;
+    if (matchesAnnual(productId) && matchesAnnual(storeId)) return true;
+    return false;
+  }
+
+  static Offering? _resolveOffering(Offerings offerings) {
+    final current = offerings.current;
+    if (current != null && current.availablePackages.isNotEmpty) {
+      return current;
+    }
+    for (final id in _offeringFallbackIds) {
+      final offering = offerings.all[id];
+      if (offering != null && offering.availablePackages.isNotEmpty) {
+        return offering;
+      }
+    }
+    for (final offering in offerings.all.values) {
+      if (offering.availablePackages.isNotEmpty) return offering;
+    }
+    return current;
+  }
+
   static Future<Package?> findPackage(String productId) async {
     if (!isConfigured) return null;
     final offerings = await Purchases.getOfferings();
-    final current = offerings.current;
-    if (current == null) return null;
+    final offering = _resolveOffering(offerings);
+    if (offering == null) return null;
 
-    for (final package in current.availablePackages) {
-      if (package.storeProduct.identifier == productId) {
+    if (matchesMonthly(productId) && offering.monthly != null) {
+      return offering.monthly;
+    }
+    if (matchesAnnual(productId) && offering.annual != null) {
+      return offering.annual;
+    }
+
+    for (final package in offering.availablePackages) {
+      if (_storeIdMatches(package.storeProduct.identifier, productId)) {
         return package;
       }
     }
     return null;
   }
 
+  static List<String> _productIdCandidates(String productId) {
+    final ids = <String>{productId};
+    if (matchesMonthly(productId)) {
+      ids.add(SubscriptionConstants.monthlyProductId);
+    }
+    if (matchesAnnual(productId)) {
+      ids.add(SubscriptionConstants.annualProductId);
+    }
+    return ids.toList();
+  }
+
+  static Future<void> _purchaseStoreProduct(StoreProduct product) async {
+    if (Platform.isAndroid) {
+      final option = product.defaultOption ??
+          (product.subscriptionOptions != null &&
+                  product.subscriptionOptions!.isNotEmpty
+              ? product.subscriptionOptions!.first
+              : null);
+      if (option != null) {
+        await Purchases.purchase(PurchaseParams.subscriptionOption(option));
+        return;
+      }
+    }
+    await Purchases.purchase(PurchaseParams.storeProduct(product));
+  }
+
   static Future<void> purchaseProduct(String productId) async {
     if (!isConfigured) {
-      throw StateError('RevenueCat yapılandırılmamış.');
+      throw StateError('purchases_unavailable');
     }
 
     final package = await findPackage(productId);
@@ -83,19 +154,17 @@ abstract final class RevenueCatService {
       return;
     }
 
-    final products = await Purchases.getProducts([productId]);
+    final products = await Purchases.getProducts(_productIdCandidates(productId));
     if (products.isEmpty) {
-      throw StateError('Ürün mağazada bulunamadı.');
+      throw StateError('purchase_product_not_found');
     }
-    await Purchases.purchase(PurchaseParams.storeProduct(products.first));
+
+    for (final product in products) {
+      if (_storeIdMatches(product.identifier, productId)) {
+        await _purchaseStoreProduct(product);
+        return;
+      }
+    }
+    await _purchaseStoreProduct(products.first);
   }
-
-  static bool matchesMonthly(String productId) =>
-      productId == SubscriptionConstants.monthlyProductId ||
-      productId.toLowerCase().contains('month');
-
-  static bool matchesAnnual(String productId) =>
-      productId == SubscriptionConstants.annualProductId ||
-      productId.toLowerCase().contains('annual') ||
-      productId.toLowerCase().contains('year');
 }

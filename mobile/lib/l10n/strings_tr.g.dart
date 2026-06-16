@@ -988,6 +988,9 @@ class _Translations$features$subscription$tr implements Translations$features$su
 	@override String get purchaseCancelled => 'Satın alma iptal edildi.';
 	@override String get purchasesUnavailable => 'Satın alma bu sürümde henüz etkin değil.';
 	@override String get loadFailed => 'Abonelik bilgisi alınamadı.';
+	@override String get purchaseProductNotFound => 'Abonelik ürünü bulunamadı. Uygulamayı Play Store test linkinden yükleyin ve birkaç saat bekleyin.';
+	@override String get purchaseStoreError => 'Google Play ödeme şu an kullanılamıyor. Test hesabınızı kontrol edin.';
+	@override String get purchaseFailed => 'Satın alma tamamlanamadı. Lütfen tekrar deneyin.';
 }
 
 // Path: features.reports
@@ -1991,6 +1994,9 @@ extension on TranslationsTr {
 			'features.subscription.purchaseCancelled' => 'Satın alma iptal edildi.',
 			'features.subscription.purchasesUnavailable' => 'Satın alma bu sürümde henüz etkin değil.',
 			'features.subscription.loadFailed' => 'Abonelik bilgisi alınamadı.',
+			'features.subscription.purchaseProductNotFound' => 'Abonelik ürünü bulunamadı. Uygulamayı Play Store test linkinden yükleyin ve birkaç saat bekleyin.',
+			'features.subscription.purchaseStoreError' => 'Google Play ödeme şu an kullanılamıyor. Test hesabınızı kontrol edin.',
+			'features.subscription.purchaseFailed' => 'Satın alma tamamlanamadı. Lütfen tekrar deneyin.',
 			'features.reports.menuDownload' => 'Rapor indir',
 			'features.reports.sheetTitle' => 'PDF rapor',
 			'features.reports.reportTypeLabel' => 'Rapor türü',

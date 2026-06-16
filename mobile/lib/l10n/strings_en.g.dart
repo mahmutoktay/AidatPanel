@@ -2566,6 +2566,15 @@ class Translations$features$subscription$en {
 
 	/// en: 'Could not load subscription.'
 	String get loadFailed => 'Could not load subscription.';
+
+	/// en: 'Subscription product not found. Install from the Play Store test link and wait a few hours.'
+	String get purchaseProductNotFound => 'Subscription product not found. Install from the Play Store test link and wait a few hours.';
+
+	/// en: 'Google Play billing is unavailable. Check your license tester account.'
+	String get purchaseStoreError => 'Google Play billing is unavailable. Check your license tester account.';
+
+	/// en: 'Purchase could not be completed. Please try again.'
+	String get purchaseFailed => 'Purchase could not be completed. Please try again.';
 }
 
 // Path: features.reports
@@ -3827,6 +3836,9 @@ extension on Translations {
 			'features.subscription.purchaseCancelled' => 'Purchase was cancelled.',
 			'features.subscription.purchasesUnavailable' => 'Purchases are not enabled in this build yet.',
 			'features.subscription.loadFailed' => 'Could not load subscription.',
+			'features.subscription.purchaseProductNotFound' => 'Subscription product not found. Install from the Play Store test link and wait a few hours.',
+			'features.subscription.purchaseStoreError' => 'Google Play billing is unavailable. Check your license tester account.',
+			'features.subscription.purchaseFailed' => 'Purchase could not be completed. Please try again.',
 			'features.reports.menuDownload' => 'Download report',
 			'features.reports.sheetTitle' => 'PDF report',
 			'features.reports.reportTypeLabel' => 'Report type',

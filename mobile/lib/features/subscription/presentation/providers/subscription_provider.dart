@@ -4,7 +4,6 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../../../core/constants/subscription_constants.dart';
 import '../../../../core/subscription/revenue_cat_service.dart';
-import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/subscription_remote_datasource.dart';
 import '../../data/repositories/subscription_repository_impl.dart';
@@ -29,6 +28,7 @@ class SubscriptionState {
   final bool isPurchasing;
   final SubscriptionEntity? subscription;
   final String? error;
+  final String? purchaseError;
   final String? successMessage;
 
   const SubscriptionState({
@@ -36,6 +36,7 @@ class SubscriptionState {
     this.isPurchasing = false,
     this.subscription,
     this.error,
+    this.purchaseError,
     this.successMessage,
   });
 
@@ -46,9 +47,11 @@ class SubscriptionState {
     bool? isPurchasing,
     SubscriptionEntity? subscription,
     String? error,
+    String? purchaseError,
     String? successMessage,
     bool clearSubscription = false,
     bool clearError = false,
+    bool clearPurchaseError = false,
     bool clearSuccess = false,
   }) {
     return SubscriptionState(
@@ -57,6 +60,8 @@ class SubscriptionState {
       subscription:
           clearSubscription ? null : (subscription ?? this.subscription),
       error: clearError ? null : (error ?? this.error),
+      purchaseError:
+          clearPurchaseError ? null : (purchaseError ?? this.purchaseError),
       successMessage:
           clearSuccess ? null : (successMessage ?? this.successMessage),
     );
@@ -83,7 +88,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: userFacingError(e),
+        error: 'subscription_load_failed',
       );
     }
   }
@@ -104,6 +109,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
     state = state.copyWith(
       isPurchasing: true,
       clearError: true,
+      clearPurchaseError: true,
       clearSuccess: true,
     );
     try {
@@ -118,20 +124,39 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
       if (code == PurchasesErrorCode.purchaseCancelledError) {
         state = state.copyWith(
           isPurchasing: false,
-          error: 'purchase_cancelled',
+          purchaseError: 'purchase_cancelled',
         );
         return;
       }
       state = state.copyWith(
         isPurchasing: false,
-        error: userFacingError(e),
+        purchaseError: _purchaseErrorKey(code),
+      );
+    } on StateError catch (e) {
+      state = state.copyWith(
+        isPurchasing: false,
+        purchaseError: e.message,
       );
     } catch (e) {
       state = state.copyWith(
         isPurchasing: false,
-        error: userFacingError(e),
+        purchaseError: 'purchase_failed',
       );
     }
+  }
+}
+
+String _purchaseErrorKey(PurchasesErrorCode code) {
+  switch (code) {
+    case PurchasesErrorCode.productNotAvailableForPurchaseError:
+    case PurchasesErrorCode.productAlreadyPurchasedError:
+      return 'purchase_product_not_found';
+    case PurchasesErrorCode.storeProblemError:
+    case PurchasesErrorCode.purchaseNotAllowedError:
+    case PurchasesErrorCode.purchaseInvalidError:
+      return 'purchase_store_error';
+    default:
+      return 'purchase_failed';
   }
 }
 

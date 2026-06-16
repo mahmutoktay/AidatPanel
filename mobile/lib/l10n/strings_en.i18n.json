@@ -846,7 +846,10 @@
       "purchaseSuccess": "Purchase completed. Your subscription will update within a few minutes.",
       "purchaseCancelled": "Purchase was cancelled.",
       "purchasesUnavailable": "Purchases are not enabled in this build yet.",
-      "loadFailed": "Could not load subscription."
+      "loadFailed": "Could not load subscription.",
+      "purchaseProductNotFound": "Subscription product not found. Install from the Play Store test link and wait a few hours.",
+      "purchaseStoreError": "Google Play billing is unavailable. Check your license tester account.",
+      "purchaseFailed": "Purchase could not be completed. Please try again."
     },
     "reports": {
       "menuDownload": "Download report",

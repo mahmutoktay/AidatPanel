@@ -846,7 +846,10 @@
       "purchaseSuccess": "Satın alma tamamlandı. Abonelik birkaç dakika içinde güncellenir.",
       "purchaseCancelled": "Satın alma iptal edildi.",
       "purchasesUnavailable": "Satın alma bu sürümde henüz etkin değil.",
-      "loadFailed": "Abonelik bilgisi alınamadı."
+      "loadFailed": "Abonelik bilgisi alınamadı.",
+      "purchaseProductNotFound": "Abonelik ürünü bulunamadı. Uygulamayı Play Store test linkinden yükleyin ve birkaç saat bekleyin.",
+      "purchaseStoreError": "Google Play ödeme şu an kullanılamıyor. Test hesabınızı kontrol edin.",
+      "purchaseFailed": "Satın alma tamamlanamadı. Lütfen tekrar deneyin."
     },
     "reports": {
       "menuDownload": "Rapor indir",
