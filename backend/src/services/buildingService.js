@@ -192,8 +192,111 @@ export const deleteBuildingService = async (id, managerId) => {
 
   if (!building) return null;
 
-  return await prisma.building.delete({
-    where: { id },
+  return await prisma.$transaction(async (tx) => {
+    // 1. Delete all DuePayments for dues of this building
+    await tx.duePayment.deleteMany({
+      where: {
+        due: {
+          apartment: {
+            buildingId: id,
+          },
+        },
+      },
+    });
+
+    // 2. Delete all DueExpenseCarryforwards for this building
+    await tx.dueExpenseCarryforward.deleteMany({
+      where: {
+        OR: [
+          {
+            expense: {
+              buildingId: id,
+            },
+          },
+          {
+            apartment: {
+              buildingId: id,
+            },
+          },
+        ],
+      },
+    });
+
+    // 3. Delete all Dekonts of this building
+    await tx.dekont.deleteMany({
+      where: {
+        buildingId: id,
+      },
+    });
+
+    // 4. Delete all Dues of this building's apartments
+    await tx.due.deleteMany({
+      where: {
+        apartment: {
+          buildingId: id,
+        },
+      },
+    });
+
+    // 5. Delete all InviteCodes of this building's apartments
+    await tx.inviteCode.deleteMany({
+      where: {
+        apartment: {
+          buildingId: id,
+        },
+      },
+    });
+
+    // 6. Delete all TicketUpdates of this building's tickets
+    await tx.ticketUpdate.deleteMany({
+      where: {
+        ticket: {
+          apartment: {
+            buildingId: id,
+          },
+        },
+      },
+    });
+
+    // 7. Delete all Tickets of this building's apartments
+    await tx.ticket.deleteMany({
+      where: {
+        apartment: {
+          buildingId: id,
+        },
+      },
+    });
+
+    // 8. Delete all Expenses of this building
+    await tx.expense.deleteMany({
+      where: {
+        buildingId: id,
+      },
+    });
+
+    // 9. Unlink any users (residents) from this building's apartments
+    await tx.user.updateMany({
+      where: {
+        apartment: {
+          buildingId: id,
+        },
+      },
+      data: {
+        apartmentId: null,
+      },
+    });
+
+    // 10. Delete all Apartments of this building
+    await tx.apartment.deleteMany({
+      where: {
+        buildingId: id,
+      },
+    });
+
+    // 11. Finally, delete the Building itself
+    return await tx.building.delete({
+      where: { id },
+    });
   });
 };
 

@@ -54,6 +54,7 @@ class AuthState {
   final bool isAuthenticated;
   final bool registrationSuccess;
   final bool isManualLogout;
+  final bool showLogoutToast;
 
   const AuthState({
     this.logoutReason,
@@ -63,6 +64,7 @@ class AuthState {
     this.isAuthenticated = false,
     this.registrationSuccess = false,
     this.isManualLogout = false,
+    this.showLogoutToast = true,
   });
 
   AuthState copyWith({
@@ -73,6 +75,7 @@ class AuthState {
     bool? isAuthenticated,
     bool? registrationSuccess,
     bool? isManualLogout,
+    bool? showLogoutToast,
     bool clearUser = false,
     bool clearError = false,
   }) {
@@ -84,6 +87,7 @@ class AuthState {
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       registrationSuccess: registrationSuccess ?? this.registrationSuccess,
       isManualLogout: isManualLogout ?? this.isManualLogout,
+      showLogoutToast: showLogoutToast ?? this.showLogoutToast,
     );
   }
 }
@@ -283,7 +287,7 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  Future<void> logout(WidgetRef ref) async {
+  Future<void> logout(WidgetRef ref, {bool showToast = true}) async {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -295,13 +299,17 @@ class AuthNotifier extends Notifier<AuthState> {
       await RevenueCatService.logOut();
       await _authRepository.logout();
       await Future.delayed(const Duration(milliseconds: 500));
-      state = AuthState(isManualLogout: true, logoutReason: LogoutReason.manual);
+      state = AuthState(
+        isManualLogout: true,
+        logoutReason: LogoutReason.manual,
+        showLogoutToast: showToast,
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
     }
   }
 
-  Future<void> logoutLocal(WidgetRef ref) async {
+  Future<void> logoutLocal(WidgetRef ref, {bool showToast = true}) async {
     resetManagerTabIndex(ref);
     resetResidentTabIndex(ref);
     ref.read(dioClientProvider).clearResponseCache();
@@ -309,7 +317,11 @@ class AuthNotifier extends Notifier<AuthState> {
     await RevenueCatService.logOut();
     await _authRepository.logout();
     await Future.delayed(const Duration(milliseconds: 300));
-    state = const AuthState(isManualLogout: true, logoutReason: LogoutReason.manual);
+    state = AuthState(
+      isManualLogout: true,
+      logoutReason: LogoutReason.manual,
+      showLogoutToast: showToast,
+    );
   }
 
   /// Tüm cihazların oturumunu kapatır ve bu cihazı da Login ekranına düşürür.
@@ -318,7 +330,7 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       await _authRepository.logoutAllDevices();
-      await logoutLocal(ref);
+      await logoutLocal(ref, showToast: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
     }

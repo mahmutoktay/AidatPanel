@@ -4,13 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/auth_screen_shell.dart';
+import '../../../../shared/widgets/auth_form_styles.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../providers/auth_provider.dart';
 
@@ -91,43 +91,72 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     final t = context.t;
 
     return AuthScreenShell(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: ProfileSettingsUi.ink),
-        onPressed: _submitting ? null : () => context.pop(),
+      wrapInCard: false,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 18, top: 16),
+        child: GestureDetector(
+          onTap: _submitting ? null : () => context.pop(),
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0x14000000), // siyah %8
+                width: 0.5,
+              ),
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.chevron_left_rounded,
+              color: Color(0xFF333333),
+              size: 18,
+            ),
+          ),
+        ),
       ),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              width: 72,
-              height: 72,
-              margin: const EdgeInsets.only(top: AppSizes.spacingS),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: AppColors.fill,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.lock_reset,
-                color: AppColors.inkDark,
-                size: 36,
+            Center(
+              child: Container(
+                width: 52,
+                height: 52,
+                margin: const EdgeInsets.only(top: AppSizes.spacingS),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFDEDEC),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.vpn_key_rounded,
+                  color: Color(0xFFE15B4D),
+                  size: 24,
+                ),
               ),
             ),
             const SizedBox(height: AppSizes.spacingL),
             Text(
               t.common.forgotPasswordTitle,
-              style: AppTypography.h2.copyWith(
-                color: AppColors.inkDark,
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF15140F),
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSizes.spacingS),
             Text(
               t.common.forgotPasswordSubtitle,
-              style: AppTypography.body2.copyWith(
-                color: AppColors.mutedText,
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF6B6757),
               ),
               textAlign: TextAlign.center,
             ),
@@ -139,12 +168,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               textInputAction: TextInputAction.done,
               autofillHints: const [AutofillHints.email],
               onFieldSubmitted: (_) => _submit(),
-              decoration: InputDecoration(
+              style: AppTypography.body1,
+              decoration: AuthFormStyles.whiteField(
                 labelText: t.features.auth.email,
                 hintText: t.features.auth.emailHint,
-                prefixIcon: const Icon(Icons.email_outlined),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                prefixIcon: const Icon(
+                  Icons.email_outlined,
+                  size: AppSizes.iconSize,
                 ),
               ),
               validator: _validateEmail,
@@ -167,7 +197,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             const SizedBox(height: AppSizes.spacingM),
             SizedBox(
               width: double.infinity,
-              height: AppSizes.buttonHeightSecondary,
+              height: 54,
               child: OutlinedButton(
                 onPressed: _submitting
                     ? null
@@ -176,19 +206,22 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           extra: _emailController.text.trim(),
                         ),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.inkDark,
+                  foregroundColor: const Color(0xFF15140F),
+                  backgroundColor: Colors.white,
                   side: const BorderSide(
-                    color: AppColors.line,
+                    color: Color(0xFFE7E4DA),
                     width: 1.5,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  textStyle: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                child: Text(
-                  t.common.iHaveACode,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
+                child: Text(t.common.iHaveACode),
               ),
             ),
           ],

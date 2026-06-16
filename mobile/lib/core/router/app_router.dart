@@ -34,6 +34,7 @@ import '../../features/buildings/data/buildings_store.dart';
 import '../../features/buildings/domain/entities/building_entity.dart';
 import '../../features/profile/presentation/screens/profile_details_screen.dart';
 import '../../features/subscription/presentation/screens/subscription_screen.dart';
+import '../../features/subscription/presentation/providers/subscription_provider.dart';
 import '../../features/profile/presentation/screens/legal_document_screen.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
@@ -45,7 +46,7 @@ import '../../shared/widgets/toast_overlay.dart';
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 /// Tam ekran alt sayfalar root navigator'da açılır (dashboard iç navigator'ına sıkışmaz).
-List<RouteBase> _managerDashboardChildRoutes() => [
+List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
   GoRoute(
     path: 'tickets',
     name: 'manager_dashboard_tickets',
@@ -124,7 +125,14 @@ List<RouteBase> _managerDashboardChildRoutes() => [
     path: 'subscription',
     name: 'manager_subscription',
     parentNavigatorKey: rootNavigatorKey,
-    builder: (context, state) => const SubscriptionScreen(),
+    builder: (context, state) => SubscriptionScreen(
+      onBuyMonthly: () {
+        ref.read(subscriptionNotifierProvider.notifier).purchaseMonthly();
+      },
+      onBuyYearly: () {
+        ref.read(subscriptionNotifierProvider.notifier).purchaseAnnual();
+      },
+    ),
   ),
 ];
 
@@ -165,16 +173,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     // Oturum sonlanınca toast bildirimi göster.
     // Normal logout → başarı mesajı, başka cihazdan çıkış / refresh başarısız → sessionExpired mesajı.
     if (previous?.isAuthenticated == true && !next.isAuthenticated) {
-      // GoRouter henüz yönlendirme yapmadı; toast'ı gecikmeli göster.
-      Future.microtask(() {
-        final message = next.isManualLogout
-            ? t.common.logoutSuccess
-            : t.common.sessionExpired;
-        final type = next.isManualLogout ? ToastType.success : ToastType.error;
-        ref
-            .read(toastProvider.notifier)
-            .show(message, type: type, duration: const Duration(seconds: 5));
-      });
+      if (next.showLogoutToast) {
+        // GoRouter henüz yönlendirme yapmadı; toast'ı gecikmeli göster.
+        Future.microtask(() {
+          final message = next.isManualLogout
+              ? t.common.logoutSuccess
+              : t.common.sessionExpired;
+          final type = next.isManualLogout ? ToastType.success : ToastType.error;
+          ref
+              .read(toastProvider.notifier)
+              .show(message, type: type, duration: const Duration(seconds: 5));
+        });
+      }
 
       // Widget tree'yi komple yeniden başlatarak State Leak'i %100 engelle.
       // GoRouter, FcmScope, tüm provider listener'ları sıfırdan yaratılır.
@@ -285,7 +295,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return const ManagerDashboardScreen();
         },
-        routes: _managerDashboardChildRoutes(),
+        routes: _managerDashboardChildRoutes(ref),
       ),
       GoRoute(
         path: '/resident-dashboard',
@@ -435,8 +445,12 @@ class _BuildingResidentsFallbackScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.dashboardBackground,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         title: Text(context.t.common.buildingDetail),
       ),

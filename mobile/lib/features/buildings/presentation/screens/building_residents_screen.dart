@@ -319,6 +319,10 @@ class _BuildingResidentsScreenState
       child: Scaffold(
         backgroundColor: AppColors.dashboardBackground,
         appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          surfaceTintColor: Colors.transparent,
           centerTitle: true,
           leading: _selectionMode
               ? IconButton(
@@ -326,7 +330,29 @@ class _BuildingResidentsScreenState
                   icon: const Icon(Icons.close_rounded),
                   onPressed: _exitSelectionMode,
                 )
-              : null,
+              : Center(
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).maybePop(),
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0x14000000), // siyah %8
+                          width: 0.5,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.chevron_left_rounded,
+                        color: Color(0xFF333333),
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
           title: Text(
             _selectionMode
                 ? '$selectedCount ${context.t.common.selectedCountLabel}'

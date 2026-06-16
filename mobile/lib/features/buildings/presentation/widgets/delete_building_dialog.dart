@@ -3,16 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_sizes.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../domain/entities/building_entity.dart';
 
-/// Bina silmek için tip-to-confirm dialog'u.
+/// Bina silmek için tip-to-confirm bottom sheet'i.
 /// Kullanıcı, bina adını aynen yazana kadar "Sil" butonu pasiftir.
 /// Belge §5: DELETE /buildings/:id; FK varsa 400 döner, mesajı
 /// kullanıcı dostu Türkçeye çeviriyoruz.
@@ -26,9 +22,14 @@ class DeleteBuildingDialog extends ConsumerStatefulWidget {
     BuildContext context, {
     required BuildingEntity building,
   }) {
-    return showDialog<bool>(
+    return showModalBottomSheet<bool>(
       context: context,
-      barrierDismissible: false,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFF4F2EC),
+      barrierColor: const Color(0x6114120C),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
       builder: (_) => DeleteBuildingDialog(building: building),
     );
   }
@@ -50,6 +51,16 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
   }
 
   bool get _matches => _controller.text.trim() == widget.building.name.trim();
+
+  void _fillPhrase(String phrase) {
+    _controller.text = phrase;
+    _controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: _controller.text.length),
+    );
+    setState(() {
+      _attempted = false;
+    });
+  }
 
   Future<void> _delete() async {
     if (!_matches) {
@@ -87,150 +98,279 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
-      ),
-      titlePadding: const EdgeInsets.fromLTRB(
-        AppSizes.spacingL,
-        AppSizes.spacingL,
-        AppSizes.spacingL,
-        AppSizes.spacingS,
-      ),
-      title: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppSizes.spacingS),
-            decoration: BoxDecoration(
-              color: AppColors.error.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.warning_amber_rounded,
-              color: AppColors.error,
-              size: 28,
-            ),
+    final t = context.t;
+    final viewInsets = MediaQuery.of(context).viewInsets.bottom;
+    final canSubmit = _matches && !_deleting;
+    final phrase = widget.building.name;
+
+    return PopScope(
+      canPop: !_deleting,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: viewInsets),
+        child: Container(
+          color: Colors.transparent,
+          padding: EdgeInsets.fromLTRB(
+            24,
+            12,
+            24,
+            24 + MediaQuery.of(context).padding.bottom,
           ),
-          const SizedBox(width: AppSizes.spacingM),
-          Expanded(
-            child: Text(
-              context.t.common.deleteBuilding,
-              style: AppTypography.h4.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.t.common.deleteBuildingHeader,
-            style: AppTypography.body1.copyWith(
-              color: AppColors.error,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppSizes.spacingM),
-          Text(
-            context.t.common.deleteBuildingTypeHint,
-            style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppSizes.spacingS),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.spacingM,
-              vertical: AppSizes.spacingS,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(DashboardScreenStyle.pillRadius),
-              border: AppColors.cardBorder,
-            ),
-            child: SelectableText(
-              widget.building.name,
-              style: AppTypography.body1.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSizes.spacingM),
-          TextField(
-            controller: _controller,
-            autofocus: true,
-            onChanged: (_) => setState(() {}),
-            style: AppTypography.body1.copyWith(color: AppColors.textPrimary),
-            decoration: InputDecoration(
-              labelText: context.t.common.deleteBuildingTypeFieldLabel,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-              ),
-              errorText: _attempted && !_matches
-                  ? context.t.common.buildingNameMismatch
-                  : null,
-            ),
-          ),
-        ],
-      ),
-      actionsPadding: const EdgeInsets.fromLTRB(
-        AppSizes.spacingL,
-        0,
-        AppSizes.spacingL,
-        AppSizes.spacingM,
-      ),
-      actions: [
-        OutlinedButton(
-          onPressed: _deleting ? null : () => Navigator.of(context).pop(false),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.textPrimary,
-            side: AppColors.cardBorderSide,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(DashboardScreenStyle.pillRadius),
-            ),
-            minimumSize: const Size(48, AppSizes.minTouchTarget),
-          ),
-          child: Text(
-            context.t.common.cancelBtn,
-            style: AppTypography.button.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        ElevatedButton.icon(
-          onPressed: (_deleting || !_matches) ? null : _delete,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.error,
-            foregroundColor: Colors.white,
-            disabledBackgroundColor:
-                AppColors.error.withValues(alpha: 0.35),
-            disabledForegroundColor: Colors.white,
-            minimumSize: const Size(48, AppSizes.minTouchTarget),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(DashboardScreenStyle.pillRadius),
-            ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.spacingL,
-              vertical: AppSizes.spacingS,
-            ),
-          ),
-          icon: _deleting
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // 1. Drag Handle
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE7E4DA),
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
                   ),
-                )
-              : const Icon(Icons.delete_outline, size: 20),
-          label: Text(context.t.common.delete),
+                ),
+                const SizedBox(height: 20),
+
+                // 2. Header Row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFDEDEC),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.warning_amber_rounded,
+                        color: Color(0xFFE15B4D),
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t.common.deleteBuilding,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 19,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF15140F),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            t.common.deleteBuildingHeader,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF6B6757),
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // 3. Type hint text
+                Text(
+                  t.common.deleteBuildingTypeHint,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF9A9686),
+                    letterSpacing: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // 4. Clickable Red Card (phrase preview)
+                _PhrasePreview(
+                  phrase: phrase,
+                  onTap: _deleting ? null : () => _fillPhrase(phrase),
+                ),
+                const SizedBox(height: 16),
+
+                // 5. Text input field
+                TextField(
+                  controller: _controller,
+                  enabled: !_deleting,
+                  onChanged: (_) => setState(() {}),
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF15140F),
+                  ),
+                  cursorColor: const Color(0xFF15140F),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
+                    hintText: phrase,
+                    hintStyle: const TextStyle(
+                      color: Color(0xFFB0AC9D),
+                      fontWeight: FontWeight.w400,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.edit_note_rounded,
+                      color: Color(0xFF9A9686),
+                      size: 22,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFF15140F), width: 1.5),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE15B4D), width: 1.5),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE15B4D), width: 1.5),
+                    ),
+                    errorStyle: const TextStyle(
+                      color: Color(0xFFE15B4D),
+                      fontSize: 12,
+                    ),
+                    errorText: _attempted && !_matches
+                        ? context.t.common.buildingNameMismatch
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // 6. Actions row
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _deleting
+                            ? null
+                            : () => Navigator.of(context).pop(false),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF15140F),
+                          backgroundColor: Colors.white,
+                          side: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
+                          minimumSize: const Size.fromHeight(54),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        child: Text(t.common.cancelBtn),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: canSubmit ? _delete : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFE15B4D),
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: const Color(0xFFE15B4D).withValues(alpha: 0.3),
+                          disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
+                          elevation: 0,
+                          minimumSize: const Size.fromHeight(54),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        child: _deleting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(t.common.delete),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-      ],
+      ),
+    );
+  }
+}
+
+/// Doğrulama cümlesini/bina adını gösteren — tıklanınca input'a yazan — kompakt kırmızı kart.
+class _PhrasePreview extends StatelessWidget {
+  final String phrase;
+  final VoidCallback? onTap;
+
+  const _PhrasePreview({required this.phrase, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFFFDEDEC),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: SelectableText(
+                  phrase,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    color: Color(0xFFE15B4D),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    letterSpacing: 1.1,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.touch_app_outlined,
+                size: 20,
+                color: Color(0xFFE15B4D),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

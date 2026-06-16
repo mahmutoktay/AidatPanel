@@ -114,6 +114,16 @@ object PluginRegistrant {
 
         )
 
+        addPluginReflective(
+
+            flutterEngine,
+
+            "com.revenuecat.purchases_flutter.PurchasesFlutterPlugin",
+
+            "purchases_flutter",
+
+        )
+
     }
 
 

@@ -4,13 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
-import '../theme/profile_settings_ui.dart';
 
 /// Hesap kapatma onay sheet'i (KVKK soft delete).
 ///
@@ -28,7 +25,11 @@ class DeleteAccountSheet extends ConsumerStatefulWidget {
     return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0xFFF4F2EC),
+      barrierColor: const Color(0x6114120C),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
       builder: (_) => const DeleteAccountSheet(),
     );
   }
@@ -79,7 +80,7 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
         duration: const Duration(seconds: 5),
       );
 
-      await ref.read(authStateProvider.notifier).logout(ref);
+      await ref.read(authStateProvider.notifier).logout(ref, showToast: false);
       goRouter.go('/login');
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -111,185 +112,215 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
       child: Padding(
         padding: EdgeInsets.only(bottom: viewInsets),
         child: Container(
-          decoration: const BoxDecoration(
-            color: ProfileSettingsUi.background,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
+          color: Colors.transparent,
           padding: EdgeInsets.fromLTRB(
             24,
-            10,
+            12,
             24,
-            20 + MediaQuery.of(context).padding.bottom,
+            24 + MediaQuery.of(context).padding.bottom,
           ),
           child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // 1. Drag Handle
                 Center(
                   child: Container(
                     width: 40,
-                    height: 4,
+                    height: 5,
                     decoration: BoxDecoration(
-                      color: ProfileSettingsUi.line,
-                      borderRadius: BorderRadius.circular(2),
+                      color: const Color(0xFFE7E4DA),
+                      borderRadius: BorderRadius.circular(2.5),
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                // Başlık satırı — küçük kırmızı çember + iki satırlı metin.
+                // 2. Header Row
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 52,
+                      height: 52,
                       decoration: BoxDecoration(
-                        color: AppColors.error.withValues(alpha: 0.10),
-                        shape: BoxShape.circle,
+                        color: const Color(0xFFFDEDEC),
+                        borderRadius: BorderRadius.circular(16),
                       ),
+                      alignment: Alignment.center,
                       child: const Icon(
                         Icons.warning_amber_rounded,
-                        color: AppColors.error,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          t.common.deleteAccountTitle,
-                          style: ProfileSettingsUi.title.copyWith(
-                            fontSize: 17,
-                            height: 1.3,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                Text(
-                  t.common.deleteAccountWarning,
-                  style: AppTypography.body2.copyWith(
-                    color: ProfileSettingsUi.muted,
-                    fontSize: 14,
-                    height: 1.45,
-                  ),
-                ),
-                const SizedBox(height: 22),
-
-                // İpucu — küçük metin.
-                Text(
-                  t.common.deleteAccountTypeHint,
-                  style: ProfileSettingsUi.fieldLabel.copyWith(fontSize: 13),
-                ),
-                const SizedBox(height: 8),
-
-                // Doğrulama cümlesi — dokununca input'a yazılan tap-to-fill.
-                _PhrasePreview(
-                  phrase: phrase,
-                  onTap: _deleting ? null : () => _fillPhrase(phrase),
-                ),
-                const SizedBox(height: 12),
-
-                // Inline alt çizgi tabanlı text field.
-                TextField(
-                  controller: _controller,
-                  autofocus: true,
-                  enabled: !_deleting,
-                  textCapitalization: TextCapitalization.characters,
-                  onChanged: (_) => setState(() {}),
-                  style: ProfileSettingsUi.fieldValue.copyWith(
-                    letterSpacing: 1.0,
-                  ),
-                  cursorColor: ProfileSettingsUi.ink,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 10),
-                    border: UnderlineInputBorder(
-                      borderSide: BorderSide(color: ProfileSettingsUi.line),
-                    ),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: ProfileSettingsUi.line),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: ProfileSettingsUi.ink,
-                        width: 1.4,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 50,
-                        child: OutlinedButton(
-                          onPressed: _deleting
-                              ? null
-                              : () => Navigator.of(context).pop(false),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: ProfileSettingsUi.ink,
-                            side: const BorderSide(
-                              color: ProfileSettingsUi.line,
-                              width: 1,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                ProfileSettingsUi.radiusMd,
-                              ),
-                            ),
-                          ),
-                          child: Text(
-                            t.common.cancelBtn,
-                            style: ProfileSettingsUi.fieldValue.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
+                        color: Color(0xFFE15B4D),
+                        size: 24,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: SizedBox(
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: canSubmit ? () => _delete(phrase) : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.error,
-                            foregroundColor: Colors.white,
-                            disabledBackgroundColor:
-                                AppColors.error.withValues(alpha: 0.30),
-                            disabledForegroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                ProfileSettingsUi.radiusMd,
-                              ),
-                            ),
-                            textStyle: ProfileSettingsUi.fieldValue.copyWith(
-                              color: Colors.white,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t.common.deleteAccount,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 19,
                               fontWeight: FontWeight.w700,
+                              color: Color(0xFF15140F),
                             ),
                           ),
-                          child: _deleting
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(t.common.deleteAccountConfirmButton),
+                          const SizedBox(height: 4),
+                          Text(
+                            t.common.deleteAccountTitle,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF6B6757),
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // 3. Warning text
+                Text(
+                  t.common.deleteAccountWarning,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 14,
+                    height: 1.45,
+                    color: Color(0xFF6B6757),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 22),
+
+                // 4. Type hint text
+                Text(
+                  t.common.deleteAccountTypeHint,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF9A9686),
+                    letterSpacing: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // 5. Red Card copyable area (phrase preview)
+                _PhrasePreview(
+                  phrase: phrase,
+                  onTap: _deleting ? null : () => _fillPhrase(phrase),
+                ),
+                const SizedBox(height: 16),
+
+                // 6. Text input field
+                TextField(
+                  controller: _controller,
+                  enabled: !_deleting,
+                  textCapitalization: TextCapitalization.characters,
+                  onChanged: (_) => setState(() {}),
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF15140F),
+                    letterSpacing: 1.0,
+                  ),
+                  cursorColor: const Color(0xFF15140F),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
+                    hintText: phrase,
+                    hintStyle: const TextStyle(
+                      color: Color(0xFFB0AC9D),
+                      fontWeight: FontWeight.w400,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.edit_note_rounded,
+                      color: Color(0xFF9A9686),
+                      size: 22,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFF15140F), width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // 7. Actions row
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _deleting
+                            ? null
+                            : () => Navigator.of(context).pop(false),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF15140F),
+                          backgroundColor: Colors.white,
+                          side: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
+                          minimumSize: const Size.fromHeight(54),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
+                        child: Text(t.common.cancelBtn),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: canSubmit ? () => _delete(phrase) : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFE15B4D),
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: const Color(0xFFE15B4D).withValues(alpha: 0.3),
+                          disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
+                          elevation: 0,
+                          minimumSize: const Size.fromHeight(54),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        child: _deleting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(t.common.deleteAccountConfirmButton),
                       ),
                     ),
                   ],
@@ -313,31 +344,32 @@ class _PhrasePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.error.withValues(alpha: 0.06),
-      borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
+      color: const Color(0xFFFDEDEC),
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Row(
             children: [
               Expanded(
                 child: SelectableText(
                   phrase,
-                  style: AppTypography.body1.copyWith(
-                    color: AppColors.error,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    color: Color(0xFFE15B4D),
                     fontWeight: FontWeight.w700,
-                    fontSize: 14,
+                    fontSize: 15,
                     letterSpacing: 1.4,
                   ),
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(
+              const Icon(
                 Icons.touch_app_outlined,
-                size: 18,
-                color: AppColors.error.withValues(alpha: 0.75),
+                size: 20,
+                color: Color(0xFFE15B4D),
               ),
             ],
           ),

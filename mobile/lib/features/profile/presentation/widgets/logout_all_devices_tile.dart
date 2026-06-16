@@ -60,7 +60,12 @@ class LogoutAllDevicesConfirmSheet extends ConsumerWidget {
   static Future<void> show(BuildContext context) {
     return showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFF4F2EC),
+      barrierColor: const Color(0x6114120C),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
       builder: (_) => const LogoutAllDevicesConfirmSheet(),
     );
   }
@@ -70,96 +75,135 @@ class LogoutAllDevicesConfirmSheet extends ConsumerWidget {
     final t = context.t;
     final isLoading = ref.watch(authStateProvider).isLoading;
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: ProfileSettingsUi.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.fromLTRB(
-        20,
-        8,
-        20,
-        20 + MediaQuery.of(context).padding.bottom,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const _SheetHandle(),
-          const SizedBox(height: 20),
-          Container(
-            width: 56,
-            height: 56,
-            decoration: const BoxDecoration(
-              color: ProfileSettingsUi.fill,
-              shape: BoxShape.circle,
+    return PopScope(
+      canPop: !isLoading,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          12,
+          24,
+          24 + MediaQuery.of(context).padding.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE7E4DA),
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
+              ),
             ),
-            child: const Icon(
-              Icons.phonelink_erase_rounded,
-              size: 26,
-              color: ProfileSettingsUi.ink,
+            const SizedBox(height: 20),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFDEDEC),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.phonelink_erase_rounded,
+                    color: Color(0xFFE15B4D),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t.common.logoutAllDevices,
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 19,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF15140F),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        t.common.logoutAllDevicesConfirm,
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF6B6757),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            t.common.logoutAllDevices,
-            style: ProfileSettingsUi.name.copyWith(fontSize: 18),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            t.common.logoutAllDevicesConfirm,
-            style: ProfileSettingsUi.handle,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: ProfileSettingsUi.buttonHeight,
+            const SizedBox(height: 28),
+            Row(
+              children: [
+                Expanded(
                   child: OutlinedButton(
                     onPressed: isLoading ? null : () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: ProfileSettingsUi.ink,
-                      side: const BorderSide(
-                        color: ProfileSettingsUi.line,
-                        width: 1,
-                      ),
+                      foregroundColor: const Color(0xFF15140F),
+                      backgroundColor: Colors.white,
+                      side: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
+                      minimumSize: const Size.fromHeight(54),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          ProfileSettingsUi.radiusMd,
-                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      textStyle: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    child: Text(
-                      t.common.cancelBtn,
-                      style: ProfileSettingsUi.rowTitle,
-                    ),
+                    child: Text(t.common.cancelBtn),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: ProfileSettingsUi.buttonHeight,
+                const SizedBox(width: 12),
+                Expanded(
                   child: ElevatedButton(
-                    style: ProfileSettingsUi.primaryButton,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF15140F),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      minimumSize: const Size.fromHeight(54),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      textStyle: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     onPressed: isLoading ? null : () => _confirm(context, ref),
                     child: isLoading
                         ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
-                        : Text(
-                            t.common.confirm,
-                            style: ProfileSettingsUi.buttonLabel,
-                          ),
+                        : Text(t.common.confirm),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -179,24 +223,6 @@ class LogoutAllDevicesConfirmSheet extends ConsumerWidget {
       hasError ? authState.error! : t.common.logoutAllDevicesSuccess,
       type: hasError ? ToastType.error : ToastType.success,
       duration: const Duration(seconds: 4),
-    );
-  }
-}
-
-class _SheetHandle extends StatelessWidget {
-  const _SheetHandle();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 40,
-        height: 4,
-        decoration: BoxDecoration(
-          color: ProfileSettingsUi.line,
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
     );
   }
 }

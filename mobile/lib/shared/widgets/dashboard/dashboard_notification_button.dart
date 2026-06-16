@@ -37,43 +37,24 @@ class DashboardNotificationButton extends ConsumerWidget {
             shape: BoxShape.circle,
             boxShadow: DashboardScreenStyle.cardShadow,
           ),
-          alignment: Alignment.center,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              const Icon(
-                Icons.notifications_outlined,
-                color: AppColors.textPrimary,
-                size: 24,
+          child: Badge(
+            isLabelVisible: showBadge,
+            label: Text(
+              badgeLabel,
+              style: AppTypography.caption.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 10,
+                height: 1.1,
               ),
-              if (showBadge)
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: Container(
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.error,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      badgeLabel,
-                      style: AppTypography.caption.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 10,
-                        height: 1,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+            ),
+            backgroundColor: AppColors.error,
+            offset: const Offset(5, -5),
+            child: const Icon(
+              Icons.notifications_outlined,
+              color: AppColors.textPrimary,
+              size: 24,
+            ),
           ),
         ),
       ),

@@ -402,19 +402,25 @@ class MinimalBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: AppSizes.minTouchTarget,
-      height: AppSizes.minTouchTarget,
-      child: Material(
-        color: Colors.transparent,
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onPressed ?? () => Navigator.of(context).maybePop(),
+    return Center(
+      child: GestureDetector(
+        onTap: onPressed ?? () => Navigator.of(context).maybePop(),
+        child: Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: const Color(0x14000000), // siyah %8
+              width: 0.5,
+            ),
+          ),
+          alignment: Alignment.center,
           child: const Icon(
             Icons.chevron_left_rounded,
-            color: ProfileSettingsUi.ink,
-            size: 28,
+            color: Color(0xFF333333),
+            size: 18,
           ),
         ),
       ),

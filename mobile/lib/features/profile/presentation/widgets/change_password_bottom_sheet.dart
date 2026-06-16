@@ -4,23 +4,165 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_sizes.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
+import '../../../../shared/widgets/password_criterion.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 
-/// Tur 5 / §10/4 — Şifre Değiştir bottom sheet.
-///
-/// Backend `PUT /me/password` başarısı sonrası `refreshTokenVersion++`
-/// uyguluyor → mevcut refresh token geçersiz olur. UX:
-///   1. Başarı toast (çok dikkat çekici, 5 sn)
-///   2. Yerel oturumu kapat (logout())
-///   3. `/login` ekranına yönlendir
+/// PasswordField Reusable Widget
+class PasswordField extends StatefulWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? hintText;
+  final String? Function(String?)? validator;
+  final bool enabled;
+  final FocusNode? focusNode;
+  final TextInputAction textInputAction;
+  final ValueChanged<String>? onChanged;
+  final VoidCallback? onFieldSubmitted;
+  final Widget? passwordCriteria;
+
+  const PasswordField({
+    super.key,
+    required this.controller,
+    required this.label,
+    this.hintText,
+    this.validator,
+    this.enabled = true,
+    this.focusNode,
+    this.textInputAction = TextInputAction.next,
+    this.onChanged,
+    this.onFieldSubmitted,
+    this.passwordCriteria,
+  });
+
+  @override
+  State<PasswordField> createState() => _PasswordFieldState();
+}
+
+class _PasswordFieldState extends State<PasswordField> {
+  late FocusNode _focusNode;
+  bool _obscureText = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = widget.focusNode ?? FocusNode();
+  }
+
+  @override
+  void dispose() {
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.label.toUpperCase(),
+          style: const TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF9A9686),
+            letterSpacing: 1.1,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: widget.controller,
+          obscureText: _obscureText,
+          enabled: widget.enabled,
+          focusNode: _focusNode,
+          textInputAction: widget.textInputAction,
+          onChanged: widget.onChanged,
+          onFieldSubmitted: (_) {
+            if (widget.onFieldSubmitted != null) {
+              widget.onFieldSubmitted!();
+            }
+          },
+          style: const TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF15140F),
+          ),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
+            prefixIcon: const Icon(
+              Icons.lock_outline_rounded,
+              color: Color(0xFF9A9686),
+              size: 20,
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                color: const Color(0xFF9A9686),
+                size: 20,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscureText = !_obscureText;
+                });
+              },
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Color(0xFF15140F), width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Color(0xFFE15B4D), width: 1.5),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Color(0xFFE15B4D), width: 1.5),
+            ),
+            errorStyle: const TextStyle(
+              color: Color(0xFFE15B4D),
+              fontSize: 12,
+            ),
+          ),
+          validator: widget.validator,
+        ),
+        if (widget.hintText != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            widget.hintText!,
+            style: const TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 11.5,
+              color: Color(0xFF9A9686),
+            ),
+          ),
+        ],
+        if (widget.passwordCriteria != null) ...[
+          const SizedBox(height: 8),
+          widget.passwordCriteria!,
+        ],
+      ],
+    );
+  }
+}
+
+/// Redesigned ChangePasswordBottomSheet
 class ChangePasswordBottomSheet extends ConsumerStatefulWidget {
   const ChangePasswordBottomSheet({super.key});
 
@@ -28,7 +170,13 @@ class ChangePasswordBottomSheet extends ConsumerStatefulWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0xFFF4F2EC),
+      barrierColor: const Color(0x6114120C),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(32),
+        ),
+      ),
       builder: (_) => const ChangePasswordBottomSheet(),
     );
   }
@@ -44,25 +192,57 @@ class _ChangePasswordBottomSheetState
   final _currentPwController = TextEditingController();
   final _newPwController = TextEditingController();
   final _confirmPwController = TextEditingController();
-
-  bool _obscureCurrent = true;
-  bool _obscureNew = true;
-  bool _obscureConfirm = true;
+  final _newPwFocusNode = FocusNode();
   bool _submitting = false;
+
+  final RegExp _upperRegex = RegExp(r'[A-Z]');
+  final RegExp _lowerRegex = RegExp(r'[a-z]');
+  final RegExp _digitRegex = RegExp(r'[0-9]');
+  final RegExp _specialRegex = RegExp(r'[@$!%*?&.]');
+
+  bool _hasMinLength = false;
+  bool _hasUpperCase = false;
+  bool _hasLowerCase = false;
+  bool _hasNumber = false;
+  bool _hasSpecialChar = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _newPwController.addListener(_onNewPasswordChanged);
+    _newPwFocusNode.addListener(_onFocusChanged);
+  }
 
   @override
   void dispose() {
+    _newPwController.removeListener(_onNewPasswordChanged);
+    _newPwFocusNode.removeListener(_onFocusChanged);
+    _newPwFocusNode.dispose();
     _currentPwController.dispose();
     _newPwController.dispose();
     _confirmPwController.dispose();
     super.dispose();
   }
 
+  void _onFocusChanged() {
+    setState(() {});
+  }
+
+  void _onNewPasswordChanged() {
+    final value = _newPwController.text;
+    setState(() {
+      _hasMinLength = value.length >= 6;
+      _hasUpperCase = _upperRegex.hasMatch(value);
+      _hasLowerCase = _lowerRegex.hasMatch(value);
+      _hasNumber = _digitRegex.hasMatch(value);
+      _hasSpecialChar = _specialRegex.hasMatch(value);
+    });
+  }
+
   String? _validateNewPassword(String? value) {
     final t = context.t;
     final key = InputValidators.validatePassword(value);
     if (key == null) {
-      // Yeni şifre eski ile aynı olamaz
       if (value != null && value == _currentPwController.text) {
         return t.common.passwordsMustDiffer;
       }
@@ -94,8 +274,6 @@ class _ChangePasswordBottomSheetState
 
     setState(() => _submitting = true);
     final repo = ref.read(profileRepositoryProvider);
-    // Sheet pop sonrası context geçersizleşeceği için global nesneleri
-    // önceden yakala (use_build_context_synchronously uyarısı için).
     final navigator = Navigator.of(context);
     final goRouter = GoRouter.of(context);
     final toast = ref.read(toastProvider.notifier);
@@ -116,7 +294,7 @@ class _ChangePasswordBottomSheetState
         duration: const Duration(seconds: 5),
       );
 
-      await ref.read(authStateProvider.notifier).logout(ref);
+      await ref.read(authStateProvider.notifier).logout(ref, showToast: false);
       goRouter.go('/login');
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -140,95 +318,159 @@ class _ChangePasswordBottomSheetState
     final t = context.t;
     final viewInsets = MediaQuery.of(context).viewInsets.bottom;
 
+    final newPasswordText = _newPwController.text;
+    final int strength = newPasswordText.isEmpty ? -1 : InputValidators.getPasswordStrength(newPasswordText);
+
+    final String strengthLabel;
+    final Color strengthBg;
+    final Color strengthText;
+    final Color strengthDot;
+
+    if (strength == -1) {
+      strengthLabel = "Belirtilmemiş";
+      strengthBg = const Color(0xFFEAE8E0);
+      strengthText = const Color(0xFF9A9686);
+      strengthDot = const Color(0xFFB0AC9D);
+    } else if (strength <= 2) {
+      strengthLabel = "Zayıf";
+      strengthBg = const Color(0xFFFDEDEC);
+      strengthText = const Color(0xFFE15B4D);
+      strengthDot = const Color(0xFFE15B4D);
+    } else if (strength <= 4) {
+      strengthLabel = "Orta";
+      strengthBg = const Color(0xFFFEF9E7);
+      strengthText = const Color(0xFF92400E);
+      strengthDot = const Color(0xFFF2A93D);
+    } else {
+      strengthLabel = "Güçlü";
+      strengthBg = const Color(0xFFF6F8F3);
+      strengthText = const Color(0xFF16A34A);
+      strengthDot = const Color(0xFF4ADE80);
+    }
+
     return PopScope(
       canPop: !_submitting,
       child: Padding(
         padding: EdgeInsets.only(bottom: viewInsets),
         child: Container(
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(DashboardScreenStyle.cardRadius),
-            ),
-          ),
+          color: Colors.transparent,
           padding: EdgeInsets.fromLTRB(
-            AppSizes.spacingL,
-            AppSizes.spacingS,
-            AppSizes.spacingL,
-            AppSizes.spacingL + MediaQuery.of(context).padding.bottom,
+            24,
+            12,
+            24,
+            24 + MediaQuery.of(context).padding.bottom,
           ),
           child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // 1. Drag Handle
                   Center(
                     child: Container(
                       width: 40,
-                      height: 4,
+                      height: 5,
                       decoration: BoxDecoration(
-                        color: AppColors.borderColor,
-                        borderRadius: BorderRadius.circular(2),
+                        color: const Color(0xFFE7E4DA),
+                        borderRadius: BorderRadius.circular(2.5),
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppSizes.spacingL),
+                  const SizedBox(height: 20),
+
+                  // 2. Header Row
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
-                        width: 44,
-                        height: 44,
+                        width: 52,
+                        height: 52,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
+                          color: const Color(0xFFFDEDEC),
+                          borderRadius: BorderRadius.circular(16),
                         ),
+                        alignment: Alignment.center,
                         child: const Icon(
-                          Icons.lock_outline,
-                          color: AppColors.primary,
+                          Icons.lock_outline_rounded,
+                          color: Color(0xFFE15B4D),
                           size: 24,
                         ),
                       ),
-                      const SizedBox(width: AppSizes.spacingM),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               t.common.changePasswordTitle,
-                              style: AppTypography.h3,
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 19,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF15140F),
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               t.common.changePasswordSubtitle,
-                              style: AppTypography.caption.copyWith(
-                                color: AppColors.textSecondary,
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF6B6757),
                               ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSizes.spacingL),
-                  TextFormField(
-                    controller: _currentPwController,
-                    obscureText: _obscureCurrent,
-                    enabled: !_submitting,
-                    autofillHints: const [AutofillHints.password],
-                    textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
-                      labelText: t.common.currentPassword,
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscureCurrent
-                            ? Icons.visibility_off
-                            : Icons.visibility),
-                        onPressed: () => setState(
-                            () => _obscureCurrent = !_obscureCurrent),
-                      ),
+                  const SizedBox(height: 20),
+
+                  // 3. Strength Pill
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: strengthBg,
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: strengthDot,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Yeni şifre güvenlik seviyesi: $strengthLabel",
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: strengthText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 4. Form Fields
+                  PasswordField(
+                    controller: _currentPwController,
+                    label: t.common.currentPassword,
+                    enabled: !_submitting,
+                    textInputAction: TextInputAction.next,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return t.common.currentPasswordRequired;
@@ -236,44 +478,50 @@ class _ChangePasswordBottomSheetState
                       return null;
                     },
                   ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  TextFormField(
+                  const SizedBox(height: 20),
+                  PasswordField(
                     controller: _newPwController,
-                    obscureText: _obscureNew,
+                    focusNode: _newPwFocusNode,
+                    label: t.common.newPassword,
+                    hintText: "Büyük harf, küçük harf ve rakam içermeli",
                     enabled: !_submitting,
-                    autofillHints: const [AutofillHints.newPassword],
                     textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
-                      labelText: t.common.newPassword,
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscureNew
-                            ? Icons.visibility_off
-                            : Icons.visibility),
-                        onPressed: () =>
-                            setState(() => _obscureNew = !_obscureNew),
-                      ),
-                    ),
                     validator: _validateNewPassword,
+                    passwordCriteria: _newPwFocusNode.hasFocus
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              PasswordCriterion(
+                                text: context.t.features.auth.minLength,
+                                isMet: _hasMinLength,
+                              ),
+                              PasswordCriterion(
+                                text: context.t.features.auth.hasUpperCase,
+                                isMet: _hasUpperCase,
+                              ),
+                              PasswordCriterion(
+                                text: context.t.features.auth.hasLowerCase,
+                                isMet: _hasLowerCase,
+                              ),
+                              PasswordCriterion(
+                                text: context.t.features.auth.hasNumber,
+                                isMet: _hasNumber,
+                              ),
+                              PasswordCriterion(
+                                text: context.t.features.auth.hasSpecialChar,
+                                isMet: _hasSpecialChar,
+                              ),
+                            ],
+                          )
+                        : null,
                   ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  TextFormField(
+                  const SizedBox(height: 20),
+                  PasswordField(
                     controller: _confirmPwController,
-                    obscureText: _obscureConfirm,
+                    label: t.common.newPasswordConfirm,
                     enabled: !_submitting,
                     textInputAction: TextInputAction.done,
-                    onFieldSubmitted: (_) => _submit(),
-                    decoration: InputDecoration(
-                      labelText: t.common.newPasswordConfirm,
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscureConfirm
-                            ? Icons.visibility_off
-                            : Icons.visibility),
-                        onPressed: () => setState(
-                            () => _obscureConfirm = !_obscureConfirm),
-                      ),
-                    ),
+                    onFieldSubmitted: _submit,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return t.features.auth.confirmPassword;
@@ -284,61 +532,59 @@ class _ChangePasswordBottomSheetState
                       return null;
                     },
                   ),
-                  const SizedBox(height: AppSizes.spacingL),
+                  const SizedBox(height: 28),
+
+                  // 5. Actions Row
                   Row(
                     children: [
                       Expanded(
-                        child: SizedBox(
-                          height: AppSizes.minTouchTarget,
-                          child: OutlinedButton(
-                            onPressed: _submitting
-                                ? null
-                                : () => Navigator.of(context).pop(),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.textPrimary,
-                              side: const BorderSide(
-                                color: AppColors.borderColor,
-                                width: 1.5,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  DashboardScreenStyle.pillRadius,
-                                ),
-                              ),
+                        child: OutlinedButton(
+                          onPressed: _submitting ? null : () => Navigator.of(context).pop(),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF15140F),
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
+                            minimumSize: const Size.fromHeight(54),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            child: Text(
-                              t.common.cancelBtn,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            textStyle: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
+                          child: Text(t.common.cancelBtn),
                         ),
                       ),
-                      const SizedBox(width: AppSizes.spacingM),
+                      const SizedBox(width: 12),
                       Expanded(
-                        child: SizedBox(
-                          height: AppSizes.minTouchTarget,
-                          child: ElevatedButton(
-                            onPressed: _submitting ? null : _submit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  DashboardScreenStyle.pillRadius,
-                                ),
-                              ),
+                        child: ElevatedButton(
+                          onPressed: _submitting ? null : _submit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF15140F),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            minimumSize: const Size.fromHeight(54),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            child: _submitting
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : Text(t.common.changePasswordTitle),
+                            textStyle: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
+                          child: _submitting
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(t.common.changePasswordTitle),
                         ),
                       ),
                     ],

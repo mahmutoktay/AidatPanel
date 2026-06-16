@@ -217,6 +217,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       },
       child: AuthScreenShell(
         centerBody: true,
+        wrapInCard: false,
         cardPadding: const EdgeInsets.symmetric(
           horizontal: AppSizes.spacingXL,
           vertical: AppSizes.spacingXL,

@@ -42,13 +42,33 @@ class DashboardSecondaryScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.dashboardBackground,
       appBar: AppBar(
-        backgroundColor: AppColors.dashboardBackground,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: ProfileSettingsUi.ink),
-          onPressed: onBack ?? () => Navigator.of(context).maybePop(),
+        leading: Center(
+          child: GestureDetector(
+            onTap: onBack ?? () => Navigator.of(context).maybePop(),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0x14000000), // siyah %8
+                  width: 0.5,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.chevron_left_rounded,
+                color: Color(0xFF333333),
+                size: 18,
+              ),
+            ),
+          ),
         ),
         title: Text(title, style: ProfileSettingsUi.title),
         actions: appBarActions.isEmpty ? null : appBarActions,

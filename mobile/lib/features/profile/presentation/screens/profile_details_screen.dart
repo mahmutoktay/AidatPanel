@@ -222,18 +222,35 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
         user != null && !_editing && !profileState.isSaving;
 
     return AppBar(
-      backgroundColor: AppColors.dashboardBackground,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
       centerTitle: true,
-      leading: IconButton(
-        icon: Icon(
-          _editing ? Icons.close : Icons.arrow_back,
-          color: ProfileSettingsUi.ink,
+      leading: Center(
+        child: GestureDetector(
+          onTap: profileState.isSaving
+              ? null
+              : (_editing ? _cancelEdit : () => Navigator.of(context).pop()),
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0x14000000), // siyah %8
+                width: 0.5,
+              ),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              _editing ? Icons.close_rounded : Icons.chevron_left_rounded,
+              color: const Color(0xFF333333),
+              size: 18,
+            ),
+          ),
         ),
-        onPressed: profileState.isSaving
-            ? null
-            : (_editing ? _cancelEdit : () => Navigator.of(context).pop()),
       ),
       title: Text(
         _editing ? t.features.profile.editTitle : t.features.profile.title,

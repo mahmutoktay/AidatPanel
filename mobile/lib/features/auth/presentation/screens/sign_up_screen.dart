@@ -551,12 +551,29 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       showBrandHeader: true,
       brandHeaderLayout: AuthBrandHeaderLayout.horizontal,
       wrapInCard: false,
-      leading: IconButton(
-        icon: const Icon(
-          Icons.arrow_back,
-          color: ProfileSettingsUi.ink,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 18, top: 16),
+        child: GestureDetector(
+          onTap: isLoading ? null : () => context.pop(),
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0x14000000), // siyah %8
+                width: 0.5,
+              ),
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.chevron_left_rounded,
+              color: Color(0xFF333333),
+              size: 18,
+            ),
+          ),
         ),
-        onPressed: isLoading ? null : () => context.pop(),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

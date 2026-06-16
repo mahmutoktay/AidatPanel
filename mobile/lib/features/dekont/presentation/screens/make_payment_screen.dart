@@ -479,24 +479,25 @@ class _CircularIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
+    return Center(
+      child: GestureDetector(
         onTap: onPressed,
-        customBorder: const CircleBorder(),
         child: Container(
-          width: AppSizes.minTouchTarget,
-          height: AppSizes.minTouchTarget,
+          width: 38,
+          height: 38,
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: Colors.white,
             shape: BoxShape.circle,
-            boxShadow: DashboardScreenStyle.cardShadow,
+            border: Border.all(
+              color: const Color(0x14000000), // siyah %8
+              width: 0.5,
+            ),
           ),
           alignment: Alignment.center,
           child: Icon(
             icon,
-            color: AppColors.textPrimary,
-            size: 24,
+            color: const Color(0xFF333333),
+            size: 18,
           ),
         ),
       ),

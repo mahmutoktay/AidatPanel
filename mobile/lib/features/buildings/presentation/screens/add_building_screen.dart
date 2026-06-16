@@ -63,9 +63,10 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
       child: Scaffold(
         backgroundColor: AppColors.dashboardBackground,
         appBar: AppBar(
-          backgroundColor: AppColors.dashboardBackground,
+          backgroundColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
+          surfaceTintColor: Colors.transparent,
           centerTitle: false,
           titleSpacing: 0,
           leading: Padding(

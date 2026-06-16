@@ -38,8 +38,8 @@ class AppColors {
 
   static const Color fill = Color(0xFFF3F4F6);
 
-  /// Dashboard arka planı (mockup #F5F5F7).
-  static const Color dashboardBackground = Color(0xFFF5F5F7);
+  /// Dashboard arka planı (mockup #F5F4F0).
+  static const Color dashboardBackground = Color(0xFFF5F4F0);
 
   // Grafik vurgu renkleri (fl_chart)
   static const Color chartGreen = Color(0xFF4CAF50);

@@ -5,13 +5,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/auth_screen_shell.dart';
+import '../../../../shared/widgets/auth_form_styles.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../providers/auth_provider.dart';
 
@@ -116,43 +116,72 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     final t = context.t;
 
     return AuthScreenShell(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: ProfileSettingsUi.ink),
-        onPressed: _submitting ? null : () => context.pop(),
+      wrapInCard: false,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 18, top: 16),
+        child: GestureDetector(
+          onTap: _submitting ? null : () => context.pop(),
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0x14000000), // siyah %8
+                width: 0.5,
+              ),
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.chevron_left_rounded,
+              color: Color(0xFF333333),
+              size: 18,
+            ),
+          ),
+        ),
       ),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              width: 72,
-              height: 72,
-              margin: const EdgeInsets.only(top: AppSizes.spacingS),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: AppColors.fill,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.password_rounded,
-                color: AppColors.inkDark,
-                size: 36,
+            Center(
+              child: Container(
+                width: 52,
+                height: 52,
+                margin: const EdgeInsets.only(top: AppSizes.spacingS),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFDEDEC),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.lock_reset_rounded,
+                  color: Color(0xFFE15B4D),
+                  size: 24,
+                ),
               ),
             ),
             const SizedBox(height: AppSizes.spacingL),
             Text(
               t.common.resetPasswordTitle,
-              style: AppTypography.h2.copyWith(
-                color: AppColors.inkDark,
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF15140F),
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSizes.spacingS),
             Text(
               t.common.resetPasswordSubtitle,
-              style: AppTypography.body2.copyWith(
-                color: AppColors.mutedText,
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF6B6757),
               ),
               textAlign: TextAlign.center,
             ),
@@ -161,9 +190,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               const SizedBox(height: AppSizes.spacingS),
               Text(
                 widget.prefilledEmail!,
-                style: AppTypography.body2.copyWith(
-                  color: AppColors.inkDark,
-                  fontWeight: FontWeight.w600,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF15140F),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -182,18 +213,21 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   ),
                 ),
               ],
-              style: AppTypography.h3.copyWith(
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 20,
                 letterSpacing: 6,
                 fontWeight: FontWeight.w700,
+                color: Color(0xFF15140F),
               ),
               textAlign: TextAlign.center,
-              decoration: InputDecoration(
+              decoration: AuthFormStyles.whiteField(
                 labelText: t.common.resetCode,
                 hintText: t.common.resetCodeHint,
                 counterText: '',
-                prefixIcon: const Icon(Icons.vpn_key_outlined),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                prefixIcon: const Icon(
+                  Icons.vpn_key_outlined,
+                  size: AppSizes.iconSize,
                 ),
               ),
               validator: (value) {
@@ -212,17 +246,19 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               obscureText: _obscureNew,
               textInputAction: TextInputAction.next,
               autofillHints: const [AutofillHints.newPassword],
-              decoration: InputDecoration(
+              style: AppTypography.body1,
+              decoration: AuthFormStyles.whiteField(
                 labelText: t.common.newPassword,
-                prefixIcon: const Icon(Icons.lock_outline),
+                prefixIcon: const Icon(
+                  Icons.lock_outline,
+                  size: AppSizes.iconSize,
+                ),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscureNew ? Icons.visibility_off : Icons.visibility,
+                    size: AppSizes.iconSize,
                   ),
                   onPressed: () => setState(() => _obscureNew = !_obscureNew),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.inputRadius),
                 ),
               ),
               validator: _validateNewPassword,
@@ -234,18 +270,20 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               obscureText: _obscureConfirm,
               textInputAction: TextInputAction.done,
               onFieldSubmitted: (_) => _submit(),
-              decoration: InputDecoration(
+              style: AppTypography.body1,
+              decoration: AuthFormStyles.whiteField(
                 labelText: t.common.newPasswordConfirm,
-                prefixIcon: const Icon(Icons.lock_outline),
+                prefixIcon: const Icon(
+                  Icons.lock_outline,
+                  size: AppSizes.iconSize,
+                ),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscureConfirm ? Icons.visibility_off : Icons.visibility,
+                    size: AppSizes.iconSize,
                   ),
                   onPressed: () =>
                       setState(() => _obscureConfirm = !_obscureConfirm),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.inputRadius),
                 ),
               ),
               validator: (value) {
@@ -276,23 +314,26 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             const SizedBox(height: AppSizes.spacingM),
             SizedBox(
               width: double.infinity,
-              height: AppSizes.buttonHeightSecondary,
+              height: 54,
               child: OutlinedButton(
                 onPressed: _submitting ? null : () => context.go('/login'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.inkDark,
+                  foregroundColor: const Color(0xFF15140F),
+                  backgroundColor: Colors.white,
                   side: const BorderSide(
-                    color: AppColors.line,
+                    color: Color(0xFFE7E4DA),
                     width: 1.5,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  textStyle: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                child: Text(
-                  t.common.backToLogin,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
+                child: Text(t.common.backToLogin),
               ),
             ),
           ],

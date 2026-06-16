@@ -144,27 +144,89 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
   void _showLanguageSheet(BuildContext context) {
     final currentLocale = ref.read(localeProvider);
+    final t = context.t;
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFF4F2EC),
+      barrierColor: const Color(0x6114120C),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
       builder: (sheetContext) => Container(
-        decoration: const BoxDecoration(
-          color: ProfileSettingsUi.background,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
+        color: Colors.transparent,
         padding: EdgeInsets.fromLTRB(
-          AppSizes.spacingL,
-          AppSizes.spacingS,
-          AppSizes.spacingL,
-          AppSizes.spacingL + MediaQuery.of(context).padding.bottom,
+          24,
+          12,
+          24,
+          24 + MediaQuery.of(context).padding.bottom,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _BottomSheetHandle(),
-            const SizedBox(height: AppSizes.spacingM),
-            Text(context.t.common.language, style: ProfileSettingsUi.title),
-            const SizedBox(height: AppSizes.spacingL),
+            Center(
+              child: Container(
+                width: 40,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE7E4DA),
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2F0FD),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.language_rounded,
+                    color: Color(0xFF1976D2),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t.common.language,
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 19,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF15140F),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        currentLocale == AppLocale.tr
+                            ? "Uygulama dilini buradan değiştirebilirsiniz."
+                            : "You can change the application language here.",
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF6B6757),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 28),
             _LanguageOption(
               flag: '🇹🇷',
               title: 'Türkçe',
@@ -182,7 +244,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 }
               },
             ),
-            const SizedBox(height: AppSizes.spacingS),
+            const SizedBox(height: 12),
             _LanguageOption(
               flag: '🇬🇧',
               title: 'English',
@@ -200,7 +262,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 }
               },
             ),
-            const SizedBox(height: AppSizes.spacingM),
           ],
         ),
       ),
@@ -404,20 +465,18 @@ class _LanguageOption extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.spacingM,
-          vertical: AppSizes.spacingM,
+          horizontal: 16,
+          vertical: 16,
         ),
         decoration: BoxDecoration(
-          color: isSelected
-              ? ProfileSettingsUi.fill
-              : ProfileSettingsUi.background,
-          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? ProfileSettingsUi.ink : ProfileSettingsUi.line,
-            width: isSelected ? AppSizes.cardBorderWidth : 1,
+            color: isSelected ? const Color(0xFF15140F) : const Color(0xFFE7E4DA),
+            width: isSelected ? 1.5 : 1.5,
           ),
         ),
         child: Row(
@@ -430,14 +489,22 @@ class _LanguageOption extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: ProfileSettingsUi.rowTitle.copyWith(
-                      fontWeight:
-                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF15140F),
                     ),
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: ProfileSettingsUi.rowTrailing,
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF9A9686),
+                    ),
                   ),
                 ],
               ),
@@ -445,26 +512,10 @@ class _LanguageOption extends StatelessWidget {
             if (isSelected)
               const Icon(
                 Icons.check_circle_rounded,
-                color: ProfileSettingsUi.ink,
+                color: Color(0xFF15140F),
                 size: 20,
               ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomSheetHandle extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 40,
-        height: 4,
-        decoration: BoxDecoration(
-          color: ProfileSettingsUi.line,
-          borderRadius: BorderRadius.circular(2),
         ),
       ),
     );
@@ -546,103 +597,180 @@ class _LogoutTile extends ConsumerWidget {
       showChevron: false,
       onTap: authState.isLoading
           ? () {}
-          : () => _confirmLogout(context, ref),
+          : () => _confirmLogout(context),
     );
   }
 
-  void _confirmLogout(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet<void>(
+  void _confirmLogout(BuildContext context) {
+    _LogoutConfirmBottomSheet.show(context);
+  }
+}
+
+class _LogoutConfirmBottomSheet extends ConsumerWidget {
+  const _LogoutConfirmBottomSheet();
+
+  static Future<void> show(BuildContext context) {
+    return showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) => Container(
-        decoration: const BoxDecoration(
-          color: ProfileSettingsUi.background,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFF4F2EC),
+      barrierColor: const Color(0x6114120C),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      builder: (_) => const _LogoutConfirmBottomSheet(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.t;
+    final isLoading = ref.watch(authStateProvider).isLoading;
+
+    return PopScope(
+      canPop: !isLoading,
+      child: Container(
+        color: Colors.transparent,
         padding: EdgeInsets.fromLTRB(
-          20,
-          8,
-          20,
-          20 + MediaQuery.of(context).padding.bottom,
+          24,
+          12,
+          24,
+          24 + MediaQuery.of(context).padding.bottom,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _BottomSheetHandle(),
+            Center(
+              child: Container(
+                width: 40,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE7E4DA),
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
+              ),
+            ),
             const SizedBox(height: 20),
-            Container(
-              width: 56,
-              height: 56,
-              decoration: const BoxDecoration(
-                color: ProfileSettingsUi.fill,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.logout_rounded,
-                size: 26,
-                color: ProfileSettingsUi.ink,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              context.t.common.logout,
-              style: ProfileSettingsUi.name.copyWith(fontSize: 18),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              context.t.common.logoutConfirm,
-              style: ProfileSettingsUi.handle,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Expanded(
-                  child: SizedBox(
-                    height: ProfileSettingsUi.buttonHeight,
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(sheetContext),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: ProfileSettingsUi.ink,
-                        side: const BorderSide(
-                          color: ProfileSettingsUi.line,
-                          width: 1,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            ProfileSettingsUi.radiusMd,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        context.t.common.cancelBtn,
-                        style: ProfileSettingsUi.rowTitle,
-                      ),
-                    ),
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFDEDEC),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.logout_rounded,
+                    color: Color(0xFFE15B4D),
+                    size: 24,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: SizedBox(
-                    height: ProfileSettingsUi.buttonHeight,
-                    child: ElevatedButton(
-                      style: ProfileSettingsUi.primaryButton,
-                      onPressed: () async {
-                        Navigator.pop(sheetContext);
-                        await ref.read(authStateProvider.notifier).logout(ref);
-                        if (!context.mounted) return;
-                        ref.read(toastProvider.notifier).show(
-                              context.t.common.logoutSuccess,
-                              type: ToastType.success,
-                              duration: const Duration(seconds: 4),
-                            );
-                        context.go('/');
-                      },
-                      child: Text(
-                        context.t.common.logout,
-                        style: ProfileSettingsUi.buttonLabel,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t.common.logout,
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 19,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF15140F),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        t.common.logoutConfirm,
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF6B6757),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 28),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: isLoading ? null : () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF15140F),
+                      backgroundColor: Colors.white,
+                      side: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
+                      minimumSize: const Size.fromHeight(54),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      textStyle: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
+                    child: Text(t.common.cancelBtn),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF15140F),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      minimumSize: const Size.fromHeight(54),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      textStyle: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            final navigator = Navigator.of(context);
+                            final goRouter = GoRouter.of(context);
+                            await ref.read(authStateProvider.notifier).logout(ref);
+                            
+                            final authState = ref.read(authStateProvider);
+                            if (authState.error != null && authState.error!.isNotEmpty) {
+                              ref.read(toastProvider.notifier).show(
+                                    authState.error!,
+                                    type: ToastType.error,
+                                  );
+                              return;
+                            }
+
+                            if (navigator.canPop()) {
+                              navigator.pop();
+                            }
+                            goRouter.go('/login');
+                          },
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(t.common.logout),
                   ),
                 ),
               ],

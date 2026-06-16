@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -121,6 +122,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
       );
     } on PlatformException catch (e) {
       final code = PurchasesErrorHelper.getErrorCode(e);
+      debugPrint('[RevenueCat] Satın alma PlatformException (code: $code): $e');
       if (code == PurchasesErrorCode.purchaseCancelledError) {
         state = state.copyWith(
           isPurchasing: false,
@@ -133,11 +135,13 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
         purchaseError: _purchaseErrorKey(code),
       );
     } on StateError catch (e) {
+      debugPrint('[RevenueCat] Satın alma StateError: $e');
       state = state.copyWith(
         isPurchasing: false,
         purchaseError: e.message,
       );
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('[RevenueCat] Satın alma beklenmeyen hata: $e\n$st');
       state = state.copyWith(
         isPurchasing: false,
         purchaseError: 'purchase_failed',

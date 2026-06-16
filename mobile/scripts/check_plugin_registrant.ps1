@@ -28,6 +28,7 @@ $symbolByPlugin = @{
     "path_provider_android"         = "JniFlutterPlugin"
     "pdfx"                          = "PdfxPlugin"
     "permission_handler_android"      = "PermissionHandlerPlugin"
+    "purchases_flutter"             = "PurchasesFlutterPlugin"
     "share_plus"                    = "share.SharePlusPlugin"
 }
 
