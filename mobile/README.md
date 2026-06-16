@@ -41,7 +41,17 @@ flutter run -t lib/main_dev.dart
 
 1. `android/upload-keystore.jks` dosyan `android/` klasöründe olsun (veya `key.properties` içindeki `storeFile` yolunu ona göre düzenle).
 2. `android/key.properties.example` dosyasını `android/key.properties` olarak kopyala; şifreleri ve `storeFile` yolunu doldur. Bu dosya `.gitignore`’dadır.
-3. `flutter build appbundle --release` → `build/app/outputs/bundle/release/app-release.aab` → Play Console’a yükle. **Her AAB öncesi** `pubspec.yaml` içinde `+` sonrası sürüm kodunu 1 artır (Play reddeder aksi halde).
+3. **Her AAB öncesi** `pubspec.yaml` içinde `+` sonrası sürüm kodunu 1 artır (Play reddeder aksi halde). Prod derleme:
+   ```bash
+   cd mobile
+   flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=REVENUECAT_ANDROID_KEY=goog_...
+   ```
+   Çıktı: `build/app/outputs/bundle/prodRelease/app-prod-release.aab`. `REVENUECAT_ANDROID_KEY` olmadan abonelik satın alma çalışmaz.
+
+Fiziksel cihaz / prod test:
+```bash
+flutter run --flavor prod -t lib/main.dart --dart-define=REVENUECAT_ANDROID_KEY=goog_...
+```
 
 `key.properties` yoksa release derlemesi geçici olarak debug anahtarıyla imzalanır; mağazaya **yalnızca** `key.properties` + keystore ile üretilen AAB gönder.
 

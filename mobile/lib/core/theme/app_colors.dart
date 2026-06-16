@@ -38,8 +38,11 @@ class AppColors {
 
   static const Color fill = Color(0xFFF3F4F6);
 
-  /// Dashboard arka planı (mockup #F5F4F0).
+  /// Dashboard / sheet ortak krem arka plan (#F5F4F0).
   static const Color dashboardBackground = Color(0xFFF5F4F0);
+
+  /// Bottom sheet ve modal zemin — [dashboardBackground] ile aynı.
+  static const Color sheetBackground = dashboardBackground;
 
   // Grafik vurgu renkleri (fl_chart)
   static const Color chartGreen = Color(0xFF4CAF50);

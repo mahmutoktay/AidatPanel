@@ -2575,6 +2575,93 @@ class Translations$features$subscription$en {
 
 	/// en: 'Purchase could not be completed. Please try again.'
 	String get purchaseFailed => 'Purchase could not be completed. Please try again.';
+
+	/// en: 'Choose a plan and subscribe'
+	String get sectionSelectPlan => 'Choose a plan and subscribe';
+
+	/// en: 'Renews every month'
+	String get cycleMonthly => 'Renews every month';
+
+	/// en: 'Renews every year'
+	String get cycleAnnual => 'Renews every year';
+
+	/// en: 'Unlimited units'
+	String get featureUnlimitedUnits => 'Unlimited units';
+
+	/// en: 'Dues tracking'
+	String get featureDuesTracking => 'Dues tracking';
+
+	/// en: 'Advanced reports'
+	String get featureAdvancedReports => 'Advanced reports';
+
+	/// en: 'Priority support'
+	String get featurePrioritySupport => 'Priority support';
+
+	/// en: 'Trial period active'
+	String get trialActive => 'Trial period active';
+
+	/// en: 'Subscription active'
+	String get subscriptionActive => 'Subscription active';
+
+	/// en: 'Subscription cancelled'
+	String get subscriptionCancelled => 'Subscription cancelled';
+
+	/// en: 'Subscription expired'
+	String get subscriptionExpired => 'Subscription expired';
+
+	/// en: 'No active subscription'
+	String get noActiveSubscription => 'No active subscription';
+
+	/// en: '{count} days left'
+	String get daysLeft => '{count} days left';
+
+	/// en: 'PLAN'
+	String get planLabel => 'PLAN';
+
+	/// en: 'STATUS'
+	String get statusLabel => 'STATUS';
+
+	/// en: 'RENEWAL'
+	String get renewalLabel => 'RENEWAL';
+
+	/// en: 'Annual'
+	String get planAnnualShort => 'Annual';
+
+	/// en: 'Monthly'
+	String get planMonthlyShort => 'Monthly';
+
+	/// en: 'Excl. VAT / month'
+	String get priceExclVatMonth => 'Excl. VAT / month';
+
+	/// en: 'Excl. VAT / year'
+	String get priceExclVatYear => 'Excl. VAT / year';
+
+	/// en: 'Save {amount}'
+	String get savingBadge => 'Save {amount}';
+
+	/// en: 'Best value'
+	String get bestValueBadge => 'Best value';
+
+	/// en: 'Subscribe monthly'
+	String get purchaseMonthlyCta => 'Subscribe monthly';
+
+	/// en: 'Subscribe annually'
+	String get purchaseAnnualCta => 'Subscribe annually';
+
+	/// en: 'Prices exclude VAT · Cancel anytime'
+	String get kdvNote => 'Prices exclude VAT · Cancel anytime';
+
+	/// en: 'User'
+	String get guestUser => 'User';
+
+	/// en: '—'
+	String get priceUnavailable => '—';
+
+	/// en: 'Loading plans…'
+	String get loadingPlans => 'Loading plans…';
+
+	/// en: 'Purchases are not enabled in this build yet.'
+	String get purchasesDisabledHint => 'Purchases are not enabled in this build yet.';
 }
 
 // Path: features.reports
@@ -3839,6 +3926,35 @@ extension on Translations {
 			'features.subscription.purchaseProductNotFound' => 'Subscription product not found. Install from the Play Store test link and wait a few hours.',
 			'features.subscription.purchaseStoreError' => 'Google Play billing is unavailable. Check your license tester account.',
 			'features.subscription.purchaseFailed' => 'Purchase could not be completed. Please try again.',
+			'features.subscription.sectionSelectPlan' => 'Choose a plan and subscribe',
+			'features.subscription.cycleMonthly' => 'Renews every month',
+			'features.subscription.cycleAnnual' => 'Renews every year',
+			'features.subscription.featureUnlimitedUnits' => 'Unlimited units',
+			'features.subscription.featureDuesTracking' => 'Dues tracking',
+			'features.subscription.featureAdvancedReports' => 'Advanced reports',
+			'features.subscription.featurePrioritySupport' => 'Priority support',
+			'features.subscription.trialActive' => 'Trial period active',
+			'features.subscription.subscriptionActive' => 'Subscription active',
+			'features.subscription.subscriptionCancelled' => 'Subscription cancelled',
+			'features.subscription.subscriptionExpired' => 'Subscription expired',
+			'features.subscription.noActiveSubscription' => 'No active subscription',
+			'features.subscription.daysLeft' => '{count} days left',
+			'features.subscription.planLabel' => 'PLAN',
+			'features.subscription.statusLabel' => 'STATUS',
+			'features.subscription.renewalLabel' => 'RENEWAL',
+			'features.subscription.planAnnualShort' => 'Annual',
+			'features.subscription.planMonthlyShort' => 'Monthly',
+			'features.subscription.priceExclVatMonth' => 'Excl. VAT / month',
+			'features.subscription.priceExclVatYear' => 'Excl. VAT / year',
+			'features.subscription.savingBadge' => 'Save {amount}',
+			'features.subscription.bestValueBadge' => 'Best value',
+			'features.subscription.purchaseMonthlyCta' => 'Subscribe monthly',
+			'features.subscription.purchaseAnnualCta' => 'Subscribe annually',
+			'features.subscription.kdvNote' => 'Prices exclude VAT · Cancel anytime',
+			'features.subscription.guestUser' => 'User',
+			'features.subscription.priceUnavailable' => '—',
+			'features.subscription.loadingPlans' => 'Loading plans…',
+			'features.subscription.purchasesDisabledHint' => 'Purchases are not enabled in this build yet.',
 			'features.reports.menuDownload' => 'Download report',
 			'features.reports.sheetTitle' => 'PDF report',
 			'features.reports.reportTypeLabel' => 'Report type',

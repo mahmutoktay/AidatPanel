@@ -6,6 +6,7 @@ import '../../core/theme/app_typography.dart';
 import '../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../theme/dashboard_screen_style.dart';
 import 'notification_icon_button.dart';
+import 'circular_back_button.dart';
 
 /// Dashboard dışı push ekranları için ortak scaffold (flat AppBar + gri arka plan).
 class DashboardSecondaryScaffold extends StatelessWidget {
@@ -47,29 +48,7 @@ class DashboardSecondaryScaffold extends StatelessWidget {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        leading: Center(
-          child: GestureDetector(
-            onTap: onBack ?? () => Navigator.of(context).maybePop(),
-            child: Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0x14000000), // siyah %8
-                  width: 0.5,
-                ),
-              ),
-              alignment: Alignment.center,
-              child: const Icon(
-                Icons.chevron_left_rounded,
-                color: Color(0xFF333333),
-                size: 18,
-              ),
-            ),
-          ),
-        ),
+        leading: CircularBackButton(onPressed: onBack),
         title: Text(title, style: ProfileSettingsUi.title),
         actions: appBarActions.isEmpty ? null : appBarActions,
         bottom: bottom,

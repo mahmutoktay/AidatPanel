@@ -28,6 +28,7 @@ class SubscriptionState {
   final bool isLoading;
   final bool isPurchasing;
   final SubscriptionEntity? subscription;
+  final SubscriptionStorePrices storePrices;
   final String? error;
   final String? purchaseError;
   final String? successMessage;
@@ -36,17 +37,20 @@ class SubscriptionState {
     this.isLoading = false,
     this.isPurchasing = false,
     this.subscription,
+    this.storePrices = SubscriptionStorePrices.empty,
     this.error,
     this.purchaseError,
     this.successMessage,
   });
 
-  bool get purchasesEnabled => RevenueCatService.isConfigured && !isPurchasing;
+  bool get purchasesEnabled =>
+      RevenueCatService.isConfigured && !isPurchasing && !isLoading;
 
   SubscriptionState copyWith({
     bool? isLoading,
     bool? isPurchasing,
     SubscriptionEntity? subscription,
+    SubscriptionStorePrices? storePrices,
     String? error,
     String? purchaseError,
     String? successMessage,
@@ -60,6 +64,7 @@ class SubscriptionState {
       isPurchasing: isPurchasing ?? this.isPurchasing,
       subscription:
           clearSubscription ? null : (subscription ?? this.subscription),
+      storePrices: storePrices ?? this.storePrices,
       error: clearError ? null : (error ?? this.error),
       purchaseError:
           clearPurchaseError ? null : (purchaseError ?? this.purchaseError),
@@ -80,15 +85,30 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true, clearSuccess: true);
     try {
-      final sub = await _repository.getMySubscription();
+      final results = await Future.wait([
+        _repository.getMySubscription(),
+        RevenueCatService.fetchStorePrices(),
+      ]);
+      final sub = results[0] as SubscriptionEntity;
+      final prices = results[1] as SubscriptionStorePrices;
       state = state.copyWith(
         isLoading: false,
         subscription: sub,
+        storePrices: prices,
         clearError: true,
       );
     } catch (e) {
+      SubscriptionStorePrices prices = SubscriptionStorePrices.empty;
+      if (RevenueCatService.isConfigured) {
+        try {
+          prices = await RevenueCatService.fetchStorePrices();
+        } catch (_) {
+          // Fiyatlar opsiyonel; abonelik yüklenemese bile göster.
+        }
+      }
       state = state.copyWith(
         isLoading: false,
+        storePrices: prices,
         error: 'subscription_load_failed',
       );
     }

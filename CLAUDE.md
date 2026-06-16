@@ -179,8 +179,17 @@ Yeni endpoint → `mobile/lib/core/constants/api_constants.dart`'a ekle, datasou
 Kullanıcı **Google Play çıktısı / .aab** istediğinde (ek script veya araç eklemeden):
 
 1. `mobile/pubspec.yaml` içindeki `version:` satırında **`+` sonrası sürüm kodunu 1 artır** (ör. `0.1.3+1778674161` → `0.1.3+1778674162`). Sürüm adı (`0.1.x`) yalnızca kullanıcı açıkça isterse değişir.
-2. Ardından `cd mobile` → `flutter build appbundle --release` (`lib/main.dart`, `main_dev` değil).
-3. Çıktı yolunu bildir: `mobile/build/app/outputs/bundle/release/app-release.aab`.
+2. Ardından `cd mobile` → prod flavor + RevenueCat anahtarı **zorunlu**:
+   ```bash
+   flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=REVENUECAT_ANDROID_KEY=goog_...
+   ```
+   (`main_dev` değil; `--flavor prod` atlanmaz; `REVENUECAT_ANDROID_KEY` olmadan satın alma devre dışı kalır.)
+3. Çıktı yolunu bildir: `mobile/build/app/outputs/bundle/prodRelease/app-prod-release.aab`.
+
+**Prod çalıştırma / fiziksel cihaz testi** de aynı anahtarı ister:
+```bash
+flutter run --flavor prod -t lib/main.dart --dart-define=REVENUECAT_ANDROID_KEY=goog_...
+```
 
 Play’deki mevcut en büyük sürüm kodundan küçük/eşit kod yeniden yükleme reddedilir; bu yüzden adım 1 atlanmaz.
 

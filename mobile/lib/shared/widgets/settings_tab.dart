@@ -148,7 +148,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFFF4F2EC),
+      backgroundColor: AppColors.sheetBackground,
       barrierColor: const Color(0x6114120C),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
@@ -613,7 +613,7 @@ class _LogoutConfirmBottomSheet extends ConsumerWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFFF4F2EC),
+      backgroundColor: AppColors.sheetBackground,
       barrierColor: const Color(0x6114120C),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),

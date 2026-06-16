@@ -1,29 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/subscription/revenue_cat_service.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/app_date_format.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/circular_back_button.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/subscription_entity.dart';
 import '../providers/subscription_provider.dart';
 
-// ═══════════════════════════════════════
-// RENK SABİTLERİ (dosya başında const)
-// ═══════════════════════════════════════
-const kDark = Color(0xFF1A1A2E);
-const kBg = Color(0xFFF5F4F0);
-const kWhite = Colors.white;
-const kGreen = Color(0xFF4ADE80);
-const kGreen2 = Color(0xFF16A34A);
-const kAmber = Color(0xFF92400E);
-const kAmberBg = Color(0xFFFEF3C7);
-
-// ═══════════════════════════════════════
-// GENEL YAPI
-// ═══════════════════════════════════════
 class SubscriptionScreen extends ConsumerStatefulWidget {
   final VoidCallback onBuyMonthly;
   final VoidCallback onBuyYearly;
@@ -51,14 +43,16 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   Widget build(BuildContext context) {
     final subscriptionState = ref.watch(subscriptionNotifierProvider);
     final authUser = ref.watch(authStateProvider).user;
+    final t = context.t.features.subscription;
 
-    // Listen to success and error states for Toast feedback
     ref.listen<SubscriptionState>(subscriptionNotifierProvider, (previous, next) {
-      if (next.successMessage != null && next.successMessage != previous?.successMessage) {
+      if (next.successMessage != null &&
+          next.successMessage != previous?.successMessage) {
         final msg = _resolveMessage(context, next.successMessage!);
         ref.read(toastProvider.notifier).show(msg, type: ToastType.success);
       }
-      if (next.purchaseError != null && next.purchaseError != previous?.purchaseError) {
+      if (next.purchaseError != null &&
+          next.purchaseError != previous?.purchaseError) {
         final msg = _resolveMessage(context, next.purchaseError!);
         ref.read(toastProvider.notifier).show(msg, type: ToastType.error);
       }
@@ -68,36 +62,76 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       }
     });
 
-    if (authUser == null && subscriptionState.isLoading) {
-      return const Scaffold(
-        backgroundColor: kBg,
+    if (subscriptionState.isLoading && subscriptionState.subscription == null) {
+      return Scaffold(
+        backgroundColor: AppColors.dashboardBackground,
         body: Center(
-          child: CircularProgressIndicator(color: kDark),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(color: AppColors.primary),
+              const SizedBox(height: AppSizes.spacingM),
+              Text(
+                t.loadingPlans,
+                style: AppTypography.body1.copyWith(color: AppColors.textSecondary),
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    final user = authUser;
     final subscription = subscriptionState.subscription;
+    final prices = subscriptionState.storePrices;
+    final purchasesEnabled = subscriptionState.purchasesEnabled;
 
-    // Calculate trial days left
     int? daysLeft;
     if (subscription != null && subscription.currentPeriodEnd != null) {
-      final diff = subscription.currentPeriodEnd!.difference(DateTime.now()).inDays;
-      // If negative or 0 but status is trial/active, we can show 0 or hide. 
+      final diff =
+          subscription.currentPeriodEnd!.difference(DateTime.now()).inDays;
       daysLeft = diff > 0 ? diff : 0;
     }
 
+    final savingsAmount = prices.savingsAmount;
+    final savingsLabel = savingsAmount != null
+        ? t.savingBadge.replaceAll(
+            '{amount}',
+            _formatMoney(context, savingsAmount, prices),
+          )
+        : null;
+    final originalPrice = prices.annualEquivalentAmount != null
+        ? _formatMoney(context, prices.annualEquivalentAmount!, prices)
+        : null;
+
+    final monthlyPrice =
+        prices.monthlyPriceString ?? t.priceUnavailable;
+    final annualPrice =
+        prices.annualPriceString ?? t.priceUnavailable;
+
+    final features = [
+      (true, t.featureUnlimitedUnits),
+      (true, t.featureDuesTracking),
+      (false, t.featureAdvancedReports),
+      (false, t.featurePrioritySupport),
+    ];
+    final annualFeatures = [
+      (true, t.featureUnlimitedUnits),
+      (true, t.featureDuesTracking),
+      (true, t.featureAdvancedReports),
+      (true, t.featurePrioritySupport),
+    ];
+
     return Scaffold(
-      backgroundColor: kBg,
+      backgroundColor: AppColors.dashboardBackground,
       body: SafeArea(
         child: Column(
           children: [
-            const _TopBar(),
+            _TopBar(title: t.title),
             Expanded(
               child: RefreshIndicator(
-                color: kDark,
-                onRefresh: () => ref.read(subscriptionNotifierProvider.notifier).load(),
+                color: AppColors.primary,
+                onRefresh: () =>
+                    ref.read(subscriptionNotifierProvider.notifier).load(),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -105,51 +139,57 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _ProfileRow(
-                        user: user,
+                        user: authUser,
                         daysLeft: daysLeft,
                         status: subscription?.status,
                       ),
                       _StatusStrip(subscription: subscription),
-                      const _SectionLabel("Plan seç ve satın al"),
+                      if (!purchasesEnabled && !subscriptionState.isPurchasing)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Text(
+                            t.purchasesDisabledHint,
+                            style: AppTypography.body1.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      _SectionLabel(label: t.sectionSelectPlan),
                       _PlanCard(
                         isYearly: false,
-                        planName: "Aylık plan",
-                        cycle: "Her ay yenilenir",
-                        price: "99",
-                        features: const [
-                          (true, "Sınırsız daire"),
-                          (true, "Aidat takibi"),
-                          (false, "Gelişmiş raporlar"),
-                          (false, "Öncelikli destek"),
-                        ],
+                        planName: t.planMonthly,
+                        cycle: t.cycleMonthly,
+                        priceDisplay: monthlyPrice,
+                        vatNote: t.priceExclVatMonth,
+                        features: features,
                         isPurchasing: subscriptionState.isPurchasing,
+                        purchasesEnabled: purchasesEnabled,
+                        ctaLabel: t.purchaseMonthlyCta,
                         onBuy: widget.onBuyMonthly,
                       ),
                       const SizedBox(height: 10),
                       _PlanCard(
                         isYearly: true,
-                        planName: "Yıllık plan",
-                        cycle: "Tek seferlik ödeme",
-                        price: "999",
-                        savingLabel: "2 ay ücretsiz · ₺189 tasarruf",
-                        originalPrice: "₺1.188",
-                        badgeLabel: "En avantajlı",
-                        features: const [
-                          (true, "Sınırsız daire"),
-                          (true, "Aidat takibi"),
-                          (true, "Gelişmiş raporlar"),
-                          (true, "Öncelikli destek"),
-                        ],
+                        planName: t.planAnnual,
+                        cycle: t.cycleAnnual,
+                        priceDisplay: annualPrice,
+                        vatNote: t.priceExclVatYear,
+                        savingLabel: savingsLabel,
+                        originalPrice: originalPrice,
+                        badgeLabel: t.bestValueBadge,
+                        features: annualFeatures,
                         isPurchasing: subscriptionState.isPurchasing,
+                        purchasesEnabled: purchasesEnabled,
+                        ctaLabel: t.purchaseAnnualCta,
                         onBuy: widget.onBuyYearly,
                       ),
-                      const _KdvNote(),
+                      _KdvNote(text: t.kdvNote),
                     ],
                   ),
                 ),
               ),
             ),
-            const _BottomNav(),
+            SizedBox(height: MediaQuery.paddingOf(context).bottom),
           ],
         ),
       ),
@@ -157,46 +197,42 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   }
 }
 
-// ═══════════════════════════════════════
-// 1. ÜST BAR
-// ═══════════════════════════════════════
+String _formatMoney(
+  BuildContext context,
+  double amount,
+  SubscriptionStorePrices prices,
+) {
+  final locale = Localizations.localeOf(context).toString();
+  final symbol = prices.monthlyPriceString?.contains('₺') == true ||
+          prices.annualPriceString?.contains('₺') == true ||
+          prices.currencyCode == 'TRY'
+      ? '₺'
+      : '';
+  return NumberFormat.currency(
+    locale: locale,
+    symbol: symbol,
+    decimalDigits: 0,
+  ).format(amount);
+}
+
 class _TopBar extends StatelessWidget {
-  const _TopBar();
+  final String title;
+
+  const _TopBar({required this.title});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16, left: 18, right: 18, bottom: 8),
+      padding: const EdgeInsets.only(top: 16, left: 10, right: 18, bottom: 8),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: kWhite,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0x14000000), // siyah %8 (0.08)
-                  width: 0.5,
-                ),
-              ),
-              alignment: Alignment.center,
-              child: const Icon(
-                Icons.chevron_left_rounded,
-                color: Color(0xFF333333),
-                size: 18,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          const Text(
-            "Abonelik",
-            style: TextStyle(
-              fontSize: 14,
+          const CircularBackButton(),
+          const SizedBox(width: 4),
+          Text(
+            title,
+            style: AppTypography.body1.copyWith(
               fontWeight: FontWeight.w500,
-              color: Color(0xFF1A1A1A),
+              color: AppColors.textPrimary,
             ),
           ),
         ],
@@ -205,9 +241,6 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════
-// 2. PROFİL SATIRI
-// ═══════════════════════════════════════
 class _ProfileRow extends StatelessWidget {
   final UserEntity? user;
   final int? daysLeft;
@@ -220,42 +253,45 @@ class _ProfileRow extends StatelessWidget {
   });
 
   String _getInitials(String userName) {
-    final parts = userName.trim().split(' ').where((p) => p.isNotEmpty).toList();
+    final parts =
+        userName.trim().split(' ').where((p) => p.isNotEmpty).toList();
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-    return parts.isNotEmpty ? parts[0][0].toUpperCase() : 'F';
+    return parts.isNotEmpty ? parts[0][0].toUpperCase() : '?';
   }
 
   Widget _buildInitialsText(String userName) {
-    final initials = _getInitials(userName);
     return Text(
-      initials,
-      style: const TextStyle(
-        fontSize: 16,
+      _getInitials(userName),
+      style: AppTypography.body1.copyWith(
         fontWeight: FontWeight.w500,
-        color: kWhite,
+        color: Colors.white,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final String? imageUrl = user?.profilePicture != null && user!.profilePicture!.isNotEmpty
+    final t = context.t.features.subscription;
+    final displayName = user?.name ?? t.guestUser;
+    final String? imageUrl = user?.profilePicture != null &&
+            user!.profilePicture!.isNotEmpty
         ? '${ApiConstants.baseUrl}/uploads/avatars/${user!.profilePicture}'
         : null;
 
     final String userStatus;
-    if (status == SubscriptionStatus.trial) {
-      userStatus = "Deneme süresi aktif";
-    } else if (status == SubscriptionStatus.active) {
-      userStatus = "Abonelik aktif";
-    } else if (status == SubscriptionStatus.cancelled) {
-      userStatus = "Abonelik iptal edildi";
-    } else if (status == SubscriptionStatus.expired) {
-      userStatus = "Abonelik süresi doldu";
-    } else {
-      userStatus = "Aktif abonelik yok";
+    switch (status) {
+      case SubscriptionStatus.trial:
+        userStatus = t.trialActive;
+      case SubscriptionStatus.active:
+        userStatus = t.subscriptionActive;
+      case SubscriptionStatus.cancelled:
+        userStatus = t.subscriptionCancelled;
+      case SubscriptionStatus.expired:
+        userStatus = t.subscriptionExpired;
+      default:
+        userStatus = t.noActiveSubscription;
     }
 
     return Container(
@@ -266,7 +302,7 @@ class _ProfileRow extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: const BoxDecoration(
-              color: kDark,
+              color: Color(0xFF1A1A2E),
               shape: BoxShape.circle,
             ),
             clipBehavior: Clip.antiAlias,
@@ -277,80 +313,80 @@ class _ProfileRow extends StatelessWidget {
                     width: 44,
                     height: 44,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => _buildInitialsText(user?.name ?? "Kullanıcı"),
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildInitialsText(displayName),
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return const Center(
                         child: SizedBox(
                           width: 16,
                           height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 1.5, color: kWhite),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1.5,
+                            color: Colors.white,
+                          ),
                         ),
                       );
                     },
                   )
-                : _buildInitialsText(user?.name ?? "Kullanıcı"),
+                : _buildInitialsText(displayName),
           ),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                user?.name ?? "Furkan Yönetici",
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF1A1A1A),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName,
+                  style: AppTypography.body1.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 1),
-              Text(
-                userStatus,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Color(0xFF888888),
+                const SizedBox(height: 2),
+                Text(
+                  userStatus,
+                  style: AppTypography.small.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          if (daysLeft != null && daysLeft! > 0 && status == SubscriptionStatus.trial) ...[
-            const Spacer(),
+          if (daysLeft != null &&
+              daysLeft! > 0 &&
+              status == SubscriptionStatus.trial)
             Container(
               decoration: BoxDecoration(
-                color: kAmberBg,
+                color: AppColors.warningBg,
                 borderRadius: BorderRadius.circular(20),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(
                     Icons.access_time_rounded,
-                    size: 11,
-                    color: kAmber,
+                    size: 16,
+                    color: AppColors.warning,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    "$daysLeft gün kaldı",
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      color: kAmber,
+                    t.daysLeft.replaceAll('{count}', daysLeft!.toString()),
+                    style: AppTypography.caption.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.warning,
                     ),
                   ),
                 ],
               ),
             ),
-          ],
         ],
       ),
     );
   }
 }
 
-// ═══════════════════════════════════════
-// 3. DURUM STRIP
-// ═══════════════════════════════════════
 class _StatusStrip extends StatelessWidget {
   final SubscriptionEntity? subscription;
 
@@ -358,58 +394,63 @@ class _StatusStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t.features.subscription;
+
     final String planValue;
     if (subscription != null && subscription!.hasRecord) {
-      if (subscription!.plan.toLowerCase().contains('annual') || subscription!.plan.toLowerCase().contains('year')) {
-        planValue = "Yıllık";
-      } else if (subscription!.plan.toLowerCase().contains('month')) {
-        planValue = "Aylık";
+      final plan = subscription!.plan.toLowerCase();
+      if (plan.contains('annual') || plan.contains('year')) {
+        planValue = t.planAnnualShort;
+      } else if (plan.contains('month')) {
+        planValue = t.planMonthlyShort;
       } else {
         planValue = subscription!.plan;
       }
     } else {
-      planValue = "-";
+      planValue = t.priceUnavailable;
     }
 
     final String statusValue;
     final Color statusColor;
     if (subscription != null && subscription!.hasRecord) {
-      if (subscription!.status == SubscriptionStatus.trial) {
-        statusValue = "Deneme";
-        statusColor = kGreen2;
-      } else if (subscription!.status == SubscriptionStatus.active) {
-        statusValue = "Aktif";
-        statusColor = kGreen2;
-      } else if (subscription!.status == SubscriptionStatus.cancelled) {
-        statusValue = "İptal";
-        statusColor = const Color(0xFF1A1A1A);
-      } else if (subscription!.status == SubscriptionStatus.expired) {
-        statusValue = "Doldu";
-        statusColor = const Color(0xFF1A1A1A);
-      } else {
-        statusValue = "Bilinmiyor";
-        statusColor = const Color(0xFF1A1A1A);
+      switch (subscription!.status) {
+        case SubscriptionStatus.trial:
+          statusValue = t.statusTrial;
+          statusColor = AppColors.success;
+        case SubscriptionStatus.active:
+          statusValue = t.statusActive;
+          statusColor = AppColors.success;
+        case SubscriptionStatus.cancelled:
+          statusValue = t.statusCancelled;
+          statusColor = AppColors.textPrimary;
+        case SubscriptionStatus.expired:
+          statusValue = t.statusExpired;
+          statusColor = AppColors.textPrimary;
+        default:
+          statusValue = t.statusUnknown;
+          statusColor = AppColors.textPrimary;
       }
     } else {
-      statusValue = "-";
-      statusColor = const Color(0xFF1A1A1A);
+      statusValue = t.priceUnavailable;
+      statusColor = AppColors.textPrimary;
     }
 
     final String renewalValue;
     if (subscription != null && subscription!.currentPeriodEnd != null) {
-      renewalValue = AppDateFormat.yearMonthDay(subscription!.currentPeriodEnd!);
+      renewalValue =
+          AppDateFormat.yearMonthDay(subscription!.currentPeriodEnd!);
     } else {
-      renewalValue = "-";
+      renewalValue = t.priceUnavailable;
     }
 
     return Container(
       margin: const EdgeInsets.only(top: 14, bottom: 20),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: kWhite,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0x12000000), // siyah %7 (0.07)
+          color: const Color(0x12000000),
           width: 0.5,
         ),
       ),
@@ -418,32 +459,26 @@ class _StatusStrip extends StatelessWidget {
           children: [
             Expanded(
               child: _StatusItem(
-                label: "PLAN",
+                label: t.planLabel,
                 value: planValue,
-                valueColor: const Color(0xFF1A1A1A),
+                valueColor: AppColors.textPrimary,
               ),
             ),
-            Container(
-              width: 0.5,
-              color: const Color(0x14000000), // siyah %8 (0.08)
-            ),
+            Container(width: 0.5, color: const Color(0x14000000)),
             Expanded(
               child: _StatusItem(
-                label: "DURUM",
+                label: t.statusLabel,
                 value: statusValue,
                 valueColor: statusColor,
               ),
             ),
-            Container(
-              width: 0.5,
-              color: const Color(0x14000000), // siyah %8 (0.08)
-            ),
+            Container(width: 0.5, color: const Color(0x14000000)),
             Expanded(
               child: _StatusItem(
-                label: "YENİLEME",
+                label: t.renewalLabel,
                 value: renewalValue,
-                valueColor: const Color(0xFF1A1A1A),
-                smallFont: true,
+                valueColor: AppColors.textPrimary,
+                compact: true,
               ),
             ),
           ],
@@ -457,13 +492,13 @@ class _StatusItem extends StatelessWidget {
   final String label;
   final String value;
   final Color valueColor;
-  final bool smallFont;
+  final bool compact;
 
   const _StatusItem({
     required this.label,
     required this.value,
     required this.valueColor,
-    this.smallFont = false,
+    this.compact = false,
   });
 
   @override
@@ -474,18 +509,21 @@ class _StatusItem extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TextStyle(
-            fontSize: smallFont ? 11 : 13,
+          textAlign: TextAlign.center,
+          maxLines: compact ? 2 : 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.small.copyWith(
+            fontSize: compact ? 14 : 16,
             fontWeight: FontWeight.w500,
             color: valueColor,
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 9,
-            color: Color(0xFFAAAAAA),
+          style: AppTypography.caption.copyWith(
+            fontSize: 12,
+            color: AppColors.textDisabled,
             letterSpacing: 0.3,
           ),
         ),
@@ -494,24 +532,20 @@ class _StatusItem extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════
-// 4. BÖLÜM ETİKETİ
-// ═══════════════════════════════════════
 class _SectionLabel extends StatelessWidget {
   final String label;
 
-  const _SectionLabel(this.label);
+  const _SectionLabel({required this.label});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
       child: Text(
         label.toUpperCase(),
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: Color(0xFFAAAAAA),
+        style: AppTypography.caption.copyWith(
+          fontWeight: FontWeight.w600,
+          color: AppColors.textDisabled,
           letterSpacing: 0.4,
         ),
       ),
@@ -519,52 +553,60 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════
-// 5. PLAN KARTLARI
-// ═══════════════════════════════════════
 class _PlanCard extends StatelessWidget {
   final bool isYearly;
   final String planName;
   final String cycle;
-  final String price;
+  final String priceDisplay;
+  final String vatNote;
   final String? savingLabel;
   final String? originalPrice;
   final String? badgeLabel;
   final List<(bool active, String text)> features;
   final bool isPurchasing;
+  final bool purchasesEnabled;
+  final String ctaLabel;
   final VoidCallback onBuy;
 
   const _PlanCard({
     required this.isYearly,
     required this.planName,
     required this.cycle,
-    required this.price,
+    required this.priceDisplay,
+    required this.vatNote,
     this.savingLabel,
     this.originalPrice,
     this.badgeLabel,
     required this.features,
     required this.isPurchasing,
+    required this.purchasesEnabled,
+    required this.ctaLabel,
     required this.onBuy,
   });
 
+  bool get _canPurchase => purchasesEnabled && !isPurchasing;
+
   @override
   Widget build(BuildContext context) {
+    const darkCard = Color(0xFF1A1A2E);
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
         decoration: BoxDecoration(
-          color: isYearly ? kDark : kWhite,
+          color: isYearly ? darkCard : AppColors.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isYearly ? kDark : const Color(0x14000000), // siyah %8
+            color: isYearly ? darkCard : const Color(0x14000000),
             width: 1,
           ),
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: isPurchasing ? null : onBuy,
+            onTap: _canPurchase ? onBuy : null,
             borderRadius: BorderRadius.circular(18),
             child: Stack(
               children: [
@@ -573,90 +615,86 @@ class _PlanCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // a) Üst Row
                       Padding(
-                        padding: EdgeInsets.only(top: isYearly ? 8.0 : 0.0),
+                        padding: EdgeInsets.only(top: isYearly ? 8 : 0),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 38,
-                                  height: 38,
-                                  decoration: BoxDecoration(
-                                    color: !isYearly
-                                        ? const Color(0xFFF5F4F0)
-                                        : const Color(0x1AFFFFFF), // beyaz %10 (0.10)
-                                    borderRadius: BorderRadius.circular(11),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Icon(
-                                    !isYearly
-                                        ? Icons.calendar_month_outlined
-                                        : Icons.workspace_premium_outlined,
-                                    color: !isYearly
-                                        ? kDark
-                                        : const Color(0xCCFFFFFF), // beyaz %80 (0.80)
-                                    size: 18,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      planName,
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500,
-                                        color: isYearly ? kWhite : const Color(0xFF1A1A1A),
-                                      ),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: !isYearly
+                                          ? AppColors.dashboardBackground
+                                          : const Color(0x1AFFFFFF),
+                                      borderRadius: BorderRadius.circular(11),
                                     ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      cycle,
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: isYearly
-                                            ? const Color(0x66FFFFFF) // beyaz %40 (0.40)
-                                            : const Color(0xFFAAAAAA),
-                                      ),
+                                    alignment: Alignment.center,
+                                    child: Icon(
+                                      !isYearly
+                                          ? Icons.calendar_month_outlined
+                                          : Icons.workspace_premium_outlined,
+                                      color: !isYearly
+                                          ? darkCard
+                                          : const Color(0xCCFFFFFF),
+                                      size: 22,
                                     ),
-                                  ],
-                                ),
-                              ],
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          planName,
+                                          style: AppTypography.body1.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: isYearly
+                                                ? Colors.white
+                                                : AppColors.textPrimary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          cycle,
+                                          style: AppTypography.small
+                                              .copyWith(
+                                            color: isYearly
+                                                ? const Color(0x99FFFFFF)
+                                                : AppColors.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                            const SizedBox(width: 8),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                RichText(
-                                  text: TextSpan(
-                                    style: TextStyle(
-                                      fontSize: 26,
-                                      fontWeight: FontWeight.w500,
-                                      color: isYearly ? kWhite : const Color(0xFF1A1A1A),
-                                    ),
-                                    children: [
-                                      TextSpan(text: price),
-                                      const TextSpan(
-                                        text: ' TL',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
+                                Text(
+                                  priceDisplay,
+                                  style: AppTypography.h2.copyWith(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w600,
+                                    color: isYearly
+                                        ? Colors.white
+                                        : AppColors.textPrimary,
                                   ),
                                 ),
-                                const SizedBox(height: 3),
+                                const SizedBox(height: 4),
                                 Text(
-                                  "KDV hariç / ${isYearly ? 'yıl' : 'ay'}",
-                                  style: TextStyle(
-                                    fontSize: 9,
+                                  vatNote,
+                                  style: AppTypography.caption.copyWith(
                                     color: isYearly
-                                        ? const Color(0x4DFFFFFF) // beyaz %30 (0.30)
-                                        : const Color(0xFFBBBBBB),
+                                        ? const Color(0x80FFFFFF)
+                                        : AppColors.textDisabled,
                                   ),
                                 ),
                               ],
@@ -664,32 +702,33 @@ class _PlanCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // b) Sadece isYearly ise tasarruf satırı
                       if (isYearly && savingLabel != null) ...[
                         const SizedBox(height: 10),
                         Row(
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: const Color.fromRGBO(74, 222, 128, 0.15), // kGreen %15
+                                color: const Color.fromRGBO(74, 222, 128, 0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Icon(
                                     Icons.bolt_rounded,
-                                    size: 10,
-                                    color: kGreen2,
+                                    size: 14,
+                                    color: AppColors.success,
                                   ),
-                                  const SizedBox(width: 2),
+                                  const SizedBox(width: 4),
                                   Text(
                                     savingLabel!,
-                                    style: const TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w500,
-                                      color: kGreen2,
+                                    style: AppTypography.caption.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.success,
                                     ),
                                   ),
                                 ],
@@ -699,9 +738,8 @@ class _PlanCard extends StatelessWidget {
                               const SizedBox(width: 8),
                               Text(
                                 originalPrice!,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Color(0x40FFFFFF), // beyaz %25 (0.25)
+                                style: AppTypography.caption.copyWith(
+                                  color: const Color(0x66FFFFFF),
                                   decoration: TextDecoration.lineThrough,
                                 ),
                               ),
@@ -709,72 +747,81 @@ class _PlanCard extends StatelessWidget {
                           ],
                         ),
                       ],
-                      // c) Divider
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Divider(
                           thickness: 0.5,
                           height: 0.5,
                           color: !isYearly
-                              ? const Color(0x12000000) // siyah %7 (0.07)
-                              : const Color(0x14FFFFFF), // beyaz %8 (0.08)
+                              ? const Color(0x12000000)
+                              : const Color(0x14FFFFFF),
                         ),
                       ),
-                      // d) Özellik listesi
-                      Column(
-                        children: features.map((feature) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 7),
-                            child: _FeatureRow(
-                              active: feature.$1,
-                              text: feature.$2,
-                              isYearly: isYearly,
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                      // e) SizedBox
-                      const SizedBox(height: 14),
-                      // f) CTA butonu
-                      ElevatedButton(
-                        onPressed: isPurchasing ? null : onBuy,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isYearly ? kWhite : kDark,
-                          foregroundColor: isYearly ? kDark : kWhite,
-                          elevation: 0,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      ...features.map(
+                        (feature) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _FeatureRow(
+                            active: feature.$1,
+                            text: feature.$2,
+                            isYearly: isYearly,
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          minimumSize: const Size(double.infinity, 0),
                         ),
-                        child: isPurchasing
-                            ? SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: isYearly ? kDark : kWhite,
-                                ),
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    isYearly ? Icons.workspace_premium_outlined : Icons.credit_card_outlined,
-                                    size: 16,
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        height: AppSizes.buttonHeightSecondary,
+                        child: ElevatedButton(
+                          onPressed: _canPurchase ? onBuy : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                isYearly ? Colors.white : darkCard,
+                            foregroundColor:
+                                isYearly ? darkCard : Colors.white,
+                            disabledBackgroundColor: isYearly
+                                ? Colors.white.withValues(alpha: 0.5)
+                                : darkCard.withValues(alpha: 0.5),
+                            disabledForegroundColor: isYearly
+                                ? darkCard.withValues(alpha: 0.5)
+                                : Colors.white.withValues(alpha: 0.5),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: isPurchasing
+                              ? SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: isYearly ? darkCard : Colors.white,
                                   ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    isYearly ? "Yıllık aboneliği satın al" : "Aylık aboneliği satın al",
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      isYearly
+                                          ? Icons.workspace_premium_outlined
+                                          : Icons.credit_card_outlined,
+                                      size: 20,
                                     ),
-                                  ),
-                                ],
-                              ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        ctaLabel,
+                                        style: AppTypography.button.copyWith(
+                                          color: isYearly
+                                              ? darkCard
+                                              : Colors.white,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
                       ),
                     ],
                   ),
@@ -785,27 +832,29 @@ class _PlanCard extends StatelessWidget {
                     right: 0,
                     child: Container(
                       decoration: const BoxDecoration(
-                        color: kGreen,
+                        color: Color(0xFF4ADE80),
                         borderRadius: BorderRadius.only(
                           topRight: Radius.circular(18),
                           bottomLeft: Radius.circular(12),
                         ),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
                             Icons.bolt_rounded,
-                            size: 10,
+                            size: 14,
                             color: Color(0xFF14532D),
                           ),
-                          const SizedBox(width: 2),
+                          const SizedBox(width: 4),
                           Text(
                             badgeLabel!,
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w500,
+                            style: AppTypography.caption.copyWith(
+                              fontWeight: FontWeight.w600,
                               color: Color(0xFF14532D),
                               letterSpacing: 0.3,
                             ),
@@ -836,33 +885,25 @@ class _FeatureRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color iconColor;
-    if (active) {
-      iconColor = isYearly ? const Color(0xB3FFFFFF) : kDark; // beyaz %70 (0.70)
-    } else {
-      iconColor = isYearly ? const Color(0x33FFFFFF) : const Color(0x33000000); // beyaz %20 / siyah %20 (0.20)
-    }
-
-    final Color textColor;
-    if (active) {
-      textColor = isYearly ? const Color(0xC0FFFFFF) : const Color(0xFF444444); // beyaz %75 (0.75) / #444
-    } else {
-      textColor = isYearly ? const Color(0x40FFFFFF) : const Color(0xFFCCCCCC); // beyaz %25 (0.25) / #ccc
-    }
+    final iconColor = active
+        ? (isYearly ? const Color(0xB3FFFFFF) : AppColors.textPrimary)
+        : (isYearly ? const Color(0x33FFFFFF) : const Color(0x33000000));
+    final textColor = active
+        ? (isYearly ? const Color(0xC0FFFFFF) : AppColors.textPrimary)
+        : (isYearly ? const Color(0x66FFFFFF) : AppColors.textDisabled);
 
     return Row(
       children: [
         Icon(
           active ? Icons.check_rounded : Icons.close_rounded,
-          size: 13,
+          size: 18,
           color: iconColor,
         ),
-        const SizedBox(width: 7),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 11,
-            color: textColor,
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: AppTypography.small.copyWith(color: textColor),
           ),
         ),
       ],
@@ -870,36 +911,25 @@ class _FeatureRow extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════
-// 6. KDV NOTU
-// ═══════════════════════════════════════
 class _KdvNote extends StatelessWidget {
-  const _KdvNote();
+  final String text;
+
+  const _KdvNote({required this.text});
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 14),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
       child: Center(
         child: Text(
-          "Fiyatlara KDV dahil değildir · İstediğin zaman iptal edebilirsin",
+          text,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 9,
-            color: Color(0xFFBBBBBB),
+          style: AppTypography.caption.copyWith(
+            color: AppColors.textDisabled,
           ),
         ),
       ),
     );
-  }
-}
-
-class _BottomNav extends StatelessWidget {
-  const _BottomNav();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(height: MediaQuery.paddingOf(context).bottom);
   }
 }
 

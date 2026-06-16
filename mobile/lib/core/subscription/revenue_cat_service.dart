@@ -96,6 +96,55 @@ abstract final class RevenueCatService {
     return current;
   }
 
+  /// Mağaza fiyatları — offerings üzerinden aylık/yıllık paket.
+  static Future<SubscriptionStorePrices> fetchStorePrices() async {
+    if (!isConfigured) return SubscriptionStorePrices.empty;
+
+    try {
+      final offerings = await Purchases.getOfferings();
+      final offering = _resolveOffering(offerings);
+      if (offering == null) return SubscriptionStorePrices.empty;
+
+      Package? monthlyPackage;
+      Package? annualPackage;
+
+      if (offering.monthly != null) {
+        monthlyPackage = offering.monthly;
+      }
+      if (offering.annual != null) {
+        annualPackage = offering.annual;
+      }
+
+      for (final package in offering.availablePackages) {
+        final id = package.storeProduct.identifier;
+        if (monthlyPackage == null &&
+            _storeIdMatches(id, SubscriptionConstants.monthlyProductId)) {
+          monthlyPackage = package;
+        }
+        if (annualPackage == null &&
+            _storeIdMatches(id, SubscriptionConstants.annualProductId)) {
+          annualPackage = package;
+        }
+      }
+
+      final monthlyProduct = monthlyPackage?.storeProduct;
+      final annualProduct = annualPackage?.storeProduct;
+
+      return SubscriptionStorePrices(
+        monthlyPriceString: monthlyProduct?.priceString,
+        annualPriceString: annualProduct?.priceString,
+        monthlyPrice: monthlyProduct?.price,
+        annualPrice: annualProduct?.price,
+        currencyCode: monthlyProduct?.currencyCode ?? annualProduct?.currencyCode,
+      );
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('[RevenueCat] fetchStorePrices başarısız: $e\n$st');
+      }
+      return SubscriptionStorePrices.empty;
+    }
+  }
+
   static Future<Package?> findPackage(String productId) async {
     if (!isConfigured) return null;
     final offerings = await Purchases.getOfferings();
@@ -166,5 +215,41 @@ abstract final class RevenueCatService {
       }
     }
     await _purchaseStoreProduct(products.first);
+  }
+}
+
+/// RevenueCat / Play Store fiyat bilgisi.
+class SubscriptionStorePrices {
+  const SubscriptionStorePrices({
+    this.monthlyPriceString,
+    this.annualPriceString,
+    this.monthlyPrice,
+    this.annualPrice,
+    this.currencyCode,
+  });
+
+  static const empty = SubscriptionStorePrices();
+
+  final String? monthlyPriceString;
+  final String? annualPriceString;
+  final double? monthlyPrice;
+  final double? annualPrice;
+  final String? currencyCode;
+
+  bool get hasAnyPrice =>
+      monthlyPriceString != null || annualPriceString != null;
+
+  /// Yıllık plan için aylık×12 karşılaştırma tutarı.
+  double? get annualEquivalentAmount {
+    if (monthlyPrice == null) return null;
+    return monthlyPrice! * 12;
+  }
+
+  /// Yıllık planda tasarruf (pozitif ise).
+  double? get savingsAmount {
+    final equivalent = annualEquivalentAmount;
+    if (equivalent == null || annualPrice == null) return null;
+    final savings = equivalent - annualPrice!;
+    return savings > 0 ? savings : null;
   }
 }

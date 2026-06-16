@@ -243,10 +243,11 @@ GET /api/v1/buildings/:id/reports?type=annual&year=2026
 1. Internal test track’e AAB yükle → lisans test kullanıcısı ekle → sandbox satın alma testi
 2. Canlı E2E (satın alma → webhook → `GET /me/subscription`) → Furkan onayı
 
-**Çalıştırma (prod / fiziksel cihaz):**
+**Çalıştırma / AAB (prod — RevenueCat anahtarı zorunlu):**
 ```bash
 cd mobile
-flutter run -t lib/main.dart --flavor prod --dart-define=REVENUECAT_ANDROID_KEY=goog_...
+flutter run --flavor prod -t lib/main.dart --dart-define=REVENUECAT_ANDROID_KEY=goog_...
+flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=REVENUECAT_ANDROID_KEY=goog_...
 ```
 
 ---
