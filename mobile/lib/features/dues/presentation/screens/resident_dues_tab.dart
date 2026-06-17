@@ -36,7 +36,17 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _ensureDuesLoaded());
-    attachPaginationScroll(_scrollController, _onScrollNearEnd);
+    attachPaginationScroll(
+      _scrollController,
+      _onScrollNearEnd,
+      canLoad: () {
+        if (_loadMoreInFlight) return false;
+        if (_selectedSegment == 0) {
+          return ref.read(duesNotifierProvider).canLoadMore;
+        }
+        return ref.read(expensesNotifierProvider).canLoadMore;
+      },
+    );
   }
 
   void _ensureDuesLoaded() {

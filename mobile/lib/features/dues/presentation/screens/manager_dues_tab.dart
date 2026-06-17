@@ -47,9 +47,11 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   @override
   void initState() {
     super.initState();
-    attachPaginationScroll(_scrollController, () {
-      ref.read(duesNotifierProvider.notifier).loadMoreBuildingDues();
-    });
+    attachPaginationScroll(
+      _scrollController,
+      () => ref.read(duesNotifierProvider.notifier).loadMoreBuildingDues(),
+      canLoad: () => ref.read(duesNotifierProvider).canLoadMore,
+    );
   }
 
   @override
@@ -373,6 +375,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           month: _monthFilter,
           year: _yearFilter,
           status: _statusFilter,
+          paginated: false,
         );
 
     if (!mounted) return;
@@ -390,7 +393,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
         setState(() => _statsDues = ref.read(duesNotifierProvider).dues);
       }
     } else {
-      setState(() => _statsDues = ref.read(duesNotifierProvider).dues);
+      setState(() => _statsDues = const []);
     }
   }
 

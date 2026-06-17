@@ -129,6 +129,7 @@ class ExpensesNotifier extends Notifier<ExpensesState> {
         expenses: merged,
         summary: summary,
         nextCursor: result.nextCursor,
+        clearNextCursor: result.nextCursor == null,
       );
     } catch (e) {
       state = state.copyWith(
@@ -172,6 +173,7 @@ class ExpensesNotifier extends Notifier<ExpensesState> {
         expenses: merged,
         clearSummary: true,
         nextCursor: result.nextCursor,
+        clearNextCursor: result.nextCursor == null,
       );
     } catch (e) {
       state = state.copyWith(

@@ -319,6 +319,13 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get changePasswordSuccess => 'Şifreniz değiştirildi. Lütfen yeni şifrenizle tekrar giriş yapın.';
 	@override String get changePasswordFailed => 'Şifre değiştirilemedi. Lütfen tekrar deneyin.';
 	@override String get changePasswordWrongCurrent => 'Mevcut şifre hatalı.';
+	@override String get languageSheetDescription => 'Uygulama dilini buradan değiştirebilirsiniz.';
+	@override String get newPasswordHint => 'Büyük harf, küçük harf ve rakam içermeli';
+	@override String get passwordStrengthUnspecified => 'Belirtilmemiş';
+	@override String get passwordStrengthWeak => 'Zayıf';
+	@override String get passwordStrengthMedium => 'Orta';
+	@override String get passwordStrengthStrong => 'Güçlü';
+	@override String get passwordStrengthLabel => 'Yeni şifre güvenlik seviyesi: {level}';
 	@override String get deleteAccount => 'Hesabımı Kapat';
 	@override String get deleteAccountTitle => 'Hesabınızı kapatmak istiyor musunuz?';
 	@override String get deleteAccountWarning => 'Bu işlem geri alınamaz. Kişisel bilgileriniz silinir, ancak yasal nedenlerle bazı kayıtlar (aidat geçmişi gibi) anonim olarak saklanır.';
@@ -664,6 +671,23 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	@override String get noteDisabledClosed => 'Kapalı talebe not eklenemez';
 	@override String get statusClosedHint => 'Bu talep kapatıldı; durum değiştirilemez.';
 	@override String get apartmentRequired => 'Daire bilgisi bulunamadı. Lütfen tekrar giriş yapın.';
+	@override String get managerUpdateLabel => 'Yönetici güncellemesi';
+	@override String get residentUpdateLabel => 'Sakin güncellemesi';
+	@override String get quickReplyTemplatesTitle => 'Hızlı yanıt şablonları';
+	@override String get confirmChanges => 'Onayla';
+	@override String get residentInfoTitle => 'Talep sahibi bilgileri';
+	@override String get defaultResidentName => 'Daire sakin';
+	@override String get apartmentNumberTag => 'Daire {number}';
+	@override String get apartmentInfoMissing => 'Daire bilgisi yok';
+	@override String get managerNoteOptional => 'Yönetici notu (opsiyonel)';
+	@override String get templateTeamDispatched => 'Ekip yönlendirildi';
+	@override String get templateTeamDispatchedText => 'Talep yerinde incelendi, teknik ekip yönlendirildi.';
+	@override String get templateWaitingPart => 'Parça bekleniyor';
+	@override String get templateWaitingPartText => 'Gerekli malzemelerin siparişi verildi, parça bekleniyor.';
+	@override String get templateAppointmentSet => 'Randevu alındı';
+	@override String get templateAppointmentSetText => 'Daire sakini ile görüşüldü, randevu ayarlandı.';
+	@override String get templateResolvedCheck => 'Çözüldü / kontrol';
+	@override String get templateResolvedCheckText => 'Sorun giderildi, kontrol sağlandı.';
 }
 
 // Path: features.dekont
@@ -919,6 +943,7 @@ class _Translations$features$notifications$tr implements Translations$features$n
 	@override String get typeExpenseAdded => 'Yeni gider';
 	@override String get typeSystem => 'Sistem';
 	@override String get typeOther => 'Bildirim';
+	@override String get allApartmentsTag => 'Tüm daireler';
 	@override String get sendTitle => 'Sakinlere Duyuru';
 	@override String get fieldTitle => 'Başlık';
 	@override String get fieldBody => 'Mesaj';
@@ -959,6 +984,16 @@ class _Translations$features$profile$tr implements Translations$features$profile
 	@override String get photoSaved => 'Profil fotoğrafı bu hesap için kaydedildi.';
 	@override String get photoRemoved => 'Profil fotoğrafı kaldırıldı.';
 	@override String get removePhoto => 'Profil fotoğrafını kaldır';
+	@override String get avatarCamera => 'Kamera';
+	@override String get avatarGallery => 'Galeri';
+	@override String get avatarSave => 'Kaydet';
+	@override String get avatarRemove => 'Fotoğrafı Kaldır';
+	@override String get avatarPhotoLoadError => 'Fotoğraf yüklenirken bir hata oluştu.';
+	@override String get avatarPhotoProcessError => 'Fotoğraf işlenirken hata oluştu.';
+	@override String get avatarCameraError => 'Kamera başlatılamadı.';
+	@override String get avatarGalleryError => 'Galeri açılamadı.';
+	@override String get avatarDecodeError => 'Görsel çözümlenemedi.';
+	@override String get avatarSaveError => 'Fotoğraf kaydedilirken hata oluştu.';
 	@override String get accountCreatedAt => 'Hesap oluşturulma: {date}';
 }
 
@@ -1507,6 +1542,13 @@ extension on TranslationsTr {
 			'common.changePasswordSuccess' => 'Şifreniz değiştirildi. Lütfen yeni şifrenizle tekrar giriş yapın.',
 			'common.changePasswordFailed' => 'Şifre değiştirilemedi. Lütfen tekrar deneyin.',
 			'common.changePasswordWrongCurrent' => 'Mevcut şifre hatalı.',
+			'common.languageSheetDescription' => 'Uygulama dilini buradan değiştirebilirsiniz.',
+			'common.newPasswordHint' => 'Büyük harf, küçük harf ve rakam içermeli',
+			'common.passwordStrengthUnspecified' => 'Belirtilmemiş',
+			'common.passwordStrengthWeak' => 'Zayıf',
+			'common.passwordStrengthMedium' => 'Orta',
+			'common.passwordStrengthStrong' => 'Güçlü',
+			'common.passwordStrengthLabel' => 'Yeni şifre güvenlik seviyesi: {level}',
 			'common.deleteAccount' => 'Hesabımı Kapat',
 			'common.deleteAccountTitle' => 'Hesabınızı kapatmak istiyor musunuz?',
 			'common.deleteAccountWarning' => 'Bu işlem geri alınamaz. Kişisel bilgileriniz silinir, ancak yasal nedenlerle bazı kayıtlar (aidat geçmişi gibi) anonim olarak saklanır.',
@@ -1709,6 +1751,8 @@ extension on TranslationsTr {
 			'features.tickets.categoryMalfunction' => 'Arıza',
 			'features.tickets.categoryOther' => 'Diğer',
 			'features.tickets.submit' => 'Gönder',
+			_ => null,
+		} ?? switch (path) {
 			'features.tickets.createSuccess' => 'Talebiniz alındı',
 			'features.tickets.createFailed' => 'Talep kaydedilemedi. Lütfen tekrar deneyin.',
 			'features.tickets.createServiceUnavailable' => 'Talep servisi şu an hazır değil. Lütfen daha sonra tekrar deneyin.',
@@ -1716,8 +1760,6 @@ extension on TranslationsTr {
 			'features.tickets.emptySubtitle' => 'Arıza veya talebinizi buradan bildirebilirsiniz',
 			'features.tickets.titleTooShort' => 'Başlık en az 3 karakter olmalı',
 			'features.tickets.descriptionTooShort' => 'Açıklama en az 10 karakter olmalı',
-			_ => null,
-		} ?? switch (path) {
 			'features.tickets.statusOpen' => 'Açık',
 			'features.tickets.statusInProgress' => 'İşlemde',
 			'features.tickets.statusResolved' => 'Çözüldü',
@@ -1744,6 +1786,23 @@ extension on TranslationsTr {
 			'features.tickets.noteDisabledClosed' => 'Kapalı talebe not eklenemez',
 			'features.tickets.statusClosedHint' => 'Bu talep kapatıldı; durum değiştirilemez.',
 			'features.tickets.apartmentRequired' => 'Daire bilgisi bulunamadı. Lütfen tekrar giriş yapın.',
+			'features.tickets.managerUpdateLabel' => 'Yönetici güncellemesi',
+			'features.tickets.residentUpdateLabel' => 'Sakin güncellemesi',
+			'features.tickets.quickReplyTemplatesTitle' => 'Hızlı yanıt şablonları',
+			'features.tickets.confirmChanges' => 'Onayla',
+			'features.tickets.residentInfoTitle' => 'Talep sahibi bilgileri',
+			'features.tickets.defaultResidentName' => 'Daire sakin',
+			'features.tickets.apartmentNumberTag' => 'Daire {number}',
+			'features.tickets.apartmentInfoMissing' => 'Daire bilgisi yok',
+			'features.tickets.managerNoteOptional' => 'Yönetici notu (opsiyonel)',
+			'features.tickets.templateTeamDispatched' => 'Ekip yönlendirildi',
+			'features.tickets.templateTeamDispatchedText' => 'Talep yerinde incelendi, teknik ekip yönlendirildi.',
+			'features.tickets.templateWaitingPart' => 'Parça bekleniyor',
+			'features.tickets.templateWaitingPartText' => 'Gerekli malzemelerin siparişi verildi, parça bekleniyor.',
+			'features.tickets.templateAppointmentSet' => 'Randevu alındı',
+			'features.tickets.templateAppointmentSetText' => 'Daire sakini ile görüşüldü, randevu ayarlandı.',
+			'features.tickets.templateResolvedCheck' => 'Çözüldü / kontrol',
+			'features.tickets.templateResolvedCheckText' => 'Sorun giderildi, kontrol sağlandı.',
 			'features.dekont.makePaymentTitle' => 'Ödeme Yap',
 			'features.dekont.myDekontsTitle' => 'Dekontlarım',
 			'features.dekont.managerTitle' => 'Dekont İnceleme',
@@ -1972,6 +2031,7 @@ extension on TranslationsTr {
 			'features.notifications.typeExpenseAdded' => 'Yeni gider',
 			'features.notifications.typeSystem' => 'Sistem',
 			'features.notifications.typeOther' => 'Bildirim',
+			'features.notifications.allApartmentsTag' => 'Tüm daireler',
 			'features.notifications.sendTitle' => 'Sakinlere Duyuru',
 			'features.notifications.fieldTitle' => 'Başlık',
 			'features.notifications.fieldBody' => 'Mesaj',
@@ -2003,6 +2063,16 @@ extension on TranslationsTr {
 			'features.profile.photoSaved' => 'Profil fotoğrafı bu hesap için kaydedildi.',
 			'features.profile.photoRemoved' => 'Profil fotoğrafı kaldırıldı.',
 			'features.profile.removePhoto' => 'Profil fotoğrafını kaldır',
+			'features.profile.avatarCamera' => 'Kamera',
+			'features.profile.avatarGallery' => 'Galeri',
+			'features.profile.avatarSave' => 'Kaydet',
+			'features.profile.avatarRemove' => 'Fotoğrafı Kaldır',
+			'features.profile.avatarPhotoLoadError' => 'Fotoğraf yüklenirken bir hata oluştu.',
+			'features.profile.avatarPhotoProcessError' => 'Fotoğraf işlenirken hata oluştu.',
+			'features.profile.avatarCameraError' => 'Kamera başlatılamadı.',
+			'features.profile.avatarGalleryError' => 'Galeri açılamadı.',
+			'features.profile.avatarDecodeError' => 'Görsel çözümlenemedi.',
+			'features.profile.avatarSaveError' => 'Fotoğraf kaydedilirken hata oluştu.',
 			'features.profile.accountCreatedAt' => 'Hesap oluşturulma: {date}',
 			'features.subscription.title' => 'Abonelik',
 			'features.subscription.statusActive' => 'Aktif',

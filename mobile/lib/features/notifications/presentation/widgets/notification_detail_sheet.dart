@@ -4,7 +4,6 @@ import '../../../../core/utils/app_date_format.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dekont/domain/entities/dekont_entity.dart';
@@ -16,6 +15,7 @@ import '../../../tickets/domain/entities/ticket_entity.dart';
 import '../../../tickets/presentation/providers/tickets_provider.dart';
 import '../../../tickets/presentation/utils/ticket_labels.dart';
 import '../../domain/entities/notification_entity.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../utils/notification_labels.dart';
 import '../utils/notification_style.dart';
 
@@ -29,10 +29,8 @@ class NotificationDetailSheet {
     required VoidCallback onMarkRead,
     VoidCallback? onNavigate,
   }) {
-    return showModalBottomSheet<void>(
+    return PremiumBottomSheetScaffold.show<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => _NotificationDetailSheetBody(
         notification: notification,
         onMarkRead: onMarkRead,
@@ -83,146 +81,120 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
     final path = n.toPayload().resolveNavigationPath(role: role);
     final canNavigate = path != null && onNavigate != null;
 
-    final maxSheetHeight = MediaQuery.sizeOf(context).height * 0.86;
-
-    return Container(
-      constraints: BoxConstraints(maxHeight: maxSheetHeight),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(DashboardScreenStyle.cardRadius),
-        ),
-        boxShadow: DashboardScreenStyle.cardShadow,
+    return PremiumBottomSheetScaffold(
+      maxHeightFactor: 0.86,
+      scrollable: true,
+      padding: const EdgeInsets.fromLTRB(
+        AppSizes.spacingM,
+        0,
+        AppSizes.spacingM,
+        AppSizes.spacingM,
       ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSizes.spacingM,
-          AppSizes.spacingS,
-          AppSizes.spacingM,
-          AppSizes.spacingXL,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(top: AppSizes.spacingXS),
-                decoration: BoxDecoration(
-                  color: AppColors.lineLight,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-              const SizedBox(height: AppSizes.spacingM),
-              Row(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: visual.background,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(visual.icon, color: visual.color, size: 28),
-                  ),
-                  const SizedBox(width: AppSizes.spacingM),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          n.type.label(context),
-                          style: AppTypography.caption.copyWith(
-                            color: visual.color,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          dateStr,
-                          style: AppTypography.caption.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+            Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        visual.color.withValues(alpha: 0.16),
+                        visual.color.withValues(alpha: 0.04),
                       ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: visual.color.withValues(alpha: 0.25),
+                      width: 1.5,
                     ),
                   ),
-                  if (!n.isRead)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.infoBg,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: AppColors.info.withValues(alpha: 0.35),
-                        ),
-                      ),
-                      child: Text(
-                        t.unreadBadge,
+                  child: Icon(visual.icon, color: visual.color, size: 28),
+                ),
+                const SizedBox(width: AppSizes.spacingM),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        n.type.label(context),
                         style: AppTypography.caption.copyWith(
-                          color: AppColors.info,
+                          color: visual.color,
                           fontWeight: FontWeight.w800,
+                          letterSpacing: 0.3,
                         ),
                       ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppSizes.spacingL),
-              Text(
-                n.title,
-                style: AppTypography.h3.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w800,
+                      const SizedBox(height: 4),
+                      Text(
+                        dateStr,
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSizes.spacingM),
-              _DetailSection(notification: n),
-              const SizedBox(height: AppSizes.spacingXL),
-              if (canNavigate)
-                SizedBox(
-                  height: AppSizes.buttonHeightPrimary,
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      if (!n.isRead) onMarkRead();
-                      Navigator.of(context).pop();
-                      onNavigate!();
-                    },
-                    icon: const Icon(Icons.arrow_forward_rounded),
-                    label: Text(_actionLabel(context)),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                if (!n.isRead)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.infoBg,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.info.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Text(
+                      t.unreadBadge,
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.info,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
-                ),
-            const SizedBox(height: AppSizes.spacingS),
-            SizedBox(
-              height: AppSizes.buttonHeightSecondary,
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {
-                  if (!n.isRead) onMarkRead();
-                  Navigator.of(context).pop();
-                },
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: Text(context.t.common.close),
+              ],
+            ),
+            const SizedBox(height: AppSizes.spacingL),
+            Text(
+              n.title,
+              style: AppTypography.h3.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w900,
+                height: 1.3,
               ),
             ),
+            const SizedBox(height: AppSizes.spacingM),
+            _DetailSection(notification: n),
+            const SizedBox(height: AppSizes.spacingXL),
           ],
         ),
+      actions: PremiumSheetActions(
+        primaryLabel: canNavigate ? _actionLabel(context) : context.t.common.close,
+        onPrimary: () {
+          if (!n.isRead) onMarkRead();
+          if (canNavigate) {
+            Navigator.of(context).pop();
+            onNavigate!();
+          } else {
+            Navigator.of(context).pop();
+          }
+        },
+        secondaryLabel: canNavigate ? context.t.common.close : null,
+        onSecondary: canNavigate
+            ? () {
+                if (!n.isRead) onMarkRead();
+                Navigator.of(context).pop();
+              }
+            : null,
       ),
     );
   }
@@ -321,11 +293,20 @@ class _TicketDetailSection extends ConsumerWidget {
                   background: statusColor.withValues(alpha: 0.15),
                 ),
                 const SizedBox(width: AppSizes.spacingS),
-                Flexible(
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.fill,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.border.withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                  ),
                   child: Text(
                     ticket.category.label(context),
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondary,
+                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -333,18 +314,22 @@ class _TicketDetailSection extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: AppSizes.spacingM),
-            if (ticket.apartmentNumber != null)
-              _InfoRow(
-                label: t.fieldApartment,
-                value: ticket.apartmentNumber!,
-              ),
-            _InfoRow(
-              label: t.fieldCreatedAt,
-              value: AppDateFormat.dateTimeMedium(ticket.createdAt),
+            _InfoCard(
+              children: [
+                if (ticket.apartmentNumber != null)
+                  PremiumInfoRow(
+                    label: t.fieldApartment,
+                    value: ticket.apartmentNumber!,
+                  ),
+                PremiumInfoRow(
+                  label: t.fieldCreatedAt,
+                  value: AppDateFormat.dateTimeMedium(ticket.createdAt),
+                ),
+              ],
             ),
             const SizedBox(height: AppSizes.spacingS),
             _SectionLabel(t.fieldDescription),
-            _SectionBox(
+            PremiumSectionBox(
               child: Text(
                 ticket.description,
                 style: AppTypography.body1.copyWith(
@@ -356,7 +341,7 @@ class _TicketDetailSection extends ConsumerWidget {
             if (ticket.updates.isNotEmpty) ...[
               const SizedBox(height: AppSizes.spacingM),
               _SectionLabel(t.fieldLatestUpdate),
-              _SectionBox(
+              PremiumSectionBox(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -367,14 +352,14 @@ class _TicketDetailSection extends ConsumerWidget {
                         height: 1.45,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
                       AppDateFormat.dateShortNoYear(
                         ticket.updates.last.createdAt,
                       ),
                       style: AppTypography.caption.copyWith(
                         color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
@@ -420,25 +405,29 @@ class _DekontDetailSection extends ConsumerWidget {
               background: visual.background,
             ),
             const SizedBox(height: AppSizes.spacingM),
-            if (dekont.parsedAmount != null && dekont.parsedAmount!.isNotEmpty)
-              _InfoRow(label: t.fieldAmount, value: dekont.parsedAmount!),
-            if (dekont.apartment != null)
-              _InfoRow(label: t.fieldApartment, value: dekont.apartment!.number),
-            if (dekont.uploadedBy != null)
-              _InfoRow(
-                label: t.fieldUploadedBy,
-                value: dekont.uploadedBy!.name,
-              ),
-            _InfoRow(
-              label: t.fieldCreatedAt,
-              value: AppDateFormat.dateTimeMedium(dekont.createdAt),
+            _InfoCard(
+              children: [
+                if (dekont.parsedAmount != null && dekont.parsedAmount!.isNotEmpty)
+                  _InfoRow(label: t.fieldAmount, value: dekont.parsedAmount!),
+                if (dekont.apartment != null)
+                  _InfoRow(label: t.fieldApartment, value: dekont.apartment!.number),
+                if (dekont.uploadedBy != null)
+                  _InfoRow(
+                    label: t.fieldUploadedBy,
+                    value: dekont.uploadedBy!.name,
+                  ),
+                _InfoRow(
+                  label: t.fieldCreatedAt,
+                  value: AppDateFormat.dateTimeMedium(dekont.createdAt),
+                ),
+              ],
             ),
             if (dekont.rejectionReason != null &&
                 dekont.rejectionReason!.isNotEmpty) ...[
               const SizedBox(height: AppSizes.spacingM),
               _SectionLabel(t.fieldRejectionReason),
-              _SectionBox(
-                background: AppColors.errorBg,
+              PremiumSectionBox(
+                backgroundColor: AppColors.errorBg,
                 borderColor: AppColors.error.withValues(alpha: 0.35),
                 child: Text(
                   dekont.rejectionReason!,
@@ -452,7 +441,7 @@ class _DekontDetailSection extends ConsumerWidget {
             if (dekont.reviewNote != null && dekont.reviewNote!.isNotEmpty) ...[
               const SizedBox(height: AppSizes.spacingM),
               _SectionLabel(t.fieldManagerNote),
-              _SectionBox(
+              PremiumSectionBox(
                 child: Text(
                   dekont.reviewNote!,
                   style: AppTypography.body1.copyWith(
@@ -545,9 +534,13 @@ class _DueDetailSection extends ConsumerWidget {
           background: visual.background,
         ),
         const SizedBox(height: AppSizes.spacingM),
-        _InfoRow(label: t.fieldAmount, value: '$amount ${due.currency}'),
-        _InfoRow(label: t.fieldPeriod, value: period),
-        _InfoRow(label: t.fieldApartment, value: due.apartmentNumber),
+        _InfoCard(
+          children: [
+            _InfoRow(label: t.fieldAmount, value: '$amount ${due.currency}'),
+            _InfoRow(label: t.fieldPeriod, value: period),
+            _InfoRow(label: t.fieldApartment, value: due.apartmentNumber),
+          ],
+        ),
       ],
     );
   }
@@ -564,7 +557,7 @@ class _GenericBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _SectionBox(
+    return PremiumSectionBox(
       child: Text(
         body,
         style: AppTypography.bodyLarge.copyWith(
@@ -610,8 +603,8 @@ class _StatusPill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Text(
         label,
@@ -624,6 +617,16 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
+class _InfoCard extends StatelessWidget {
+  final List<Widget> children;
+  const _InfoCard({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return PremiumInfoCard(children: children);
+  }
+}
+
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
@@ -632,34 +635,7 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSizes.spacingS),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 110,
-            child: Text(
-              label,
-              style: AppTypography.body1.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSizes.spacingS),
-          Expanded(
-            child: Text(
-              value,
-              style: AppTypography.body1.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    return PremiumInfoRow(label: label, value: value);
   }
 }
 
@@ -671,43 +647,15 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSizes.spacingXS),
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
       child: Text(
         text,
         style: AppTypography.caption.copyWith(
           color: AppColors.textSecondary,
           fontWeight: FontWeight.w800,
+          letterSpacing: 0.5,
         ),
       ),
-    );
-  }
-}
-
-class _SectionBox extends StatelessWidget {
-  final Widget child;
-  final Color? background;
-  final Color? borderColor;
-
-  const _SectionBox({
-    required this.child,
-    this.background,
-    this.borderColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: (background != null
-              ? DashboardScreenStyle.whiteCard(color: background)
-              : DashboardScreenStyle.whiteCard())
-          .copyWith(
-        border: borderColor != null
-            ? Border.all(color: borderColor!)
-            : Border.all(color: AppColors.lineLight),
-      ),
-      child: child,
     );
   }
 }

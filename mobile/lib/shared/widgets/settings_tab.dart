@@ -13,6 +13,7 @@ import '../../features/profile/presentation/providers/profile_notifier.dart';
 import '../../features/profile/presentation/widgets/change_password_bottom_sheet.dart';
 import '../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../l10n/strings.g.dart';
+import 'premium_bottom_sheet.dart';
 import 'profile_avatar.dart';
 import 'profile_avatar_actions.dart';
 import 'toast_overlay.dart';
@@ -145,93 +146,27 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
   void _showLanguageSheet(BuildContext context) {
     final currentLocale = ref.read(localeProvider);
     final t = context.t;
-    showModalBottomSheet<void>(
+    PremiumBottomSheetScaffold.show<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.sheetBackground,
-      barrierColor: const Color(0x6114120C),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-      ),
-      builder: (sheetContext) => Container(
-        color: Colors.transparent,
-        padding: EdgeInsets.fromLTRB(
-          24,
-          12,
-          24,
-          24 + MediaQuery.of(context).padding.bottom,
-        ),
-        child: Column(
+      builder: (sheetContext) => PremiumBottomSheetScaffold(
+        title: t.common.language,
+        scrollable: false,
+        body: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE7E4DA),
-                  borderRadius: BorderRadius.circular(2.5),
-                ),
-              ),
+            Text(
+              t.common.languageSheetDescription,
+              style: ProfileSettingsUi.handle,
             ),
-            const SizedBox(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE2F0FD),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.language_rounded,
-                    color: Color(0xFF1976D2),
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        t.common.language,
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 19,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF15140F),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        currentLocale == AppLocale.tr
-                            ? "Uygulama dilini buradan değiştirebilirsiniz."
-                            : "You can change the application language here.",
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF6B6757),
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 28),
-            _LanguageOption(
-              flag: '🇹🇷',
-              title: 'Türkçe',
+            const SizedBox(height: AppSizes.spacingL),
+            PremiumActionSheetTile(
+              icon: Icons.language_rounded,
+              label: 'Türkçe',
               subtitle: 'Turkish',
-              isSelected: currentLocale == AppLocale.tr,
+              trailing: currentLocale == AppLocale.tr
+                  ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                  : null,
               onTap: () async {
                 final ok = await changeLocale(ref, AppLocale.tr);
                 if (!sheetContext.mounted) return;
@@ -244,12 +179,13 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 }
               },
             ),
-            const SizedBox(height: 12),
-            _LanguageOption(
-              flag: '🇬🇧',
-              title: 'English',
+            PremiumActionSheetTile(
+              icon: Icons.translate_rounded,
+              label: 'English',
               subtitle: 'İngilizce',
-              isSelected: currentLocale == AppLocale.en,
+              trailing: currentLocale == AppLocale.en
+                  ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                  : null,
               onTap: () async {
                 final ok = await changeLocale(ref, AppLocale.en);
                 if (!sheetContext.mounted) return;
@@ -446,82 +382,6 @@ String _formatPhone(String phone) {
       '${p.substring(6, 8)} ${p.substring(8, 10)}';
 }
 
-class _LanguageOption extends StatelessWidget {
-  final String flag;
-  final String title;
-  final String subtitle;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _LanguageOption({
-    required this.flag,
-    required this.title,
-    required this.subtitle,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF15140F) : const Color(0xFFE7E4DA),
-            width: isSelected ? 1.5 : 1.5,
-          ),
-        ),
-        child: Row(
-          children: [
-            Text(flag, style: const TextStyle(fontSize: 24)),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF15140F),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF9A9686),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle_rounded,
-                color: Color(0xFF15140F),
-                size: 20,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _SettingsTile extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -610,14 +470,8 @@ class _LogoutConfirmBottomSheet extends ConsumerWidget {
   const _LogoutConfirmBottomSheet();
 
   static Future<void> show(BuildContext context) {
-    return showModalBottomSheet<void>(
+    return PremiumBottomSheetScaffold.show<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.sheetBackground,
-      barrierColor: const Color(0x6114120C),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-      ),
       builder: (_) => const _LogoutConfirmBottomSheet(),
     );
   }
@@ -629,153 +483,82 @@ class _LogoutConfirmBottomSheet extends ConsumerWidget {
 
     return PopScope(
       canPop: !isLoading,
-      child: Container(
-        color: Colors.transparent,
-        padding: EdgeInsets.fromLTRB(
-          24,
-          12,
-          24,
-          24 + MediaQuery.of(context).padding.bottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 5,
+      child: PremiumBottomSheetScaffold(
+        scrollable: false,
+        header: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSizes.spacingL,
+            AppSizes.spacingM,
+            AppSizes.spacingL,
+            AppSizes.spacingS,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE7E4DA),
-                  borderRadius: BorderRadius.circular(2.5),
+                  color: ProfileSettingsUi.danger.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.logout_rounded,
+                  color: ProfileSettingsUi.danger,
+                  size: 24,
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFDEDEC),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.logout_rounded,
-                    color: Color(0xFFE15B4D),
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        t.common.logout,
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 19,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF15140F),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        t.common.logoutConfirm,
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF6B6757),
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 28),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: isLoading ? null : () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF15140F),
-                      backgroundColor: Colors.white,
-                      side: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
-                      minimumSize: const Size.fromHeight(54),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      textStyle: const TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.common.logout,
+                      style: ProfileSettingsUi.title,
                     ),
-                    child: Text(t.common.cancelBtn),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF15140F),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      minimumSize: const Size.fromHeight(54),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      textStyle: const TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    const SizedBox(height: 4),
+                    Text(
+                      t.common.logoutConfirm,
+                      style: ProfileSettingsUi.handle.copyWith(fontSize: 13),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    onPressed: isLoading
-                        ? null
-                        : () async {
-                            final navigator = Navigator.of(context);
-                            final goRouter = GoRouter.of(context);
-                            await ref.read(authStateProvider.notifier).logout(ref);
-                            
-                            final authState = ref.read(authStateProvider);
-                            if (authState.error != null && authState.error!.isNotEmpty) {
-                              ref.read(toastProvider.notifier).show(
-                                    authState.error!,
-                                    type: ToastType.error,
-                                  );
-                              return;
-                            }
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        body: const SizedBox.shrink(),
+        actions: PremiumSheetActions(
+          primaryLabel: t.common.logout,
+          primaryLoading: isLoading,
+          onPrimary: isLoading
+              ? null
+              : () async {
+                  final navigator = Navigator.of(context);
+                  final goRouter = GoRouter.of(context);
+                  await ref.read(authStateProvider.notifier).logout(ref);
 
-                            if (navigator.canPop()) {
-                              navigator.pop();
-                            }
-                            goRouter.go('/login');
-                          },
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(t.common.logout),
-                  ),
-                ),
-              ],
-            ),
-          ],
+                  final authState = ref.read(authStateProvider);
+                  if (authState.error != null && authState.error!.isNotEmpty) {
+                    ref.read(toastProvider.notifier).show(
+                          authState.error!,
+                          type: ToastType.error,
+                        );
+                    return;
+                  }
+
+                  if (navigator.canPop()) {
+                    navigator.pop();
+                  }
+                  goRouter.go('/login');
+                },
+          secondaryLabel: t.common.cancelBtn,
+          onSecondary: isLoading ? null : () => Navigator.pop(context),
+          secondaryEnabled: !isLoading,
         ),
       ),
     );

@@ -12,6 +12,11 @@ class TicketModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? apartmentNumber;
+  final String? residentName;
+  final String? residentPhone;
+  final String? residentEmail;
+  final String? residentProfilePicture;
+  final String? creatorName;
   final List<TicketUpdateModel> updates;
 
   const TicketModel({
@@ -25,6 +30,11 @@ class TicketModel {
     required this.createdAt,
     required this.updatedAt,
     this.apartmentNumber,
+    this.residentName,
+    this.residentPhone,
+    this.residentEmail,
+    this.residentProfilePicture,
+    this.creatorName,
     this.updates = const [],
   });
 
@@ -48,6 +58,29 @@ class TicketModel {
       }
     }
 
+    final resident = json['resident'];
+    final createdBy = json['createdBy'];
+    
+    String? resName;
+    String? resPhone;
+    String? resEmail;
+    String? resPic;
+    if (resident is Map) {
+      resName = resident['name'] as String?;
+      resPhone = resident['phone'] as String?;
+      resEmail = resident['email'] as String?;
+      resPic = resident['profilePicture'] as String?;
+    }
+
+    String? crName;
+    if (createdBy is Map) {
+      crName = createdBy['name'] as String?;
+      resName ??= crName;
+      resPhone ??= createdBy['phone'] as String?;
+      resEmail ??= createdBy['email'] as String?;
+      resPic ??= createdBy['profilePicture'] as String?;
+    }
+
     return TicketModel(
       id: (json['id'] ?? '') as String,
       apartmentId: (json['apartmentId'] ?? '') as String,
@@ -59,6 +92,11 @@ class TicketModel {
       createdAt: parseDate(json['createdAt']),
       updatedAt: parseDate(json['updatedAt']),
       apartmentNumber: aptNum,
+      residentName: resName,
+      residentPhone: resPhone,
+      residentEmail: resEmail,
+      residentProfilePicture: resPic,
+      creatorName: crName,
       updates: updates,
     );
   }
@@ -81,6 +119,11 @@ class TicketModel {
         createdAt: createdAt,
         updatedAt: updatedAt,
         apartmentNumber: apartmentNumber,
+        residentName: residentName,
+        residentPhone: residentPhone,
+        residentEmail: residentEmail,
+        residentProfilePicture: residentProfilePicture,
+        creatorName: creatorName,
         updates: updates.map((u) => u.toEntity()).toList(),
       );
 

@@ -31,9 +31,11 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
   @override
   void initState() {
     super.initState();
-    attachPaginationScroll(_scrollController, () {
-      ref.read(managerDekontsNotifierProvider.notifier).loadMore();
-    });
+    attachPaginationScroll(
+      _scrollController,
+      () => ref.read(managerDekontsNotifierProvider.notifier).loadMore(),
+      canLoad: () => ref.read(managerDekontsNotifierProvider).canLoadMore,
+    );
   }
 
   @override

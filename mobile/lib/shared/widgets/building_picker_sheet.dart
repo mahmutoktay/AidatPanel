@@ -5,6 +5,8 @@ import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/buildings/domain/entities/building_entity.dart';
 import '../../l10n/strings.g.dart';
+import 'minimal_form_widgets.dart';
+import 'premium_bottom_sheet.dart';
 
 /// Bina seçim alt sayfası sonucu. [cancelled] true ise kullanıcı vazgeçti.
 class BuildingPickerResult {
@@ -46,13 +48,8 @@ class BuildingPickerSheet extends StatefulWidget {
     required String? selectedBuildingId,
     bool includeAllOption = false,
   }) async {
-    final result = await showModalBottomSheet<BuildingPickerResult>(
+    final result = await PremiumBottomSheetScaffold.show<BuildingPickerResult>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (_) => BuildingPickerSheet(
         buildings: buildings,
         selectedBuildingId: selectedBuildingId,
@@ -94,76 +91,53 @@ class _BuildingPickerSheetState extends State<BuildingPickerSheet> {
       minChildSize: 0.45,
       maxChildSize: 0.92,
       builder: (_, scrollController) {
-        return Column(
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.lineLight,
-                borderRadius: BorderRadius.circular(2),
-              ),
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(PremiumBottomSheetScaffold.topRadius),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSizes.spacingM,
-                0,
-                AppSizes.spacingM,
-                AppSizes.spacingS,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      t.selectBuilding,
-                      style: AppTypography.h4.copyWith(
-                        color: AppColors.inkDark,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: AppSizes.spacingS),
+              const PremiumSheetHandle(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSizes.spacingL,
+                  AppSizes.spacingM,
+                  AppSizes.spacingS,
+                  AppSizes.spacingS,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        t.selectBuilding,
+                        style: AppTypography.h3.copyWith(
+                          color: AppColors.inkDark,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    width: AppSizes.minTouchTargetComfort,
-                    height: AppSizes.minTouchTargetComfort,
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(
+                        const BuildingPickerResult.cancelled(),
+                      ),
+                      icon: const Icon(Icons.close_rounded),
                       tooltip: context.t.common.cancelBtn,
-                      icon: const Icon(Icons.close_rounded, size: 22),
-                      onPressed: () =>
-                          Navigator.of(context).pop(const BuildingPickerResult.cancelled()),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
-              child: TextField(
-                autofocus: widget.buildings.length > 8,
-                onChanged: (value) => setState(() => _query = value),
-                style: AppTypography.body1.copyWith(fontSize: 16),
-                decoration: InputDecoration(
-                  hintText: t.searchBuildings,
-                  hintStyle: AppTypography.body1.copyWith(
-                    color: AppColors.mutedText,
-                    fontSize: 16,
-                  ),
-                  prefixIcon: const Icon(Icons.search_rounded),
-                  filled: true,
-                  fillColor: AppColors.dashboardBackground,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.spacingM,
-                    vertical: AppSizes.spacingS,
-                  ),
+                  ],
                 ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
+                child: MinimalSearchField(
+                  hint: t.searchBuildings,
+                  autofocus: widget.buildings.length > 8,
+                  onChanged: (value) => setState(() => _query = value),
+                ),
+              ),
             const SizedBox(height: AppSizes.spacingS),
             Expanded(
               child: listCount == 0
@@ -228,6 +202,7 @@ class _BuildingPickerSheetState extends State<BuildingPickerSheet> {
                     ),
             ),
           ],
+        ),
         );
       },
     );
@@ -256,70 +231,19 @@ class _BuildingPickerTile extends StatelessWidget {
           ? AppColors.primary.withValues(alpha: 0.06)
           : Colors.transparent,
       borderRadius: BorderRadius.circular(14),
-      child: InkWell(
+      child: PremiumActionSheetTile(
+        icon: leadingIcon,
+        label: title,
+        subtitle: subtitle,
+        iconColor: AppColors.statusBlue,
+        trailing: selected
+            ? const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.statusGreen,
+                size: 22,
+              )
+            : null,
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.spacingS,
-            vertical: 6,
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.dashboardBackground,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: Icon(leadingIcon, color: AppColors.statusBlue, size: 22),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: AppTypography.body1.copyWith(
-                        color: AppColors.inkDark,
-                        fontWeight:
-                            selected ? FontWeight.w800 : FontWeight.w600,
-                        fontSize: 16,
-                        height: 1.2,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: AppTypography.body2.copyWith(
-                        color: AppColors.mutedText,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        height: 1.25,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              if (selected)
-                const Padding(
-                  padding: EdgeInsets.only(left: 8),
-                  child: Icon(
-                    Icons.check_circle_rounded,
-                    color: AppColors.statusGreen,
-                    size: 22,
-                  ),
-                ),
-            ],
-          ),
-        ),
       ),
     );
   }

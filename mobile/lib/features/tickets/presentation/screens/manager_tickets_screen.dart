@@ -32,9 +32,11 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
   @override
   void initState() {
     super.initState();
-    attachPaginationScroll(_scrollController, () {
-      ref.read(ticketsNotifierProvider.notifier).loadMore();
-    });
+    attachPaginationScroll(
+      _scrollController,
+      () => ref.read(ticketsNotifierProvider.notifier).loadMore(),
+      canLoad: () => ref.read(ticketsNotifierProvider).canLoadMore,
+    );
   }
 
   @override

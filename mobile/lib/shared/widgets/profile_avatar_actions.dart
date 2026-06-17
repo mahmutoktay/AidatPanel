@@ -14,7 +14,9 @@ import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/profile/presentation/providers/profile_notifier.dart';
+import '../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../l10n/strings.g.dart';
+import 'premium_bottom_sheet.dart';
 import 'toast_overlay.dart';
 
 /// Opens the custom profile photo editor bottom sheet.
@@ -22,10 +24,8 @@ Future<void> handleProfileAvatarTap(BuildContext context, WidgetRef ref) async {
   final user = ref.read(authStateProvider).user;
   if (user == null) return;
 
-  await showModalBottomSheet<void>(
+  await PremiumBottomSheetScaffold.show<void>(
     context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
     builder: (context) => const ProfilePhotoEditSheet(),
   );
 }
@@ -121,7 +121,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
           _isProcessing = false;
         });
         ref.read(toastProvider.notifier).show(
-              "Fotoğraf yüklenirken bir hata oluştu.",
+              context.t.features.profile.avatarPhotoLoadError,
               type: ToastType.error,
             );
       }
@@ -133,6 +133,8 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
       _isProcessing = true;
     });
 
+    final t = context.t.features.profile;
+
     try {
       // Clean up previous temp file if exists
       await _cleanupTempFile();
@@ -143,7 +145,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
       // Decode image
       final original = img.decodeImage(bytes);
       if (original == null) {
-        throw Exception("Görsel çözümlenemedi.");
+        throw Exception(t.avatarDecodeError);
       }
 
       // Bake EXIF orientation to avoid rotation mismatches in the preview and crop
@@ -164,7 +166,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
           _isProcessing = false;
         });
         ref.read(toastProvider.notifier).show(
-              "Fotoğraf işlenirken hata oluştu.",
+              context.t.features.profile.avatarPhotoProcessError,
               type: ToastType.error,
             );
       }
@@ -181,7 +183,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
     } catch (e) {
       if (mounted) {
         ref.read(toastProvider.notifier).show(
-              "Kamera başlatılamadı.",
+              context.t.features.profile.avatarCameraError,
               type: ToastType.error,
             );
       }
@@ -198,7 +200,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
     } catch (e) {
       if (mounted) {
         ref.read(toastProvider.notifier).show(
-              "Galeri açılamadı.",
+              context.t.features.profile.avatarGalleryError,
               type: ToastType.error,
             );
       }
@@ -219,7 +221,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
       final bytes = await _imageFile!.readAsBytes();
       final original = img.decodeImage(bytes);
       if (original == null) {
-        throw Exception("Görsel çözümlenemedi.");
+        throw Exception(t.features.profile.avatarDecodeError);
       }
 
       final matrix = _transformationController.value;
@@ -293,7 +295,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
           _isProcessing = false;
         });
         ref.read(toastProvider.notifier).show(
-              "Fotoğraf kaydedilirken hata oluştu: ${e.toString()}",
+              t.features.profile.avatarSaveError,
               type: ToastType.error,
             );
       }
@@ -343,29 +345,14 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
   Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider).user;
     final hasPhoto = user?.profilePicture != null && user!.profilePicture!.isNotEmpty;
-    final bottomPad = MediaQuery.of(context).padding.bottom;
+    final profileT = context.t.features.profile;
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.fromLTRB(20, 8, 20, 12 + bottomPad),
-      child: Column(
+    return PremiumBottomSheetScaffold(
+      scrollable: false,
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+      body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Drag handle ──
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE0E0E0),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-
-          // ── Crop area (full-width rectangle, circle guide centered) ──
           LayoutBuilder(
             builder: (context, constraints) {
               final viewportW = constraints.maxWidth;
@@ -441,7 +428,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
               Expanded(
                 child: _SourceButton(
                   icon: Icons.camera_alt_outlined,
-                  label: "Kamera",
+                  label: profileT.avatarCamera,
                   onTap: _isProcessing ? null : _pickFromCamera,
                 ),
               ),
@@ -449,7 +436,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
               Expanded(
                 child: _SourceButton(
                   icon: Icons.photo_library_outlined,
-                  label: "Galeri",
+                  label: profileT.avatarGallery,
                   onTap: _isProcessing ? null : _pickFromGallery,
                 ),
               ),
@@ -460,19 +447,10 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
           // ── Save button ──
           SizedBox(
             width: double.infinity,
-            height: AppSizes.buttonHeightSecondary,
+            height: ProfileSettingsUi.buttonHeight,
             child: ElevatedButton(
               onPressed: _imageFile != null && !_isProcessing ? _saveImage : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.25),
-                disabledForegroundColor: Colors.white60,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-                ),
-                elevation: 0,
-              ),
+              style: ProfileSettingsUi.primaryButton,
               child: _isProcessing && _imageFile != null
                   ? const SizedBox(
                       width: 20,
@@ -482,7 +460,10 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
                         color: Colors.white,
                       ),
                     )
-                  : Text("Kaydet", style: AppTypography.button.copyWith(color: Colors.white)),
+                  : Text(
+                      profileT.avatarSave,
+                      style: AppTypography.button.copyWith(color: Colors.white),
+                    ),
             ),
           ),
 
@@ -505,7 +486,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
                         color: AppColors.error,
                       ),
                     )
-                  : const Text("Fotoğrafı Kaldır"),
+                  : Text(profileT.avatarRemove),
             ),
           ],
         ],
@@ -531,8 +512,11 @@ class _SourceButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.fill,
-      borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        side: ProfileSettingsUi.cardBorderSide,
+      ),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
         onTap: onTap,

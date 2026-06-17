@@ -38,7 +38,7 @@ class TicketStatusStepper extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: AppColors.warningBg,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(

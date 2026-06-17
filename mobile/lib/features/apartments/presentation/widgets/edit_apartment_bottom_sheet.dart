@@ -4,17 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/theme/dashboard_screen_style.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/apartments_store.dart';
 import '../../domain/entities/apartment_entity.dart';
 
 /// Daire numarası ve katı düzenler.
-/// Belge §6: PUT /buildings/:bId/apartments/:id body `number?`, `floor?`.
 class EditApartmentBottomSheet extends ConsumerStatefulWidget {
   final ApartmentEntity apartment;
 
@@ -24,10 +22,8 @@ class EditApartmentBottomSheet extends ConsumerStatefulWidget {
     BuildContext context, {
     required ApartmentEntity apartment,
   }) {
-    return showModalBottomSheet<void>(
+    return PremiumBottomSheetScaffold.show<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (_) => EditApartmentBottomSheet(apartment: apartment),
     );
   }
@@ -47,7 +43,8 @@ class _EditApartmentBottomSheetState
   @override
   void initState() {
     super.initState();
-    _numberController = TextEditingController(text: widget.apartment.apartmentNumber);
+    _numberController =
+        TextEditingController(text: widget.apartment.apartmentNumber);
     _floorController = TextEditingController(
       text: widget.apartment.floor?.toString() ?? '',
     );
@@ -110,162 +107,55 @@ class _EditApartmentBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    final viewInsets = MediaQuery.of(context).viewInsets.bottom;
-    return Padding(
-      padding: EdgeInsets.only(bottom: viewInsets),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(DashboardScreenStyle.cardRadius),
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            padding: AppSizes.screenBodyScrollPadding,
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: AppColors.borderColor,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  Text(
-                    context.t.common.editApartment,
-                    style: AppTypography.h3.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSizes.spacingL),
-                  TextFormField(
-                    controller: _numberController,
-                    style: AppTypography.body1.copyWith(color: AppColors.textPrimary),
-                    decoration: InputDecoration(
-                      labelText: context.t.common.apartmentNumberLabel,
-                      prefixIcon: const Icon(
-                        Icons.door_front_door_outlined,
-                        color: AppColors.primary,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                      ),
-                    ),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) {
-                        return context.t.common.fieldRequired;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  TextFormField(
-                    controller: _floorController,
-                    keyboardType: const TextInputType.numberWithOptions(signed: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^-?\d*')),
-                    ],
-                    style: AppTypography.body1.copyWith(color: AppColors.textPrimary),
-                    decoration: InputDecoration(
-                      labelText: context.t.common.floorOptional,
-                      prefixIcon: const Icon(
-                        Icons.stairs_outlined,
-                        color: AppColors.primary,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                      ),
-                    ),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) return null;
-                      final n = int.tryParse(v.trim());
-                      if (n == null) {
-                        return context.t.common.fieldRequired;
-                      }
-                      // Backend §6: floor -5..200 (validation şemasından).
-                      if (n < -5 || n > 200) {
-                        return context.t.common.fieldRequired;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSizes.spacingXL),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: AppSizes.minTouchTarget,
-                          child: OutlinedButton(
-                            onPressed:
-                                _saving ? null : () => Navigator.of(context).pop(),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.textPrimary,
-                              side: const BorderSide(
-                                color: AppColors.borderColor,
-                                width: 1.5,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  DashboardScreenStyle.pillRadius,
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              context.t.common.cancelBtn,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppSizes.spacingM),
-                      Expanded(
-                        child: SizedBox(
-                          height: AppSizes.minTouchTarget,
-                          child: ElevatedButton.icon(
-                            onPressed: _saving ? null : _save,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  DashboardScreenStyle.pillRadius,
-                                ),
-                              ),
-                            ),
-                            icon: _saving
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
-                                  )
-                                : const Icon(Icons.save_outlined),
-                            label: Text(context.t.common.save),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+    final t = context.t.common;
+
+    return Form(
+      key: _formKey,
+      child: PremiumBottomSheetScaffold(
+        title: t.editApartment,
+        scrollable: false,
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            MinimalTextField(
+              controller: _numberController,
+              label: t.apartmentNumberLabel,
+              icon: Icons.door_front_door_outlined,
+              required: true,
+              enabled: !_saving,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? t.fieldRequired : null,
             ),
-          ),
+            const SizedBox(height: AppSizes.spacingM),
+            MinimalTextField(
+              controller: _floorController,
+              label: t.floorOptional,
+              icon: Icons.stairs_outlined,
+              enabled: !_saving,
+              keyboardType:
+                  const TextInputType.numberWithOptions(signed: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^-?\d*')),
+              ],
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return null;
+                final n = int.tryParse(v.trim());
+                if (n == null) return t.fieldRequired;
+                if (n < -5 || n > 200) return t.fieldRequired;
+                return null;
+              },
+            ),
+          ],
+        ),
+        actions: PremiumSheetActions(
+          primaryLabel: t.save,
+          onPrimary: _saving ? null : _save,
+          primaryLoading: _saving,
+          icon: Icons.save_outlined,
+          secondaryLabel: t.cancelBtn,
+          onSecondary: _saving ? null : () => Navigator.of(context).pop(),
+          secondaryEnabled: !_saving,
         ),
       ),
     );

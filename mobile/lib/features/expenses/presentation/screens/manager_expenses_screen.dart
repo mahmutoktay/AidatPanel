@@ -40,9 +40,11 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     final now = DateTime.now();
     _month = now.month;
     _year = now.year;
-    attachPaginationScroll(_scrollController, () {
-      ref.read(expensesNotifierProvider.notifier).loadMore();
-    });
+    attachPaginationScroll(
+      _scrollController,
+      () => ref.read(expensesNotifierProvider.notifier).loadMore(),
+      canLoad: () => ref.read(expensesNotifierProvider).canLoadMore,
+    );
   }
 
   @override

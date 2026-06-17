@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/widgets/app_select_field.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import 'dues_screen_style.dart';
 
 class DuesQuickAmountCard extends StatelessWidget {
@@ -85,7 +86,7 @@ class DuesQuickAmountCard extends StatelessWidget {
 }
 
 /// Aidat tutarı güncelleme alt sayfası.
-class DuesAmountUpdateSheet extends StatelessWidget {
+class DuesAmountUpdateSheet extends StatefulWidget {
   final TextEditingController amountController;
   final int? selectedDueDay;
   final bool affectCurrent;
@@ -119,132 +120,123 @@ class DuesAmountUpdateSheet extends StatelessWidget {
     required ValueChanged<bool> onAffectCurrentChanged,
     required VoidCallback onSubmit,
   }) {
-    return showModalBottomSheet<void>(
+    return PremiumBottomSheetScaffold.show<void>(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      builder: (_) => DuesAmountUpdateSheet(
+        amountController: amountController,
+        selectedDueDay: selectedDueDay,
+        affectCurrent: affectCurrent,
+        isLoading: isLoading,
+        hintAmount: hintAmount,
+        onDueDayChanged: onDueDayChanged,
+        onAffectCurrentChanged: onAffectCurrentChanged,
+        onSubmit: onSubmit,
       ),
-      backgroundColor: AppColors.surface,
-      builder: (sheetContext) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
-          ),
-          child: DuesAmountUpdateSheet(
-            amountController: amountController,
-            selectedDueDay: selectedDueDay,
-            affectCurrent: affectCurrent,
-            isLoading: isLoading,
-            hintAmount: hintAmount,
-            onDueDayChanged: onDueDayChanged,
-            onAffectCurrentChanged: onAffectCurrentChanged,
-            onSubmit: onSubmit,
-          ),
-        );
-      },
     );
+  }
+
+  @override
+  State<DuesAmountUpdateSheet> createState() => _DuesAmountUpdateSheetState();
+}
+
+class _DuesAmountUpdateSheetState extends State<DuesAmountUpdateSheet> {
+  bool _pickingDueDay = false;
+
+  Future<void> _pickDueDay(BuildContext context) async {
+    if (widget.isLoading || _pickingDueDay) return;
+    setState(() => _pickingDueDay = true);
+    final t = context.t.common;
+    const clearSentinel = -1;
+    try {
+      final picked = await PremiumBottomSheetScaffold.show<int>(
+        context: context,
+        builder: (ctx) => PremiumBottomSheetScaffold(
+          title: t.dueDay,
+          scrollable: true,
+          body: PremiumActionSheetList(
+            children: [
+              PremiumActionSheetTile(
+                icon: Icons.event_busy_outlined,
+                label: t.selectDueDay,
+                trailing: widget.selectedDueDay == null
+                    ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                    : null,
+                onTap: () => Navigator.pop(ctx, clearSentinel),
+              ),
+              for (var day = 1; day <= 28; day++)
+                PremiumActionSheetTile(
+                  icon: Icons.calendar_today_outlined,
+                  label: '$day',
+                  trailing: widget.selectedDueDay == day
+                      ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                      : null,
+                  onTap: () => Navigator.pop(ctx, day),
+                ),
+            ],
+          ),
+        ),
+      );
+      if (picked == null) return;
+      widget.onDueDayChanged(picked == clearSentinel ? null : picked);
+    } finally {
+      if (mounted) setState(() => _pickingDueDay = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final currencySymbol =
         LocaleSettings.currentLocale == AppLocale.tr ? '₺' : r'$';
+    final t = context.t.common;
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSizes.spacingM,
-          AppSizes.spacingS,
-          AppSizes.spacingM,
-          AppSizes.spacingM,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.lineLight,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+    return PremiumBottomSheetScaffold(
+      title: t.updateDueAmount,
+      scrollable: false,
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          MinimalTextField(
+            controller: widget.amountController,
+            label: t.amount,
+            hint: widget.hintAmount,
+            icon: Icons.payments_outlined,
+            enabled: !widget.isLoading,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+            ],
+            suffix: Text(
+              currencySymbol,
+              style: AppTypography.body1.copyWith(
+                color: AppColors.mutedText,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: AppSizes.spacingM),
-            Text(
-              context.t.common.updateDueAmount,
-              style: AppTypography.h3.copyWith(
-                color: AppColors.inkDark,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: AppSizes.spacingM),
-            TextField(
-              controller: amountController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                labelText: context.t.common.amount,
-                prefixText: '$currencySymbol ',
-                hintText: hintAmount,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSizes.spacingS),
-            AppSelectField<int?>(
-              label: context.t.common.dueDay,
-              value: selectedDueDay,
-              enabled: !isLoading,
-              displayText: (v) =>
-                  v == null ? context.t.common.selectDueDay : '$v',
-              options: [
-                AppSelectOption(
-                  value: null,
-                  label: context.t.common.selectDueDay,
-                ),
-                for (var day = 1; day <= 28; day++)
-                  AppSelectOption(value: day, label: '$day'),
-              ],
-              onChanged: isLoading ? null : onDueDayChanged,
-            ),
-            const SizedBox(height: AppSizes.spacingS),
-            SwitchListTile.adaptive(
-              contentPadding: EdgeInsets.zero,
-              value: affectCurrent,
-              onChanged: isLoading ? null : onAffectCurrentChanged,
-              title: Text(
-                context.t.common.affectCurrentDues,
-                style: AppTypography.body1.copyWith(color: AppColors.inkDark),
-              ),
-              subtitle: Text(
-                context.t.common.affectCurrentDuesHint,
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.mutedText,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSizes.spacingM),
-            SizedBox(
-              height: AppSizes.buttonHeightSecondary,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : onSubmit,
-                style: AppButtonStyles.elevatedPrimary(),
-                child: isLoading
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(context.t.common.update),
-              ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          MinimalPickerField(
+            label: t.dueDay,
+            value: widget.selectedDueDay?.toString(),
+            hint: t.selectDueDay,
+            icon: Icons.event_outlined,
+            enabled: !widget.isLoading && !_pickingDueDay,
+            onTap: () => _pickDueDay(context),
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          MinimalToggleRow(
+            title: t.affectCurrentDues,
+            subtitle: t.affectCurrentDuesHint,
+            value: widget.affectCurrent,
+            enabled: !widget.isLoading,
+            onChanged: widget.isLoading ? null : widget.onAffectCurrentChanged,
+          ),
+        ],
+      ),
+      actions: PremiumSheetActions(
+        primaryLabel: t.update,
+        onPrimary: widget.isLoading ? null : widget.onSubmit,
+        primaryLoading: widget.isLoading,
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
@@ -59,130 +60,78 @@ class DuesPeriodChips extends StatelessWidget {
 
   void _showMonthPicker(BuildContext context) {
     if (!enabled) return;
-    showModalBottomSheet<void>(
+    PremiumBottomSheetScaffold.show<void>(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      builder: (sheetContext) => PremiumBottomSheetScaffold(
+        title: context.t.common.month,
+        scrollable: true,
+        body: PremiumActionSheetList(
+          children: [
+            for (var i = 0; i < 13; i++)
+              Builder(
+                builder: (_) {
+                  final month = i == 0 ? null : i;
+                  final label = month == null
+                      ? context.t.common.allMonths
+                      : monthLabel(month);
+                  final selected = selectedMonth == month;
+                  return PremiumActionSheetTile(
+                    icon: Icons.calendar_month_outlined,
+                    label: label,
+                    trailing: selected
+                        ? const Icon(
+                            Icons.check_rounded,
+                            color: AppColors.inkDark,
+                          )
+                        : null,
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      onMonthChanged(month);
+                    },
+                  );
+                },
+              ),
+          ],
+        ),
       ),
-      backgroundColor: AppColors.surface,
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSizes.spacingM),
-                child: Text(
-                  context.t.common.month,
-                  style: AppTypography.h4.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.inkDark,
-                  ),
-                ),
-              ),
-              const Divider(height: 1),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: 13,
-                  itemBuilder: (_, i) {
-                    final month = i == 0 ? null : i;
-                    final label = month == null
-                        ? context.t.common.allMonths
-                        : monthLabel(month);
-                    final selected = selectedMonth == month;
-                    return ListTile(
-                      minTileHeight: AppSizes.minTouchTarget,
-                      title: Text(
-                        label,
-                        style: AppTypography.body1.copyWith(
-                          fontWeight:
-                              selected ? FontWeight.w700 : FontWeight.w500,
-                          color: AppColors.inkDark,
-                        ),
-                      ),
-                      trailing: selected
-                          ? const Icon(
-                              Icons.check_rounded,
-                              color: AppColors.inkDark,
-                            )
-                          : null,
-                      onTap: () {
-                        Navigator.of(sheetContext).pop();
-                        onMonthChanged(month);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
   void _showYearPicker(BuildContext context) {
     if (!enabled) return;
-    showModalBottomSheet<void>(
+    PremiumBottomSheetScaffold.show<void>(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      builder: (sheetContext) => PremiumBottomSheetScaffold(
+        title: context.t.common.year,
+        scrollable: true,
+        body: PremiumActionSheetList(
+          children: [
+            for (var i = 0; i < years.length + 1; i++)
+              Builder(
+                builder: (_) {
+                  final year = i == 0 ? null : years[i - 1];
+                  final label =
+                      year == null ? context.t.common.allYears : '$year';
+                  final selected = selectedYear == year;
+                  return PremiumActionSheetTile(
+                    icon: Icons.date_range_outlined,
+                    label: label,
+                    trailing: selected
+                        ? const Icon(
+                            Icons.check_rounded,
+                            color: AppColors.inkDark,
+                          )
+                        : null,
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      onYearChanged(year);
+                    },
+                  );
+                },
+              ),
+          ],
+        ),
       ),
-      backgroundColor: AppColors.surface,
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSizes.spacingM),
-                child: Text(
-                  context.t.common.year,
-                  style: AppTypography.h4.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.inkDark,
-                  ),
-                ),
-              ),
-              const Divider(height: 1),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: years.length + 1,
-                  itemBuilder: (_, i) {
-                    final year = i == 0 ? null : years[i - 1];
-                    final label =
-                        year == null ? context.t.common.allYears : '$year';
-                    final selected = selectedYear == year;
-                    return ListTile(
-                      minTileHeight: AppSizes.minTouchTarget,
-                      title: Text(
-                        label,
-                        style: AppTypography.body1.copyWith(
-                          fontWeight:
-                              selected ? FontWeight.w700 : FontWeight.w500,
-                          color: AppColors.inkDark,
-                        ),
-                      ),
-                      trailing: selected
-                          ? const Icon(
-                              Icons.check_rounded,
-                              color: AppColors.inkDark,
-                            )
-                          : null,
-                      onTap: () {
-                        Navigator.of(sheetContext).pop();
-                        onYearChanged(year);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

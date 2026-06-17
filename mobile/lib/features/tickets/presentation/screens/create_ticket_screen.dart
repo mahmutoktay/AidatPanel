@@ -4,14 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/dashboard_filter_chips_row.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../profile/presentation/theme/profile_settings_ui.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/tickets_provider.dart';
 import '../utils/ticket_labels.dart';
@@ -37,38 +36,6 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
     super.dispose();
   }
 
-  InputDecoration _fieldDecoration(String label, {String? hint}) =>
-      InputDecoration(
-        labelText: label,
-        hintText: hint,
-        labelStyle: ProfileSettingsUi.fieldLabel,
-        floatingLabelStyle: ProfileSettingsUi.fieldLabel.copyWith(
-          color: ProfileSettingsUi.ink,
-        ),
-        filled: true,
-        fillColor: AppColors.fill,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
-          borderSide: const BorderSide(color: ProfileSettingsUi.ink, width: 1.4),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
-          borderSide: const BorderSide(color: ProfileSettingsUi.danger),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.spacingM,
-          vertical: AppSizes.spacingM,
-        ),
-      );
-
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.tickets;
@@ -78,7 +45,11 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
       child: DashboardSecondaryScaffold(
         title: t.createTitle,
         onBack: _submitting ? () {} : () => context.pop(),
-        bottomNavigationBar: _buildSubmitBar(context),
+        bottomNavigationBar: MinimalStickyActionBar(
+          label: t.submit,
+          onPressed: _submit,
+          loading: _submitting,
+        ),
         body: SafeArea(
           child: AbsorbPointer(
             absorbing: _submitting,
@@ -105,80 +76,45 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
                     ],
                   ),
                   const SizedBox(height: AppSizes.spacingM),
-                  DashboardSectionTitle(title: t.fieldTitle),
-                  const SizedBox(height: AppSizes.spacingS),
-                  DashboardSurfaceCard(
-                    child: TextFormField(
-                      controller: _titleController,
-                      style: ProfileSettingsUi.fieldValue,
-                      cursorColor: ProfileSettingsUi.ink,
-                      decoration: _fieldDecoration(
-                        t.fieldTitle,
-                        hint: t.fieldTitleHint,
-                      ),
-                      validator: (v) {
-                        final raw = v?.trim() ?? '';
-                        if (raw.isEmpty) {
-                          return context.t.common.fieldRequired;
-                        }
-                        if (raw.length < 3) return t.titleTooShort;
-                        return null;
-                      },
-                    ),
+                  MinimalTextField(
+                    controller: _titleController,
+                    label: t.fieldTitle,
+                    hint: t.fieldTitleHint,
+                    icon: Icons.title_rounded,
+                    required: true,
+                    enabled: !_submitting,
+                    textCapitalization: TextCapitalization.sentences,
+                    validator: (v) {
+                      final raw = v?.trim() ?? '';
+                      if (raw.isEmpty) {
+                        return context.t.common.fieldRequired;
+                      }
+                      if (raw.length < 3) return t.titleTooShort;
+                      return null;
+                    },
                   ),
                   const SizedBox(height: AppSizes.spacingM),
-                  DashboardSectionTitle(title: t.fieldDescription),
-                  const SizedBox(height: AppSizes.spacingS),
-                  DashboardSurfaceCard(
-                    child: TextFormField(
-                      controller: _descriptionController,
-                      maxLines: 5,
-                      style: ProfileSettingsUi.fieldValue,
-                      cursorColor: ProfileSettingsUi.ink,
-                      decoration: _fieldDecoration(
-                        t.fieldDescription,
-                        hint: t.fieldDescriptionHint,
-                      ),
-                      validator: (v) {
-                        final raw = v?.trim() ?? '';
-                        if (raw.isEmpty) {
-                          return context.t.common.fieldRequired;
-                        }
-                        if (raw.length < 10) return t.descriptionTooShort;
-                        return null;
-                      },
-                    ),
+                  MinimalTextField(
+                    controller: _descriptionController,
+                    label: t.fieldDescription,
+                    hint: t.fieldDescriptionHint,
+                    icon: Icons.description_rounded,
+                    maxLines: 5,
+                    required: true,
+                    enabled: !_submitting,
+                    textCapitalization: TextCapitalization.sentences,
+                    validator: (v) {
+                      final raw = v?.trim() ?? '';
+                      if (raw.isEmpty) {
+                        return context.t.common.fieldRequired;
+                      }
+                      if (raw.length < 10) return t.descriptionTooShort;
+                      return null;
+                    },
                   ),
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubmitBar(BuildContext context) {
-    final t = context.t.features.tickets;
-    return ColoredBox(
-      color: AppColors.dashboardBackground,
-      child: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-        child: SizedBox(
-          height: ProfileSettingsUi.buttonHeight,
-          child: ElevatedButton(
-            onPressed: _submitting ? null : _submit,
-            style: ProfileSettingsUi.primaryButton,
-            child: _submitting
-                ? const SizedBox(
-                    height: 22,
-                    width: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.4,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(t.submit),
           ),
         ),
       ),

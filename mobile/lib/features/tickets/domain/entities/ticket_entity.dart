@@ -17,6 +17,11 @@ class TicketEntity extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? apartmentNumber;
+  final String? residentName;
+  final String? residentPhone;
+  final String? residentEmail;
+  final String? residentProfilePicture;
+  final String? creatorName;
   final List<TicketUpdateEntity> updates;
 
   const TicketEntity({
@@ -30,6 +35,11 @@ class TicketEntity extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     this.apartmentNumber,
+    this.residentName,
+    this.residentPhone,
+    this.residentEmail,
+    this.residentProfilePicture,
+    this.creatorName,
     this.updates = const [],
   });
 
@@ -45,6 +55,11 @@ class TicketEntity extends Equatable {
         createdAt,
         updatedAt,
         apartmentNumber,
+        residentName,
+        residentPhone,
+        residentEmail,
+        residentProfilePicture,
+        creatorName,
         updates,
       ];
 }

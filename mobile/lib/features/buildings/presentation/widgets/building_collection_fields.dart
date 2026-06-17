@@ -9,6 +9,7 @@ import '../../../../features/profile/presentation/theme/profile_settings_ui.dart
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../data/buildings_store.dart';
 import '../../domain/entities/collection_preset_entity.dart';
 import '../utils/collection_preset_display.dart';
@@ -268,30 +269,22 @@ class _SelectedPresetCompactSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accountTitle = preset.collectionAccountTitle?.trim();
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, top: 2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            IbanUtils.formatDisplay(preset.collectionIban),
-            style: ProfileSettingsUi.handle.copyWith(fontSize: 13),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (accountTitle != null && accountTitle.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(
-              accountTitle,
-              style: ProfileSettingsUi.handle.copyWith(fontSize: 13),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ],
+    final rows = <Widget>[
+      PremiumInfoRow(
+        label: context.t.features.buildings.collection.ibanLabel,
+        value: IbanUtils.formatDisplay(preset.collectionIban),
       ),
-    );
+    ];
+    if (accountTitle != null && accountTitle.isNotEmpty) {
+      rows.add(
+        PremiumInfoRow(
+          label: context.t.features.buildings.collection.accountTitleLabel,
+          value: accountTitle,
+        ),
+      );
+    }
+
+    return PremiumInfoCard(children: rows);
   }
 }
 
@@ -311,13 +304,8 @@ class CollectionPresetPickerSheet extends StatefulWidget {
     required List<CollectionPresetEntity> presets,
     String? selectedIban,
   }) {
-    return showModalBottomSheet<CollectionPresetPickResult>(
+    return PremiumBottomSheetScaffold.show<CollectionPresetPickResult>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.dashboardBackground,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (_) => CollectionPresetPickerSheet(
         presets: presets,
         selectedIban: selectedIban,
@@ -355,176 +343,102 @@ class _CollectionPresetPickerSheetState
       minChildSize: 0.45,
       maxChildSize: 0.92,
       builder: (_, scrollController) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: AppSizes.spacingS),
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.lineLight,
-                  borderRadius: BorderRadius.circular(2),
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(PremiumBottomSheetScaffold.topRadius),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: AppSizes.spacingS),
+              const PremiumSheetHandle(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSizes.spacingL,
+                  AppSizes.spacingM,
+                  AppSizes.spacingL,
+                  AppSizes.spacingS,
+                ),
+                child: Text(
+                  t.savedListTitle,
+                  style: ProfileSettingsUi.title,
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSizes.spacingM,
-                AppSizes.spacingM,
-                AppSizes.spacingM,
-                AppSizes.spacingS,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
+                child: MinimalSearchField(
+                  hint: t.searchSavedIban,
+                  onChanged: (v) => setState(() => _query = v),
+                ),
               ),
-              child: Text(t.savedListTitle, style: ProfileSettingsUi.title),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
-              child: MinimalSearchField(
-                hint: t.searchSavedIban,
-                onChanged: (v) => setState(() => _query = v),
+              const SizedBox(height: AppSizes.spacingM),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
+                child: Text(
+                  t.savedListSectionLabel.toUpperCase(),
+                  style: ProfileSettingsUi.fieldLabelUppercase,
+                ),
               ),
-            ),
-            const SizedBox(height: AppSizes.spacingM),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
-              child: Text(
-                t.savedListSectionLabel.toUpperCase(),
-                style: ProfileSettingsUi.fieldLabelUppercase,
-              ),
-            ),
-            const SizedBox(height: AppSizes.spacingS),
-            Expanded(
-              child: filtered.isEmpty
-                  ? Center(
-                      child: Text(
-                        t.presetsEmpty,
-                        style: ProfileSettingsUi.handle,
+              const SizedBox(height: AppSizes.spacingS),
+              Expanded(
+                child: filtered.isEmpty
+                    ? Center(
+                        child: Text(
+                          t.presetsEmpty,
+                          style: ProfileSettingsUi.handle,
+                        ),
+                      )
+                    : ListView.separated(
+                        controller: scrollController,
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSizes.spacingL,
+                          0,
+                          AppSizes.spacingL,
+                          AppSizes.spacingS,
+                        ),
+                        itemCount: filtered.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: AppSizes.spacingXS),
+                        itemBuilder: (_, i) {
+                          final p = filtered[i];
+                          final ibanNorm = IbanUtils.normalize(p.collectionIban);
+                          final selected = widget.selectedIban == ibanNorm;
+                          return _PresetSelectTile(
+                            preset: p,
+                            selected: selected,
+                            onTap: () => Navigator.of(context).pop(
+                              CollectionPresetPickResult.preset(p),
+                            ),
+                          );
+                        },
                       ),
-                    )
-                  : ListView.separated(
-                      controller: scrollController,
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSizes.spacingM,
-                        0,
-                        AppSizes.spacingM,
-                        AppSizes.spacingS,
-                      ),
-                      itemCount: filtered.length,
-                      separatorBuilder: (_, _) =>
-                          const SizedBox(height: AppSizes.spacingS),
-                      itemBuilder: (_, i) {
-                        final p = filtered[i];
-                        final ibanNorm = IbanUtils.normalize(p.collectionIban);
-                        final selected = widget.selectedIban == ibanNorm;
-                        return _PresetSelectTile(
-                          preset: p,
-                          selected: selected,
-                          onTap: () => Navigator.of(context).pop(
-                            CollectionPresetPickResult.preset(p),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                AppSizes.spacingM,
-                AppSizes.spacingS,
-                AppSizes.spacingM,
-                AppSizes.spacingM + MediaQuery.paddingOf(context).bottom,
               ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSizes.spacingL,
+                  AppSizes.spacingS,
+                  AppSizes.spacingL,
+                  AppSizes.spacingM + MediaQuery.paddingOf(context).bottom,
+                ),
+                child: PremiumActionSheetTile(
+                  icon: Icons.add,
+                  label: t.savedIbansAddTitle,
+                  iconColor: ProfileSettingsUi.muted,
+                  trailing: const SizedBox.shrink(),
                   onTap: () => Navigator.of(context).pop(
                     const CollectionPresetPickResult.addNew(),
                   ),
-                  borderRadius:
-                      BorderRadius.circular(ProfileSettingsUi.fieldRadius),
-                  child: Container(
-                    constraints: const BoxConstraints(
-                      minHeight: AppSizes.minTouchTarget,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(
-                        ProfileSettingsUi.fieldRadius,
-                      ),
-                    ),
-                    child: CustomPaint(
-                      painter: _DashedBorderPainter(
-                        color: ProfileSettingsUi.muted.withValues(alpha: 0.5),
-                        radius: ProfileSettingsUi.fieldRadius,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.add,
-                            size: 20,
-                            color: ProfileSettingsUi.muted,
-                          ),
-                          const SizedBox(width: AppSizes.spacingXS),
-                          Text(
-                            t.savedIbansAddTitle,
-                            style: ProfileSettingsUi.fieldValue.copyWith(
-                              color: ProfileSettingsUi.muted,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
   }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  final Color color;
-  final double radius;
-
-  _DashedBorderPainter({required this.color, required this.radius});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-
-    final path = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(1, 1, size.width - 2, size.height - 2),
-          Radius.circular(radius),
-        ),
-      );
-
-    const dashWidth = 6.0;
-    const dashSpace = 4.0;
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        final end = distance + dashWidth;
-        canvas.drawPath(
-          metric.extractPath(distance, end.clamp(0.0, metric.length)),
-          paint,
-        );
-        distance = end + dashSpace;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) =>
-      oldDelegate.color != color;
 }
 
 class _PresetSelectTile extends StatelessWidget {

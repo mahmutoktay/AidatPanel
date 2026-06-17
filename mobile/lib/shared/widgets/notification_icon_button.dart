@@ -28,31 +28,37 @@ class NotificationIconButton extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.only(right: AppSizes.spacingXS),
-      child: IconButton(
-        tooltip: context.t.common.notifications,
-        onPressed: () => _openNotifications(context, ref),
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(
-          minWidth: AppSizes.minTouchTarget,
-          minHeight: AppSizes.minTouchTarget,
-        ),
-        icon: Badge(
-          isLabelVisible: showBadge,
-          label: Text(
-            badgeLabel,
-            style: AppTypography.caption.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 10,
-              height: 1.1,
+      child: Tooltip(
+        message: context.t.common.notifications,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _openNotifications(context, ref),
+            customBorder: const CircleBorder(),
+            child: Container(
+              width: AppSizes.minTouchTarget,
+              height: AppSizes.minTouchTarget,
+              alignment: Alignment.center,
+              child: Badge(
+                isLabelVisible: showBadge,
+                label: Text(
+                  badgeLabel,
+                  style: AppTypography.caption.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 10,
+                    height: 1.1,
+                  ),
+                ),
+                backgroundColor: AppColors.error,
+                offset: const Offset(6, -6),
+                child: const Icon(
+                  Icons.notifications_outlined,
+                  color: AppColors.textPrimary,
+                  size: 26,
+                ),
+              ),
             ),
-          ),
-          backgroundColor: AppColors.error,
-          offset: const Offset(6, -6),
-          child: const Icon(
-            Icons.notifications_outlined,
-            color: AppColors.textPrimary,
-            size: 26,
           ),
         ),
       ),

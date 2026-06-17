@@ -7,10 +7,9 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/api_user_message.dart';
 import '../../../../core/utils/month_labels.dart';
 import '../../../../core/utils/user_error_message.dart';
-import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/theme/dashboard_screen_style.dart';
-import '../../../../shared/widgets/app_select_field.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/sliding_segmented_control.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
 import '../../domain/entities/report_entity.dart';
@@ -26,10 +25,8 @@ class ReportDownloadSheet extends ConsumerStatefulWidget {
     BuildContext context, {
     required BuildingEntity building,
   }) {
-    return showModalBottomSheet<void>(
+    return PremiumBottomSheetScaffold.show<void>(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
       builder: (_) => ReportDownloadSheet(building: building),
     );
   }
@@ -76,6 +73,58 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
         .replaceAll('{year}', '$_year');
   }
 
+  Future<void> _pickMonth(BuildContext context) async {
+    if (_isLoading) return;
+    final t = context.t.features.reports;
+    final picked = await PremiumBottomSheetScaffold.show<int>(
+      context: context,
+      builder: (ctx) => PremiumBottomSheetScaffold(
+        title: t.selectMonthTitle,
+        scrollable: true,
+        body: PremiumActionSheetList(
+          children: [
+            for (var month = 1; month <= 12; month++)
+              PremiumActionSheetTile(
+                icon: Icons.calendar_month_outlined,
+                label: localizedMonthName(context, month),
+                trailing: _month == month
+                    ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                    : null,
+                onTap: () => Navigator.pop(ctx, month),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (picked != null) setState(() => _month = picked);
+  }
+
+  Future<void> _pickYear(BuildContext context) async {
+    if (_isLoading) return;
+    final t = context.t.features.reports;
+    final picked = await PremiumBottomSheetScaffold.show<int>(
+      context: context,
+      builder: (ctx) => PremiumBottomSheetScaffold(
+        title: t.selectYearTitle,
+        scrollable: true,
+        body: PremiumActionSheetList(
+          children: [
+            for (final year in _yearOptions)
+              PremiumActionSheetTile(
+                icon: Icons.date_range_outlined,
+                label: '$year',
+                trailing: _year == year
+                    ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                    : null,
+                onTap: () => Navigator.pop(ctx, year),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (picked != null) setState(() => _year = picked);
+  }
+
   Future<void> _onShowReport() async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
@@ -117,104 +166,81 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.reports;
-    final bottom = MediaQuery.paddingOf(context).bottom;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(DashboardScreenStyle.cardRadius),
+    return PremiumBottomSheetScaffold(
+      scrollable: false,
+      header: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSizes.spacingL,
+          AppSizes.spacingM,
+          AppSizes.spacingS,
+          AppSizes.spacingS,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.fill,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.borderColor.withValues(alpha: 0.14),
+                  width: 0.5,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.picture_as_pdf_outlined,
+                size: 24,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    t.sheetTitle,
+                    style: AppTypography.h3.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.building.name,
+                    style: AppTypography.body2.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.close_rounded),
+              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+              style: IconButton.styleFrom(
+                minimumSize: const Size(
+                  AppSizes.minTouchTarget,
+                  AppSizes.minTouchTarget,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
-      padding: EdgeInsets.fromLTRB(
-        AppSizes.spacingL,
-        AppSizes.spacingS,
-        AppSizes.spacingL,
-        AppSizes.spacingL + bottom,
-      ),
-      child: Column(
+      body: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const _SheetHandle(),
-          const SizedBox(height: AppSizes.spacingM),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.fill,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColors.borderColor.withValues(alpha: 0.14),
-                    width: 0.5,
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.picture_as_pdf_outlined,
-                  size: 24,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t.sheetTitle,
-                      style: AppTypography.h3.copyWith(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 20,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.building.name,
-                      style: AppTypography.body2.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 15,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              InkResponse(
-                onTap: () => Navigator.of(context).pop(),
-                radius: 24,
-                child: Container(
-                  width: AppSizes.minTouchTarget,
-                  height: AppSizes.minTouchTarget,
-                  alignment: Alignment.center,
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: AppColors.fill,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.borderColor.withValues(alpha: 0.14),
-                        width: 0.5,
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.close_rounded,
-                      size: 22,
-                      color: AppColors.textSecondary.withValues(alpha: 0.85),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.spacingL),
           Text(
             t.reportTypeLabel,
             style: AppTypography.caption.copyWith(
@@ -246,83 +272,36 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
             children: [
               if (_type == ReportType.monthly) ...[
                 Expanded(
-                  child: AppSelectField<int>(
+                  child: MinimalPickerField(
                     label: t.fieldMonth,
-                    sheetTitle: t.selectMonthTitle,
-                    value: _month,
+                    value: localizedMonthName(context, _month),
+                    hint: t.fieldMonth,
+                    icon: Icons.calendar_month_outlined,
                     enabled: !_isLoading,
-                    displayText: (v) =>
-                        v == null ? '' : localizedMonthName(context, v),
-                    options: [
-                      for (var m = 1; m <= 12; m++)
-                        AppSelectOption(
-                          value: m,
-                          label: localizedMonthName(context, m),
-                        ),
-                    ],
-                    onChanged: (v) {
-                      if (v != null) setState(() => _month = v);
-                    },
+                    onTap: () => _pickMonth(context),
                   ),
                 ),
                 const SizedBox(width: AppSizes.spacingS),
               ],
               Expanded(
-                child: AppSelectField<int>(
+                child: MinimalPickerField(
                   label: t.fieldYear,
-                  sheetTitle: t.selectYearTitle,
-                  value: _year,
+                  value: '$_year',
+                  hint: t.fieldYear,
+                  icon: Icons.date_range_outlined,
                   enabled: !_isLoading,
-                  displayText: (v) => v == null ? '' : '$v',
-                  options: [
-                    for (final y in _yearOptions)
-                      AppSelectOption(value: y, label: '$y'),
-                  ],
-                  onChanged: (v) {
-                    if (v != null) setState(() => _year = v);
-                  },
+                  onTap: () => _pickYear(context),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSizes.spacingL),
-          SizedBox(
-            height: ProfileSettingsUi.buttonHeight,
-            child: ElevatedButton.icon(
-              onPressed: _isLoading ? null : _onShowReport,
-              style: ProfileSettingsUi.primaryButton,
-              icon: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.4,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.picture_as_pdf_outlined, size: 22),
-              label: Text(_isLoading ? t.downloading : t.download),
-            ),
-          ),
         ],
       ),
-    );
-  }
-}
-
-class _SheetHandle extends StatelessWidget {
-  const _SheetHandle();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 40,
-        height: 4,
-        decoration: BoxDecoration(
-          color: AppColors.borderColor,
-          borderRadius: BorderRadius.circular(2),
-        ),
+      actions: PremiumSheetActions(
+        primaryLabel: _isLoading ? t.downloading : t.download,
+        onPrimary: _isLoading ? null : _onShowReport,
+        primaryLoading: _isLoading,
+        icon: Icons.picture_as_pdf_outlined,
       ),
     );
   }

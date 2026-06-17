@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/tint_dashboard_tile.dart';
 import '../../../../shared/widgets/user_profile_avatar.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
@@ -26,10 +27,8 @@ class ApartmentDetailsSheet {
   }
 
   static void show(BuildContext context, {required ApartmentEntity apt}) {
-    showModalBottomSheet<void>(
+    PremiumBottomSheetScaffold.show<void>(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
       builder: (sheetContext) => _ApartmentDetailsSheetBody(
         pageContext: context,
         apt: apt,
@@ -55,236 +54,75 @@ class _ApartmentDetailsSheetBody extends ConsumerWidget {
     final phoneText = apt.phone != null
         ? ApartmentUiUtils.formatPhone(apt.phone!)
         : context.t.common.phoneNotShared;
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
-    final maxSheetH = MediaQuery.sizeOf(context).height * 0.85;
 
-    return Container(
-      constraints: BoxConstraints(maxHeight: maxSheetH),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            blurRadius: 24,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: Column(
+    return PremiumBottomSheetScaffold(
+      maxHeightFactor: 0.85,
+      showCloseButton: true,
+      title: isOccupied
+          ? context.t.common.residentDetailsSheetTitle
+          : context.t.common.apartmentDetailsSheetTitle,
+      body: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: AppSizes.spacingS),
-          const _SheetHandle(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSizes.spacingL,
-              AppSizes.spacingM,
-              AppSizes.spacingS,
-              AppSizes.spacingS,
-            ),
-            child: Row(
+          _SheetHero(
+            apt: apt,
+            statusInfo: statusInfo,
+          ),
+          const SizedBox(height: AppSizes.spacingL),
+          _StatGrid(apt: apt),
+          if (isOccupied && resident != null) ...[
+            const SizedBox(height: AppSizes.spacingL),
+            PremiumInfoCard(
               children: [
-                Expanded(
-                  child: Text(
-                    isOccupied
-                        ? context.t.common.residentDetailsSheetTitle
-                        : context.t.common.apartmentDetailsSheetTitle,
-                    style: AppTypography.h3.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+                PremiumInfoRow(
+                  label: context.t.features.auth.email,
+                  value: resident.email,
                 ),
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => Navigator.of(context).pop(),
-                    customBorder: const CircleBorder(),
-                    child: SizedBox(
-                      width: AppSizes.minTouchTarget,
-                      height: AppSizes.minTouchTarget,
-                      child: Center(
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: AppColors.fill,
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.close_rounded,
-                            size: 22,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                PremiumInfoRow(
+                  label: context.t.features.auth.phone,
+                  value: phoneText,
                 ),
               ],
             ),
-          ),
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                AppSizes.spacingL,
-                0,
-                AppSizes.spacingL,
-                AppSizes.spacingM,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _SheetHero(
-                    apt: apt,
-                    statusInfo: statusInfo,
-                  ),
-                  const SizedBox(height: AppSizes.spacingL),
-                  _StatGrid(apt: apt),
-                  if (isOccupied && resident != null) ...[
-                    const SizedBox(height: AppSizes.spacingL),
-                    _ContactCard(
-                      email: resident.email,
-                      phone: phoneText,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              AppSizes.spacingL,
-              AppSizes.spacingS,
-              AppSizes.spacingL,
-              AppSizes.spacingM + bottomInset,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: AppSizes.minTouchTargetComfort,
-                    child: FilledButton.icon(
-                      onPressed: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
-                        pageContext,
-                        context,
-                        () => EditApartmentBottomSheet.show(
-                          pageContext,
-                          apartment: apt,
-                        ),
-                      ),
-                      icon: const Icon(Icons.edit_outlined, size: 20),
-                      label: Text(
-                        context.t.common.editApartment,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSizes.buttonRadius,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSizes.spacingS),
-                Expanded(
-                  child: SizedBox(
-                    height: AppSizes.minTouchTargetComfort,
-                    child: isOccupied
-                        ? OutlinedButton.icon(
-                            onPressed: () =>
-                                ApartmentDetailsSheet._afterApartmentSheetClosed(
-                              pageContext,
-                              context,
-                              () => RemoveResidentDialog.show(
-                                pageContext,
-                                apartment: apt,
-                              ),
-                            ),
-                            icon: const Icon(
-                              Icons.person_remove_outlined,
-                              size: 20,
-                            ),
-                            label: Text(
-                              context.t.common.removeResident,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.error,
-                              side: BorderSide(
-                                color: AppColors.error.withValues(alpha: 0.45),
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppSizes.buttonRadius,
-                                ),
-                              ),
-                            ),
-                          )
-                        : FilledButton.icon(
-                            onPressed: () =>
-                                ApartmentDetailsSheet._afterApartmentSheetClosed(
-                              pageContext,
-                              context,
-                              () => DeleteApartmentDialog.show(
-                                pageContext,
-                                apartment: apt,
-                              ),
-                            ),
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              size: 20,
-                            ),
-                            label: Text(
-                              context.t.common.deleteApartment,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: AppColors.error,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppSizes.buttonRadius,
-                                ),
-                              ),
-                            ),
-                          ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          ],
         ],
       ),
-    );
-  }
-}
-
-class _SheetHandle extends StatelessWidget {
-  const _SheetHandle();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 40,
-        height: 4,
-        decoration: BoxDecoration(
-          color: AppColors.border,
-          borderRadius: BorderRadius.circular(2),
+      actions: PremiumSheetActions(
+        primaryLabel: context.t.common.editApartment,
+        icon: Icons.edit_outlined,
+        onPrimary: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
+          pageContext,
+          context,
+          () => EditApartmentBottomSheet.show(
+            pageContext,
+            apartment: apt,
+          ),
         ),
+        secondaryLabel: isOccupied
+            ? context.t.common.removeResident
+            : context.t.common.deleteApartment,
+        onSecondary: () {
+          if (isOccupied) {
+            ApartmentDetailsSheet._afterApartmentSheetClosed(
+              pageContext,
+              context,
+              () => RemoveResidentDialog.show(
+                pageContext,
+                apartment: apt,
+              ),
+            );
+          } else {
+            ApartmentDetailsSheet._afterApartmentSheetClosed(
+              pageContext,
+              context,
+              () => DeleteApartmentDialog.show(
+                pageContext,
+                apartment: apt,
+              ),
+            );
+          }
+        },
       ),
     );
   }
@@ -471,110 +309,6 @@ class _StatGrid extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ContactCard extends StatelessWidget {
-  const _ContactCard({
-    required this.email,
-    required this.phone,
-  });
-
-  final String email;
-  final String phone;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-      ),
-      child: Column(
-        children: [
-          _SheetContactRow(
-            icon: Icons.mail_outline_rounded,
-            label: context.t.features.auth.email,
-            value: email,
-          ),
-          Divider(
-            height: 1,
-            indent: AppSizes.spacingM + 44,
-            endIndent: AppSizes.spacingM,
-            color: AppColors.borderColor.withValues(alpha: 0.35),
-          ),
-          _SheetContactRow(
-            icon: Icons.phone_outlined,
-            label: context.t.features.auth.phone,
-            value: phone,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SheetContactRow extends StatelessWidget {
-  const _SheetContactRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.spacingM,
-        vertical: AppSizes.spacingM,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            alignment: Alignment.center,
-            child: Icon(icon, color: AppColors.primary, size: 22),
-          ),
-          const SizedBox(width: AppSizes.spacingM),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: AppTypography.body1.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

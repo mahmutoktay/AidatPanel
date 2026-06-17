@@ -74,6 +74,7 @@ class DuesNotifier extends Notifier<DuesState> {
   DueStatus? _lastStatus;
   String? _loadedBuildingId;
   bool _isResidentList = false;
+  bool _paginated = true;
 
   @override
   DuesState build() => const DuesState();
@@ -83,14 +84,17 @@ class DuesNotifier extends Notifier<DuesState> {
     int? month,
     int? year,
     DueStatus? status,
+    bool paginated = true,
   }) async {
     final filtersChanged =
         _loadedBuildingId != buildingId ||
         _lastMonth != month ||
         _lastYear != year ||
         _lastStatus != status ||
-        _isResidentList;
+        _isResidentList ||
+        _paginated != paginated;
     final effectiveRefresh = refresh || filtersChanged;
+    if (!paginated && !effectiveRefresh) return;
     if (!effectiveRefresh && !state.canLoadMore) return;
 
     final buildingChanged =
@@ -100,6 +104,7 @@ class DuesNotifier extends Notifier<DuesState> {
     _lastMonth = month;
     _lastYear = year;
     _lastStatus = status;
+    _paginated = paginated;
     // Aynı bina + filtre yenilemede önceki listeyi tutup üstte ince yükleme
     // göstermek için veriyi silmiyoruz; bina değişince yanlış veri
     // göstermemek için listeyi temizleriz.
@@ -116,7 +121,8 @@ class DuesNotifier extends Notifier<DuesState> {
         month: month,
         year: year,
         status: status,
-        cursor: effectiveRefresh ? null : state.nextCursor,
+        cursor: effectiveRefresh || !paginated ? null : state.nextCursor,
+        paginated: paginated,
       );
       final merged = effectiveRefresh
           ? result.items
@@ -126,6 +132,7 @@ class DuesNotifier extends Notifier<DuesState> {
         isLoadingMore: false,
         dues: merged,
         nextCursor: result.nextCursor,
+        clearNextCursor: result.nextCursor == null,
       );
     } catch (e) {
       state = state.copyWith(
@@ -178,6 +185,7 @@ class DuesNotifier extends Notifier<DuesState> {
         isLoadingMore: false,
         dues: dues,
         nextCursor: result.nextCursor,
+        clearNextCursor: result.nextCursor == null,
       );
     } catch (e) {
       state = state.copyWith(
@@ -190,13 +198,14 @@ class DuesNotifier extends Notifier<DuesState> {
 
   Future<void> loadMoreBuildingDues() {
     final id = _loadedBuildingId;
-    if (id == null || id.isEmpty) return Future.value();
+    if (id == null || id.isEmpty || !_paginated) return Future.value();
     return loadBuildingDues(
       id,
       refresh: false,
       month: _lastMonth,
       year: _lastYear,
       status: _lastStatus,
+      paginated: true,
     );
   }
 
@@ -227,6 +236,7 @@ class DuesNotifier extends Notifier<DuesState> {
         month: _lastMonth,
         year: _lastYear,
         status: _lastStatus,
+        paginated: _paginated,
       );
     } catch (e) {
       state = state.copyWith(error: userFacingError(e));
@@ -261,6 +271,7 @@ class DuesNotifier extends Notifier<DuesState> {
         month: _lastMonth,
         year: _lastYear,
         status: _lastStatus,
+        paginated: _paginated,
       );
       return true;
     } catch (e) {

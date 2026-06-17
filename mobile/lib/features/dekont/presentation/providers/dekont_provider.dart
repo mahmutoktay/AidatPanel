@@ -345,7 +345,7 @@ class MyDekontsNotifier extends Notifier<MyDekontsState> {
         isLoadingMore: false,
         dekonts: visible,
         nextCursor: useClientFilter ? null : result.nextCursor,
-        clearNextCursor: useClientFilter,
+        clearNextCursor: useClientFilter || result.nextCursor == null,
       );
     } catch (e, st) {
       dekontDebugLog('provider.myDekonts.fail', '$e\n$st');
@@ -466,7 +466,7 @@ class ManagerDekontsNotifier extends Notifier<ManagerDekontsState> {
         isLoadingMore: false,
         dekonts: visible,
         nextCursor: useClientFilter ? null : result.nextCursor,
-        clearNextCursor: useClientFilter,
+        clearNextCursor: useClientFilter || result.nextCursor == null,
       );
     } catch (e, st) {
       dekontDebugLog('provider.managerDekonts.fail', '$e\n$st');

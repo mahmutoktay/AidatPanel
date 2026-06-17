@@ -230,6 +230,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
       isLoading: refresh,
       isLoadingMore: !refresh,
       clearError: true,
+      clearNextCursor: refresh,
     );
     try {
       final result = await _repository.list(
@@ -244,6 +245,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
         items: merged,
         unreadCount: result.unreadCount,
         nextCursor: result.nextCursor,
+        clearNextCursor: result.nextCursor == null,
       );
     } catch (e) {
       state = state.copyWith(

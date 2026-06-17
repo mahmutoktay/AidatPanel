@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/notifications/notification_navigation.dart';
+import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -42,7 +43,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _scrollController.addListener(_onScroll);
+    attachPaginationScroll(
+      _scrollController,
+      () => ref.read(notificationsNotifierProvider.notifier).loadMore(),
+      canLoad: () => ref.read(notificationsNotifierProvider).canLoadMore,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _reload());
     _pollTimer = Timer.periodic(_pollInterval, (_) => _reload());
   }
@@ -65,15 +70,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   Future<void> _reload() async {
     if (!mounted) return;
     await ref.read(notificationsNotifierProvider.notifier).load(refresh: true);
-  }
-
-  void _onScroll() {
-    if (!_scrollController.hasClients) return;
-    final max = _scrollController.position.maxScrollExtent;
-    final offset = _scrollController.offset;
-    if (max - offset < 120) {
-      ref.read(notificationsNotifierProvider.notifier).loadMore();
-    }
   }
 
   Future<void> _openNotification(NotificationEntity n) async {

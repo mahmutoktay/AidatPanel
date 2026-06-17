@@ -8,6 +8,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../data/cities_data.dart';
@@ -249,13 +250,8 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   }
 
   void _showCityPicker() {
-    showModalBottomSheet<void>(
+    PremiumBottomSheetScaffold.show<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.dashboardBackground,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) => _SearchablePicker(
         title: context.t.common.selectCityTitle,
         items: sortedCityNames,
@@ -272,13 +268,8 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
 
   void _showDistrictPicker() {
     final districts = turkishCities[_selectedCity] ?? const [];
-    showModalBottomSheet<void>(
+    PremiumBottomSheetScaffold.show<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.dashboardBackground,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) => _SearchablePicker(
         title: context.t.common.selectDistrictTitle,
         items: districts,

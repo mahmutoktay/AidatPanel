@@ -75,6 +75,13 @@ class AppColors {
 
   static const Color infoBg = Color(0xFFDBEAFE);
 
+  /// Gider bildirimleri — mor vurgu.
+  static const Color expenseAccent = Color(0xFF9333EA);
+  static const Color expenseAccentBg = Color(0xFFF3E8FF);
+
+  /// Sistem bildirimleri — koyu gri metin.
+  static const Color systemMuted = Color(0xFF4B5563);
+
   /// Profil/ayarlar ekranları için alias (geriye uyum).
 
   static const Color ink = primary;

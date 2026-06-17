@@ -27,9 +27,11 @@ class _MyDekontsScreenState extends ConsumerState<MyDekontsScreen> {
   @override
   void initState() {
     super.initState();
-    attachPaginationScroll(_scrollController, () {
-      ref.read(myDekontsNotifierProvider.notifier).loadMore();
-    });
+    attachPaginationScroll(
+      _scrollController,
+      () => ref.read(myDekontsNotifierProvider.notifier).loadMore(),
+      canLoad: () => ref.read(myDekontsNotifierProvider).canLoadMore,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 

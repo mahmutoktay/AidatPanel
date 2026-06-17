@@ -37,6 +37,7 @@ class DashboardNotificationButton extends ConsumerWidget {
             shape: BoxShape.circle,
             boxShadow: DashboardScreenStyle.cardShadow,
           ),
+          alignment: Alignment.center,
           child: Badge(
             isLabelVisible: showBadge,
             label: Text(

@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/theme/dashboard_screen_style.dart';
-import '../../../../shared/widgets/app_select_field.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
+import '../../../buildings/domain/entities/building_entity.dart';
 import '../providers/notifications_provider.dart';
 
 /// Yönetici duyuru formu → `POST /buildings/:id/announcements` (B5).
@@ -20,10 +19,8 @@ class AnnouncementFormSheet extends ConsumerStatefulWidget {
   const AnnouncementFormSheet({super.key});
 
   static Future<bool?> show(BuildContext context) {
-    return showModalBottomSheet<bool>(
+    return PremiumBottomSheetScaffold.show<bool>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (_) => const AnnouncementFormSheet(),
     );
   }
@@ -57,7 +54,6 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
     final buildingsAsync = ref.watch(buildingsStoreProvider);
     final buildings = buildingsAsync.value ?? const [];
     final t = context.t.features.notifications;
-    final bottom = MediaQuery.viewInsetsOf(context).bottom;
     final isLoadingBuildings =
         buildingsAsync.isLoading && buildings.isEmpty;
     final loadFailed = buildingsAsync.hasError && buildings.isEmpty;
@@ -66,168 +62,161 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
       _buildingId = buildings.first.id;
     }
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottom),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(DashboardScreenStyle.cardRadius),
+    return Form(
+      key: _formKey,
+      child: PremiumBottomSheetScaffold(
+        title: t.sendTitle,
+        body: _buildBody(
+          context,
+          buildings: buildings,
+          isLoadingBuildings: isLoadingBuildings,
+          loadFailed: loadFailed,
+          buildingsAsync: buildingsAsync,
+        ),
+        actions: buildings.isEmpty || isLoadingBuildings || loadFailed
+            ? null
+            : PremiumSheetActions(
+                primaryLabel: t.sendButton,
+                onPrimary: _submitting ? null : _submit,
+                primaryLoading: _submitting,
+              ),
+      ),
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context, {
+    required List<BuildingEntity> buildings,
+    required bool isLoadingBuildings,
+    required bool loadFailed,
+    required AsyncValue<List<BuildingEntity>> buildingsAsync,
+  }) {
+    final t = context.t.features.notifications;
+    if (isLoadingBuildings) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: AppSizes.spacingXL),
+        child: Center(
+          child: SizedBox(
+            width: 32,
+            height: 32,
+            child: CircularProgressIndicator(strokeWidth: 2),
           ),
         ),
-        child: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              AppSizes.spacingM,
-              AppSizes.spacingS,
-              AppSizes.spacingM,
-              AppSizes.spacingM,
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
-                      decoration: BoxDecoration(
-                        color: AppColors.borderColor,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  Text(
-                    t.sendTitle,
-                    style: AppTypography.h4.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  if (isLoadingBuildings)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: AppSizes.spacingXL,
-                      ),
-                      child: Center(
-                        child: SizedBox(
-                          width: 32,
-                          height: 32,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                    )
-                  else if (loadFailed)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        EmptyStateWidget(
-                          icon: Icons.cloud_off_outlined,
-                          title: context.t.features.auth.splashConnectionError,
-                          subtitle: buildingsAsync.error != null
-                              ? userFacingError(buildingsAsync.error!)
-                              : context.t.features.auth.splashConnectionHint,
-                        ),
-                        const SizedBox(height: AppSizes.spacingL),
-                        SizedBox(
-                          height: AppSizes.buttonHeightPrimary,
-                          child: ElevatedButton.icon(
-                            onPressed: () => ref
-                                .read(buildingsStoreProvider.notifier)
-                                .loadBuildings(),
-                            style: AppButtonStyles.elevatedPrimary(),
-                            icon: const Icon(Icons.refresh, size: 22),
-                            label: Text(context.t.common.tryAgain),
-                          ),
-                        ),
-                      ],
-                    )
-                  else if (buildings.isEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        EmptyStateWidget(
-                          icon: Icons.apartment_outlined,
-                          title: t.noBuilding,
-                        ),
-                        const SizedBox(height: AppSizes.spacingL),
-                        SizedBox(
-                          height: AppSizes.buttonHeightPrimary,
-                          child: ElevatedButton.icon(
-                            onPressed: _openAddBuilding,
-                            style: AppButtonStyles.elevatedPrimary(),
-                            icon: const Icon(Icons.add_business),
-                            label: Text(context.t.common.addBuilding),
-                          ),
-                        ),
-                      ],
-                    )
-                  else ...[
-                    AppSelectField<String>(
-                      label: context.t.common.buildingName,
-                      value: _buildingId,
-                      options: [
-                        for (final b in buildings)
-                          AppSelectOption(value: b.id, label: b.name),
-                      ],
-                      onChanged: (id) => setState(() => _buildingId = id),
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    TextFormField(
-                      controller: _titleController,
-                      maxLength: 120,
-                      decoration: InputDecoration(labelText: t.fieldTitle),
-                      validator: (v) {
-                        final s = v?.trim() ?? '';
-                        if (s.isEmpty) return t.fieldRequired;
-                        if (s.length > 120) return t.titleTooLong;
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    TextFormField(
-                      controller: _bodyController,
-                      maxLines: 5,
-                      maxLength: 2000,
-                      decoration: InputDecoration(labelText: t.fieldBody),
-                      validator: (v) {
-                        final s = v?.trim() ?? '';
-                        if (s.isEmpty) return t.fieldRequired;
-                        if (s.length > 2000) return t.bodyTooLong;
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: AppSizes.spacingXL),
-                    SizedBox(
-                      height: AppSizes.minTouchTarget,
-                      child: ElevatedButton(
-                        onPressed: _submitting ? null : _submit,
-                        style: AppButtonStyles.elevatedPrimary(fullWidth: true),
-                        child: _submitting
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(t.sendButton),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+      );
+    }
+    if (loadFailed) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          EmptyStateWidget(
+            icon: Icons.cloud_off_outlined,
+            title: context.t.features.auth.splashConnectionError,
+            subtitle: buildingsAsync.error != null
+                ? userFacingError(buildingsAsync.error!)
+                : context.t.features.auth.splashConnectionHint,
           ),
+          const SizedBox(height: AppSizes.spacingL),
+          PremiumSheetActions(
+            primaryLabel: context.t.common.tryAgain,
+            onPrimary: () =>
+                ref.read(buildingsStoreProvider.notifier).loadBuildings(),
+          ),
+        ],
+      );
+    }
+    if (buildings.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          EmptyStateWidget(
+            icon: Icons.apartment_outlined,
+            title: t.noBuilding,
+          ),
+          const SizedBox(height: AppSizes.spacingL),
+          PremiumSheetActions(
+            primaryLabel: context.t.common.addBuilding,
+            onPrimary: _openAddBuilding,
+            icon: Icons.add_business,
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        MinimalPickerField(
+          label: context.t.common.buildingName,
+          value: buildings
+              .firstWhere(
+                (b) => b.id == _buildingId,
+                orElse: () => buildings.first,
+              )
+              .name,
+          hint: context.t.common.buildingName,
+          icon: Icons.apartment_outlined,
+          required: true,
+          onTap: () => _pickBuilding(context, buildings),
+        ),
+        const SizedBox(height: AppSizes.spacingM),
+        MinimalTextField(
+          controller: _titleController,
+          label: t.fieldTitle,
+          icon: Icons.title_outlined,
+          required: true,
+          enabled: !_submitting,
+          validator: (v) {
+            final s = v?.trim() ?? '';
+            if (s.isEmpty) return t.fieldRequired;
+            if (s.length > 120) return t.titleTooLong;
+            return null;
+          },
+        ),
+        const SizedBox(height: AppSizes.spacingM),
+        MinimalTextField(
+          controller: _bodyController,
+          label: t.fieldBody,
+          icon: Icons.notes_outlined,
+          required: true,
+          maxLines: 5,
+          enabled: !_submitting,
+          validator: (v) {
+            final s = v?.trim() ?? '';
+            if (s.isEmpty) return t.fieldRequired;
+            if (s.length > 2000) return t.bodyTooLong;
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Future<void> _pickBuilding(
+    BuildContext context,
+    List<BuildingEntity> buildings,
+  ) async {
+    final picked = await PremiumBottomSheetScaffold.show<String>(
+      context: context,
+      builder: (ctx) => PremiumBottomSheetScaffold(
+        title: context.t.common.buildingName,
+        scrollable: true,
+        body: PremiumActionSheetList(
+          children: [
+            for (final b in buildings)
+              PremiumActionSheetTile(
+                icon: Icons.apartment_outlined,
+                label: b.name,
+                subtitle: b.displayAddress,
+                trailing: _buildingId == b.id
+                    ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                    : null,
+                onTap: () => Navigator.pop(ctx, b.id),
+              ),
+          ],
         ),
       ),
     );
+    if (picked != null) setState(() => _buildingId = picked);
   }
 
   Future<void> _submit() async {

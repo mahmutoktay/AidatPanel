@@ -86,6 +86,7 @@ class TicketsNotifier extends Notifier<TicketsState> {
         isLoadingMore: false,
         tickets: merged,
         nextCursor: result.nextCursor,
+        clearNextCursor: result.nextCursor == null,
       );
     } catch (e) {
       state = state.copyWith(
@@ -124,6 +125,7 @@ class TicketsNotifier extends Notifier<TicketsState> {
         isLoadingMore: false,
         tickets: merged,
         nextCursor: result.nextCursor,
+        clearNextCursor: result.nextCursor == null,
       );
     } catch (e) {
       state = state.copyWith(

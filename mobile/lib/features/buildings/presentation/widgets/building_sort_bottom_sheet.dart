@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../utils/building_collection_status.dart';
 
 /// Sıralama seçeneklerini gösteren alt sayfa.
@@ -17,59 +17,32 @@ class BuildingSortBottomSheet {
     final t = context.t.features.buildings.list;
     final options = BuildingListSort.values;
 
-    return showModalBottomSheet<BuildingListSort>(
+    return PremiumBottomSheetScaffold.show<BuildingListSort>(
       context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      builder: (context) => PremiumBottomSheetScaffold(
+        title: t.sort,
+        scrollable: false,
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < options.length; i++) ...[
+              if (i > 0) const SizedBox(height: AppSizes.spacingXS),
+              PremiumActionSheetTile(
+                icon: Icons.sort_rounded,
+                label: buildingListSortLabel(context, options[i]),
+                trailing: options[i] == current
+                    ? const Icon(
+                        Icons.check_rounded,
+                        color: AppColors.statusGreen,
+                      )
+                    : null,
+                onTap: () => Navigator.of(context).pop(options[i]),
+              ),
+            ],
+          ],
+        ),
       ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSizes.spacingM,
-              AppSizes.spacingM,
-              AppSizes.spacingM,
-              AppSizes.spacingL,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  t.sort,
-                  style: AppTypography.h4.copyWith(
-                    color: AppColors.inkDark,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: AppSizes.spacingM),
-                for (final option in options)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    minTileHeight: AppSizes.minTouchTargetComfort,
-                    title: Text(
-                      buildingListSortLabel(context, option),
-                      style: AppTypography.body1.copyWith(
-                        color: AppColors.inkDark,
-                        fontWeight: option == current
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                      ),
-                    ),
-                    trailing: option == current
-                        ? const Icon(
-                            Icons.check_rounded,
-                            color: AppColors.statusGreen,
-                          )
-                        : null,
-                    onTap: () => Navigator.of(context).pop(option),
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }
@@ -109,7 +82,7 @@ class BuildingSortChip extends StatelessWidget {
                       applyHeightToFirstAscent: false,
                       applyHeightToLastDescent: false,
                     ),
-                    style: AppTypography.label.copyWith(
+                    style: const TextStyle(
                       color: AppColors.inkDark,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,

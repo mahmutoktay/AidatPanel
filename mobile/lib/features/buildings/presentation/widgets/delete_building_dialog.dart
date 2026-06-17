@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/user_error_message.dart';
+import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../domain/entities/building_entity.dart';
@@ -23,14 +26,9 @@ class DeleteBuildingDialog extends ConsumerStatefulWidget {
     BuildContext context, {
     required BuildingEntity building,
   }) {
-    return showModalBottomSheet<bool>(
+    return PremiumBottomSheetScaffold.show<bool>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.sheetBackground,
-      barrierColor: const Color(0x6114120C),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-      ),
+      isDismissible: true,
       builder: (_) => DeleteBuildingDialog(building: building),
     );
   }
@@ -100,231 +98,102 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
   @override
   Widget build(BuildContext context) {
     final t = context.t;
-    final viewInsets = MediaQuery.of(context).viewInsets.bottom;
     final canSubmit = _matches && !_deleting;
     final phrase = widget.building.name;
 
     return PopScope(
       canPop: !_deleting,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: viewInsets),
-        child: Container(
-          color: Colors.transparent,
-          padding: EdgeInsets.fromLTRB(
-            24,
-            12,
-            24,
-            24 + MediaQuery.of(context).padding.bottom,
+      child: PremiumBottomSheetScaffold(
+        scrollable: true,
+        header: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSizes.spacingL,
+            AppSizes.spacingM,
+            AppSizes.spacingL,
+            AppSizes.spacingS,
           ),
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // 1. Drag Handle
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE7E4DA),
-                      borderRadius: BorderRadius.circular(2.5),
-                    ),
-                  ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: ProfileSettingsUi.danger.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                const SizedBox(height: 20),
-
-                // 2. Header Row
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.warning_amber_rounded,
+                  color: ProfileSettingsUi.danger,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFDEDEC),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        Icons.warning_amber_rounded,
-                        color: Color(0xFFE15B4D),
-                        size: 24,
-                      ),
+                    Text(
+                      t.common.deleteBuilding,
+                      style: ProfileSettingsUi.title,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            t.common.deleteBuilding,
-                            style: const TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 19,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF15140F),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            t.common.deleteBuildingHeader,
-                            style: const TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF6B6757),
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                    const SizedBox(height: 4),
+                    Text(
+                      t.common.deleteBuildingHeader,
+                      style: ProfileSettingsUi.handle.copyWith(fontSize: 13),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-
-                // 3. Type hint text
-                Text(
-                  t.common.deleteBuildingTypeHint,
-                  style: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF9A9686),
-                    letterSpacing: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // 4. Clickable Red Card (phrase preview)
-                _PhrasePreview(
-                  phrase: phrase,
-                  onTap: _deleting ? null : () => _fillPhrase(phrase),
-                ),
-                const SizedBox(height: 16),
-
-                // 5. Text input field
-                TextField(
-                  controller: _controller,
-                  enabled: !_deleting,
-                  onChanged: (_) => setState(() {}),
-                  style: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF15140F),
-                  ),
-                  cursorColor: const Color(0xFF15140F),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
-                    hintText: phrase,
-                    hintStyle: const TextStyle(
-                      color: Color(0xFFB0AC9D),
-                      fontWeight: FontWeight.w400,
-                    ),
-                    prefixIcon: const Icon(
-                      Icons.edit_note_rounded,
-                      color: Color(0xFF9A9686),
-                      size: 22,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFF15140F), width: 1.5),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE15B4D), width: 1.5),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE15B4D), width: 1.5),
-                    ),
-                    errorStyle: const TextStyle(
-                      color: Color(0xFFE15B4D),
-                      fontSize: 12,
-                    ),
-                    errorText: _attempted && !_matches
-                        ? context.t.common.buildingNameMismatch
-                        : null,
-                  ),
-                ),
-                const SizedBox(height: 28),
-
-                // 6. Actions row
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _deleting
-                            ? null
-                            : () => Navigator.of(context).pop(false),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF15140F),
-                          backgroundColor: Colors.white,
-                          side: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
-                          minimumSize: const Size.fromHeight(54),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          textStyle: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        child: Text(t.common.cancelBtn),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: canSubmit ? _delete : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE15B4D),
-                          foregroundColor: Colors.white,
-                          disabledBackgroundColor: const Color(0xFFE15B4D).withValues(alpha: 0.3),
-                          disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
-                          elevation: 0,
-                          minimumSize: const Size.fromHeight(54),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          textStyle: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        child: _deleting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(t.common.delete),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
+            ],
+          ),
+        ),
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              t.common.deleteBuildingTypeHint,
+              style: ProfileSettingsUi.fieldLabelUppercase,
             ),
-          ),
+            const SizedBox(height: AppSizes.spacingS),
+            _PhrasePreview(
+              phrase: phrase,
+              onTap: _deleting ? null : () => _fillPhrase(phrase),
+            ),
+            const SizedBox(height: AppSizes.spacingM),
+            MinimalTextField(
+              controller: _controller,
+              label: t.common.deleteBuilding,
+              hint: phrase,
+              icon: Icons.edit_note_rounded,
+              enabled: !_deleting,
+              onChanged: (_) => setState(() {}),
+            ),
+            if (_attempted && !_matches) ...[
+              const SizedBox(height: AppSizes.spacingXS),
+              Text(
+                context.t.common.buildingNameMismatch,
+                style: ProfileSettingsUi.fieldLabel.copyWith(
+                  color: ProfileSettingsUi.danger,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: PremiumSheetActions(
+          primaryLabel: t.common.delete,
+          onPrimary: _delete,
+          primaryLoading: _deleting,
+          primaryEnabled: canSubmit,
+          dangerPrimary: true,
+          secondaryLabel: t.common.cancelBtn,
+          onSecondary: _deleting ? null : () => Navigator.of(context).pop(false),
+          secondaryEnabled: !_deleting,
         ),
       ),
     );
@@ -341,34 +210,37 @@ class _PhrasePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFFFDEDEC),
-      borderRadius: BorderRadius.circular(16),
+      color: ProfileSettingsUi.danger.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(ProfileSettingsUi.fieldRadius),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: SelectableText(
-                  phrase,
-                  style: const TextStyle(
-                    fontFamily: 'Inter',
-                    color: Color(0xFFE15B4D),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                    letterSpacing: 1.1,
+        borderRadius: BorderRadius.circular(ProfileSettingsUi.fieldRadius),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: AppSizes.minTouchTarget,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SelectableText(
+                    phrase,
+                    style: ProfileSettingsUi.fieldValue.copyWith(
+                      color: ProfileSettingsUi.danger,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.1,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(
-                Icons.touch_app_outlined,
-                size: 20,
-                color: Color(0xFFE15B4D),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.touch_app_outlined,
+                  size: 20,
+                  color: ProfileSettingsUi.danger,
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -857,6 +857,27 @@ class Translations$common$en {
 	/// en: 'Current password is incorrect.'
 	String get changePasswordWrongCurrent => 'Current password is incorrect.';
 
+	/// en: 'You can change the application language here.'
+	String get languageSheetDescription => 'You can change the application language here.';
+
+	/// en: 'Must include uppercase, lowercase, and a number'
+	String get newPasswordHint => 'Must include uppercase, lowercase, and a number';
+
+	/// en: 'Not specified'
+	String get passwordStrengthUnspecified => 'Not specified';
+
+	/// en: 'Weak'
+	String get passwordStrengthWeak => 'Weak';
+
+	/// en: 'Medium'
+	String get passwordStrengthMedium => 'Medium';
+
+	/// en: 'Strong'
+	String get passwordStrengthStrong => 'Strong';
+
+	/// en: 'New password strength: {level}'
+	String get passwordStrengthLabel => 'New password strength: {level}';
+
 	/// en: 'Close My Account'
 	String get deleteAccount => 'Close My Account';
 
@@ -1684,6 +1705,57 @@ class Translations$features$tickets$en {
 
 	/// en: 'Apartment not linked. Please sign in again.'
 	String get apartmentRequired => 'Apartment not linked. Please sign in again.';
+
+	/// en: 'Manager update'
+	String get managerUpdateLabel => 'Manager update';
+
+	/// en: 'Resident update'
+	String get residentUpdateLabel => 'Resident update';
+
+	/// en: 'Quick reply templates'
+	String get quickReplyTemplatesTitle => 'Quick reply templates';
+
+	/// en: 'Confirm'
+	String get confirmChanges => 'Confirm';
+
+	/// en: 'Requester details'
+	String get residentInfoTitle => 'Requester details';
+
+	/// en: 'Resident'
+	String get defaultResidentName => 'Resident';
+
+	/// en: 'Apt {number}'
+	String get apartmentNumberTag => 'Apt {number}';
+
+	/// en: 'No apartment info'
+	String get apartmentInfoMissing => 'No apartment info';
+
+	/// en: 'Manager note (optional)'
+	String get managerNoteOptional => 'Manager note (optional)';
+
+	/// en: 'Team dispatched'
+	String get templateTeamDispatched => 'Team dispatched';
+
+	/// en: 'Issue inspected on site; technical team dispatched.'
+	String get templateTeamDispatchedText => 'Issue inspected on site; technical team dispatched.';
+
+	/// en: 'Waiting for parts'
+	String get templateWaitingPart => 'Waiting for parts';
+
+	/// en: 'Required materials ordered; waiting for delivery.'
+	String get templateWaitingPartText => 'Required materials ordered; waiting for delivery.';
+
+	/// en: 'Appointment set'
+	String get templateAppointmentSet => 'Appointment set';
+
+	/// en: 'Spoke with resident; appointment scheduled.'
+	String get templateAppointmentSetText => 'Spoke with resident; appointment scheduled.';
+
+	/// en: 'Resolved / verified'
+	String get templateResolvedCheck => 'Resolved / verified';
+
+	/// en: 'Issue fixed; verification completed.'
+	String get templateResolvedCheckText => 'Issue fixed; verification completed.';
 }
 
 // Path: features.dekont
@@ -2396,6 +2468,9 @@ class Translations$features$notifications$en {
 	/// en: 'Notification'
 	String get typeOther => 'Notification';
 
+	/// en: 'All apartments'
+	String get allApartmentsTag => 'All apartments';
+
 	/// en: 'Announcement to residents'
 	String get sendTitle => 'Announcement to residents';
 
@@ -2497,6 +2572,36 @@ class Translations$features$profile$en {
 
 	/// en: 'Remove profile photo'
 	String get removePhoto => 'Remove profile photo';
+
+	/// en: 'Camera'
+	String get avatarCamera => 'Camera';
+
+	/// en: 'Gallery'
+	String get avatarGallery => 'Gallery';
+
+	/// en: 'Save'
+	String get avatarSave => 'Save';
+
+	/// en: 'Remove Photo'
+	String get avatarRemove => 'Remove Photo';
+
+	/// en: 'Could not load the photo.'
+	String get avatarPhotoLoadError => 'Could not load the photo.';
+
+	/// en: 'Could not process the photo.'
+	String get avatarPhotoProcessError => 'Could not process the photo.';
+
+	/// en: 'Could not open the camera.'
+	String get avatarCameraError => 'Could not open the camera.';
+
+	/// en: 'Could not open the gallery.'
+	String get avatarGalleryError => 'Could not open the gallery.';
+
+	/// en: 'Could not decode the image.'
+	String get avatarDecodeError => 'Could not decode the image.';
+
+	/// en: 'Could not save the photo.'
+	String get avatarSaveError => 'Could not save the photo.';
 
 	/// en: 'Account created: {date}'
 	String get accountCreatedAt => 'Account created: {date}';
@@ -3407,6 +3512,13 @@ extension on Translations {
 			'common.changePasswordSuccess' => 'Your password has been changed. Please sign in again with your new password.',
 			'common.changePasswordFailed' => 'Could not change password. Please try again.',
 			'common.changePasswordWrongCurrent' => 'Current password is incorrect.',
+			'common.languageSheetDescription' => 'You can change the application language here.',
+			'common.newPasswordHint' => 'Must include uppercase, lowercase, and a number',
+			'common.passwordStrengthUnspecified' => 'Not specified',
+			'common.passwordStrengthWeak' => 'Weak',
+			'common.passwordStrengthMedium' => 'Medium',
+			'common.passwordStrengthStrong' => 'Strong',
+			'common.passwordStrengthLabel' => 'New password strength: {level}',
 			'common.deleteAccount' => 'Close My Account',
 			'common.deleteAccountTitle' => 'Do you want to close your account?',
 			'common.deleteAccountWarning' => 'This action cannot be undone. Your personal data will be removed, but for legal reasons some records (such as dues history) are kept anonymously.',
@@ -3609,6 +3721,8 @@ extension on Translations {
 			'features.tickets.categoryMalfunction' => 'Malfunction',
 			'features.tickets.categoryOther' => 'Other',
 			'features.tickets.submit' => 'Submit',
+			_ => null,
+		} ?? switch (path) {
 			'features.tickets.createSuccess' => 'Your request has been submitted',
 			'features.tickets.createFailed' => 'Could not save your request. Please try again.',
 			'features.tickets.createServiceUnavailable' => 'The request service is not available right now. Please try again later.',
@@ -3616,8 +3730,6 @@ extension on Translations {
 			'features.tickets.emptySubtitle' => 'Report an issue or request from here',
 			'features.tickets.titleTooShort' => 'Title must be at least 3 characters',
 			'features.tickets.descriptionTooShort' => 'Description must be at least 10 characters',
-			_ => null,
-		} ?? switch (path) {
 			'features.tickets.statusOpen' => 'Open',
 			'features.tickets.statusInProgress' => 'In progress',
 			'features.tickets.statusResolved' => 'Resolved',
@@ -3644,6 +3756,23 @@ extension on Translations {
 			'features.tickets.noteDisabledClosed' => 'Cannot add notes to a closed request',
 			'features.tickets.statusClosedHint' => 'This request is closed; status cannot be changed.',
 			'features.tickets.apartmentRequired' => 'Apartment not linked. Please sign in again.',
+			'features.tickets.managerUpdateLabel' => 'Manager update',
+			'features.tickets.residentUpdateLabel' => 'Resident update',
+			'features.tickets.quickReplyTemplatesTitle' => 'Quick reply templates',
+			'features.tickets.confirmChanges' => 'Confirm',
+			'features.tickets.residentInfoTitle' => 'Requester details',
+			'features.tickets.defaultResidentName' => 'Resident',
+			'features.tickets.apartmentNumberTag' => 'Apt {number}',
+			'features.tickets.apartmentInfoMissing' => 'No apartment info',
+			'features.tickets.managerNoteOptional' => 'Manager note (optional)',
+			'features.tickets.templateTeamDispatched' => 'Team dispatched',
+			'features.tickets.templateTeamDispatchedText' => 'Issue inspected on site; technical team dispatched.',
+			'features.tickets.templateWaitingPart' => 'Waiting for parts',
+			'features.tickets.templateWaitingPartText' => 'Required materials ordered; waiting for delivery.',
+			'features.tickets.templateAppointmentSet' => 'Appointment set',
+			'features.tickets.templateAppointmentSetText' => 'Spoke with resident; appointment scheduled.',
+			'features.tickets.templateResolvedCheck' => 'Resolved / verified',
+			'features.tickets.templateResolvedCheckText' => 'Issue fixed; verification completed.',
 			'features.dekont.makePaymentTitle' => 'Make Payment',
 			'features.dekont.myDekontsTitle' => 'My Receipts',
 			'features.dekont.managerTitle' => 'Receipt Review',
@@ -3872,6 +4001,7 @@ extension on Translations {
 			'features.notifications.typeExpenseAdded' => 'New expense',
 			'features.notifications.typeSystem' => 'System',
 			'features.notifications.typeOther' => 'Notification',
+			'features.notifications.allApartmentsTag' => 'All apartments',
 			'features.notifications.sendTitle' => 'Announcement to residents',
 			'features.notifications.fieldTitle' => 'Title',
 			'features.notifications.fieldBody' => 'Message',
@@ -3903,6 +4033,16 @@ extension on Translations {
 			'features.profile.photoSaved' => 'Profile photo saved for this account.',
 			'features.profile.photoRemoved' => 'Profile photo removed.',
 			'features.profile.removePhoto' => 'Remove profile photo',
+			'features.profile.avatarCamera' => 'Camera',
+			'features.profile.avatarGallery' => 'Gallery',
+			'features.profile.avatarSave' => 'Save',
+			'features.profile.avatarRemove' => 'Remove Photo',
+			'features.profile.avatarPhotoLoadError' => 'Could not load the photo.',
+			'features.profile.avatarPhotoProcessError' => 'Could not process the photo.',
+			'features.profile.avatarCameraError' => 'Could not open the camera.',
+			'features.profile.avatarGalleryError' => 'Could not open the gallery.',
+			'features.profile.avatarDecodeError' => 'Could not decode the image.',
+			'features.profile.avatarSaveError' => 'Could not save the photo.',
 			'features.profile.accountCreatedAt' => 'Account created: {date}',
 			'features.subscription.title' => 'Subscription',
 			'features.subscription.statusActive' => 'Active',

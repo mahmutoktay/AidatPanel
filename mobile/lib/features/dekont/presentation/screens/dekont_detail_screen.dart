@@ -15,6 +15,7 @@ import '../../../../core/utils/api_user_message.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
@@ -142,11 +143,8 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
   }
 
   Future<void> _openReviewSheet(DekontEntity dekont) async {
-    final ok = await showModalBottomSheet<bool>(
+    final ok = await PremiumBottomSheetScaffold.show<bool>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (sheetContext) => _ManagerReviewSheet(dekont: dekont),
     );
     if (ok == true && mounted) {
@@ -359,96 +357,69 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.dekont;
-    final bottom = MediaQuery.viewInsetsOf(context).bottom;
     final buildingId = widget.dekont.buildingId;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottom),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: AppButtonStyles.sheetTop.borderRadius,
-        ),
-        child: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              AppSizes.spacingL,
-              AppSizes.spacingM,
-              AppSizes.spacingL,
-              AppSizes.spacingL,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
-                    decoration: BoxDecoration(
-                      color: AppColors.border.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                Text(t.reviewAction, style: AppTypography.h2),
-                const SizedBox(height: AppSizes.spacingS),
-                Text(
-                  t.managerApprovalHint,
-                  style: AppTypography.body2.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: AppSizes.spacingL),
-                MinimalTextField(
-                  controller: _noteController,
-                  label: t.reviewNote,
-                  icon: Icons.notes_outlined,
-                  maxLines: 3,
-                ),
-                const SizedBox(height: AppSizes.spacingM),
-                _BuildingDuesPicker(
-                  buildingId: buildingId,
-                  apartmentId: widget.dekont.apartmentId,
-                  selectedDueId: _selectedDueId ?? widget.dekont.dueId,
-                  onChanged: (id) => setState(() => _selectedDueId = id),
-                ),
-                const SizedBox(height: AppSizes.spacingL),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _pendingDecision != null
-                            ? null
-                            : () => _submit(DekontReviewDecision.reject),
-                        style: ProfileSettingsUi.dangerOutlinedButton,
-                        child: _pendingDecision == DekontReviewDecision.reject
-                            ? const _ReviewButtonSpinner()
-                            : Text(t.reject),
-                      ),
-                    ),
-                    const SizedBox(width: AppSizes.spacingS),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _pendingDecision != null
-                            ? null
-                            : () => _submit(DekontReviewDecision.approve),
-                        style: AppButtonStyles.elevatedSuccess(fullWidth: true),
-                        child: _pendingDecision == DekontReviewDecision.approve
-                            ? const _ReviewButtonSpinner(
-                                color: Colors.white,
-                              )
-                            : Text(t.approve),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+    return PremiumBottomSheetScaffold(
+      title: t.reviewAction,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            t.managerApprovalHint,
+            style: AppTypography.body2.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
             ),
           ),
+          const SizedBox(height: AppSizes.spacingL),
+          MinimalTextField(
+            controller: _noteController,
+            label: t.reviewNote,
+            icon: Icons.notes_outlined,
+            maxLines: 3,
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          _BuildingDuesPicker(
+            buildingId: buildingId,
+            apartmentId: widget.dekont.apartmentId,
+            selectedDueId: _selectedDueId ?? widget.dekont.dueId,
+            onChanged: (id) => setState(() => _selectedDueId = id),
+          ),
+        ],
+      ),
+      actions: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSizes.spacingL,
+          AppSizes.spacingS,
+          AppSizes.spacingL,
+          AppSizes.spacingM,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _pendingDecision != null
+                    ? null
+                    : () => _submit(DekontReviewDecision.reject),
+                style: ProfileSettingsUi.dangerOutlinedButton,
+                child: _pendingDecision == DekontReviewDecision.reject
+                    ? const _ReviewButtonSpinner()
+                    : Text(t.reject),
+              ),
+            ),
+            const SizedBox(width: AppSizes.spacingS),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _pendingDecision != null
+                    ? null
+                    : () => _submit(DekontReviewDecision.approve),
+                style: AppButtonStyles.elevatedSuccess(fullWidth: true),
+                child: _pendingDecision == DekontReviewDecision.approve
+                    ? const _ReviewButtonSpinner(color: Colors.white)
+                    : Text(t.approve),
+              ),
+            ),
+          ],
         ),
       ),
     );
