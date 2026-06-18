@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/navigation/app_back_navigation.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
@@ -18,6 +19,8 @@ class DashboardSecondaryScaffold extends StatelessWidget {
   final Widget? bottomNavigationBar;
   final bool showNotificationAction;
   final VoidCallback? onBack;
+  final String? fallbackRoute;
+  final VoidCallback? onFallback;
   final PreferredSizeWidget? bottom;
 
   const DashboardSecondaryScaffold({
@@ -30,8 +33,26 @@ class DashboardSecondaryScaffold extends StatelessWidget {
     this.bottomNavigationBar,
     this.showNotificationAction = false,
     this.onBack,
+    this.fallbackRoute,
+    this.onFallback,
     this.bottom,
   });
+
+  bool get _handlesSystemBack =>
+      fallbackRoute != null || onFallback != null;
+
+  VoidCallback? _resolveBackHandler(BuildContext context) {
+    if (onBack != null) return onBack;
+    if (!_handlesSystemBack) return null;
+    return () {
+      if (!AppBackNavigation.handleSecondaryScreenBack(
+        context,
+        fallbackPath: fallbackRoute,
+      )) {
+        onFallback?.call();
+      }
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +60,9 @@ class DashboardSecondaryScaffold extends StatelessWidget {
       ...?actions,
       if (showNotificationAction) const NotificationIconButton(),
     ];
+    final backHandler = _resolveBackHandler(context);
 
-    return Scaffold(
+    Widget child = Scaffold(
       backgroundColor: AppColors.dashboardBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -48,7 +70,7 @@ class DashboardSecondaryScaffold extends StatelessWidget {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        leading: CircularBackButton(onPressed: onBack),
+        leading: CircularBackButton(onPressed: backHandler),
         title: Text(title, style: ProfileSettingsUi.title),
         actions: appBarActions.isEmpty ? null : appBarActions,
         bottom: bottom,
@@ -58,6 +80,18 @@ class DashboardSecondaryScaffold extends StatelessWidget {
       floatingActionButtonLocation: floatingActionButtonLocation,
       bottomNavigationBar: bottomNavigationBar,
     );
+
+    if (_handlesSystemBack && backHandler != null) {
+      child = BackButtonListener(
+        onBackButtonPressed: () async {
+          backHandler();
+          return true;
+        },
+        child: child,
+      );
+    }
+
+    return child;
   }
 }
 

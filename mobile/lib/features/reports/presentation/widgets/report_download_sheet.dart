@@ -88,7 +88,7 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
                 icon: Icons.calendar_month_outlined,
                 label: localizedMonthName(context, month),
                 trailing: _month == month
-                    ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                    ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                     : null,
                 onTap: () => Navigator.pop(ctx, month),
               ),
@@ -114,7 +114,7 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
                 icon: Icons.date_range_outlined,
                 label: '$year',
                 trailing: _year == year
-                    ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                    ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                     : null,
                 onTap: () => Navigator.pop(ctx, year),
               ),
@@ -191,7 +191,7 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
                 ),
               ),
               alignment: Alignment.center,
-              child: const Icon(
+              child: Icon(
                 Icons.picture_as_pdf_outlined,
                 size: 24,
                 color: AppColors.textPrimary,

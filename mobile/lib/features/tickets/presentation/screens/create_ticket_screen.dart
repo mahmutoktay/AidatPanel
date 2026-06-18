@@ -6,6 +6,7 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
@@ -78,7 +79,11 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
       canPop: !_submitting,
       child: DashboardSecondaryScaffold(
         title: t.createTitle,
-        onBack: _submitting ? () {} : () => context.pop(),
+        onBack: _submitting ? () {} : null,
+        onFallback: () {
+          ref.read(residentTabIndexProvider.notifier).update(2);
+          context.go('/resident-dashboard');
+        },
         bottomNavigationBar: MinimalStickyActionBar(
           label: t.submit,
           onPressed: _submit,

@@ -176,7 +176,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                 : () => ref
                       .read(notificationsNotifierProvider.notifier)
                       .markAllRead(),
-            icon: const Icon(Icons.done_all_rounded, color: AppColors.inkDark),
+            icon: Icon(Icons.done_all_rounded, color: AppColors.inkDark),
           ),
       ],
       body: DashboardListScreenBody(

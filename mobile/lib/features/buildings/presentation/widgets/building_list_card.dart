@@ -45,7 +45,7 @@ class BuildingListCard extends StatelessWidget {
     final buildingsT = context.t.features.buildings;
     return PopupMenuButton<String>(
       tooltip: MaterialLocalizations.of(context).showMenuTooltip,
-      icon: const Icon(
+      icon: Icon(
         Icons.more_vert,
         color: AppColors.mutedText,
         size: AppSizes.iconSize,

@@ -201,6 +201,9 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
         ref.watch(authStateProvider).user?.role == UserRole.manager;
     final t = context.t.features.dekont;
     final downloadActions = _downloadActions(detail);
+    final fallbackRoute = isManager
+        ? '/manager-dashboard/dekonts'
+        : '/resident-dashboard/dekonts';
 
     final body = detail.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -297,6 +300,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     return DashboardSecondaryScaffold(
       title: t.detailTitle,
       actions: downloadActions,
+      fallbackRoute: fallbackRoute,
       body: body,
     );
   }

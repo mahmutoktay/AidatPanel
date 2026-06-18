@@ -52,7 +52,7 @@ class NotificationIconButton extends ConsumerWidget {
                 ),
                 backgroundColor: AppColors.error,
                 offset: const Offset(6, -6),
-                child: const Icon(
+                child: Icon(
                   Icons.notifications_outlined,
                   color: AppColors.textPrimary,
                   size: 26,

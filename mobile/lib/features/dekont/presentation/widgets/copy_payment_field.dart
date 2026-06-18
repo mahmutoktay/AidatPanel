@@ -90,7 +90,7 @@ class CopyPaymentField extends ConsumerWidget {
                     ),
                   ),
                   alignment: Alignment.center,
-                  child: const Icon(
+                  child: Icon(
                     Icons.copy_outlined,
                     color: AppColors.textPrimary,
                     size: 20,

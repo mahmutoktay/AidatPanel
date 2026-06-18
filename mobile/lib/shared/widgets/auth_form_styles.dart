@@ -37,7 +37,7 @@ abstract final class AuthFormStyles {
       border: border,
       enabledBorder: border,
       focusedBorder: border.copyWith(
-        borderSide: const BorderSide(color: AppColors.lineLight, width: 1),
+        borderSide: BorderSide(color: AppColors.lineLight, width: 1),
       ),
       errorBorder: border.copyWith(
         borderSide: const BorderSide(color: AppColors.error, width: 1),

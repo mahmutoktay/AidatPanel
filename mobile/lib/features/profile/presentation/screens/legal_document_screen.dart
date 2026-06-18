@@ -117,7 +117,7 @@ class LegalDocumentScreen extends StatelessWidget {
                   ],
                 ),
               ],
-              const Divider(height: AppSizes.spacingXL, color: ProfileSettingsUi.line),
+              Divider(height: AppSizes.spacingXL, color: ProfileSettingsUi.line),
               Text(
                 legal.companyName,
                 style: ProfileSettingsUi.fieldValue.copyWith(

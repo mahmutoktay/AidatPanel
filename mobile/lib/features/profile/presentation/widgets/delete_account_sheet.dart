@@ -212,7 +212,7 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
                   borderRadius: BorderRadius.circular(
                     ProfileSettingsUi.fieldRadius,
                   ),
-                  borderSide: const BorderSide(
+                  borderSide: BorderSide(
                     color: ProfileSettingsUi.ink,
                     width: ProfileSettingsUi.fieldFocusBorderWidth,
                   ),

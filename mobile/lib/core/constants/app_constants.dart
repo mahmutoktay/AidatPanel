@@ -10,6 +10,7 @@ class AppConstants {
   static const String tokenExpiryKey = 'token_expiry';
   static const String userKey = 'user';
   static const String languageKey = 'language';
+  static const String themeKey = 'theme_preference';
   static const String fcmTokenKey = 'fcm_token';
   static const String sessionIdKey = 'session_id';
   /// Yönetici kayıtlı IBAN şablonları (backend yalnızca binalardan türetir; yetim setler cihazda).

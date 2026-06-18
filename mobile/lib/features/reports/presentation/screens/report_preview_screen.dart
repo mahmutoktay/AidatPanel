@@ -200,7 +200,7 @@ class _ReportPreviewScreenState extends ConsumerState<ReportPreviewScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.picture_as_pdf_outlined,
               size: 64,
               color: AppColors.primary,

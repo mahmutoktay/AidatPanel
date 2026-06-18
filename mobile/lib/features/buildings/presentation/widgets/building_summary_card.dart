@@ -115,7 +115,7 @@ class BuildingSummaryCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
           ),
           alignment: Alignment.center,
-          child: const Icon(
+          child: Icon(
             Icons.apartment_rounded,
             color: AppColors.inkDark,
             size: 26,

@@ -44,7 +44,7 @@ class LogoutAllDevicesTile extends ConsumerWidget {
                     style: ProfileSettingsUi.rowTitle,
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.chevron_right,
                   size: 22,
                   color: ProfileSettingsUi.muted,

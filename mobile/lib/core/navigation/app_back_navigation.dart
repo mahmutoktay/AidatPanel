@@ -80,6 +80,27 @@ class AppBackNavigation {
     return true;
   }
 
+  /// Üst seviye detay ekranları (dekont, ticket, expense) — önce pop, yoksa fallback.
+  ///
+  /// `true` = geri olayı işlendi.
+  static bool handleSecondaryScreenBack(
+    BuildContext context, {
+    String? fallbackPath,
+  }) {
+    final router = GoRouter.of(context);
+    if (router.canPop()) {
+      resetExitTimer();
+      router.pop();
+      return true;
+    }
+    if (fallbackPath != null && fallbackPath.isNotEmpty) {
+      resetExitTimer();
+      router.go(fallbackPath);
+      return true;
+    }
+    return false;
+  }
+
   /// Login vb. — stack varsa pop, yoksa arka plan.
   static bool handleAuthBackPressed(BuildContext context) {
     final navigator = Navigator.of(context);

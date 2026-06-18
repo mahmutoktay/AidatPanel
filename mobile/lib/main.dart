@@ -2,12 +2,14 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'core/constants/app_constants.dart';
 import 'core/notifications/fcm_scope.dart';
 import 'core/notifications/firebase_bootstrap.dart';
+import 'core/providers/theme_mode_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/subscription/revenue_cat_service.dart';
 import 'core/theme/app_theme.dart';
@@ -36,6 +38,11 @@ void main() async {
   } catch (e, st) {
     developer.log('initLocale başarısız', name: 'main', error: e, stackTrace: st);
     LocaleSettings.setLocale(AppLocale.tr);
+  }
+  try {
+    await initTheme();
+  } catch (e, st) {
+    developer.log('initTheme başarısız', name: 'main', error: e, stackTrace: st);
   }
   try {
     await initDateFormatting();
@@ -109,6 +116,15 @@ Future<void> initLocale() async {
   }
 }
 
+void applySystemChromeOverlay(bool isDark) {
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+    ),
+  );
+}
+
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -138,19 +154,56 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class _MyAppContent extends ConsumerWidget {
+class _MyAppContent extends ConsumerStatefulWidget {
   const _MyAppContent({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Intent dinleyicisini başlat
+  ConsumerState<_MyAppContent> createState() => _MyAppContentState();
+}
+
+class _MyAppContentState extends ConsumerState<_MyAppContent>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    final pref = ref.read(themeModeProvider);
+    if (pref == AppThemePreference.system) {
+      syncAppColors(
+        pref,
+        WidgetsBinding.instance.platformDispatcher.platformBrightness,
+      );
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.watch(shareIntentProvider);
-    
+
+    final themePref = ref.watch(themeModeProvider);
+    final platformBrightness = MediaQuery.platformBrightnessOf(context);
+    syncAppColors(themePref, platformBrightness);
+    final isDark = isDarkTheme(themePref, platformBrightness);
+    applySystemChromeOverlay(isDark);
+
     final router = ref.watch(appRouterProvider);
     return TranslationProvider(
       child: MaterialApp.router(
         title: 'AidatPanel',
         theme: AppTheme.lightTheme(),
+        darkTheme: AppTheme.darkTheme(),
+        themeMode: resolveThemeMode(themePref),
         routerConfig: router,
         locale: LocaleSettings.currentLocale.flutterLocale,
         localizationsDelegates: const [

@@ -45,7 +45,7 @@ class TicketDetailResidentInfoCard extends StatelessWidget {
                   color: AppColors.primary.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.person_outline_rounded,
                   color: AppColors.primary,
                   size: 18,
@@ -103,7 +103,7 @@ class TicketDetailResidentInfoCard extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.phone_outlined,
                                 size: 15,
                                 color: AppColors.textSecondary,
@@ -125,7 +125,7 @@ class TicketDetailResidentInfoCard extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.mail_outline_rounded,
                                 size: 15,
                                 color: AppColors.textSecondary,

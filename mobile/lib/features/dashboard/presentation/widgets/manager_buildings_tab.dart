@@ -117,7 +117,7 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
                 _buildListHeader(context),
                 if (isRefreshing && buildings.isNotEmpty) ...[
                   const SizedBox(height: AppSizes.spacingS),
-                  const LinearProgressIndicator(
+                  LinearProgressIndicator(
                     minHeight: 2,
                     backgroundColor: AppColors.lineLight,
                     valueColor: AlwaysStoppedAnimation<Color>(

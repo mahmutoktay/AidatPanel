@@ -238,7 +238,7 @@ class _SessionsInfoCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
-            child: const Icon(
+            child: Icon(
               Icons.devices_rounded,
               color: AppColors.primary,
               size: 22,
@@ -286,7 +286,7 @@ class _SessionsEmptyCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: const Icon(
+            child: Icon(
               Icons.verified_user_outlined,
               color: AppColors.primary,
               size: 30,

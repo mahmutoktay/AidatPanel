@@ -131,7 +131,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             height: 48,
             child: ElevatedButton.icon(
               onPressed: _bootstrap,
-              icon: const Icon(Icons.refresh, color: AppColors.primary),
+              icon: Icon(Icons.refresh, color: AppColors.primary),
               label: Text(
                 context.t.features.buildings.tekrarDene,
                 style: AppTypography.body1.copyWith(
@@ -158,7 +158,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               },
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary, width: 1.5),
+                side: BorderSide(color: AppColors.primary, width: 1.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSizes.cardRadius),
                 ),
@@ -253,7 +253,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               if (_hasBootError)
                 _buildRetrySection(context)
               else
-                const SizedBox(
+                SizedBox(
                   width: 32,
                   height: 32,
                   child: CircularProgressIndicator(

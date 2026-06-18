@@ -165,7 +165,7 @@ class _BuildingResidentsScreenState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (i > 0) ...[
-                                const Divider(
+                                Divider(
                                   height: 1,
                                   color: AppColors.borderColor,
                                 ),
@@ -199,7 +199,7 @@ class _BuildingResidentsScreenState
               onPressed: () => Navigator.of(dialogContext).pop(false),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(
+                side: BorderSide(
                   color: AppColors.borderColor,
                   width: 1.5,
                 ),
@@ -573,7 +573,7 @@ class _BuildingResidentsScreenState
       ),
       child: Column(
         children: [
-          const Icon(
+          Icon(
             Icons.people_outline,
             size: 56,
             color: AppColors.mutedText,

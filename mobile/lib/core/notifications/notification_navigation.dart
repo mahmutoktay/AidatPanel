@@ -8,7 +8,8 @@ import '../../shared/providers/navigation_provider.dart';
 ///
 /// Dashboard rotalarında sekme değişimi provider üzerinden yapılır;
 /// `push` yerine `go` kullanılır ki ayarlar/bildirimler üstünde kalan
-/// yığın ana menüye sapmasın.
+/// yığın ana menüye sapmasın. Detay rotalarında `push` kullanılır ki geri
+/// tuşu önceki ekrana dönebilsin.
 void navigateFromNotificationPath(
   BuildContext context,
   WidgetRef ref,
@@ -29,7 +30,24 @@ void navigateFromNotificationPath(
     return;
   }
 
+  if (isNotificationDetailPath(loc)) {
+    context.push(path);
+    return;
+  }
+
   context.go(path);
+}
+
+/// `/dekonts/:id`, `/tickets/:id`, `/expenses/:id` gibi detay rotaları.
+bool isNotificationDetailPath(String loc) {
+  final segments = Uri.parse(loc).pathSegments;
+  if (segments.length != 2) return false;
+  final id = segments.last;
+  if (id == 'create' || id == 'new') return false;
+  return switch (segments.first) {
+    'dekonts' || 'tickets' || 'expenses' => true,
+    _ => false,
+  };
 }
 
 void _applyResidentDashboardQuery(

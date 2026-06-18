@@ -178,7 +178,7 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen> {
                     onPressed: widget.onDownload,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: ProfileSettingsUi.ink,
-                      side: const BorderSide(color: AppColors.borderColor),
+                      side: BorderSide(color: AppColors.borderColor),
                       minimumSize: const Size.fromHeight(
                         ProfileSettingsUi.buttonHeight,
                       ),

@@ -169,7 +169,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                     onPressed: () => setState(() => obscure = !obscure),
                     color: ProfileSettingsUi.muted,
                   ),
-                  focusedBorder: const UnderlineInputBorder(
+                  focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: ProfileSettingsUi.ink, width: 1.4),
                   ),
                 ),
@@ -179,7 +179,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.common.cancel, style: const TextStyle(color: ProfileSettingsUi.muted)),
+              child: Text(t.common.cancel, style: TextStyle(color: ProfileSettingsUi.muted)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(controller.text),

@@ -44,7 +44,7 @@ class DashboardBottomNavBar extends StatelessWidget {
     final count = destinations.length;
 
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(
           top: BorderSide(color: AppColors.lineLight, width: 1),

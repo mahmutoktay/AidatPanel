@@ -99,7 +99,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       border: border,
       enabledBorder: border,
       focusedBorder: border.copyWith(
-        borderSide: const BorderSide(color: AppColors.lineLight, width: 1),
+        borderSide: BorderSide(color: AppColors.lineLight, width: 1),
       ),
     );
   }
@@ -252,7 +252,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.inkDark,
                 backgroundColor: AppColors.surface,
-                side: const BorderSide(
+                side: BorderSide(
                   color: AppColors.lineLight,
                   width: 1,
                 ),

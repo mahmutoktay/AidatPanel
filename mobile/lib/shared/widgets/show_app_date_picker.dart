@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_color_palette.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_date_picker_theme.dart';
 import '../../core/theme/app_sizes.dart';
@@ -29,6 +30,7 @@ Future<DateTime?> showAppDatePicker(
       data: Theme.of(dialogContext).copyWith(
         dialogTheme: AppDatePickerTheme.dialogTheme(
           Theme.of(dialogContext).dialogTheme,
+          AppColors.isDark ? AppColorPalette.dark : AppColorPalette.light,
         ),
       ),
       child: _HybridDatePickerDialog(
@@ -368,7 +370,7 @@ class _CalendarHeaderBar extends StatelessWidget {
             style: AppTypography.body2.copyWith(color: AppColors.textPrimary),
           ),
         ),
-        const Icon(Icons.calendar_today_outlined, color: AppColors.textSecondary),
+        Icon(Icons.calendar_today_outlined, color: AppColors.textSecondary),
       ],
     );
   }
@@ -739,7 +741,7 @@ class _DateWheel extends StatelessWidget {
               height: _wheelItemExtent,
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.05),
-                border: const Border(
+                border: Border(
                   top: BorderSide(color: AppColors.border),
                   bottom: BorderSide(color: AppColors.border),
                 ),

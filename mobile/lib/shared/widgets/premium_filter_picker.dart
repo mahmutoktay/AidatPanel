@@ -38,7 +38,7 @@ Future<T?> showPremiumSingleSelectPicker<T>({
               icon: option.icon,
               label: option.label,
               trailing: isSelected(selected, option.value)
-                  ? const Icon(
+                  ? Icon(
                       Icons.check_rounded,
                       color: AppColors.inkDark,
                     )

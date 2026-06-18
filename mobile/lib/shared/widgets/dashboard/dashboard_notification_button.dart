@@ -51,7 +51,7 @@ class DashboardNotificationButton extends ConsumerWidget {
             ),
             backgroundColor: AppColors.error,
             offset: const Offset(5, -5),
-            child: const Icon(
+            child: Icon(
               Icons.notifications_outlined,
               color: AppColors.textPrimary,
               size: 24,

@@ -82,7 +82,7 @@ class BuildingSortChip extends StatelessWidget {
                       applyHeightToFirstAscent: false,
                       applyHeightToLastDescent: false,
                     ),
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.inkDark,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -90,7 +90,7 @@ class BuildingSortChip extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(
+                  Icon(
                     Icons.unfold_more_rounded,
                     size: 18,
                     color: AppColors.mutedText,

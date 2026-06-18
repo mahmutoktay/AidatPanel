@@ -39,6 +39,14 @@ class SecureStorage {
     return await _storage.read(key: AppConstants.languageKey);
   }
 
+  Future<void> saveTheme(String theme) async {
+    await _storage.write(key: AppConstants.themeKey, value: theme);
+  }
+
+  Future<String?> getTheme() async {
+    return await _storage.read(key: AppConstants.themeKey);
+  }
+
   Future<void> saveFcmToken(String token) async {
     await _storage.write(key: AppConstants.fcmTokenKey, value: token);
   }
@@ -88,10 +96,12 @@ class SecureStorage {
 
   Future<void> clearAuth() async {
     final language = await getLanguage();
+    final theme = await getTheme();
     final profilePhotos = await getProfilePhotosMap();
     final localPresets = await readRaw(AppConstants.localCollectionPresetsKey);
     await _storage.deleteAll();
     if (language != null) await saveLanguage(language);
+    if (theme != null) await saveTheme(theme);
     if (profilePhotos.isNotEmpty) {
       await saveProfilePhotosMap(profilePhotos);
     }

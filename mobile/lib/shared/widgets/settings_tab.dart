@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/providers/locale_provider.dart';
+import '../../core/providers/theme_mode_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
@@ -39,6 +40,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     final authState = ref.watch(authStateProvider);
     final user = authState.user;
     final currentLocale = ref.watch(localeProvider);
+    final currentTheme = ref.watch(themeModeProvider);
 
     return ColoredBox(
       color: AppColors.dashboardBackground,
@@ -93,6 +95,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                   onTap: () => _showLanguageSheet(context),
                 ),
                 _SettingsTile(
+                  icon: Icons.dark_mode_outlined,
+                  title: context.t.common.theme,
+                  trailing: _themePreferenceLabel(context, currentTheme),
+                  onTap: () => _showThemeSheet(context),
+                ),
+                _SettingsTile(
                   icon: Icons.notifications_outlined,
                   title: context.t.common.notifications,
                   onTap: () => context.push('/notifications'),
@@ -143,6 +151,77 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     );
   }
 
+  String _themePreferenceLabel(BuildContext context, AppThemePreference pref) {
+    final t = context.t.common;
+    return switch (pref) {
+      AppThemePreference.light => t.themeLight,
+      AppThemePreference.dark => t.themeDark,
+      AppThemePreference.system => t.themeSystem,
+    };
+  }
+
+  void _showThemeSheet(BuildContext context) {
+    final currentTheme = ref.read(themeModeProvider);
+    final t = context.t;
+    PremiumBottomSheetScaffold.show<void>(
+      context: context,
+      builder: (sheetContext) => PremiumBottomSheetScaffold(
+        title: t.common.theme,
+        scrollable: false,
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              t.common.themeSheetDescription,
+              style: ProfileSettingsUi.handle,
+            ),
+            const SizedBox(height: AppSizes.spacingL),
+            PremiumActionSheetTile(
+              icon: Icons.light_mode_rounded,
+              label: t.common.themeLight,
+              subtitle: 'Light',
+              trailing: currentTheme == AppThemePreference.light
+                  ? Icon(Icons.check_rounded, color: AppColors.inkDark)
+                  : null,
+              onTap: () async {
+                await changeThemeMode(ref, AppThemePreference.light);
+                if (!sheetContext.mounted) return;
+                Navigator.pop(sheetContext);
+              },
+            ),
+            PremiumActionSheetTile(
+              icon: Icons.dark_mode_rounded,
+              label: t.common.themeDark,
+              subtitle: 'Dark',
+              trailing: currentTheme == AppThemePreference.dark
+                  ? Icon(Icons.check_rounded, color: AppColors.inkDark)
+                  : null,
+              onTap: () async {
+                await changeThemeMode(ref, AppThemePreference.dark);
+                if (!sheetContext.mounted) return;
+                Navigator.pop(sheetContext);
+              },
+            ),
+            PremiumActionSheetTile(
+              icon: Icons.brightness_auto_rounded,
+              label: t.common.themeSystem,
+              subtitle: 'System',
+              trailing: currentTheme == AppThemePreference.system
+                  ? Icon(Icons.check_rounded, color: AppColors.inkDark)
+                  : null,
+              onTap: () async {
+                await changeThemeMode(ref, AppThemePreference.system);
+                if (!sheetContext.mounted) return;
+                Navigator.pop(sheetContext);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showLanguageSheet(BuildContext context) {
     final currentLocale = ref.read(localeProvider);
     final t = context.t;
@@ -165,7 +244,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               label: 'Türkçe',
               subtitle: 'Turkish',
               trailing: currentLocale == AppLocale.tr
-                  ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                  ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                   : null,
               onTap: () async {
                 final ok = await changeLocale(ref, AppLocale.tr);
@@ -184,7 +263,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               label: 'English',
               subtitle: 'İngilizce',
               trailing: currentLocale == AppLocale.en
-                  ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                  ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                   : null,
               onTap: () async {
                 final ok = await changeLocale(ref, AppLocale.en);
@@ -355,7 +434,7 @@ class _SettingsProfileHeader extends StatelessWidget {
             child: InkWell(
               onTap: onProfileTap,
               customBorder: const CircleBorder(),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.all(8),
                 child: Icon(
                   Icons.chevron_right,

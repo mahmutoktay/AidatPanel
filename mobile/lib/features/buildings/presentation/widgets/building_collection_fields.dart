@@ -348,7 +348,7 @@ class _CollectionPresetPickerSheetState
       maxChildSize: 0.92,
       builder: (_, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.vertical(
               top: Radius.circular(PremiumBottomSheetScaffold.topRadius),

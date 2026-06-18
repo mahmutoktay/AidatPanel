@@ -335,23 +335,24 @@ class MinimalPickerField extends StatelessWidget {
 
 /// Sticky alt aksiyon çubuğu — üstte gradient fade + birincil buton.
 class MinimalStickyActionBar extends StatelessWidget {
-  final String label;
-  final VoidCallback? onPressed;
-  final bool loading;
-  final Color backgroundColor;
-
   const MinimalStickyActionBar({
     super.key,
     required this.label,
     this.onPressed,
     this.loading = false,
-    this.backgroundColor = AppColors.dashboardBackground,
+    this.backgroundColor,
   });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool loading;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
+    final barColor = backgroundColor ?? AppColors.dashboardBackground;
     return ColoredBox(
-      color: backgroundColor,
+      color: barColor,
       child: SafeArea(
         minimum: const EdgeInsets.fromLTRB(20, 0, 20, 12),
         child: Column(
@@ -364,8 +365,8 @@ class MinimalStickyActionBar extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    backgroundColor.withValues(alpha: 0),
-                    backgroundColor,
+                    barColor.withValues(alpha: 0),
+                    barColor,
                   ],
                 ),
               ),

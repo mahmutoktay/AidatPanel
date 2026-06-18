@@ -23,20 +23,20 @@ class BuildingCollectionStatus {
 
   static BuildingCollectionStatus fromRate(double rate) {
     if (rate >= 80) {
-      return const BuildingCollectionStatus(
+      return BuildingCollectionStatus(
         level: BuildingHealthLevel.healthy,
         color: AppColors.statusGreen,
         backgroundColor: AppColors.statusGreenBg,
       );
     }
     if (rate >= 40) {
-      return const BuildingCollectionStatus(
+      return BuildingCollectionStatus(
         level: BuildingHealthLevel.warning,
         color: AppColors.statusAmber,
         backgroundColor: AppColors.statusAmberBg,
       );
     }
-    return const BuildingCollectionStatus(
+    return BuildingCollectionStatus(
       level: BuildingHealthLevel.critical,
       color: AppColors.statusRed,
       backgroundColor: AppColors.statusRedBg,

@@ -28,7 +28,7 @@ Future<int?> showDueDayPicker(
               icon: Icons.event_busy_outlined,
               label: t.selectDueDay,
               trailing: selectedDueDay == null
-                  ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                  ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                   : null,
               onTap: () => Navigator.pop(ctx, kDueDayClearSentinel),
             ),
@@ -37,7 +37,7 @@ Future<int?> showDueDayPicker(
               icon: Icons.calendar_today_outlined,
               label: '$day',
               trailing: selectedDueDay == day
-                  ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                  ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                   : null,
               onTap: () => Navigator.pop(ctx, day),
             ),

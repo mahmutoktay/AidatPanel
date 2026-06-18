@@ -69,7 +69,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(color: AppColors.primary),
+              CircularProgressIndicator(color: AppColors.primary),
               const SizedBox(height: AppSizes.spacingM),
               Text(
                 t.loadingPlans,
@@ -886,11 +886,11 @@ class _FeatureRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconColor = active
-        ? (isYearly ? const Color(0xB3FFFFFF) : AppColors.textPrimary)
+        ? (isYearly ? Color(0xB3FFFFFF) : AppColors.textPrimary)
         : (isYearly ? const Color(0x33FFFFFF) : const Color(0x33000000));
     final textColor = active
-        ? (isYearly ? const Color(0xC0FFFFFF) : AppColors.textPrimary)
-        : (isYearly ? const Color(0x66FFFFFF) : AppColors.textDisabled);
+        ? (isYearly ? Color(0xC0FFFFFF) : AppColors.textPrimary)
+        : (isYearly ? Color(0x66FFFFFF) : AppColors.textDisabled);
 
     return Row(
       children: [

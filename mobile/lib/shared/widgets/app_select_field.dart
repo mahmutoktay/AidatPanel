@@ -153,7 +153,7 @@ Future<void> showAppSelectSheet<T>({
                   icon: Icons.radio_button_unchecked_outlined,
                   label: opt.label,
                   trailing: isSelected
-                      ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                      ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                       : null,
                   onTap: () {
                     onSelected(opt.value);

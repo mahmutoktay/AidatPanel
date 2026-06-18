@@ -114,7 +114,7 @@ class ExpenseReceiptSection extends StatelessWidget {
                 color: AppColors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.receipt_long_outlined,
                 color: AppColors.primary,
                 size: 24,

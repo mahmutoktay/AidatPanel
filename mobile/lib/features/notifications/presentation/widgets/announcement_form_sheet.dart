@@ -208,7 +208,7 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
                 label: b.name,
                 subtitle: b.displayAddress,
                 trailing: _buildingId == b.id
-                    ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
+                    ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                     : null,
                 onTap: () => Navigator.pop(ctx, b.id),
               ),

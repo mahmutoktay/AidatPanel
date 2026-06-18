@@ -20,7 +20,7 @@ class PremiumBottomSheetScaffold extends StatelessWidget {
     this.body,
     this.actions,
     this.maxHeightFactor = 0.92,
-    this.backgroundColor = AppColors.sheetBackground,
+    this.backgroundColor,
     this.scrollable = true,
     this.padding = const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
   }) : assert(
@@ -38,7 +38,7 @@ class PremiumBottomSheetScaffold extends StatelessWidget {
   final Widget? body;
   final Widget? actions;
   final double maxHeightFactor;
-  final Color backgroundColor;
+  final Color? backgroundColor;
   final bool scrollable;
   final EdgeInsets padding;
 
@@ -87,7 +87,7 @@ class PremiumBottomSheetScaffold extends StatelessWidget {
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: backgroundColor ?? AppColors.sheetBackground,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(topRadius),
         ),

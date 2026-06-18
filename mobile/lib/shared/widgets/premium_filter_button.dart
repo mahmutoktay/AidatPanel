@@ -94,7 +94,7 @@ class PremiumFilterButton extends StatelessWidget {
                         width: 7,
                         height: 7,
                         margin: const EdgeInsets.only(right: 6),
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           color: AppColors.inkDark,
                           shape: BoxShape.circle,
                         ),

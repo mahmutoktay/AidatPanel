@@ -123,7 +123,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),
-          borderSide: const BorderSide(color: ProfileSettingsUi.ink, width: 1.4),
+          borderSide: BorderSide(color: ProfileSettingsUi.ink, width: 1.4),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusMd),

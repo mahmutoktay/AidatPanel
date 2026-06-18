@@ -1,48 +1,41 @@
 import 'package:flutter/material.dart';
 
+import 'app_color_palette.dart';
 import 'app_sizes.dart';
 
 /// Monokrom marka (siyah) + anlamlı durum renkleri.
-
+/// Nötr renkler aktif paletten gelir; tema değişiminde [applyPalette] çağrılır.
 class AppColors {
-  // Ana marka renkleri — siyah-beyaz
+  static AppColorPalette _palette = AppColorPalette.light;
 
-  static const Color primary = Color(0xFF111111);
+  static void applyPalette(AppColorPalette palette) {
+    _palette = palette;
+  }
 
-  static const Color primaryLight = Color(0xFF333333);
+  static bool get isDark => identical(_palette, AppColorPalette.dark);
+
+  // Ana marka — palet tabanlı
+  static Color get primary => _palette.primary;
+  static Color get primaryLight => _palette.primaryLight;
 
   static const Color accent = Color(0xFFF59E0B);
 
-  /// Ödeme Yap CTA — hafif sarımsı turuncu zemin, koyu metin.
-  static const Color paymentCta = Color(0xFFFFE4B5);
+  static Color get paymentCta => _palette.paymentCta;
+  static Color get paymentCtaForeground => _palette.paymentCtaForeground;
 
-  static const Color paymentCtaForeground = Color(0xFF78350F);
-
-  // Durum renkleri — metin / rozet vurgusu
-
+  // Durum renkleri — metin / rozet vurgusu (tema bağımsız)
   static const Color success = Color(0xFF16A34A);
-
   static const Color successLight = Color(0xFF10B981);
-
   static const Color error = Color(0xFFDC2626);
-
   static const Color warning = Color(0xFFF59E0B);
-
   static const Color info = Color(0xFF2563EB);
 
-  // Nötr renkler
-
-  static const Color background = Color(0xFFFFFFFF);
-
-  static const Color surface = Color(0xFFFFFFFF);
-
-  static const Color fill = Color(0xFFF3F4F6);
-
-  /// Dashboard / sheet ortak krem arka plan (#F5F4F0).
-  static const Color dashboardBackground = Color(0xFFF5F4F0);
-
-  /// Bottom sheet ve modal zemin — [dashboardBackground] ile aynı.
-  static const Color sheetBackground = dashboardBackground;
+  // Nötr renkler — palet tabanlı
+  static Color get background => _palette.background;
+  static Color get surface => _palette.surface;
+  static Color get fill => _palette.fill;
+  static Color get dashboardBackground => _palette.dashboardBackground;
+  static Color get sheetBackground => _palette.sheetBackground;
 
   // Grafik vurgu renkleri (fl_chart)
   static const Color chartGreen = Color(0xFF4CAF50);
@@ -51,66 +44,56 @@ class AppColors {
   static const Color chartYellow = Color(0xFFFFC107);
   static const Color chartOrange = Color(0xFFFF9800);
 
-  /// Çerçeve opaklığı — [primary] üzerinde; tüm kart/form kenarlıkları.
   static const double borderOpacity = 0.6;
 
-  /// Kart, kutu ve form çerçeveleri — siyah, hafif saydam (primary × borderOpacity).
-  static const Color border = Color(0x99111111);
+  static Color get border => _palette.border;
+  static Color get borderColor => border;
 
-  static const Color borderColor = border;
+  static Color get textPrimary => _palette.textPrimary;
+  static Color get textSecondary => _palette.textSecondary;
+  static Color get textDisabled => _palette.textDisabled;
 
-  static const Color textPrimary = Color(0xFF111111);
+  // Durum badge arka planları — palet tabanlı
+  static Color get successBg => _palette.successBg;
+  static Color get errorBg => _palette.errorBg;
+  static Color get warningBg => _palette.warningBg;
+  static Color get infoBg => _palette.infoBg;
 
-  static const Color textSecondary = Color(0xFF6B7280);
-
-  static const Color textDisabled = Color(0xFF9CA3AF);
-
-  // Durum badge arka planları
-
-  static const Color successBg = Color(0xFFDCFCE7);
-
-  static const Color errorBg = Color(0xFFFEE2E2);
-
-  static const Color warningBg = Color(0xFFFEF3C7);
-
-  static const Color infoBg = Color(0xFFDBEAFE);
-
-  /// Gider bildirimleri — mor vurgu.
   static const Color expenseAccent = Color(0xFF9333EA);
-  static const Color expenseAccentBg = Color(0xFFF3E8FF);
+  static Color get expenseAccentBg => _palette.expenseAccentBg;
 
-  /// Sistem bildirimleri — koyu gri metin.
-  static const Color systemMuted = Color(0xFF4B5563);
+  static Color get systemMuted => _palette.systemMuted;
 
-  /// Profil/ayarlar ekranları için alias (geriye uyum).
+  // Profil/ayarlar alias
+  static Color get ink => primary;
+  static Color get muted => textSecondary;
+  static Color get line => border;
 
-  static const Color ink = primary;
+  static Color get inkDark => _palette.inkDark;
 
-  static const Color muted = textSecondary;
+  static Color get actionButton => _palette.actionButton;
+  static Color get actionButtonForeground => _palette.actionButtonForeground;
+  static Color get mutedText => _palette.mutedText;
 
-  static const Color line = border;
-
-  /// Bina listesi / dashboard durum paleti (mockup).
-  static const Color inkDark = Color(0xFF161B22);
-
-  /// Birincil aksiyon buton dolgusu — premium gece laciverti.
-  static const Color actionButton = Color(0xFF12181F);
-  static const Color mutedText = Color(0xFF8A93A6);
   static const Color statusGreen = Color(0xFF2FB872);
-  static const Color statusGreenBg = Color(0xFFE7F8EF);
+  static Color get statusGreenBg => _palette.statusGreenBg;
   static const Color statusRed = Color(0xFFF0463C);
-  static const Color statusRedBg = Color(0xFFFDEAE9);
+  static Color get statusRedBg => _palette.statusRedBg;
   static const Color statusAmber = Color(0xFFF2A93D);
-  static const Color statusAmberBg = Color(0xFFFDF3E3);
+  static Color get statusAmberBg => _palette.statusAmberBg;
   static const Color statusBlue = Color(0xFF3D7CF2);
-  static const Color statusBlueBg = Color(0xFFEAF1FF);
-  static const Color lineLight = Color(0xFFECEEF2);
+  static Color get statusBlueBg => _palette.statusBlueBg;
+  static Color get lineLight => _palette.lineLight;
 
-  /// Kart / kutu çerçevesi — renk + kalınlık tek kaynak.
-  static const BorderSide cardBorderSide = BorderSide(
-    color: border,
-    width: AppSizes.cardBorderWidth,
-  );
+  static Color get datePickerHeaderForeground =>
+      _palette.datePickerHeaderForeground;
+  static Color get datePickerSelectedDayForeground =>
+      _palette.datePickerSelectedDayForeground;
 
-  static const Border cardBorder = Border.fromBorderSide(cardBorderSide);
+  static BorderSide get cardBorderSide => BorderSide(
+        color: border,
+        width: AppSizes.cardBorderWidth,
+      );
+
+  static Border get cardBorder => Border.fromBorderSide(cardBorderSide);
 }

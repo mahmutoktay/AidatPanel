@@ -157,6 +157,21 @@ class Translations$common$en {
 	/// en: 'Language'
 	String get language => 'Language';
 
+	/// en: 'Theme'
+	String get theme => 'Theme';
+
+	/// en: 'Light'
+	String get themeLight => 'Light';
+
+	/// en: 'Dark'
+	String get themeDark => 'Dark';
+
+	/// en: 'System'
+	String get themeSystem => 'System';
+
+	/// en: 'You can change the app appearance here.'
+	String get themeSheetDescription => 'You can change the app appearance here.';
+
 	/// en: 'Turkish'
 	String get turkish => 'Turkish';
 
@@ -3285,6 +3300,11 @@ extension on Translations {
 			'common.editProfile' => 'Edit Profile',
 			'common.changePassword' => 'Change Password',
 			'common.language' => 'Language',
+			'common.theme' => 'Theme',
+			'common.themeLight' => 'Light',
+			'common.themeDark' => 'Dark',
+			'common.themeSystem' => 'System',
+			'common.themeSheetDescription' => 'You can change the app appearance here.',
 			'common.turkish' => 'Turkish',
 			'common.notifications' => 'Notifications',
 			'common.info' => 'Info',
@@ -3758,13 +3778,13 @@ extension on Translations {
 			'features.auth.invalidInviteCodeFormat' => 'Invalid invite code format (Ex: AP3-B12-A9F0)',
 			'features.auth.invalidPhoneFormat' => 'Enter a valid phone number (5XX XXX XX XX)',
 			'features.auth.inviteCodeAndPasswordRequired' => 'Invite code, name and password cannot be empty',
+			_ => null,
+		} ?? switch (path) {
 			'features.auth.invalidPhoneNumber' => 'Enter a valid phone number',
 			'features.auth.areYouManager' => 'Are you a manager? Register',
 			'features.apartments.residentPanel' => 'Resident',
 			'features.tickets.myTickets' => 'My requests',
 			'features.tickets.newTicket' => 'New request',
-			_ => null,
-		} ?? switch (path) {
 			'features.tickets.createTitle' => 'Report issue / request',
 			'features.tickets.fieldTitle' => 'Title',
 			'features.tickets.fieldTitleHint' => 'e.g. Elevator malfunction',

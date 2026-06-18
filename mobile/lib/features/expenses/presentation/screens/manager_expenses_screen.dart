@@ -198,7 +198,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
       showNotificationAction: true,
       actions: [
         IconButton(
-          icon: const Icon(Icons.add, color: AppColors.inkDark),
+          icon: Icon(Icons.add, color: AppColors.inkDark),
           onPressed: _buildingId == null ? null : () => _openForm(),
         ),
       ],

@@ -11,21 +11,21 @@ class PasswordCriterion extends StatelessWidget {
     required this.isMet,
   });
 
-  static const _metIcon = Icon(
+  static final _metIcon = Icon(
     Icons.check_circle,
     color: AppColors.success,
     size: 16,
   );
-  static const _unmetIcon = Icon(
+  static final _unmetIcon = Icon(
     Icons.circle_outlined,
     color: AppColors.textDisabled,
     size: 16,
   );
-  static const _metStyle = TextStyle(
+  static final _metStyle = TextStyle(
     color: AppColors.success,
     fontSize: 12,
   );
-  static const _unmetStyle = TextStyle(
+  static final _unmetStyle = TextStyle(
     color: AppColors.textDisabled,
     fontSize: 12,
   );

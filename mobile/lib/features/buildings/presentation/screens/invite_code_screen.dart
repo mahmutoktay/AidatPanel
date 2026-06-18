@@ -438,7 +438,7 @@ class _InviteBuildingBanner extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: const Icon(
+            child: Icon(
               Icons.apartment_rounded,
               color: AppColors.primary,
               size: 24,

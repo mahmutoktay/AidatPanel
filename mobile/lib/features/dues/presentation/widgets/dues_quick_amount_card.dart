@@ -46,7 +46,7 @@ class DuesQuickAmountCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   alignment: Alignment.center,
-                  child: const Icon(
+                  child: Icon(
                     Icons.edit_note_rounded,
                     color: AppColors.inkDark,
                     size: 24,

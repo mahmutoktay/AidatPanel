@@ -132,7 +132,7 @@ class ExpenseListItemCard extends StatelessWidget {
                 ),
                 if (showMenu)
                   PopupMenuButton<String>(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.more_vert,
                       color: AppColors.textDisabled,
                     ),

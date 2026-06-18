@@ -1,65 +1,80 @@
 import 'package:flutter/material.dart';
 
+import 'app_color_palette.dart';
 import 'app_colors.dart';
 import 'app_sizes.dart';
 import 'app_typography.dart';
 
 /// Material takvim diyaloğu — AidatPanel marka stili.
 abstract final class AppDatePickerTheme {
-  static DatePickerThemeData get data => DatePickerThemeData(
-        backgroundColor: AppColors.surface,
+  static DatePickerThemeData dataFor(AppColorPalette palette) =>
+      DatePickerThemeData(
+        backgroundColor: palette.surface,
         elevation: 8,
         shadowColor: Colors.black26,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.dialogRadius),
         ),
-        headerBackgroundColor: AppColors.primary,
-        headerForegroundColor: Colors.white,
-        headerHeadlineStyle: AppTypography.h3.copyWith(color: Colors.white),
+        headerBackgroundColor: palette.primary,
+        headerForegroundColor: palette.datePickerHeaderForeground,
+        headerHeadlineStyle: AppTypography.h3.copyWith(
+          color: palette.datePickerHeaderForeground,
+        ),
         headerHelpStyle: AppTypography.caption.copyWith(
-          color: Colors.white.withValues(alpha: 0.88),
+          color: palette.datePickerHeaderForeground.withValues(alpha: 0.88),
           fontWeight: FontWeight.w600,
         ),
         weekdayStyle: AppTypography.caption.copyWith(
-          color: AppColors.textSecondary,
+          color: palette.textSecondary,
           fontWeight: FontWeight.w700,
         ),
         dayStyle: AppTypography.body1.copyWith(
-          color: AppColors.textPrimary,
+          color: palette.textPrimary,
           fontWeight: FontWeight.w600,
         ),
         yearStyle: AppTypography.body1.copyWith(
-          color: AppColors.textPrimary,
+          color: palette.textPrimary,
           fontWeight: FontWeight.w600,
         ),
-        todayForegroundColor: WidgetStatePropertyAll(AppColors.primary),
-        todayBackgroundColor: WidgetStatePropertyAll(AppColors.fill),
+        todayForegroundColor: WidgetStatePropertyAll(palette.primary),
+        todayBackgroundColor: WidgetStatePropertyAll(palette.fill),
         dayForegroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return Colors.white;
-          if (states.contains(WidgetState.disabled)) {
-            return AppColors.textDisabled;
+          if (states.contains(WidgetState.selected)) {
+            return palette.datePickerSelectedDayForeground;
           }
-          return AppColors.textPrimary;
+          if (states.contains(WidgetState.disabled)) {
+            return palette.textDisabled;
+          }
+          return palette.textPrimary;
         }),
         dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return AppColors.primary;
+          if (states.contains(WidgetState.selected)) return palette.primary;
           return Colors.transparent;
         }),
         cancelButtonStyle: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: palette.primary,
           textStyle: AppTypography.button,
           minimumSize: const Size(72, AppSizes.minTouchTarget),
         ),
         confirmButtonStyle: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: palette.primary,
           textStyle: AppTypography.button,
           minimumSize: const Size(72, AppSizes.minTouchTarget),
         ),
       );
 
-  static DialogThemeData dialogTheme(DialogThemeData base) => base.copyWith(
-        backgroundColor: AppColors.surface,
+  /// Aktif palet ile (widget katmanı).
+  static DatePickerThemeData get data => dataFor(
+        AppColors.isDark ? AppColorPalette.dark : AppColorPalette.light,
+      );
+
+  static DialogThemeData dialogTheme(
+    DialogThemeData base,
+    AppColorPalette palette,
+  ) =>
+      base.copyWith(
+        backgroundColor: palette.surface,
         elevation: 8,
         shadowColor: Colors.black26,
         surfaceTintColor: Colors.transparent,

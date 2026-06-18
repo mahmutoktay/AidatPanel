@@ -378,6 +378,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     if (expense == null) {
       return DashboardSecondaryScaffold(
         title: t.detailTitle,
+        fallbackRoute: '/manager-dashboard/expenses',
         body: Center(
           child: Text(context.t.common.api.expenseNotFound),
         ),
@@ -390,6 +391,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
 
     return DashboardSecondaryScaffold(
       title: t.detailTitle,
+      fallbackRoute: '/manager-dashboard/expenses',
       body: ListView.builder(
         padding: AppSizes.screenBodyScrollPadding,
         itemCount: _listItemCount(expense),

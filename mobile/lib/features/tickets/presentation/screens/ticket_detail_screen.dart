@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -7,6 +8,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
+import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -54,6 +56,14 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
 
     return DashboardSecondaryScaffold(
       title: t.detailTitle,
+      fallbackRoute:
+          isManager ? '/manager-dashboard/tickets' : null,
+      onFallback: isManager
+          ? null
+          : () {
+              ref.read(residentTabIndexProvider.notifier).update(2);
+              context.go('/resident-dashboard');
+            },
       body: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -299,14 +309,14 @@ class _TicketHeaderCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSizes.spacingM),
-          const Divider(color: AppColors.lineLight, height: 1),
+          Divider(color: AppColors.lineLight, height: 1),
           const SizedBox(height: AppSizes.spacingM),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.schedule_outlined,
                     size: 16,
                     color: AppColors.textDisabled,

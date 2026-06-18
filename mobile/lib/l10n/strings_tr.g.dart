@@ -85,6 +85,11 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get editProfile => 'Profili Düzenle';
 	@override String get changePassword => 'Şifre Değiştir';
 	@override String get language => 'Dil';
+	@override String get theme => 'Tema';
+	@override String get themeLight => 'Açık';
+	@override String get themeDark => 'Koyu';
+	@override String get themeSystem => 'Sistem';
+	@override String get themeSheetDescription => 'Uygulamanın görünümünü buradan değiştirebilirsiniz.';
 	@override String get turkish => 'Türkçe';
 	@override String get notifications => 'Bildirimler';
 	@override String get info => 'Bilgi';
@@ -1287,6 +1292,11 @@ extension on TranslationsTr {
 			'common.editProfile' => 'Profili Düzenle',
 			'common.changePassword' => 'Şifre Değiştir',
 			'common.language' => 'Dil',
+			'common.theme' => 'Tema',
+			'common.themeLight' => 'Açık',
+			'common.themeDark' => 'Koyu',
+			'common.themeSystem' => 'Sistem',
+			'common.themeSheetDescription' => 'Uygulamanın görünümünü buradan değiştirebilirsiniz.',
 			'common.turkish' => 'Türkçe',
 			'common.notifications' => 'Bildirimler',
 			'common.info' => 'Bilgi',
@@ -1760,13 +1770,13 @@ extension on TranslationsTr {
 			'features.auth.invalidInviteCodeFormat' => 'Geçersiz davet kodu formatı (Örn: AP3-B12-A9F0)',
 			'features.auth.invalidPhoneFormat' => 'Geçerli bir telefon numarası giriniz (5XX XXX XX XX)',
 			'features.auth.inviteCodeAndPasswordRequired' => 'Davet kodu, ad ve şifre boş bırakılamaz',
+			_ => null,
+		} ?? switch (path) {
 			'features.auth.invalidPhoneNumber' => 'Geçerli bir telefon numarası giriniz',
 			'features.auth.areYouManager' => 'Yönetici misiniz? Kaydolun',
 			'features.apartments.residentPanel' => 'Sakin',
 			'features.tickets.myTickets' => 'Taleplerim',
 			'features.tickets.newTicket' => 'Yeni Talep',
-			_ => null,
-		} ?? switch (path) {
 			'features.tickets.createTitle' => 'Arıza / Talep Bildir',
 			'features.tickets.fieldTitle' => 'Başlık',
 			'features.tickets.fieldTitleHint' => 'Örn: Asansör arızası',

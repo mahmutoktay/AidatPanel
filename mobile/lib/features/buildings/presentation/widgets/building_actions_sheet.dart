@@ -66,7 +66,7 @@ class BuildingActionsSheet extends StatelessWidget {
           PremiumActionSheetTile(
             icon: Icons.edit_outlined,
             label: t.common.editBuilding,
-            trailing: const Icon(
+            trailing: Icon(
               Icons.chevron_right_rounded,
               color: AppColors.mutedText,
               size: AppSizes.iconSize,
@@ -82,7 +82,7 @@ class BuildingActionsSheet extends StatelessWidget {
             iconColor:
                 collectionReady ? AppColors.textPrimary : AppColors.warning,
             trailing: collectionReady
-                ? const Icon(
+                ? Icon(
                     Icons.chevron_right_rounded,
                     color: AppColors.mutedText,
                     size: AppSizes.iconSize,

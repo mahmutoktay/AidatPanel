@@ -451,7 +451,7 @@ class _MakePaymentTopBar extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const Icon(
+                      Icon(
                         Icons.chevron_right_rounded,
                         color: AppColors.textPrimary,
                         size: 20,

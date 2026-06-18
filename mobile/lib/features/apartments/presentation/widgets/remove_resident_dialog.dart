@@ -125,7 +125,7 @@ class _RemoveResidentDialogState extends ConsumerState<RemoveResidentDialog> {
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.person_outline,
                   color: AppColors.primary,
                   size: 20,
