@@ -241,6 +241,8 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get dueAmountInvalidPositive => 'Geçerli bir tutar yazın.';
 	@override String get dueDayOutOfRange => 'Aidat günü 1 ile 28 arasında olmalıdır.';
 	@override String get update => 'Güncelle';
+	@override String get filter => 'Filtrele';
+	@override String get apply => 'Uygula';
 	@override String get overdueDays => 'gün gecikmiş';
 	@override String get dueMetaOverdueDelay => '{days} gün gecikme';
 	@override String get dueMetaPaidInMonth => '{month} {year}\'de ödendi';
@@ -1464,6 +1466,8 @@ extension on TranslationsTr {
 			'common.dueAmountInvalidPositive' => 'Geçerli bir tutar yazın.',
 			'common.dueDayOutOfRange' => 'Aidat günü 1 ile 28 arasında olmalıdır.',
 			'common.update' => 'Güncelle',
+			'common.filter' => 'Filtrele',
+			'common.apply' => 'Uygula',
 			'common.overdueDays' => 'gün gecikmiş',
 			'common.dueMetaOverdueDelay' => '{days} gün gecikme',
 			'common.dueMetaPaidInMonth' => '{month} {year}\'de ödendi',
@@ -1749,10 +1753,10 @@ extension on TranslationsTr {
 			'features.tickets.categoryComplaint' => 'Şikayet',
 			'features.tickets.categoryRequest' => 'Talep',
 			'features.tickets.categoryMalfunction' => 'Arıza',
-			'features.tickets.categoryOther' => 'Diğer',
-			'features.tickets.submit' => 'Gönder',
 			_ => null,
 		} ?? switch (path) {
+			'features.tickets.categoryOther' => 'Diğer',
+			'features.tickets.submit' => 'Gönder',
 			'features.tickets.createSuccess' => 'Talebiniz alındı',
 			'features.tickets.createFailed' => 'Talep kaydedilemedi. Lütfen tekrar deneyin.',
 			'features.tickets.createServiceUnavailable' => 'Talep servisi şu an hazır değil. Lütfen daha sonra tekrar deneyin.',

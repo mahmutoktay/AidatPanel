@@ -238,7 +238,7 @@ class _SavedIbansScreenState extends ConsumerState<SavedIbansScreen> {
 
     return SelectionActionFab(
       onPressed: _openAdd,
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.actionButton,
       icon: Icons.add,
       label: t.savedIbansAddTitle,
     );

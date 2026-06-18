@@ -92,6 +92,9 @@ class AppColors {
 
   /// Bina listesi / dashboard durum paleti (mockup).
   static const Color inkDark = Color(0xFF161B22);
+
+  /// Birincil aksiyon buton dolgusu — premium gece laciverti.
+  static const Color actionButton = Color(0xFF12181F);
   static const Color mutedText = Color(0xFF8A93A6);
   static const Color statusGreen = Color(0xFF2FB872);
   static const Color statusGreenBg = Color(0xFFE7F8EF);

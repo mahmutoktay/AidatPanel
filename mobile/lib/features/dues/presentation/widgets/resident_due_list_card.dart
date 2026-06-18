@@ -157,7 +157,7 @@ class _PrimaryActionButton extends StatelessWidget {
     return FilledButton(
       onPressed: onTap,
       style: FilledButton.styleFrom(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.actionButton,
         foregroundColor: AppColors.surface,
         elevation: 0,
         minimumSize: const Size(0, AppSizes.buttonHeightSmall),

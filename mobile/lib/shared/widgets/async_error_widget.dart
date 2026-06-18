@@ -54,7 +54,7 @@ class AsyncErrorWidget extends StatelessWidget {
                 icon: const Icon(Icons.refresh, size: 20),
                 label: Text(context.t.features.buildings.tekrarDene),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.actionButton,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),

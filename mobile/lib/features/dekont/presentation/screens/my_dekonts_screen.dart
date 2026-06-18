@@ -6,11 +6,12 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/widgets/dashboard_filter_chips_row.dart';
 import '../../../../shared/widgets/dashboard_filterable_list_screen.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
+import '../../../../shared/widgets/premium_filter_button.dart';
+import '../../../../shared/widgets/premium_filter_picker.dart';
+import '../../../../shared/widgets/premium_filter_sheet.dart';
 import '../providers/dekont_provider.dart';
-import '../utils/dekont_filter_chips.dart';
 import '../widgets/dekont_list_card.dart';
 
 class MyDekontsScreen extends ConsumerStatefulWidget {
@@ -47,6 +48,78 @@ class _MyDekontsScreenState extends ConsumerState<MyDekontsScreen> {
         .load(filterKey: _filterKey, refresh: true);
   }
 
+  String _dekontFilterLabel(BuildContext context, String? key) {
+    final t = context.t.features.dekont;
+    switch (key) {
+      case 'pending':
+        return t.filterPending;
+      case 'approved':
+        return t.filterApproved;
+      case 'rejected':
+        return t.filterRejected;
+      default:
+        return t.filterAll;
+    }
+  }
+
+  Future<void> _openFilterSheet() async {
+    var draftKey = _filterKey;
+    final common = context.t.common;
+    final t = context.t.features.dekont;
+    final allToken = Object();
+
+    await PremiumFilterSheet.show(
+      context: context,
+      title: common.filter,
+      applyLabel: common.apply,
+      fieldBuilder: (ctx, setSheetState) => [
+        PremiumFilterFieldConfig(
+          label: common.status,
+          value: _dekontFilterLabel(ctx, draftKey),
+          hint: t.filterAll,
+          icon: Icons.receipt_long_outlined,
+          onTap: () async {
+            final picked = await showPremiumSingleSelectPicker<Object?>(
+              context: ctx,
+              title: common.status,
+              selected: draftKey ?? allToken,
+              options: [
+                PremiumFilterPickerOption(
+                  value: allToken,
+                  label: t.filterAll,
+                  icon: Icons.layers_outlined,
+                ),
+                PremiumFilterPickerOption(
+                  value: 'pending',
+                  label: t.filterPending,
+                  icon: Icons.hourglass_top_outlined,
+                ),
+                PremiumFilterPickerOption(
+                  value: 'approved',
+                  label: t.filterApproved,
+                  icon: Icons.check_circle_outline,
+                ),
+                PremiumFilterPickerOption(
+                  value: 'rejected',
+                  label: t.filterRejected,
+                  icon: Icons.cancel_outlined,
+                ),
+              ],
+            );
+            if (picked == null) return;
+            setSheetState(() {
+              draftKey = identical(picked, allToken) ? null : picked as String?;
+            });
+          },
+        ),
+      ],
+      onApply: () {
+        setState(() => _filterKey = draftKey);
+        _load();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(myDekontsNotifierProvider);
@@ -62,15 +135,9 @@ class _MyDekontsScreenState extends ConsumerState<MyDekontsScreen> {
           icon: const Icon(Icons.add_circle_outline),
         ),
       ],
-      header: DashboardFilterChipsRow(
-        chips: dekontStatusFilterChips(
-          context,
-          selectedFilterKey: _filterKey,
-          onSelected: (key) {
-            setState(() => _filterKey = key);
-            _load();
-          },
-        ),
+      header: PremiumFilterButton(
+        hasActiveFilters: _filterKey != null,
+        onPressed: _openFilterSheet,
       ),
       list: _buildList(context, state),
     );

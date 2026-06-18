@@ -191,7 +191,7 @@ abstract final class ProfileSettingsUi {
 
   static ButtonStyle get primaryButton => ElevatedButton.styleFrom(
 
-        backgroundColor: AppColors.inkDark,
+        backgroundColor: AppColors.actionButton,
 
         foregroundColor: Colors.white,
 

@@ -238,7 +238,7 @@ class TicketDetailManagerActions extends StatelessWidget {
                     : const Icon(Icons.check_circle_outline, size: 20),
                 label: Text(t.confirmChanges),
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.actionButton,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 28),
                   shape: RoundedRectangleBorder(

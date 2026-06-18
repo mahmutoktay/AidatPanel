@@ -35,7 +35,7 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.actionButton,
           foregroundColor: Colors.white,
           minimumSize: const Size(
             double.infinity,

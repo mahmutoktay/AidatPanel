@@ -230,6 +230,8 @@
     "dueAmountInvalidPositive": "Geçerli bir tutar yazın.",
     "dueDayOutOfRange": "Aidat günü 1 ile 28 arasında olmalıdır.",
     "update": "Güncelle",
+    "filter": "Filtrele",
+    "apply": "Uygula",
     "overdueDays": "gün gecikmiş",
     "dueMetaOverdueDelay": "{days} gün gecikme",
     "dueMetaPaidInMonth": "{month} {year}'de ödendi",

@@ -72,13 +72,13 @@ abstract final class AppButtonStyles {
 
 
 
-  /// Güçlü CTA: siyah dolgu + beyaz metin.
+  /// Güçlü CTA: premium lacivert dolgu + beyaz metin.
 
   static ButtonStyle elevatedPrimary({bool fullWidth = false}) =>
 
       _filled(
 
-        background: AppColors.primary,
+        background: AppColors.actionButton,
 
         foreground: Colors.white,
 

@@ -6,9 +6,11 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/dashboard_building_selector.dart';
-import '../../../../shared/widgets/dashboard_filter_chips_row.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
+import '../../../../shared/widgets/premium_filter_button.dart';
+import '../../../../shared/widgets/premium_filter_picker.dart';
+import '../../../../shared/widgets/premium_filter_sheet.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/manager_open_tickets_count_provider.dart';
@@ -65,6 +67,69 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     return tickets.where((t) => t.status == _statusFilter).toList();
   }
 
+  String _statusFilterLabel(BuildContext context, TicketStatus? status) {
+    if (status == null) return context.t.common.all;
+    return status.label(context);
+  }
+
+  Future<void> _openFilterSheet() async {
+    var draftStatus = _statusFilter;
+    final common = context.t.common;
+
+    await PremiumFilterSheet.show(
+      context: context,
+      title: common.filter,
+      applyLabel: common.apply,
+      fieldBuilder: (ctx, setSheetState) {
+        final allToken = Object();
+        return [
+          PremiumFilterFieldConfig(
+            label: common.status,
+            value: _statusFilterLabel(ctx, draftStatus),
+            hint: common.all,
+            icon: Icons.flag_outlined,
+            onTap: () async {
+              final picked = await showPremiumSingleSelectPicker<Object?>(
+                context: ctx,
+                title: common.status,
+                selected: draftStatus ?? allToken,
+                options: [
+                  PremiumFilterPickerOption(
+                    value: allToken,
+                    label: common.all,
+                    icon: Icons.layers_outlined,
+                  ),
+                  PremiumFilterPickerOption(
+                    value: TicketStatus.open,
+                    label: TicketStatus.open.label(ctx),
+                    icon: Icons.radio_button_unchecked,
+                  ),
+                  PremiumFilterPickerOption(
+                    value: TicketStatus.inProgress,
+                    label: TicketStatus.inProgress.label(ctx),
+                    icon: Icons.autorenew_rounded,
+                  ),
+                  PremiumFilterPickerOption(
+                    value: TicketStatus.closed,
+                    label: TicketStatus.closed.label(ctx),
+                    icon: Icons.check_circle_outline,
+                  ),
+                ],
+              );
+              if (picked == null) return;
+              setSheetState(() {
+                draftStatus = identical(picked, allToken)
+                    ? null
+                    : picked as TicketStatus;
+              });
+            },
+          ),
+        ];
+      },
+      onApply: () => setState(() => _statusFilter = draftStatus),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final buildings = ref.watch(buildingsStoreProvider).value ?? [];
@@ -98,33 +163,9 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                     },
                   ),
                   const SizedBox(height: AppSizes.spacingM),
-                  DashboardFilterChipsRow(
-                    chips: [
-                      DashboardFilterChipItem(
-                        label: context.t.common.all,
-                        selected: _statusFilter == null,
-                        onTap: () => setState(() => _statusFilter = null),
-                      ),
-                      DashboardFilterChipItem(
-                        label: TicketStatus.open.label(context),
-                        selected: _statusFilter == TicketStatus.open,
-                        onTap: () =>
-                            setState(() => _statusFilter = TicketStatus.open),
-                      ),
-                      DashboardFilterChipItem(
-                        label: TicketStatus.inProgress.label(context),
-                        selected: _statusFilter == TicketStatus.inProgress,
-                        onTap: () => setState(
-                          () => _statusFilter = TicketStatus.inProgress,
-                        ),
-                      ),
-                      DashboardFilterChipItem(
-                        label: TicketStatus.closed.label(context),
-                        selected: _statusFilter == TicketStatus.closed,
-                        onTap: () =>
-                            setState(() => _statusFilter = TicketStatus.closed),
-                      ),
-                    ],
+                  PremiumFilterButton(
+                    hasActiveFilters: _statusFilter != null,
+                    onPressed: _openFilterSheet,
                   ),
                 ],
               ),

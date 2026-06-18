@@ -10,9 +10,11 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
-import '../../../../shared/widgets/dashboard_filter_chips_row.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
+import '../../../../shared/widgets/premium_filter_button.dart';
+import '../../../../shared/widgets/premium_filter_picker.dart';
+import '../../../../shared/widgets/premium_filter_sheet.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../providers/notifications_provider.dart';
@@ -100,10 +102,54 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
     );
   }
 
-  String _unreadChipLabel(BuildContext context, int unreadCount) {
-    final label = context.t.features.notifications.filterUnread;
-    if (unreadCount <= 0) return label;
-    return '$label ($unreadCount)';
+  String _notificationFilterLabel(BuildContext context, _NotificationFilter filter) {
+    return filter == _NotificationFilter.unread
+        ? context.t.features.notifications.filterUnread
+        : context.t.features.notifications.filterAll;
+  }
+
+  Future<void> _openFilterSheet() async {
+    var draftFilter = _filter;
+    final common = context.t.common;
+    final t = context.t.features.notifications;
+
+    await PremiumFilterSheet.show(
+      context: context,
+      title: common.filter,
+      applyLabel: common.apply,
+      fieldBuilder: (ctx, setSheetState) {
+        return [
+          PremiumFilterFieldConfig(
+            label: common.status,
+            value: _notificationFilterLabel(ctx, draftFilter),
+            hint: t.filterUnread,
+            icon: Icons.visibility_outlined,
+            onTap: () async {
+              final picked = await showPremiumSingleSelectPicker<_NotificationFilter>(
+                context: ctx,
+                title: common.status,
+                selected: draftFilter,
+                options: [
+                  PremiumFilterPickerOption(
+                    value: _NotificationFilter.unread,
+                    label: t.filterUnread,
+                    icon: Icons.mark_email_unread_outlined,
+                  ),
+                  PremiumFilterPickerOption(
+                    value: _NotificationFilter.all,
+                    label: t.filterAll,
+                    icon: Icons.inbox_outlined,
+                  ),
+                ],
+              );
+              if (picked == null) return;
+              setSheetState(() => draftFilter = picked);
+            },
+          ),
+        ];
+      },
+      onApply: () => setState(() => _filter = draftFilter),
+    );
   }
 
   @override
@@ -137,21 +183,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
         header: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            DashboardFilterChipsRow(
-              chips: [
-                DashboardFilterChipItem(
-                  label: _unreadChipLabel(context, state.unreadCount),
-                  selected: _filter == _NotificationFilter.unread,
-                  onTap: () =>
-                      setState(() => _filter = _NotificationFilter.unread),
-                ),
-                DashboardFilterChipItem(
-                  label: t.filterAll,
-                  selected: _filter == _NotificationFilter.all,
-                  onTap: () =>
-                      setState(() => _filter = _NotificationFilter.all),
-                ),
-              ],
+            PremiumFilterButton(
+              hasActiveFilters: _filter != _NotificationFilter.unread,
+              onPressed: _openFilterSheet,
             ),
             const SizedBox(height: AppSizes.spacingM),
             DashboardSectionTitle(

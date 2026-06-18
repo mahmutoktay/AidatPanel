@@ -623,6 +623,12 @@ class Translations$common$en {
 	/// en: 'Update'
 	String get update => 'Update';
 
+	/// en: 'Filter'
+	String get filter => 'Filter';
+
+	/// en: 'Apply'
+	String get apply => 'Apply';
+
 	/// en: 'days overdue'
 	String get overdueDays => 'days overdue';
 
@@ -3434,6 +3440,8 @@ extension on Translations {
 			'common.dueAmountInvalidPositive' => 'Enter a valid amount.',
 			'common.dueDayOutOfRange' => 'Due day must be between 1 and 28.',
 			'common.update' => 'Update',
+			'common.filter' => 'Filter',
+			'common.apply' => 'Apply',
 			'common.overdueDays' => 'days overdue',
 			'common.dueMetaOverdueDelay' => '{days} days overdue',
 			'common.dueMetaPaidInMonth' => 'paid in {month} {year}',
@@ -3719,10 +3727,10 @@ extension on Translations {
 			'features.tickets.categoryComplaint' => 'Complaint',
 			'features.tickets.categoryRequest' => 'Request',
 			'features.tickets.categoryMalfunction' => 'Malfunction',
-			'features.tickets.categoryOther' => 'Other',
-			'features.tickets.submit' => 'Submit',
 			_ => null,
 		} ?? switch (path) {
+			'features.tickets.categoryOther' => 'Other',
+			'features.tickets.submit' => 'Submit',
 			'features.tickets.createSuccess' => 'Your request has been submitted',
 			'features.tickets.createFailed' => 'Could not save your request. Please try again.',
 			'features.tickets.createServiceUnavailable' => 'The request service is not available right now. Please try again later.',

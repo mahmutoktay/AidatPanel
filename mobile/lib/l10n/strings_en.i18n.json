@@ -230,6 +230,8 @@
     "dueAmountInvalidPositive": "Enter a valid amount.",
     "dueDayOutOfRange": "Due day must be between 1 and 28.",
     "update": "Update",
+    "filter": "Filter",
+    "apply": "Apply",
     "overdueDays": "days overdue",
     "dueMetaOverdueDelay": "{days} days overdue",
     "dueMetaPaidInMonth": "paid in {month} {year}",

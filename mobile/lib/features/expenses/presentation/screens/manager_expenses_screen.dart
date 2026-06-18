@@ -10,9 +10,11 @@ import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/dashboard_building_selector.dart';
-import '../../../../shared/widgets/dashboard_filter_chips_row.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
+import '../../../../shared/widgets/premium_filter_button.dart';
+import '../../../../shared/widgets/premium_filter_picker.dart';
+import '../../../../shared/widgets/premium_filter_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../domain/entities/expense_entity.dart';
@@ -105,6 +107,78 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
   List<int> get _yearOptions =>
       List.generate(6, (i) => DateTime.now().year - i);
 
+  bool get _hasNonDefaultPeriod {
+    final now = DateTime.now();
+    return _month != now.month || _year != now.year;
+  }
+
+  Future<void> _openFilterSheet() async {
+    var draftMonth = _month;
+    var draftYear = _year;
+    final common = context.t.common;
+
+    await PremiumFilterSheet.show(
+      context: context,
+      title: common.filter,
+      applyLabel: common.apply,
+      fieldBuilder: (ctx, setSheetState) => [
+        PremiumFilterFieldConfig(
+          label: common.year,
+          value: '$draftYear',
+          hint: common.year,
+          icon: Icons.date_range_outlined,
+          onTap: () async {
+            final picked = await showPremiumSingleSelectPicker<int>(
+              context: ctx,
+              title: common.year,
+              selected: draftYear,
+              options: [
+                for (final y in _yearOptions)
+                  PremiumFilterPickerOption(
+                    value: y,
+                    label: '$y',
+                    icon: Icons.calendar_today_outlined,
+                  ),
+              ],
+            );
+            if (picked == null) return;
+            setSheetState(() => draftYear = picked);
+          },
+        ),
+        PremiumFilterFieldConfig(
+          label: common.month,
+          value: localizedMonthName(ctx, draftMonth),
+          hint: common.month,
+          icon: Icons.calendar_month_outlined,
+          onTap: () async {
+            final picked = await showPremiumSingleSelectPicker<int>(
+              context: ctx,
+              title: common.month,
+              selected: draftMonth,
+              options: [
+                for (var m = 1; m <= 12; m++)
+                  PremiumFilterPickerOption(
+                    value: m,
+                    label: localizedMonthName(ctx, m),
+                    icon: Icons.event_outlined,
+                  ),
+              ],
+            );
+            if (picked == null) return;
+            setSheetState(() => draftMonth = picked);
+          },
+        ),
+      ],
+      onApply: () {
+        setState(() {
+          _month = draftMonth;
+          _year = draftYear;
+        });
+        _load();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final buildings = ref.watch(buildingsStoreProvider).value ?? [];
@@ -143,32 +217,9 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
                     },
                   ),
                   const SizedBox(height: AppSizes.spacingM),
-                  DashboardFilterChipsRow(
-                    chips: [
-                      for (final y in _yearOptions)
-                        DashboardFilterChipItem(
-                          label: '$y',
-                          selected: _year == y,
-                          onTap: () {
-                            setState(() => _year = y);
-                            _load();
-                          },
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSizes.spacingS),
-                  DashboardFilterChipsRow(
-                    chips: [
-                      for (var m = 1; m <= 12; m++)
-                        DashboardFilterChipItem(
-                          label: localizedMonthName(context, m),
-                          selected: _month == m,
-                          onTap: () {
-                            setState(() => _month = m);
-                            _load();
-                          },
-                        ),
-                    ],
+                  PremiumFilterButton(
+                    hasActiveFilters: _hasNonDefaultPeriod,
+                    onPressed: _openFilterSheet,
                   ),
                   if (state.summary != null) ...[
                     const SizedBox(height: AppSizes.spacingM),

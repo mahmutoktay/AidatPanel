@@ -10,6 +10,9 @@ import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/building_picker_sheet.dart';
+import '../../../../shared/widgets/premium_filter_button.dart';
+import '../../../../shared/widgets/premium_filter_picker.dart';
+import '../../../../shared/widgets/premium_filter_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
@@ -18,9 +21,7 @@ import '../providers/dues_provider.dart';
 import '../utils/dues_ui_helpers.dart';
 import '../widgets/due_status_sheet.dart';
 import '../widgets/dues_building_selector_card.dart';
-import '../widgets/dues_filter_chips_row.dart';
 import '../widgets/dues_list_item_card.dart';
-import '../widgets/dues_period_chips.dart';
 import '../widgets/dues_quick_amount_card.dart';
 import '../widgets/dues_stat_cards_row.dart';
 
@@ -152,20 +153,10 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                 ],
-                DuesPeriodChips(
-                  selectedMonth: _monthFilter,
-                  selectedYear: _yearFilter,
-                  years: _yearOptions(dues),
+                PremiumFilterButton(
                   enabled: !isLoading,
-                  monthLabel: (m) => monthName(context, m),
-                  onMonthChanged: (value) {
-                    setState(() => _monthFilter = value);
-                    _reloadDues();
-                  },
-                  onYearChanged: (value) {
-                    setState(() => _yearFilter = value);
-                    _reloadDues();
-                  },
+                  hasActiveFilters: _hasActiveFilters,
+                  onPressed: () => _openFilterSheet(context, dues, isLoading),
                 ),
                 const SizedBox(height: AppSizes.spacingM),
                 if (statsSource.isNotEmpty || selectedBuilding != null)
@@ -181,15 +172,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                         .length,
                     totalUnits: totalUnits,
                   ),
-                const SizedBox(height: AppSizes.spacingM),
-                DuesFilterChipsRow(
-                  selectedStatus: _statusFilter,
-                  enabled: !isLoading,
-                  onChanged: (value) {
-                    setState(() => _statusFilter = value);
-                    _reloadDues();
-                  },
-                ),
                 const SizedBox(height: AppSizes.spacingM),
                 if (selectedBuilding != null)
                   DuesQuickAmountCard(
@@ -345,6 +327,167 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
       ...dues.map((d) => d.year),
     };
     return yearSet.toList()..sort((a, b) => b.compareTo(a));
+  }
+
+  bool get _hasActiveFilters {
+    final now = DateTime.now();
+    return _statusFilter != null ||
+        _monthFilter == null ||
+        _yearFilter == null ||
+        _monthFilter != now.month ||
+        _yearFilter != now.year;
+  }
+
+  String _dueStatusLabel(BuildContext context, DueStatus? status) {
+    final common = context.t.common;
+    if (status == null) return common.all;
+    switch (status) {
+      case DueStatus.paid:
+        return common.paidStatus;
+      case DueStatus.pending:
+        return common.pendingStatus;
+      case DueStatus.overdue:
+        return common.overdueStatus;
+      case DueStatus.waived:
+        return common.all;
+    }
+  }
+
+  Future<void> _openFilterSheet(
+    BuildContext context,
+    List<DueEntity> dues,
+    bool isLoading,
+  ) async {
+    if (isLoading) return;
+    var draftStatus = _statusFilter;
+    var draftMonth = _monthFilter;
+    var draftYear = _yearFilter;
+    final common = context.t.common;
+    final years = _yearOptions(dues);
+
+    await PremiumFilterSheet.show(
+      context: context,
+      title: common.filter,
+      applyLabel: common.apply,
+      fieldBuilder: (ctx, setSheetState) {
+        final statusAllToken = Object();
+        final monthAllToken = Object();
+        final yearAllToken = Object();
+        return [
+          PremiumFilterFieldConfig(
+            label: common.status,
+            value: _dueStatusLabel(ctx, draftStatus),
+            hint: common.all,
+            icon: Icons.flag_outlined,
+            onTap: () async {
+              final picked = await showPremiumSingleSelectPicker<Object?>(
+                context: ctx,
+                title: common.status,
+                selected: draftStatus ?? statusAllToken,
+                options: [
+                  PremiumFilterPickerOption(
+                    value: statusAllToken,
+                    label: common.all,
+                    icon: Icons.layers_outlined,
+                  ),
+                  PremiumFilterPickerOption(
+                    value: DueStatus.paid,
+                    label: common.paidStatus,
+                    icon: Icons.check_circle_outline,
+                  ),
+                  PremiumFilterPickerOption(
+                    value: DueStatus.pending,
+                    label: common.pendingStatus,
+                    icon: Icons.schedule_outlined,
+                  ),
+                  PremiumFilterPickerOption(
+                    value: DueStatus.overdue,
+                    label: common.overdueStatus,
+                    icon: Icons.warning_amber_rounded,
+                  ),
+                ],
+              );
+              if (picked == null) return;
+              setSheetState(() {
+                draftStatus = identical(picked, statusAllToken)
+                    ? null
+                    : picked as DueStatus;
+              });
+            },
+          ),
+          PremiumFilterFieldConfig(
+            label: common.month,
+            value: draftMonth == null
+                ? common.allMonths
+                : monthName(ctx, draftMonth!),
+            hint: common.allMonths,
+            icon: Icons.calendar_month_outlined,
+            onTap: () async {
+              final picked = await showPremiumSingleSelectPicker<Object?>(
+                context: ctx,
+                title: common.month,
+                selected: draftMonth ?? monthAllToken,
+                options: [
+                  PremiumFilterPickerOption(
+                    value: monthAllToken,
+                    label: common.allMonths,
+                    icon: Icons.calendar_view_month_outlined,
+                  ),
+                  for (var m = 1; m <= 12; m++)
+                    PremiumFilterPickerOption(
+                      value: m,
+                      label: monthName(ctx, m),
+                      icon: Icons.event_outlined,
+                    ),
+                ],
+              );
+              if (picked == null) return;
+              setSheetState(() {
+                draftMonth = identical(picked, monthAllToken) ? null : picked as int;
+              });
+            },
+          ),
+          PremiumFilterFieldConfig(
+            label: common.year,
+            value: draftYear == null ? common.allYears : '$draftYear',
+            hint: common.allYears,
+            icon: Icons.date_range_outlined,
+            onTap: () async {
+              final picked = await showPremiumSingleSelectPicker<Object?>(
+                context: ctx,
+                title: common.year,
+                selected: draftYear ?? yearAllToken,
+                options: [
+                  PremiumFilterPickerOption(
+                    value: yearAllToken,
+                    label: common.allYears,
+                    icon: Icons.date_range_outlined,
+                  ),
+                  for (final y in years)
+                    PremiumFilterPickerOption(
+                      value: y,
+                      label: '$y',
+                      icon: Icons.calendar_today_outlined,
+                    ),
+                ],
+              );
+              if (picked == null) return;
+              setSheetState(() {
+                draftYear = identical(picked, yearAllToken) ? null : picked as int;
+              });
+            },
+          ),
+        ];
+      },
+      onApply: () {
+        setState(() {
+          _statusFilter = draftStatus;
+          _monthFilter = draftMonth;
+          _yearFilter = draftYear;
+        });
+        _reloadDues();
+      },
+    );
   }
 
   int _resolveTotalUnits(

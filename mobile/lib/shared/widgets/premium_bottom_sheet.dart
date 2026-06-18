@@ -74,7 +74,7 @@ class PremiumBottomSheetScaffold extends StatelessWidget {
     Widget bodyWidget = content;
     if (scrollable) {
       bodyWidget = SingleChildScrollView(
-        padding: padding,
+        padding: padding.copyWith(bottom: AppSizes.spacingL),
         child: content,
       );
     } else {
@@ -101,6 +101,7 @@ class PremiumBottomSheetScaffold extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
+        minimum: const EdgeInsets.only(bottom: AppSizes.spacingS),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -210,7 +211,7 @@ class PremiumSheetActions extends StatelessWidget {
         AppSizes.spacingL,
         AppSizes.spacingS,
         AppSizes.spacingL,
-        AppSizes.spacingM,
+        AppSizes.spacingL,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

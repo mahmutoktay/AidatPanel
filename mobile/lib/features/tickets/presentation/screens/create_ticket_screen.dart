@@ -6,10 +6,10 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/widgets/dashboard_filter_chips_row.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
+import '../../../../shared/widgets/premium_filter_picker.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/tickets_provider.dart';
@@ -34,6 +34,40 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  IconData _categoryIcon(TicketCategory category) {
+    switch (category) {
+      case TicketCategory.complaint:
+        return Icons.report_problem_outlined;
+      case TicketCategory.request:
+        return Icons.help_outline_rounded;
+      case TicketCategory.malfunction:
+        return Icons.build_outlined;
+      case TicketCategory.other:
+        return Icons.more_horiz_rounded;
+    }
+  }
+
+  Future<void> _pickCategory() async {
+    if (_submitting) return;
+    final t = context.t.features.tickets;
+    final picked = await showPremiumSingleSelectPicker<TicketCategory>(
+      context: context,
+      title: t.fieldCategory,
+      selected: _category,
+      options: [
+        for (final category in TicketCategory.values)
+          PremiumFilterPickerOption(
+            value: category,
+            label: category.label(context),
+            icon: _categoryIcon(category),
+          ),
+      ],
+    );
+    if (picked != null && mounted) {
+      setState(() => _category = picked);
+    }
   }
 
   @override
@@ -62,18 +96,14 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
                   bottom: AppSizes.spacingXL,
                 ),
                 children: [
-                  DashboardSectionTitle(title: t.fieldCategory),
-                  const SizedBox(height: AppSizes.spacingS),
-                  DashboardFilterChipsRow(
+                  MinimalPickerField(
+                    label: t.fieldCategory,
+                    value: _category.label(context),
+                    hint: t.fieldCategory,
+                    icon: Icons.category_outlined,
+                    required: true,
                     enabled: !_submitting,
-                    chips: [
-                      for (final c in TicketCategory.values)
-                        DashboardFilterChipItem(
-                          label: c.label(context),
-                          selected: _category == c,
-                          onTap: () => setState(() => _category = c),
-                        ),
-                    ],
+                    onTap: _pickCategory,
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                   MinimalTextField(
