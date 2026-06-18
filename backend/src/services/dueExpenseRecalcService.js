@@ -1,6 +1,10 @@
 import { prisma } from "../config/db.js";
 import { bulkGenerateBuildingDuesService } from "./dueBulkService.js";
-import { getIstanbulYearMonth } from "../utils/trDueDate.js";
+import {
+  computeOverdueDays,
+  endOfDueDayIstanbul,
+  getIstanbulYearMonth,
+} from "../utils/trDueDate.js";
 
 export function roundMoney(value) {
   return Math.round(Number(value) * 100) / 100;
@@ -173,6 +177,83 @@ export async function recalculateBuildingDuesForMonth(buildingId, month, year, d
         amount: breakdown.total,
         currency: building.currency ?? "TRY",
       },
+    });
+    updated += 1;
+  }
+
+  return { updated };
+}
+
+/**
+ * Açık (PENDING/OVERDUE) aidat için tutar, vade tarihi ve durum güncellemesi üretir.
+ * @param {{ month: number, year: number }} due
+ */
+export function resolveOpenDueSyncData(
+  due,
+  { dueDay, amount, currency, now = new Date() }
+) {
+  const dueDate = endOfDueDayIstanbul(due.year, due.month, dueDay);
+  const isOverdue = dueDate.getTime() < now.getTime();
+
+  return {
+    amount,
+    currency: currency ?? "TRY",
+    dueDate,
+    status: isOverdue ? "OVERDUE" : "PENDING",
+    overdueDays: isOverdue ? computeOverdueDays(dueDate, now) : 0,
+  };
+}
+
+/**
+ * Binadaki tüm açık aidatları bina ayarlarına göre senkronize eder:
+ * tutar (gider payı dahil), dueDate (dueDay) ve PENDING/OVERDUE durumu.
+ */
+export async function syncOpenBuildingDues(
+  buildingId,
+  { dueDay, currency } = {},
+  db = prisma,
+  now = new Date()
+) {
+  const building = await db.building.findUnique({
+    where: { id: buildingId },
+    select: { dueAmount: true, dueDay: true, currency: true },
+  });
+
+  if (building?.dueAmount == null) {
+    return { updated: 0 };
+  }
+
+  const effectiveDueDay = dueDay ?? building.dueDay ?? 1;
+  const effectiveCurrency = currency ?? building.currency ?? "TRY";
+
+  const openDues = await db.due.findMany({
+    where: {
+      apartment: { buildingId },
+      status: { in: ["PENDING", "OVERDUE"] },
+    },
+  });
+
+  let updated = 0;
+
+  for (const due of openDues) {
+    const breakdown = await computeDueBreakdown(
+      due.apartmentId,
+      due.month,
+      due.year,
+      buildingId,
+      db
+    );
+
+    const syncData = resolveOpenDueSyncData(due, {
+      dueDay: effectiveDueDay,
+      amount: breakdown.total,
+      currency: effectiveCurrency,
+      now,
+    });
+
+    await db.due.update({
+      where: { id: due.id },
+      data: syncData,
     });
     updated += 1;
   }

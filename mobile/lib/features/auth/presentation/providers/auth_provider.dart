@@ -324,13 +324,34 @@ class AuthNotifier extends Notifier<AuthState> {
     );
   }
 
-  /// Tüm cihazların oturumunu kapatır ve bu cihazı da Login ekranına düşürür.
+  /// Başka cihazdan oturum kapatıldığında — sessionExpired toast gösterilir.
+  Future<void> logoutRemoteSession(WidgetRef ref) async {
+    resetManagerTabIndex(ref);
+    resetResidentTabIndex(ref);
+    ref.read(dioClientProvider).clearResponseCache();
+    await invalidateCachesOnLogout(ref);
+    await RevenueCatService.logOut();
+    try {
+      await _authRepository.logout();
+    } catch (_) {
+      // Oturum zaten sunucuda kapatılmış olabilir; yerel temizlik yeterli.
+    }
+    await Future.delayed(const Duration(milliseconds: 300));
+    state = const AuthState(
+      logoutReason: LogoutReason.otherDevices,
+      isManualLogout: false,
+      showLogoutToast: true,
+    );
+  }
+
+  /// Diğer cihazlardan çıkış — bu cihazda oturum devam eder.
   Future<void> logoutAllDevices(WidgetRef ref) async {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       await _authRepository.logoutAllDevices();
-      await logoutLocal(ref, showToast: false);
+      ref.read(dioClientProvider).clearResponseCache();
+      state = state.copyWith(isLoading: false, clearError: true);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
     }

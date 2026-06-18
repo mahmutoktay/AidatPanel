@@ -9,6 +9,7 @@ import '../../../../features/profile/presentation/theme/profile_settings_ui.dart
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
+import '../../../../shared/widgets/show_due_day_picker.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../data/cities_data.dart';
@@ -42,6 +43,8 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
 
   String? _selectedCity;
   String? _selectedDistrict;
+  int _selectedDueDay = 1;
+  bool _pickingDueDay = false;
   bool _submitting = false;
 
   @override
@@ -221,6 +224,15 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
                         : null,
                   ),
                   const SizedBox(height: AppSizes.spacingFieldSpacing),
+                  MinimalPickerField(
+                    label: context.t.common.dueDay,
+                    value: '$_selectedDueDay',
+                    hint: context.t.common.selectDueDay,
+                    icon: Icons.event_outlined,
+                    enabled: !_submitting && !_pickingDueDay,
+                    onTap: _showDueDayPicker,
+                  ),
+                  const SizedBox(height: AppSizes.spacingFieldSpacing),
                   BuildingCollectionFields(
                     ibanController: _collectionIbanController,
                     accountTitleController: _collectionAccountTitleController,
@@ -281,6 +293,23 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
     );
   }
 
+  Future<void> _showDueDayPicker() async {
+    if (_submitting || _pickingDueDay) return;
+    setState(() => _pickingDueDay = true);
+    try {
+      final picked = await showDueDayPicker(
+        context,
+        selectedDueDay: _selectedDueDay,
+        allowClear: false,
+      );
+      if (picked != null) {
+        setState(() => _selectedDueDay = picked);
+      }
+    } finally {
+      if (mounted) setState(() => _pickingDueDay = false);
+    }
+  }
+
   Future<void> _onSubmit() async {
     if (_submitting) return;
 
@@ -330,7 +359,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
             totalFloors: floors,
             apartmentsPerFloor: apartmentsPerFloor,
             dueAmount: dueAmount,
-            dueDay: 1,
+            dueDay: _selectedDueDay,
             currency: 'TRY',
             collectionIban: collection?.collectionIban,
             collectionAccountTitle: collection?.collectionAccountTitle,

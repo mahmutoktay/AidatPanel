@@ -265,7 +265,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
                     child: Text(context.t.common.tryAgain),
                   ),
                 ],
-                if (dekont.status == DekontStatus.rejected) ...[
+                if (!isManager && dekont.status == DekontStatus.rejected) ...[
                   const SizedBox(height: AppSizes.spacingM),
                   SizedBox(
                     width: double.infinity,

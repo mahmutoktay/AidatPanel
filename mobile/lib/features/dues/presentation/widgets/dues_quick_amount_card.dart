@@ -7,6 +7,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
+import '../../../../shared/widgets/show_due_day_picker.dart';
 import 'dues_screen_style.dart';
 
 class DuesQuickAmountCard extends StatelessWidget {
@@ -94,7 +95,7 @@ class DuesAmountUpdateSheet extends StatefulWidget {
   final String? hintAmount;
   final ValueChanged<int?> onDueDayChanged;
   final ValueChanged<bool> onAffectCurrentChanged;
-  final VoidCallback onSubmit;
+  final Future<void> Function() onSubmit;
 
   const DuesAmountUpdateSheet({
     super.key,
@@ -118,7 +119,7 @@ class DuesAmountUpdateSheet extends StatefulWidget {
     required String currencySymbol,
     required ValueChanged<int?> onDueDayChanged,
     required ValueChanged<bool> onAffectCurrentChanged,
-    required VoidCallback onSubmit,
+    required Future<void> Function() onSubmit,
   }) {
     return PremiumBottomSheetScaffold.show<void>(
       context: context,
@@ -141,45 +142,42 @@ class DuesAmountUpdateSheet extends StatefulWidget {
 
 class _DuesAmountUpdateSheetState extends State<DuesAmountUpdateSheet> {
   bool _pickingDueDay = false;
+  bool _isSubmitting = false;
+  late int? _selectedDueDay;
+  late bool _affectCurrent;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDueDay = widget.selectedDueDay;
+    _affectCurrent = widget.affectCurrent;
+  }
 
   Future<void> _pickDueDay(BuildContext context) async {
-    if (widget.isLoading || _pickingDueDay) return;
+    if (_isSubmitting || _pickingDueDay) return;
     setState(() => _pickingDueDay = true);
-    final t = context.t.common;
-    const clearSentinel = -1;
     try {
-      final picked = await PremiumBottomSheetScaffold.show<int>(
-        context: context,
-        builder: (ctx) => PremiumBottomSheetScaffold(
-          title: t.dueDay,
-          scrollable: true,
-          body: PremiumActionSheetList(
-            children: [
-              PremiumActionSheetTile(
-                icon: Icons.event_busy_outlined,
-                label: t.selectDueDay,
-                trailing: widget.selectedDueDay == null
-                    ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
-                    : null,
-                onTap: () => Navigator.pop(ctx, clearSentinel),
-              ),
-              for (var day = 1; day <= 28; day++)
-                PremiumActionSheetTile(
-                  icon: Icons.calendar_today_outlined,
-                  label: '$day',
-                  trailing: widget.selectedDueDay == day
-                      ? const Icon(Icons.check_rounded, color: AppColors.inkDark)
-                      : null,
-                  onTap: () => Navigator.pop(ctx, day),
-                ),
-            ],
-          ),
-        ),
+      final picked = await showDueDayPicker(
+        context,
+        selectedDueDay: _selectedDueDay,
       );
       if (picked == null) return;
-      widget.onDueDayChanged(picked == clearSentinel ? null : picked);
+      final newValue =
+          picked == kDueDayClearSentinel ? null : picked;
+      setState(() => _selectedDueDay = newValue);
+      widget.onDueDayChanged(newValue);
     } finally {
       if (mounted) setState(() => _pickingDueDay = false);
+    }
+  }
+
+  Future<void> _handleSubmit() async {
+    if (_isSubmitting) return;
+    setState(() => _isSubmitting = true);
+    try {
+      await widget.onSubmit();
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
@@ -201,7 +199,7 @@ class _DuesAmountUpdateSheetState extends State<DuesAmountUpdateSheet> {
             label: t.amount,
             hint: widget.hintAmount,
             icon: Icons.payments_outlined,
-            enabled: !widget.isLoading,
+            enabled: !_isSubmitting,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
@@ -217,26 +215,31 @@ class _DuesAmountUpdateSheetState extends State<DuesAmountUpdateSheet> {
           const SizedBox(height: AppSizes.spacingM),
           MinimalPickerField(
             label: t.dueDay,
-            value: widget.selectedDueDay?.toString(),
+            value: _selectedDueDay?.toString(),
             hint: t.selectDueDay,
             icon: Icons.event_outlined,
-            enabled: !widget.isLoading && !_pickingDueDay,
+            enabled: !_isSubmitting && !_pickingDueDay,
             onTap: () => _pickDueDay(context),
           ),
           const SizedBox(height: AppSizes.spacingM),
           MinimalToggleRow(
             title: t.affectCurrentDues,
             subtitle: t.affectCurrentDuesHint,
-            value: widget.affectCurrent,
-            enabled: !widget.isLoading,
-            onChanged: widget.isLoading ? null : widget.onAffectCurrentChanged,
+            value: _affectCurrent,
+            enabled: !_isSubmitting,
+            onChanged: _isSubmitting
+                ? null
+                : (value) {
+                    setState(() => _affectCurrent = value);
+                    widget.onAffectCurrentChanged(value);
+                  },
           ),
         ],
       ),
       actions: PremiumSheetActions(
         primaryLabel: t.update,
-        onPrimary: widget.isLoading ? null : widget.onSubmit,
-        primaryLoading: widget.isLoading,
+        onPrimary: _isSubmitting ? null : _handleSubmit,
+        primaryLoading: _isSubmitting,
       ),
     );
   }

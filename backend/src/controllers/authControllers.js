@@ -50,7 +50,10 @@ export const login = async (req, res, next) => {
 
 export const refreshToken = async (req, res, next) => {
   try {
-    const data = await refreshAccessTokenService(req.body.refreshToken);
+    const data = await refreshAccessTokenService(
+      req.body.refreshToken,
+      req.body
+    );
     res.status(200).json({ success: true, data });
   } catch (err) {
     handleHttp(err, res, next);
@@ -72,7 +75,7 @@ export const join = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
-    await logoutService(req.user.id);
+    await logoutService(req.user.id, req.user.sessionId);
     res.status(200).json({
       success: true,
       message: "Çıkış başarılı.",
@@ -84,7 +87,7 @@ export const logout = async (req, res, next) => {
 
 export const logoutAllDevices = async (req, res, next) => {
   try {
-    const data = await logoutAllDevicesService(req.user.id);
+    const data = await logoutAllDevicesService(req.user.id, req.user.sessionId);
     res.status(200).json({
       success: true,
       message: "Diğer cihazlardaki oturumlar sonlandırıldı.",

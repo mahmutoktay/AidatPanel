@@ -4,6 +4,7 @@ import '../../../../core/network/dio_client.dart';
 import '../../../../core/network/paginated_list_result.dart';
 import '../../../../core/network/pagination_parse.dart';
 import '../models/due_model.dart';
+import '../../domain/entities/due_remind_result.dart';
 
 abstract class DuesRemoteDataSource {
   /// Tur 5 / §10/3 — backend `dueController.getDuesByBuildingController`
@@ -40,7 +41,7 @@ abstract class DuesRemoteDataSource {
     String? currency,
     bool affectCurrent = false,
   });
-  Future<int> remindBuildingDues(
+  Future<DueRemindResult> remindBuildingDues(
     String buildingId, {
     List<String>? dueIds,
   });
@@ -147,7 +148,7 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
   }
 
   @override
-  Future<int> remindBuildingDues(
+  Future<DueRemindResult> remindBuildingDues(
     String buildingId, {
     List<String>? dueIds,
   }) async {
@@ -156,10 +157,13 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
       data: dueIds != null && dueIds.isNotEmpty ? {'dueIds': dueIds} : {},
     );
     final data = response.data['data'];
-    if (data is Map && data['reminded'] != null) {
-      return _toInt(data['reminded']);
+    if (data is Map) {
+      return DueRemindResult(
+        reminded: _toInt(data['reminded']),
+        skippedCooldown: _toInt(data['skippedCooldown']),
+      );
     }
-    return 0;
+    return const DueRemindResult(reminded: 0);
   }
 
   static int _toInt(dynamic value) {

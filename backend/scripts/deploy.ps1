@@ -1,6 +1,7 @@
 # AidatPanel backend — VPS deploy (Mutagen yerine SSH + tar)
 # Kullanım:
-#   .\backend\scripts\deploy.ps1              # yükle + npm + migrate + restart
+#   Git Bash (önerilen):  bash backend/scripts/deploy.sh
+#   PowerShell:           .\backend\scripts\deploy.ps1
 #   .\backend\scripts\deploy.ps1 -SyncOnly    # sadece dosya yükle
 #   .\backend\scripts\deploy.ps1 -RestartOnly # sadece pm2 restart
 #   .\backend\scripts\deploy.ps1 -Logs        # son log satırları
@@ -93,16 +94,18 @@ function Sync-BackendGit {
 function Sync-BackendTar {
     Write-Host ">> Sync deploy: backend/ -> $($config.remotePath)" -ForegroundColor Cyan
 
-    $tarFile = Join-Path $env:TEMP "aidatpanel-backend-$(Get-Date -Format 'yyyyMMddHHmmss').tar.gz"
+    # MSYS/Git Bash tar, C:\... yollarini okuyamaz — arsivi backend icinde goreli yol ile olustur.
+    $tarName = "aidatpanel-backend-deploy-$(Get-Date -Format 'yyyyMMddHHmmss').tar.gz"
+    $tarFile = Join-Path $BackendRoot $tarName
     $remoteTar = "/tmp/aidatpanel-backend-deploy.tar.gz"
 
     Push-Location $BackendRoot
     try {
         if (-not (Get-Command tar -ErrorAction SilentlyContinue)) {
-            throw "Windows 'tar' bulunamadi. Windows 10+ gerekli veya WSL kullanin."
+            throw "Windows 'tar' bulunamadi. Windows 10+ gerekli, veya Git Bash: bash backend/scripts/deploy.sh"
         }
 
-        & tar -czf $tarFile `
+        & tar -czf $tarName `
             --exclude=node_modules `
             --exclude=.env `
             --exclude=.env.* `
@@ -223,7 +226,7 @@ if (-not $SyncOnly) {
     Test-Health
     Write-Host ""
     Write-Host "Deploy tamam." -ForegroundColor Green
-    Write-Host "  Log: .\backend\scripts\deploy.ps1 -Logs" -ForegroundColor DarkGray
+    Write-Host "  Log: bash backend/scripts/deploy.sh --logs  (veya deploy.ps1 -Logs)" -ForegroundColor DarkGray
 }
 else {
     Write-Host ""

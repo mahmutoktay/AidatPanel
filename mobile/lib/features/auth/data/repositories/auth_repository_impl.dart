@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../../../core/device/device_info_service.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/token_refresh_service.dart';
 import '../../../../core/storage/secure_storage.dart';
@@ -63,19 +64,33 @@ class AuthRepositoryImpl implements AuthRepository {
   }) : _remoteDataSource = remoteDataSource,
        _secureStorage = secureStorage;
 
+  Future<void> _persistTokens(String accessToken, String refreshToken) async {
+    await _secureStorage.saveToken(accessToken);
+    await _secureStorage.saveRefreshToken(refreshToken);
+    await _secureStorage.saveTokenExpiry(
+      JwtUtils.parseExpiry(accessToken),
+    );
+    final sid = JwtUtils.parseSessionId(refreshToken) ??
+        JwtUtils.parseSessionId(accessToken);
+    if (sid != null) {
+      await _secureStorage.saveSessionId(sid);
+    }
+  }
+
   @override
   Future<UserEntity> login(String identifier, String password) async {
     try {
-      final request =
-          LoginRequest(identifier: identifier, password: password);
+      final device = await DeviceInfoService.currentDeviceMeta();
+      final request = LoginRequest(
+        identifier: identifier,
+        password: password,
+        deviceLabel: device.deviceLabel,
+        platform: device.platform,
+      );
       final response = await _remoteDataSource.login(request);
 
-      await _secureStorage.saveToken(response.accessToken);
-      await _secureStorage.saveRefreshToken(response.refreshToken);
+      await _persistTokens(response.accessToken, response.refreshToken);
       await _secureStorage.saveUser(jsonEncode(response.user.toJson()));
-      await _secureStorage.saveTokenExpiry(
-        JwtUtils.parseExpiry(response.accessToken),
-      );
 
       return response.user.toEntity();
     } on ApiException {
@@ -116,21 +131,20 @@ class AuthRepositoryImpl implements AuthRepository {
     String? phone,
   ) async {
     try {
+      final device = await DeviceInfoService.currentDeviceMeta();
       final request = JoinRequest(
         inviteCode: inviteCode,
         email: email,
         password: password,
         name: name,
         phone: phone,
+        deviceLabel: device.deviceLabel,
+        platform: device.platform,
       );
       final response = await _remoteDataSource.join(request);
 
-      await _secureStorage.saveToken(response.accessToken);
-      await _secureStorage.saveRefreshToken(response.refreshToken);
+      await _persistTokens(response.accessToken, response.refreshToken);
       await _secureStorage.saveUser(jsonEncode(response.user.toJson()));
-      await _secureStorage.saveTokenExpiry(
-        JwtUtils.parseExpiry(response.accessToken),
-      );
 
       return response.user.toEntity();
     } on ApiException {
@@ -177,11 +191,7 @@ class AuthRepositoryImpl implements AuthRepository {
         message: 'Diğer cihazlardan çıkış yapılamadı, lütfen tekrar deneyin',
       );
     }
-    await _secureStorage.saveToken(tokens.accessToken);
-    await _secureStorage.saveRefreshToken(refresh);
-    await _secureStorage.saveTokenExpiry(
-      JwtUtils.parseExpiry(tokens.accessToken),
-    );
+    await _persistTokens(tokens.accessToken, refresh);
   }
 
   @override
@@ -265,6 +275,11 @@ class AuthRepositoryImpl implements AuthRepository {
       );
       if (result.refreshToken != null && result.refreshToken!.isNotEmpty) {
         await _secureStorage.saveRefreshToken(result.refreshToken!);
+      }
+      final sid = JwtUtils.parseSessionId(result.refreshToken ?? refreshToken) ??
+          JwtUtils.parseSessionId(result.accessToken);
+      if (sid != null) {
+        await _secureStorage.saveSessionId(sid);
       }
       return user;
     } on ApiException catch (e) {

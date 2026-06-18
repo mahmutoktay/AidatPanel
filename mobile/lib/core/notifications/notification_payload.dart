@@ -10,6 +10,7 @@ class NotificationPayload {
   final String? buildingId;
   final String? status;
   final String? route;
+  final String? sessionId;
 
   const NotificationPayload({
     this.type,
@@ -20,6 +21,7 @@ class NotificationPayload {
     this.buildingId,
     this.status,
     this.route,
+    this.sessionId,
   });
 
   factory NotificationPayload.fromFcmData(Map<String, dynamic> data) {
@@ -38,6 +40,7 @@ class NotificationPayload {
       buildingId: str(data['buildingId']),
       status: str(data['status']),
       route: str(data['route']),
+      sessionId: str(data['sessionId']),
     );
   }
 

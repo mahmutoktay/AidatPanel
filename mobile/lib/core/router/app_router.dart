@@ -33,6 +33,7 @@ import '../../features/buildings/presentation/screens/invite_code_screen.dart';
 import '../../features/buildings/data/buildings_store.dart';
 import '../../features/buildings/domain/entities/building_entity.dart';
 import '../../features/profile/presentation/screens/profile_details_screen.dart';
+import '../../features/profile/presentation/screens/active_sessions_screen.dart';
 import '../../features/subscription/presentation/screens/subscription_screen.dart';
 import '../../features/subscription/presentation/providers/subscription_provider.dart';
 import '../../features/profile/presentation/screens/legal_document_screen.dart';
@@ -114,6 +115,12 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
     builder: (context, state) => const ProfileDetailsScreen(),
   ),
   GoRoute(
+    path: 'profile/sessions',
+    name: 'manager_profile_sessions',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const ActiveSessionsScreen(),
+  ),
+  GoRoute(
     path: 'overdue-apartments',
     name: 'manager_overdue_apartments',
     parentNavigatorKey: rootNavigatorKey,
@@ -163,6 +170,12 @@ List<RouteBase> _residentDashboardChildRoutes() => [
     name: 'resident_profile',
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) => const ProfileDetailsScreen(),
+  ),
+  GoRoute(
+    path: 'profile/sessions',
+    name: 'resident_profile_sessions',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const ActiveSessionsScreen(),
   ),
 ];
 

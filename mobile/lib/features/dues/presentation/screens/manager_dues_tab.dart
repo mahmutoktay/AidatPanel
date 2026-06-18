@@ -305,6 +305,11 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     BuildingEntity building,
     bool isLoading,
   ) async {
+    _amountController.clear();
+    setState(() {
+      _selectedDueDay = null;
+      _affectCurrent = false;
+    });
     await DuesAmountUpdateSheet.show(
       context,
       amountController: _amountController,
@@ -644,17 +649,19 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
       type: ok ? ToastType.success : ToastType.error,
     );
     if (ok) {
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
       _amountController.clear();
       setState(() {
         _selectedDueDay = null;
         _affectCurrent = false;
       });
+      if (context.mounted) {
+        Navigator.of(context).maybePop();
+      }
       await ref.read(buildingsStoreProvider.notifier).refreshBuildings();
       if (!mounted) return;
       _invalidateDashboardDuesHero();
+      if (!mounted) return;
+      await _reloadDues();
     }
   }
 

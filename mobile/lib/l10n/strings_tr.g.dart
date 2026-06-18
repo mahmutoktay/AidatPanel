@@ -71,6 +71,15 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get logoutAllDevicesConfirm => 'Diğer telefon ve tabletlerdeki oturumlar kapanır. Bu cihazda girişiniz devam eder.';
 	@override String get logoutAllDevicesSuccess => 'Diğer cihazlardaki oturumlar kapatıldı.';
 	@override String get logoutAllDevicesFailed => 'İşlem tamamlanamadı. Lütfen tekrar deneyin.';
+	@override String get thisDevice => 'Bu cihaz';
+	@override String signedInAt({required Object date}) => 'Giriş: ${date}';
+	@override String get removeSession => 'Çıkar';
+	@override String get removeSessionConfirm => 'Bu cihazdaki oturum kapatılacak. Devam etmek istiyor musunuz?';
+	@override String get removeAllOtherSessions => 'Diğer tüm cihazlardan çık';
+	@override String get removeAllOtherSessionsConfirm => 'Diğer telefon ve tabletlerdeki oturumlar kapanır. Bu cihazda girişiniz devam eder.';
+	@override String get sessionRemoved => 'Oturum kapatıldı.';
+	@override String get noOtherSessions => 'Başka aktif cihaz oturumu yok.';
+	@override String get sessionsScreenHint => 'Hesabınıza giriş yapmış cihazları buradan görebilir ve istediğinizi kapatabilirsiniz.';
 	@override String get sessionExpired => 'Bu cihazdaki oturumunuz başka bir cihazdan sonlandırıldı.';
 	@override String get account => 'Hesap';
 	@override String get editProfile => 'Profili Düzenle';
@@ -235,7 +244,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get dueDay => 'Aidat Günü (1-28)';
 	@override String get selectDueDay => 'Gün seçin';
 	@override String get affectCurrentDues => 'Bekleyen aidatlara da uygula';
-	@override String get affectCurrentDuesHint => 'Açık olduğunda mevcut bekleyen (PENDING) aidat tutarları da yeni tutara güncellenir.';
+	@override String get affectCurrentDuesHint => 'Açık aidatların (bekleyen ve gecikmiş) tutarı ve vade günü yeni değerlere göre güncellenir. Vade henüz gelmemişse gecikmiş durum kalkar.';
 	@override String get dueUpdateNeedAmountOrDay => 'Güncellemek için tutar girin veya aidat günü seçin.';
 	@override String get dueUpdateNeedStoredAmount => 'Bu bina için kayıtlı tutar yok. Aidat gününü güncellemek için önce tutar yazın.';
 	@override String get dueAmountInvalidPositive => 'Geçerli bir tutar yazın.';
@@ -1121,7 +1130,10 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get legendPending => 'Bekliyor';
 	@override String get legendUnit => '{count} aidat';
 	@override String get remind => 'Hatırlat';
+	@override String get remindAll => 'Tümüne Hatırlat';
 	@override String get remindSent => 'Hatırlatma gönderildi';
+	@override String get remindAllSent => '{count} sakine hatırlatma gönderildi.';
+	@override String get remindCooldown => 'Bu aidat için son 24 saat içinde hatırlatma gönderildi.';
 	@override String get remindNoRecipient => 'Bu dairede hatırlatma gönderilecek sakin bulunamadı.';
 	@override String get apartmentTitle => 'Daire {number}';
 	@override String get apartmentWithFloor => 'Daire {number} · {floor}. Kat';
@@ -1261,6 +1273,15 @@ extension on TranslationsTr {
 			'common.logoutAllDevicesConfirm' => 'Diğer telefon ve tabletlerdeki oturumlar kapanır. Bu cihazda girişiniz devam eder.',
 			'common.logoutAllDevicesSuccess' => 'Diğer cihazlardaki oturumlar kapatıldı.',
 			'common.logoutAllDevicesFailed' => 'İşlem tamamlanamadı. Lütfen tekrar deneyin.',
+			'common.thisDevice' => 'Bu cihaz',
+			'common.signedInAt' => ({required Object date}) => 'Giriş: ${date}',
+			'common.removeSession' => 'Çıkar',
+			'common.removeSessionConfirm' => 'Bu cihazdaki oturum kapatılacak. Devam etmek istiyor musunuz?',
+			'common.removeAllOtherSessions' => 'Diğer tüm cihazlardan çık',
+			'common.removeAllOtherSessionsConfirm' => 'Diğer telefon ve tabletlerdeki oturumlar kapanır. Bu cihazda girişiniz devam eder.',
+			'common.sessionRemoved' => 'Oturum kapatıldı.',
+			'common.noOtherSessions' => 'Başka aktif cihaz oturumu yok.',
+			'common.sessionsScreenHint' => 'Hesabınıza giriş yapmış cihazları buradan görebilir ve istediğinizi kapatabilirsiniz.',
 			'common.sessionExpired' => 'Bu cihazdaki oturumunuz başka bir cihazdan sonlandırıldı.',
 			'common.account' => 'Hesap',
 			'common.editProfile' => 'Profili Düzenle',
@@ -1460,7 +1481,7 @@ extension on TranslationsTr {
 			'common.dueDay' => 'Aidat Günü (1-28)',
 			'common.selectDueDay' => 'Gün seçin',
 			'common.affectCurrentDues' => 'Bekleyen aidatlara da uygula',
-			'common.affectCurrentDuesHint' => 'Açık olduğunda mevcut bekleyen (PENDING) aidat tutarları da yeni tutara güncellenir.',
+			'common.affectCurrentDuesHint' => 'Açık aidatların (bekleyen ve gecikmiş) tutarı ve vade günü yeni değerlere göre güncellenir. Vade henüz gelmemişse gecikmiş durum kalkar.',
 			'common.dueUpdateNeedAmountOrDay' => 'Güncellemek için tutar girin veya aidat günü seçin.',
 			'common.dueUpdateNeedStoredAmount' => 'Bu bina için kayıtlı tutar yok. Aidat gününü güncellemek için önce tutar yazın.',
 			'common.dueAmountInvalidPositive' => 'Geçerli bir tutar yazın.',
@@ -1744,6 +1765,8 @@ extension on TranslationsTr {
 			'features.apartments.residentPanel' => 'Sakin',
 			'features.tickets.myTickets' => 'Taleplerim',
 			'features.tickets.newTicket' => 'Yeni Talep',
+			_ => null,
+		} ?? switch (path) {
 			'features.tickets.createTitle' => 'Arıza / Talep Bildir',
 			'features.tickets.fieldTitle' => 'Başlık',
 			'features.tickets.fieldTitleHint' => 'Örn: Asansör arızası',
@@ -1753,8 +1776,6 @@ extension on TranslationsTr {
 			'features.tickets.categoryComplaint' => 'Şikayet',
 			'features.tickets.categoryRequest' => 'Talep',
 			'features.tickets.categoryMalfunction' => 'Arıza',
-			_ => null,
-		} ?? switch (path) {
 			'features.tickets.categoryOther' => 'Diğer',
 			'features.tickets.submit' => 'Gönder',
 			'features.tickets.createSuccess' => 'Talebiniz alındı',
@@ -2175,7 +2196,10 @@ extension on TranslationsTr {
 			'features.dashboard.legendPending' => 'Bekliyor',
 			'features.dashboard.legendUnit' => '{count} aidat',
 			'features.dashboard.remind' => 'Hatırlat',
+			'features.dashboard.remindAll' => 'Tümüne Hatırlat',
 			'features.dashboard.remindSent' => 'Hatırlatma gönderildi',
+			'features.dashboard.remindAllSent' => '{count} sakine hatırlatma gönderildi.',
+			'features.dashboard.remindCooldown' => 'Bu aidat için son 24 saat içinde hatırlatma gönderildi.',
 			'features.dashboard.remindNoRecipient' => 'Bu dairede hatırlatma gönderilecek sakin bulunamadı.',
 			'features.dashboard.apartmentTitle' => 'Daire {number}',
 			'features.dashboard.apartmentWithFloor' => 'Daire {number} · {floor}. Kat',

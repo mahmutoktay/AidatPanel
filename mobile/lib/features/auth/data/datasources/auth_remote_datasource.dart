@@ -1,3 +1,4 @@
+import '../../../../core/device/device_info_service.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/token_refresh_service.dart';
@@ -80,9 +81,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<TokenRefreshResult> refreshToken(String refreshToken) async {
+    final device = await DeviceInfoService.currentDeviceMeta();
     final response = await _dioClient.post(
       ApiConstants.refresh,
-      data: {'refreshToken': refreshToken},
+      data: {
+        'refreshToken': refreshToken,
+        ...device.toJson(),
+      },
     );
     final raw = response.data;
     final Map<String, dynamic> payload = raw is Map && raw['data'] != null

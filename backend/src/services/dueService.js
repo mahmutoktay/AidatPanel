@@ -13,8 +13,8 @@ import {
 } from "../utils/listQuery.js";
 import {
   computeDueBreakdown,
-  recalculateBuildingDuesForMonth,
   serializeBreakdownForDue,
+  syncOpenBuildingDues,
 } from "./dueExpenseRecalcService.js";
 
 function mapDueRow(due) {
@@ -290,7 +290,7 @@ export const getMyDuesService = async (userId, filters = {}) => {
 
 /**
  * Bina aidat bedelini güncelle
- * affectCurrent: true ise mevcut PENDING aidatları da güncelle
+ * affectCurrent: true ise açık (PENDING/OVERDUE) aidatların tutarı, vadesi ve durumu güncellenir
  */
 export const updateBuildingDueAmountService = async (buildingId, managerId, { dueAmount, dueDay, currency, affectCurrent = false }) => {
   // Binanın yöneticiye ait olduğunu kontrol et
@@ -304,27 +304,19 @@ export const updateBuildingDueAmountService = async (buildingId, managerId, { du
     const updated = await tx.building.update({
       where: { id: buildingId },
       data: {
-        dueAmount,
-        ...(dueDay && { dueDay }),
+        ...(dueAmount != null && { dueAmount }),
+        ...(dueDay != null && { dueDay }),
         ...(currency && { currency }),
       },
     });
 
     return updated;
   }).then(async (updated) => {
-    if (affectCurrent && dueAmount) {
-      const openPeriods = await prisma.due.findMany({
-        where: {
-          apartment: { buildingId },
-          status: { in: ["PENDING", "OVERDUE"] },
-        },
-        select: { month: true, year: true },
-        distinct: ["month", "year"],
+    if (affectCurrent && (dueAmount != null || dueDay != null)) {
+      await syncOpenBuildingDues(buildingId, {
+        dueDay: updated.dueDay,
+        currency: updated.currency,
       });
-
-      for (const { month, year } of openPeriods) {
-        await recalculateBuildingDuesForMonth(buildingId, month, year);
-      }
     }
 
     return updated;

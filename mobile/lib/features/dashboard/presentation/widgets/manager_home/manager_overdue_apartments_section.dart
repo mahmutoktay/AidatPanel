@@ -14,14 +14,14 @@ class ManagerOverdueApartmentsSection extends StatelessWidget {
 
   final List<ManagerOverdueApartmentItem> items;
   final void Function(ManagerOverdueApartmentItem item)? onRemind;
-  final VoidCallback? onSeeMore;
+  final VoidCallback? onSeeAll;
   final String? remindingDueId;
 
   const ManagerOverdueApartmentsSection({
     super.key,
     required this.items,
     this.onRemind,
-    this.onSeeMore,
+    this.onSeeAll,
     this.remindingDueId,
   });
 
@@ -29,16 +29,56 @@ class ManagerOverdueApartmentsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.t.features.dashboard;
     final previewItems = items.take(previewLimit).toList(growable: false);
-    final hiddenCount = items.length - previewItems.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ManagerDashboardSectionHeader(
-          title: t.overdueApartments,
-          trailing: ManagerDashboardPill(
-            label: t.apartmentCountBadge.replaceAll('{count}', '${items.length}'),
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                t.overdueApartments,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                    ),
+              ),
+            ),
+            if (items.isNotEmpty) ...[
+              ManagerDashboardPill(
+                label: t.apartmentCountBadge.replaceAll(
+                  '{count}',
+                  '${items.length}',
+                ),
+              ),
+              if (onSeeAll != null) ...[
+                const SizedBox(width: AppSizes.spacingS),
+                TextButton(
+                  onPressed: onSeeAll,
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.chartBlue,
+                    minimumSize: const Size(48, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        context.t.common.all,
+                        style: AppTypography.body2.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      const Icon(Icons.chevron_right_rounded, size: 20),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ],
         ),
         const SizedBox(height: AppSizes.spacingS),
         if (items.isEmpty)
@@ -51,49 +91,17 @@ class ManagerOverdueApartmentsSection extends StatelessWidget {
             ),
           )
         else
-          ManagerDashboardCard(
-            padding: EdgeInsets.zero,
-            child: Column(
-              children: [
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: previewItems.length,
-                  separatorBuilder: (_, _) => Divider(
-                    height: 1,
-                    color: AppColors.fill,
-                    indent: AppSizes.spacingM,
-                    endIndent: AppSizes.spacingM,
-                  ),
-                  itemBuilder: (context, index) {
-                    return ManagerOverdueApartmentRow(
-                      item: previewItems[index],
-                      onRemind: onRemind,
-                      isReminding: remindingDueId == previewItems[index].dueId,
-                    );
-                  },
+          Column(
+            children: [
+              for (var i = 0; i < previewItems.length; i++) ...[
+                if (i > 0) const SizedBox(height: AppSizes.spacingM),
+                ManagerOverdueApartmentRow(
+                  item: previewItems[i],
+                  onRemind: onRemind,
+                  isReminding: remindingDueId == previewItems[i].dueId,
                 ),
-                if (hiddenCount > 0 && onSeeMore != null) ...[
-                  Divider(height: 1, color: AppColors.fill),
-                  SizedBox(
-                    width: double.infinity,
-                    height: AppSizes.minTouchTarget,
-                    child: TextButton(
-                      onPressed: onSeeMore,
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.chartBlue,
-                      ),
-                      child: Text(
-                        t.seeMoreOverdue.replaceAll('{count}', '$hiddenCount'),
-                        style: AppTypography.body2.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ],
-            ),
+            ],
           ),
       ],
     );

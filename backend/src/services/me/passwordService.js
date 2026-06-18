@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../../config/db.js";
 import { HttpError } from "../../utils/httpError.js";
 import { findActiveUserById } from "./profileHelpers.js";
+import { revokeAllUserSessions } from "../sessionService.js";
 
 export async function changePasswordService(userId, currentPassword, newPassword) {
   const user = await findActiveUserById(userId);
@@ -22,4 +23,5 @@ export async function changePasswordService(userId, currentPassword, newPassword
       refreshTokenVersion: { increment: 1 },
     },
   });
+  await revokeAllUserSessions(userId);
 }

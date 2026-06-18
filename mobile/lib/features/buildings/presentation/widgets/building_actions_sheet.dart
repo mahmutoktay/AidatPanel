@@ -66,6 +66,11 @@ class BuildingActionsSheet extends StatelessWidget {
           PremiumActionSheetTile(
             icon: Icons.edit_outlined,
             label: t.common.editBuilding,
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.mutedText,
+              size: AppSizes.iconSize,
+            ),
             onTap: () => Navigator.pop(context, BuildingMenuAction.edit),
           ),
           const SizedBox(height: AppSizes.spacingXS),
@@ -77,7 +82,11 @@ class BuildingActionsSheet extends StatelessWidget {
             iconColor:
                 collectionReady ? AppColors.textPrimary : AppColors.warning,
             trailing: collectionReady
-                ? null
+                ? const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.mutedText,
+                    size: AppSizes.iconSize,
+                  )
                 : const Icon(
                     Icons.warning_amber_rounded,
                     size: AppSizes.iconSizeSmall,

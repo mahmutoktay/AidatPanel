@@ -25,10 +25,11 @@
 ```
 
 **Sunucu davranışı:**
-1. `refreshTokenVersion` +1 (eski `rv` içeren access ve refresh JWT'ler geçersiz).
-2. Güncel kullanıcı ile yeni access + refresh üretilir.
-3. `fcmToken` **silinmez** (bu cihaz push almaya devam eder).
-4. WebSocket `force_logout` olayı diğer oturumlara iletilir.
+1. Diğer `UserSession` kayıtları `revokedAt` ile kapatılır.
+2. `refreshTokenVersion` +1 (eski `rv` içeren access ve refresh JWT'ler geçersiz).
+3. Güncel kullanıcı ile yeni access + refresh üretilir (mevcut `sid` korunur).
+4. `fcmToken` **silinmez** (bu cihaz push almaya devam eder).
+5. WebSocket `force_logout` olayı hedef oturumlara `sessionId` ile iletilir.
 
 ## `POST /auth/logout` farkı
 

@@ -119,6 +119,9 @@ class ApiConstants {
   static const String changePassword = '$apiVersion/me/password';
   static const String changeLanguage = '$apiVersion/me/language';
   static const String profilePicture = '$apiVersion/me/profile-picture';
+  static const String sessions = '$apiVersion/me/sessions';
+  static String sessionDetail(String sessionId) =>
+      '$apiVersion/me/sessions/$sessionId';
 
   // Subscription endpoints
   static const String subscription = '$apiVersion/me/subscription';

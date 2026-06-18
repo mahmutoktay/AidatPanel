@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/utils/app_currency_format.dart';
+
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../core/utils/app_currency_format.dart';
 import '../../../../../l10n/strings.g.dart';
+import '../../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../domain/entities/manager_dashboard_entities.dart';
 
 class ManagerOverdueApartmentRow extends StatelessWidget {
@@ -32,11 +34,10 @@ class ManagerOverdueApartmentRow extends StatelessWidget {
             .replaceAll('{floor}', '${item.floor}')
         : t.apartmentTitle.replaceAll('{number}', item.apartmentNumber);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.spacingM,
-        vertical: AppSizes.spacingS,
-      ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSizes.spacingM),
+      decoration: DashboardScreenStyle.whiteCard(color: AppColors.surface),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -69,7 +70,7 @@ class ManagerOverdueApartmentRow extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
@@ -79,9 +80,13 @@ class ManagerOverdueApartmentRow extends StatelessWidget {
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 RichText(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   text: TextSpan(
                     style: AppTypography.body2.copyWith(
                       color: AppColors.textSecondary,
@@ -106,13 +111,16 @@ class ManagerOverdueApartmentRow extends StatelessWidget {
                     style: AppTypography.caption.copyWith(
                       color: AppColors.textSecondary,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ],
             ),
           ),
+          const SizedBox(width: 4),
           SizedBox(
-            width: 72,
+            width: 96,
             height: AppSizes.minTouchTarget,
             child: isReminding
                 ? const Center(
@@ -127,13 +135,17 @@ class ManagerOverdueApartmentRow extends StatelessWidget {
                         onRemind == null ? null : () => onRemind!(item),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.chartBlue,
-                      minimumSize: const Size(48, 48),
+                      minimumSize: const Size(88, 48),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                     child: Text(
                       t.remind,
                       style: AppTypography.body2.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.visible,
+                      softWrap: false,
                     ),
                   ),
           ),

@@ -147,12 +147,10 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       return;
     }
     if (apt.phone != null) {
-      showDialog<void>(
-        context: context,
-        builder: (_) => OccupiedApartmentConfirmDialog(
-          apartment: apt,
-          onConfirm: () => _generateAndShow(apt),
-        ),
+      OccupiedApartmentConfirmDialog.show(
+        context,
+        apartment: apt,
+        onConfirm: () => _generateAndShow(apt),
       );
     } else {
       _generateAndShow(apt);
@@ -190,17 +188,15 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
 
   void _confirmRevoke() {
     final apt = _selectedApartment!;
-    showDialog<void>(
-      context: context,
-      builder: (_) => RevokeInviteCodeDialog(
-        onConfirm: () {
-          ref.read(inviteCodeStoreProvider.notifier).revoke(apt.id);
-          ref
-              .read(toastProvider.notifier)
-              .show(context.t.common.codeRevoked, type: ToastType.success);
-          _resetFlow();
-        },
-      ),
+    RevokeInviteCodeDialog.show(
+      context,
+      onConfirm: () {
+        ref.read(inviteCodeStoreProvider.notifier).revoke(apt.id);
+        ref
+            .read(toastProvider.notifier)
+            .show(context.t.common.codeRevoked, type: ToastType.success);
+        _resetFlow();
+      },
     );
   }
 

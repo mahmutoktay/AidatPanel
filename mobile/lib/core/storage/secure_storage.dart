@@ -47,6 +47,18 @@ class SecureStorage {
     return await _storage.read(key: AppConstants.fcmTokenKey);
   }
 
+  Future<void> saveSessionId(String sessionId) async {
+    await _storage.write(key: AppConstants.sessionIdKey, value: sessionId);
+  }
+
+  Future<String?> getSessionId() async {
+    return await _storage.read(key: AppConstants.sessionIdKey);
+  }
+
+  Future<void> clearSessionId() async {
+    await _storage.delete(key: AppConstants.sessionIdKey);
+  }
+
   Future<void> saveTokenExpiry(DateTime expiry) async {
     await _storage.write(
       key: AppConstants.tokenExpiryKey,

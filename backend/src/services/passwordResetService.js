@@ -4,6 +4,7 @@ import { appendFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
+import { revokeAllUserSessions } from "./sessionService.js";
 
 const DEFAULT_EXPIRES_MIN = 60;
 
@@ -196,4 +197,5 @@ export async function resetPasswordWithTokenService(plainToken, newPassword) {
       data: { usedAt: new Date() },
     }),
   ]);
+  await revokeAllUserSessions(row.userId);
 }

@@ -208,9 +208,13 @@ Play’deki mevcut en büyük sürüm kodundan küçük/eşit kod yeniden yükle
 **Deploy adımları**
 
 1. `backend/scripts/deploy.local.json` mevcut olmalı (yoksa kullanıcıdan `deploy.config.example.json` kopyalayıp doldurmasını iste).
-2. Komut: `powershell -ExecutionPolicy Bypass -File backend/scripts/deploy.ps1`
+2. Komut (varsayılan terminal **Git Bash**):
+   ```bash
+   bash backend/scripts/deploy.sh
+   ```
+   PowerShell alternatifi: `powershell -ExecutionPolicy Bypass -File backend/scripts/deploy.ps1`
 3. PM2 süreç adı: **`aidapanel-api`** (t harfi yok — `aidatpanel-api` değil).
-4. Sadece dosya: `-SyncOnly` · Sadece restart: `-RestartOnly` · Log: `-Logs`
+4. Sadece dosya: `--sync-only` / `-SyncOnly` · Sadece restart: `--restart-only` / `-RestartOnly` · Log: `--logs` / `-Logs`
 5. `.env`, `uploads/dekonts/`, Firebase JSON **asla** üzerine yazılmaz.
 6. Deploy sonrası doğrula: PM2 `online` + gerekirse `-Logs` veya ilgili endpoint.
 

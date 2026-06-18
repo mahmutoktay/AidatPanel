@@ -76,10 +76,14 @@ class _ApartmentDetailsSheetBody extends ConsumerWidget {
             PremiumInfoCard(
               children: [
                 PremiumInfoRow(
+                  icon: Icons.mail_outline_rounded,
+                  iconColor: AppColors.primary,
                   label: context.t.features.auth.email,
                   value: resident.email,
                 ),
                 PremiumInfoRow(
+                  icon: Icons.phone_outlined,
+                  iconColor: AppColors.primary,
                   label: context.t.features.auth.phone,
                   value: phoneText,
                 ),

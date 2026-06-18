@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
 import '../utils/apartment_ui_utils.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/premium_bottom_sheet.dart';
 
-/// Dolu daireye yine de yeni kod üretilmek istendiğinde gösterilen onay dialogu.
+/// Dolu daireye yine de yeni kod üretilmek istendiğinde gösterilen onay sheet'i.
 class OccupiedApartmentConfirmDialog extends StatelessWidget {
   final ApartmentEntity apartment;
   final VoidCallback onConfirm;
@@ -19,196 +19,236 @@ class OccupiedApartmentConfirmDialog extends StatelessWidget {
     required this.onConfirm,
   });
 
+  static Future<void> show(
+    BuildContext context, {
+    required ApartmentEntity apartment,
+    required VoidCallback onConfirm,
+  }) {
+    return PremiumBottomSheetScaffold.show<void>(
+      context: context,
+      builder: (_) => OccupiedApartmentConfirmDialog(
+        apartment: apartment,
+        onConfirm: onConfirm,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final t = context.t.features.buildings;
     final apartmentLabel = ApartmentUiUtils.formatApartmentLabel(
       context,
       apartment.apartmentNumber,
     );
 
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSizes.dialogRadius),
+    return PremiumBottomSheetScaffold(
+      scrollable: false,
+      header: _InviteConfirmHeader(
+        icon: Icons.warning_amber_rounded,
+        iconColor: AppColors.warning,
+        title: t.apartmentOccupied,
+        subtitle: apartmentLabel,
       ),
-      title: Row(
-        children: [
-          const Icon(Icons.warning_amber_rounded, color: AppColors.warning),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              context.t.features.buildings.apartmentOccupied,
-              style: AppTypography.h3.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w800,
-                fontSize: 18,
-              ),
-            ),
-          ),
-        ],
-      ),
-      content: Column(
+      body: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            '$apartmentLabel dairesinde "${apartment.residentName}" kayıtlı.',
-            style: AppTypography.body1.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-            ),
+          PremiumSheetMetaRow(
+            icon: Icons.person_outline_rounded,
+            iconColor: AppColors.primary,
+            label: context.t.common.residentPrefix,
+            value: apartment.residentName,
           ),
-          const SizedBox(height: AppSizes.spacingS),
-          Text.rich(
-            TextSpan(
-              style: AppTypography.body2.copyWith(
-                color: AppColors.textSecondary,
-                fontSize: 15,
-                height: 1.35,
-              ),
-              children: [
-                TextSpan(text: context.t.features.buildings.newCodePrefix),
-                TextSpan(
-                  text: context.t.features.buildings.oldUserRemoved,
-                  style: AppTypography.body2.copyWith(
-                    color: AppColors.error,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                  ),
+          const PremiumSheetDivider(),
+          PremiumSheetMetaRow(
+            icon: Icons.door_front_door_outlined,
+            iconColor: AppColors.warning,
+            label: context.t.common.apartmentsBadge,
+            value: apartmentLabel,
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          _InviteWarningBox(
+            child: Text.rich(
+              TextSpan(
+                style: ProfileSettingsUi.handle.copyWith(
+                  fontSize: 15,
+                  height: 1.4,
+                  color: AppColors.inkDark,
                 ),
-                TextSpan(text: context.t.common.confirmMessage),
-              ],
+                children: [
+                  TextSpan(text: t.newCodePrefix),
+                  TextSpan(
+                    text: t.oldUserRemoved,
+                    style: const TextStyle(
+                      color: AppColors.error,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  TextSpan(text: context.t.common.confirmMessage),
+                ],
+              ),
             ),
           ),
         ],
       ),
-      actionsPadding: const EdgeInsets.fromLTRB(
-        AppSizes.spacingM,
-        0,
-        AppSizes.spacingM,
-        AppSizes.spacingM,
+      actions: PremiumSheetActions(
+        primaryLabel: t.produceAnyway,
+        icon: Icons.qr_code_2_rounded,
+        dangerPrimary: true,
+        onPrimary: () {
+          Navigator.pop(context);
+          onConfirm();
+        },
+        secondaryLabel: context.t.common.cancelBtn,
+        onSecondary: () => Navigator.pop(context),
       ),
-      actions: [
-        _DialogActionRow(
-          confirmLabel: context.t.features.buildings.produceAnyway,
-          confirmStyle: AppButtonStyles.elevatedPrimary(fullWidth: true),
-          onConfirm: () {
-            Navigator.pop(context);
-            onConfirm();
-          },
-        ),
-      ],
     );
   }
 }
 
-/// Aktif kodu iptal etmek için onay dialogu.
+/// Aktif kodu iptal etmek için onay sheet'i.
 class RevokeInviteCodeDialog extends StatelessWidget {
   final VoidCallback onConfirm;
 
   const RevokeInviteCodeDialog({super.key, required this.onConfirm});
 
+  static Future<void> show(
+    BuildContext context, {
+    required VoidCallback onConfirm,
+  }) {
+    return PremiumBottomSheetScaffold.show<void>(
+      context: context,
+      builder: (_) => RevokeInviteCodeDialog(onConfirm: onConfirm),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSizes.dialogRadius),
+    final t = context.t.features.buildings;
+
+    return PremiumBottomSheetScaffold(
+      scrollable: false,
+      header: _InviteConfirmHeader(
+        icon: Icons.cancel_outlined,
+        iconColor: ProfileSettingsUi.danger,
+        title: t.cancelCode,
+        subtitle: t.revokeDialog,
       ),
-      title: Row(
-        children: [
-          const Icon(Icons.cancel_outlined, color: AppColors.error),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              context.t.features.buildings.cancelCode,
-              style: AppTypography.h3.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w800,
-                fontSize: 18,
-              ),
+      body: _InviteWarningBox(
+        child: Text.rich(
+          TextSpan(
+            style: ProfileSettingsUi.handle.copyWith(
+              fontSize: 15,
+              height: 1.4,
+              color: AppColors.inkDark,
             ),
-          ),
-        ],
-      ),
-      content: Text.rich(
-        TextSpan(
-          style: AppTypography.body1.copyWith(
-            color: AppColors.textSecondary,
-            fontSize: 16,
-            height: 1.35,
-          ),
-          children: [
-            TextSpan(text: context.t.features.buildings.currentCodePrefix),
-            TextSpan(
-              text: context.t.features.buildings.codeInvalid,
-              style: AppTypography.body1.copyWith(
-                color: AppColors.error,
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
+            children: [
+              TextSpan(text: t.currentCodePrefix),
+              TextSpan(
+                text: t.codeInvalid,
+                style: const TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            TextSpan(text: context.t.common.confirmMessage),
-          ],
+              TextSpan(text: context.t.common.confirmMessage),
+            ],
+          ),
         ),
       ),
-      actionsPadding: const EdgeInsets.fromLTRB(
-        AppSizes.spacingM,
-        0,
-        AppSizes.spacingM,
-        AppSizes.spacingM,
+      actions: PremiumSheetActions(
+        primaryLabel: t.cancelCode,
+        dangerPrimary: true,
+        onPrimary: () {
+          Navigator.pop(context);
+          onConfirm();
+        },
+        secondaryLabel: context.t.common.cancelBtn,
+        onSecondary: () => Navigator.pop(context),
       ),
-      actions: [
-        _DialogActionRow(
-          confirmLabel: context.t.features.buildings.cancelCode,
-          confirmStyle: AppButtonStyles.filledDanger(fullWidth: true),
-          onConfirm: () {
-            Navigator.pop(context);
-            onConfirm();
-          },
-        ),
-      ],
     );
   }
 }
 
-/// Vazgeç + onay butonlu yatay aksiyon satırı (dialoglarda kullanılır).
-class _DialogActionRow extends StatelessWidget {
-  final String confirmLabel;
-  final ButtonStyle confirmStyle;
-  final VoidCallback onConfirm;
+class _InviteConfirmHeader extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
 
-  const _DialogActionRow({
-    required this.confirmLabel,
-    required this.confirmStyle,
-    required this.onConfirm,
+  const _InviteConfirmHeader({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: AppSizes.buttonHeightSecondary,
-            child: OutlinedButton(
-              onPressed: () => Navigator.pop(context),
-              style: AppButtonStyles.outlinedNeutral(fullWidth: true),
-              child: Text(context.t.common.cancelBtn),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSizes.spacingL,
+        AppSizes.spacingM,
+        AppSizes.spacingL,
+        AppSizes.spacingS,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, color: iconColor, size: 24),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: ProfileSettingsUi.title),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: ProfileSettingsUi.handle.copyWith(fontSize: 13),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
-        ),
-        const SizedBox(width: AppSizes.spacingS),
-        Expanded(
-          child: SizedBox(
-            height: AppSizes.buttonHeightSecondary,
-            child: ElevatedButton(
-              style: confirmStyle,
-              onPressed: onConfirm,
-              child: Text(confirmLabel),
-            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InviteWarningBox extends StatelessWidget {
+  final Widget child;
+
+  const _InviteWarningBox({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return PremiumSectionBox(
+      backgroundColor: AppColors.warning.withValues(alpha: 0.08),
+      borderColor: AppColors.warning.withValues(alpha: 0.3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.info_outline_rounded,
+            color: AppColors.warning,
+            size: 20,
           ),
-        ),
-      ],
+          const SizedBox(width: AppSizes.spacingS),
+          Expanded(child: child),
+        ],
+      ),
     );
   }
 }

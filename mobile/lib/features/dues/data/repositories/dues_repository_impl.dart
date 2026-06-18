@@ -1,6 +1,7 @@
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/paginated_list_result.dart';
 import '../../domain/entities/due_entity.dart';
+import '../../domain/entities/due_remind_result.dart';
 import '../../domain/repositories/dues_repository.dart';
 import '../datasources/dues_remote_datasource.dart';
 
@@ -114,7 +115,7 @@ class DuesRepositoryImpl implements DuesRepository {
   }
 
   @override
-  Future<int> remindBuildingDues(
+  Future<DueRemindResult> remindBuildingDues(
     String buildingId, {
     List<String>? dueIds,
   }) async {

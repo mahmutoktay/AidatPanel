@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../constants/api_constants.dart';
+import '../device/device_info_service.dart';
 import '../storage/secure_storage.dart';
 import '../utils/jwt_utils.dart';
 
@@ -58,9 +59,13 @@ class TokenRefreshService {
     if (refreshToken == null || refreshToken.isEmpty) return null;
 
     try {
+      final device = await DeviceInfoService.currentDeviceMeta();
       final response = await _refreshDio.post<Map<String, dynamic>>(
         ApiConstants.refresh,
-        data: {'refreshToken': refreshToken},
+        data: {
+          'refreshToken': refreshToken,
+          ...device.toJson(),
+        },
       );
 
       final raw = response.data;
@@ -79,6 +84,11 @@ class TokenRefreshService {
       await _secureStorage.saveTokenExpiry(JwtUtils.parseExpiry(accessToken));
       if (rotatedRefresh != null && rotatedRefresh.isNotEmpty) {
         await _secureStorage.saveRefreshToken(rotatedRefresh);
+      }
+      final sid = JwtUtils.parseSessionId(rotatedRefresh ?? refreshToken) ??
+          JwtUtils.parseSessionId(accessToken);
+      if (sid != null) {
+        await _secureStorage.saveSessionId(sid);
       }
 
       return TokenRefreshResult(

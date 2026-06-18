@@ -1,6 +1,19 @@
 import { z } from "zod";
 import { optionalPhone } from "./shared.js";
 
+const deviceMetaFields = {
+  deviceLabel: z
+    .string()
+    .min(1, "Cihaz adı en az 1 karakter olmalıdır")
+    .max(120, "Cihaz adı en fazla 120 karakter olabilir")
+    .optional(),
+  platform: z
+    .string()
+    .min(1, "Platform en az 1 karakter olmalıdır")
+    .max(20, "Platform en fazla 20 karakter olabilir")
+    .optional(),
+};
+
 export const authSchemas = {
   register: {
     body: z.object({
@@ -21,12 +34,14 @@ export const authSchemas = {
     body: z.object({
       identifier: z.string().min(1, "Email veya telefon numarası gereklidir"),
       password: z.string().min(1, "Şifre gereklidir"),
+      ...deviceMetaFields,
     }),
   },
 
   refreshToken: {
     body: z.object({
       refreshToken: z.string().min(1, "Refresh token gereklidir"),
+      ...deviceMetaFields,
     }),
   },
 
@@ -49,6 +64,7 @@ export const authSchemas = {
           .min(1, "Davet kodu gereklidir")
           .max(20, "Davet kodu en fazla 20 karakter olabilir")
       ),
+      ...deviceMetaFields,
     }),
   },
 

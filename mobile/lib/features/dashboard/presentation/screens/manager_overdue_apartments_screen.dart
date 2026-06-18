@@ -32,6 +32,7 @@ class _ManagerOverdueApartmentsScreenState
     extends ConsumerState<ManagerOverdueApartmentsScreen> {
   String? _selectedBuildingId;
   String? _remindingDueId;
+  bool _isRemindingAll = false;
 
   @override
   void initState() {
@@ -100,6 +101,39 @@ class _ManagerOverdueApartmentsScreenState
                           .replaceAll('{count}', '${items.length}'),
                     ),
                   ),
+                  if (items.isNotEmpty) ...[
+                    const SizedBox(height: AppSizes.spacingS),
+                    SizedBox(
+                      width: double.infinity,
+                      height: AppSizes.minTouchTarget,
+                      child: OutlinedButton(
+                        onPressed: _isRemindingAll || _remindingDueId != null
+                            ? null
+                            : () => _onRemindAll(items),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.chartBlue,
+                          side: const BorderSide(color: AppColors.chartBlue),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: _isRemindingAll
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                t.remindAll,
+                                style: AppTypography.body1.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
               list: items.isEmpty
@@ -117,34 +151,24 @@ class _ManagerOverdueApartmentsScreenState
                         ),
                       ],
                     )
-                  : Padding(
+                  : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(
                         AppSizes.dashboardScreenPaddingHorizontal,
                         AppSizes.spacingS,
                         AppSizes.dashboardScreenPaddingHorizontal,
                         AppSizes.spacingXL,
                       ),
-                      child: ManagerDashboardCard(
-                        padding: EdgeInsets.zero,
-                        child: ListView.separated(
-                          padding: EdgeInsets.zero,
-                          itemCount: items.length,
-                          separatorBuilder: (_, _) => Divider(
-                            height: 1,
-                            color: AppColors.fill,
-                            indent: AppSizes.spacingM,
-                            endIndent: AppSizes.spacingM,
-                          ),
-                          itemBuilder: (context, index) {
-                            final item = items[index];
-                            return ManagerOverdueApartmentRow(
-                              item: item,
-                              isReminding: _remindingDueId == item.dueId,
-                              onRemind: _onRemind,
-                            );
-                          },
-                        ),
-                      ),
+                      itemCount: items.length,
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(height: AppSizes.spacingM),
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        return ManagerOverdueApartmentRow(
+                          item: item,
+                          isReminding: _remindingDueId == item.dueId,
+                          onRemind: _isRemindingAll ? null : _onRemind,
+                        );
+                      },
                     ),
             ),
           );
@@ -161,6 +185,18 @@ class _ManagerOverdueApartmentsScreenState
       onLoadingChanged: (dueId) {
         if (!mounted) return;
         setState(() => _remindingDueId = dueId);
+      },
+    );
+  }
+
+  Future<void> _onRemindAll(List<ManagerOverdueApartmentItem> items) {
+    return remindAllOverdueApartments(
+      context: context,
+      ref: ref,
+      items: items,
+      onLoadingChanged: (isLoading) {
+        if (!mounted) return;
+        setState(() => _isRemindingAll = isLoading);
       },
     );
   }

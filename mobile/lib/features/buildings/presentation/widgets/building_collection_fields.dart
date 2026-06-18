@@ -271,6 +271,8 @@ class _SelectedPresetCompactSummary extends StatelessWidget {
     final accountTitle = preset.collectionAccountTitle?.trim();
     final rows = <Widget>[
       PremiumInfoRow(
+        icon: Icons.account_balance_outlined,
+        iconColor: AppColors.primary,
         label: context.t.features.buildings.collection.ibanLabel,
         value: IbanUtils.formatDisplay(preset.collectionIban),
       ),
@@ -278,6 +280,8 @@ class _SelectedPresetCompactSummary extends StatelessWidget {
     if (accountTitle != null && accountTitle.isNotEmpty) {
       rows.add(
         PremiumInfoRow(
+          icon: Icons.badge_outlined,
+          iconColor: AppColors.primary,
           label: context.t.features.buildings.collection.accountTitleLabel,
           value: accountTitle,
         ),

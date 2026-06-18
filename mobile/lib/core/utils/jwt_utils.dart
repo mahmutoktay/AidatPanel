@@ -33,10 +33,23 @@ class JwtUtils {
       final data = _decodePayload(accessToken);
       final id = data['id'];
       final rv = data['rv'] ?? 0;
+      final sid = data['sid'];
+      if (sid is String && sid.isNotEmpty) {
+        return '${id ?? 'u'}:$sid';
+      }
       return '${id ?? 'u'}:$rv';
     } catch (_) {
       return 't${accessToken.hashCode}';
     }
+  }
+
+  /// JWT `sid` claim — cihaz oturumu kimliği.
+  static String? parseSessionId(String token) {
+    try {
+      final sid = _decodePayload(token)['sid'];
+      if (sid is String && sid.isNotEmpty) return sid;
+    } catch (_) {}
+    return null;
   }
 
   static Map<String, dynamic> _decodePayload(String token) {

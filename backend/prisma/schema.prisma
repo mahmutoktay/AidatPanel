@@ -42,8 +42,24 @@ model User {
   passwordResetTokens PasswordResetToken[]
   uploadedDekonts     Dekont[]
   reviewedDekonts     Dekont[]     @relation("DekontReviewer")
+  sessions            UserSession[]
 
   @@index([apartmentId])
+}
+
+/// Cihaz bazlı oturum takibi — login/join'de oluşur; revoke ile sonlandırılır.
+model UserSession {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceLabel String
+  platform    String
+  createdAt   DateTime  @default(now())
+  lastSeenAt  DateTime  @default(now())
+  revokedAt   DateTime?
+
+  @@index([userId])
+  @@index([userId, revokedAt])
 }
 
 /// Şifre sıfırlama: düz metin token yalnızca e-postada; DB'de SHA-256 özeti.

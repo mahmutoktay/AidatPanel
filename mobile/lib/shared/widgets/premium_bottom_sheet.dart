@@ -285,6 +285,95 @@ class PremiumSheetActions extends StatelessWidget {
   }
 }
 
+/// Sheet içi ikon sütunu hizası — ayırıcı indent değeri.
+const double premiumSheetIconIndent = 56;
+
+/// Sheet listelerinde ikon hizasından başlayan ince ayırıcı.
+class PremiumSheetDivider extends StatelessWidget {
+  const PremiumSheetDivider({super.key, this.indent = premiumSheetIconIndent});
+
+  final double indent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingS),
+      child: Divider(
+        height: 1,
+        thickness: 1,
+        color: AppColors.line.withValues(alpha: 0.35),
+        indent: indent,
+      ),
+    );
+  }
+}
+
+/// Sheet bilgi satırı — ikon + uppercase etiket + değer.
+class PremiumSheetMetaRow extends StatelessWidget {
+  const PremiumSheetMetaRow({
+    super.key,
+    required this.label,
+    required this.value,
+    this.icon = Icons.info_outline_rounded,
+    this.iconColor,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color? iconColor;
+
+  static const double _iconBoxSize = 44;
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveColor = iconColor ?? AppColors.mutedText;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          width: _iconBoxSize,
+          height: _iconBoxSize,
+          decoration: BoxDecoration(
+            color: effectiveColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.center,
+          child: Icon(icon, color: effectiveColor, size: 22),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label.toUpperCase(),
+                style: ProfileSettingsUi.fieldLabelUppercase.copyWith(
+                  fontSize: 11,
+                  letterSpacing: 0.8,
+                  color: AppColors.mutedText,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                value,
+                style: ProfileSettingsUi.fieldValue.copyWith(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                  height: 1.25,
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Menü / aksiyon listesi satırı.
 class PremiumActionSheetTile extends StatelessWidget {
   const PremiumActionSheetTile({
@@ -308,12 +397,14 @@ class PremiumActionSheetTile extends StatelessWidget {
   final VoidCallback? onTap;
   final bool danger;
 
+  static const double _iconBoxSize = 44;
+
   @override
   Widget build(BuildContext context) {
     final effectiveIconColor =
         danger ? ProfileSettingsUi.danger : (iconColor ?? AppColors.inkDark);
     final effectiveBg = iconBackground ??
-        effectiveIconColor.withValues(alpha: danger ? 0.1 : 0.08);
+        effectiveIconColor.withValues(alpha: danger ? 0.1 : 0.1);
 
     return Material(
       color: Colors.transparent,
@@ -325,15 +416,12 @@ class PremiumActionSheetTile extends StatelessWidget {
             minHeight: AppSizes.minTouchTargetComfort,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.spacingS,
-              vertical: AppSizes.spacingS,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingXS),
             child: Row(
               children: [
                 Container(
-                  width: ProfileSettingsUi.rowIconBox,
-                  height: ProfileSettingsUi.rowIconBox,
+                  width: _iconBoxSize,
+                  height: _iconBoxSize,
                   decoration: BoxDecoration(
                     color: effectiveBg,
                     borderRadius: BorderRadius.circular(12),
@@ -341,11 +429,11 @@ class PremiumActionSheetTile extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Icon(
                     icon,
-                    size: ProfileSettingsUi.iconSize,
+                    size: 22,
                     color: effectiveIconColor,
                   ),
                 ),
-                const SizedBox(width: AppSizes.spacingM),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -370,12 +458,7 @@ class PremiumActionSheetTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                trailing ??
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: AppColors.mutedText,
-                      size: AppSizes.iconSize,
-                    ),
+                ?trailing,
               ],
             ),
           ),
@@ -385,7 +468,7 @@ class PremiumActionSheetTile extends StatelessWidget {
   }
 }
 
-/// Picker / aksiyon listesi — beyaz kart içinde satırlar.
+/// Picker / aksiyon listesi — şeffaf, sheet zemini üzerinde satırlar.
 class PremiumActionSheetList extends StatelessWidget {
   const PremiumActionSheetList({
     super.key,
@@ -396,35 +479,20 @@ class PremiumActionSheetList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusLg),
-        border: ProfileSettingsUi.cardBorder,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < children.length; i++) ...[
-            if (i > 0)
-              Divider(
-                height: 1,
-                thickness: 1,
-                color: AppColors.lineLight,
-                indent: AppSizes.spacingS,
-                endIndent: AppSizes.spacingS,
-              ),
-            children[i],
-          ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < children.length; i++) ...[
+          if (i > 0) const PremiumSheetDivider(),
+          children[i],
         ],
-      ),
+      ],
     );
   }
 }
 
-/// Bilgi kartı — bildirim/talep detay satırları.
+/// Bilgi bloğu — şeffaf, meta satırlar.
 class PremiumInfoCard extends StatelessWidget {
   const PremiumInfoCard({
     super.key,
@@ -439,91 +507,64 @@ class PremiumInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(ProfileSettingsUi.radiusLg),
-        border: ProfileSettingsUi.cardBorder,
-      ),
-      padding: const EdgeInsets.all(AppSizes.spacingM),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (title != null) ...[
-            Row(
-              children: [
-                if (titleIcon != null) ...[
-                  Icon(
-                    titleIcon,
-                    size: 18,
-                    color: AppColors.mutedText,
-                  ),
-                  const SizedBox(width: AppSizes.spacingXS),
-                ],
-                Text(
-                  title!.toUpperCase(),
-                  style: ProfileSettingsUi.fieldLabelUppercase,
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSizes.spacingM),
-          ],
-          for (var i = 0; i < children.length; i++) ...[
-            if (i > 0)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingS),
-                child: Divider(
-                  height: 1,
-                  color: AppColors.line.withValues(alpha: 0.6),
-                ),
-              ),
-            children[i],
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// Bilgi kartı satırı — label / value.
-class PremiumInfoRow extends StatelessWidget {
-  const PremiumInfoRow({
-    super.key,
-    required this.label,
-    required this.value,
-  });
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          flex: 2,
-          child: Text(
-            label,
-            style: ProfileSettingsUi.handle.copyWith(fontSize: 15),
+        if (title != null) ...[
+          Row(
+            children: [
+              if (titleIcon != null) ...[
+                Icon(
+                  titleIcon,
+                  size: 18,
+                  color: AppColors.mutedText,
+                ),
+                const SizedBox(width: AppSizes.spacingXS),
+              ],
+              Text(
+                title!.toUpperCase(),
+                style: ProfileSettingsUi.fieldLabelUppercase,
+              ),
+            ],
           ),
-        ),
-        Expanded(
-          flex: 3,
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            style: ProfileSettingsUi.fieldValue.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
+          const SizedBox(height: AppSizes.spacingM),
+        ],
+        for (var i = 0; i < children.length; i++) ...[
+          if (i > 0) const PremiumSheetDivider(),
+          children[i],
+        ],
       ],
     );
   }
 }
 
-/// Bölüm kutusu — açıklama metni vb.
+/// Bilgi satırı — [PremiumSheetMetaRow] kısayolu.
+class PremiumInfoRow extends StatelessWidget {
+  const PremiumInfoRow({
+    super.key,
+    required this.label,
+    required this.value,
+    this.icon,
+    this.iconColor,
+  });
+
+  final String label;
+  final String value;
+  final IconData? icon;
+  final Color? iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return PremiumSheetMetaRow(
+      label: label,
+      value: value,
+      icon: icon ?? Icons.info_outline_rounded,
+      iconColor: iconColor,
+    );
+  }
+}
+
+/// Bölüm kutusu — açıklama / uyarı metni.
 class PremiumSectionBox extends StatelessWidget {
   const PremiumSectionBox({
     super.key,
@@ -542,10 +583,10 @@ class PremiumSectionBox extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.surface,
+        color: backgroundColor ?? AppColors.fill.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(ProfileSettingsUi.fieldRadius),
         border: Border.all(
-          color: borderColor ?? AppColors.lineLight,
+          color: borderColor ?? AppColors.line.withValues(alpha: 0.35),
         ),
       ),
       child: child,

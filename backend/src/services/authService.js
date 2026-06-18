@@ -4,7 +4,12 @@ import jwt from "jsonwebtoken";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateTokens.js";
 import { validateInviteCode } from "./inviteCodeService.js";
 import { HttpError } from "../utils/httpError.js";
-import { publishToUser } from "../realtime/realtimeHub.js";
+import {
+  assertSessionActive,
+  createSession,
+  revokeOtherSessions,
+  touchSession,
+} from "./sessionService.js";
 
 function authUserPayload(user) {
   return {
@@ -17,6 +22,20 @@ function authUserPayload(user) {
     apartmentId: user.apartmentId,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
+  };
+}
+
+function deviceMeta(body) {
+  return {
+    deviceLabel: body?.deviceLabel,
+    platform: body?.platform,
+  };
+}
+
+async function issueTokenPair(user, sessionId) {
+  return {
+    accessToken: generateAccessToken(user, sessionId),
+    refreshToken: generateRefreshToken(user, sessionId),
   };
 }
 
@@ -82,7 +101,8 @@ export async function registerService({ name, email, phone, password }) {
 /**
  * Giriş — POST /auth/login
  */
-export async function loginService({ identifier, password }) {
+export async function loginService(body) {
+  const { identifier, password } = body;
   const user = await findActiveUserByIdentifier(identifier);
 
   if (!user) {
@@ -94,9 +114,11 @@ export async function loginService({ identifier, password }) {
     throw new HttpError(401, "Email/telefon veya şifre hatalı.");
   }
 
+  const session = await createSession(user.id, deviceMeta(body));
+  const tokens = await issueTokenPair(user, session.id);
+
   return {
-    accessToken: generateAccessToken(user),
-    refreshToken: generateRefreshToken(user),
+    ...tokens,
     user: authUserPayload(user),
   };
 }
@@ -104,7 +126,7 @@ export async function loginService({ identifier, password }) {
 /**
  * Access token yenileme — POST /auth/refresh
  */
-export async function refreshAccessTokenService(refreshToken) {
+export async function refreshAccessTokenService(refreshToken, body = {}) {
   if (!refreshToken) {
     throw new HttpError(401, "Refresh token gerekli.");
   }
@@ -117,6 +139,7 @@ export async function refreshAccessTokenService(refreshToken) {
   }
 
   const tokenRv = decoded.rv ?? 0;
+  const tokenSid = decoded.sid ?? null;
   const user = await prisma.user.findFirst({
     where: { id: decoded.id, deletedAt: null },
   });
@@ -129,13 +152,23 @@ export async function refreshAccessTokenService(refreshToken) {
     throw new HttpError(401, "Oturum sonlandırıldı. Lütfen tekrar giriş yapın.");
   }
 
-  return { accessToken: generateAccessToken(user) };
+  let sessionId = tokenSid;
+  if (sessionId) {
+    await assertSessionActive(sessionId);
+    await touchSession(sessionId);
+  } else {
+    const session = await createSession(user.id, deviceMeta(body));
+    sessionId = session.id;
+  }
+
+  return issueTokenPair(user, sessionId);
 }
 
 /**
  * Davet koduyla sakin kaydı — POST /auth/join
  */
-export async function joinWithInviteCodeService({ name, email, phone, password, inviteCode }) {
+export async function joinWithInviteCodeService(body) {
+  const { name, email, phone, password, inviteCode } = body;
   let inviteCodeData;
   try {
     inviteCodeData = await validateInviteCode(inviteCode);
@@ -171,9 +204,11 @@ export async function joinWithInviteCodeService({ name, email, phone, password, 
     return created;
   });
 
+  const session = await createSession(user.id, deviceMeta(body));
+  const tokens = await issueTokenPair(user, session.id);
+
   return {
-    accessToken: generateAccessToken(user),
-    refreshToken: generateRefreshToken(user),
+    ...tokens,
     user: authUserPayload(user),
   };
 }
@@ -181,17 +216,24 @@ export async function joinWithInviteCodeService({ name, email, phone, password, 
 /**
  * Tek cihaz çıkışı — POST /auth/logout
  */
-export async function logoutService(userId) {
+export async function logoutService(userId, sessionId) {
   await prisma.user.update({
     where: { id: userId },
     data: { fcmToken: null },
   });
+
+  if (sessionId) {
+    await prisma.userSession.updateMany({
+      where: { id: sessionId, userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
 }
 
 /**
  * Diğer cihazlardan çıkış — POST /auth/logout-all-devices
  */
-export async function logoutAllDevicesService(userId) {
+export async function logoutAllDevicesService(userId, currentSessionId) {
   const user = await prisma.user.update({
     where: { id: userId },
     data: {
@@ -199,10 +241,7 @@ export async function logoutAllDevicesService(userId) {
     },
   });
 
-  publishToUser(user.id, { event: "force_logout" });
+  await revokeOtherSessions(userId, currentSessionId);
 
-  return {
-    accessToken: generateAccessToken(user),
-    refreshToken: generateRefreshToken(user),
-  };
+  return issueTokenPair(user, currentSessionId ?? null);
 }

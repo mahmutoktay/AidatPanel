@@ -318,10 +318,14 @@ class _TicketDetailSection extends ConsumerWidget {
               children: [
                 if (ticket.apartmentNumber != null)
                   PremiumInfoRow(
+                    icon: Icons.door_front_door_outlined,
+                    iconColor: AppColors.primary,
                     label: t.fieldApartment,
                     value: ticket.apartmentNumber!,
                   ),
                 PremiumInfoRow(
+                  icon: Icons.schedule_outlined,
+                  iconColor: AppColors.mutedText,
                   label: t.fieldCreatedAt,
                   value: AppDateFormat.dateTimeMedium(ticket.createdAt),
                 ),

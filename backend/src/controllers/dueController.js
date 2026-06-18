@@ -133,12 +133,18 @@ export const postRemindBuildingDues = async (req, res, next) => {
       dueIds,
     });
 
+    let message;
+    if (data.reminded > 0) {
+      message = `${data.reminded} sakine aidat hatırlatması gönderildi.`;
+    } else if (data.skippedCooldown > 0) {
+      message = "Son 24 saat içinde zaten hatırlatma gönderildi.";
+    } else {
+      message = "Hatırlatılacak aidat bulunamadı.";
+    }
+
     res.status(200).json({
       success: true,
-      message:
-        data.reminded > 0
-          ? `${data.reminded} sakine aidat hatırlatması gönderildi.`
-          : "Hatırlatılacak aidat bulunamadı.",
+      message,
       data,
     });
   } catch (error) {

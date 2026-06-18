@@ -115,6 +115,33 @@ class Translations$common$en {
 	/// en: 'Could not complete this action. Please try again.'
 	String get logoutAllDevicesFailed => 'Could not complete this action. Please try again.';
 
+	/// en: 'This device'
+	String get thisDevice => 'This device';
+
+	/// en: 'Signed in: $date'
+	String signedInAt({required Object date}) => 'Signed in: ${date}';
+
+	/// en: 'Remove'
+	String get removeSession => 'Remove';
+
+	/// en: 'This device will be signed out. Do you want to continue?'
+	String get removeSessionConfirm => 'This device will be signed out. Do you want to continue?';
+
+	/// en: 'Sign out all other devices'
+	String get removeAllOtherSessions => 'Sign out all other devices';
+
+	/// en: 'Sessions on your other phones and tablets will end. You will stay signed in on this device.'
+	String get removeAllOtherSessionsConfirm => 'Sessions on your other phones and tablets will end. You will stay signed in on this device.';
+
+	/// en: 'Session ended.'
+	String get sessionRemoved => 'Session ended.';
+
+	/// en: 'No other active device sessions.'
+	String get noOtherSessions => 'No other active device sessions.';
+
+	/// en: 'View devices signed in to your account and sign out any you do not recognize.'
+	String get sessionsScreenHint => 'View devices signed in to your account and sign out any you do not recognize.';
+
 	/// en: 'Your session on this device has been ended by another device.'
 	String get sessionExpired => 'Your session on this device has been ended by another device.';
 
@@ -605,8 +632,8 @@ class Translations$common$en {
 	/// en: 'Apply to pending dues'
 	String get affectCurrentDues => 'Apply to pending dues';
 
-	/// en: 'When enabled, current PENDING due amounts are updated to the new amount.'
-	String get affectCurrentDuesHint => 'When enabled, current PENDING due amounts are updated to the new amount.';
+	/// en: 'Open dues (pending and overdue) get updated amounts and due dates. If the new due date has not passed yet, overdue status is cleared.'
+	String get affectCurrentDuesHint => 'Open dues (pending and overdue) get updated amounts and due dates. If the new due date has not passed yet, overdue status is cleared.';
 
 	/// en: 'Enter an amount or select a due day to update.'
 	String get dueUpdateNeedAmountOrDay => 'Enter an amount or select a due day to update.';
@@ -2930,8 +2957,17 @@ class Translations$features$dashboard$en {
 	/// en: 'Remind'
 	String get remind => 'Remind';
 
+	/// en: 'Remind all'
+	String get remindAll => 'Remind all';
+
 	/// en: 'Reminder sent'
 	String get remindSent => 'Reminder sent';
+
+	/// en: 'Reminders sent to {count} residents.'
+	String get remindAllSent => 'Reminders sent to {count} residents.';
+
+	/// en: 'A reminder was already sent for this due within the last 24 hours.'
+	String get remindCooldown => 'A reminder was already sent for this due within the last 24 hours.';
 
 	/// en: 'No resident found to send a reminder for this apartment.'
 	String get remindNoRecipient => 'No resident found to send a reminder for this apartment.';
@@ -3235,6 +3271,15 @@ extension on Translations {
 			'common.logoutAllDevicesConfirm' => 'Sessions on your other phones and tablets will end. You will stay signed in on this device.',
 			'common.logoutAllDevicesSuccess' => 'Other devices have been signed out.',
 			'common.logoutAllDevicesFailed' => 'Could not complete this action. Please try again.',
+			'common.thisDevice' => 'This device',
+			'common.signedInAt' => ({required Object date}) => 'Signed in: ${date}',
+			'common.removeSession' => 'Remove',
+			'common.removeSessionConfirm' => 'This device will be signed out. Do you want to continue?',
+			'common.removeAllOtherSessions' => 'Sign out all other devices',
+			'common.removeAllOtherSessionsConfirm' => 'Sessions on your other phones and tablets will end. You will stay signed in on this device.',
+			'common.sessionRemoved' => 'Session ended.',
+			'common.noOtherSessions' => 'No other active device sessions.',
+			'common.sessionsScreenHint' => 'View devices signed in to your account and sign out any you do not recognize.',
 			'common.sessionExpired' => 'Your session on this device has been ended by another device.',
 			'common.account' => 'Account',
 			'common.editProfile' => 'Edit Profile',
@@ -3434,7 +3479,7 @@ extension on Translations {
 			'common.dueDay' => 'Due Day (1-28)',
 			'common.selectDueDay' => 'Select day',
 			'common.affectCurrentDues' => 'Apply to pending dues',
-			'common.affectCurrentDuesHint' => 'When enabled, current PENDING due amounts are updated to the new amount.',
+			'common.affectCurrentDuesHint' => 'Open dues (pending and overdue) get updated amounts and due dates. If the new due date has not passed yet, overdue status is cleared.',
 			'common.dueUpdateNeedAmountOrDay' => 'Enter an amount or select a due day to update.',
 			'common.dueUpdateNeedStoredAmount' => 'This building has no saved amount yet. Enter an amount before updating the due day only.',
 			'common.dueAmountInvalidPositive' => 'Enter a valid amount.',
@@ -3718,6 +3763,8 @@ extension on Translations {
 			'features.apartments.residentPanel' => 'Resident',
 			'features.tickets.myTickets' => 'My requests',
 			'features.tickets.newTicket' => 'New request',
+			_ => null,
+		} ?? switch (path) {
 			'features.tickets.createTitle' => 'Report issue / request',
 			'features.tickets.fieldTitle' => 'Title',
 			'features.tickets.fieldTitleHint' => 'e.g. Elevator malfunction',
@@ -3727,8 +3774,6 @@ extension on Translations {
 			'features.tickets.categoryComplaint' => 'Complaint',
 			'features.tickets.categoryRequest' => 'Request',
 			'features.tickets.categoryMalfunction' => 'Malfunction',
-			_ => null,
-		} ?? switch (path) {
 			'features.tickets.categoryOther' => 'Other',
 			'features.tickets.submit' => 'Submit',
 			'features.tickets.createSuccess' => 'Your request has been submitted',
@@ -4149,7 +4194,10 @@ extension on Translations {
 			'features.dashboard.legendPending' => 'Pending',
 			'features.dashboard.legendUnit' => '{count} due(s)',
 			'features.dashboard.remind' => 'Remind',
+			'features.dashboard.remindAll' => 'Remind all',
 			'features.dashboard.remindSent' => 'Reminder sent',
+			'features.dashboard.remindAllSent' => 'Reminders sent to {count} residents.',
+			'features.dashboard.remindCooldown' => 'A reminder was already sent for this due within the last 24 hours.',
 			'features.dashboard.remindNoRecipient' => 'No resident found to send a reminder for this apartment.',
 			'features.dashboard.apartmentTitle' => 'Apt. {number}',
 			'features.dashboard.apartmentWithFloor' => 'Apt. {number} · Floor {floor}',

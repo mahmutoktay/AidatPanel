@@ -106,7 +106,7 @@ class NotificationDeliveryCoordinator {
     
     // Anında çıkış (Zorunlu Logout) - Cihaz diğer oturumdan atıldıysa bekletme
     if (event.payload.type == 'force_logout') {
-      ref.read(authStateProvider.notifier).logoutLocal(ref);
+      unawaited(_handleForceLogout(ref, event.payload.sessionId));
       return;
     }
 
@@ -164,6 +164,19 @@ class NotificationDeliveryCoordinator {
     final ctx = rootNavigatorKey.currentContext;
     if (ctx == null || !ctx.mounted) return;
     navigateFromNotificationPath(ctx, ref, path);
+  }
+
+  Future<void> _handleForceLogout(WidgetRef ref, String? targetSessionId) async {
+    if (targetSessionId != null && targetSessionId.isNotEmpty) {
+      final currentSessionId =
+          await ref.read(secureStorageProvider).getSessionId();
+      if (currentSessionId != null &&
+          currentSessionId.isNotEmpty &&
+          currentSessionId != targetSessionId) {
+        return;
+      }
+    }
+    await ref.read(authStateProvider.notifier).logoutRemoteSession(ref);
   }
 }
 

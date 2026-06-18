@@ -27,6 +27,7 @@ import '../features/buildings/domain/entities/collection_preset_entity.dart';
 import '../features/buildings/domain/entities/saved_iban_delete_result.dart';
 import '../core/utils/iban_utils.dart';
 import '../features/dues/domain/entities/due_entity.dart';
+import '../features/dues/domain/entities/due_remind_result.dart';
 import '../features/dues/domain/repositories/dues_repository.dart';
 import '../features/profile/data/repositories/profile_repository.dart';
 import '../features/subscription/domain/entities/subscription_entity.dart';
@@ -1216,14 +1217,14 @@ class MockDuesRepository implements DuesRepository {
   }
 
   @override
-  Future<int> remindBuildingDues(
+  Future<DueRemindResult> remindBuildingDues(
     String buildingId, {
     List<String>? dueIds,
   }) async {
     await Future.delayed(_delay);
     final list = _byBuilding[buildingId] ?? const <DueEntity>[];
     if (dueIds == null || dueIds.isEmpty) {
-      return list
+      final count = list
           .where(
             (d) =>
                 d.resident != null &&
@@ -1233,9 +1234,11 @@ class MockDuesRepository implements DuesRepository {
           .map((d) => d.resident!.id)
           .toSet()
           .length;
+      return DueRemindResult(reminded: count);
     }
     final matches = list.where((d) => dueIds.contains(d.id));
-    return matches.where((d) => d.resident != null).length;
+    final count = matches.where((d) => d.resident != null).length;
+    return DueRemindResult(reminded: count);
   }
 }
 

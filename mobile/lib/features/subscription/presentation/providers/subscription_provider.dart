@@ -89,7 +89,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
         _repository.getMySubscription(),
         RevenueCatService.fetchStorePrices(),
       ]);
-      final sub = results[0] as SubscriptionEntity;
+      final sub = results[0] as SubscriptionEntity?;
       final prices = results[1] as SubscriptionStorePrices;
       state = state.copyWith(
         isLoading: false,

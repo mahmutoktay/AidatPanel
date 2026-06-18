@@ -48,6 +48,7 @@ class NotificationRealtimeEvent {
       'notificationId': json['notificationId']?.toString(),
       'title': json['title']?.toString(),
       'body': json['body']?.toString(),
+      'sessionId': json['sessionId']?.toString(),
       if (json['data'] is Map)
         ...Map<String, dynamic>.from(json['data'] as Map),
     };

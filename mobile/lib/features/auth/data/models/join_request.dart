@@ -4,6 +4,8 @@ class JoinRequest {
   final String password;
   final String name;
   final String? phone;
+  final String? deviceLabel;
+  final String? platform;
 
   JoinRequest({
     required this.inviteCode,
@@ -11,6 +13,8 @@ class JoinRequest {
     required this.password,
     required this.name,
     this.phone,
+    this.deviceLabel,
+    this.platform,
   });
 
   Map<String, dynamic> toJson() {
@@ -21,6 +25,9 @@ class JoinRequest {
       'password': password,
       'name': name,
       if (cleanPhone != null && cleanPhone.isNotEmpty) 'phone': cleanPhone,
+      if (deviceLabel != null && deviceLabel!.isNotEmpty)
+        'deviceLabel': deviceLabel,
+      if (platform != null && platform!.isNotEmpty) 'platform': platform,
     };
   }
 }

@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../../config/db.js";
 import { HttpError } from "../../utils/httpError.js";
+import { revokeAllUserSessions } from "../sessionService.js";
 /**
  * KVKK: kayıt silinmez; PII maskelenir, oturumlar iptal edilir.
  * Yöneticinin en az bir yönettiği bina varsa 409.
@@ -41,4 +42,5 @@ export async function softDeleteAccountService(userId) {
       },
     }),
   ]);
+  await revokeAllUserSessions(userId);
 }

@@ -18,10 +18,7 @@ export const authMiddleware = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Veritabanına (DB) gitmiyoruz. Access token süresine (15dk) ve JWT imzasına güveniyoruz.
-    // 'Tüm cihazlardan çıkış' esnasında anında düşürme işlemi artık WebSocket üzerinden sağlanıyor.
-    
-    req.user = { id: decoded.id, role: decoded.role };
+    req.user = { id: decoded.id, role: decoded.role, sessionId: decoded.sid ?? null };
     next();
   } catch (error) {
     next(error);

@@ -1,5 +1,6 @@
 import '../../../../core/network/paginated_list_result.dart';
 import '../entities/due_entity.dart';
+import '../entities/due_remind_result.dart';
 
 abstract class DuesRepository {
   /// Tur 5 / §10/3 — server-side filtreleme.
@@ -33,7 +34,7 @@ abstract class DuesRepository {
     String? currency,
     bool affectCurrent = false,
   });
-  Future<int> remindBuildingDues(
+  Future<DueRemindResult> remindBuildingDues(
     String buildingId, {
     List<String>? dueIds,
   });

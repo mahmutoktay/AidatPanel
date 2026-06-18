@@ -11,6 +11,29 @@ const REMIND_CONCURRENCY = Math.max(
   Number(process.env.DUE_REMIND_CONCURRENCY) || 8
 );
 
+const REMIND_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * @param {string} residentId
+ * @param {string} dueId
+ */
+async function wasRemindedRecently(residentId, dueId) {
+  const since = new Date(Date.now() - REMIND_COOLDOWN_MS);
+  const recent = await prisma.notification.findFirst({
+    where: {
+      userId: residentId,
+      type: NOTIFICATION_TYPES.DUE_REMINDER,
+      createdAt: { gte: since },
+      data: {
+        path: ["dueId"],
+        equals: dueId,
+      },
+    },
+    select: { id: true },
+  });
+  return recent != null;
+}
+
 /**
  * Binadaki PENDING/OVERDUE aidatlar için sakinlere hatırlatma (in-app + FCM).
  * POST /api/v1/buildings/:buildingId/dues/remind
@@ -51,7 +74,13 @@ export async function remindBuildingDuesService(
   });
 
   if (dues.length === 0) {
-    return { reminded: 0, pushSent: 0, pushFailed: 0, pushSkipped: 0 };
+    return {
+      reminded: 0,
+      skippedCooldown: 0,
+      pushSent: 0,
+      pushFailed: 0,
+      pushSkipped: 0,
+    };
   }
 
   /** @type {Map<string, typeof dues[0]>} */
@@ -65,8 +94,19 @@ export async function remindBuildingDuesService(
   }
 
   const jobs = [...firstDueByResident.entries()];
+  let skippedCooldown = 0;
 
   const outcomes = await runPool(jobs, REMIND_CONCURRENCY, async ([residentId, due]) => {
+    if (await wasRemindedRecently(residentId, due.id)) {
+      skippedCooldown += 1;
+      return {
+        skipped: true,
+        pushSent: 0,
+        pushFailed: 0,
+        pushSkipped: 0,
+      };
+    }
+
     const amount =
       due.amount != null ? Number(due.amount).toFixed(2) : "0.00";
     const currency = due.currency ?? building.currency ?? "TRY";
@@ -86,19 +126,26 @@ export async function remindBuildingDuesService(
     });
   });
 
+  let reminded = 0;
   let pushSent = 0;
   let pushFailed = 0;
   let pushSkipped = 0;
   for (const result of outcomes) {
-    pushSent += result.pushSent;
-    pushFailed += result.pushFailed;
-    pushSkipped += result.pushSkipped;
+    if (result?.skipped) continue;
+    reminded += 1;
+    pushSent += result.pushSent ?? 0;
+    pushFailed += result.pushFailed ?? 0;
+    pushSkipped += result.pushSkipped ?? 0;
   }
 
   return {
-    reminded: jobs.length,
+    reminded,
+    skippedCooldown,
     pushSent,
     pushFailed,
     pushSkipped,
   };
 }
+
+/** Test ve dış kullanım için export */
+export { wasRemindedRecently, REMIND_COOLDOWN_MS };

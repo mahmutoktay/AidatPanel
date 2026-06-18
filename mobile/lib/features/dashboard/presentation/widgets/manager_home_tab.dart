@@ -203,8 +203,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
                 items: overdueItems,
                 onRemind: _onRemindOverdue,
                 remindingDueId: _remindingDueId,
-                onSeeMore: overdueItems.length >
-                        ManagerOverdueApartmentsSection.previewLimit
+                onSeeAll: overdueItems.isNotEmpty
                     ? () => _openOverdueDuesList(selectedBuildingId)
                     : null,
               ),
