@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -41,33 +42,28 @@ class UserProfileAvatar extends ConsumerWidget {
 
     final hasPicture = profilePicture != null && profilePicture!.isNotEmpty;
 
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.fill,
-        image: hasPicture
-            ? DecorationImage(
-                image: NetworkImage(
-                  '${ApiConstants.baseUrl}/uploads/avatars/$profilePicture',
-                ),
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
-              )
-            : null,
-        border: hasPicture
-            ? null
-            : Border.fromBorderSide(
-                AppColors.cardBorderSide.copyWith(width: borderWidth),
-              ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      alignment: Alignment.center,
-      child: hasPicture
-          ? null
-          : _InitialsContent(userName: userName, size: size),
-    );
+    Widget body;
+    if (hasPicture) {
+      body = CachedNetworkImage(
+        imageUrl: '${ApiConstants.baseUrl}/uploads/avatars/$profilePicture',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorWidget: (context, url, error) =>
+            _InitialsContent(userName: userName, size: size),
+        placeholder: (context, url) => Center(
+          child: SizedBox(
+            width: size * 0.35,
+            height: size * 0.35,
+            child: const CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    } else {
+      body = _InitialsContent(userName: userName, size: size);
+    }
+
+    return _AvatarFrame(size: size, borderWidth: borderWidth, child: body);
   }
 }
 
