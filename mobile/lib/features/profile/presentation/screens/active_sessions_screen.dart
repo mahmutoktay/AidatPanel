@@ -78,7 +78,9 @@ class _ActiveSessionsScreenState extends ConsumerState<ActiveSessionsScreen> {
     if (!mounted) return;
     setState(() => _revokingSessionId = null);
 
-    ref.read(toastProvider.notifier).show(
+    ref
+        .read(toastProvider.notifier)
+        .show(
           ok
               ? t.common.sessionRemoved
               : ref.read(sessionsNotifierProvider).error!,
@@ -101,7 +103,9 @@ class _ActiveSessionsScreenState extends ConsumerState<ActiveSessionsScreen> {
 
     final authState = ref.read(authStateProvider);
     final hasError = authState.error != null;
-    ref.read(toastProvider.notifier).show(
+    ref
+        .read(toastProvider.notifier)
+        .show(
           hasError ? authState.error! : t.common.logoutAllDevicesSuccess,
           type: hasError ? ToastType.error : ToastType.success,
         );
@@ -116,7 +120,9 @@ class _ActiveSessionsScreenState extends ConsumerState<ActiveSessionsScreen> {
     final t = context.t;
     final state = ref.watch(sessionsNotifierProvider);
     final otherCount = state.otherSessions.length;
-    final authLoading = ref.watch(authStateProvider).isLoading;
+    final authLoading = ref.watch(
+      authStateProvider.select((state) => state.isLoading),
+    );
     final showBottomAction = otherCount > 0;
 
     return DashboardSecondaryScaffold(
@@ -124,9 +130,7 @@ class _ActiveSessionsScreenState extends ConsumerState<ActiveSessionsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: _buildBody(context, state, showBottomAction),
-          ),
+          Expanded(child: _buildBody(context, state, showBottomAction)),
           if (showBottomAction)
             SafeArea(
               top: false,

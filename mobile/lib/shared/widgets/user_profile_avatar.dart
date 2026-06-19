@@ -39,37 +39,35 @@ class UserProfileAvatar extends ConsumerWidget {
       return _VacantAvatar(size: size, borderWidth: borderWidth);
     }
 
-    Widget body;
-    if (profilePicture != null && profilePicture!.isNotEmpty) {
-      body = Image.network(
-        '${ApiConstants.baseUrl}/uploads/avatars/$profilePicture',
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) =>
-            _InitialsContent(userName: userName, size: size),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: SizedBox(
-              width: size * 0.35,
-              height: size * 0.35,
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-                strokeWidth: 2,
-              ),
-            ),
-          );
-        },
-      );
-    } else {
-      body = _InitialsContent(userName: userName, size: size);
-    }
+    final hasPicture = profilePicture != null && profilePicture!.isNotEmpty;
 
-    return _AvatarFrame(size: size, borderWidth: borderWidth, child: body);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.fill,
+        image: hasPicture
+            ? DecorationImage(
+                image: NetworkImage(
+                  '${ApiConstants.baseUrl}/uploads/avatars/$profilePicture',
+                ),
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+              )
+            : null,
+        border: hasPicture
+            ? null
+            : Border.fromBorderSide(
+                AppColors.cardBorderSide.copyWith(width: borderWidth),
+              ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      alignment: Alignment.center,
+      child: hasPicture
+          ? null
+          : _InitialsContent(userName: userName, size: size),
+    );
   }
 }
 
@@ -103,10 +101,7 @@ class _AvatarFrame extends StatelessWidget {
 }
 
 class _VacantAvatar extends StatelessWidget {
-  const _VacantAvatar({
-    required this.size,
-    required this.borderWidth,
-  });
+  const _VacantAvatar({required this.size, required this.borderWidth});
 
   final double size;
   final double borderWidth;

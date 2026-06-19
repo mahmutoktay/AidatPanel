@@ -198,7 +198,8 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
   Widget build(BuildContext context) {
     final detail = ref.watch(dekontDetailProvider(widget.dekontId));
     final isManager =
-        ref.watch(authStateProvider).user?.role == UserRole.manager;
+        ref.watch(authStateProvider.select((state) => state.user?.role)) ==
+        UserRole.manager;
     final t = context.t.features.dekont;
     final downloadActions = _downloadActions(detail);
     final fallbackRoute = isManager
@@ -242,10 +243,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                DekontSystemInfoSection(
-                  dekont: dekont,
-                  isManager: isManager,
-                ),
+                DekontSystemInfoSection(dekont: dekont, isManager: isManager),
                 const SizedBox(height: AppSizes.spacingM),
                 DekontDetailFileRow(
                   dekont: dekont,
@@ -457,8 +455,9 @@ class _BuildingDuesPicker extends ConsumerWidget {
     String? apartmentId,
   ) {
     if (apartmentId == null || apartmentId.isEmpty) return dues;
-    final forApartment =
-        dues.where((d) => d.apartmentId == apartmentId).toList();
+    final forApartment = dues
+        .where((d) => d.apartmentId == apartmentId)
+        .toList();
     return forApartment.isNotEmpty ? forApartment : dues;
   }
 
@@ -504,18 +503,19 @@ final buildingDuesForReviewProvider = FutureProvider.autoDispose
     .family<List<DueEntity>, String>((ref, buildingId) async {
       final repo = ref.read(duesRepositoryProvider);
       final all = await repo.getBuildingDues(buildingId, paginated: false);
-      final reviewable = all.items
-          .where(
-            (d) =>
-                d.status == DueStatus.pending ||
-                d.status == DueStatus.overdue,
-          )
-          .toList()
-        ..sort((a, b) {
-          final yearCmp = b.year.compareTo(a.year);
-          if (yearCmp != 0) return yearCmp;
-          return b.month.compareTo(a.month);
-        });
+      final reviewable =
+          all.items
+              .where(
+                (d) =>
+                    d.status == DueStatus.pending ||
+                    d.status == DueStatus.overdue,
+              )
+              .toList()
+            ..sort((a, b) {
+              final yearCmp = b.year.compareTo(a.year);
+              if (yearCmp != 0) return yearCmp;
+              return b.month.compareTo(a.month);
+            });
       return reviewable;
     });
 
@@ -531,9 +531,7 @@ class _ReviewButtonSpinner extends StatelessWidget {
       height: 22,
       child: CircularProgressIndicator(
         strokeWidth: 2.5,
-        valueColor: AlwaysStoppedAnimation<Color>(
-          color ?? AppColors.error,
-        ),
+        valueColor: AlwaysStoppedAnimation<Color>(color ?? AppColors.error),
       ),
     );
   }

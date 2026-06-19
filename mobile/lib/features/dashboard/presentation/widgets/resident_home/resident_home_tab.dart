@@ -36,13 +36,15 @@ class ResidentHomeTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dues = ref.watch(duesNotifierProvider).dues;
+    final dues = ref.watch(duesNotifierProvider.select((state) => state.dues));
     final tickets = ref.watch(ticketsNotifierProvider).tickets;
 
-    final pendingCount =
-        dues.where((d) => d.status == DueStatus.pending).length;
-    final overdueCount =
-        dues.where((d) => d.status == DueStatus.overdue).length;
+    final pendingCount = dues
+        .where((d) => d.status == DueStatus.pending)
+        .length;
+    final overdueCount = dues
+        .where((d) => d.status == DueStatus.overdue)
+        .length;
     final paidCount = dues.where((d) => d.status == DueStatus.paid).length;
     final openTicketCount = tickets
         .where(

@@ -1,23 +1,55 @@
 import { prisma } from "../config/db.js";
+import { HttpError } from "../utils/httpError.js";
 import { buildDueRowsForApartments } from "../utils/dueGeneration.js";
 import { userPublicSelect } from "./meService.js";
+import {
+  resolveListTake,
+  resolvePageLimit,
+  wantsPaginatedList,
+  buildListResponse,
+  mergeCreatedAtCursorWhere,
+} from "../utils/listQuery.js";
 
-// GET apartments
-export const getApartmentsService = async (buildingId, managerId) => {
+// GET apartments (sayfalama destekli)
+export const getApartmentsService = async (buildingId, managerId, filters = {}) => {
   // önce bina kontrol
   const building = await prisma.building.findUnique({
     where: { id: buildingId },
   });
 
   if (!building || building.managerId !== managerId) {
-    return null;
+    throw new HttpError(403, "Bu binanın dairelerini görüntüleme yetkiniz yok.");
   }
 
-  return await prisma.apartment.findMany({
-    where: { buildingId },
+  const paginated = wantsPaginatedList(filters);
+  const pageLimit = paginated ? resolvePageLimit(filters.limit) : resolveListTake(filters.limit);
+  const take = paginated ? pageLimit + 1 : pageLimit;
+
+  let where = { buildingId };
+
+  if (filters.search) {
+    where.number = { contains: filters.search, mode: "insensitive" };
+  }
+
+  if (paginated && filters.cursor) {
+    where = await mergeCreatedAtCursorWhere(where, filters.cursor, (id) =>
+      prisma.apartment.findFirst({
+        where: { id, buildingId },
+        select: { id: true, createdAt: true },
+      })
+    );
+  }
+
+  const apartments = await prisma.apartment.findMany({
+    where,
     include: { resident: { select: userPublicSelect } },
-    orderBy: { number: "asc" },
+    orderBy: paginated
+      ? [{ createdAt: "desc" }, { id: "desc" }]
+      : [{ number: "asc" }],
+    take,
   });
+
+  return buildListResponse(filters, apartments, (apt) => apt);
 };
 
 /**
@@ -29,7 +61,7 @@ export const removeResidentFromApartmentService = async (apartmentId, buildingId
   });
 
   if (!building || building.managerId !== managerId) {
-    return { forbidden: true };
+    throw new HttpError(403, "Bu işlem için yetkiniz yok.");
   }
 
   const apartment = await prisma.apartment.findFirst({
@@ -37,7 +69,7 @@ export const removeResidentFromApartmentService = async (apartmentId, buildingId
   });
 
   if (!apartment) {
-    return { notFound: true };
+    throw new HttpError(404, "Daire bulunamadı.");
   }
 
   const resident = await prisma.user.findFirst({
@@ -45,7 +77,7 @@ export const removeResidentFromApartmentService = async (apartmentId, buildingId
   });
 
   if (!resident) {
-    return { noResident: true };
+    throw new HttpError(404, "Bu dairede kayıtlı sakin yok.");
   }
 
   await prisma.user.update({
@@ -53,12 +85,10 @@ export const removeResidentFromApartmentService = async (apartmentId, buildingId
     data: { apartmentId: null },
   });
 
-  const updated = await prisma.apartment.findUnique({
+  return await prisma.apartment.findUnique({
     where: { id: apartmentId },
     include: { resident: { select: userPublicSelect } },
   });
-
-  return { apartment: updated };
 };
 
 // CREATE apartment
@@ -68,7 +98,7 @@ export const createApartmentService = async ({ buildingId, number, floor, manage
   });
 
   if (!building || building.managerId !== managerId) {
-    return null;
+    throw new HttpError(403, "Bu binaya daire ekleme yetkiniz yok.");
   }
 
   return await prisma.$transaction(async (tx) => {
@@ -101,7 +131,7 @@ export const deleteApartmentService = async (id, buildingId, managerId) => {
   });
 
   if (!building || building.managerId !== managerId) {
-    return null;
+    throw new HttpError(403, "Bu daireyi silme yetkiniz yok.");
   }
 
   return await prisma.apartment.delete({
@@ -116,7 +146,7 @@ export const updateApartmentService = async (id, buildingId, managerId, data) =>
   });
 
   if (!building || building.managerId !== managerId) {
-    return null;
+    throw new HttpError(403, "Bu daireyi güncelleme yetkiniz yok.");
   }
 
   const apartment = await prisma.apartment.findFirst({
@@ -124,7 +154,7 @@ export const updateApartmentService = async (id, buildingId, managerId, data) =>
   });
 
   if (!apartment) {
-    return null;
+    throw new HttpError(404, "Daire bulunamadı.");
   }
 
   return await prisma.apartment.update({

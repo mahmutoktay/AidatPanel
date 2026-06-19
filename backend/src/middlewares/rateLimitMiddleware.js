@@ -1,10 +1,6 @@
 import rateLimit from "express-rate-limit";
 import { authRouteKey } from "../utils/authRateLimitKey.js";
 import {
-  DEKONT_UPLOAD_RATE_MAX,
-  DEKONT_UPLOAD_RATE_WINDOW_MS,
-} from "../config/dekont.js";
-import {
   API_WINDOW_MS,
   API_MAX_REQUESTS,
   AUTH_WINDOW_MS,
@@ -76,11 +72,11 @@ export const authLimiter = rateLimit({
 const dekontUploadMax = isE2E
   ? 0
   : isProduction
-    ? DEKONT_UPLOAD_RATE_MAX
-    : Math.max(DEKONT_UPLOAD_RATE_MAX, 200);
+    ? DEKONT_UPLOAD_MAX_REQUESTS
+    : Math.max(DEKONT_UPLOAD_MAX_REQUESTS, 200);
 
 export const dekontUploadLimiter = rateLimit({
-  windowMs: DEKONT_UPLOAD_RATE_WINDOW_MS,
+  windowMs: DEKONT_UPLOAD_WINDOW_MS,
   max: dekontUploadMax,
   skip: () => isE2E || (!isProduction && dekontUploadMax === 0),
   message: {

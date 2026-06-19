@@ -78,20 +78,23 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 if (user?.role == UserRole.manager) ...[
                   _SettingsTile(
                     icon: Icons.account_balance_wallet_outlined,
-                    title: context.t.features.buildings.collection.savedIbansTitle,
+                    title:
+                        context.t.features.buildings.collection.savedIbansTitle,
                     onTap: () => context.push('/manager-dashboard/saved-ibans'),
                   ),
                   _SettingsTile(
                     icon: Icons.card_membership_outlined,
                     title: context.t.features.subscription.title,
-                    onTap: () => context.push('/manager-dashboard/subscription'),
+                    onTap: () =>
+                        context.push('/manager-dashboard/subscription'),
                   ),
                 ],
                 _SettingsTile(
                   icon: Icons.language_outlined,
                   title: context.t.common.language,
-                  trailing:
-                      currentLocale == AppLocale.tr ? 'Türkçe' : 'English',
+                  trailing: currentLocale == AppLocale.tr
+                      ? 'Türkçe'
+                      : 'English',
                   onTap: () => _showLanguageSheet(context),
                 ),
                 _SettingsTile(
@@ -136,11 +139,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ],
             ),
             const SizedBox(height: AppSizes.spacingM),
-            _SettingsSurfaceCard(
-              children: [
-                _LogoutTile(),
-              ],
-            ),
+            _SettingsSurfaceCard(children: [_LogoutTile()]),
             if (kDebugMode) ...[
               const SizedBox(height: AppSizes.spacingM),
               _TokenTestButton(),
@@ -251,7 +250,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 if (!sheetContext.mounted) return;
                 Navigator.pop(sheetContext);
                 if (!ok) {
-                  ref.read(toastProvider.notifier).show(
+                  ref
+                      .read(toastProvider.notifier)
+                      .show(
                         context.t.features.profile.profileUpdateFailed,
                         type: ToastType.error,
                       );
@@ -270,7 +271,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 if (!sheetContext.mounted) return;
                 Navigator.pop(sheetContext);
                 if (!ok) {
-                  ref.read(toastProvider.notifier).show(
+                  ref
+                      .read(toastProvider.notifier)
+                      .show(
                         context.t.features.profile.profileUpdateFailed,
                         type: ToastType.error,
                       );
@@ -339,10 +342,7 @@ class _SettingsSurfaceCard extends StatelessWidget {
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
 }
@@ -485,7 +485,9 @@ class _SettingsTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: ProfileSettingsUi.rowHeight),
+          constraints: const BoxConstraints(
+            minHeight: ProfileSettingsUi.rowHeight,
+          ),
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSizes.spacingM,
@@ -499,12 +501,7 @@ class _SettingsTile extends StatelessWidget {
                   color: iconColor ?? ProfileSettingsUi.ink,
                 ),
                 const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: ProfileSettingsUi.rowTitle,
-                  ),
-                ),
+                Expanded(child: Text(title, style: ProfileSettingsUi.rowTitle)),
                 if (trailing != null) ...[
                   Text(trailing!, style: ProfileSettingsUi.rowTrailing),
                   const SizedBox(width: 8),
@@ -534,9 +531,7 @@ class _LogoutTile extends ConsumerWidget {
       iconColor: AppColors.error,
       title: context.t.common.logout,
       showChevron: false,
-      onTap: authState.isLoading
-          ? () {}
-          : () => _confirmLogout(context),
+      onTap: authState.isLoading ? () {} : () => _confirmLogout(context),
     );
   }
 
@@ -558,7 +553,9 @@ class _LogoutConfirmBottomSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.t;
-    final isLoading = ref.watch(authStateProvider).isLoading;
+    final isLoading = ref.watch(
+      authStateProvider.select((state) => state.isLoading),
+    );
 
     return PopScope(
       canPop: !isLoading,
@@ -593,10 +590,7 @@ class _LogoutConfirmBottomSheet extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      t.common.logout,
-                      style: ProfileSettingsUi.title,
-                    ),
+                    Text(t.common.logout, style: ProfileSettingsUi.title),
                     const SizedBox(height: 4),
                     Text(
                       t.common.logoutConfirm,
@@ -623,10 +617,9 @@ class _LogoutConfirmBottomSheet extends ConsumerWidget {
 
                   final authState = ref.read(authStateProvider);
                   if (authState.error != null && authState.error!.isNotEmpty) {
-                    ref.read(toastProvider.notifier).show(
-                          authState.error!,
-                          type: ToastType.error,
-                        );
+                    ref
+                        .read(toastProvider.notifier)
+                        .show(authState.error!, type: ToastType.error);
                     return;
                   }
 

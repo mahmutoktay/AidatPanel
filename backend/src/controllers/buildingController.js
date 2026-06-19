@@ -64,8 +64,14 @@ export const getCollectionPresets = async (req, res, next) => {
 export const getBuildings = async (req, res, next) => {
   try {
     const managerId = req.user.id;
+    const { cursor, limit, paginated, search } = req.query;
 
-    const buildings = await getBuildingsService(managerId);
+    const buildings = await getBuildingsService(managerId, {
+      cursor,
+      limit,
+      paginated,
+      search,
+    });
 
     res.json({
       success: true,
@@ -84,6 +90,7 @@ export const getBuildingById = async (req, res, next) => {
 
     const building = await getBuildingByIdService(id, managerId);
 
+    // getBuildingByIdService returns null if not found or not owned
     if (!building) {
       return res.status(404).json({
         success: false,
@@ -108,13 +115,6 @@ export const updateBuilding = async (req, res, next) => {
 
     const updated = await updateBuildingService(id, managerId, req.body);
 
-    if (!updated) {
-      return res.status(404).json({
-        success: false,
-        message: "Bina bulunamadı",
-      });
-    }
-
     res.json({
       success: true,
       data: updated,
@@ -130,14 +130,7 @@ export const deleteBuilding = async (req, res, next) => {
     const { id } = req.params;
     const managerId = req.user.id;
 
-    const deleted = await deleteBuildingService(id, managerId);
-
-    if (!deleted) {
-      return res.status(404).json({
-        success: false,
-        message: "Bina bulunamadı",
-      });
-    }
+    await deleteBuildingService(id, managerId);
 
     res.json({
       success: true,

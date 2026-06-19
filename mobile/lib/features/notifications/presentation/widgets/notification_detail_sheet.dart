@@ -94,91 +94,93 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-            Row(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        visual.color.withValues(alpha: 0.16),
-                        visual.color.withValues(alpha: 0.04),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: visual.color.withValues(alpha: 0.25),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Icon(visual.icon, color: visual.color, size: 28),
-                ),
-                const SizedBox(width: AppSizes.spacingM),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        n.type.label(context),
-                        style: AppTypography.caption.copyWith(
-                          color: visual.color,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        dateStr,
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+          Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      visual.color.withValues(alpha: 0.16),
+                      visual.color.withValues(alpha: 0.04),
                     ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: visual.color.withValues(alpha: 0.25),
+                    width: 1.5,
                   ),
                 ),
-                if (!n.isRead)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.infoBg,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.info.withValues(alpha: 0.35),
-                      ),
-                    ),
-                    child: Text(
-                      t.unreadBadge,
+                child: Icon(visual.icon, color: visual.color, size: 28),
+              ),
+              const SizedBox(width: AppSizes.spacingM),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      n.type.label(context),
                       style: AppTypography.caption.copyWith(
-                        color: AppColors.info,
+                        color: visual.color,
                         fontWeight: FontWeight.w800,
+                        letterSpacing: 0.3,
                       ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      dateStr,
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!n.isRead)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.infoBg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.info.withValues(alpha: 0.35),
                     ),
                   ),
-              ],
+                  child: Text(
+                    t.unreadBadge,
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.info,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.spacingL),
+          Text(
+            n.title,
+            style: AppTypography.h3.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w900,
+              height: 1.3,
             ),
-            const SizedBox(height: AppSizes.spacingL),
-            Text(
-              n.title,
-              style: AppTypography.h3.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w900,
-                height: 1.3,
-              ),
-            ),
-            const SizedBox(height: AppSizes.spacingM),
-            _DetailSection(notification: n),
-            const SizedBox(height: AppSizes.spacingXL),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          _DetailSection(notification: n),
+          const SizedBox(height: AppSizes.spacingXL),
+        ],
+      ),
       actions: PremiumSheetActions(
-        primaryLabel: canNavigate ? _actionLabel(context) : context.t.common.close,
+        primaryLabel: canNavigate
+            ? _actionLabel(context)
+            : context.t.common.close,
         onPrimary: () {
           if (!n.isRead) onMarkRead();
           if (canNavigate) {
@@ -217,27 +219,18 @@ class _DetailSection extends ConsumerWidget {
       case NotificationType.ticketUpdate:
         final ticketId = payload.ticketId;
         if (ticketId == null) return _GenericBody(body: n.body);
-        return _TicketDetailSection(
-          ticketId: ticketId,
-          fallbackBody: n.body,
-        );
+        return _TicketDetailSection(ticketId: ticketId, fallbackBody: n.body);
       case NotificationType.dekontReceived:
       case NotificationType.dekontNeedsReview:
       case NotificationType.dekontMatched:
       case NotificationType.dekontPaymentApplied:
         final dekontId = payload.dekontId;
         if (dekontId == null) return _GenericBody(body: n.body);
-        return _DekontDetailSection(
-          dekontId: dekontId,
-          fallbackBody: n.body,
-        );
+        return _DekontDetailSection(dekontId: dekontId, fallbackBody: n.body);
       case NotificationType.dueReminder:
       case NotificationType.duePaid:
       case NotificationType.expenseAdded:
-        return _DueDetailSection(
-          dueId: payload.dueId,
-          fallbackBody: n.body,
-        );
+        return _DueDetailSection(dueId: payload.dueId, fallbackBody: n.body);
       case NotificationType.announcement:
       case NotificationType.system:
       case NotificationType.other:
@@ -294,7 +287,10 @@ class _TicketDetailSection extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppSizes.spacingS),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.fill,
                     borderRadius: BorderRadius.circular(20),
@@ -411,10 +407,14 @@ class _DekontDetailSection extends ConsumerWidget {
             const SizedBox(height: AppSizes.spacingM),
             _InfoCard(
               children: [
-                if (dekont.parsedAmount != null && dekont.parsedAmount!.isNotEmpty)
+                if (dekont.parsedAmount != null &&
+                    dekont.parsedAmount!.isNotEmpty)
                   _InfoRow(label: t.fieldAmount, value: dekont.parsedAmount!),
                 if (dekont.apartment != null)
-                  _InfoRow(label: t.fieldApartment, value: dekont.apartment!.number),
+                  _InfoRow(
+                    label: t.fieldApartment,
+                    value: dekont.apartment!.number,
+                  ),
                 if (dekont.uploadedBy != null)
                   _InfoRow(
                     label: t.fieldUploadedBy,
@@ -470,10 +470,7 @@ class _DueDetailSection extends ConsumerWidget {
   final String? dueId;
   final String fallbackBody;
 
-  const _DueDetailSection({
-    required this.dueId,
-    required this.fallbackBody,
-  });
+  const _DueDetailSection({required this.dueId, required this.fallbackBody});
 
   ({String label, Color color, Color background}) _statusVisual(
     BuildContext context,
@@ -513,7 +510,9 @@ class _DueDetailSection extends ConsumerWidget {
     final t = context.t.features.notifications;
     DueEntity? due;
     if (dueId != null) {
-      for (final d in ref.watch(duesNotifierProvider).dues) {
+      for (final d in ref.watch(
+        duesNotifierProvider.select((state) => state.dues),
+      )) {
         if (d.id == dueId) {
           due = d;
           break;

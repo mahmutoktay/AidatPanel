@@ -35,16 +35,19 @@ class ProfilePhotoEditSheet extends ConsumerStatefulWidget {
   const ProfilePhotoEditSheet({super.key});
 
   @override
-  ConsumerState<ProfilePhotoEditSheet> createState() => _ProfilePhotoEditSheetState();
+  ConsumerState<ProfilePhotoEditSheet> createState() =>
+      _ProfilePhotoEditSheetState();
 }
 
 class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
   /// Circle diameter — the actual crop region is a square of this size.
   static const double _kCircleDiameter = 220.0;
+
   /// Visual viewport height equals the circle diameter.
   static const double _kViewportH = _kCircleDiameter;
 
-  final TransformationController _transformationController = TransformationController();
+  final TransformationController _transformationController =
+      TransformationController();
   final ImagePicker _picker = ImagePicker();
 
   File? _imageFile;
@@ -74,8 +77,6 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
       } catch (_) {}
     }
   }
-
-
 
   Future<void> _loadImageInfo(File file) async {
     try {
@@ -120,7 +121,9 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
         setState(() {
           _isProcessing = false;
         });
-        ref.read(toastProvider.notifier).show(
+        ref
+            .read(toastProvider.notifier)
+            .show(
               context.t.features.profile.avatarPhotoLoadError,
               type: ToastType.error,
             );
@@ -141,7 +144,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
 
       // Read original image bytes
       final bytes = await File(picked.path).readAsBytes();
-      
+
       // Decode image
       final original = img.decodeImage(bytes);
       if (original == null) {
@@ -165,7 +168,9 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
         setState(() {
           _isProcessing = false;
         });
-        ref.read(toastProvider.notifier).show(
+        ref
+            .read(toastProvider.notifier)
+            .show(
               context.t.features.profile.avatarPhotoProcessError,
               type: ToastType.error,
             );
@@ -182,7 +187,9 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
       }
     } catch (e) {
       if (mounted) {
-        ref.read(toastProvider.notifier).show(
+        ref
+            .read(toastProvider.notifier)
+            .show(
               context.t.features.profile.avatarCameraError,
               type: ToastType.error,
             );
@@ -199,7 +206,9 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
       }
     } catch (e) {
       if (mounted) {
-        ref.read(toastProvider.notifier).show(
+        ref
+            .read(toastProvider.notifier)
+            .show(
               context.t.features.profile.avatarGalleryError,
               type: ToastType.error,
             );
@@ -232,7 +241,8 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
       // Map coordinates back to original image space using the viewport width and circle diameter.
       // Since the circle is centered in the viewport, the crop area's left edge is at (viewportWidth - circleDiameter) / 2.
       final double totalScale = s * _scaleToCover;
-      final double cropX = (((_viewportWidth - _kCircleDiameter) / 2.0) - tx) / totalScale;
+      final double cropX =
+          (((_viewportWidth - _kCircleDiameter) / 2.0) - tx) / totalScale;
       final double cropY = -ty / totalScale;
       final double cropW = _kCircleDiameter / totalScale;
       final double cropH = _kCircleDiameter / totalScale;
@@ -241,9 +251,15 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
       final double cropSize = math.min(cropW, cropH);
 
       // Clamp coordinates to stay within image boundaries
-      final int finalX = cropX.clamp(0.0, (original.width - cropSize).toDouble()).toInt();
-      final int finalY = cropY.clamp(0.0, (original.height - cropSize).toDouble()).toInt();
-      final int finalSize = cropSize.clamp(1.0, math.min(original.width, original.height).toDouble()).toInt();
+      final int finalX = cropX
+          .clamp(0.0, (original.width - cropSize).toDouble())
+          .toInt();
+      final int finalY = cropY
+          .clamp(0.0, (original.height - cropSize).toDouble())
+          .toInt();
+      final int finalSize = cropSize
+          .clamp(1.0, math.min(original.width, original.height).toDouble())
+          .toInt();
 
       final cropped = img.copyCrop(
         original,
@@ -253,7 +269,9 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
         height: finalSize,
       );
 
-      final croppedBytes = Uint8List.fromList(img.encodeJpg(cropped, quality: 85));
+      final croppedBytes = Uint8List.fromList(
+        img.encodeJpg(cropped, quality: 85),
+      );
 
       final tempDir = await getTemporaryDirectory();
       final tempFile = File(
@@ -277,14 +295,15 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
       });
 
       if (success) {
-        ref.read(toastProvider.notifier).show(
-              t.features.profile.photoSaved,
-              type: ToastType.success,
-            );
+        ref
+            .read(toastProvider.notifier)
+            .show(t.features.profile.photoSaved, type: ToastType.success);
         Navigator.pop(context);
       } else {
         final error = ref.read(profileNotifierProvider).error;
-        ref.read(toastProvider.notifier).show(
+        ref
+            .read(toastProvider.notifier)
+            .show(
               error ?? t.features.expenses.receiptPickFailed,
               type: ToastType.error,
             );
@@ -294,10 +313,9 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
         setState(() {
           _isProcessing = false;
         });
-        ref.read(toastProvider.notifier).show(
-              t.features.profile.avatarSaveError,
-              type: ToastType.error,
-            );
+        ref
+            .read(toastProvider.notifier)
+            .show(t.features.profile.avatarSaveError, type: ToastType.error);
       }
     }
   }
@@ -306,7 +324,8 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
     if (_isProcessing) return;
 
     final user = ref.read(authStateProvider).user;
-    final hasPhoto = user?.profilePicture != null && user!.profilePicture!.isNotEmpty;
+    final hasPhoto =
+        user?.profilePicture != null && user!.profilePicture!.isNotEmpty;
 
     if (!hasPhoto) {
       Navigator.pop(context);
@@ -318,7 +337,9 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
     });
 
     final t = context.t;
-    final success = await ref.read(profileNotifierProvider.notifier).deleteAvatar();
+    final success = await ref
+        .read(profileNotifierProvider.notifier)
+        .deleteAvatar();
 
     if (!mounted) return;
 
@@ -327,14 +348,15 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
     });
 
     if (success) {
-      ref.read(toastProvider.notifier).show(
-            t.features.profile.photoRemoved,
-            type: ToastType.info,
-          );
+      ref
+          .read(toastProvider.notifier)
+          .show(t.features.profile.photoRemoved, type: ToastType.info);
       Navigator.pop(context);
     } else {
       final error = ref.read(profileNotifierProvider).error;
-      ref.read(toastProvider.notifier).show(
+      ref
+          .read(toastProvider.notifier)
+          .show(
             error ?? t.features.expenses.receiptPickFailed,
             type: ToastType.error,
           );
@@ -343,8 +365,9 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authStateProvider).user;
-    final hasPhoto = user?.profilePicture != null && user!.profilePicture!.isNotEmpty;
+    final user = ref.watch(authStateProvider.select((state) => state.user));
+    final hasPhoto =
+        user?.profilePicture != null && user!.profilePicture!.isNotEmpty;
     final profileT = context.t.features.profile;
 
     return PremiumBottomSheetScaffold(
@@ -373,17 +396,17 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
                         minScale: 1.0,
                         maxScale: 4.0,
                         boundaryMargin: EdgeInsets.symmetric(
-                          horizontal: math.max(0.0, (viewportW - _kCircleDiameter) / 2.0),
+                          horizontal: math.max(
+                            0.0,
+                            (viewportW - _kCircleDiameter) / 2.0,
+                          ),
                         ),
                         clipBehavior: Clip.none,
                         constrained: false,
                         child: SizedBox(
                           width: _imageInfo!.width.toDouble() * _scaleToCover,
                           height: _imageInfo!.height.toDouble() * _scaleToCover,
-                          child: Image.file(
-                            _imageFile!,
-                            fit: BoxFit.fill,
-                          ),
+                          child: Image.file(_imageFile!, fit: BoxFit.fill),
                         ),
                       )
                     else if (_isProcessing)
@@ -449,7 +472,9 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
             width: double.infinity,
             height: ProfileSettingsUi.buttonHeight,
             child: ElevatedButton(
-              onPressed: _imageFile != null && !_isProcessing ? _saveImage : null,
+              onPressed: _imageFile != null && !_isProcessing
+                  ? _saveImage
+                  : null,
               style: ProfileSettingsUi.primaryButton,
               child: _isProcessing && _imageFile != null
                   ? const SizedBox(
@@ -475,7 +500,9 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.error,
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                textStyle: AppTypography.caption.copyWith(fontWeight: FontWeight.w700),
+                textStyle: AppTypography.caption.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               child: _isProcessing && _imageFile == null
                   ? SizedBox(
@@ -503,11 +530,7 @@ class _SourceButton extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
 
-  const _SourceButton({
-    required this.icon,
-    required this.label,
-    this.onTap,
-  });
+  const _SourceButton({required this.icon, required this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -565,7 +588,10 @@ class _CircleCropOverlayPainter extends CustomPainter {
     canvas.drawPath(
       overlayPath,
       Paint()
-        ..color = const Color(0x80161B22) // 50 % overlay — lets the image show through
+        ..color =
+            const Color(
+              0x80161B22,
+            ) // 50 % overlay — lets the image show through
         ..style = PaintingStyle.fill,
     );
 

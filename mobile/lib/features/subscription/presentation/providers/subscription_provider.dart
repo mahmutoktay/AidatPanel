@@ -187,12 +187,17 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
     const maxAttempts = 3;
     const delay = Duration(milliseconds: 1500);
 
+    // Fiyatları polling öncesinde bir kere çek, her denemede tekrar isteme.
+    final prices = RevenueCatService.isConfigured
+        ? await RevenueCatService.fetchStorePrices()
+        : SubscriptionStorePrices.empty;
+
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       if (attempt > 1) {
         await Future.delayed(delay);
       }
 
-      // Subscription'ı backend'den çek (fiyatları tekrar isteme).
+      // Sadece subscription'ı backend'den çek.
       try {
         state = state.copyWith(
           isLoading: true,
@@ -200,7 +205,6 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
           clearSuccess: true,
         );
         final sub = await _repository.getMySubscription();
-        final prices = await RevenueCatService.fetchStorePrices();
 
         if (sub != null) {
           // Webhook işlenmiş, subscription kaydı gelmiş.
@@ -216,7 +220,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
           return;
         }
 
-        // Henüz kayıt yok — fiyatları kaydet ve bir sonraki denemeye geç.
+        // Henüz kayıt yok.
         state = state.copyWith(
           isLoading: false,
           storePrices: prices,

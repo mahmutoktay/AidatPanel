@@ -54,9 +54,7 @@ dependencies:
   pdfx: ^2.9.2
   receive_sharing_intent: ^1.8.1
   gal: ^2.3.2
-  image_cropper: ^12.2.1
   image: ^4.9.1
-  crop_your_image: ^2.0.0
   purchases_flutter: ^10.2.3
 
 dev_dependencies:

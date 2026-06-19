@@ -2,6 +2,14 @@ import { prisma } from "../config/db.js";
 import { buildDueRowsForApartments } from "../utils/dueGeneration.js";
 import { isValidTrIban, normalizeIban } from "../utils/iban.js";
 import { HttpError } from "../utils/httpError.js";
+import { assertManagerOwnsBuilding } from "../utils/access.js";
+import {
+  resolveListTake,
+  resolvePageLimit,
+  wantsPaginatedList,
+  buildListResponse,
+  mergeCreatedAtCursorWhere,
+} from "../utils/listQuery.js";
 
 /**
  * Tahsilat alanlarını create/update body'den Prisma data'ya çevirir.
@@ -125,10 +133,35 @@ export const createBuildingService = async ({
   );
 };
 
-export const getBuildingsService = async (managerId) => {
+export const getBuildingsService = async (managerId, filters = {}) => {
+  const paginated = wantsPaginatedList(filters);
+  const pageLimit = paginated ? resolvePageLimit(filters.limit) : resolveListTake(filters.limit);
+  const take = paginated ? pageLimit + 1 : pageLimit;
+
+  let where = { managerId };
+
+  if (filters.search) {
+    where.OR = [
+      { name: { contains: filters.search, mode: "insensitive" } },
+      { city: { contains: filters.search, mode: "insensitive" } },
+    ];
+  }
+
+  if (paginated && filters.cursor) {
+    where = await mergeCreatedAtCursorWhere(where, filters.cursor, (id) =>
+      prisma.building.findFirst({
+        where: { id, managerId },
+        select: { id: true, createdAt: true },
+      })
+    );
+  }
+
   const buildings = await prisma.building.findMany({
-    where: { managerId },
-    orderBy: { createdAt: "desc" },
+    where,
+    orderBy: paginated
+      ? [{ createdAt: "desc" }, { id: "desc" }]
+      : [{ createdAt: "desc" }],
+    take,
     include: {
       _count: {
         select: { apartments: true },
@@ -140,13 +173,15 @@ export const getBuildingsService = async (managerId) => {
     },
   });
 
-  return buildings.map(b => {
+  const mapped = buildings.map(b => {
     const { apartments, ...rest } = b;
     return {
       ...rest,
       occupiedApartments: apartments.length,
     };
   });
+
+  return buildListResponse(filters, mapped, (b) => b);
 };
 
 export const getBuildingByIdService = async (id, managerId) => {
@@ -173,11 +208,7 @@ export const getBuildingByIdService = async (id, managerId) => {
 };
 
 export const updateBuildingService = async (id, managerId, data) => {
-  const building = await prisma.building.findFirst({
-    where: { id, managerId },
-  });
-
-  if (!building) return null;
+  await assertManagerOwnsBuilding(id, managerId);
 
   return await prisma.building.update({
     where: { id },
@@ -186,11 +217,7 @@ export const updateBuildingService = async (id, managerId, data) => {
 };
 
 export const deleteBuildingService = async (id, managerId) => {
-  const building = await prisma.building.findFirst({
-    where: { id, managerId },
-  });
-
-  if (!building) return null;
+  await assertManagerOwnsBuilding(id, managerId);
 
   return await prisma.$transaction(async (tx) => {
     // 1. Delete all DuePayments for dues of this building
@@ -304,11 +331,7 @@ export const deleteBuildingService = async (id, managerId) => {
  * Tahsilat hesabı (dekont alıcı IBAN doğrulaması).
  */
 export const updateBuildingCollectionService = async (id, managerId, body) => {
-  const building = await prisma.building.findFirst({
-    where: { id, managerId },
-  });
-
-  if (!building) return null;
+  await assertManagerOwnsBuilding(id, managerId);
 
   const data = collectionFieldsFromBody(body);
 

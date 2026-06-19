@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/navigation/app_back_navigation.dart';
 import '../../../../core/navigation/dashboard_back_handler.dart';
+import '../../../../core/providers/theme_mode_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
@@ -27,7 +28,8 @@ class ResidentDashboardScreen extends ConsumerStatefulWidget {
       _ResidentDashboardScreenState();
 }
 
-class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScreen>
+class _ResidentDashboardScreenState
+    extends ConsumerState<ResidentDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _requestedInitialDues = false;
@@ -79,6 +81,9 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
 
   @override
   Widget build(BuildContext context) {
+    // Tema değişiminde tüm dashboard iskeletinin rebuild olması için watch
+    ref.watch(themeModeProvider);
+
     ref.listen<int>(residentTabIndexProvider, (previous, next) {
       if (_tabController.index != next) {
         _tabController.animateTo(
@@ -107,7 +112,8 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
     final selectedTab = ref.watch(residentTabIndexProvider);
     final t = context.t.common;
     final userName =
-        ref.watch(authStateProvider).user?.name ?? context.t.common.user;
+        ref.watch(authStateProvider.select((state) => state.user?.name)) ??
+        context.t.common.user;
     final isSettings = selectedTab == 3;
     final title = isSettings ? t.settings : t.resident;
 
@@ -123,7 +129,9 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
           curve: DashboardNavAnimation.curve,
         );
       },
-      onExitHint: (message) => ref.read(toastProvider.notifier).show(
+      onExitHint: (message) => ref
+          .read(toastProvider.notifier)
+          .show(
             message,
             type: ToastType.info,
             duration: AppBackNavigation.exitGracePeriod,
