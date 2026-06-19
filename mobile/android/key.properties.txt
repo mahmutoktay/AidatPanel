@@ -1,0 +1,8 @@
+# Bu dosyayı kopyala: key.properties (aynı klasörde)
+# Şifreleri doldur. key.properties asla commit edilmez (.gitignore).
+
+storePassword=363841anathema
+keyPassword=363841anathema
+keyAlias=upload
+# Keystore dosyası android/ klasörüne göre yol (upload-keystore.jks buradaysa):
+storeFile=upload-keystore.jks

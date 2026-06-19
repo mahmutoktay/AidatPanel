@@ -63,7 +63,7 @@ void _applyResidentDashboardQuery(
     }
   } else if (tab == 'issues') {
     ref.read(residentTabIndexProvider.notifier).update(2);
-  } else if (tab == 'settings') {
+  } else if (tab == 'menu' || tab == 'settings') {
     ref.read(residentTabIndexProvider.notifier).update(3);
   } else if (tab == 'home' || tab == null) {
     ref.read(residentTabIndexProvider.notifier).update(0);
@@ -89,7 +89,7 @@ void _applyManagerDashboardQuery(
     }
   } else if (tab == 'buildings') {
     ref.read(managerTabIndexProvider.notifier).update(1);
-  } else if (tab == 'settings') {
+  } else if (tab == 'menu' || tab == 'settings') {
     ref.read(managerTabIndexProvider.notifier).update(3);
   } else if (tab == 'home' || tab == null) {
     ref.read(managerTabIndexProvider.notifier).update(0);

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../platform/system_navigator_bridge.dart';
@@ -29,6 +29,12 @@ class AppBackNavigation {
     required VoidCallback goToHomeTab,
     required void Function(String message) onExitHint,
   }) {
+    final scaffoldState = Scaffold.maybeOf(context);
+    if (scaffoldState?.isDrawerOpen ?? false) {
+      scaffoldState!.closeDrawer();
+      return true;
+    }
+
     final path = _currentPath(context);
     final rootNavigator = Navigator.of(context, rootNavigator: true);
 

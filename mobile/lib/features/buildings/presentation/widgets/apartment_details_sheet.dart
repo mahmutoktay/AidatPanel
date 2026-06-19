@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/fixed_width_copy_button.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/tint_dashboard_tile.dart';
+import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../../shared/widgets/user_profile_avatar.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
 import '../../../apartments/presentation/widgets/delete_apartment_dialog.dart';
 import '../../../apartments/presentation/widgets/edit_apartment_bottom_sheet.dart';
 import '../../../apartments/presentation/widgets/remove_resident_dialog.dart';
+import '../../data/buildings_store.dart';
+import '../../data/invite_code_store.dart';
+import '../../utils/invite_code_helpers.dart';
 import '../utils/apartment_ui_utils.dart';
 
 class ApartmentDetailsSheet {
@@ -26,7 +34,10 @@ class ApartmentDetailsSheet {
     });
   }
 
-  static void show(BuildContext context, {required ApartmentEntity apt}) {
+  static void show(
+    BuildContext context, {
+    required ApartmentEntity apt,
+  }) {
     PremiumBottomSheetScaffold.show<void>(
       context: context,
       builder: (sheetContext) => _ApartmentDetailsSheetBody(
@@ -50,7 +61,8 @@ class _ApartmentDetailsSheetBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isOccupied = apt.isOccupied;
     final resident = apt.resident;
-    final statusInfo = ApartmentUiUtils.getStatusInfo(context, apt.paymentStatus);
+    final statusInfo =
+        ApartmentUiUtils.getStatusInfo(context, apt.paymentStatus);
     final phoneText = apt.phone != null
         ? ApartmentUiUtils.formatPhone(apt.phone!)
         : context.t.common.phoneNotShared;
@@ -69,64 +81,317 @@ class _ApartmentDetailsSheetBody extends ConsumerWidget {
             apt: apt,
             statusInfo: statusInfo,
           ),
-          const SizedBox(height: AppSizes.spacingL),
-          _StatGrid(apt: apt),
-          if (isOccupied && resident != null) ...[
+          if (isOccupied) ...[
             const SizedBox(height: AppSizes.spacingL),
-            PremiumInfoCard(
-              children: [
-                PremiumInfoRow(
-                  icon: Icons.mail_outline_rounded,
-                  iconColor: AppColors.primary,
-                  label: context.t.features.auth.email,
-                  value: resident.email,
-                ),
-                PremiumInfoRow(
-                  icon: Icons.phone_outlined,
-                  iconColor: AppColors.primary,
-                  label: context.t.features.auth.phone,
-                  value: phoneText,
-                ),
-              ],
-            ),
+            _StatGrid(apt: apt),
+            if (resident != null) ...[
+              const SizedBox(height: AppSizes.spacingL),
+              PremiumInfoCard(
+                children: [
+                  PremiumInfoRow(
+                    icon: Icons.mail_outline_rounded,
+                    iconColor: AppColors.primary,
+                    label: context.t.features.auth.email,
+                    value: resident.email,
+                  ),
+                  PremiumInfoRow(
+                    icon: Icons.phone_outlined,
+                    iconColor: AppColors.primary,
+                    label: context.t.features.auth.phone,
+                    value: phoneText,
+                  ),
+                ],
+              ),
+            ],
+          ] else ...[
+            const SizedBox(height: AppSizes.spacingL),
+            _VacantInfoCard(),
+            const SizedBox(height: AppSizes.spacingL),
+            _VacantInviteSection(apt: apt),
           ],
         ],
       ),
-      actions: PremiumSheetActions(
-        primaryLabel: context.t.common.editApartment,
-        icon: Icons.edit_outlined,
-        onPrimary: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
-          pageContext,
-          context,
-          () => EditApartmentBottomSheet.show(
-            pageContext,
-            apartment: apt,
+      actions: isOccupied
+          ? PremiumSheetActions(
+              primaryLabel: context.t.common.editApartment,
+              icon: Icons.edit_outlined,
+              onPrimary: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
+                pageContext,
+                context,
+                () => EditApartmentBottomSheet.show(
+                  pageContext,
+                  apartment: apt,
+                ),
+              ),
+              secondaryLabel: context.t.common.removeResident,
+              onSecondary: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
+                pageContext,
+                context,
+                () => RemoveResidentDialog.show(
+                  pageContext,
+                  apartment: apt,
+                ),
+              ),
+            )
+          : PremiumSheetActions(
+              primaryLabel: context.t.common.deleteApartment,
+              dangerPrimary: true,
+              icon: Icons.delete_outline_rounded,
+              onPrimary: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
+                pageContext,
+                context,
+                () => DeleteApartmentDialog.show(
+                  pageContext,
+                  apartment: apt,
+                ),
+              ),
+            ),
+    );
+  }
+}
+
+class _VacantInfoCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.spacingM),
+      decoration: BoxDecoration(
+        color: AppColors.info.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.person_off_outlined, size: 22, color: AppColors.info),
+          const SizedBox(width: AppSizes.spacingS),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.t.common.noResidentAssigned,
+                  style: AppTypography.body1.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 17,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  context.t.features.buildings.vacantInviteHint,
+                  style: AppTypography.body2.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VacantInviteSection extends ConsumerStatefulWidget {
+  const _VacantInviteSection({required this.apt});
+
+  final ApartmentEntity apt;
+
+  @override
+  ConsumerState<_VacantInviteSection> createState() =>
+      _VacantInviteSectionState();
+}
+
+class _VacantInviteSectionState extends ConsumerState<_VacantInviteSection> {
+  bool _isGenerating = false;
+
+  ActiveInviteCode? get _activeCode =>
+      ref.read(inviteCodeStoreProvider.notifier).activeFor(widget.apt.id);
+
+  Future<void> _generateInvite() async {
+    if (_isGenerating) return;
+    setState(() => _isGenerating = true);
+    final active = await ref
+        .read(inviteCodeStoreProvider.notifier)
+        .generateInviteCode(widget.apt.id);
+    if (!mounted) return;
+    setState(() => _isGenerating = false);
+    if (active == null) {
+      ref.read(toastProvider.notifier).show(
+            context.t.common.loadFailed,
+            type: ToastType.error,
+          );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(inviteCodeStoreProvider);
+    final active = _activeCode;
+
+    if (active != null) {
+      return _InviteCodeCard(
+        apt: widget.apt,
+        code: active.code,
+        expiresAt: active.expiresAt,
+      );
+    }
+
+    return SizedBox(
+      height: AppSizes.buttonHeightPrimary,
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: _isGenerating ? null : _generateInvite,
+        style: AppButtonStyles.elevatedAccent(fullWidth: true),
+        icon: _isGenerating
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Icon(Icons.person_add_alt_1_rounded),
+        label: Text(context.t.features.buildings.inviteResident),
+      ),
+    );
+  }
+}
+
+class _InviteCodeCard extends ConsumerWidget {
+  const _InviteCodeCard({
+    required this.apt,
+    required this.code,
+    required this.expiresAt,
+  });
+
+  final ApartmentEntity apt;
+  final String code;
+  final DateTime expiresAt;
+
+  Future<void> _shareInvite(BuildContext context, WidgetRef ref) async {
+    final buildings = ref.read(buildingsStoreProvider).value;
+    final building = buildings?.where((b) => b.id == apt.buildingId).firstOrNull;
+    if (building == null) {
+      ref.read(toastProvider.notifier).show(
+            context.t.common.loadFailed,
+            type: ToastType.error,
+          );
+      return;
+    }
+
+    final message = InviteCodeHelpers.buildShareMessage(
+      code: code,
+      building: building,
+      apartment: apt,
+      expiresAt: expiresAt,
+    );
+
+    try {
+      final box = context.findRenderObject() as RenderBox?;
+      await SharePlus.instance.share(
+        ShareParams(
+          text: message,
+          subject: 'AidatPanel Davet',
+          sharePositionOrigin: box != null
+              ? box.localToGlobal(Offset.zero) & box.size
+              : null,
         ),
-        secondaryLabel: isOccupied
-            ? context.t.common.removeResident
-            : context.t.common.deleteApartment,
-        onSecondary: () {
-          if (isOccupied) {
-            ApartmentDetailsSheet._afterApartmentSheetClosed(
-              pageContext,
-              context,
-              () => RemoveResidentDialog.show(
-                pageContext,
-                apartment: apt,
-              ),
+      );
+    } catch (_) {
+      await Clipboard.setData(ClipboardData(text: message));
+      if (context.mounted) {
+        ref.read(toastProvider.notifier).show(
+              context.t.common.clipboardCopied,
+              type: ToastType.info,
             );
-          } else {
-            ApartmentDetailsSheet._afterApartmentSheetClosed(
-              pageContext,
-              context,
-              () => DeleteApartmentDialog.show(
-                pageContext,
-                apartment: apt,
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final remaining = expiresAt.difference(DateTime.now());
+
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.spacingM),
+      decoration: BoxDecoration(
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            context.t.features.buildings.codeReady,
+            style: AppTypography.body1.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSizes.spacingS),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.spacingM,
+              vertical: AppSizes.spacingS,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.12),
               ),
-            );
-          }
-        },
+            ),
+            child: SelectableText(
+              code,
+              style: AppTypography.h3.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 2,
+                fontFamily: 'monospace',
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingS),
+          Text(
+            '${context.t.common.remainingPrefix}: ${InviteCodeHelpers.remainingText(remaining)}',
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          Row(
+            children: [
+              FixedWidthCopyButton(
+                textToCopy: code,
+                copyLabel: context.t.features.buildings.copy,
+                copiedLabel: context.t.common.copied,
+              ),
+              const SizedBox(width: AppSizes.spacingM),
+              Expanded(
+                child: SizedBox(
+                  height: AppSizes.buttonHeightPrimary,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _shareInvite(context, ref),
+                    style: AppButtonStyles.elevatedAccent(fullWidth: true),
+                    icon: const Icon(Icons.share_rounded),
+                    label: Text(context.t.features.buildings.inviteResident),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

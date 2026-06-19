@@ -1,3 +1,4 @@
+import '../../../core/constants/invite_link_constants.dart';
 import '../../apartments/domain/entities/apartment_entity.dart';
 import '../domain/entities/building_entity.dart';
 
@@ -50,6 +51,11 @@ class InviteCodeHelpers {
     return '${d.inMinutes} dk';
   }
 
+  /// Davet linki (web landing — uygulama yüklüyse App Link ile açılır).
+  static String buildInviteLink(String code) {
+    return InviteLinkConstants.joinPathWithCode(code);
+  }
+
   /// Paylaşılacak mesajı oluşturur.
   static String buildShareMessage({
     required String code,
@@ -57,11 +63,14 @@ class InviteCodeHelpers {
     required ApartmentEntity apartment,
     required DateTime expiresAt,
   }) {
-    return 'AidatPanel davet kodu\n\n'
+    final link = buildInviteLink(code);
+    return 'AidatPanel davet\n\n'
         'Bina: ${building.name}\n'
-        'Daire: ${formatApartmentLabel(apartment.apartmentNumber)}\n'
-        'Kod: $code\n\n'
+        'Daire: ${formatApartmentLabel(apartment.apartmentNumber)}\n\n'
+        'Katılmak için bağlantıya dokunun:\n$link\n\n'
+        'Davet kodu: $code\n'
         'Son kullanma: ${formatDate(expiresAt)} (7 gün geçerli)\n\n'
-        'AidatPanel uygulamasını indirip kayıt olurken bu kodu kullanabilirsiniz.';
+        'Uygulama yüklü değilse bağlantıdan indirebilir, kurulumdan sonra '
+        'aynı bağlantıya tekrar dokunarak kayıt olabilirsiniz.';
   }
 }

@@ -36,12 +36,40 @@ class DashboardStatTile extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
+    final valueStyle = AppTypography.h3.copyWith(
+      color: valueColor ?? AppColors.textPrimary,
+      fontWeight: FontWeight.w800,
+      fontSize: 17,
+      height: 1.1,
+    );
+
+    Widget valueWidget;
+    if (rollingValue != null) {
+      valueWidget = AnimatedRollingValue(
+        target: rollingValue!,
+        prefix: rollingPrefix,
+        suffix: rollingSuffix,
+        delay: rollingDelay,
+        formatter: rollingFormatter,
+        style: valueStyle,
+      );
+    } else {
+      valueWidget = Text(
+        value,
+        style: valueStyle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+
     return Container(
       decoration: DashboardScreenStyle.statCard(),
-      padding: const EdgeInsets.all(DashboardScreenStyle.statTilePadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+      padding: const EdgeInsets.symmetric(
+        horizontal: DashboardScreenStyle.statTilePadding,
+        vertical: 8,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             width: DashboardScreenStyle.iconBoxSize,
@@ -54,51 +82,27 @@ class DashboardStatTile extends StatelessWidget {
             alignment: Alignment.center,
             child: Icon(icon, color: iconColor, size: 18),
           ),
-          const SizedBox(height: 6),
-          rollingValue != null
-              ? AnimatedRollingValue(
-                  target: rollingValue!,
-                  prefix: rollingPrefix,
-                  suffix: rollingSuffix,
-                  delay: rollingDelay,
-                  formatter: rollingFormatter,
-                  style: AppTypography.h3.copyWith(
-                    color: valueColor ?? AppColors.textPrimary,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 18,
-                    height: 1.1,
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                valueWidget,
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: AppTypography.label.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    height: 1.15,
                   ),
-                )
-              : SizedBox(
-                  height: AnimatedRollingValue.lineHeightFor(
-                    AppTypography.h3.copyWith(fontSize: 18, height: 1.1),
-                  ),
-                  width: double.infinity,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      value,
-                      style: AppTypography.h3.copyWith(
-                        color: valueColor ?? AppColors.textPrimary,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
-                        height: 1.1,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: AppTypography.label.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
+              ],
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

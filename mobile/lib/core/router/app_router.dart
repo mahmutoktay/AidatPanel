@@ -266,7 +266,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/join',
         name: 'join',
         builder: (context, state) {
-          return const SignUpScreen();
+          final code = state.uri.queryParameters['code'];
+          return SignUpScreen(initialInviteCode: code);
         },
       ),
       GoRoute(

@@ -20,10 +20,17 @@ import '../widgets/sign_up_role_toggle.dart';
 
 /// Birleşik üyelik ekranı: varsayılan sakin (davet kodu), üstten yönetici geçişi.
 class SignUpScreen extends ConsumerStatefulWidget {
-  const SignUpScreen({super.key, this.initialIsManager = false});
+  const SignUpScreen({
+    super.key,
+    this.initialIsManager = false,
+    this.initialInviteCode,
+  });
 
   /// `true` → yönetici kayıt formu; `false` → sakin (davet kodu) formu.
   final bool initialIsManager;
+
+  /// Davet linkinden gelen kod (sakin kayıt alanına ön doldurulur).
+  final String? initialInviteCode;
 
   @override
   ConsumerState<SignUpScreen> createState() => _SignUpScreenState();
@@ -65,8 +72,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   @override
   void initState() {
     super.initState();
+    final prefilledCode = widget.initialInviteCode?.trim();
     _isManager = widget.initialIsManager;
-    _inviteCodeController = TextEditingController();
+    if (prefilledCode != null && prefilledCode.isNotEmpty) {
+      _isManager = false;
+    }
+    _inviteCodeController = TextEditingController(text: prefilledCode ?? '');
     _nameController = TextEditingController();
     _emailController = TextEditingController();
     _phoneController = TextEditingController();

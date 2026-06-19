@@ -9,13 +9,15 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../../shared/widgets/dashboard/dashboard_bottom_nav_bar.dart';
-import '../../../../shared/widgets/dashboard/dashboard_welcome_header.dart';
-import '../../../../shared/widgets/notification_icon_button.dart';
+import '../../../../shared/widgets/dashboard/dashboard_app_bar.dart';
+import '../../../../shared/widgets/dashboard/profile_drawer.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../../../shared/widgets/notification_icon_button.dart';
 import '../providers/manager_home_counts_provider.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../dues/presentation/screens/manager_dues_tab.dart';
-import '../../../../shared/widgets/settings_tab.dart';
+import '../../../../shared/widgets/menu_tab.dart';
 
 import '../widgets/manager_home_tab.dart';
 import '../widgets/manager_buildings_tab.dart';
@@ -31,6 +33,7 @@ class ManagerDashboardScreen extends ConsumerStatefulWidget {
 class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -77,8 +80,6 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     final userName =
         ref.watch(authStateProvider).user?.name ?? context.t.common.user;
     final selectedTab = ref.watch(managerTabIndexProvider);
-    final isSettings = selectedTab == 3;
-    final title = isSettings ? context.t.common.settings : context.t.common.manager;
 
     return DashboardBackHandler(
       dashboardRootPath: '/manager-dashboard',
@@ -100,6 +101,9 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
             duration: AppBackNavigation.exitGracePeriod,
           ),
       child: Scaffold(
+        key: _scaffoldKey,
+        drawer: const ProfileDrawer(role: UserRole.manager),
+        drawerEnableOpenDragGesture: false,
         backgroundColor: AppColors.dashboardBackground,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -111,10 +115,11 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                   top: AppSizes.spacingS,
                   bottom: AppSizes.spacingM,
                 ),
-                child: DashboardPageHeader(
-                  title: title,
+                child: DashboardAppBar(
+                  roleTitle: context.t.common.manager,
                   userName: userName,
-                  showWelcome: !isSettings,
+                  showWelcome: selectedTab == 0,
+                  onProfileTap: () => _scaffoldKey.currentState?.openDrawer(),
                 ),
               ),
             ),
@@ -130,7 +135,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                   ),
                   ManagerBuildingsTab(buildingsAsync: buildingsAsync),
                   const ManagerDuesTab(),
-                  const SettingsTab(),
+                  const MenuTab(role: UserRole.manager),
                 ],
               ),
             ),
@@ -163,9 +168,9 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
               label: context.t.common.dues,
             ),
             DashboardNavDestination(
-              icon: Icons.settings_outlined,
-              selectedIcon: Icons.settings,
-              label: context.t.common.settings,
+              icon: Icons.apps_outlined,
+              selectedIcon: Icons.apps_rounded,
+              label: context.t.common.menu,
             ),
           ],
         ),

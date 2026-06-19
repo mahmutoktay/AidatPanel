@@ -58,6 +58,12 @@ void syncAppColors(AppThemePreference pref, Brightness platformBrightness) {
   );
 }
 
+/// GoRouter aynı child örneğini tuttuğunda statik [AppColors] güncellenmez;
+/// [KeyedSubtree] anahtarı ile alt ağacı tema değişiminde yeniden kur.
+Object themeSubtreeKey(AppThemePreference pref, Brightness platformBrightness) {
+  return Object.hash(pref, isDarkTheme(pref, platformBrightness));
+}
+
 class ThemeModeNotifier extends Notifier<AppThemePreference> {
   @override
   AppThemePreference build() =>
@@ -97,7 +103,11 @@ Future<void> initTheme() async {
 
 Future<void> changeThemeMode(WidgetRef ref, AppThemePreference pref) async {
   ref.read(themeModeProvider.notifier).update(pref);
-  await ref
-      .read(secureStorageProvider)
-      .saveTheme(themePreferenceToStorage(pref));
+  try {
+    await ref
+        .read(secureStorageProvider)
+        .saveTheme(themePreferenceToStorage(pref));
+  } catch (_) {
+    // Depolama hatası UI temasını geri almaz; bir sonraki açılışta yeniden seçilir.
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:aidatpanel/core/constants/api_constants.dart';
+import 'package:aidatpanel/core/navigation/invite_link_parser.dart';
 import 'package:aidatpanel/core/network/paginated_list_result.dart';
 import 'package:aidatpanel/features/expenses/domain/entities/expense_create_outcome.dart';
 import 'package:aidatpanel/features/expenses/data/datasources/expense_remote_datasource.dart';
@@ -33,6 +34,14 @@ void main() {
     test('geçerli format normalize edilir', () {
       expect(
         AuthValidators.normalizeInviteCode(' ap3-b12-a9f0 '),
+        'AP3-B12-A9F0',
+      );
+    });
+
+    test('davet linkinden kod çıkarılır', () {
+      final uri = Uri.parse('https://aidatpanel.com/join?code=AP3-B12-A9F0');
+      expect(
+        InviteLinkParser.inviteCodeFrom(uri),
         'AP3-B12-A9F0',
       );
     });

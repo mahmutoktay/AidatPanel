@@ -32,7 +32,7 @@ dependencies:
   slang_flutter: ^4.15.0
 
   # Firebase (FAZ 2 — push / FCM)
-  firebase_core: ^4.10.0
+  firebase_core: ^4.11.0
   firebase_messaging: ^16.3.0
   flutter_local_notifications: ^21.0.0
   permission_handler: ^12.0.3
@@ -42,6 +42,7 @@ dependencies:
   intl: ^0.20.2
   equatable: ^2.0.5
   share_plus: ^13.1.0
+  app_links: ^6.4.0
   package_info_plus: ^10.1.0
   device_info_plus: ^13.1.0
   image_picker: ^1.2.1

@@ -9,6 +9,7 @@ import '../../domain/entities/building_entity.dart';
 import '../../utils/invite_code_helpers.dart';
 import '../utils/apartment_ui_utils.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/fixed_width_copy_button.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
 
 /// Adım 3: Üretilen davet kodunu gösteren ve aksiyonları sunan görünüm.
@@ -204,16 +205,10 @@ class InviteCodeResultView extends StatelessWidget {
   Widget _buildPrimaryActions(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: SizedBox(
-            height: AppSizes.buttonHeightPrimary,
-            child: ElevatedButton.icon(
-              onPressed: onCopy,
-              style: AppButtonStyles.elevatedPrimary(fullWidth: true),
-              icon: const Icon(Icons.copy_rounded),
-              label: Text(context.t.features.buildings.copy),
-            ),
-          ),
+        FixedWidthCopyButton(
+          textToCopy: code,
+          copyLabel: context.t.features.buildings.copy,
+          copiedLabel: context.t.common.copied,
         ),
         const SizedBox(width: AppSizes.spacingM),
         Expanded(
@@ -223,7 +218,7 @@ class InviteCodeResultView extends StatelessWidget {
               onPressed: onShare,
               style: AppButtonStyles.outlinedPrimary(fullWidth: true),
               icon: const Icon(Icons.share_rounded),
-              label: Text(context.t.features.buildings.share),
+              label: Text(context.t.features.buildings.inviteResident),
             ),
           ),
         ),

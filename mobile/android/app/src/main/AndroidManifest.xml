@@ -39,6 +39,25 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Davet linki: https://aidatpanel.com/join?code=... -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="aidatpanel.com"
+                    android:pathPrefix="/join" />
+            </intent-filter>
+            <!-- Yedek: özel şema (App Link doğrulanmamış ortamlar) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="aidatpanel"
+                    android:host="join" />
+            </intent-filter>
             <!-- Receive Single or Multiple Image/PDF Files -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../shared/widgets/branded_app_logo.dart';
+import '../../../../shared/widgets/branded_app_title.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -23,8 +24,6 @@ class AuthBrandHeader extends StatelessWidget {
 
   final AuthBrandHeaderLayout layout;
 
-  static const String _logoAsset = 'assets/brand/app_logo.png';
-
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.auth;
@@ -41,41 +40,18 @@ class AuthBrandHeader extends StatelessWidget {
             : AppSizes.spacingS,
       ),
       child: layout == AuthBrandHeaderLayout.horizontal
-          ? _buildHorizontal(
-              appTitle: t.appTitle,
-              appSubtitle: t.appSubtitle,
-            )
-          : _buildVertical(
-              appTitle: t.appTitle,
-              appSubtitle: t.appSubtitle,
-            ),
+          ? _buildHorizontal(appSubtitle: t.appSubtitle)
+          : _buildVertical(appSubtitle: t.appSubtitle),
     );
   }
 
-  Widget _buildVertical({
-    required String appTitle,
-    required String appSubtitle,
-  }) {
+  Widget _buildVertical({required String appSubtitle}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Image.asset(
-          _logoAsset,
-          width: 88,
-          height: 88,
-          fit: BoxFit.contain,
-        ),
+        const BrandedAppLogo(size: 88, padding: 5),
         const SizedBox(height: AppSizes.spacingM),
-        Text(
-          appTitle,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.archivoBlack(
-            fontSize: 30,
-            height: 1.05,
-            letterSpacing: 1.4,
-            color: AppColors.textPrimary,
-          ),
-        ),
+        const BrandedAppTitle(fontSize: 30),
         const SizedBox(height: AppSizes.spacingXS),
         Text(
           appSubtitle,
@@ -90,35 +66,19 @@ class AuthBrandHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildHorizontal({
-    required String appTitle,
-    required String appSubtitle,
-  }) {
+  Widget _buildHorizontal({required String appSubtitle}) {
     return Center(
       child: Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Image.asset(
-            _logoAsset,
-            width: 64,
-            height: 64,
-            fit: BoxFit.contain,
-          ),
+          const BrandedAppLogo(size: 64, padding: 4),
           const SizedBox(width: AppSizes.spacingM),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                appTitle,
-                style: GoogleFonts.archivoBlack(
-                  fontSize: 26,
-                  height: 1.05,
-                  letterSpacing: 1.2,
-                  color: AppColors.textPrimary,
-                ),
-              ),
+              const BrandedAppTitle(fontSize: 26, textAlign: TextAlign.start),
               const SizedBox(height: 2),
               Text(
                 appSubtitle,

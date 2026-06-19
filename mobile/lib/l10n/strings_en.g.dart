@@ -257,6 +257,69 @@ class Translations$common$en {
 	/// en: 'Settings'
 	String get settings => 'Settings';
 
+	/// en: 'Menu'
+	String get menu => 'Menu';
+
+	/// en: 'Access all features in one place'
+	String get menuSubtitle => 'Access all features in one place';
+
+	/// en: 'Finance & collection'
+	String get menuSectionFinance => 'Finance & collection';
+
+	/// en: 'Building management'
+	String get menuSectionBuildings => 'Building management';
+
+	/// en: 'Communication'
+	String get menuSectionCommunication => 'Communication';
+
+	/// en: 'Payments'
+	String get menuSectionPayments => 'Payments';
+
+	/// en: 'Support'
+	String get menuSectionSupport => 'Support';
+
+	/// en: 'Legal & info'
+	String get menuSectionLegal => 'Legal & info';
+
+	/// en: 'Account'
+	String get menuSectionAccount => 'Account';
+
+	/// en: 'Overdue apartments'
+	String get menuOverdueApartments => 'Overdue apartments';
+
+	/// en: 'Send announcement'
+	String get menuSendAnnouncement => 'Send announcement';
+
+	/// en: 'Download report'
+	String get menuDownloadReport => 'Download report';
+
+	/// en: 'Add building'
+	String get menuAddBuilding => 'Add building';
+
+	/// en: 'Create invite code'
+	String get menuInviteCode => 'Create invite code';
+
+	/// en: 'My profile'
+	String get menuMyProfile => 'My profile';
+
+	/// en: 'Active sessions'
+	String get menuActiveSessions => 'Active sessions';
+
+	/// en: 'My receipts'
+	String get menuMyDekonts => 'My receipts';
+
+	/// en: 'Review receipts'
+	String get menuReviewDekonts => 'Review receipts';
+
+	/// en: 'Create ticket'
+	String get menuCreateTicket => 'Create ticket';
+
+	/// en: 'Quick access'
+	String get profileDrawerQuickLinks => 'Quick access';
+
+	/// en: 'My account'
+	String get profileDrawerAccount => 'My account';
+
 	/// en: 'User'
 	String get user => 'User';
 
@@ -266,11 +329,11 @@ class Translations$common$en {
 	/// en: 'Managed Buildings'
 	String get managedBuildings => 'Managed Buildings';
 
-	/// en: 'Issues'
-	String get issues => 'Issues';
+	/// en: 'Tickets'
+	String get issues => 'Tickets';
 
-	/// en: 'Issues Tab'
-	String get issuesTab => 'Issues Tab';
+	/// en: 'Tickets Tab'
+	String get issuesTab => 'Tickets Tab';
 
 	/// en: 'Apartment'
 	String get apartment => 'Apartment';
@@ -478,6 +541,9 @@ class Translations$common$en {
 
 	/// en: 'Code copied'
 	String get codeCopied => 'Code copied';
+
+	/// en: 'Copied'
+	String get copied => 'Copied';
 
 	/// en: 'Message copied to clipboard'
 	String get clipboardCopied => 'Message copied to clipboard';
@@ -1355,11 +1421,26 @@ class Translations$features$buildings$en {
 	/// en: 'Add New Building'
 	String get newBuilding => 'Add New Building';
 
+	/// en: 'New Building'
+	String get newBuildingShort => 'New Building';
+
+	/// en: 'New Site'
+	String get newSite => 'New Site';
+
+	/// en: '+ New'
+	String get fabNew => '+ New';
+
+	/// en: 'Create an invite code to add a resident.'
+	String get vacantInviteHint => 'Create an invite code to add a resident.';
+
 	/// en: 'Invite Code'
 	String get inviteCode => 'Invite Code';
 
 	/// en: 'Create Invite Code'
 	String get createInviteCode => 'Create Invite Code';
+
+	/// en: 'Invite'
+	String get inviteResident => 'Invite';
 
 	/// en: 'Cancel Code'
 	String get cancelCode => 'Cancel Code';
@@ -3369,11 +3450,32 @@ extension on Translations {
 			'common.buildings' => 'Buildings',
 			'common.dues' => 'Dues',
 			'common.settings' => 'Settings',
+			'common.menu' => 'Menu',
+			'common.menuSubtitle' => 'Access all features in one place',
+			'common.menuSectionFinance' => 'Finance & collection',
+			'common.menuSectionBuildings' => 'Building management',
+			'common.menuSectionCommunication' => 'Communication',
+			'common.menuSectionPayments' => 'Payments',
+			'common.menuSectionSupport' => 'Support',
+			'common.menuSectionLegal' => 'Legal & info',
+			'common.menuSectionAccount' => 'Account',
+			'common.menuOverdueApartments' => 'Overdue apartments',
+			'common.menuSendAnnouncement' => 'Send announcement',
+			'common.menuDownloadReport' => 'Download report',
+			'common.menuAddBuilding' => 'Add building',
+			'common.menuInviteCode' => 'Create invite code',
+			'common.menuMyProfile' => 'My profile',
+			'common.menuActiveSessions' => 'Active sessions',
+			'common.menuMyDekonts' => 'My receipts',
+			'common.menuReviewDekonts' => 'Review receipts',
+			'common.menuCreateTicket' => 'Create ticket',
+			'common.profileDrawerQuickLinks' => 'Quick access',
+			'common.profileDrawerAccount' => 'My account',
 			'common.user' => 'User',
 			'common.welcome' => 'Welcome',
 			'common.managedBuildings' => 'Managed Buildings',
-			'common.issues' => 'Issues',
-			'common.issuesTab' => 'Issues Tab',
+			'common.issues' => 'Tickets',
+			'common.issuesTab' => 'Tickets Tab',
 			'common.apartment' => 'Apartment',
 			'common.addBuilding' => 'Add Building',
 			'common.inviteCode' => 'Invite Code',
@@ -3443,6 +3545,7 @@ extension on Translations {
 			'common.emptyApartment' => 'Empty apartment',
 			'common.codeRevoked' => 'Code revoked',
 			'common.codeCopied' => 'Code copied',
+			'common.copied' => 'Copied',
 			'common.clipboardCopied' => 'Message copied to clipboard',
 			'common.expiresAtPrefix' => 'Expires at',
 			'common.remainingPrefix' => 'Remaining',
@@ -3635,8 +3738,13 @@ extension on Translations {
 			'features.buildings.buildingDetail' => 'Building Detail',
 			'features.buildings.addBuilding' => 'Add Building',
 			'features.buildings.newBuilding' => 'Add New Building',
+			'features.buildings.newBuildingShort' => 'New Building',
+			'features.buildings.newSite' => 'New Site',
+			'features.buildings.fabNew' => '+ New',
+			'features.buildings.vacantInviteHint' => 'Create an invite code to add a resident.',
 			'features.buildings.inviteCode' => 'Invite Code',
 			'features.buildings.createInviteCode' => 'Create Invite Code',
+			'features.buildings.inviteResident' => 'Invite',
 			'features.buildings.cancelCode' => 'Cancel Code',
 			'features.buildings.apartmentOccupied' => 'Apartment Occupied',
 			'features.buildings.copy' => 'Copy',
@@ -3751,6 +3859,8 @@ extension on Translations {
 			'features.auth.noAccount' => 'Don\'t have an account? Register',
 			'features.auth.joinWithCode' => 'Join with Invite Code',
 			'features.auth.signUp' => 'Sign up',
+			_ => null,
+		} ?? switch (path) {
 			'features.auth.signUpTitle' => 'Sign Up',
 			'features.auth.signUpSubtitle' => 'How would you like to join?',
 			'features.auth.beManager' => 'Become a manager',
@@ -3778,8 +3888,6 @@ extension on Translations {
 			'features.auth.invalidInviteCodeFormat' => 'Invalid invite code format (Ex: AP3-B12-A9F0)',
 			'features.auth.invalidPhoneFormat' => 'Enter a valid phone number (5XX XXX XX XX)',
 			'features.auth.inviteCodeAndPasswordRequired' => 'Invite code, name and password cannot be empty',
-			_ => null,
-		} ?? switch (path) {
 			'features.auth.invalidPhoneNumber' => 'Enter a valid phone number',
 			'features.auth.areYouManager' => 'Are you a manager? Register',
 			'features.apartments.residentPanel' => 'Resident',
@@ -4265,6 +4373,8 @@ extension on Translations {
 			'legal.helpIntro' => 'Help center coming soon',
 			'legal.helpBody' => 'FAQs, step-by-step guides, and support channels will be added here soon. For app support: store@vefayazilim.com (Vefa Yazılım). For urgent building matters, contact your building manager or site administration.',
 			'db_context.user_entry' => 'Record: {value}',
+			_ => null,
+		} ?? switch (path) {
 			'db_context.building_name' => 'Building: {value}',
 			'db_context.apartment_label' => 'Apartment: {value}',
 			'db_context.code_value' => 'Code: {value}',

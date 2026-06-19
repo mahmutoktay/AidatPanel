@@ -1,0 +1,105 @@
+/* Davet sayfası — web/style.css ile birlikte kullanılır */
+.join-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.join-page main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px 64px;
+}
+
+.join-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 32px 28px;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.06);
+}
+
+.join-card h1 {
+  color: var(--primary);
+  font-size: 1.5rem;
+  margin: 0 0 12px;
+  line-height: 1.3;
+}
+
+.join-lead {
+  color: var(--text-sec);
+  margin: 0 0 20px;
+  font-size: 1.05rem;
+}
+
+.join-code-label {
+  color: var(--text-sec);
+  font-weight: 600;
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.join-code-box {
+  background: var(--light-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--primary);
+  margin-bottom: 24px;
+  word-break: break-all;
+}
+
+.join-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.join-actions .btn {
+  width: 100%;
+  min-height: 52px;
+  font-size: 1.05rem;
+}
+
+.join-stores {
+  margin-top: 8px;
+}
+
+.join-stores .store-buttons {
+  margin-top: 16px;
+}
+
+.join-hint {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-light);
+  color: var(--text-sec);
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.join-error {
+  color: #c62828;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.join-nav .logo {
+  text-decoration: none;
+}
+
+@media (max-width: 480px) {
+  .join-card {
+    padding: 24px 20px;
+  }
+}

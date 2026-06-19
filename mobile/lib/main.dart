@@ -10,6 +10,7 @@ import 'core/constants/app_constants.dart';
 import 'core/notifications/fcm_scope.dart';
 import 'core/notifications/firebase_bootstrap.dart';
 import 'core/providers/theme_mode_provider.dart';
+import 'core/navigation/invite_deep_link_listener.dart';
 import 'core/router/app_router.dart';
 import 'core/subscription/revenue_cat_service.dart';
 import 'core/theme/app_theme.dart';
@@ -196,6 +197,7 @@ class _MyAppContentState extends ConsumerState<_MyAppContent>
     syncAppColors(themePref, platformBrightness);
     final isDark = isDarkTheme(themePref, platformBrightness);
     applySystemChromeOverlay(isDark);
+    final subtreeKey = themeSubtreeKey(themePref, platformBrightness);
 
     final router = ref.watch(appRouterProvider);
     return TranslationProvider(
@@ -213,8 +215,15 @@ class _MyAppContentState extends ConsumerState<_MyAppContent>
         ],
         supportedLocales: AppLocaleUtils.supportedLocales,
         builder: (context, child) {
-          return FcmScope(
-            child: ToastOverlay(child: child ?? const SizedBox.shrink()),
+          return InviteDeepLinkListener(
+            child: FcmScope(
+              child: ToastOverlay(
+                child: KeyedSubtree(
+                  key: ValueKey(subtreeKey),
+                  child: child ?? const SizedBox.shrink(),
+                ),
+              ),
+            ),
           );
         },
       ),

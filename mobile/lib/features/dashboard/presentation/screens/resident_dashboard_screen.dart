@@ -8,10 +8,12 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/dashboard/dashboard_bottom_nav_bar.dart';
-import '../../../../shared/widgets/dashboard/dashboard_welcome_header.dart';
-import '../../../../shared/widgets/notification_icon_button.dart';
-import '../../../../shared/widgets/settings_tab.dart';
+import '../../../../shared/widgets/dashboard/dashboard_app_bar.dart';
+import '../../../../shared/widgets/dashboard/profile_drawer.dart';
+import '../../../../shared/widgets/menu_tab.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
+import '../../../../shared/widgets/notification_icon_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../../dues/presentation/screens/resident_dues_tab.dart';
@@ -30,6 +32,7 @@ class ResidentDashboardScreen extends ConsumerStatefulWidget {
 class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _requestedInitialDues = false;
   bool _requestedInitialTickets = false;
 
@@ -108,8 +111,6 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
     final t = context.t.common;
     final userName =
         ref.watch(authStateProvider).user?.name ?? context.t.common.user;
-    final isSettings = selectedTab == 3;
-    final title = isSettings ? t.settings : t.resident;
 
     return DashboardBackHandler(
       dashboardRootPath: '/resident-dashboard',
@@ -129,6 +130,9 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
             duration: AppBackNavigation.exitGracePeriod,
           ),
       child: Scaffold(
+        key: _scaffoldKey,
+        drawer: const ProfileDrawer(role: UserRole.resident),
+        drawerEnableOpenDragGesture: false,
         backgroundColor: AppColors.dashboardBackground,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -140,10 +144,11 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
                   top: AppSizes.spacingS,
                   bottom: AppSizes.spacingM,
                 ),
-                child: DashboardPageHeader(
-                  title: title,
+                child: DashboardAppBar(
+                  roleTitle: t.resident,
                   userName: userName,
-                  showWelcome: !isSettings,
+                  showWelcome: selectedTab == 0,
+                  onProfileTap: () => _scaffoldKey.currentState?.openDrawer(),
                 ),
               ),
             ),
@@ -158,7 +163,7 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
                   ),
                   const ResidentDuesTab(),
                   const ResidentTicketsTab(),
-                  const SettingsTab(),
+                  const MenuTab(role: UserRole.resident),
                 ],
               ),
             ),
@@ -191,9 +196,9 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
               label: t.issues,
             ),
             DashboardNavDestination(
-              icon: Icons.settings_outlined,
-              selectedIcon: Icons.settings,
-              label: t.settings,
+              icon: Icons.apps_outlined,
+              selectedIcon: Icons.apps_rounded,
+              label: t.menu,
             ),
           ],
         ),

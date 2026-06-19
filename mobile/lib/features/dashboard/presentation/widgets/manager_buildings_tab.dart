@@ -16,6 +16,7 @@ import '../../../buildings/presentation/models/building_list_item_model.dart';
 import '../../../buildings/presentation/utils/building_collection_status.dart';
 import '../../../buildings/presentation/widgets/building_list_card.dart';
 import '../../../buildings/presentation/widgets/building_sort_bottom_sheet.dart';
+import '../../../buildings/presentation/widgets/buildings_expandable_fab.dart';
 import '../../../buildings/presentation/widgets/buildings_summary_strip.dart';
 import '../../../buildings/presentation/widgets/delete_building_dialog.dart';
 import '../../../buildings/presentation/widgets/edit_building_bottom_sheet.dart';
@@ -38,17 +39,14 @@ class ManagerBuildingsTab extends ConsumerStatefulWidget {
 
 class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
   BuildingListSort _sort = BuildingListSort.byOverdue;
+  bool _fabExpanded = false;
+  final _fabKey = GlobalKey<BuildingsExpandableFabState>();
 
-  static const _actionButtonRadius = 18.0;
+  static const _fabBottomPadding = 96.0;
 
-  ButtonStyle _actionButtonStyle(ButtonStyle base) {
-    return base.copyWith(
-      shape: WidgetStatePropertyAll(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(_actionButtonRadius),
-        ),
-      ),
-    );
+  void _closeFab() {
+    _fabKey.currentState?.close();
+    if (_fabExpanded) setState(() => _fabExpanded = false);
   }
 
   @override
@@ -100,19 +98,23 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
     final sortedItems = sortBuildingListItems(items, _sort);
     final totals = BuildingsSummaryTotals.fromItems(items);
 
-    return RefreshIndicator(
-      onRefresh: _onRefresh,
-      color: AppColors.primary,
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          SliverPadding(
-            padding: AppSizes.screenBodyScrollPadding.copyWith(bottom: 0),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                _buildActionButtons(context),
-                const SizedBox(height: AppSizes.spacingM),
-                BuildingsSummaryStrip(totals: totals),
+    return Stack(
+      children: [
+        BuildingsExpandableFabOverlay(
+          visible: _fabExpanded,
+          onClose: _closeFab,
+        ),
+        RefreshIndicator(
+          onRefresh: _onRefresh,
+          color: AppColors.primary,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverPadding(
+                padding: AppSizes.screenBodyScrollPadding.copyWith(bottom: 0),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    BuildingsSummaryStrip(totals: totals),
                 const SizedBox(height: AppSizes.spacingL),
                 _buildListHeader(context),
                 if (isRefreshing && buildings.isNotEmpty) ...[
@@ -143,7 +145,10 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
             )
           else
             SliverPadding(
-              padding: AppSizes.screenBodyScrollPadding.copyWith(top: 0),
+              padding: AppSizes.screenBodyScrollPadding.copyWith(
+                top: 0,
+                bottom: _fabBottomPadding,
+              ),
               sliver: SliverList.builder(
                 itemCount: sortedItems.length,
                 itemBuilder: (context, index) {
@@ -166,35 +171,20 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
                 },
               ),
             ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: AppSizes.buttonHeightPrimary,
-            child: ElevatedButton.icon(
-              onPressed: _onAddBuildingPressed,
-              style: _actionButtonStyle(AppButtonStyles.elevatedPrimary()),
-              icon: const Icon(Icons.add_business),
-              label: Text(context.t.common.addBuilding),
-            ),
+            ],
           ),
         ),
-        const SizedBox(width: AppSizes.spacingM),
-        Expanded(
-          child: SizedBox(
-            height: AppSizes.buttonHeightPrimary,
-            child: ElevatedButton.icon(
-              onPressed: _onCreateInviteCodePressed,
-              style: _actionButtonStyle(AppButtonStyles.elevatedAccent()),
-              icon: const Icon(Icons.qr_code_2),
-              label: Text(context.t.common.inviteCode),
-            ),
+        Positioned(
+          right: AppSizes.spacingM,
+          bottom: AppSizes.spacingM,
+          child: BuildingsExpandableFab(
+            key: _fabKey,
+            onNewBuilding: _onAddBuildingPressed,
+            onExpandedChanged: (expanded) {
+              if (_fabExpanded != expanded) {
+                setState(() => _fabExpanded = expanded);
+              }
+            },
           ),
         ),
       ],
@@ -244,10 +234,6 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
 
   void _onAddBuildingPressed() {
     context.push('/manager-dashboard/add-building');
-  }
-
-  void _onCreateInviteCodePressed() {
-    context.push('/manager-dashboard/invite-code');
   }
 
   void _onBuildingTapped(BuildingEntity building) {

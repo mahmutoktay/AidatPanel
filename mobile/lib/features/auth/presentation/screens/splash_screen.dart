@@ -1,15 +1,20 @@
 import 'dart:async';
 
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/platform/system_navigator_bridge.dart';
+import '../../../../core/navigation/invite_link_parser.dart';
+import '../../../../core/navigation/pending_invite_code_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/auth_screen_shell.dart';
+import '../../../../shared/widgets/branded_app_logo.dart';
+import '../../../../shared/widgets/branded_app_title.dart';
 import '../../../dekont/presentation/providers/share_intent_provider.dart';
 import '../../presentation/providers/auth_provider.dart';
 import '../../domain/entities/user_entity.dart' show UserRole;
@@ -91,6 +96,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     }
 
     if (!mounted) return;
+
+    try {
+      final initialLink = await AppLinks().getInitialLink();
+      if (initialLink != null) {
+        final code = InviteLinkParser.inviteCodeFrom(initialLink);
+        if (code != null) {
+          setPendingInviteCode(ref, code);
+        }
+      }
+    } catch (_) {}
+
     _navigateBasedOnAuth();
   }
 
@@ -197,6 +213,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         context.go('/resident-dashboard');
       }
     } else {
+      final pendingInvite = readPendingInviteCode(ref);
+      if (pendingInvite != null) {
+        clearPendingInviteCode(ref);
+        context.go('/join?code=${Uri.encodeComponent(pendingInvite)}');
+        return;
+      }
       context.go('/login');
     }
   }
@@ -227,20 +249,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
-                'assets/brand/app_logo.png',
-                width: 140,
-                height: 140,
-                fit: BoxFit.contain,
-              ),
+              const BrandedAppLogo(size: 152, padding: 6),
               const SizedBox(height: AppSizes.spacingL),
-              Text(
-                context.t.features.auth.appTitle,
-                style: AppTypography.h1.copyWith(
-                  color: AppColors.inkDark,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              const BrandedAppTitle(fontSize: 32),
               const SizedBox(height: AppSizes.spacingS),
               Text(
                 context.t.features.auth.appSubtitle,
