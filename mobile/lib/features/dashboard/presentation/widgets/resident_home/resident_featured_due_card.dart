@@ -42,10 +42,12 @@ class ResidentFeaturedDueCard extends StatelessWidget {
         ? '$periodLabel · $dueDateSuffix'
         : periodLabel;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.inkDark,
+        color: isDark ? AppColors.fill : AppColors.inkDark,
         borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
         boxShadow: DashboardScreenStyle.cardShadow,
       ),
@@ -57,7 +59,10 @@ class ResidentFeaturedDueCard extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.error.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -72,8 +77,10 @@ class ResidentFeaturedDueCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      dashT.overduePaymentsBadge
-                          .replaceAll('{count}', '$overdueCount'),
+                      dashT.overduePaymentsBadge.replaceAll(
+                        '{count}',
+                        '$overdueCount',
+                      ),
                       style: AppTypography.caption.copyWith(
                         color: AppColors.statusRed,
                         fontWeight: FontWeight.w700,
@@ -88,7 +95,7 @@ class ResidentFeaturedDueCard extends StatelessWidget {
           Text(
             amountText,
             style: AppTypography.h1.copyWith(
-              color: Colors.white,
+              color: isDark ? AppColors.textPrimary : Colors.white,
               fontWeight: FontWeight.w800,
               fontSize: 36,
               height: 1.1,
@@ -98,7 +105,9 @@ class ResidentFeaturedDueCard extends StatelessWidget {
           Text(
             subtitle,
             style: AppTypography.body2.copyWith(
-              color: Colors.white.withValues(alpha: 0.72),
+              color: isDark
+                  ? AppColors.textSecondary
+                  : Colors.white.withValues(alpha: 0.72),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -108,18 +117,23 @@ class ResidentFeaturedDueCard extends StatelessWidget {
             child: FilledButton(
               onPressed: onPay,
               style: FilledButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.textPrimary,
+                backgroundColor: isDark ? AppColors.actionButton : Colors.white,
+                foregroundColor: isDark
+                    ? AppColors.actionButtonForeground
+                    : AppColors.textPrimary,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(DashboardScreenStyle.pillRadius),
+                  borderRadius: BorderRadius.circular(
+                    DashboardScreenStyle.pillRadius,
+                  ),
                 ),
               ),
               child: Text(
                 dashT.payNow,
                 style: AppTypography.button.copyWith(
-                  color: AppColors.textPrimary,
+                  color: isDark
+                      ? AppColors.actionButtonForeground
+                      : AppColors.textPrimary,
                   fontWeight: FontWeight.w800,
                 ),
               ),

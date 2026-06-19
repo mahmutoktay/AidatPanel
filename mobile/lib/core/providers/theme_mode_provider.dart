@@ -64,18 +64,23 @@ class ThemeModeNotifier extends Notifier<AppThemePreference> {
       _bootThemePreference ?? AppThemePreference.system;
 
   void update(AppThemePreference pref) {
-    state = pref;
+    // Önce AppColors static field'larını güncelle, SONRA state'i değiştir.
+    // Bu sıralama, Riverpod'un watcher'ları tetiklemesi anında
+    // AppColors'in zaten doğru palete sahip olmasını garanti eder.
+    // Aksi halde widget rebuild'i sırasında eski renkler okunur
+    // ve alt navigasyon/tab bar anlık beyaz kalır.
     syncAppColors(
       pref,
       WidgetsBinding.instance.platformDispatcher.platformBrightness,
     );
+    state = pref;
   }
 }
 
 final themeModeProvider =
     NotifierProvider<ThemeModeNotifier, AppThemePreference>(
-  ThemeModeNotifier.new,
-);
+      ThemeModeNotifier.new,
+    );
 
 Future<void> initTheme() async {
   final storage = SecureStorage();
@@ -92,5 +97,7 @@ Future<void> initTheme() async {
 
 Future<void> changeThemeMode(WidgetRef ref, AppThemePreference pref) async {
   ref.read(themeModeProvider.notifier).update(pref);
-  await ref.read(secureStorageProvider).saveTheme(themePreferenceToStorage(pref));
+  await ref
+      .read(secureStorageProvider)
+      .saveTheme(themePreferenceToStorage(pref));
 }

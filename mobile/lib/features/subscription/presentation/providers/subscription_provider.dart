@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,10 +15,10 @@ import '../../domain/repositories/subscription_repository.dart';
 
 final subscriptionRemoteDataSourceProvider =
     Provider<SubscriptionRemoteDataSource>((ref) {
-  return SubscriptionRemoteDataSourceImpl(
-    dioClient: ref.watch(dioClientProvider),
-  );
-});
+      return SubscriptionRemoteDataSourceImpl(
+        dioClient: ref.watch(dioClientProvider),
+      );
+    });
 
 final subscriptionRepositoryProvider = Provider<SubscriptionRepository>((ref) {
   return SubscriptionRepositoryImpl(
@@ -62,14 +64,17 @@ class SubscriptionState {
     return SubscriptionState(
       isLoading: isLoading ?? this.isLoading,
       isPurchasing: isPurchasing ?? this.isPurchasing,
-      subscription:
-          clearSubscription ? null : (subscription ?? this.subscription),
+      subscription: clearSubscription
+          ? null
+          : (subscription ?? this.subscription),
       storePrices: storePrices ?? this.storePrices,
       error: clearError ? null : (error ?? this.error),
-      purchaseError:
-          clearPurchaseError ? null : (purchaseError ?? this.purchaseError),
-      successMessage:
-          clearSuccess ? null : (successMessage ?? this.successMessage),
+      purchaseError: clearPurchaseError
+          ? null
+          : (purchaseError ?? this.purchaseError),
+      successMessage: clearSuccess
+          ? null
+          : (successMessage ?? this.successMessage),
     );
   }
 }
@@ -83,7 +88,11 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
 
   Future<void> load() async {
     if (state.isLoading) return;
-    state = state.copyWith(isLoading: true, clearError: true, clearSuccess: true);
+    state = state.copyWith(
+      isLoading: true,
+      clearError: true,
+      clearSuccess: true,
+    );
     try {
       final results = await Future.wait([
         _repository.getMySubscription(),
@@ -135,7 +144,9 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
     );
     try {
       await RevenueCatService.purchaseProduct(productId);
-      await load();
+      // Satın alma başarılı — webhook'un backend'e ulaşması için
+      // birkaç saniye bekle. Polling ile subscription kaydını al.
+      await _loadWithPolling();
       state = state.copyWith(
         isPurchasing: false,
         successMessage: 'purchase_success',
@@ -156,10 +167,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
       );
     } on StateError catch (e) {
       debugPrint('[RevenueCat] Satın alma StateError: $e');
-      state = state.copyWith(
-        isPurchasing: false,
-        purchaseError: e.message,
-      );
+      state = state.copyWith(isPurchasing: false, purchaseError: e.message);
     } catch (e, st) {
       debugPrint('[RevenueCat] Satın alma beklenmeyen hata: $e\n$st');
       state = state.copyWith(
@@ -167,6 +175,68 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
         purchaseError: 'purchase_failed',
       );
     }
+  }
+
+  /// Satın alma sonrası webhook işlenene kadar backend'i polling yap.
+  /// En fazla 3 deneme, her biri arasında 1.5 saniye bekler.
+  /// İlk denemede subscription bulunursa hemen döner.
+  /// Hiçbir denemede bulunamazsa `load()`'un normal davranışına düşer
+  /// (hata göstermez, subscription null kalır — kullanıcı pull-to-refresh
+  /// ile yenileyebilir).
+  Future<void> _loadWithPolling() async {
+    const maxAttempts = 3;
+    const delay = Duration(milliseconds: 1500);
+
+    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+      if (attempt > 1) {
+        await Future.delayed(delay);
+      }
+
+      // Subscription'ı backend'den çek (fiyatları tekrar isteme).
+      try {
+        state = state.copyWith(
+          isLoading: true,
+          clearError: true,
+          clearSuccess: true,
+        );
+        final sub = await _repository.getMySubscription();
+        final prices = await RevenueCatService.fetchStorePrices();
+
+        if (sub != null) {
+          // Webhook işlenmiş, subscription kaydı gelmiş.
+          state = state.copyWith(
+            isLoading: false,
+            subscription: sub,
+            storePrices: prices,
+            clearError: true,
+          );
+          debugPrint(
+            '[Subscription] Polling: subscription found on attempt $attempt',
+          );
+          return;
+        }
+
+        // Henüz kayıt yok — fiyatları kaydet ve bir sonraki denemeye geç.
+        state = state.copyWith(
+          isLoading: false,
+          storePrices: prices,
+          clearError: true,
+        );
+        debugPrint(
+          '[Subscription] Polling: no subscription yet (attempt $attempt/$maxAttempts)',
+        );
+      } catch (_) {
+        // Polling sırasında hata olursa sessizce bir sonraki denemeye geç.
+        state = state.copyWith(isLoading: false, clearError: true);
+        debugPrint(
+          '[Subscription] Polling: error on attempt $attempt, retrying...',
+        );
+      }
+    }
+
+    // Tüm denemeler bitti — son bir kez load() dene (fiyatları da al).
+    debugPrint('[Subscription] Polling exhausted, falling back to load()');
+    await load();
   }
 }
 
@@ -186,5 +256,5 @@ String _purchaseErrorKey(PurchasesErrorCode code) {
 
 final subscriptionNotifierProvider =
     NotifierProvider<SubscriptionNotifier, SubscriptionState>(
-  SubscriptionNotifier.new,
-);
+      SubscriptionNotifier.new,
+    );
