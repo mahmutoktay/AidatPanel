@@ -414,48 +414,50 @@ export async function computeDueBreakdownsBatch(items, buildingId, db = prisma) 
   const expenseCache = new Map(); // "month-year" -> expenseLines
   const carryforwardCache = new Map(); // "apartmentId-month-year" -> carryLines
 
-  for (const periodKey of periodSet) {
-    const [m, y] = periodKey.split("-").map(Number);
+  await Promise.all(
+    Array.from(periodSet).map(async (periodKey) => {
+      const [m, y] = periodKey.split("-").map(Number);
 
-    const expenses = await loadBuildingExpensesForMonth(db, buildingId, m, y);
-    expenseCache.set(periodKey, expenses.map((e) => ({
-      title: e.title,
-      amount: formatBreakdownMoney(e.perUnitAmount),
-      kind: "EXPENSE",
-    })));
+      const expenses = await loadBuildingExpensesForMonth(db, buildingId, m, y);
+      expenseCache.set(periodKey, expenses.map((e) => ({
+        title: e.title,
+        amount: formatBreakdownMoney(e.perUnitAmount),
+        kind: "EXPENSE",
+      })));
 
-    // Bu periyottaki tüm apartmentId'ler için carryforward'ları toplu çek
-    const aptIds = items
-      .filter((item) => item.month === m && item.year === y)
-      .map((item) => item.apartmentId);
+      // Bu periyottaki tüm apartmentId'ler için carryforward'ları toplu çek
+      const aptIds = items
+        .filter((item) => item.month === m && item.year === y)
+        .map((item) => item.apartmentId);
 
-    if (aptIds.length > 0) {
-      const carryforwards = await db.dueExpenseCarryforward.findMany({
-        where: {
-          apartmentId: { in: aptIds },
-          toMonth: m,
-          toYear: y,
-        },
-        include: {
-          expense: { select: { title: true } },
-        },
-        orderBy: { createdAt: "asc" },
-      });
-
-      // apartmentId bazında grupla
-      for (const cf of carryforwards) {
-        const key = `${cf.apartmentId}-${m}-${y}`;
-        if (!carryforwardCache.has(key)) {
-          carryforwardCache.set(key, []);
-        }
-        carryforwardCache.get(key).push({
-          title: `Önceki aydan devreden — ${cf.expense.title}`,
-          amount: formatBreakdownMoney(cf.amount),
-          kind: "CARRYFORWARD",
+      if (aptIds.length > 0) {
+        const carryforwards = await db.dueExpenseCarryforward.findMany({
+          where: {
+            apartmentId: { in: aptIds },
+            toMonth: m,
+            toYear: y,
+          },
+          include: {
+            expense: { select: { title: true } },
+          },
+          orderBy: { createdAt: "asc" },
         });
+
+        // apartmentId bazında grupla
+        for (const cf of carryforwards) {
+          const key = `${cf.apartmentId}-${m}-${y}`;
+          if (!carryforwardCache.has(key)) {
+            carryforwardCache.set(key, []);
+          }
+          carryforwardCache.get(key).push({
+            title: `Önceki aydan devreden — ${cf.expense.title}`,
+            amount: formatBreakdownMoney(cf.amount),
+            kind: "CARRYFORWARD",
+          });
+        }
       }
-    }
-  }
+    })
+  );
 
   // Her öğe için breakdown oluştur
   const results = new Map();

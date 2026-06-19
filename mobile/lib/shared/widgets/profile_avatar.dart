@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -46,21 +47,32 @@ class ProfileAvatar extends ConsumerWidget {
         user.profilePicture != null &&
         user.profilePicture!.isNotEmpty;
 
+    Widget avatarChild;
+    if (hasPicture && !profileState.isSaving) {
+      avatarChild = CachedNetworkImage(
+        imageUrl: '${ApiConstants.baseUrl}/uploads/avatars/${user!.profilePicture}',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorWidget: (context, url, error) => _buildChild(profileState, false, fontSize),
+        placeholder: (context, url) => Center(
+          child: SizedBox(
+            width: size * 0.35,
+            height: size * 0.35,
+            child: const CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    } else {
+      avatarChild = _buildChild(profileState, hasPicture, fontSize);
+    }
+
     final avatar = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: AppColors.fill,
-        image: hasPicture && !profileState.isSaving
-            ? DecorationImage(
-                image: NetworkImage(
-                  '${ApiConstants.baseUrl}/uploads/avatars/${user.profilePicture}',
-                ),
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
-              )
-            : null,
         border: hasPicture
             ? null
             : Border.fromBorderSide(
@@ -69,7 +81,7 @@ class ProfileAvatar extends ConsumerWidget {
       ),
       clipBehavior: Clip.antiAlias,
       alignment: Alignment.center,
-      child: _buildChild(profileState, hasPicture, fontSize),
+      child: avatarChild,
     );
 
     if (onTap == null) return avatar;
