@@ -94,18 +94,20 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
 
     final phone = _phoneController.text.trim();
     final newEmail = _emailController.text.trim();
-    
+
     if (phone.isEmpty && newEmail.isEmpty) {
-      ref.read(toastProvider.notifier).show(
-        'En az bir iletişim kanalı (E-posta veya Telefon) kayıtlı olmalıdır.',
-        type: ToastType.error,
-      );
+      ref
+          .read(toastProvider.notifier)
+          .show(
+            'En az bir iletişim kanalı (E-posta veya Telefon) kayıtlı olmalıdır.',
+            type: ToastType.error,
+          );
       return;
     }
-    
+
     final isEmailChanged = newEmail != (user.email ?? '');
     final isPhoneChanged = phone != _phoneDigits(user.phone);
-    
+
     String? currentPassword;
     if (isEmailChanged || isPhoneChanged) {
       currentPassword = await _showPasswordDialog(context);
@@ -114,7 +116,9 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
       }
     }
 
-    final ok = await ref.read(profileNotifierProvider.notifier).saveProfile(
+    final ok = await ref
+        .read(profileNotifierProvider.notifier)
+        .saveProfile(
           name: _nameController.text.trim(),
           email: newEmail.isEmpty ? null : newEmail,
           phone: phone.isEmpty ? null : phone,
@@ -123,14 +127,15 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     if (!mounted) return;
 
     if (ok) {
-      ref.read(toastProvider.notifier).show(
-            t.features.profile.profileUpdated,
-            type: ToastType.success,
-          );
+      ref
+          .read(toastProvider.notifier)
+          .show(t.features.profile.profileUpdated, type: ToastType.success);
       setState(() => _editing = false);
     } else {
       final error = ref.read(profileNotifierProvider).error;
-      ref.read(toastProvider.notifier).show(
+      ref
+          .read(toastProvider.notifier)
+          .show(
             error ?? t.features.profile.profileUpdateFailed,
             type: ToastType.error,
           );
@@ -165,12 +170,17 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                   labelText: t.features.auth.password,
                   labelStyle: ProfileSettingsUi.fieldLabel,
                   suffixIcon: IconButton(
-                    icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+                    icon: Icon(
+                      obscure ? Icons.visibility_off : Icons.visibility,
+                    ),
                     onPressed: () => setState(() => obscure = !obscure),
                     color: ProfileSettingsUi.muted,
                   ),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: ProfileSettingsUi.ink, width: 1.4),
+                    borderSide: BorderSide(
+                      color: ProfileSettingsUi.ink,
+                      width: 1.4,
+                    ),
                   ),
                 ),
               ),
@@ -179,7 +189,10 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.common.cancel, style: TextStyle(color: ProfileSettingsUi.muted)),
+              child: Text(
+                t.common.cancel,
+                style: TextStyle(color: ProfileSettingsUi.muted),
+              ),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(controller.text),
@@ -195,7 +208,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final profileState = ref.watch(profileNotifierProvider);
-    final authUser = ref.watch(authStateProvider).user;
+    final authUser = ref.watch(authStateProvider.select((state) => state.user));
     final user = profileState.user ?? authUser;
     final subscriptionState = ref.watch(subscriptionNotifierProvider);
 
@@ -218,8 +231,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     ProfileState profileState,
   ) {
     final t = context.t;
-    final showEdit =
-        user != null && !_editing && !profileState.isSaving;
+    final showEdit = user != null && !_editing && !profileState.isSaving;
 
     return AppBar(
       backgroundColor: Colors.transparent,
@@ -319,8 +331,9 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
       );
     }
 
-    final roleLabel =
-        user.role == UserRole.manager ? t.common.manager : t.common.resident;
+    final roleLabel = user.role == UserRole.manager
+        ? t.common.manager
+        : t.common.resident;
     final languageLabel = user.language == 'en' ? 'English' : t.common.turkish;
 
     final content = Form(
@@ -383,7 +396,9 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                       enabled: !profileState.isSaving,
                       keyboardType: TextInputType.number,
                       textInputAction: TextInputAction.done,
-                      autofillHints: const [AutofillHints.telephoneNumberNational],
+                      autofillHints: const [
+                        AutofillHints.telephoneNumberNational,
+                      ],
                       maxLength: 10,
                       prefixText: '+90 ',
                       helperText: t.features.profile.phoneOptionalHint,
@@ -445,9 +460,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
           ),
           if (!_editing) ...[
             const SizedBox(height: AppSizes.spacingM),
-            _ProfileSurfaceCard(
-              children: const [LogoutAllDevicesTile()],
-            ),
+            _ProfileSurfaceCard(children: const [LogoutAllDevicesTile()]),
             const SizedBox(height: AppSizes.spacingM),
             _ProfileSurfaceCard(
               children: [
@@ -729,7 +742,11 @@ class _ProfileHeroMeta extends StatelessWidget {
   String _formatAccountDate(DateTime date) {
     final formatted = AppDateFormat.yearMonthDay(date);
     if (formatted.isEmpty) return formatted;
-    return formatted.replaceRange(0, 1, formatted.substring(0, 1).toUpperCase());
+    return formatted.replaceRange(
+      0,
+      1,
+      formatted.substring(0, 1).toUpperCase(),
+    );
   }
 
   String _statusLabel(Translations t, SubscriptionStatus status) {
@@ -848,7 +865,9 @@ class _DangerTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: ProfileSettingsUi.rowHeight),
+          constraints: const BoxConstraints(
+            minHeight: ProfileSettingsUi.rowHeight,
+          ),
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSizes.spacingM,
@@ -971,9 +990,8 @@ class _InlineField extends StatelessWidget {
                       fontSize: 12,
                     ),
                     counterText: '',
-                    suffixIcon: showClearSuffix &&
-                            enabled &&
-                            controller.text.isNotEmpty
+                    suffixIcon:
+                        showClearSuffix && enabled && controller.text.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.close, size: 20),
                             color: ProfileSettingsUi.muted,

@@ -382,3 +382,100 @@ export function serializeBreakdownForDue(breakdown) {
     total: breakdown.total,
   };
 }
+
+/**
+ * Toplu breakdown hesaplama - N+1 sorununu çözer.
+ * Aynı (buildingId, month, year) grubundaki tüm daireler için
+ * expense ve carryforward sorgularını tek seferde çeker.
+ *
+ * @param {Array<{apartmentId: string, month: number, year: number}>} items
+ * @param {string} buildingId
+ * @param {import("@prisma/client").PrismaClient} [db]
+ * @returns {Promise<Map<string, object>>} apartmentId -> breakdown
+ */
+export async function computeDueBreakdownsBatch(items, buildingId, db = prisma) {
+  if (!items.length) return new Map();
+
+  const building = await db.building.findUnique({
+    where: { id: buildingId },
+    select: { dueAmount: true, currency: true },
+  });
+
+  const baseAmount = building?.dueAmount != null ? Number(building.dueAmount) : 0;
+  const currency = building?.currency ?? "TRY";
+
+  // Benzersiz (month, year) kombinasyonlarını bul
+  const periodSet = new Set();
+  for (const item of items) {
+    periodSet.add(`${item.month}-${item.year}`);
+  }
+
+  // Tüm periyotlar için expense ve carryforward'ları toplu çek
+  const expenseCache = new Map(); // "month-year" -> expenseLines
+  const carryforwardCache = new Map(); // "apartmentId-month-year" -> carryLines
+
+  for (const periodKey of periodSet) {
+    const [m, y] = periodKey.split("-").map(Number);
+
+    const expenses = await loadBuildingExpensesForMonth(db, buildingId, m, y);
+    expenseCache.set(periodKey, expenses.map((e) => ({
+      title: e.title,
+      amount: formatBreakdownMoney(e.perUnitAmount),
+      kind: "EXPENSE",
+    })));
+
+    // Bu periyottaki tüm apartmentId'ler için carryforward'ları toplu çek
+    const aptIds = items
+      .filter((item) => item.month === m && item.year === y)
+      .map((item) => item.apartmentId);
+
+    if (aptIds.length > 0) {
+      const carryforwards = await db.dueExpenseCarryforward.findMany({
+        where: {
+          apartmentId: { in: aptIds },
+          toMonth: m,
+          toYear: y,
+        },
+        include: {
+          expense: { select: { title: true } },
+        },
+        orderBy: { createdAt: "asc" },
+      });
+
+      // apartmentId bazında grupla
+      for (const cf of carryforwards) {
+        const key = `${cf.apartmentId}-${m}-${y}`;
+        if (!carryforwardCache.has(key)) {
+          carryforwardCache.set(key, []);
+        }
+        carryforwardCache.get(key).push({
+          title: `Önceki aydan devreden — ${cf.expense.title}`,
+          amount: formatBreakdownMoney(cf.amount),
+          kind: "CARRYFORWARD",
+        });
+      }
+    }
+  }
+
+  // Her öğe için breakdown oluştur
+  const results = new Map();
+  for (const item of items) {
+    const periodKey = `${item.month}-${item.year}`;
+    const cfKey = `${item.apartmentId}-${item.month}-${item.year}`;
+
+    const expenseLines = expenseCache.get(periodKey) ?? [];
+    const carryLines = carryforwardCache.get(cfKey) ?? [];
+    const allLines = [...expenseLines, ...carryLines];
+    const extras = allLines.reduce((sum, line) => sum + Number(line.amount), 0);
+    const total = roundMoney(baseAmount + extras);
+
+    results.set(item.apartmentId, {
+      baseAmount: formatBreakdownMoney(baseAmount),
+      expenseLines: allLines,
+      total: formatBreakdownMoney(total),
+      currency,
+    });
+  }
+
+  return results;
+}

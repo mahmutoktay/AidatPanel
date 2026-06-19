@@ -20,6 +20,7 @@ import dekontRoutes from "./src/routes/dekontRoutes.js";
 import subscriptionRoutes from "./src/routes/subscriptionRoutes.js";
 import { apiLimiter } from "./src/middlewares/rateLimitMiddleware.js";
 import { errorHandler, notFoundHandler } from "./src/middlewares/errorHandler.js";
+import { logger, requestLogger } from "./src/config/logger.js";
 import { attachWebSocketServer } from "./src/realtime/wsGateway.js";
 import { ensureDekontStorageDirs } from "./src/utils/ensureDekontStorage.js";
 import { startDueAutoGenerateScheduler } from "./src/jobs/dueAutoGenerateJob.js";
@@ -54,12 +55,8 @@ app.use("/api/v1", apiLimiter);
 // BODY PARSING MIDDLEWARE'I
 app.use(express.json());
 
-if (process.env.NODE_ENV !== "production") {
-  app.use((req, res, next) => {
-    console.log(`[http] ${req.method} ${req.originalUrl}`);
-    next();
-  });
-}
+// Request logging — development'da pretty print, production'da JSON stdout
+app.use(requestLogger);
 
 // ROTALAR — Faz 2A mount sırası (PLAN.md A0): notifications/tickets önce
 app.use("/api/v1/notifications", notificationRoutes);
@@ -90,25 +87,25 @@ async function bootstrap() {
   await ensureDekontStorageDirs();
   await fs.promises.mkdir("uploads/avatars", { recursive: true });
   server = app.listen(port, () => {
-    console.log("Server is running on port: ", port);
+    logger.info("Server started", { port });
   });
   attachWebSocketServer(server);
   startDueAutoGenerateScheduler();
 }
 
 bootstrap().catch((err) => {
-  console.error("Bootstrap failed:", err);
+  logger.error("Bootstrap failed", { error: err.message, stack: err.stack });
   process.exit(1);
 });
 
 // Yakalanmamış promise — tek istek yüzünden tüm API'yi kapatma (502/502 dalgası önlenir)
 process.on("unhandledRejection", (err) => {
-  console.error("[api] Unhandled Rejection:", err?.stack || err);
+  logger.error("Unhandled Rejection", { error: err?.stack || err });
 });
 
 // Gerçek senkron çökme — yine de logla; production'da PM2 yeniden başlatır
 process.on("uncaughtException", async (err) => {
-  console.error("[api] Uncaught Exception:", err?.stack || err);
+  logger.error("Uncaught Exception", { error: err?.stack || err });
   try {
     await disconnectDB();
   } catch (_) {
@@ -119,7 +116,7 @@ process.on("uncaughtException", async (err) => {
 
 // Graceful shutdown
 process.on("SIGTERM", async () => {
-  console.log("SIGTERM received, shutting down gracefully");
+  logger.info("SIGTERM received, shutting down gracefully");
   if (!server) {
     process.exit(0);
     return;

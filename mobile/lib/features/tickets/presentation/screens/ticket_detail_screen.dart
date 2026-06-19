@@ -51,13 +51,13 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
   Widget build(BuildContext context) {
     final detail = ref.watch(ticketDetailProvider(widget.ticketId));
     final isManager =
-        ref.watch(authStateProvider).user?.role == UserRole.manager;
+        ref.watch(authStateProvider.select((state) => state.user?.role)) ==
+        UserRole.manager;
     final t = context.t.features.tickets;
 
     return DashboardSecondaryScaffold(
       title: t.detailTitle,
-      fallbackRoute:
-          isManager ? '/manager-dashboard/tickets' : null,
+      fallbackRoute: isManager ? '/manager-dashboard/tickets' : null,
       onFallback: isManager
           ? null
           : () {

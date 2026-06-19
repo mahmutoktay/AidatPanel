@@ -5,21 +5,21 @@ import {
   updateApartmentService,
   removeResidentFromApartmentService,
 } from "../services/apartmentService.js";
+import { HttpError } from "../utils/httpError.js";
 
 // GET /api/v1/buildings/:buildingId/apartments
 export const getApartments = async (req, res, next) => {
   try {
     const { buildingId } = req.params;
     const managerId = req.user.id;
+    const { cursor, limit, paginated, search } = req.query;
 
-    const apartments = await getApartmentsService(buildingId, managerId);
-
-    if (!apartments) {
-      return res.status(403).json({
-        success: false,
-        message: "Bu binanın dairelerini görüntüleme yetkiniz yok.",
-      });
-    }
+    const apartments = await getApartmentsService(buildingId, managerId, {
+      cursor,
+      limit,
+      paginated,
+      search,
+    });
 
     res.status(200).json({
       success: true,
@@ -38,10 +38,7 @@ export const createApartment = async (req, res, next) => {
     const managerId = req.user.id;
 
     if (!number) {
-      return res.status(400).json({
-        success: false,
-        message: "Daire numarası zorunludur.",
-      });
+      throw new HttpError(400, "Daire numarası zorunludur.");
     }
 
     const apartment = await createApartmentService({
@@ -50,13 +47,6 @@ export const createApartment = async (req, res, next) => {
       floor: floor ? Number(floor) : null,
       managerId,
     });
-
-    if (!apartment) {
-      return res.status(403).json({
-        success: false,
-        message: "Bu binaya daire ekleme yetkiniz yok.",
-      });
-    }
 
     res.status(201).json({
       success: true,
@@ -74,31 +64,12 @@ export const removeResidentFromApartment = async (req, res, next) => {
     const { buildingId, id } = req.params;
     const managerId = req.user.id;
 
-    const result = await removeResidentFromApartmentService(id, buildingId, managerId);
-
-    if (result.forbidden) {
-      return res.status(403).json({
-        success: false,
-        message: "Bu işlem için yetkiniz yok.",
-      });
-    }
-    if (result.notFound) {
-      return res.status(404).json({
-        success: false,
-        message: "Daire bulunamadı.",
-      });
-    }
-    if (result.noResident) {
-      return res.status(404).json({
-        success: false,
-        message: "Bu dairede kayıtlı sakin yok.",
-      });
-    }
+    const apartment = await removeResidentFromApartmentService(id, buildingId, managerId);
 
     res.status(200).json({
       success: true,
       message: "Sakin daireden ayrıldı.",
-      data: result.apartment,
+      data: apartment,
     });
   } catch (error) {
     next(error);
@@ -111,14 +82,7 @@ export const deleteApartment = async (req, res, next) => {
     const { buildingId, id } = req.params;
     const managerId = req.user.id;
 
-    const deleted = await deleteApartmentService(id, buildingId, managerId);
-
-    if (!deleted) {
-      return res.status(404).json({
-        success: false,
-        message: "Daire bulunamadı veya silme yetkiniz yok.",
-      });
-    }
+    await deleteApartmentService(id, buildingId, managerId);
 
     res.status(200).json({
       success: true,
@@ -141,13 +105,6 @@ export const updateApartment = async (req, res, next) => {
     if (floor !== undefined) updateData.floor = Number(floor);
 
     const apartment = await updateApartmentService(id, buildingId, managerId, updateData);
-
-    if (!apartment) {
-      return res.status(404).json({
-        success: false,
-        message: "Daire bulunamadı veya güncelleme yetkiniz yok.",
-      });
-    }
 
     res.status(200).json({
       success: true,

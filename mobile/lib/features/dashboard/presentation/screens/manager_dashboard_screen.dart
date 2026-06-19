@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/navigation/dashboard_back_handler.dart';
 import '../../../../core/navigation/app_back_navigation.dart';
+import '../../../../core/providers/theme_mode_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
@@ -66,6 +67,9 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Tema değişiminde tüm dashboard iskeletinin rebuild olması için watch
+    ref.watch(themeModeProvider);
+
     ref.listen<int>(managerTabIndexProvider, (previous, next) {
       if (_tabController.index != next) {
         _tabController.animateTo(
@@ -78,7 +82,8 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
 
     final buildingsAsync = ref.watch(buildingsStoreProvider);
     final userName =
-        ref.watch(authStateProvider).user?.name ?? context.t.common.user;
+        ref.watch(authStateProvider.select((state) => state.user?.name)) ??
+        context.t.common.user;
     final selectedTab = ref.watch(managerTabIndexProvider);
 
     return DashboardBackHandler(
@@ -130,8 +135,9 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                 children: [
                   ManagerHomeTab(
                     buildingsAsync: buildingsAsync,
-                    onRetryBuildings: () =>
-                        ref.read(buildingsStoreProvider.notifier).loadBuildings(),
+                    onRetryBuildings: () => ref
+                        .read(buildingsStoreProvider.notifier)
+                        .loadBuildings(),
                   ),
                   ManagerBuildingsTab(buildingsAsync: buildingsAsync),
                   const ManagerDuesTab(),
@@ -142,7 +148,9 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
           ],
         ),
         bottomNavigationBar: DashboardBottomNavBar(
-          selectedIndex: ref.watch(managerTabIndexProvider),
+          selectedIndex: ref.watch(
+            managerTabIndexProvider.select((index) => index),
+          ),
           onDestinationSelected: (index) {
             ref.read(managerTabIndexProvider.notifier).update(index);
             _tabController.animateTo(

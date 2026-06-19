@@ -54,7 +54,7 @@ export const logger = pino({
 
   ...(isProduction
     ? {
-        // Production: ham JSON
+        // Production: ham JSON (log aggregator uyumlu)
         timestamp: pino.stdTimeFunctions.isoTime,
       }
     : {
@@ -65,18 +65,9 @@ export const logger = pino({
             colorize: true,
             translateTime: "SYS:yyyy-mm-dd HH:MM:ss.l",
             ignore: "pid,hostname",
-            messageFormat: "{msg} {context}",
           },
         },
       }),
-
-  // Hata nesnelerini otomatik serialize et
-  serializers: {
-    err: pino.stdSerializers.err,
-    error: pino.stdSerializers.err,
-    req: pino.stdSerializers.req,
-    res: pino.stdSerializers.res,
-  },
 
   // Her loga eklenen sabit alanlar
   base: {
@@ -94,7 +85,7 @@ export const logger = pino({
  */
 export function reqLogger(req) {
   return logger.child({
-    reqId: req.id,
+    reqId: req.id || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
     method: req.method,
     url: req.originalUrl || req.url,
     userId: req.user?.id,

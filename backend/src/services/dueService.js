@@ -1,6 +1,7 @@
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
 import { DUE_PAID_RESIDENT } from "../constants/notificationTemplates.js";
 import { prisma } from "../config/db.js";
+import { HttpError } from "../utils/httpError.js";
 import { userPublicSelect } from "./meService.js";
 import { createForUsers } from "./notificationService.js";
 import { computeOverdueDays } from "../utils/trDueDate.js";
@@ -13,6 +14,7 @@ import {
 } from "../utils/listQuery.js";
 import {
   computeDueBreakdown,
+  computeDueBreakdownsBatch,
   serializeBreakdownForDue,
   syncOpenBuildingDues,
 } from "./dueExpenseRecalcService.js";
@@ -50,6 +52,35 @@ async function attachBreakdownToDue(due, buildingId) {
 }
 
 /**
+ * Toplu breakdown ekleme - N+1 sorununu çözer.
+ * Aynı buildingId altındaki tüm due'lar için tek seferde breakdown hesaplar.
+ */
+async function attachBreakdownToDuesBatch(dues, buildingId) {
+  if (!dues.length) return dues;
+
+  const items = dues.map((due) => ({
+    apartmentId: due.apartmentId ?? due.apartment?.id,
+    month: due.month,
+    year: due.year,
+  }));
+
+  const validItems = items.filter((i) => i.apartmentId);
+  if (!validItems.length) return dues;
+
+  const breakdownMap = await computeDueBreakdownsBatch(validItems, buildingId);
+
+  return dues.map((due) => {
+    const row = (due.apartment && !due.apartmentNumber) ? mapDueRow(due) : due;
+    const apartmentId = due.apartmentId ?? due.apartment?.id;
+    const breakdown = apartmentId ? breakdownMap.get(apartmentId) : undefined;
+
+    return breakdown
+      ? { ...row, breakdown: serializeBreakdownForDue(breakdown) }
+      : row;
+  });
+}
+
+/**
  * Binadaki tüm aidatları listele (yönetici için)
  * Filtreleme: month, year, status
  */
@@ -59,7 +90,9 @@ export const getDuesByBuildingService = async (buildingId, managerId, filters = 
     where: { id: buildingId, managerId },
   });
 
-  if (!building) return null;
+  if (!building) {
+    throw new HttpError(404, "Bina bulunamadı veya erişim yetkiniz yok.");
+  }
 
   const { month, year, status } = filters;
   const paginated = wantsPaginatedList(filters);
@@ -108,12 +141,10 @@ export const getDuesByBuildingService = async (buildingId, managerId, filters = 
 
   const mapped = buildListResponse(filters, dues, mapDueRow);
   if (paginated) {
-    const items = await Promise.all(
-      mapped.items.map((due) => attachBreakdownToDue(due, buildingId))
-    );
+    const items = await attachBreakdownToDuesBatch(mapped.items, buildingId);
     return { ...mapped, items };
   }
-  return Promise.all(mapped.map((due) => attachBreakdownToDue(due, buildingId)));
+  return attachBreakdownToDuesBatch(mapped, buildingId);
 };
 
 /**
@@ -130,14 +161,16 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
     },
   });
 
-  if (!due) return null;
+  if (!due) {
+    throw new HttpError(404, "Aidat kaydı bulunamadı.");
+  }
 
   if (due.apartment.building.managerId !== managerId) {
-    return { forbidden: true };
+    throw new HttpError(403, "Bu aidat kaydını güncelleme yetkiniz yok.");
   }
 
   if (buildingId && due.apartment.buildingId !== buildingId) {
-    return { forbidden: true };
+    throw new HttpError(403, "Bu aidat kaydını güncelleme yetkiniz yok.");
   }
 
   const previousStatus = due.status;
@@ -145,8 +178,10 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
   // Güncelleme verisi
   const updateData = { status };
 
+  let resident = null;
+
   if (status === "PAID") {
-    const resident = await prisma.user.findFirst({
+    resident = await prisma.user.findFirst({
       where: {
         apartmentId: due.apartmentId,
         deletedAt: null,
@@ -155,7 +190,7 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
       select: { id: true },
     });
     if (!resident) {
-      return { invalidResident: true };
+      throw new HttpError(400, "Sakin atanmamış dairelerin aidatları 'Ödendi' yapılamaz.");
     }
     updateData.paidAt = paidAt ? new Date(paidAt) : new Date();
     updateData.overdueDays = 0;
@@ -180,31 +215,20 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
     },
   });
 
-  if (status === "PAID" && previousStatus !== "PAID") {
-    const resident = await prisma.user.findFirst({
-      where: {
+  if (status === "PAID" && previousStatus !== "PAID" && resident) {
+    await createForUsers([resident.id], {
+      type: NOTIFICATION_TYPES.DUE_PAID,
+      title: DUE_PAID_RESIDENT.title,
+      body: DUE_PAID_RESIDENT.body(due.month, due.year),
+      data: {
+        dueId: due.id,
+        buildingId: due.apartment.buildingId,
         apartmentId: due.apartmentId,
-        deletedAt: null,
-        role: "RESIDENT",
+        month: String(due.month),
+        year: String(due.year),
+        route: "/resident-dashboard",
       },
-      select: { id: true },
     });
-
-    if (resident) {
-      await createForUsers([resident.id], {
-        type: NOTIFICATION_TYPES.DUE_PAID,
-        title: DUE_PAID_RESIDENT.title,
-        body: DUE_PAID_RESIDENT.body(due.month, due.year),
-        data: {
-          dueId: due.id,
-          buildingId: due.apartment.buildingId,
-          apartmentId: due.apartmentId,
-          month: String(due.month),
-          year: String(due.year),
-          route: "/resident-dashboard",
-        },
-      });
-    }
   }
 
   return {
@@ -280,12 +304,10 @@ export const getMyDuesService = async (userId, filters = {}) => {
   }));
 
   if (paginated) {
-    const items = await Promise.all(
-      mapped.items.map((due) => attachBreakdownToDue(due, buildingId))
-    );
+    const items = await attachBreakdownToDuesBatch(mapped.items, buildingId);
     return { ...mapped, items };
   }
-  return Promise.all(mapped.map((due) => attachBreakdownToDue(due, buildingId)));
+  return attachBreakdownToDuesBatch(mapped, buildingId);
 };
 
 /**
@@ -298,7 +320,9 @@ export const updateBuildingDueAmountService = async (buildingId, managerId, { du
     where: { id: buildingId, managerId },
   });
 
-  if (!building) return null;
+  if (!building) {
+    throw new HttpError(404, "Bina bulunamadı veya erişim yetkiniz yok.");
+  }
 
   return await prisma.$transaction(async (tx) => {
     const updated = await tx.building.update({

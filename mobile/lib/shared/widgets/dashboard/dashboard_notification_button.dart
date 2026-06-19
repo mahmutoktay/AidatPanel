@@ -1,33 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../core/providers/theme_mode_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_sizes.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../../features/notifications/presentation/providers/notifications_provider.dart';
 import '../../theme/dashboard_screen_style.dart';
+import '../notification_icon_button.dart';
 
 /// Dairesel beyaz zemin üzerinde bildirim zili — dashboard üst şerit.
 class DashboardNotificationButton extends ConsumerWidget {
   const DashboardNotificationButton({super.key});
 
-  Future<void> _openNotifications(BuildContext context, WidgetRef ref) async {
-    await ref.read(notificationsNotifierProvider.notifier).load(refresh: true);
-    if (!context.mounted) return;
-    await context.push('/notifications');
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final unread = ref.watch(notificationsNotifierProvider).unreadCount;
-    final showBadge = unread > 0;
-    final badgeLabel = unread > 99 ? '99+' : unread.toString();
-
+    ref.watch(themeModeProvider);
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _openNotifications(context, ref),
+        onTap: () => openNotificationList(context, ref),
         customBorder: const CircleBorder(),
         child: Container(
           width: AppSizes.minTouchTarget,
@@ -38,24 +28,9 @@ class DashboardNotificationButton extends ConsumerWidget {
             boxShadow: DashboardScreenStyle.cardShadow,
           ),
           alignment: Alignment.center,
-          child: Badge(
-            isLabelVisible: showBadge,
-            label: Text(
-              badgeLabel,
-              style: AppTypography.caption.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 10,
-                height: 1.1,
-              ),
-            ),
-            backgroundColor: AppColors.error,
-            offset: const Offset(5, -5),
-            child: Icon(
-              Icons.notifications_outlined,
-              color: AppColors.textPrimary,
-              size: 24,
-            ),
+          child: const NotificationIconBody(
+            size: 24,
+            badgeOffset: Offset(5, -5),
           ),
         ),
       ),

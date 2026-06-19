@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/navigation/app_back_navigation.dart';
+import '../../core/providers/theme_mode_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
@@ -10,7 +12,7 @@ import 'notification_icon_button.dart';
 import 'circular_back_button.dart';
 
 /// Dashboard dışı push ekranları için ortak scaffold (flat AppBar + gri arka plan).
-class DashboardSecondaryScaffold extends StatelessWidget {
+class DashboardSecondaryScaffold extends ConsumerWidget {
   final String title;
   final Widget body;
   final List<Widget>? actions;
@@ -38,8 +40,7 @@ class DashboardSecondaryScaffold extends StatelessWidget {
     this.bottom,
   });
 
-  bool get _handlesSystemBack =>
-      fallbackRoute != null || onFallback != null;
+  bool get _handlesSystemBack => fallbackRoute != null || onFallback != null;
 
   VoidCallback? _resolveBackHandler(BuildContext context) {
     if (onBack != null) return onBack;
@@ -55,7 +56,9 @@ class DashboardSecondaryScaffold extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Tema değişiminde push ekranlarının da anında güncellenmesi için
+    ref.watch(themeModeProvider);
     final appBarActions = <Widget>[
       ...?actions,
       if (showNotificationAction) const NotificationIconButton(),
@@ -100,11 +103,7 @@ class DashboardListScreenBody extends StatelessWidget {
   final Widget? header;
   final Widget list;
 
-  const DashboardListScreenBody({
-    super.key,
-    this.header,
-    required this.list,
-  });
+  const DashboardListScreenBody({super.key, this.header, required this.list});
 
   @override
   Widget build(BuildContext context) {
@@ -167,11 +166,7 @@ class DashboardSectionTitle extends StatelessWidget {
   final String title;
   final Widget? trailing;
 
-  const DashboardSectionTitle({
-    super.key,
-    required this.title,
-    this.trailing,
-  });
+  const DashboardSectionTitle({super.key, required this.title, this.trailing});
 
   @override
   Widget build(BuildContext context) {

@@ -6,7 +6,6 @@ import {
 } from "../services/dueService.js";
 import { remindBuildingDuesService } from "../services/dueReminderService.js";
 import { bulkGenerateBuildingDuesService } from "../services/dueBulkService.js";
-import { HttpError } from "../utils/httpError.js";
 
 /**
  * GET /api/v1/buildings/:id/dues
@@ -26,13 +25,6 @@ export const getDuesByBuilding = async (req, res, next) => {
       limit,
       paginated,
     });
-
-    if (dues === null) {
-      return res.status(404).json({
-        success: false,
-        message: "Bina bulunamadı veya erişim yetkiniz yok.",
-      });
-    }
 
     res.json({
       success: true,
@@ -59,27 +51,6 @@ export const updateDueStatus = async (req, res, next) => {
       note,
       buildingId,
     });
-
-    if (result === null) {
-      return res.status(404).json({
-        success: false,
-        message: "Aidat kaydı bulunamadı.",
-      });
-    }
-
-    if (result.forbidden) {
-      return res.status(403).json({
-        success: false,
-        message: "Bu aidat kaydını güncelleme yetkiniz yok.",
-      });
-    }
-
-    if (result.invalidResident) {
-      return res.status(400).json({
-        success: false,
-        message: "Sakin atanmamış dairelerin aidatları 'Ödendi' yapılamaz.",
-      });
-    }
 
     res.json({
       success: true,
@@ -203,13 +174,6 @@ export const updateBuildingDueAmount = async (req, res, next) => {
       currency,
       affectCurrent,
     });
-
-    if (result === null) {
-      return res.status(404).json({
-        success: false,
-        message: "Bina bulunamadı veya erişim yetkiniz yok.",
-      });
-    }
 
     res.json({
       success: true,

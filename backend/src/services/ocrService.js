@@ -6,6 +6,7 @@ import { promisify } from "util";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import sharp from "sharp";
 import { DEKONT_MIN_TEXT_LENGTH } from "../config/dekont.js";
+import { logger } from "../config/logger.js";
 import { runTesseractOnImageBuffer } from "../utils/runTesseract.js";
 import { parseReceiptText } from "../constants/bankReceiptProfiles.js";
 
@@ -68,7 +69,7 @@ export async function extractDekontText(buffer, mimeType) {
     try {
       text = await extractPdfTextWithPdfjs(buffer);
     } catch (err) {
-      // pdfjs-dist başarısız → scanned PDF olabilir, sessizce fallback'e geç
+      logger.warn("pdfjs-dist metin çıkarımı başarısız, scanned PDF fallback'e geçiliyor", { error: err.message });
     }
 
     if (text.length >= DEKONT_MIN_TEXT_LENGTH) {

@@ -42,10 +42,13 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   @override
   Widget build(BuildContext context) {
     final subscriptionState = ref.watch(subscriptionNotifierProvider);
-    final authUser = ref.watch(authStateProvider).user;
+    final authUser = ref.watch(authStateProvider.select((state) => state.user));
     final t = context.t.features.subscription;
 
-    ref.listen<SubscriptionState>(subscriptionNotifierProvider, (previous, next) {
+    ref.listen<SubscriptionState>(subscriptionNotifierProvider, (
+      previous,
+      next,
+    ) {
       if (next.successMessage != null &&
           next.successMessage != previous?.successMessage) {
         final msg = _resolveMessage(context, next.successMessage!);
@@ -73,7 +76,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               const SizedBox(height: AppSizes.spacingM),
               Text(
                 t.loadingPlans,
-                style: AppTypography.body1.copyWith(color: AppColors.textSecondary),
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -87,8 +92,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 
     int? daysLeft;
     if (subscription != null && subscription.currentPeriodEnd != null) {
-      final diff =
-          subscription.currentPeriodEnd!.difference(DateTime.now()).inDays;
+      final diff = subscription.currentPeriodEnd!
+          .difference(DateTime.now())
+          .inDays;
       daysLeft = diff > 0 ? diff : 0;
     }
 
@@ -103,10 +109,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         ? _formatMoney(context, prices.annualEquivalentAmount!, prices)
         : null;
 
-    final monthlyPrice =
-        prices.monthlyPriceString ?? t.priceUnavailable;
-    final annualPrice =
-        prices.annualPriceString ?? t.priceUnavailable;
+    final monthlyPrice = prices.monthlyPriceString ?? t.priceUnavailable;
+    final annualPrice = prices.annualPriceString ?? t.priceUnavailable;
 
     final features = [
       (true, t.featureUnlimitedUnits),
@@ -203,7 +207,8 @@ String _formatMoney(
   SubscriptionStorePrices prices,
 ) {
   final locale = Localizations.localeOf(context).toString();
-  final symbol = prices.monthlyPriceString?.contains('₺') == true ||
+  final symbol =
+      prices.monthlyPriceString?.contains('₺') == true ||
           prices.annualPriceString?.contains('₺') == true ||
           prices.currencyCode == 'TRY'
       ? '₺'
@@ -253,8 +258,11 @@ class _ProfileRow extends StatelessWidget {
   });
 
   String _getInitials(String userName) {
-    final parts =
-        userName.trim().split(' ').where((p) => p.isNotEmpty).toList();
+    final parts = userName
+        .trim()
+        .split(' ')
+        .where((p) => p.isNotEmpty)
+        .toList();
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
@@ -275,8 +283,8 @@ class _ProfileRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.t.features.subscription;
     final displayName = user?.name ?? t.guestUser;
-    final String? imageUrl = user?.profilePicture != null &&
-            user!.profilePicture!.isNotEmpty
+    final String? imageUrl =
+        user?.profilePicture != null && user!.profilePicture!.isNotEmpty
         ? '${ApiConstants.baseUrl}/uploads/avatars/${user!.profilePicture}'
         : null;
 
@@ -301,35 +309,20 @@ class _ProfileRow extends StatelessWidget {
           Container(
             width: 44,
             height: 44,
-            decoration: const BoxDecoration(
-              color: Color(0xFF1A1A2E),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A1A2E),
               shape: BoxShape.circle,
+              image: imageUrl != null
+                  ? DecorationImage(
+                      image: NetworkImage(imageUrl),
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.high,
+                    )
+                  : null,
             ),
             clipBehavior: Clip.antiAlias,
             alignment: Alignment.center,
-            child: imageUrl != null
-                ? Image.network(
-                    imageUrl,
-                    width: 44,
-                    height: 44,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildInitialsText(displayName),
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return const Center(
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.5,
-                            color: Colors.white,
-                          ),
-                        ),
-                      );
-                    },
-                  )
-                : _buildInitialsText(displayName),
+            child: imageUrl != null ? null : _buildInitialsText(displayName),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -437,8 +430,9 @@ class _StatusStrip extends StatelessWidget {
 
     final String renewalValue;
     if (subscription != null && subscription!.currentPeriodEnd != null) {
-      renewalValue =
-          AppDateFormat.yearMonthDay(subscription!.currentPeriodEnd!);
+      renewalValue = AppDateFormat.yearMonthDay(
+        subscription!.currentPeriodEnd!,
+      );
     } else {
       renewalValue = t.priceUnavailable;
     }
@@ -449,10 +443,7 @@ class _StatusStrip extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0x12000000),
-          width: 0.5,
-        ),
+        border: Border.all(color: const Color(0x12000000), width: 0.5),
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -661,8 +652,7 @@ class _PlanCard extends StatelessWidget {
                                         const SizedBox(height: 2),
                                         Text(
                                           cycle,
-                                          style: AppTypography.small
-                                              .copyWith(
+                                          style: AppTypography.small.copyWith(
                                             color: isYearly
                                                 ? const Color(0x99FFFFFF)
                                                 : AppColors.textSecondary,
@@ -774,10 +764,8 @@ class _PlanCard extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: _canPurchase ? onBuy : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                isYearly ? Colors.white : darkCard,
-                            foregroundColor:
-                                isYearly ? darkCard : Colors.white,
+                            backgroundColor: isYearly ? Colors.white : darkCard,
+                            foregroundColor: isYearly ? darkCard : Colors.white,
                             disabledBackgroundColor: isYearly
                                 ? Colors.white.withValues(alpha: 0.5)
                                 : darkCard.withValues(alpha: 0.5),
@@ -924,9 +912,7 @@ class _KdvNote extends StatelessWidget {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: AppTypography.caption.copyWith(
-            color: AppColors.textDisabled,
-          ),
+          style: AppTypography.caption.copyWith(color: AppColors.textDisabled),
         ),
       ),
     );

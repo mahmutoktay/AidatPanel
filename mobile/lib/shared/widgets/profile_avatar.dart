@@ -23,8 +23,11 @@ class ProfileAvatar extends ConsumerWidget {
   });
 
   String get _initials {
-    final parts =
-        userName.trim().split(' ').where((p) => p.isNotEmpty).toList();
+    final parts = userName
+        .trim()
+        .split(' ')
+        .where((p) => p.isNotEmpty)
+        .toList();
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
@@ -33,67 +36,15 @@ class ProfileAvatar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authStateProvider).user;
+    final authUser = ref.watch(authStateProvider.select((state) => state.user));
     final profileState = ref.watch(profileNotifierProvider);
+    final user = profileState.user ?? authUser;
     final fontSize = size * 0.34;
 
-    Widget avatarBody;
-
-    if (profileState.isSaving) {
-      avatarBody = Center(
-        child: SizedBox(
-          width: size * 0.35,
-          height: size * 0.35,
-          child: const CircularProgressIndicator(strokeWidth: 2),
-        ),
-      );
-    } else if (user != null &&
+    final hasPicture =
+        user != null &&
         user.profilePicture != null &&
-        user.profilePicture!.isNotEmpty) {
-      avatarBody = Image.network(
-        '${ApiConstants.baseUrl}/uploads/avatars/${user.profilePicture}',
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Center(
-          child: Text(
-            _initials,
-            style: AppTypography.h3.copyWith(
-              color: AppColors.textPrimary,
-              fontSize: fontSize,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: SizedBox(
-              width: size * 0.35,
-              height: size * 0.35,
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-                strokeWidth: 2,
-              ),
-            ),
-          );
-        },
-      );
-    } else {
-      avatarBody = Center(
-        child: Text(
-          _initials,
-          style: AppTypography.h3.copyWith(
-            color: AppColors.textPrimary,
-            fontSize: fontSize,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      );
-    }
+        user.profilePicture!.isNotEmpty;
 
     final avatar = Container(
       width: size,
@@ -101,12 +52,24 @@ class ProfileAvatar extends ConsumerWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: AppColors.fill,
-        border: Border.fromBorderSide(
-          AppColors.cardBorderSide.copyWith(width: borderWidth),
-        ),
+        image: hasPicture && !profileState.isSaving
+            ? DecorationImage(
+                image: NetworkImage(
+                  '${ApiConstants.baseUrl}/uploads/avatars/${user.profilePicture}',
+                ),
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+              )
+            : null,
+        border: hasPicture
+            ? null
+            : Border.fromBorderSide(
+                AppColors.cardBorderSide.copyWith(width: borderWidth),
+              ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: avatarBody,
+      alignment: Alignment.center,
+      child: _buildChild(profileState, hasPicture, fontSize),
     );
 
     if (onTap == null) return avatar;
@@ -117,6 +80,37 @@ class ProfileAvatar extends ConsumerWidget {
         onTap: onTap,
         customBorder: const CircleBorder(),
         child: avatar,
+      ),
+    );
+  }
+
+  Widget _buildChild(
+    ProfileState profileState,
+    bool hasPicture,
+    double fontSize,
+  ) {
+    if (profileState.isSaving) {
+      return Center(
+        child: SizedBox(
+          width: size * 0.35,
+          height: size * 0.35,
+          child: const CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+
+    if (hasPicture) {
+      return const SizedBox.shrink();
+    }
+
+    return Center(
+      child: Text(
+        _initials,
+        style: AppTypography.h3.copyWith(
+          color: AppColors.textPrimary,
+          fontSize: fontSize,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
