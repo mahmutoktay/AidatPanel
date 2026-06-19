@@ -4,6 +4,16 @@ import {
   DEKONT_UPLOAD_RATE_MAX,
   DEKONT_UPLOAD_RATE_WINDOW_MS,
 } from "../config/dekont.js";
+import {
+  API_WINDOW_MS,
+  API_MAX_REQUESTS,
+  AUTH_WINDOW_MS,
+  AUTH_MAX_REQUESTS,
+  DEKONT_UPLOAD_WINDOW_MS,
+  DEKONT_UPLOAD_MAX_REQUESTS,
+  STRICT_WINDOW_MS,
+  STRICT_MAX_REQUESTS,
+} from "../constants/limiterConstants.js";
 
 const isProduction = process.env.NODE_ENV === "production";
 const isE2E = process.env.AIDATPANEL_E2E === "1";
@@ -16,7 +26,7 @@ function userOrIpKey(req) {
 
 const apiMaxRequests =
   Number(process.env.API_RATE_LIMIT_MAX) ||
-  (isE2E ? 0 : isProduction ? 600 : 5000);
+  (isE2E ? 0 : isProduction ? API_MAX_REQUESTS : 5000);
 
 /**
  * Genel API rate limiter
@@ -25,7 +35,7 @@ const apiMaxRequests =
  * Development / E2E: yüksek limit veya kapalı.
  */
 export const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: API_WINDOW_MS,
   max: apiMaxRequests,
   keyGenerator: userOrIpKey,
   skip: () => isE2E || (!isProduction && apiMaxRequests === 0),
@@ -43,10 +53,10 @@ export const apiLimiter = rateLimit({
  */
 const authMaxRequests =
   Number(process.env.AUTH_RATE_LIMIT_MAX) ||
-  (process.env.NODE_ENV === "production" ? 5 : 50);
+  (process.env.NODE_ENV === "production" ? AUTH_MAX_REQUESTS : 50);
 
 export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 dakika
+  windowMs: AUTH_WINDOW_MS,
   max: authMaxRequests,
   keyGenerator: authRouteKey,
   skip: () => isE2E,
@@ -60,9 +70,6 @@ export const authLimiter = rateLimit({
   skipSuccessfulRequests: true,
 });
 
-/**
- * Şifre sıfırlama gibi hassas işlemler için
- */
 /**
  * Dekont yükleme — kullanıcı başına saatlik limit
  */
@@ -85,9 +92,12 @@ export const dekontUploadLimiter = rateLimit({
   keyGenerator: (req) => req.user?.id || req.ip,
 });
 
+/**
+ * Strict rate limiter — hassas işlemler (şifre sıfırlama, vs.)
+ */
 export const strictLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 saat
-  max: 3, // IP başına 3 istek
+  windowMs: STRICT_WINDOW_MS,
+  max: STRICT_MAX_REQUESTS,
   message: {
     success: false,
     message: "Bu işlem için saatlik limit aşıldı. Lütfen daha sonra tekrar deneyin.",

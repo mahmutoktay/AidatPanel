@@ -19,13 +19,12 @@
 | 3 | Tickets + Dekont/IBAN | ✅ | — | ✅ 2026-06-02 |
 | 4 | Profil + Reports (PDF) | ✅ | 2026-07-03 | ✅ 2026-06-13 |
 | 5 | Test + Sertleştirme | ✅ | 2026-07-10 | ✅ 2026-06-14 |
-| **6** | **Subscription** | **▶ AKTİF** | 2026-07-12 | — |
-| 7 | v1.0.0 Lansman | 🔒 | 2026-07-14 | — |
+| 6 | Subscription | ✅ | 2026-07-12 | ✅ 2026-06-18 |
+| **7** | **v1.0.0 Lansman** | **▶ AKTİF** | 2026-07-14 | — |
 
 ```
-▶ ŞU AN: FAZ 6 — Subscription (RevenueCat webhook + satın alma)
-▶ FAZ 0–5: kapalı (onaylı)
-▶ FAZ 7: kilitli
+▶ ŞU AN: FAZ 7 — v1.0.0 Lansman
+▶ FAZ 0–6: kapalı (onaylı)
 ```
 
 ---
@@ -212,14 +211,14 @@ GET /api/v1/buildings/:id/reports?type=annual&year=2026
 
 ---
 
-## ▶ FAZ 6 — Subscription (AKTİF)
+## ✅ FAZ 6 — Subscription (TAMAMLANDI)
 
-**Hedef:** ~2026-07-12
+**Hedef:** ~2026-07-12 · **ONAY: Furkan ✅** (2026-06-18)
 
 - [x] RevenueCat webhook (`POST /subscription/webhook/revenuecat`)
 - [x] RevenueCat SDK + satın alma (Mobil)
 - [x] Abonelik okuma ekranı (`GET /me/subscription`); satın alma butonu devre dışı
-- [ ] Canlı E2E — Abonelik akışı
+- [x] Canlı E2E — Abonelik akışı
 
 ### 📌 Devam noktası (2026-06-15 — Furkan)
 
@@ -240,8 +239,27 @@ GET /api/v1/buildings/:id/reports?type=annual&year=2026
 - [x] TLS cert pin, RevenueCat `logIn` giriş engeli, JitPack repo düzeltmeleri
 
 **Bekleyen (sırayla):**
-1. Internal test track’e AAB yükle → lisans test kullanıcısı ekle → sandbox satın alma testi
-2. Canlı E2E (satın alma → webhook → `GET /me/subscription`) → Furkan onayı
+1. [x] Internal test track'e AAB yükle → lisans test kullanıcısı ekle → sandbox satın alma testi
+2. [x] Canlı E2E (satın alma → webhook → `GET /me/subscription`) → Furkan onayı
+
+### 🔧 Kod Kalitesi İyileştirmeleri (ANALIZ_RAPORU_FAZ6.md)
+
+**Gerçek Durum (mevcut kod analiz edildi):**
+
+| # | Madde | Severity | Platform | Durum | Açıklama |
+|---|-------|----------|----------|-------|----------|
+| 1 | pdf-parse → pdfjs-dist (OCR) | 🟡 MEDIUM | Backend | [x] | `pdfjs-dist` entegre edildi (`extractPdfTextWithPdfjs`) |
+| 2 | file_picker beta → stable | 🟡 MEDIUM | Mobil | [x] | `12.0.0-beta.5` → `11.1.1` |
+| 3 | asyncHandler.js (try-catch wrapper) | 🟢 CODE QUALITY | Backend | [x] | `src/utils/asyncHandler.js` oluşturuldu |
+| 4 | logger.js (Pino structured logging) | 🟢 CODE QUALITY | Backend | [x] | `src/config/logger.js` oluşturuldu (Pino) |
+| 5 | limiterConstants.js (rate limit config) | 🟢 CODE QUALITY | Backend | [x] | `src/constants/limiterConstants.js` oluşturuldu, `rateLimitMiddleware.js` güncellendi |
+
+**✅ Zaten mevcut olanlar (rapor hatalı):**
+- Token Refresh Race Condition → `_inFlight` pattern zaten var (`token_refresh_service.dart:28`)
+- CORS wildcard → Env'den `allowedOrigins` whitelist kullanılıyor (`index.js:35-37`)
+- WebSocket Auto-Reconnect → `_scheduleReconnect()` zaten var (`websocket_notification_realtime_source.dart:123`)
+- CSRF Protection → Web UI olmadığı için henüz gerekli değil
+- Multer Cleanup → Kontrol edilecek
 
 **Çalıştırma / AAB (prod — RevenueCat anahtarı zorunlu):**
 ```bash
@@ -264,9 +282,9 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 
 ---
 
-## 🔒 FAZ 7 — v1.0.0 Lansman (kilitli)
+## ▶ FAZ 7 — v1.0.0 Lansman (AKTİF)
 
-**Hedef:** ~2026-07-14 · FAZ 6 bitmeden açılamaz
+**Hedef:** ~2026-07-14
 
 - [ ] App Store & Google Play submit
 - [ ] Landing page güncelleme

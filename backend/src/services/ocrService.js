@@ -3,7 +3,7 @@ import os from "os";
 import path from "path";
 import { execFile } from "child_process";
 import { promisify } from "util";
-import pdfParse from "pdf-parse";
+import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import sharp from "sharp";
 import { DEKONT_MIN_TEXT_LENGTH } from "../config/dekont.js";
 import { runTesseractOnImageBuffer } from "../utils/runTesseract.js";
@@ -43,18 +43,40 @@ function normalizeForOcrImage(buffer) {
 }
 
 /**
+ * pdfjs-dist ile PDF'den metin çıkarır.
+ * pdf-parse (bakımsız) yerine kullanılıyor — pdfjs-dist Mozilla tarafından aktif geliştiriliyor.
+ */
+async function extractPdfTextWithPdfjs(pdfBuffer) {
+  const uint8Array = new Uint8Array(pdfBuffer);
+  const doc = await getDocument({ data: uint8Array }).promise;
+  let text = "";
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const textContent = await page.getTextContent();
+    text += textContent.items.map((item) => item.str).join(" ") + "\n";
+  }
+  return text.trim();
+}
+
+/**
  * @returns {Promise<{ rawText: string, parsed: any, profile: string, confidence: number }>}
  */
 export async function extractDekontText(buffer, mimeType) {
   if (mimeType === "application/pdf") {
-    const parsedPdf = await pdfParse(buffer).catch(() => ({ text: "" }));
-    const text = String(parsedPdf?.text ?? "").trim();
+    // pdfjs-dist ile metin çıkarımı — başarısız olursa scanned PDF fallback
+    let text = "";
+    try {
+      text = await extractPdfTextWithPdfjs(buffer);
+    } catch (err) {
+      // pdfjs-dist başarısız → scanned PDF olabilir, sessizce fallback'e geç
+    }
+
     if (text.length >= DEKONT_MIN_TEXT_LENGTH) {
       const parsed = parseReceiptText(text);
       return { rawText: text, parsed: parsed.parsed, profile: parsed.profile, confidence: 0.95 };
     }
 
-    // scanned PDF fallback
+    // scanned PDF fallback: pdftoppm → Tesseract OCR
     const png = await pdfFirstPageToPngBuffer(buffer);
     const normalized = await normalizeForOcrImage(png);
     const ocr = await runTesseractOnImageBuffer(normalized);
