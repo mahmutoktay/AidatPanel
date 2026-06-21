@@ -3,6 +3,7 @@ import { publishToUser, subscriberCount } from "../realtime/realtimeHub.js";
 import { buildPushData } from "../utils/notificationPayload.js";
 import { sendToToken } from "./pushService.js";
 import { runPool } from "../utils/asyncPool.js";
+import { logger } from "../config/logger.js";
 
 const PUSH_CONCURRENCY = Math.max(
   1,
@@ -36,15 +37,7 @@ export async function deliverCreatedNotifications(
   const pushOutcomes = await runPool(notifications, PUSH_CONCURRENCY, async (notification) => {
     const token = tokenByUserId.get(notification.userId);
     if (!token) {
-      console.warn(
-        "[notification] push atlandı — fcmToken yok:",
-        "userId=",
-        notification.userId,
-        "type=",
-        type,
-        "notificationId=",
-        notification.id
-      );
+      logger.warn({ type: "notification_push_skipped", reason: "no_fcm_token", userId: notification.userId, notificationType: type, notificationId: notification.id });
       return "skipped";
     }
 
@@ -56,26 +49,10 @@ export async function deliverCreatedNotifications(
 
     if (result.sent) return "sent";
     if (result.skipped) {
-      console.warn(
-        "[notification] push atlandı:",
-        result.reason ?? "unknown",
-        "userId=",
-        notification.userId,
-        "type=",
-        type
-      );
+      logger.warn({ type: "notification_push_skipped", reason: result.reason ?? "unknown", userId: notification.userId, notificationType: type });
       return "skipped";
     }
-    console.warn(
-      "[notification] push başarısız:",
-      result.code ?? result.error ?? "unknown",
-      "userId=",
-      notification.userId,
-      "type=",
-      type,
-      "notificationId=",
-      notification.id
-    );
+    logger.warn({ type: "notification_push_failed", code: result.code ?? result.error ?? "unknown", userId: notification.userId, notificationType: type, notificationId: notification.id });
     return "failed";
   });
 
@@ -91,9 +68,9 @@ export async function deliverCreatedNotifications(
     pushFailed,
   };
   if (pushFailed > 0 || pushSkipped > 0) {
-    console.warn("[notification] iletim özeti:", logLine);
+    logger.warn({ type: "notification_delivery_summary", ...logLine });
   } else {
-    console.log("[notification] iletim özeti:", logLine);
+    logger.info({ type: "notification_delivery_summary", ...logLine });
   }
 
   return { realtimePublished, pushSent, pushSkipped, pushFailed };

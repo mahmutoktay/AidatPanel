@@ -5,7 +5,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import fs from "fs";
-import { connectDB, disconnectDB } from "./src/config/db.js";
+import { connectDB, disconnectDB, prisma } from "./src/config/db.js";
 import { initFirebase } from "./src/config/firebase.js";
 import authRouter from "./src/routes/authRoutes.js";
 import buildingRoutes from "./src/routes/buildingRoutes.js";
@@ -59,6 +59,14 @@ app.use(express.json());
 app.use(requestLogger);
 
 // ROTALAR — Faz 2A mount sırası (PLAN.md A0): notifications/tickets önce
+app.get("/health", async (req, res) => {
+  try {
+    await prisma.$queryRawUnsafe("SELECT 1");
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  } catch {
+    res.status(503).json({ status: "error", timestamp: new Date().toISOString() });
+  }
+});
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/tickets", ticketRoutes);
 app.use("/api/v1/apartments/:apartmentId/tickets", apartmentTicketRoutes);
@@ -83,6 +91,20 @@ let server;
 
 async function bootstrap() {
   await connectDB();
+
+  // Preflight: kritik migration'ların uygulandığını doğrula
+  try {
+    const cols = await prisma.$queryRawUnsafe(
+      `SELECT column_name FROM information_schema.columns WHERE table_name = 'UserSession' AND column_name = 'lastTokenHash'`
+    );
+    if (cols.length === 0) {
+      logger.error("Missing migration: lastTokenHash column not found. Run: npx prisma migrate deploy");
+      process.exit(1);
+    }
+  } catch (e) {
+    logger.warn("Migration preflight check skipped (query failed)", { err: e?.message });
+  }
+
   initFirebase();
   await ensureDekontStorageDirs();
   await fs.promises.mkdir("uploads/avatars", { recursive: true });

@@ -288,7 +288,7 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 
 - [ ] App Store & Google Play submit
 - [ ] Landing page güncelleme
-- [ ] Firebase Analytics & Crashlytics
+- [x] Firebase Analytics & Crashlytics
 - [ ] v1.0.0 release tag
 
 ---
@@ -312,8 +312,14 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 | 13 | OCR performans iyileştirmesi | Backend | ⏳ | Worker thread kısmen; kuyruk var |
 | 14 | Aidat yaşam döngüsü | Backend | ✅ | bulk + OVERDUE job |
 | 15 | `authService` refactor | Backend | ✅ | FAZ 5 |
-| 16 | Backend unit test (Jest) | Backend | ✅ | 24 test (`npm test`) |
+| 16 | Backend unit test (Jest) | Backend | ✅ | 53 test (13 suite) |
 | 17 | VPS deploy scriptleri | Backend | ✅ | `deploy.ps1` / `deploy.sh` |
+| 18 | console.* → Pino structured logging | Backend | ✅ | Tüm runtime dosyaları |
+| 19 | Health check endpoint (`GET /health`) | Backend | ✅ | DB connectivity check |
+| 20 | Prisma P2014 handler (409) | Backend | ✅ | Relation violation |
+| 21 | Notification partial index | Backend | ✅ | `userId + createdAt WHERE isRead=false` |
+| 22 | Annual report batch optimizasyonu | Backend | ✅ | 24→2 sorgu |
+| 23 | Firebase Analytics + Crashlytics | Mobil | ✅ | FAZ 7 |
 
 ---
 

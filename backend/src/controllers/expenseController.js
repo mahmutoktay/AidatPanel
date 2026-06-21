@@ -10,6 +10,7 @@ import {
 } from "../services/expenseService.js";
 import { HttpError } from "../utils/httpError.js";
 import { createDekontReadStream } from "../services/dekontStorageService.js";
+import { logger } from "../config/logger.js";
 
 const handleHttp = (err, res, next) => {
   if (err instanceof HttpError) {
@@ -177,7 +178,7 @@ export const getExpenseFile = async (req, res, next) => {
     res.setHeader("Cache-Control", "private, no-store");
 
     stream.on("error", (err) => {
-      console.error("[expense] file stream error", err);
+      logger.error({ type: "expense_file_stream", expenseId: req.params.expenseId, err: err?.message });
       next(err);
     });
 

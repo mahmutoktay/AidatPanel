@@ -50,7 +50,7 @@ class ProfileAvatar extends ConsumerWidget {
     Widget avatarChild;
     if (hasPicture && !profileState.isSaving) {
       avatarChild = CachedNetworkImage(
-        imageUrl: '${ApiConstants.baseUrl}/uploads/avatars/${user!.profilePicture}',
+        imageUrl: '${ApiConstants.baseUrl}/uploads/avatars/${user.profilePicture!}',
         width: size,
         height: size,
         fit: BoxFit.cover,

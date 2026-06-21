@@ -4,6 +4,7 @@
  */
 
 import { HttpError } from "../utils/httpError.js";
+import { logger } from "../config/logger.js";
 
 function isDekontRoute(req) {
   const url = req?.originalUrl || req?.url || "";
@@ -12,12 +13,15 @@ function isDekontRoute(req) {
 
 function logUnhandledError(err, req) {
   const route = `${req?.method ?? "?"} ${req?.originalUrl ?? req?.url ?? "?"}`;
-  console.error("[api] unhandled error", {
+  logger.error({
+    type: "unhandled_api_error",
     route,
-    name: err?.name,
-    message: err?.message,
-    code: err?.code,
-    stack: err?.stack,
+    err: {
+      name: err?.name,
+      message: err?.message,
+      code: err?.code,
+      stack: err?.stack,
+    },
   });
 }
 
@@ -55,6 +59,15 @@ export const errorHandler = (err, req, res, next) => {
         success: false,
         message: "İlişkili kayıt bulunamadı",
         error: "Foreign key constraint failed",
+      });
+    }
+
+    // Prisma relation violation (silme kısıtlaması vb.)
+    if (err.code === "P2014") {
+      return res.status(409).json({
+        success: false,
+        message: "Bu kayıt bağlı veriler nedeniyle silinemez. Önce ilişkili kayıtları kaldırın.",
+        error: "Relation constraint violation",
       });
     }
 
@@ -132,7 +145,7 @@ export const errorHandler = (err, req, res, next) => {
   const message = err.message || "Sunucu hatası";
   const dekontRoute = isDekontRoute(req);
 
-  if (dekontRoute) {
+  if (statusCode >= 500 || dekontRoute) {
     logUnhandledError(err, req);
   }
 

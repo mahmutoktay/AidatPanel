@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { prisma } from "../config/db.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -5,11 +6,14 @@ import { generateAccessToken, generateRefreshToken } from "../utils/generateToke
 import { validateInviteCode } from "./inviteCodeService.js";
 import { HttpError } from "../utils/httpError.js";
 import {
-  assertSessionActive,
   createSession,
   revokeOtherSessions,
-  touchSession,
 } from "./sessionService.js";
+
+/** Refresh token'ın SHA-256 özeti — DB'de saklanır, replay tespiti için. */
+function hashToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
 
 function authUserPayload(user) {
   return {
@@ -115,7 +119,18 @@ export async function loginService(body) {
   }
 
   const session = await createSession(user.id, deviceMeta(body));
-  const tokens = await issueTokenPair(user, session.id);
+
+  // Token üretimi + hash kaydı atomik (crash-window önleme)
+  const tokens = await prisma.$transaction(async (tx) => {
+    const t = await issueTokenPair(user, session.id);
+    if (t.refreshToken) {
+      await tx.userSession.update({
+        where: { id: session.id },
+        data: { lastTokenHash: hashToken(t.refreshToken) },
+      });
+    }
+    return t;
+  });
 
   return {
     ...tokens,
@@ -152,16 +167,63 @@ export async function refreshAccessTokenService(refreshToken, body = {}) {
     throw new HttpError(401, "Oturum sonlandırıldı. Lütfen tekrar giriş yapın.");
   }
 
-  let sessionId = tokenSid;
-  if (sessionId) {
-    await assertSessionActive(sessionId);
-    await touchSession(sessionId);
-  } else {
-    const session = await createSession(user.id, deviceMeta(body));
-    sessionId = session.id;
-  }
+  // Session kontrolü + token üretimi + hash güncellemesi — TOCTOU race önleme için atomik transaction.
+  const tokens = await prisma.$transaction(async (tx) => {
+    let finalSessionId = tokenSid;
 
-  return issueTokenPair(user, sessionId);
+    if (finalSessionId) {
+      const session = await tx.userSession.findFirst({
+        where: { id: finalSessionId, revokedAt: null },
+        select: { id: true, lastTokenHash: true },
+      });
+      if (!session) {
+        throw new HttpError(401, "Oturum sonlandırıldı. Lütfen tekrar giriş yapın.");
+      }
+
+      // Token replay detection: eski token tekrar kullanıldıysa tüm oturumu iptal et.
+      const currentHash = hashToken(refreshToken);
+      if (session.lastTokenHash && session.lastTokenHash !== currentHash) {
+        // Eski token kullanıldı — saldırı şüphesi, tüm oturumları revoke et
+        await tx.user.update({
+          where: { id: user.id },
+          data: { refreshTokenVersion: { increment: 1 } },
+        });
+        await tx.userSession.updateMany({
+          where: { userId: user.id, revokedAt: null },
+          data: { revokedAt: new Date() },
+        });
+        throw new HttpError(401, "Şüpheli oturum aktivitesi tespit edildi. Tüm oturumlar sonlandırıldı.");
+      }
+
+      await tx.userSession.update({
+        where: { id: finalSessionId },
+        data: { lastSeenAt: new Date() },
+      });
+    } else {
+      const session = await tx.userSession.create({
+        data: {
+          userId: user.id,
+          deviceLabel: body?.deviceLabel ?? "unknown",
+          platform: body?.platform ?? "unknown",
+        },
+      });
+      finalSessionId = session.id;
+    }
+
+    const newTokens = await issueTokenPair(user, finalSessionId);
+
+    // Yeni refresh token hash'ini session'a kaydet
+    if (newTokens.refreshToken) {
+      await tx.userSession.update({
+        where: { id: finalSessionId },
+        data: { lastTokenHash: hashToken(newTokens.refreshToken) },
+      });
+    }
+
+    return newTokens;
+  }, { isolationLevel: "ReadCommitted" });
+
+  return tokens;
 }
 
 /**
@@ -205,7 +267,18 @@ export async function joinWithInviteCodeService(body) {
   });
 
   const session = await createSession(user.id, deviceMeta(body));
-  const tokens = await issueTokenPair(user, session.id);
+
+  // Token üretimi + hash kaydı atomik (crash-window önleme)
+  const tokens = await prisma.$transaction(async (tx) => {
+    const t = await issueTokenPair(user, session.id);
+    if (t.refreshToken) {
+      await tx.userSession.update({
+        where: { id: session.id },
+        data: { lastTokenHash: hashToken(t.refreshToken) },
+      });
+    }
+    return t;
+  });
 
   return {
     ...tokens,
@@ -243,5 +316,17 @@ export async function logoutAllDevicesService(userId, currentSessionId) {
 
   await revokeOtherSessions(userId, currentSessionId);
 
-  return issueTokenPair(user, currentSessionId ?? null);
+  // Token üretimi + hash kaydı atomik (crash-window önleme)
+  const tokens = await prisma.$transaction(async (tx) => {
+    const t = await issueTokenPair(user, currentSessionId ?? null);
+    if (currentSessionId && t.refreshToken) {
+      await tx.userSession.update({
+        where: { id: currentSessionId },
+        data: { lastTokenHash: hashToken(t.refreshToken) },
+      });
+    }
+    return t;
+  });
+
+  return tokens;
 }

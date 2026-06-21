@@ -3,6 +3,7 @@
  * Bugün: in-memory abone seti (WebSocket gateway bağlanınca dolar).
  * Yarın: `wsGateway` aynı hub üzerinden publish eder — notificationService değişmez.
  */
+import { logger } from "../config/logger.js";
 
 /** @type {Map<string, Set<(payload: object) => void>>} */
 const subscribersByUserId = new Map();
@@ -41,7 +42,7 @@ export function publishToUser(userId, payload) {
     try {
       fn(payload);
     } catch (err) {
-      console.warn("[realtime] subscriber hata:", err?.message ?? err);
+      logger.warn({ type: "realtime_subscriber_error", err: err?.message ?? String(err) });
     }
   }
 }

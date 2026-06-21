@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import multer from "multer";
+import { logger } from "../config/logger.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireRoles } from "../middlewares/roleMiddleware.js";
 import { validate, dekontSchemas } from "../middlewares/validate.js";
@@ -56,7 +57,7 @@ router.post(
   (req, res, next) => {
     upload.single("file")(req, res, (err) => {
       if (err) {
-        console.error("[dekont] multer hata", err?.message || err);
+        logger.error({ type: "dekont_multer_error", err: err?.message || String(err) });
         return next(err);
       }
       next();

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { prisma } from "../config/db.js";
+import { logger } from "../config/logger.js";
 import { HttpError } from "../utils/httpError.js";
 import { assertManagerOwnsBuilding } from "../utils/access.js";
 import {
@@ -289,7 +290,7 @@ export async function createDekontFromUpload(user, file, { dueId } = {}) {
         }
       }
     }
-    console.error("[dekont] upload failed:", err);
+    logger.error({ type: "dekont_upload_failed", err: err?.message });
     dekontLogError("upload failed", err, {
       userId: user?.id,
       createdDekontId,

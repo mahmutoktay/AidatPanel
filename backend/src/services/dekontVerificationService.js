@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { logger } from "../config/logger.js";
 import {
   DEKONT_AUTO_APPLY_PAYMENT,
   DEKONT_OCR_MIN_CONFIDENCE,
@@ -38,10 +39,10 @@ async function tryAutoApplyPayment(dekontId, managerId) {
       managerId,
       dueId: dekont.dueId,
     });
-    console.log("[dekont] Otomatik ödeme uygulandı:", dekontId);
+    logger.info({ type: "dekont_auto_payment", dekontId, result: "applied" });
     return true;
   } catch (err) {
-    console.error("[dekont] Otomatik ödeme başarısız:", dekontId, err.message);
+    logger.error({ type: "dekont_auto_payment_failed", dekontId, err: err?.message });
     return false;
   }
 }

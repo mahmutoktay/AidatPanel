@@ -1,6 +1,7 @@
 import { WebSocketServer } from "ws";
 import { verifyAccessTokenToUserId } from "../utils/verifyAccessToken.js";
 import { subscribeUser } from "./realtimeHub.js";
+import { logger } from "../config/logger.js";
 
 /** Mobil [NotificationDeliveryConfig.webSocketPath] ile aynı */
 export const REALTIME_WS_PATH = "/api/v1/realtime";
@@ -39,7 +40,7 @@ export function attachWebSocketServer(httpServer) {
         wss.emit("connection", ws, request);
       });
     } catch (err) {
-      console.warn("[realtime] upgrade hata:", err?.message ?? err);
+      logger.warn({ type: "realtime_upgrade_error", err: err?.message ?? String(err) });
       socket.destroy();
     }
   });
@@ -60,7 +61,7 @@ export function attachWebSocketServer(httpServer) {
     ws.on("error", () => unsubscribe());
   });
 
-  console.info(`[realtime] WebSocket dinleniyor: ${REALTIME_WS_PATH}`);
+  logger.info({ type: "realtime_ws_listening", path: REALTIME_WS_PATH });
 
   return {
     close: () => {

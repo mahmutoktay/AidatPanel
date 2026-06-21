@@ -1,4 +1,5 @@
 import { DEKONT_PIPELINE_CONCURRENCY } from "../config/dekont.js";
+import { logger } from "../config/logger.js";
 
 /** @type {Array<{ run: () => Promise<void>, label?: string }>} */
 const pending = [];
@@ -11,7 +12,7 @@ function drain() {
     Promise.resolve()
       .then(run)
       .catch((err) => {
-        console.error("[dekont-queue] iş hatası:", label ?? "pipeline", err);
+        logger.error({ type: "dekont_queue_error", label: label ?? "pipeline", err: err?.message });
       })
       .finally(() => {
         active -= 1;

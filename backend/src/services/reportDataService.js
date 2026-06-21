@@ -77,57 +77,7 @@ async function loadExpenseSummary(buildingId, month, year, currency) {
     orderBy: { date: "desc" },
   });
 
-  const byCategoryMap = new Map();
-  let totalKnown = 0;
-  let uncalculatedCount = 0;
-
-  for (const expense of expenses) {
-    const amount = resolveExpenseAmount(expense);
-    if (amount == null) {
-      uncalculatedCount += 1;
-      continue;
-    }
-    totalKnown += amount;
-    const cat = expense.category;
-    const prev = byCategoryMap.get(cat) ?? { amount: 0, count: 0 };
-    byCategoryMap.set(cat, {
-      amount: prev.amount + amount,
-      count: prev.count + 1,
-    });
-  }
-
-  const byCategory = [...byCategoryMap.entries()]
-    .map(([category, v]) => ({
-      category,
-      label: EXPENSE_CATEGORY_LABELS[category] ?? category,
-      amount: v.amount,
-      amountFormatted: formatMoney(v.amount, currency),
-      count: v.count,
-    }))
-    .sort((a, b) => b.amount - a.amount);
-
-  const items = expenses.slice(0, 25).map((e) => {
-    const amount = resolveExpenseAmount(e);
-    return {
-      id: e.id,
-      title: e.title,
-      category: e.category,
-      categoryLabel: EXPENSE_CATEGORY_LABELS[e.category] ?? e.category,
-      date: e.date.toISOString(),
-      amount,
-      amountFormatted:
-        amount != null ? formatMoney(amount, currency) : "Hesaplanmadi",
-    };
-  });
-
-  return {
-    totalAmount: totalKnown,
-    totalAmountFormatted: formatMoney(totalKnown, currency),
-    uncalculatedCount,
-    byCategory,
-    items,
-    totalCount: expenses.length,
-  };
+  return computeExpenseSummary(expenses, currency);
 }
 
 async function loadOperationalSummary(buildingId, start, end) {
@@ -274,46 +224,144 @@ export async function getMonthlyReportData(buildingId, managerId, { month, year 
   };
 }
 
+/**
+ * Gider listesinden ozet (kategori bazli gruplama + top 25 items).
+ * DB sorgusu yapmaz — onceden yuklenmis liste uzerinde calısır.
+ */
+function computeExpenseSummary(expenses, currency) {
+  const byCategoryMap = new Map();
+  let totalKnown = 0;
+  let uncalculatedCount = 0;
+
+  for (const expense of expenses) {
+    const amount = resolveExpenseAmount(expense);
+    if (amount == null) {
+      uncalculatedCount += 1;
+      continue;
+    }
+    totalKnown += amount;
+    const cat = expense.category;
+    const prev = byCategoryMap.get(cat) ?? { amount: 0, count: 0 };
+    byCategoryMap.set(cat, { amount: prev.amount + amount, count: prev.count + 1 });
+  }
+
+  const byCategory = [...byCategoryMap.entries()]
+    .map(([category, v]) => ({
+      category,
+      label: EXPENSE_CATEGORY_LABELS[category] ?? category,
+      amount: v.amount,
+      amountFormatted: formatMoney(v.amount, currency),
+      count: v.count,
+    }))
+    .sort((a, b) => b.amount - a.amount);
+
+  const items = expenses.slice(0, 25).map((e) => {
+    const amount = resolveExpenseAmount(e);
+    return {
+      id: e.id,
+      title: e.title,
+      category: e.category,
+      categoryLabel: EXPENSE_CATEGORY_LABELS[e.category] ?? e.category,
+      date: e.date.toISOString(),
+      amount,
+      amountFormatted:
+        amount != null ? formatMoney(amount, currency) : "Hesaplanmadi",
+    };
+  });
+
+  return {
+    totalAmount: totalKnown,
+    totalAmountFormatted: formatMoney(totalKnown, currency),
+    uncalculatedCount,
+    byCategory,
+    items,
+    totalCount: expenses.length,
+  };
+}
+
+/**
+ * Yillik rapor — tum aidat ve giderleri yil boyu tek seferde yukler (2 sorgu),
+ * ardindan ay bazinda gruplar. Onceki 24 sorgu (12 ay × 2) yerine.
+ */
 export async function getAnnualReportData(buildingId, managerId, { year }) {
   const ctx = await loadBuildingContext(buildingId, managerId);
   const y = parseInt(String(year), 10);
   const { start, end } = yearRange(year);
 
+  // 2 sorgu: tum yilin aidatlari + tum yilin giderleri
+  const [allDues, allExpenses] = await Promise.all([
+    prisma.due.findMany({
+      where: { apartment: { buildingId }, year: y },
+      include: {
+        apartment: {
+          select: {
+            id: true,
+            number: true,
+            resident: { select: { name: true, deletedAt: true } },
+          },
+        },
+      },
+      orderBy: { apartment: { number: "asc" } },
+    }),
+    prisma.expense.findMany({
+      where: { buildingId, targetYear: y },
+      orderBy: { date: "desc" },
+    }),
+  ]);
+
+  // Ay bazinda grupla
+  const duesByMonth = new Map();
+  for (const due of allDues) {
+    const m = due.month;
+    if (!duesByMonth.has(m)) duesByMonth.set(m, []);
+    duesByMonth.get(m).push(due);
+  }
+
+  const expensesByMonth = new Map();
+  for (const expense of allExpenses) {
+    const m = expense.targetMonth;
+    if (!expensesByMonth.has(m)) expensesByMonth.set(m, []);
+    expensesByMonth.get(m).push(expense);
+  }
+
+  // Ay satirlari olustur
   const monthlyRows = [];
   let yearExpected = 0;
   let yearCollected = 0;
   let yearExpenses = 0;
 
   for (let m = 1; m <= 12; m += 1) {
-    const [dues, expenseBlock] = await Promise.all([
-      loadDuesForPeriod(buildingId, m, y),
-      loadExpenseSummary(buildingId, m, y, ctx.currency),
-    ]);
-    const dueSummary = summarizeDues(dues);
-    const net = computeNet(dueSummary.collected, expenseBlock.totalAmount);
+    const monthDues = duesByMonth.get(m) ?? [];
+    const monthExpenses = expensesByMonth.get(m) ?? [];
 
+    const dueSummary = summarizeDues(monthDues);
+    const expenseTotal = monthExpenses.reduce((sum, e) => {
+      const amt = resolveExpenseAmount(e);
+      return amt != null ? sum + amt : sum;
+    }, 0);
+
+    const net = computeNet(dueSummary.collected, expenseTotal);
     yearExpected += dueSummary.expected;
     yearCollected += dueSummary.collected;
-    yearExpenses += expenseBlock.totalAmount;
+    yearExpenses += expenseTotal;
 
     monthlyRows.push({
       month: m,
       expected: dueSummary.expected,
       collected: dueSummary.collected,
-      expenses: expenseBlock.totalAmount,
+      expenses: expenseTotal,
       net,
       collectionRateRounded: Math.round(dueSummary.collectionRate),
       expectedFormatted: formatMoney(dueSummary.expected, ctx.currency),
       collectedFormatted: formatMoney(dueSummary.collected, ctx.currency),
-      expensesFormatted: formatMoney(expenseBlock.totalAmount, ctx.currency),
+      expensesFormatted: formatMoney(expenseTotal, ctx.currency),
       netFormatted: formatMoney(net, ctx.currency),
     });
   }
 
-  const [yearExpenseSummary, operational] = await Promise.all([
-    loadExpenseSummary(buildingId, null, y, ctx.currency),
-    loadOperationalSummary(buildingId, start, end),
-  ]);
+  // Yillik gider ozeti (tum yil icin tek hesaplama)
+  const yearExpenseSummary = computeExpenseSummary(allExpenses, ctx.currency);
+  const operational = await loadOperationalSummary(buildingId, start, end);
 
   const yearNet = computeNet(yearCollected, yearExpenses);
 

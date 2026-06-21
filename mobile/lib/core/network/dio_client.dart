@@ -9,6 +9,7 @@ import '../storage/secure_storage.dart';
 import '../utils/jwt_utils.dart';
 import 'api_exception.dart';
 import 'certificate_pinning.dart';
+import 'retry_interceptor.dart';
 import 'safe_log_interceptor.dart';
 import 'token_refresh_service.dart';
 
@@ -80,6 +81,9 @@ class DioClient {
     _uploadDio = _createDio(AppConstants.uploadTimeout);
     _refreshDio = _createDio(AppConstants.apiTimeout);
 
+    // Retry interceptor — auth interceptor'dan ÖNCE (502/503/504 için)
+    _dio.interceptors.add(RetryInterceptor(_dio));
+
     _tokenRefresh = TokenRefreshService(
       refreshDio: _refreshDio,
       secureStorage: _secureStorage,
@@ -88,6 +92,7 @@ class DioClient {
 
     _attachAuthInterceptors(_dio);
     _attachAuthInterceptors(_uploadDio);
+    // NOT: _uploadDio'ya RetryInterceptor EKLENMEZ (multipart duplicate riski)
 
     if (kDebugMode) {
       _dio.interceptors.add(SafeLogInterceptor());

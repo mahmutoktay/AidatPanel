@@ -22,6 +22,8 @@ plugins {
     id("com.android.application") version "8.11.1" apply false
     // FlutterFire — google-services.json (FCM)
     id("com.google.gms.google-services") version("4.3.15") apply false
+    // Crashlytics — dSYM + mapping upload
+    id("com.google.firebase.crashlytics") version("3.0.4") apply false
     id("org.jetbrains.kotlin.android") version "2.2.20" apply false
 }
 

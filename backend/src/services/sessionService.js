@@ -40,14 +40,15 @@ export async function touchSession(sessionId) {
 
 /** @param {string | null | undefined} sessionId */
 export async function assertSessionActive(sessionId) {
-  if (!sessionId) return;
+  if (!sessionId) return null;
   const session = await prisma.userSession.findFirst({
     where: { id: sessionId, revokedAt: null },
-    select: { id: true },
+    select: { id: true, lastTokenHash: true },
   });
   if (!session) {
     throw new HttpError(401, "Oturum sonlandırıldı. Lütfen tekrar giriş yapın.");
   }
+  return session;
 }
 
 /**
