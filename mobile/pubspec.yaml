@@ -3,7 +3,7 @@ description: "AidatPanel - Türk apartman ve site yöneticileri için mobil aida
 publish_to: 'none'
 
 # --- Google Play (sürüm kodu = + sonrası; her AAB öncesi +1 — CLAUDE.md) ---
-version: 0.4.7+2000000005
+version: 0.5.2+2000000007
 
 environment:
   sdk: ^3.11.5
@@ -31,9 +31,11 @@ dependencies:
   slang: ^4.15.0
   slang_flutter: ^4.15.0
 
-  # Firebase (FAZ 2 — push / FCM)
+  # Firebase (FAZ 2 — push / FCM; FAZ 7 — analytics + crashlytics)
   firebase_core: ^4.10.0
   firebase_messaging: ^16.3.0
+  firebase_analytics: ^12.0.0
+  firebase_crashlytics: ^5.0.0
   flutter_local_notifications: ^21.0.0
   permission_handler: ^12.0.3
 
@@ -65,6 +67,7 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+  mocktail: ^1.0.0
 
   build_runner: ^2.12.2
   slang_build_runner: ^4.15.0

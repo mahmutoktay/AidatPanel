@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { logger } from "../config/logger.js";
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
 import {
   DEKONT_RECEIVED_MANAGER,
@@ -73,10 +74,7 @@ export async function notifyDekontStatus(dekontId) {
       });
     }
   } catch (err) {
-    console.error("[dekont] notify status failed", {
-      dekontId,
-      message: err?.message,
-    });
+    logger.error({ type: "dekont_notify_status_failed", dekontId, err: err?.message });
   }
 }
 
@@ -110,9 +108,6 @@ export async function notifyDekontRejected(dekontId) {
       },
     });
   } catch (err) {
-    console.error("[dekont] notify rejected failed", {
-      dekontId,
-      message: err?.message,
-    });
+    logger.error({ type: "dekont_notify_rejected_failed", dekontId, err: err?.message });
   }
 }

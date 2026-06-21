@@ -1,5 +1,6 @@
 import { autoGenerateAllBuildingDuesService } from "../services/dueBulkService.js";
 import { markOverdueDuesService } from "../services/dueOverdueService.js";
+import { logger } from "../config/logger.js";
 
 const DEFAULT_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const STARTUP_DELAY_MS = 30_000;
@@ -11,14 +12,18 @@ export async function runDueMaintenanceJob() {
   const overdue = await markOverdueDuesService();
 
   if (generated.totalCreated > 0) {
-    console.info(
-      `[due-job] ${generated.totalCreated} aidat oluşturuldu (${generated.buildingsProcessed} bina)`
-    );
+    logger.info({
+      type: "due_job_generated",
+      totalCreated: generated.totalCreated,
+      buildingsProcessed: generated.buildingsProcessed,
+    });
   }
   if (overdue.transitioned > 0 || overdue.refreshed > 0) {
-    console.info(
-      `[due-job] gecikme: ${overdue.transitioned} PENDING→OVERDUE, ${overdue.refreshed} overdueDays güncellendi`
-    );
+    logger.info({
+      type: "due_job_overdue",
+      transitioned: overdue.transitioned,
+      refreshed: overdue.refreshed,
+    });
   }
 
   return { generated, overdue };
@@ -46,16 +51,17 @@ export function startDueAutoGenerateScheduler() {
 
   const tick = () => {
     runDueMaintenanceJob().catch((err) => {
-      console.error("[due-job] hata:", err?.stack || err);
+      logger.error({ type: "due_job_error", err: err?.stack || err?.message });
     });
   };
 
   setTimeout(tick, STARTUP_DELAY_MS);
   timer = setInterval(tick, intervalMs);
 
-  console.info(
-    `[due-job] Otomatik aidat bakımı aktif (üretim + gecikme; aralık: ${Math.round(intervalMs / 60_000)} dk)`
-  );
+  logger.info({
+    type: "due_job_started",
+    intervalMin: Math.round(intervalMs / 60_000),
+  });
 }
 
 export function stopDueAutoGenerateScheduler() {

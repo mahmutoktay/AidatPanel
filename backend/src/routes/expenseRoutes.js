@@ -7,6 +7,7 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
+import { logger } from "../config/logger.js";
 import { DEKONT_MAX_BYTES, DEKONT_ALLOWED_MIMES, DEKONT_UPLOAD_TMP_DIR } from "../config/dekont.js";
 import { extensionForMime } from "../services/dekontStorage/local.js";
 
@@ -56,7 +57,7 @@ router.post(
       { name: "files[]", maxCount: 10 },
     ])(req, res, (err) => {
       if (err) {
-        console.error("[expense] multer hata", err?.message || err);
+        logger.error({ type: "expense_multer_error", err: err?.message || String(err) });
         return next(err);
       }
       next();

@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { logger } from "../config/logger.js";
 import { extractDekontTextForPipeline } from "./dekontOcrRunner.js";
 import { enqueueDekontPipeline } from "./dekontPipelineQueue.js";
 import {
@@ -54,7 +55,7 @@ export async function runExpenseReceiptOcr(fileMeta) {
       ocrNote = "Desteklenmeyen dosya türü — OCR atlandı.";
     }
   } catch (ocrErr) {
-    console.warn(`[expenseOcr] OCR hatası (${index + 1}. dosya):`, ocrErr.message);
+    logger.warn({ type: "expense_ocr_error", fileIndex: index + 1, err: ocrErr.message });
     ocrNote = "OCR işlemi sırasında hata oluştu.";
   }
 

@@ -173,7 +173,7 @@ if [[ "$SYNC_ONLY" != true ]]; then
   ssh_cmd "set -e
 source ~/.nvm/nvm.sh 2>/dev/null || true
 cd '$REMOTE_PATH'
-npm ci --omit=dev
+npm ci --omit=dev 2>/dev/null || npm install --omit=dev
 npx prisma migrate deploy
 npx prisma generate
 if pm2 describe '$PM2_NAME' >/dev/null 2>&1; then

@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 import { extractDekontText } from "./ocrService.js";
 import { readDekontFileBuffer } from "./dekontStorageService.js";
 import { resolveDekontAbsolutePath } from "./dekontStorage/local.js";
+import { logger } from "../config/logger.js";
 import {
   DEKONT_OCR_IN_WORKER,
   DEKONT_OCR_WORKER_TIMEOUT_MS,
@@ -64,7 +65,7 @@ export async function extractDekontTextForPipeline(storedPath, mimeType) {
     try {
       return await runOcrWorker(absolutePath, mimeType);
     } catch (err) {
-      console.warn("[dekont] Worker OCR başarısız, inline fallback:", err.message);
+      logger.warn({ type: "dekont_ocr_worker_fallback", err: err.message });
     }
   }
 

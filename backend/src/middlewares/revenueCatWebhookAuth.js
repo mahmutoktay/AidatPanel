@@ -1,30 +1,32 @@
 /**
  * RevenueCat dashboard'da tanımlanan Authorization: Bearer <secret> başlığını doğrular.
  */
+import { logger } from "../config/logger.js";
+
 export const revenueCatWebhookAuth = (req, res, next) => {
   const secret = process.env.REVENUECAT_WEBHOOK_SECRET;
-  console.log("[RevenueCat Webhook Auth] Checking authorization header.");
+  logger.info({ type: "revenuecat_webhook_auth", phase: "checking" });
   if (!secret) {
     if (process.env.NODE_ENV === "production") {
-      console.warn("[RevenueCat Webhook Auth] Secret is not configured in production!");
+      logger.warn({ type: "revenuecat_webhook_auth", phase: "no_secret_production" });
       return res.status(503).json({
         success: false,
         message: "Abonelik webhook yapılandırılmamış.",
       });
     }
-    console.log("[RevenueCat Webhook Auth] No secret configured, skipping auth check.");
+    logger.info({ type: "revenuecat_webhook_auth", phase: "no_secret_skip" });
     return next();
   }
 
   const authHeader = req.headers.authorization;
   if (authHeader !== `Bearer ${secret}`) {
-    console.warn(`[RevenueCat Webhook Auth] Authorization failed. Header: ${authHeader}`);
+    logger.warn({ type: "revenuecat_webhook_auth", phase: "failed", headerPresent: !!authHeader });
     return res.status(401).json({
       success: false,
       message: "Geçersiz webhook yetkisi.",
     });
   }
-  console.log("[RevenueCat Webhook Auth] Authorization successful.");
+  logger.info({ type: "revenuecat_webhook_auth", phase: "success" });
   next();
 };
 

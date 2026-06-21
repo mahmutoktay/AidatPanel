@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { logger } from "../config/logger.js";
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
 import { EXPENSE_CATEGORY_LABELS } from "../constants/reportLabels.js";
 import { EXPENSE_ADDED_RESIDENT } from "../constants/notificationTemplates.js";
@@ -75,10 +76,11 @@ export async function notifyResidentsOfNewExpense(buildingId, payload) {
       }
     );
   } catch (err) {
-    console.error("[expense] notify residents failed", {
+    logger.error({
+      type: "expense_notify_failed",
       buildingId,
       expenseId: payload?.expenseId,
-      message: err?.message,
+      err: err?.message,
     });
   }
 }

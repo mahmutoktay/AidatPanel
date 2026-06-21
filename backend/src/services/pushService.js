@@ -4,6 +4,7 @@ import {
   isFirebaseReady,
 } from "../config/firebase.js";
 import { clearFcmToken } from "../services/fcmTokenService.js";
+import { logger } from "../config/logger.js";
 
 const INVALID_TOKEN_CODES = new Set([
   "messaging/invalid-registration-token",
@@ -35,7 +36,7 @@ function toFcmData(data) {
  */
 export async function sendToToken(fcmToken, { title, body, data = {} }) {
   if (!isFirebaseReady()) {
-    console.warn("[push] Firebase hazır değil — gönderim atlandı.");
+    logger.warn({ type: "push_firebase_not_ready" });
     return { sent: false, skipped: true, reason: "firebase_not_ready" };
   }
 
@@ -76,45 +77,28 @@ export async function sendToToken(fcmToken, { title, body, data = {} }) {
       },
     });
     if (debugPush) {
-      console.log(
-        "[push] gönderildi type=",
-        fcmData.type ?? "?",
-        "token=",
-        fcmToken.slice(0, 12) + "…"
-      );
+      logger.info({ type: "push_sent", eventType: fcmData.type ?? "?", tokenPrefix: fcmToken.slice(0, 12) });
     }
     return { sent: true };
   } catch (err) {
     const code = err.code ?? err.errorInfo?.code;
     if (code && INVALID_TOKEN_CODES.has(code)) {
       await clearFcmToken(fcmToken);
-      console.warn("[push] Geçersiz token temizlendi:", code);
+      logger.warn({ type: "push_invalid_token", code });
     } else {
-      console.warn(
-        "[push] Gönderim hatası:",
-        code || err.message,
-        "type=",
-        fcmData.type ?? "?",
-        "tokenPrefix=",
-        fcmToken.slice(0, 20) + "…",
-        "adminProject=",
-        getFirebaseProjectId() ?? "?"
-      );
+      logger.warn({
+        type: "push_send_error",
+        code: code || err.message,
+        eventType: fcmData.type ?? "?",
+        tokenPrefix: fcmToken.slice(0, 20),
+        adminProject: getFirebaseProjectId() ?? "?",
+      });
       if (code === "messaging/mismatched-credential") {
         const detail = err.message ?? "";
         if (detail.includes("cloudmessaging.messages.create")) {
-          console.warn(
-            "[push] FCM API / IAM izni eksik (proje aidatpanel). "
-              + "Google Cloud → Firebase Cloud Messaging API etkinleştir; "
-              + "service account'a Firebase Admin veya Cloud Messaging Admin rolü ver. "
-              + "Detay:",
-            detail
-          );
+          logger.warn({ type: "push_fcm_iam_missing", detail });
         } else {
-          console.warn(
-            "[push] mismatched-credential: credential ile cihaz token farklı projeden olabilir. "
-              + "pm2 env | grep FIREBASE — eski deneme JSON silinsin."
-          );
+          logger.warn({ type: "push_mismatched_credential" });
         }
       }
     }

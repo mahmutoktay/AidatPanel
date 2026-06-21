@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { appendFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { prisma } from "../config/db.js";
+import { logger } from "../config/logger.js";
 import { HttpError } from "../utils/httpError.js";
 import { revokeAllUserSessions } from "./sessionService.js";
 
@@ -55,7 +56,7 @@ async function sendResendEmail({ to, subject, html }) {
   });
   if (!res.ok) {
     const text = await res.text();
-    console.error("Resend error:", res.status, text);
+    logger.error({ type: "resend_email_error", status: res.status, body: text });
     return false;
   }
   return true;
@@ -124,17 +125,14 @@ export async function requestPasswordResetService(email) {
         "utf8",
       );
     } catch (e) {
-      console.error("AIDATPANEL_E2E_RESET_LOG yazılamadı:", e);
+      logger.error({ type: "e2e_reset_log_write_failed", err: e?.message });
     }
   }
 
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     if (process.env.NODE_ENV === "development") {
-      console.warn(
-        "[password-reset] RESEND_API_KEY yok; token üretildi ancak e-posta gönderilmedi. Geliştirme için token:",
-        plain,
-      );
+      logger.warn({ type: "password_reset_no_resend_key", token: plain });
     }
     return;
   }

@@ -458,7 +458,10 @@ class PremiumActionSheetTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                ?trailing,
+                if (trailing != null) ...[
+                  const SizedBox(width: AppSizes.spacingS),
+                  trailing!,
+                ],
               ],
             ),
           ),
