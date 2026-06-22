@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/navigation/app_back_navigation.dart';
 import '../../../../core/navigation/dashboard_back_handler.dart';
-import '../../../../core/providers/theme_mode_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
@@ -30,8 +29,7 @@ class ResidentDashboardScreen extends ConsumerStatefulWidget {
       _ResidentDashboardScreenState();
 }
 
-class _ResidentDashboardScreenState
-    extends ConsumerState<ResidentDashboardScreen>
+class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -84,9 +82,6 @@ class _ResidentDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
-    // Tema değişiminde tüm dashboard iskeletinin rebuild olması için watch
-    ref.watch(themeModeProvider);
-
     ref.listen<int>(residentTabIndexProvider, (previous, next) {
       if (_tabController.index != next) {
         _tabController.animateTo(
@@ -130,9 +125,7 @@ class _ResidentDashboardScreenState
           curve: DashboardNavAnimation.curve,
         );
       },
-      onExitHint: (message) => ref
-          .read(toastProvider.notifier)
-          .show(
+      onExitHint: (message) => ref.read(toastProvider.notifier).show(
             message,
             type: ToastType.info,
             duration: AppBackNavigation.exitGracePeriod,
