@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/providers/locale_provider.dart';
+import '../../core/providers/theme_mode_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
@@ -10,10 +12,12 @@ import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/buildings/data/buildings_store.dart';
 import '../../features/buildings/domain/entities/building_entity.dart';
 import '../../features/notifications/presentation/widgets/announcement_form_sheet.dart';
+import '../../features/profile/presentation/widgets/change_password_bottom_sheet.dart';
 import '../../features/reports/presentation/widgets/report_download_sheet.dart';
 import '../../l10n/strings.g.dart';
 import '../providers/navigation_provider.dart';
 import 'dashboard/dashboard_app_bar.dart';
+import 'settings/settings_sheet_actions.dart';
 import 'settings/settings_ui_widgets.dart';
 
 class MenuTab extends ConsumerWidget {
@@ -158,6 +162,50 @@ class MenuTab extends ConsumerWidget {
               onTap: () => context.push('/manager-dashboard/profile'),
             ),
             SettingsTile(
+              icon: Icons.devices_outlined,
+              title: common.menuActiveSessions,
+              onTap: () => context.push('/manager-dashboard/profile/sessions'),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSizes.spacingM),
+        MenuSectionTitle(title: common.menuSectionSettings),
+        SettingsSurfaceCard(
+          children: [
+            SettingsTile(
+              icon: Icons.lock_outline,
+              title: common.changePassword,
+              onTap: () => ChangePasswordBottomSheet.show(context),
+            ),
+            SettingsTile(
+              icon: Icons.language_outlined,
+              title: common.language,
+              trailing: ref.watch(localeProvider) == AppLocale.tr
+                  ? 'Türkçe'
+                  : 'English',
+              onTap: () => showLanguageSheet(context, ref),
+            ),
+            SettingsTile(
+              icon: Icons.dark_mode_outlined,
+              title: common.theme,
+              trailing: themePreferenceLabel(
+                context,
+                ref.watch(themeModeProvider),
+              ),
+              onTap: () => showThemeSheet(context, ref),
+            ),
+            SettingsTile(
+              icon: Icons.notifications_outlined,
+              title: common.notifications,
+              onTap: () => context.push('/manager-dashboard/notifications'),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSizes.spacingM),
+        MenuSectionTitle(title: common.menuSectionSubscription),
+        SettingsSurfaceCard(
+          children: [
+            SettingsTile(
               icon: Icons.card_membership_outlined,
               title: t.features.subscription.title,
               onTap: () => context.push('/manager-dashboard/subscription'),
@@ -231,6 +279,44 @@ class MenuTab extends ConsumerWidget {
               icon: Icons.person_outline,
               title: common.menuMyProfile,
               onTap: () => context.push('/resident-dashboard/profile'),
+            ),
+            SettingsTile(
+              icon: Icons.devices_outlined,
+              title: common.menuActiveSessions,
+              onTap: () => context.push('/resident-dashboard/profile/sessions'),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSizes.spacingM),
+        MenuSectionTitle(title: common.menuSectionSettings),
+        SettingsSurfaceCard(
+          children: [
+            SettingsTile(
+              icon: Icons.lock_outline,
+              title: common.changePassword,
+              onTap: () => ChangePasswordBottomSheet.show(context),
+            ),
+            SettingsTile(
+              icon: Icons.language_outlined,
+              title: common.language,
+              trailing: ref.watch(localeProvider) == AppLocale.tr
+                  ? 'Türkçe'
+                  : 'English',
+              onTap: () => showLanguageSheet(context, ref),
+            ),
+            SettingsTile(
+              icon: Icons.dark_mode_outlined,
+              title: common.theme,
+              trailing: themePreferenceLabel(
+                context,
+                ref.watch(themeModeProvider),
+              ),
+              onTap: () => showThemeSheet(context, ref),
+            ),
+            SettingsTile(
+              icon: Icons.notifications_outlined,
+              title: common.notifications,
+              onTap: () => context.push('/resident-dashboard/notifications'),
             ),
           ],
         ),

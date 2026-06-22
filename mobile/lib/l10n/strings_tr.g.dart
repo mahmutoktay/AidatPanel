@@ -128,6 +128,8 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get menuSectionSupport => 'Destek';
 	@override String get menuSectionLegal => 'Yasal ve Bilgi';
 	@override String get menuSectionAccount => 'Hesap';
+	@override String get menuSectionSettings => 'Ayarlar';
+	@override String get menuSectionSubscription => 'Abonelik';
 	@override String get menuOverdueApartments => 'Geciken Daireler';
 	@override String get menuSendAnnouncement => 'Duyuru Gönder';
 	@override String get menuDownloadReport => 'Rapor İndir';
@@ -1397,6 +1399,8 @@ extension on TranslationsTr {
 			'common.menuSectionSupport' => 'Destek',
 			'common.menuSectionLegal' => 'Yasal ve Bilgi',
 			'common.menuSectionAccount' => 'Hesap',
+			'common.menuSectionSettings' => 'Ayarlar',
+			'common.menuSectionSubscription' => 'Abonelik',
 			'common.menuOverdueApartments' => 'Geciken Daireler',
 			'common.menuSendAnnouncement' => 'Duyuru Gönder',
 			'common.menuDownloadReport' => 'Rapor İndir',
@@ -1795,10 +1799,10 @@ extension on TranslationsTr {
 			'features.auth.phoneLogin' => 'Telefon ile Giriş Yap',
 			'features.auth.or' => 'veya',
 			'features.auth.noAccount' => 'Hesabınız yok mu? Kaydolun',
-			'features.auth.joinWithCode' => 'Davet kodu ile katılın',
-			'features.auth.signUp' => 'Üye ol',
 			_ => null,
 		} ?? switch (path) {
+			'features.auth.joinWithCode' => 'Davet kodu ile katılın',
+			'features.auth.signUp' => 'Üye ol',
 			'features.auth.signUpTitle' => 'Üye Ol',
 			'features.auth.signUpSubtitle' => 'Nasıl katılmak istiyorsunuz?',
 			'features.auth.beManager' => 'Yönetici ol',
@@ -2309,10 +2313,10 @@ extension on TranslationsTr {
 			'legal.kvkkS6Title' => 'İlgili kişi hakları',
 			'legal.kvkkS6Body' => 'Kanunun 11. maddesi kapsamındaki haklarınızı kullanmak için talebinizi Vefa Yazılım’a (store@vefayazilim.com) iletebilirsiniz; başvurularınız mevzuattaki sürelerde yanıtlanır.',
 			'legal.helpIntro' => 'Yardım merkezi hazırlanıyor',
-			'legal.helpBody' => 'Sık sorulan sorular, adım adım rehberler ve destek kanalları yakında bu bölümde yer alacak. Uygulama desteği için: store@vefayazilim.com (Vefa Yazılım). Acil apartman işleri için yöneticiniz veya site yönetiminizle iletişime geçebilirsiniz.',
-			'db_context.user_entry' => 'Kayıt: {value}',
 			_ => null,
 		} ?? switch (path) {
+			'legal.helpBody' => 'Sık sorulan sorular, adım adım rehberler ve destek kanalları yakında bu bölümde yer alacak. Uygulama desteği için: store@vefayazilim.com (Vefa Yazılım). Acil apartman işleri için yöneticiniz veya site yönetiminizle iletişime geçebilirsiniz.',
+			'db_context.user_entry' => 'Kayıt: {value}',
 			'db_context.building_name' => 'Bina: {value}',
 			'db_context.apartment_label' => 'Daire: {value}',
 			'db_context.code_value' => 'Kod: {value}',

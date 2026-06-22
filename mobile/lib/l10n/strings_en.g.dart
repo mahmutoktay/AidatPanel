@@ -284,6 +284,12 @@ class Translations$common$en {
 	/// en: 'Account'
 	String get menuSectionAccount => 'Account';
 
+	/// en: 'Settings'
+	String get menuSectionSettings => 'Settings';
+
+	/// en: 'Subscription'
+	String get menuSectionSubscription => 'Subscription';
+
 	/// en: 'Overdue apartments'
 	String get menuOverdueApartments => 'Overdue apartments';
 
@@ -3459,6 +3465,8 @@ extension on Translations {
 			'common.menuSectionSupport' => 'Support',
 			'common.menuSectionLegal' => 'Legal & info',
 			'common.menuSectionAccount' => 'Account',
+			'common.menuSectionSettings' => 'Settings',
+			'common.menuSectionSubscription' => 'Subscription',
 			'common.menuOverdueApartments' => 'Overdue apartments',
 			'common.menuSendAnnouncement' => 'Send announcement',
 			'common.menuDownloadReport' => 'Download report',
@@ -3857,10 +3865,10 @@ extension on Translations {
 			'features.auth.phoneLogin' => 'Login with Phone',
 			'features.auth.or' => 'or',
 			'features.auth.noAccount' => 'Don\'t have an account? Register',
-			'features.auth.joinWithCode' => 'Join with Invite Code',
-			'features.auth.signUp' => 'Sign up',
 			_ => null,
 		} ?? switch (path) {
+			'features.auth.joinWithCode' => 'Join with Invite Code',
+			'features.auth.signUp' => 'Sign up',
 			'features.auth.signUpTitle' => 'Sign Up',
 			'features.auth.signUpSubtitle' => 'How would you like to join?',
 			'features.auth.beManager' => 'Become a manager',
@@ -4371,10 +4379,10 @@ extension on Translations {
 			'legal.kvkkS6Title' => 'Data subject rights',
 			'legal.kvkkS6Body' => 'You may exercise your rights under Article 11 of KVKK by contacting Vefa Yazılım at store@vefayazilim.com; requests are answered within statutory time limits.',
 			'legal.helpIntro' => 'Help center coming soon',
-			'legal.helpBody' => 'FAQs, step-by-step guides, and support channels will be added here soon. For app support: store@vefayazilim.com (Vefa Yazılım). For urgent building matters, contact your building manager or site administration.',
-			'db_context.user_entry' => 'Record: {value}',
 			_ => null,
 		} ?? switch (path) {
+			'legal.helpBody' => 'FAQs, step-by-step guides, and support channels will be added here soon. For app support: store@vefayazilim.com (Vefa Yazılım). For urgent building matters, contact your building manager or site administration.',
+			'db_context.user_entry' => 'Record: {value}',
 			'db_context.building_name' => 'Building: {value}',
 			'db_context.apartment_label' => 'Apartment: {value}',
 			'db_context.code_value' => 'Code: {value}',

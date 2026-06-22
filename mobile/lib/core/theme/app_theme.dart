@@ -136,7 +136,7 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: palette.surface,
-        selectedItemColor: palette.primary,
+        selectedItemColor: palette.navSelected,
         unselectedItemColor: palette.textDisabled,
         elevation: 8,
         type: BottomNavigationBarType.fixed,
@@ -148,7 +148,7 @@ class AppTheme {
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return IconThemeData(
-              color: palette.primary,
+              color: palette.navSelected,
               size: AppSizes.iconSize,
             );
           }
@@ -160,7 +160,7 @@ class AppTheme {
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return AppTypography.caption.copyWith(
-              color: palette.primary,
+              color: palette.navSelected,
               fontWeight: FontWeight.w700,
             );
           }

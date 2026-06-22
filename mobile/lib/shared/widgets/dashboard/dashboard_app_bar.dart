@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_brand_colors.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_sizes.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../l10n/strings.g.dart';
 import '../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import 'dashboard_notification_button.dart';
-import '../profile_avatar.dart';
 
 /// Dashboard üst şerit — profil (sol), rol başlığı (orta), bildirim (sağ).
 class DashboardAppBar extends StatelessWidget {
@@ -33,11 +33,7 @@ class DashboardAppBar extends StatelessWidget {
       children: [
         Row(
           children: [
-            ProfileAvatar(
-              size: AppSizes.minTouchTarget,
-              userName: userName,
-              onTap: onProfileTap,
-            ),
+            _ProfileMenuButton(onTap: onProfileTap),
             Expanded(
               child: Text(
                 roleTitle,
@@ -82,6 +78,33 @@ class DashboardAppBar extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// Sol üst profil menüsü — person ikonu; fotoğraf drawer içinde gösterilir.
+class _ProfileMenuButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ProfileMenuButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: SizedBox(
+          width: AppSizes.minTouchTarget,
+          height: AppSizes.minTouchTarget,
+          child: Icon(
+            Icons.person_outline_rounded,
+            size: 28,
+            color: AppBrandColors.panelColor(context),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_brand_colors.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_sizes.dart';
 import '../../../core/theme/app_typography.dart';
@@ -44,7 +45,9 @@ class SettingsSurfaceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.06),
+            color: AppColors.isDark
+                ? AppBrandColors.panelNavyOnDark.withValues(alpha: 0.12)
+                : AppBrandColors.aidatOrange.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

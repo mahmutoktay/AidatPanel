@@ -18,7 +18,7 @@ class AppColors {
   static Color get primary => _palette.primary;
   static Color get primaryLight => _palette.primaryLight;
 
-  static const Color accent = Color(0xFFF59E0B);
+  static const Color accent = Color(0xFFFF6600);
 
   static Color get paymentCta => _palette.paymentCta;
   static Color get paymentCtaForeground => _palette.paymentCtaForeground;

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Açık ve koyu tema için nötr / yüzey renk paleti.
+import 'app_brand_colors.dart';
+
+/// Açık ve koyu tema — logo renkleri (turuncu + lacivert) tabanlı palet.
 class AppColorPalette {
   const AppColorPalette({
     required this.primary,
@@ -32,6 +34,7 @@ class AppColorPalette {
     required this.paymentCtaForeground,
     required this.datePickerHeaderForeground,
     required this.datePickerSelectedDayForeground,
+    required this.navSelected,
   });
 
   final Color primary;
@@ -63,70 +66,73 @@ class AppColorPalette {
   final Color paymentCtaForeground;
   final Color datePickerHeaderForeground;
   final Color datePickerSelectedDayForeground;
+  final Color navSelected;
 
   Color get sheetBackground => dashboardBackground;
 
   static const light = AppColorPalette(
-    primary: Color(0xFF111111),
-    primaryLight: Color(0xFF333333),
+    primary: AppBrandColors.panelNavy,
+    primaryLight: Color(0xFF003D8F),
     background: Color(0xFFFFFFFF),
     surface: Color(0xFFFFFFFF),
-    fill: Color(0xFFF3F4F6),
-    dashboardBackground: Color(0xFFF5F4F0),
-    border: Color(0x99111111),
-    textPrimary: Color(0xFF111111),
-    textSecondary: Color(0xFF6B7280),
-    textDisabled: Color(0xFF9CA3AF),
+    fill: Color(0xFFEEF2F8),
+    dashboardBackground: Color(0xFFF5F7FB),
+    border: Color(0x6600235B),
+    textPrimary: Color(0xFF00235B),
+    textSecondary: Color(0xFF5C6B80),
+    textDisabled: Color(0xFF9AA8B8),
     successBg: Color(0xFFDCFCE7),
     errorBg: Color(0xFFFEE2E2),
-    warningBg: Color(0xFFFEF3C7),
-    infoBg: Color(0xFFDBEAFE),
+    warningBg: Color(0xFFFFF3E6),
+    infoBg: Color(0xFFE8F0FE),
     expenseAccentBg: Color(0xFFF3E8FF),
-    systemMuted: Color(0xFF4B5563),
-    inkDark: Color(0xFF161B22),
-    actionButton: Color(0xFF12181F),
+    systemMuted: Color(0xFF5C6B80),
+    inkDark: AppBrandColors.panelNavy,
+    actionButton: AppBrandColors.aidatOrange,
     actionButtonForeground: Color(0xFFFFFFFF),
-    mutedText: Color(0xFF8A93A6),
+    mutedText: Color(0xFF7A8A9E),
     statusGreenBg: Color(0xFFE7F8EF),
     statusRedBg: Color(0xFFFDEAE9),
-    statusAmberBg: Color(0xFFFDF3E3),
-    statusBlueBg: Color(0xFFEAF1FF),
-    lineLight: Color(0xFFECEEF2),
-    paymentCta: Color(0xFFFFE4B5),
-    paymentCtaForeground: Color(0xFF78350F),
+    statusAmberBg: Color(0xFFFFF0E0),
+    statusBlueBg: Color(0xFFE8F0FE),
+    lineLight: Color(0xFFE2E8F2),
+    paymentCta: Color(0xFFFFE8D9),
+    paymentCtaForeground: Color(0xFF9A3412),
     datePickerHeaderForeground: Color(0xFFFFFFFF),
     datePickerSelectedDayForeground: Color(0xFFFFFFFF),
+    navSelected: AppBrandColors.aidatOrange,
   );
 
   static const dark = AppColorPalette(
-    primary: Color(0xFFF3F4F6),
-    primaryLight: Color(0xFFE5E7EB),
-    background: Color(0xFF141414),
-    surface: Color(0xFF141414),
-    fill: Color(0xFF1F1F1F),
-    dashboardBackground: Color(0xFF0A0A0A),
-    border: Color(0x99F3F4F6),
-    textPrimary: Color(0xFFF3F4F6),
-    textSecondary: Color(0xFF9CA3AF),
-    textDisabled: Color(0xFF6B7280),
+    primary: AppBrandColors.panelNavyOnDark,
+    primaryLight: Color(0xFF8BB8E8),
+    background: Color(0xFF0F1624),
+    surface: Color(0xFF141D2E),
+    fill: Color(0xFF1C2840),
+    dashboardBackground: Color(0xFF0A0F18),
+    border: Color(0x666BA3E0),
+    textPrimary: Color(0xFFF0F4FA),
+    textSecondary: Color(0xFF9BB0C9),
+    textDisabled: Color(0xFF6B7F96),
     successBg: Color(0x3316A34A),
     errorBg: Color(0x33DC2626),
-    warningBg: Color(0x33F59E0B),
-    infoBg: Color(0x332563EB),
+    warningBg: Color(0x33FF6600),
+    infoBg: Color(0x336BA3E0),
     expenseAccentBg: Color(0x339333EA),
-    systemMuted: Color(0xFF9CA3AF),
-    inkDark: Color(0xFFF3F4F6),
-    actionButton: Color(0xFFF3F4F6),
-    actionButtonForeground: Color(0xFF111111),
-    mutedText: Color(0xFF9CA3AF),
+    systemMuted: Color(0xFF9BB0C9),
+    inkDark: Color(0xFFF0F4FA),
+    actionButton: AppBrandColors.aidatOrange,
+    actionButtonForeground: Color(0xFFFFFFFF),
+    mutedText: Color(0xFF9BB0C9),
     statusGreenBg: Color(0x332FB872),
     statusRedBg: Color(0x33F0463C),
-    statusAmberBg: Color(0x33F2A93D),
-    statusBlueBg: Color(0x333D7CF2),
-    lineLight: Color(0xFF2A2A2A),
-    paymentCta: Color(0xFF3D2E14),
-    paymentCtaForeground: Color(0xFFFFE4B5),
-    datePickerHeaderForeground: Color(0xFF111111),
-    datePickerSelectedDayForeground: Color(0xFF111111),
+    statusAmberBg: Color(0x33FF6600),
+    statusBlueBg: Color(0x336BA3E0),
+    lineLight: Color(0xFF243044),
+    paymentCta: Color(0xFF3D2610),
+    paymentCtaForeground: Color(0xFFFFB380),
+    datePickerHeaderForeground: Color(0xFF0A0F18),
+    datePickerSelectedDayForeground: Color(0xFF0A0F18),
+    navSelected: AppBrandColors.aidatOrange,
   );
 }
