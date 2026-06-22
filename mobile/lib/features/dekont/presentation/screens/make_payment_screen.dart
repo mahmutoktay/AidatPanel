@@ -486,17 +486,17 @@ class _CircularIconButton extends StatelessWidget {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.iconButtonBackground,
             shape: BoxShape.circle,
             border: Border.all(
-              color: const Color(0x14000000), // siyah %8
+              color: AppColors.iconButtonBorder,
               width: 0.5,
             ),
           ),
           alignment: Alignment.center,
           child: Icon(
             icon,
-            color: const Color(0xFF333333),
+            color: AppColors.iconButtonForeground,
             size: 18,
           ),
         ),

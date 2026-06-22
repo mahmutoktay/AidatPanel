@@ -69,7 +69,7 @@ class BuildingSummaryCard extends StatelessWidget {
             children: [
               Container(
                 width: statusStripWidth,
-                color: AppColors.inkDark,
+                color: AppColors.primary,
               ),
               Expanded(
                 child: Padding(

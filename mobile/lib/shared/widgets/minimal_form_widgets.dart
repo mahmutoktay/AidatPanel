@@ -477,7 +477,7 @@ class CollectionIbanSegmentToggle extends StatelessWidget {
                     width: segmentWidth,
                     height: controlHeight,
                     decoration: BoxDecoration(
-                      color: AppColors.inkDark,
+                      color: AppColors.segmentSelectedBackground,
                       borderRadius: BorderRadius.circular(
                         ProfileSettingsUi.fieldRadius - 2,
                       ),
@@ -528,7 +528,8 @@ class _SegmentOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? Colors.white : ProfileSettingsUi.muted;
+    final color =
+        selected ? AppColors.segmentSelectedForeground : ProfileSettingsUi.muted;
 
     return Material(
       color: Colors.transparent,

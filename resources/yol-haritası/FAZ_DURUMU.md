@@ -1,7 +1,7 @@
 # AidatPanel — Yol Haritası ve Faz Durumu
 
 **Tek kaynak:** Fazlar, checklist, onaylar ve eksikler (Mobil + Backend).  
-**Güncelleme:** 2026-06-14 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
+**Güncelleme:** 2026-06-22 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
 
 **AI asistanlar** her oturumda bu dosyayı okur; yalnızca **AKTİF** fazda kod yazar (`CLAUDE.md` faz kapısı).
 
@@ -21,9 +21,11 @@
 | 5 | Test + Sertleştirme | ✅ | 2026-07-10 | ✅ 2026-06-14 |
 | 6 | Subscription | ✅ | 2026-07-12 | ✅ 2026-06-18 |
 | **7** | **v1.0.0 Lansman** | **▶ AKTİF** | 2026-07-14 | — |
+| **8** | **Site Yönetimi** | **📋 PLANLI** | 2026-08 | — |
 
 ```
 ▶ ŞU AN: FAZ 7 — v1.0.0 Lansman
+▶ SIRADAKİ: FAZ 8 — Site Yönetimi (plan onaylandı, FAZ 7 bitince başlar)
 ▶ FAZ 0–6: kapalı (onaylı)
 ```
 
@@ -293,6 +295,76 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 
 ---
 
+## 📋 FAZ 8 — Site Yönetimi (PLANLI)
+
+**Hedef:** ~2026-08 · **Önkoşul:** FAZ 7 `ONAY: Furkan ✅`
+
+Site → bina hiyerarşisi; tekil binalar korunur. Site silinince alt binalar cascade silinir. Abonelik kotası **yönetim birimi (YB)** ile sayılır. Site ortak giderleri tüm site dairelerine paylaştırılır; site + bina PDF raporları ayrı üretilir.
+
+### Kararlar (2026-06-22)
+
+| Konu | Karar |
+| --- | --- |
+| Site silme | `onDelete: Cascade` — alt binalar + tüm bağlı veriler silinir |
+| `blockLabel` | **Opsiyonel**; bina `name` yeterli (ör. "C Blok") |
+| Mevcut "Sitesi A Blok" binalar | Taşıma / dönüştürme aracı **yok**; `siteId = null` tekil kalır |
+| Abonelik kotası | **YB** = tekil bina sayısı + site sayısı (site içi binalar ek kota tüketmez) |
+| Site ortak gideri | `SiteExpense` + tüm site dairelerine eşit pay (`perUnitAmount`) |
+| Raporlar | `GET /sites/:id/reports` (aylık/yıllık PDF) + mevcut bina raporları korunur |
+
+### Backend — veri modeli
+
+- [ ] `Site` modeli (adres, varsayılan aidat, varsayılan IBAN)
+- [ ] `Building.siteId?`, `Building.blockLabel?`, `Building.addressExtra?`
+- [ ] `SiteExpense` modeli (site ortak gider; `Expense` alanlarıyla uyumlu)
+- [ ] `DueExpenseCarryforward.siteExpenseId?` (site gider payı daire aidatına yansıma)
+- [ ] Migration; mevcut binalar `siteId = null`
+
+### Backend — API & servis
+
+- [ ] `GET/POST /api/v1/sites`, `GET/PUT/DELETE /api/v1/sites/:id`
+- [ ] `PATCH /api/v1/sites/:id/collection`
+- [ ] `GET/POST /api/v1/sites/:id/buildings` (site altı bina; inherit + override)
+- [ ] `GET /api/v1/buildings?standalone=true` (Binalar sekmesi)
+- [ ] `resolveEffectiveBuildingConfig` (aidat / IBAN / adres site varsayılanına düşer)
+- [ ] Dekont + sakin ödeme: effective IBAN
+- [ ] `siteExpenseService` + `siteExpenseAllocationService` (tüm site dairelerine pay)
+- [ ] `siteAggregationService` — site ve bina `collectedAmount` / `expectedAmount` (cari ay)
+- [ ] `GET /api/v1/sites/:id/reports?type=monthly\|annual` (PDF)
+- [ ] `reportDataService` / `reportPdfService` site konsolidasyonu
+- [ ] `managementQuotaService` — YB sayımı; `POST /sites` ve tekil `POST /buildings` öncesi kontrol
+- [ ] `GET /me/subscription` yanıtına `usage` + `limits.managementUnits` ekleme
+- [ ] Jest: site CRUD, cascade delete, quota, gider paylaşımı, site raporu
+
+### Mobil — `features/sites/`
+
+- [ ] Clean Architecture katmanları (`SiteEntity`, repository, datasource)
+- [ ] `sitesStoreProvider` + `siteBuildingsProvider`
+- [ ] `AddSiteScreen` (adres + varsayılan aidat + IBAN; kat/daire yok)
+- [ ] `SiteDetailScreen` (blok listesi + site toplanan tutar)
+- [ ] `AddSiteBuildingScreen` (blok opsiyonel, ek adres, aidat/IBAN override switch)
+- [ ] `ManagerBuildingsTab` → **Siteler \| Binalar** sekmeleri (Siteler solda)
+- [ ] FAB: sekme bağlamına göre Yeni Site / Yeni Bina
+- [ ] Site ortak gider formu + listesi (`features/expenses/` veya `sites/` alt ekran)
+- [ ] Site rapor indirme sheet (`features/reports/` genişletme)
+- [ ] i18n (TR + EN) + `build_runner`
+
+### Mobil — mevcut modül güncellemeleri
+
+- [ ] `BuildingEntity` / model: `siteId`, `blockLabel`, `addressExtra`, effective alanlar
+- [ ] `InviteCodeScreen`: site → bina → daire akışı (site’li binalar için)
+- [ ] Davet paylaşım metni: site adı + bina/blok
+- [ ] Saved IBAN matcher: site varsayılan IBAN dahil
+- [ ] Abonelik ekranı: YB kullanım özeti (`usage.managementUnits`)
+
+### E2E & dokümantasyon
+
+- [ ] Canlı E2E: site oluştur → blok ekle → ortak gider → aidat breakdown → site PDF
+- [ ] `resources/AIDATPANEL.md` API + şema güncellemesi
+- [ ] Furkan onayı → `ONAY: Furkan ✅`
+
+---
+
 ## Teknik borç ve bilinen eksikler
 
 | # | Konu | Platform | Durum | Not |
@@ -320,6 +392,7 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 | 21 | Notification partial index | Backend | ✅ | `userId + createdAt WHERE isRead=false` |
 | 22 | Annual report batch optimizasyonu | Backend | ✅ | 24→2 sorgu |
 | 23 | Firebase Analytics + Crashlytics | Mobil | ✅ | FAZ 7 |
+| 24 | Site yönetimi (hiyerarşi + ortak gider + rapor) | Fullstack | 📋 | FAZ 8 |
 
 ---
 

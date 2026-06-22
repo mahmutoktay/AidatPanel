@@ -352,7 +352,7 @@ class _MetricsGrid extends StatelessWidget {
         Text(
           data.value,
           style: AppTypography.body1.copyWith(
-            color: AppColors.inkDark,
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.w700,
             fontSize: 16,
             height: 1.3,

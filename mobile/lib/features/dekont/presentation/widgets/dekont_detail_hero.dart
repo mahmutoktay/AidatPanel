@@ -11,7 +11,7 @@ import '../../domain/entities/dekont_entity.dart';
 import '../utils/dekont_labels.dart';
 import '../utils/dekont_parsed_fields.dart';
 
-/// Dekont detay — koyu hero kart (tutar, durum, tarih).
+/// Dekont detay — hero kart (tutar, durum, tarih).
 class DekontDetailHero extends StatelessWidget {
   final DekontEntity dekont;
 
@@ -37,7 +37,7 @@ class DekontDetailHero extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.inkDark,
+        color: AppColors.heroCardBackground,
         borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
         boxShadow: DashboardScreenStyle.cardShadow,
       ),
@@ -53,7 +53,7 @@ class DekontDetailHero extends StatelessWidget {
                     ? Text(
                         t.systemInfoProcessing,
                         style: AppTypography.body1.copyWith(
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: AppColors.heroCardBody,
                           fontWeight: FontWeight.w600,
                           height: 1.4,
                         ),
@@ -62,7 +62,7 @@ class DekontDetailHero extends StatelessWidget {
                         ? Text(
                             amount,
                             style: AppTypography.h1.copyWith(
-                              color: Colors.white,
+                              color: AppColors.heroCardTitle,
                               fontWeight: FontWeight.w800,
                               fontSize: 32,
                               height: 1.1,
@@ -70,27 +70,27 @@ class DekontDetailHero extends StatelessWidget {
                             ),
                           )
                         : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            t.parsedAmount,
-                            style: AppTypography.caption.copyWith(
-                              color: Colors.white.withValues(alpha: 0.6),
-                              fontWeight: FontWeight.w600,
-                            ),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                t.parsedAmount,
+                                style: AppTypography.caption.copyWith(
+                                  color: AppColors.heroCardSubtitle,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '—',
+                                style: AppTypography.h1.copyWith(
+                                  color: AppColors.heroCardTitle,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 32,
+                                  height: 1.1,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '—',
-                            style: AppTypography.h1.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 32,
-                              height: 1.1,
-                            ),
-                          ),
-                        ],
-                      ),
               ),
               const SizedBox(width: AppSizes.spacingS),
               _StatusPill(visual: visual),
@@ -100,7 +100,7 @@ class DekontDetailHero extends StatelessWidget {
           Text(
             subtitle,
             style: AppTypography.body2.copyWith(
-              color: Colors.white.withValues(alpha: 0.65),
+              color: AppColors.heroCardSubtitle,
               fontWeight: FontWeight.w500,
             ),
           ),

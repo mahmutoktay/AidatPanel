@@ -71,6 +71,32 @@ class AppColors {
 
   static Color get inkDark => _palette.inkDark;
 
+  /// Koyu hero kart zeminleri (dekont tutar, öne çıkan aidat vb.).
+  static Color get heroCardBackground => isDark ? fill : primary;
+
+  static Color get heroCardTitle =>
+      isDark ? textPrimary : const Color(0xFFFFFFFF);
+
+  static Color get heroCardSubtitle =>
+      isDark ? textSecondary : const Color(0xA6FFFFFF);
+
+  static Color get heroCardBody =>
+      isDark ? textPrimary : const Color(0xD9FFFFFF);
+
+  /// Dairesel ikon butonları (geri, kapat vb.).
+  static Color get iconButtonBackground => isDark ? fill : surface;
+
+  static Color get iconButtonForeground =>
+      isDark ? textPrimary : const Color(0xFF333333);
+
+  static Color get iconButtonBorder => isDark ? border : const Color(0x14000000);
+
+  /// Segment / sekme seçili durumu.
+  static Color get segmentSelectedBackground => isDark ? fill : primary;
+
+  static Color get segmentSelectedForeground =>
+      isDark ? textPrimary : const Color(0xFFFFFFFF);
+
   static Color get actionButton => _palette.actionButton;
   static Color get actionButtonForeground => _palette.actionButtonForeground;
   static Color get mutedText => _palette.mutedText;

@@ -47,7 +47,7 @@ class ResidentFeaturedDueCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: isDark ? AppColors.fill : AppColors.inkDark,
+        color: AppColors.heroCardBackground,
         borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
         boxShadow: DashboardScreenStyle.cardShadow,
       ),
@@ -95,7 +95,7 @@ class ResidentFeaturedDueCard extends StatelessWidget {
           Text(
             amountText,
             style: AppTypography.h1.copyWith(
-              color: isDark ? AppColors.textPrimary : Colors.white,
+              color: AppColors.heroCardTitle,
               fontWeight: FontWeight.w800,
               fontSize: 36,
               height: 1.1,
@@ -105,9 +105,7 @@ class ResidentFeaturedDueCard extends StatelessWidget {
           Text(
             subtitle,
             style: AppTypography.body2.copyWith(
-              color: isDark
-                  ? AppColors.textSecondary
-                  : Colors.white.withValues(alpha: 0.72),
+              color: AppColors.heroCardSubtitle,
               fontWeight: FontWeight.w500,
             ),
           ),
