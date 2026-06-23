@@ -88,6 +88,7 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
     required bool isRefreshing,
   }) {
     final items = buildings
+        .where((b) => b.isStandalone)
         .map(
           (building) => BuildingListItemModel.fromEntity(
             building: building,
@@ -153,7 +154,9 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
                 itemCount: sortedItems.length,
                 itemBuilder: (context, index) {
                   final item = sortedItems[index];
-                  final building = buildings.firstWhere(
+                  final building = buildings
+                      .where((b) => b.isStandalone)
+                      .firstWhere(
                     (b) => b.id == item.id,
                   );
                   return BuildingListCard(
@@ -179,7 +182,9 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
           bottom: AppSizes.spacingM,
           child: BuildingsExpandableFab(
             key: _fabKey,
+            onNewSite: () => context.push('/manager-dashboard/add-site'),
             onNewBuilding: _onAddBuildingPressed,
+            showSiteAction: false,
             onExpandedChanged: (expanded) {
               if (_fabExpanded != expanded) {
                 setState(() => _fabExpanded = expanded);

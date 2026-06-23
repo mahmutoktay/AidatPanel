@@ -36,6 +36,12 @@ class BuildingEntity extends Equatable {
   /// Havale açıklama şablonu; `{{number}}` → daire no.
   final String? paymentReferenceTemplate;
 
+  /// Site altı bina ise dolu; tekil binalarda null.
+  final String? siteId;
+  final String? blockLabel;
+  final String? addressExtra;
+  final String? siteName;
+
   const BuildingEntity({
     required this.id,
     required this.name,
@@ -51,7 +57,13 @@ class BuildingEntity extends Equatable {
     this.collectionIban,
     this.collectionAccountTitle,
     this.paymentReferenceTemplate,
+    this.siteId,
+    this.blockLabel,
+    this.addressExtra,
+    this.siteName,
   });
+
+  bool get isStandalone => siteId == null || siteId!.isEmpty;
 
   /// Geçerli TR IBAN tanımlı mı (`^TR\d{24}$`).
   bool get isCollectionConfigured => IbanUtils.isValidTrIban(collectionIban);
@@ -80,6 +92,10 @@ class BuildingEntity extends Equatable {
     String? collectionIban,
     String? collectionAccountTitle,
     String? paymentReferenceTemplate,
+    String? siteId,
+    String? blockLabel,
+    String? addressExtra,
+    String? siteName,
   }) {
     return BuildingEntity(
       id: id ?? this.id,
@@ -98,6 +114,10 @@ class BuildingEntity extends Equatable {
           collectionAccountTitle ?? this.collectionAccountTitle,
       paymentReferenceTemplate:
           paymentReferenceTemplate ?? this.paymentReferenceTemplate,
+      siteId: siteId ?? this.siteId,
+      blockLabel: blockLabel ?? this.blockLabel,
+      addressExtra: addressExtra ?? this.addressExtra,
+      siteName: siteName ?? this.siteName,
     );
   }
 
@@ -117,5 +137,9 @@ class BuildingEntity extends Equatable {
         collectionIban,
         collectionAccountTitle,
         paymentReferenceTemplate,
+        siteId,
+        blockLabel,
+        addressExtra,
+        siteName,
       ];
 }

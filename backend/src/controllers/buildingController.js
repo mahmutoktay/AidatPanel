@@ -64,13 +64,14 @@ export const getCollectionPresets = async (req, res, next) => {
 export const getBuildings = async (req, res, next) => {
   try {
     const managerId = req.user.id;
-    const { cursor, limit, paginated, search } = req.query;
+    const { cursor, limit, paginated, search, standalone } = req.query;
 
     const buildings = await getBuildingsService(managerId, {
       cursor,
       limit,
       paginated,
       search,
+      standalone,
     });
 
     res.json({

@@ -23,6 +23,12 @@ class BuildingModel {
   final String? paymentReferenceTemplate;
   final bool? isCollectionConfiguredFromApi;
   final int? occupiedApartmentsFromApi;
+  final String? siteId;
+  final String? blockLabel;
+  final String? addressExtra;
+  final String? siteName;
+  final double? effectiveDueAmount;
+  final String? effectiveCollectionIban;
 
   BuildingModel({
     required this.id,
@@ -41,6 +47,12 @@ class BuildingModel {
     this.paymentReferenceTemplate,
     this.isCollectionConfiguredFromApi,
     this.occupiedApartmentsFromApi,
+    this.siteId,
+    this.blockLabel,
+    this.addressExtra,
+    this.siteName,
+    this.effectiveDueAmount,
+    this.effectiveCollectionIban,
   });
 
   factory BuildingModel.fromJson(Map<String, dynamic> json) {
@@ -67,13 +79,23 @@ class BuildingModel {
       paymentReferenceTemplate: json['paymentReferenceTemplate'] as String?,
       isCollectionConfiguredFromApi: json['isCollectionConfigured'] as bool?,
       occupiedApartmentsFromApi: json['occupiedApartments'] as int?,
+      siteId: json['siteId'] as String?,
+      blockLabel: json['blockLabel'] as String?,
+      addressExtra: json['addressExtra'] as String?,
+      siteName: json['siteName'] as String?,
+      effectiveDueAmount: parseDouble(
+        json['effectiveDueAmount'] ?? json['dueAmount'],
+      ),
+      effectiveCollectionIban: json['effectiveCollectionIban'] as String? ??
+          json['collectionIban'] as String?,
     );
   }
 
   BuildingEntity toEntity() {
     final total = apartmentCountFromApi ??
         ((totalFloors ?? 0) * (apartmentsPerFloor ?? 0));
-    final monthly = (dueAmount ?? 0) * total;
+    final resolvedDue = effectiveDueAmount ?? dueAmount;
+    final monthly = (resolvedDue ?? 0) * total;
     return BuildingEntity(
       id: id,
       name: name,
@@ -83,16 +105,24 @@ class BuildingModel {
       occupiedApartments: occupiedApartmentsFromApi ?? 0,
       totalMonthlyDues: monthly,
       collectedDues: 0.0,
-      dueAmount: dueAmount,
+      dueAmount: resolvedDue,
       dueDay: dueDay,
       currency: currency ?? 'TRY',
-      collectionIban: collectionIban,
+      collectionIban: effectiveCollectionIban ?? collectionIban,
       collectionAccountTitle: collectionAccountTitle,
       paymentReferenceTemplate: paymentReferenceTemplate,
+      siteId: siteId,
+      blockLabel: blockLabel,
+      addressExtra: addressExtra,
+      siteName: siteName,
     );
   }
 
   static double? _toDouble(dynamic value) {
+    return parseDouble(value);
+  }
+
+  static double? parseDouble(dynamic value) {
     if (value == null) return null;
     if (value is num) return value.toDouble();
     if (value is String) return double.tryParse(value);

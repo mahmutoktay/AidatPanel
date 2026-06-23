@@ -505,6 +505,24 @@
         "monthlyDuesShort": "Aylık Aidat"
       }
     },
+    "sites": {
+      "tabSites": "Siteler",
+      "tabBuildings": "Binalar",
+      "mySites": "Sitelerim",
+      "addSite": "Site Ekle",
+      "createSite": "Site Oluştur",
+      "siteName": "Site adı",
+      "siteNameHint": "Örn: Lale Sitesi",
+      "defaultDuesSection": "Varsayılan aidat",
+      "defaultDuesHint": "Bloklar bu tutarı miras alır; isterseniz blok bazında değiştirebilirsiniz.",
+      "siteCreated": "Site oluşturuldu.",
+      "siteDetail": "Site Detayı",
+      "blocksTitle": "Bloklar",
+      "noBlocksYet": "Henüz blok eklenmedi.",
+      "blockCount": "blok",
+      "addBlock": "Blok Ekle",
+      "emptySites": "Henüz site eklenmedi. Sağ alttan yeni site ekleyebilirsiniz."
+    },
     "auth": {
       "register": "Kaydol",
       "login": "Giriş Yap",

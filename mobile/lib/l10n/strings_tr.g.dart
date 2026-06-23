@@ -424,6 +424,7 @@ class _Translations$features$tr implements Translations$features$en {
 
 	// Translations
 	@override late final _Translations$features$buildings$tr buildings = _Translations$features$buildings$tr._(_root);
+	@override late final _Translations$features$sites$tr sites = _Translations$features$sites$tr._(_root);
 	@override late final _Translations$features$auth$tr auth = _Translations$features$auth$tr._(_root);
 	@override late final _Translations$features$apartments$tr apartments = _Translations$features$apartments$tr._(_root);
 	@override late final _Translations$features$tickets$tr tickets = _Translations$features$tickets$tr._(_root);
@@ -589,6 +590,31 @@ class _Translations$features$buildings$tr implements Translations$features$build
 	@override String get tekrarDene => 'Tekrar Dene';
 	@override late final _Translations$features$buildings$collection$tr collection = _Translations$features$buildings$collection$tr._(_root);
 	@override late final _Translations$features$buildings$list$tr list = _Translations$features$buildings$list$tr._(_root);
+}
+
+// Path: features.sites
+class _Translations$features$sites$tr implements Translations$features$sites$en {
+	_Translations$features$sites$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get tabSites => 'Siteler';
+	@override String get tabBuildings => 'Binalar';
+	@override String get mySites => 'Sitelerim';
+	@override String get addSite => 'Site Ekle';
+	@override String get createSite => 'Site Oluştur';
+	@override String get siteName => 'Site adı';
+	@override String get siteNameHint => 'Örn: Lale Sitesi';
+	@override String get defaultDuesSection => 'Varsayılan aidat';
+	@override String get defaultDuesHint => 'Bloklar bu tutarı miras alır; isterseniz blok bazında değiştirebilirsiniz.';
+	@override String get siteCreated => 'Site oluşturuldu.';
+	@override String get siteDetail => 'Site Detayı';
+	@override String get blocksTitle => 'Bloklar';
+	@override String get noBlocksYet => 'Henüz blok eklenmedi.';
+	@override String get blockCount => 'blok';
+	@override String get addBlock => 'Blok Ekle';
+	@override String get emptySites => 'Henüz site eklenmedi. Sağ alttan yeni site ekleyebilirsiniz.';
 }
 
 // Path: features.auth
@@ -1777,12 +1803,30 @@ extension on TranslationsTr {
 			'features.buildings.list.unitsWaiting' => '{count} daire bekliyor',
 			'features.buildings.list.allPaymentsComplete' => 'Tüm ödemeler tamam',
 			'features.buildings.list.monthlyDuesShort' => 'Aylık Aidat',
+			'features.sites.tabSites' => 'Siteler',
+			'features.sites.tabBuildings' => 'Binalar',
+			'features.sites.mySites' => 'Sitelerim',
+			'features.sites.addSite' => 'Site Ekle',
+			'features.sites.createSite' => 'Site Oluştur',
+			'features.sites.siteName' => 'Site adı',
+			'features.sites.siteNameHint' => 'Örn: Lale Sitesi',
+			'features.sites.defaultDuesSection' => 'Varsayılan aidat',
+			'features.sites.defaultDuesHint' => 'Bloklar bu tutarı miras alır; isterseniz blok bazında değiştirebilirsiniz.',
+			'features.sites.siteCreated' => 'Site oluşturuldu.',
+			'features.sites.siteDetail' => 'Site Detayı',
+			'features.sites.blocksTitle' => 'Bloklar',
+			'features.sites.noBlocksYet' => 'Henüz blok eklenmedi.',
+			'features.sites.blockCount' => 'blok',
+			'features.sites.addBlock' => 'Blok Ekle',
+			'features.sites.emptySites' => 'Henüz site eklenmedi. Sağ alttan yeni site ekleyebilirsiniz.',
 			'features.auth.register' => 'Kaydol',
 			'features.auth.login' => 'Giriş Yap',
 			'features.auth.join' => 'Katıl',
 			'features.auth.passwordRequired' => 'Şifre gerekli',
 			'features.auth.errorOccurred' => 'Bir hata oluştu',
 			'features.auth.registrationSuccess' => 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.',
+			_ => null,
+		} ?? switch (path) {
 			'features.auth.loginSuccess' => 'Giriş başarılı. Hoş geldiniz.',
 			'features.auth.appTitle' => 'AidatPanel',
 			'features.auth.appSubtitle' => 'Apartman Yönetim Sistemi',
@@ -1799,8 +1843,6 @@ extension on TranslationsTr {
 			'features.auth.phoneLogin' => 'Telefon ile Giriş Yap',
 			'features.auth.or' => 'veya',
 			'features.auth.noAccount' => 'Hesabınız yok mu? Kaydolun',
-			_ => null,
-		} ?? switch (path) {
 			'features.auth.joinWithCode' => 'Davet kodu ile katılın',
 			'features.auth.signUp' => 'Üye ol',
 			'features.auth.signUpTitle' => 'Üye Ol',
@@ -2297,6 +2339,8 @@ extension on TranslationsTr {
 			'legal.privacyS4Body' => 'Veriler güvenli sunucularda saklanır; iletişim HTTPS ile şifrelenir. Oturum bilgileri cihazınızda güvenli depolamada tutulur. Yasal zorunluluklar dışında veriler, hizmet ilişkisi süresince ve mevzuattaki süreler boyunca muhafaza edilir.',
 			'legal.privacyS5Title' => '5. Paylaşım',
 			'legal.privacyS5Body' => 'Kişisel verileriniz üçüncü taraflara satılmaz. Yalnızca hizmetin sunulması için gerekli altyapı sağlayıcıları (barındırma, bildirim servisi vb.) ve kanunen yetkili kurumlarla, mevzuata uygun şekilde paylaşılabilir.',
+			_ => null,
+		} ?? switch (path) {
 			'legal.privacyS6Title' => '6. Haklarınız',
 			'legal.privacyS6Body' => 'KVKK kapsamında verilerinize erişme, düzeltme, silme, işlemeyi kısıtlama ve itiraz etme haklarına sahipsiniz. Hesap kapatma (soft delete) Ayarlar üzerinden yapılabilir; yasal saklama gerektiren kayıtlar anonimleştirilerek tutulabilir. Başvurularınızı store@vefayazilim.com adresine iletebilirsiniz.',
 			'legal.kvkkIntro' => '6698 sayılı Kanun uyarınca Vefa Yazılım tarafından işlenen kişisel verilerinize ilişkin aydınlatma metnidir.',
@@ -2313,8 +2357,6 @@ extension on TranslationsTr {
 			'legal.kvkkS6Title' => 'İlgili kişi hakları',
 			'legal.kvkkS6Body' => 'Kanunun 11. maddesi kapsamındaki haklarınızı kullanmak için talebinizi Vefa Yazılım’a (store@vefayazilim.com) iletebilirsiniz; başvurularınız mevzuattaki sürelerde yanıtlanır.',
 			'legal.helpIntro' => 'Yardım merkezi hazırlanıyor',
-			_ => null,
-		} ?? switch (path) {
 			'legal.helpBody' => 'Sık sorulan sorular, adım adım rehberler ve destek kanalları yakında bu bölümde yer alacak. Uygulama desteği için: store@vefayazilim.com (Vefa Yazılım). Acil apartman işleri için yöneticiniz veya site yönetiminizle iletişime geçebilirsiniz.',
 			'db_context.user_entry' => 'Kayıt: {value}',
 			'db_context.building_name' => 'Bina: {value}',

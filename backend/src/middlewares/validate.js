@@ -15,3 +15,4 @@ export { ticketSchemas } from "../validators/ticketSchemas.js";
 export { dekontSchemas } from "../validators/dekontSchemas.js";
 export { notificationSchemas } from "../validators/notificationValidator.js";
 export { reportSchemas } from "../validators/reportSchemas.js";
+export { siteSchemas } from "../validators/siteSchemas.js";

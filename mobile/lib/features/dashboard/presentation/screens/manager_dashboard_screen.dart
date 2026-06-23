@@ -20,7 +20,7 @@ import '../../../dues/presentation/screens/manager_dues_tab.dart';
 import '../../../../shared/widgets/menu_tab.dart';
 
 import '../widgets/manager_home_tab.dart';
-import '../widgets/manager_buildings_tab.dart';
+import '../widgets/manager_properties_tab.dart';
 
 class ManagerDashboardScreen extends ConsumerStatefulWidget {
   const ManagerDashboardScreen({super.key});
@@ -133,7 +133,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                     onRetryBuildings: () =>
                         ref.read(buildingsStoreProvider.notifier).loadBuildings(),
                   ),
-                  ManagerBuildingsTab(buildingsAsync: buildingsAsync),
+                  ManagerPropertiesTab(buildingsAsync: buildingsAsync),
                   const ManagerDuesTab(),
                   const MenuTab(role: UserRole.manager),
                 ],

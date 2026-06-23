@@ -40,6 +40,14 @@ class ApiConstants {
       '$apiVersion/buildings/$buildingId';
   static String buildingCollection(String buildingId) =>
       '$apiVersion/buildings/$buildingId/collection';
+
+  // Sites endpoints (FAZ 8)
+  static const String sites = '$apiVersion/sites';
+  static String siteDetail(String siteId) => '$apiVersion/sites/$siteId';
+  static String siteCollection(String siteId) =>
+      '$apiVersion/sites/$siteId/collection';
+  static String siteBuildings(String siteId) =>
+      '$apiVersion/sites/$siteId/buildings';
   static String buildingApartments(String buildingId) =>
       '$apiVersion/buildings/$buildingId/apartments';
   static String buildingDues(String buildingId) =>

@@ -10,10 +10,16 @@ class BuildingsExpandableFab extends StatefulWidget {
   const BuildingsExpandableFab({
     super.key,
     required this.onNewBuilding,
+    this.onNewSite,
+    this.showSiteAction = true,
+    this.showBuildingAction = true,
     this.onExpandedChanged,
   });
 
   final VoidCallback onNewBuilding;
+  final VoidCallback? onNewSite;
+  final bool showSiteAction;
+  final bool showBuildingAction;
   final ValueChanged<bool>? onExpandedChanged;
 
   @override
@@ -69,6 +75,7 @@ class BuildingsExpandableFabState extends State<BuildingsExpandableFab>
 
   void _onNewSite() {
     close();
+    widget.onNewSite?.call();
   }
 
   @override
@@ -91,18 +98,22 @@ class BuildingsExpandableFabState extends State<BuildingsExpandableFab>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  _ExpandFabAction(
-                    label: t.newSite,
-                    icon: Icons.domain_add_outlined,
-                    onTap: _onNewSite,
-                  ),
-                  const SizedBox(height: AppSizes.spacingS),
-                  _ExpandFabAction(
-                    label: t.newBuildingShort,
-                    icon: Icons.add_business_outlined,
-                    onTap: _onNewBuilding,
-                  ),
-                  const SizedBox(height: AppSizes.spacingS),
+                  if (widget.showSiteAction) ...[
+                    _ExpandFabAction(
+                      label: t.newSite,
+                      icon: Icons.domain_add_outlined,
+                      onTap: _onNewSite,
+                    ),
+                    const SizedBox(height: AppSizes.spacingS),
+                  ],
+                  if (widget.showBuildingAction) ...[
+                    _ExpandFabAction(
+                      label: t.newBuildingShort,
+                      icon: Icons.add_business_outlined,
+                      onTap: _onNewBuilding,
+                    ),
+                    const SizedBox(height: AppSizes.spacingS),
+                  ],
                 ],
               ),
             ),

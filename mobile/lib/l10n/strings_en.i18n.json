@@ -505,6 +505,24 @@
         "monthlyDuesShort": "Monthly Dues"
       }
     },
+    "sites": {
+      "tabSites": "Sites",
+      "tabBuildings": "Buildings",
+      "mySites": "My Sites",
+      "addSite": "Add Site",
+      "createSite": "Create Site",
+      "siteName": "Site name",
+      "siteNameHint": "e.g. Lale Site",
+      "defaultDuesSection": "Default dues",
+      "defaultDuesHint": "Blocks inherit this amount; you can override per block later.",
+      "siteCreated": "Site created.",
+      "siteDetail": "Site Detail",
+      "blocksTitle": "Blocks",
+      "noBlocksYet": "No blocks added yet.",
+      "blockCount": "blocks",
+      "addBlock": "Add Block",
+      "emptySites": "No sites yet. Use the button at the bottom right to add one."
+    },
     "auth": {
       "register": "Register",
       "login": "Login",

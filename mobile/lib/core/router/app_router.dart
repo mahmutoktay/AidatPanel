@@ -28,6 +28,9 @@ import '../../features/dekont/presentation/screens/manager_dekonts_screen.dart';
 import '../../features/dekont/presentation/screens/my_dekonts_screen.dart';
 import '../../features/buildings/presentation/screens/saved_ibans_screen.dart';
 import '../../features/buildings/presentation/screens/add_building_screen.dart';
+import '../../features/sites/presentation/screens/add_site_screen.dart';
+import '../../features/sites/presentation/screens/add_site_building_screen.dart';
+import '../../features/sites/presentation/screens/site_detail_screen.dart';
 import '../../features/buildings/presentation/screens/building_residents_screen.dart';
 import '../../features/buildings/presentation/screens/invite_code_screen.dart';
 import '../../features/buildings/data/buildings_store.dart';
@@ -87,6 +90,30 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
     name: 'manager_add_building',
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) => const AddBuildingScreen(),
+  ),
+  GoRoute(
+    path: 'add-site',
+    name: 'manager_add_site',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const AddSiteScreen(),
+  ),
+  GoRoute(
+    path: 'sites/:siteId',
+    name: 'manager_site_detail',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => SiteDetailScreen(
+      siteId: state.pathParameters['siteId']!,
+    ),
+    routes: [
+      GoRoute(
+        path: 'add-building',
+        name: 'manager_add_site_building',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => AddSiteBuildingScreen(
+          siteId: state.pathParameters['siteId']!,
+        ),
+      ),
+    ],
   ),
   GoRoute(
     path: 'invite-code',

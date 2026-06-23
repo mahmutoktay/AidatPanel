@@ -6,6 +6,7 @@ import {
   mapStoreToPlatform,
   parseWebhookPeriodDates,
 } from "../utils/revenueCatWebhook.js";
+import { getManagementQuotaUsage } from "./managementQuotaService.js";
 
 function toSubscriptionDto(subscription) {
   return {
@@ -22,8 +23,20 @@ export async function getMySubscriptionService(userId) {
   const subscription = await prisma.subscription.findUnique({
     where: { userId },
   });
-  if (!subscription) return null;
-  return toSubscriptionDto(subscription);
+  const usage = await getManagementQuotaUsage(userId);
+  const quotaFields = {
+    usage: { managementUnits: usage.managementUnits },
+    limits: { managementUnits: usage.limit },
+  };
+
+  if (!subscription) {
+    return quotaFields;
+  }
+
+  return {
+    ...toSubscriptionDto(subscription),
+    ...quotaFields,
+  };
 }
 
 /**

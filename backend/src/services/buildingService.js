@@ -3,6 +3,8 @@ import { buildDueRowsForApartments } from "../utils/dueGeneration.js";
 import { isValidTrIban, normalizeIban } from "../utils/iban.js";
 import { HttpError } from "../utils/httpError.js";
 import { assertManagerOwnsBuilding } from "../utils/access.js";
+import { assertCanAddManagementUnit } from "./managementQuotaService.js";
+import { resolveEffectiveBuildingConfig } from "../utils/effectiveBuildingConfig.js";
 import {
   resolveListTake,
   resolvePageLimit,
@@ -62,7 +64,15 @@ export const createBuildingService = async ({
   collectionIban,
   collectionAccountTitle,
   paymentReferenceTemplate,
+  skipQuotaCheck = false,
+  siteId = null,
+  blockLabel = null,
+  addressExtra = null,
 }) => {
+  if (!skipQuotaCheck) {
+    await assertCanAddManagementUnit(managerId);
+  }
+
   const collectionData = collectionFieldsFromBody({
     collectionIban,
     collectionAccountTitle,
@@ -83,6 +93,9 @@ export const createBuildingService = async ({
           dueDay,
           currency,
           managerId,
+          siteId,
+          blockLabel,
+          addressExtra,
           ...collectionData,
         },
       });
@@ -140,6 +153,10 @@ export const getBuildingsService = async (managerId, filters = {}) => {
 
   let where = { managerId };
 
+  if (filters.standalone === true || filters.standalone === "true") {
+    where.siteId = null;
+  }
+
   if (filters.search) {
     where.OR = [
       { name: { contains: filters.search, mode: "insensitive" } },
@@ -170,15 +187,17 @@ export const getBuildingsService = async (managerId, filters = {}) => {
         where: { resident: { isNot: null } },
         select: { id: true },
       },
+      site: true,
     },
   });
 
-  const mapped = buildings.map(b => {
-    const { apartments, ...rest } = b;
-    return {
+  const mapped = buildings.map((b) => {
+    const { apartments, site, ...rest } = b;
+    return resolveEffectiveBuildingConfig({
       ...rest,
+      site,
       occupiedApartments: apartments.length,
-    };
+    });
   });
 
   return buildListResponse(filters, mapped, (b) => b);
@@ -195,16 +214,18 @@ export const getBuildingByIdService = async (id, managerId) => {
         where: { resident: { isNot: null } },
         select: { id: true },
       },
+      site: true,
     },
   });
 
   if (!building) return null;
 
-  const { apartments, ...rest } = building;
-  return {
+  const { apartments, site, ...rest } = building;
+  return resolveEffectiveBuildingConfig({
     ...rest,
+    site,
     occupiedApartments: apartments.length,
-  };
+  });
 };
 
 export const updateBuildingService = async (id, managerId, data) => {

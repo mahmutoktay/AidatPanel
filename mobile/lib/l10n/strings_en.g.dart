@@ -1133,6 +1133,7 @@ class Translations$features$en {
 
 	// Translations
 	late final Translations$features$buildings$en buildings = Translations$features$buildings$en._(_root);
+	late final Translations$features$sites$en sites = Translations$features$sites$en._(_root);
 	late final Translations$features$auth$en auth = Translations$features$auth$en._(_root);
 	late final Translations$features$apartments$en apartments = Translations$features$apartments$en._(_root);
 	late final Translations$features$tickets$en tickets = Translations$features$tickets$en._(_root);
@@ -1513,6 +1514,63 @@ class Translations$features$buildings$en {
 
 	late final Translations$features$buildings$collection$en collection = Translations$features$buildings$collection$en._(_root);
 	late final Translations$features$buildings$list$en list = Translations$features$buildings$list$en._(_root);
+}
+
+// Path: features.sites
+class Translations$features$sites$en {
+	Translations$features$sites$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Sites'
+	String get tabSites => 'Sites';
+
+	/// en: 'Buildings'
+	String get tabBuildings => 'Buildings';
+
+	/// en: 'My Sites'
+	String get mySites => 'My Sites';
+
+	/// en: 'Add Site'
+	String get addSite => 'Add Site';
+
+	/// en: 'Create Site'
+	String get createSite => 'Create Site';
+
+	/// en: 'Site name'
+	String get siteName => 'Site name';
+
+	/// en: 'e.g. Lale Site'
+	String get siteNameHint => 'e.g. Lale Site';
+
+	/// en: 'Default dues'
+	String get defaultDuesSection => 'Default dues';
+
+	/// en: 'Blocks inherit this amount; you can override per block later.'
+	String get defaultDuesHint => 'Blocks inherit this amount; you can override per block later.';
+
+	/// en: 'Site created.'
+	String get siteCreated => 'Site created.';
+
+	/// en: 'Site Detail'
+	String get siteDetail => 'Site Detail';
+
+	/// en: 'Blocks'
+	String get blocksTitle => 'Blocks';
+
+	/// en: 'No blocks added yet.'
+	String get noBlocksYet => 'No blocks added yet.';
+
+	/// en: 'blocks'
+	String get blockCount => 'blocks';
+
+	/// en: 'Add Block'
+	String get addBlock => 'Add Block';
+
+	/// en: 'No sites yet. Use the button at the bottom right to add one.'
+	String get emptySites => 'No sites yet. Use the button at the bottom right to add one.';
 }
 
 // Path: features.auth
@@ -3843,12 +3901,30 @@ extension on Translations {
 			'features.buildings.list.unitsWaiting' => '{count} units waiting',
 			'features.buildings.list.allPaymentsComplete' => 'All payments complete',
 			'features.buildings.list.monthlyDuesShort' => 'Monthly Dues',
+			'features.sites.tabSites' => 'Sites',
+			'features.sites.tabBuildings' => 'Buildings',
+			'features.sites.mySites' => 'My Sites',
+			'features.sites.addSite' => 'Add Site',
+			'features.sites.createSite' => 'Create Site',
+			'features.sites.siteName' => 'Site name',
+			'features.sites.siteNameHint' => 'e.g. Lale Site',
+			'features.sites.defaultDuesSection' => 'Default dues',
+			'features.sites.defaultDuesHint' => 'Blocks inherit this amount; you can override per block later.',
+			'features.sites.siteCreated' => 'Site created.',
+			'features.sites.siteDetail' => 'Site Detail',
+			'features.sites.blocksTitle' => 'Blocks',
+			'features.sites.noBlocksYet' => 'No blocks added yet.',
+			'features.sites.blockCount' => 'blocks',
+			'features.sites.addBlock' => 'Add Block',
+			'features.sites.emptySites' => 'No sites yet. Use the button at the bottom right to add one.',
 			'features.auth.register' => 'Register',
 			'features.auth.login' => 'Login',
 			'features.auth.join' => 'Join',
 			'features.auth.passwordRequired' => 'Password required',
 			'features.auth.errorOccurred' => 'An error occurred',
 			'features.auth.registrationSuccess' => 'Account created. You can now log in.',
+			_ => null,
+		} ?? switch (path) {
 			'features.auth.loginSuccess' => 'Signed in successfully. Welcome.',
 			'features.auth.appTitle' => 'AidatPanel',
 			'features.auth.appSubtitle' => 'Apartment Management System',
@@ -3865,8 +3941,6 @@ extension on Translations {
 			'features.auth.phoneLogin' => 'Login with Phone',
 			'features.auth.or' => 'or',
 			'features.auth.noAccount' => 'Don\'t have an account? Register',
-			_ => null,
-		} ?? switch (path) {
 			'features.auth.joinWithCode' => 'Join with Invite Code',
 			'features.auth.signUp' => 'Sign up',
 			'features.auth.signUpTitle' => 'Sign Up',
@@ -4363,6 +4437,8 @@ extension on Translations {
 			'legal.privacyS4Body' => 'Data is stored on secure servers; communication uses HTTPS. Session data is kept in secure device storage. Data is retained for the service relationship and as required by law.',
 			'legal.privacyS5Title' => '5. Sharing',
 			'legal.privacyS5Body' => 'We do not sell your data. It may be shared only with infrastructure providers necessary to run the service (hosting, push notifications, etc.) and authorities when legally required.',
+			_ => null,
+		} ?? switch (path) {
 			'legal.privacyS6Title' => '6. Your rights',
 			'legal.privacyS6Body' => 'You may request access, correction, deletion, or restriction of processing. Account closure (soft delete) is available in Settings; records that must be kept by law may be stored in anonymized form. Submit requests to store@vefayazilim.com.',
 			'legal.kvkkIntro' => 'This notice is provided under Turkish Personal Data Protection Law No. 6698 (KVKK) for processing by Vefa Yazılım.',
@@ -4379,8 +4455,6 @@ extension on Translations {
 			'legal.kvkkS6Title' => 'Data subject rights',
 			'legal.kvkkS6Body' => 'You may exercise your rights under Article 11 of KVKK by contacting Vefa Yazılım at store@vefayazilim.com; requests are answered within statutory time limits.',
 			'legal.helpIntro' => 'Help center coming soon',
-			_ => null,
-		} ?? switch (path) {
 			'legal.helpBody' => 'FAQs, step-by-step guides, and support channels will be added here soon. For app support: store@vefayazilim.com (Vefa Yazılım). For urgent building matters, contact your building manager or site administration.',
 			'db_context.user_entry' => 'Record: {value}',
 			'db_context.building_name' => 'Building: {value}',
