@@ -190,20 +190,20 @@ class InputValidators {
     String? customMessage,
   }) {
     if (required && (value == null || value.isEmpty)) {
-      return '$fieldName boş bırakılamaz';
+      return 'field_required';
     }
 
     if (value != null) {
       if (minLength != null && value.length < minLength) {
-        return '$fieldName en az $minLength karakter olmalıdır';
+        return 'field_too_short';
       }
 
       if (maxLength != null && value.length > maxLength) {
-        return '$fieldName çok uzun';
+        return 'field_too_long';
       }
 
       if (customRegex != null && !RegExp(customRegex).hasMatch(value)) {
-        return customMessage ?? 'Geçerli bir $fieldName giriniz';
+        return customMessage ?? 'field_invalid';
       }
     }
 

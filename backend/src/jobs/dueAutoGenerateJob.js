@@ -58,13 +58,16 @@ export function startDueAutoGenerateScheduler() {
   );
 
   const tick = () => {
-    runDueMaintenanceJob().catch((err) => {
-      logger.error({ type: "due_job_error", err: err?.stack || err?.message });
-    });
+    runDueMaintenanceJob()
+      .catch((err) => {
+        logger.error({ type: "due_job_error", err: err?.stack || err?.message });
+      })
+      .finally(() => {
+        timer = setTimeout(tick, intervalMs);
+      });
   };
 
-  setTimeout(tick, STARTUP_DELAY_MS);
-  timer = setInterval(tick, intervalMs);
+  timer = setTimeout(tick, STARTUP_DELAY_MS);
 
   logger.info({
     type: "due_job_started",
@@ -74,7 +77,7 @@ export function startDueAutoGenerateScheduler() {
 
 export function stopDueAutoGenerateScheduler() {
   if (timer) {
-    clearInterval(timer);
+    clearTimeout(timer);
     timer = null;
   }
 }

@@ -16,9 +16,12 @@ class CertificatePinning {
       'CERT_PIN_SHA256',
       defaultValue: 'sbmhsbTKB9yczL2ZifgL7++jUOlOINTSG+pcBLX3xmE=',
     ),
+    // TODO(security): Backup pin'i gerçek yedek sertifikanın SHA-256 hash'i ile değiştirin.
+    // Mevcut değer geçici placeholder'dır ve production'da kullanılmamalıdır.
+    // Doğru hash'i almak için: openssl s_client -connect <host>:443 | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64
     String.fromEnvironment(
       'CERT_PIN_SHA256_BACKUP',
-      defaultValue: 'Y9mvm0exBk1JoQ57fRE0cgQiacS71fONvF9f6U=', // placeholder
+      defaultValue: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
     )
   ];
 

@@ -108,7 +108,7 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
   /// rethrow ediyoruz, başarı durumunda listeyi yeniden yazıyoruz.
   Future<void> removeBuilding(String buildingId) async {
     await _repository.deleteBuilding(buildingId);
-    final List<BuildingEntity> current = state.hasValue ? (state.value ?? <BuildingEntity>[]) : <BuildingEntity>[];
+    final current = state.asData?.value ?? <BuildingEntity>[];
     state = AsyncValue.data(
       current.where((b) => b.id != buildingId).toList(),
     );
