@@ -1,5 +1,5 @@
 import { prisma } from "../config/db.js";
-import { assertManagerOwnsBuilding } from "../utils/access.js";
+import { assertManagerOwnsBuilding, assertManagerOwnsSite } from "../utils/access.js";
 import { monthYearRange, yearRange } from "../utils/reportPeriod.js";
 import {
   summarizeDues,
@@ -398,5 +398,217 @@ export async function getAnnualReportData(buildingId, managerId, { year }) {
       note: "Net tutar = yillik tahsil - yillik giderler (bina kasa bakiyesi degildir).",
     },
     operational,
+  };
+}
+
+async function loadSiteContext(siteId, managerId) {
+  const site = await assertManagerOwnsSite(siteId, managerId);
+  const manager = await prisma.user.findFirst({
+    where: { id: managerId, deletedAt: null },
+    select: { name: true },
+  });
+
+  const buildings = await prisma.building.findMany({
+    where: { siteId },
+    include: {
+      apartments: {
+        include: {
+          resident: { select: { name: true, deletedAt: true } },
+        },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  let totalApartments = 0;
+  let occupied = 0;
+  const buildingSummaries = buildings.map((b) => {
+    const aptCount = b.apartments.length;
+    const occ = b.apartments.filter(
+      (a) => a.resident != null && a.resident.deletedAt == null
+    ).length;
+    totalApartments += aptCount;
+    occupied += occ;
+    return {
+      id: b.id,
+      name: b.name,
+      blockLabel: b.blockLabel,
+      apartmentCount: aptCount,
+      occupied: occ,
+    };
+  });
+
+  return {
+    site,
+    managerName: manager?.name ?? "Yonetici",
+    buildings: buildingSummaries,
+    occupancy: { total: totalApartments, occupied },
+    currency: site.currency ?? "TRY",
+  };
+}
+
+async function loadSiteDuesForPeriod(siteId, month, year) {
+  const buildingIds = (
+    await prisma.building.findMany({ where: { siteId }, select: { id: true } })
+  ).map((b) => b.id);
+
+  const where = {
+    apartment: { buildingId: { in: buildingIds } },
+    year: parseInt(String(year), 10),
+  };
+  if (month != null) {
+    where.month = parseInt(String(month), 10);
+  }
+
+  return prisma.due.findMany({
+    where,
+    include: {
+      apartment: {
+        select: {
+          id: true,
+          number: true,
+          building: { select: { name: true, blockLabel: true } },
+          resident: { select: { name: true, deletedAt: true } },
+        },
+      },
+    },
+    orderBy: { apartment: { number: "asc" } },
+  });
+}
+
+async function loadSiteExpenseSummaryOnly(siteId, month, year, currency) {
+  const y = parseInt(String(year), 10);
+  const where = { siteId, targetYear: y };
+  if (month != null) where.targetMonth = parseInt(String(month), 10);
+
+  const expenses = await prisma.siteExpense.findMany({
+    where,
+    orderBy: { date: "desc" },
+  });
+
+  return computeExpenseSummary(expenses, currency);
+}
+
+function mapSiteDueRows(dues, currency) {
+  return dues.map((due) => ({
+    apartmentNumber: due.apartment.number,
+    buildingName: due.apartment.building.blockLabel ?? due.apartment.building.name,
+    residentName:
+      due.apartment.resident && due.apartment.resident.deletedAt == null
+        ? due.apartment.resident.name
+        : "-",
+    amount: toMoneyDecimal(due.amount),
+    amountFormatted: formatMoney(toMoneyDecimal(due.amount), currency),
+    status: due.status,
+    paidAt: due.paidAt?.toISOString() ?? null,
+    overdueDays: due.overdueDays ?? 0,
+  }));
+}
+
+export async function getMonthlySiteReportData(siteId, managerId, { month, year }) {
+  const ctx = await loadSiteContext(siteId, managerId);
+  const { start, end } = monthYearRange(year, month);
+
+  const buildingIds = (
+    await prisma.building.findMany({ where: { siteId }, select: { id: true } })
+  ).map((b) => b.id);
+
+  const [dues, siteExpenses] = await Promise.all([
+    loadSiteDuesForPeriod(siteId, month, year),
+    loadSiteExpenseSummaryOnly(siteId, month, year, ctx.currency),
+  ]);
+
+  const dueSummary = summarizeDues(dues);
+  const net = computeNet(dueSummary.collected, siteExpenses.totalAmount);
+
+  return {
+    type: "monthly",
+    scope: "site",
+    generatedAt: new Date().toISOString(),
+    period: {
+      month: parseInt(String(month), 10),
+      year: parseInt(String(year), 10),
+    },
+    site: {
+      id: ctx.site.id,
+      name: ctx.site.name,
+      address: ctx.site.address,
+      city: ctx.site.city,
+    },
+    buildings: ctx.buildings,
+    managerName: ctx.managerName,
+    currency: ctx.currency,
+    occupancy: ctx.occupancy,
+    dues: {
+      summary: {
+        ...dueSummary,
+        expectedFormatted: formatMoney(dueSummary.expected, ctx.currency),
+        collectedFormatted: formatMoney(dueSummary.collected, ctx.currency),
+      },
+      rows: mapSiteDueRows(dues, ctx.currency),
+    },
+    siteExpenses,
+    financial: {
+      net,
+      netFormatted: formatMoney(net, ctx.currency),
+      note: "Net tutar = tahsil - site giderleri (kasa bakiyesi degildir).",
+    },
+    operational: buildingIds.length
+      ? await loadOperationalSummary(buildingIds[0], start, end)
+      : {},
+  };
+}
+
+export async function getAnnualSiteReportData(siteId, managerId, { year }) {
+  const ctx = await loadSiteContext(siteId, managerId);
+  const y = parseInt(String(year), 10);
+  const { start, end } = yearRange(year);
+
+  const buildingIds = (
+    await prisma.building.findMany({ where: { siteId }, select: { id: true } })
+  ).map((b) => b.id);
+
+  const [allDues, siteExpenses] = await Promise.all([
+    loadSiteDuesForPeriod(siteId, null, y),
+    loadSiteExpenseSummaryOnly(siteId, null, y, ctx.currency),
+  ]);
+
+  const dueSummary = summarizeDues(allDues);
+  const net = computeNet(dueSummary.collected, siteExpenses.totalAmount);
+
+  return {
+    type: "annual",
+    scope: "site",
+    generatedAt: new Date().toISOString(),
+    period: { year: y },
+    site: {
+      id: ctx.site.id,
+      name: ctx.site.name,
+      address: ctx.site.address,
+      city: ctx.site.city,
+    },
+    buildings: ctx.buildings,
+    managerName: ctx.managerName,
+    currency: ctx.currency,
+    occupancy: ctx.occupancy,
+    yearSummary: {
+      expected: dueSummary.expected,
+      collected: dueSummary.collected,
+      expenses: siteExpenses.totalAmount,
+      net,
+      expectedFormatted: formatMoney(dueSummary.expected, ctx.currency),
+      collectedFormatted: formatMoney(dueSummary.collected, ctx.currency),
+      expensesFormatted: formatMoney(siteExpenses.totalAmount, ctx.currency),
+      netFormatted: formatMoney(net, ctx.currency),
+    },
+    siteExpenses,
+    financial: {
+      net,
+      netFormatted: formatMoney(net, ctx.currency),
+      note: "Net tutar = yillik tahsil - site giderleri (kasa bakiyesi degildir).",
+    },
+    operational: buildingIds.length
+      ? await loadOperationalSummary(buildingIds[0], start, end)
+      : {},
   };
 }

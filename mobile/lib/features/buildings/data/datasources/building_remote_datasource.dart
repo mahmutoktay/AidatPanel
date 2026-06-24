@@ -5,7 +5,7 @@ import '../models/building_model.dart';
 import '../models/collection_preset_model.dart';
 
 abstract class BuildingRemoteDataSource {
-  Future<List<BuildingModel>> fetchBuildings();
+  Future<List<BuildingModel>> fetchBuildings({bool standalone = false});
   Future<List<CollectionPresetModel>> fetchCollectionPresets();
   Future<BuildingModel> createBuilding({
     required String name,
@@ -64,9 +64,20 @@ class BuildingRemoteDataSourceImpl implements BuildingRemoteDataSource {
   }
 
   @override
-  Future<List<BuildingModel>> fetchBuildings() async {
-    final response = await _dioClient.get(ApiConstants.buildings);
-    final data = response.data['data'] as List;
+  Future<List<BuildingModel>> fetchBuildings({bool standalone = false}) async {
+    final response = await _dioClient.get(
+      ApiConstants.buildings,
+      queryParameters: standalone ? {'standalone': 'true'} : null,
+    );
+    final raw = response.data['data'];
+    final List data;
+    if (raw is List) {
+      data = raw;
+    } else if (raw is Map<String, dynamic> && raw['items'] is List) {
+      data = raw['items'] as List;
+    } else {
+      data = const [];
+    }
     return data
         .map((json) => BuildingModel.fromJson(json as Map<String, dynamic>))
         .toList();

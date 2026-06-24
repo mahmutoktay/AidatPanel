@@ -63,6 +63,23 @@ class ApiConstants {
   static String buildingReports(String buildingId) =>
       '$apiVersion/buildings/$buildingId/reports';
 
+  // Sites endpoints
+  static const String sites = '$apiVersion/sites';
+  static String siteDetail(String siteId) => '$apiVersion/sites/$siteId';
+  static String siteCollection(String siteId) =>
+      '$apiVersion/sites/$siteId/collection';
+  static String siteBuildings(String siteId) =>
+      '$apiVersion/sites/$siteId/buildings';
+  static String siteAggregation(String siteId) =>
+      '$apiVersion/sites/$siteId/aggregation';
+  static String siteReports(String siteId) => '$apiVersion/sites/$siteId/reports';
+  static String siteExpenses(String siteId) =>
+      '$apiVersion/sites/$siteId/expenses';
+  static String siteExpensesSummary(String siteId) =>
+      '$apiVersion/sites/$siteId/expenses/summary';
+  static String siteExpense(String siteId, String expenseId) =>
+      '$apiVersion/sites/$siteId/expenses/$expenseId';
+
   // Apartments endpoints
   // Belge §6: daire CRUD'u nested path altında (/buildings/:bId/apartments[/:id])
   // ApartmentRemoteDataSource bu nested path'i kullanır; düz /apartments/:id

@@ -19,7 +19,7 @@ import '../../../dues/presentation/screens/manager_dues_tab.dart';
 import '../../../../shared/widgets/settings_tab.dart';
 
 import '../widgets/manager_home_tab.dart';
-import '../widgets/manager_buildings_tab.dart';
+import '../widgets/manager_properties_tab.dart';
 
 class ManagerDashboardScreen extends ConsumerStatefulWidget {
   const ManagerDashboardScreen({super.key});
@@ -78,6 +78,8 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     });
 
     final buildingsAsync = ref.watch(buildingsStoreProvider);
+    final standaloneBuildingsAsync =
+        ref.watch(standaloneBuildingsStoreProvider);
     final userName =
         ref.watch(authStateProvider.select((state) => state.user?.name)) ??
         context.t.common.user;
@@ -136,7 +138,9 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                         .read(buildingsStoreProvider.notifier)
                         .loadBuildings(),
                   ),
-                  ManagerBuildingsTab(buildingsAsync: buildingsAsync),
+                  ManagerPropertiesTab(
+                    standaloneBuildingsAsync: standaloneBuildingsAsync,
+                  ),
                   const ManagerDuesTab(),
                   const SettingsTab(),
                 ],

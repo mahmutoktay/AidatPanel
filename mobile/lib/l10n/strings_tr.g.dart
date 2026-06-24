@@ -183,6 +183,8 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get buildingAddedSuccess => 'Bina başarıyla eklendi';
 	@override String get createInviteCode => 'Davet Kodu Oluştur';
 	@override String get whichBuildingForCode => 'Hangi binadan kod üretilecek?';
+	@override String get whichSiteForCode => 'Hangi siteden kod üretilecek?';
+	@override String get inviteStandaloneBuildings => 'Tekil binalar';
 	@override String get whichApartmentForCode => 'Hangi daire için kod üretilecek?';
 	@override String get noApartmentsInBuilding => 'Bu binaya henüz daire eklenmemiş';
 	@override String get activeCodeBadge => 'Aktif Kod';
@@ -272,6 +274,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get apartmentLabel => 'DAİRE';
 	@override String get turkishLanguage => 'Türkçe';
 	@override String get englishLanguage => 'English';
+	@override String get stepSite => 'Site';
 	@override String get stepBuilding => 'Bina';
 	@override String get stepApartment => 'Daire';
 	@override String get stepCode => 'Kod';
@@ -378,18 +381,10 @@ class _Translations$validation$tr implements Translations$validation$en {
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String get emailRequired => 'Email adresi boş bırakılamaz';
-	@override String get emailInvalid => 'Geçerli bir email adresi giriniz';
-	@override String get emailTooLong => 'Email adresi çok uzun';
-	@override String get phoneRequired => 'Telefon numarası boş bırakılamaz';
-	@override String get phoneInvalid => 'Telefon numarası 10 haneli olmalıdır';
-	@override String get passwordRequired => 'Şifre boş bırakılamaz';
-	@override String get passwordTooShort => 'Şifre en az 6 karakter olmalıdır';
-	@override String get passwordTooLong => 'Şifre çok uzun';
-	@override String get passwordUppercaseRequired => 'Şifrede en az 1 büyük harf olmalıdır';
-	@override String get passwordLowercaseRequired => 'Şifrede en az 1 küçük harf olmalıdır';
-	@override String get passwordNumberRequired => 'Şifrede en az 1 rakam olmalıdır';
-	@override String get passwordSpecialCharRequired => 'Şifrede en az 1 özel karakter olmalıdır';
+	@override String get field_required => 'Bu alan boş bırakılamaz';
+	@override String get field_too_short => 'Girilen değer çok kısa';
+	@override String get field_too_long => 'Girilen değer çok uzun';
+	@override String get field_invalid => 'Geçerli bir değer giriniz';
 }
 
 // Path: features
@@ -400,6 +395,7 @@ class _Translations$features$tr implements Translations$features$en {
 
 	// Translations
 	@override late final _Translations$features$buildings$tr buildings = _Translations$features$buildings$tr._(_root);
+	@override late final _Translations$features$sites$tr sites = _Translations$features$sites$tr._(_root);
 	@override late final _Translations$features$auth$tr auth = _Translations$features$auth$tr._(_root);
 	@override late final _Translations$features$apartments$tr apartments = _Translations$features$apartments$tr._(_root);
 	@override late final _Translations$features$tickets$tr tickets = _Translations$features$tickets$tr._(_root);
@@ -560,6 +556,71 @@ class _Translations$features$buildings$tr implements Translations$features$build
 	@override String get tekrarDene => 'Tekrar Dene';
 	@override late final _Translations$features$buildings$collection$tr collection = _Translations$features$buildings$collection$tr._(_root);
 	@override late final _Translations$features$buildings$list$tr list = _Translations$features$buildings$list$tr._(_root);
+}
+
+// Path: features.sites
+class _Translations$features$sites$tr implements Translations$features$sites$en {
+	_Translations$features$sites$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get addSiteTitle => 'Yeni Site Ekle';
+	@override String get createSite => 'Site Oluştur';
+	@override String get siteName => 'Site adı';
+	@override String get siteNameHint => 'Örn: Güneş Sitesi';
+	@override String get siteCreated => 'Site başarıyla oluşturuldu';
+	@override String get siteCreateFailed => 'Site eklenemedi';
+	@override String get mySites => 'Sitelerim';
+	@override String get tabSites => 'Siteler';
+	@override String get tabBuildings => 'Binalar';
+	@override String get emptySites => 'Henüz site eklenmedi';
+	@override String get newSite => 'Yeni Site';
+	@override String get newBuilding => 'Yeni Bina';
+	@override String get siteDetailTitle => 'Site Detayı';
+	@override String get addBlock => 'Blok Ekle';
+	@override String get addBlockTitle => 'Siteye Blok Ekle';
+	@override String get createBlock => 'Blok Oluştur';
+	@override String get blockCreated => 'Blok başarıyla eklendi';
+	@override String get blockSection => 'Blok bilgileri';
+	@override String get blockLabel => 'Blok adı';
+	@override String get blockLabelHint => 'Örn: A Blok';
+	@override String get blockNameOptional => 'Bina adı (isteğe bağlı)';
+	@override String get blockNameHint => 'Boş bırakılırsa blok adı kullanılır';
+	@override String get addressExtra => 'Ek adres bilgisi';
+	@override String get addressExtraHint => 'Örn: Arka giriş, Kapı no 2';
+	@override String get overrideDue => 'Aidatı site varsayılanından farklı ayarla';
+	@override String get overrideDueHint => 'Kapalıyken site aidatı geçerli olur';
+	@override String get overrideCollection => 'IBAN\'ı site varsayılanından farklı ayarla';
+	@override String get overrideCollectionHint => 'Kapalıyken site IBAN\'ı geçerli olur';
+	@override String get blocksTitle => 'Bloklar';
+	@override String get noBlocks => 'Henüz blok eklenmedi';
+	@override String get blockApartments => '{count} daire';
+	@override String get blockCount => 'Blok';
+	@override String get apartmentCount => 'Daire';
+	@override String get collectedAmount => 'Toplanan';
+	@override String get expectedAmount => 'Beklenen';
+	@override String get collectionRate => 'Tahsilat';
+	@override String get collectedExpected => '{collected} / {expected}';
+	@override String get commonExpenses => 'Ortak Giderler';
+	@override String get report => 'Rapor';
+	@override String get reportSheetTitle => 'Site raporu';
+	@override String get monthlyReport => 'Aylık rapor (PDF)';
+	@override String get annualReport => 'Yıllık rapor (PDF)';
+	@override String get siteExpensesTitle => 'Site Ortak Giderleri';
+	@override String get addExpenseTitle => 'Ortak Gider Ekle';
+	@override String get editExpenseTitle => 'Gideri Düzenle';
+	@override String get addExpense => 'Gider Ekle';
+	@override String get expenseCreated => 'Site gideri eklendi';
+	@override String get expenseUpdated => 'Site gideri güncellendi';
+	@override String get confirmExpenseTitle => 'Onay gerekli';
+	@override String get deleteExpenseTitle => 'Gider silinsin mi?';
+	@override String get deleteExpenseConfirm => 'Bu site gideri kalıcı olarak silinecek.';
+	@override String get deleteExpenseSuccess => 'Site gideri silindi';
+	@override String get noExpenses => 'Gider yok';
+	@override String get noExpensesHint => 'Bu ay için ortak gider kaydı bulunmuyor.';
+	@override String get totalExpenses => 'Toplam: {amount}';
+	@override String get perUnitShare => 'Daire payı: {amount}';
 }
 
 // Path: features.auth
@@ -1049,6 +1110,8 @@ class _Translations$features$subscription$tr implements Translations$features$su
 	@override String get cycleMonthly => 'Her ay yenilenir';
 	@override String get cycleAnnual => 'Her yıl yenilenir';
 	@override String get featureUnlimitedUnits => 'Sınırsız daire';
+	@override String get buildingUsageSummary => 'Yönetilen bina: {used}';
+	@override String get buildingUsageWithLimit => 'Yönetilen bina: {used} / {limit}';
 	@override String get featureDuesTracking => 'Aidat takibi';
 	@override String get featureAdvancedReports => 'Gelişmiş raporlar';
 	@override String get featurePrioritySupport => 'Öncelikli destek';
@@ -1428,6 +1491,8 @@ extension on TranslationsTr {
 			'common.buildingAddedSuccess' => 'Bina başarıyla eklendi',
 			'common.createInviteCode' => 'Davet Kodu Oluştur',
 			'common.whichBuildingForCode' => 'Hangi binadan kod üretilecek?',
+			'common.whichSiteForCode' => 'Hangi siteden kod üretilecek?',
+			'common.inviteStandaloneBuildings' => 'Tekil binalar',
 			'common.whichApartmentForCode' => 'Hangi daire için kod üretilecek?',
 			'common.noApartmentsInBuilding' => 'Bu binaya henüz daire eklenmemiş',
 			'common.activeCodeBadge' => 'Aktif Kod',
@@ -1517,6 +1582,7 @@ extension on TranslationsTr {
 			'common.apartmentLabel' => 'DAİRE',
 			'common.turkishLanguage' => 'Türkçe',
 			'common.englishLanguage' => 'English',
+			'common.stepSite' => 'Site',
 			'common.stepBuilding' => 'Bina',
 			'common.stepApartment' => 'Daire',
 			'common.stepCode' => 'Kod',
@@ -1614,18 +1680,10 @@ extension on TranslationsTr {
 			'common.resetPasswordFailed' => 'Şifre sıfırlanamadı. Kod hatalı veya süresi dolmuş olabilir.',
 			'common.resetPasswordSubmit' => 'Şifreyi Sıfırla',
 			'common.backToLogin' => 'Giriş ekranına dön',
-			'validation.emailRequired' => 'Email adresi boş bırakılamaz',
-			'validation.emailInvalid' => 'Geçerli bir email adresi giriniz',
-			'validation.emailTooLong' => 'Email adresi çok uzun',
-			'validation.phoneRequired' => 'Telefon numarası boş bırakılamaz',
-			'validation.phoneInvalid' => 'Telefon numarası 10 haneli olmalıdır',
-			'validation.passwordRequired' => 'Şifre boş bırakılamaz',
-			'validation.passwordTooShort' => 'Şifre en az 6 karakter olmalıdır',
-			'validation.passwordTooLong' => 'Şifre çok uzun',
-			'validation.passwordUppercaseRequired' => 'Şifrede en az 1 büyük harf olmalıdır',
-			'validation.passwordLowercaseRequired' => 'Şifrede en az 1 küçük harf olmalıdır',
-			'validation.passwordNumberRequired' => 'Şifrede en az 1 rakam olmalıdır',
-			'validation.passwordSpecialCharRequired' => 'Şifrede en az 1 özel karakter olmalıdır',
+			'validation.field_required' => 'Bu alan boş bırakılamaz',
+			'validation.field_too_short' => 'Girilen değer çok kısa',
+			'validation.field_too_long' => 'Girilen değer çok uzun',
+			'validation.field_invalid' => 'Geçerli bir değer giriniz',
 			'features.buildings.managerPanel' => 'Yönetici',
 			'features.buildings.buildingDetail' => 'Bina Detayı',
 			'features.buildings.addBuilding' => 'Bina Ekle',
@@ -1722,6 +1780,64 @@ extension on TranslationsTr {
 			'features.buildings.list.unitsWaiting' => '{count} daire bekliyor',
 			'features.buildings.list.allPaymentsComplete' => 'Tüm ödemeler tamam',
 			'features.buildings.list.monthlyDuesShort' => 'Aylık Aidat',
+			'features.sites.addSiteTitle' => 'Yeni Site Ekle',
+			'features.sites.createSite' => 'Site Oluştur',
+			'features.sites.siteName' => 'Site adı',
+			'features.sites.siteNameHint' => 'Örn: Güneş Sitesi',
+			'features.sites.siteCreated' => 'Site başarıyla oluşturuldu',
+			'features.sites.siteCreateFailed' => 'Site eklenemedi',
+			'features.sites.mySites' => 'Sitelerim',
+			'features.sites.tabSites' => 'Siteler',
+			'features.sites.tabBuildings' => 'Binalar',
+			'features.sites.emptySites' => 'Henüz site eklenmedi',
+			'features.sites.newSite' => 'Yeni Site',
+			'features.sites.newBuilding' => 'Yeni Bina',
+			'features.sites.siteDetailTitle' => 'Site Detayı',
+			'features.sites.addBlock' => 'Blok Ekle',
+			'features.sites.addBlockTitle' => 'Siteye Blok Ekle',
+			'features.sites.createBlock' => 'Blok Oluştur',
+			'features.sites.blockCreated' => 'Blok başarıyla eklendi',
+			'features.sites.blockSection' => 'Blok bilgileri',
+			'features.sites.blockLabel' => 'Blok adı',
+			'features.sites.blockLabelHint' => 'Örn: A Blok',
+			'features.sites.blockNameOptional' => 'Bina adı (isteğe bağlı)',
+			'features.sites.blockNameHint' => 'Boş bırakılırsa blok adı kullanılır',
+			'features.sites.addressExtra' => 'Ek adres bilgisi',
+			'features.sites.addressExtraHint' => 'Örn: Arka giriş, Kapı no 2',
+			'features.sites.overrideDue' => 'Aidatı site varsayılanından farklı ayarla',
+			'features.sites.overrideDueHint' => 'Kapalıyken site aidatı geçerli olur',
+			'features.sites.overrideCollection' => 'IBAN\'ı site varsayılanından farklı ayarla',
+			'features.sites.overrideCollectionHint' => 'Kapalıyken site IBAN\'ı geçerli olur',
+			'features.sites.blocksTitle' => 'Bloklar',
+			'features.sites.noBlocks' => 'Henüz blok eklenmedi',
+			'features.sites.blockApartments' => '{count} daire',
+			'features.sites.blockCount' => 'Blok',
+			'features.sites.apartmentCount' => 'Daire',
+			'features.sites.collectedAmount' => 'Toplanan',
+			'features.sites.expectedAmount' => 'Beklenen',
+			'features.sites.collectionRate' => 'Tahsilat',
+			'features.sites.collectedExpected' => '{collected} / {expected}',
+			'features.sites.commonExpenses' => 'Ortak Giderler',
+			'features.sites.report' => 'Rapor',
+			'features.sites.reportSheetTitle' => 'Site raporu',
+			'features.sites.monthlyReport' => 'Aylık rapor (PDF)',
+			'features.sites.annualReport' => 'Yıllık rapor (PDF)',
+			'features.sites.siteExpensesTitle' => 'Site Ortak Giderleri',
+			'features.sites.addExpenseTitle' => 'Ortak Gider Ekle',
+			'features.sites.editExpenseTitle' => 'Gideri Düzenle',
+			'features.sites.addExpense' => 'Gider Ekle',
+			'features.sites.expenseCreated' => 'Site gideri eklendi',
+			'features.sites.expenseUpdated' => 'Site gideri güncellendi',
+			'features.sites.confirmExpenseTitle' => 'Onay gerekli',
+			'features.sites.deleteExpenseTitle' => 'Gider silinsin mi?',
+			'features.sites.deleteExpenseConfirm' => 'Bu site gideri kalıcı olarak silinecek.',
+			'features.sites.deleteExpenseSuccess' => 'Site gideri silindi',
+			'features.sites.noExpenses' => 'Gider yok',
+			'features.sites.noExpensesHint' => 'Bu ay için ortak gider kaydı bulunmuyor.',
+			'features.sites.totalExpenses' => 'Toplam: {amount}',
+			'features.sites.perUnitShare' => 'Daire payı: {amount}',
+			_ => null,
+		} ?? switch (path) {
 			'features.auth.register' => 'Kaydol',
 			'features.auth.login' => 'Giriş Yap',
 			'features.auth.join' => 'Katıl',
@@ -1773,8 +1889,6 @@ extension on TranslationsTr {
 			'features.auth.invalidInviteCodeFormat' => 'Geçersiz davet kodu formatı (Örn: AP3-B12-A9F0)',
 			'features.auth.invalidPhoneFormat' => 'Geçerli bir telefon numarası giriniz (5XX XXX XX XX)',
 			'features.auth.inviteCodeAndPasswordRequired' => 'Davet kodu, ad ve şifre boş bırakılamaz',
-			_ => null,
-		} ?? switch (path) {
 			'features.auth.invalidPhoneNumber' => 'Geçerli bir telefon numarası giriniz',
 			'features.auth.areYouManager' => 'Yönetici misiniz? Kaydolun',
 			'features.apartments.residentPanel' => 'Sakin',
@@ -2141,6 +2255,8 @@ extension on TranslationsTr {
 			'features.subscription.cycleMonthly' => 'Her ay yenilenir',
 			'features.subscription.cycleAnnual' => 'Her yıl yenilenir',
 			'features.subscription.featureUnlimitedUnits' => 'Sınırsız daire',
+			'features.subscription.buildingUsageSummary' => 'Yönetilen bina: {used}',
+			'features.subscription.buildingUsageWithLimit' => 'Yönetilen bina: {used} / {limit}',
 			'features.subscription.featureDuesTracking' => 'Aidat takibi',
 			'features.subscription.featureAdvancedReports' => 'Gelişmiş raporlar',
 			'features.subscription.featurePrioritySupport' => 'Öncelikli destek',
@@ -2234,6 +2350,8 @@ extension on TranslationsTr {
 			'legal.contactBlock' => 'Veri sorumlusu: Vefa Yazılım\nE-posta: store@vefayazilim.com',
 			'legal.updatedLabel' => 'Son güncelleme',
 			'legal.updatedDate' => 'Haziran 2026',
+			_ => null,
+		} ?? switch (path) {
 			'legal.privacyIntro' => 'Bu metin, Vefa Yazılım tarafından sunulan AidatPanel mobil uygulamasını kullanırken kişisel verilerinizin nasıl işlendiğini açıklar. Uygulamayı kullanmaya devam ederek bu politikayı okuduğunuzu kabul etmiş sayılırsınız.',
 			'legal.privacyS1Title' => '1. Veri sorumlusu',
 			'legal.privacyS1Body' => 'AidatPanel hizmeti kapsamında kişisel verileriniz, veri sorumlusu Vefa Yazılım tarafından 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) ve ilgili mevzuata uygun olarak işlenir. KVKK ve gizlilik talepleriniz için: store@vefayazilim.com',

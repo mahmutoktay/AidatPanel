@@ -39,9 +39,10 @@ class BuildingRepositoryImpl implements BuildingRepository {
   }
 
   @override
-  Future<List<BuildingEntity>> fetchBuildings() async {
+  Future<List<BuildingEntity>> fetchBuildings({bool standalone = false}) async {
     try {
-      final models = await _remoteDataSource.fetchBuildings();
+      final models =
+          await _remoteDataSource.fetchBuildings(standalone: standalone);
       return models.map((m) => m.toEntity()).toList();
     } on ApiException {
       rethrow;

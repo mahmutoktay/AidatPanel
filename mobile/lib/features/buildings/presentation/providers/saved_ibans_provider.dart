@@ -25,7 +25,13 @@ class SavedIbanMatcher {
     return presets.map((preset) {
       final key = IbanUtils.normalize(preset.collectionIban);
       final matched = buildings
-          .where((b) => IbanUtils.normalize(b.collectionIban ?? '') == key)
+          .where(
+            (b) =>
+                IbanUtils.normalize(
+                  b.effectiveCollectionIban ?? b.collectionIban ?? '',
+                ) ==
+                key,
+          )
           .toList();
       return SavedIbanItem(preset: preset, buildings: matched);
     }).toList();

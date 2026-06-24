@@ -23,6 +23,19 @@ class BuildingModel {
   final String? paymentReferenceTemplate;
   final bool? isCollectionConfiguredFromApi;
   final int? occupiedApartmentsFromApi;
+  final String? siteId;
+  final String? blockLabel;
+  final String? addressExtra;
+  final double? effectiveDueAmount;
+  final int? effectiveDueDay;
+  final String? effectiveCurrency;
+  final String? effectiveCollectionIban;
+  final String? effectiveCollectionAccountTitle;
+  final String? effectivePaymentReferenceTemplate;
+  final String? effectiveAddress;
+  final String? effectiveCity;
+  final String? displayNameFromApi;
+  final String? siteName;
 
   BuildingModel({
     required this.id,
@@ -41,6 +54,19 @@ class BuildingModel {
     this.paymentReferenceTemplate,
     this.isCollectionConfiguredFromApi,
     this.occupiedApartmentsFromApi,
+    this.siteId,
+    this.blockLabel,
+    this.addressExtra,
+    this.effectiveDueAmount,
+    this.effectiveDueDay,
+    this.effectiveCurrency,
+    this.effectiveCollectionIban,
+    this.effectiveCollectionAccountTitle,
+    this.effectivePaymentReferenceTemplate,
+    this.effectiveAddress,
+    this.effectiveCity,
+    this.displayNameFromApi,
+    this.siteName,
   });
 
   factory BuildingModel.fromJson(Map<String, dynamic> json) {
@@ -67,18 +93,37 @@ class BuildingModel {
       paymentReferenceTemplate: json['paymentReferenceTemplate'] as String?,
       isCollectionConfiguredFromApi: json['isCollectionConfigured'] as bool?,
       occupiedApartmentsFromApi: json['occupiedApartments'] as int?,
+      siteId: json['siteId'] as String?,
+      blockLabel: json['blockLabel'] as String?,
+      addressExtra: json['addressExtra'] as String?,
+      effectiveDueAmount: _toDouble(json['effectiveDueAmount']),
+      effectiveDueDay: (json['effectiveDueDay'] as num?)?.toInt(),
+      effectiveCurrency: json['effectiveCurrency'] as String?,
+      effectiveCollectionIban: json['effectiveCollectionIban'] as String?,
+      effectiveCollectionAccountTitle:
+          json['effectiveCollectionAccountTitle'] as String?,
+      effectivePaymentReferenceTemplate:
+          json['effectivePaymentReferenceTemplate'] as String?,
+      effectiveAddress: json['effectiveAddress'] as String?,
+      effectiveCity: json['effectiveCity'] as String?,
+      displayNameFromApi: json['displayName'] as String?,
+      siteName: json['siteName'] as String?,
     );
   }
 
   BuildingEntity toEntity() {
     final total = apartmentCountFromApi ??
         ((totalFloors ?? 0) * (apartmentsPerFloor ?? 0));
-    final monthly = (dueAmount ?? 0) * total;
+    final resolvedDue = effectiveDueAmount ?? dueAmount;
+    final monthly = (resolvedDue ?? 0) * total;
+    final resolvedName = displayNameFromApi?.trim().isNotEmpty == true
+        ? displayNameFromApi!.trim()
+        : name;
     return BuildingEntity(
       id: id,
-      name: name,
-      address: address,
-      city: city ?? '',
+      name: resolvedName,
+      address: effectiveAddress ?? address,
+      city: effectiveCity ?? city ?? '',
       totalApartments: total,
       occupiedApartments: occupiedApartmentsFromApi ?? 0,
       totalMonthlyDues: monthly,
@@ -89,6 +134,18 @@ class BuildingModel {
       collectionIban: collectionIban,
       collectionAccountTitle: collectionAccountTitle,
       paymentReferenceTemplate: paymentReferenceTemplate,
+      siteId: siteId,
+      blockLabel: blockLabel,
+      addressExtra: addressExtra,
+      effectiveDueAmount: effectiveDueAmount,
+      effectiveDueDay: effectiveDueDay,
+      effectiveCurrency: effectiveCurrency,
+      effectiveCollectionIban: effectiveCollectionIban,
+      effectiveCollectionAccountTitle: effectiveCollectionAccountTitle,
+      effectivePaymentReferenceTemplate: effectivePaymentReferenceTemplate,
+      effectiveAddress: effectiveAddress,
+      effectiveCity: effectiveCity,
+      siteName: siteName,
     );
   }
 

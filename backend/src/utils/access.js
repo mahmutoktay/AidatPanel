@@ -83,3 +83,31 @@ export async function assertManagerOwnsExpense(expenseId, managerId) {
   }
   return expense;
 }
+
+/**
+ * Yöneticinin siteye erişimi var mı?
+ * @returns {Promise<import("@prisma/client").Site>}
+ */
+export async function assertManagerOwnsSite(siteId, managerId) {
+  const site = await prisma.site.findFirst({
+    where: { id: siteId, managerId },
+  });
+  if (!site) {
+    throw new HttpError(404, "Site bulunamadı veya erişim yetkiniz yok.");
+  }
+  return site;
+}
+
+/**
+ * Site gider kaydı — yönetici site sahibi mi?
+ */
+export async function assertManagerOwnsSiteExpense(siteExpenseId, managerId) {
+  const expense = await prisma.siteExpense.findUnique({
+    where: { id: siteExpenseId },
+    include: { site: { select: { managerId: true } } },
+  });
+  if (!expense || expense.site.managerId !== managerId) {
+    throw new HttpError(404, "Site gider kaydı bulunamadı.");
+  }
+  return expense;
+}

@@ -1,5 +1,7 @@
 import { prisma } from "../config/db.js";
 import { bulkGenerateBuildingDuesService } from "./dueBulkService.js";
+import { resolveEffectiveBuildingConfig } from "./buildingConfigService.js";
+import { getSiteBuildingIds } from "./siteExpenseAllocationService.js";
 import {
   computeOverdueDays,
   endOfDueDayIstanbul,
@@ -61,6 +63,24 @@ function formatBreakdownMoney(value) {
   return roundMoney(value).toFixed(2);
 }
 
+async function loadSiteExpensesForMonth(db, siteId, month, year) {
+  if (!siteId) return [];
+  return db.siteExpense.findMany({
+    where: {
+      siteId,
+      targetMonth: parseInt(String(month), 10),
+      targetYear: parseInt(String(year), 10),
+      perUnitAmount: { not: null },
+    },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      title: true,
+      perUnitAmount: true,
+    },
+  });
+}
+
 async function loadBuildingExpensesForMonth(db, buildingId, month, year) {
   return db.expense.findMany({
     where: {
@@ -87,6 +107,7 @@ async function loadCarryforwardsForApartment(db, apartmentId, month, year) {
     },
     include: {
       expense: { select: { title: true } },
+      siteExpense: { select: { title: true } },
     },
     orderBy: { createdAt: "asc" },
   });
@@ -98,11 +119,17 @@ async function loadCarryforwardsForApartment(db, apartmentId, month, year) {
 export async function computeDueBreakdown(apartmentId, month, year, buildingId, db = prisma) {
   const building = await db.building.findUnique({
     where: { id: buildingId },
-    select: { dueAmount: true, currency: true },
+    include: { site: true },
   });
 
-  const baseAmount = building?.dueAmount != null ? Number(building.dueAmount) : 0;
+  const effective = await resolveEffectiveBuildingConfig(building ?? { id: buildingId }, db);
+  const baseAmount =
+    effective.effectiveDueAmount != null ? Number(effective.effectiveDueAmount) : 0;
+
   const expenses = await loadBuildingExpensesForMonth(db, buildingId, month, year);
+  const siteExpenses = building?.siteId
+    ? await loadSiteExpensesForMonth(db, building.siteId, month, year)
+    : [];
   const carryforwards = await loadCarryforwardsForApartment(db, apartmentId, month, year);
 
   const expenseLines = expenses.map((e) => ({
@@ -111,13 +138,22 @@ export async function computeDueBreakdown(apartmentId, month, year, buildingId, 
     kind: "EXPENSE",
   }));
 
-  const carryLines = carryforwards.map((c) => ({
-    title: `Önceki aydan devreden — ${c.expense.title}`,
-    amount: formatBreakdownMoney(c.amount),
-    kind: "CARRYFORWARD",
+  const siteExpenseLines = siteExpenses.map((e) => ({
+    title: `Site ortak — ${e.title}`,
+    amount: formatBreakdownMoney(e.perUnitAmount),
+    kind: "SITE_EXPENSE",
   }));
 
-  const allLines = [...expenseLines, ...carryLines];
+  const carryLines = carryforwards.map((c) => {
+    const sourceTitle = c.expense?.title ?? c.siteExpense?.title ?? "Gider";
+    return {
+      title: `Önceki aydan devreden — ${sourceTitle}`,
+      amount: formatBreakdownMoney(c.amount),
+      kind: "CARRYFORWARD",
+    };
+  });
+
+  const allLines = [...expenseLines, ...siteExpenseLines, ...carryLines];
   const extras = allLines.reduce((sum, line) => sum + Number(line.amount), 0);
   const total = roundMoney(baseAmount + extras);
 
@@ -125,7 +161,7 @@ export async function computeDueBreakdown(apartmentId, month, year, buildingId, 
     baseAmount: formatBreakdownMoney(baseAmount),
     expenseLines: allLines,
     total: formatBreakdownMoney(total),
-    currency: building?.currency ?? "TRY",
+    currency: effective.effectiveCurrency ?? "TRY",
   };
 }
 
@@ -146,10 +182,11 @@ export async function recalculateBuildingDuesForMonth(buildingId, month, year, d
 
   const building = await db.building.findUnique({
     where: { id: buildingId },
-    select: { dueAmount: true, currency: true },
+    include: { site: true },
   });
 
-  if (building?.dueAmount == null) {
+  const effective = await resolveEffectiveBuildingConfig(building ?? { id: buildingId }, db);
+  if (effective.effectiveDueAmount == null) {
     return { updated: 0 };
   }
 
@@ -175,7 +212,7 @@ export async function recalculateBuildingDuesForMonth(buildingId, month, year, d
       where: { id: due.id },
       data: {
         amount: breakdown.total,
-        currency: building.currency ?? "TRY",
+        currency: effective.effectiveCurrency ?? "TRY",
       },
     });
     updated += 1;
@@ -216,15 +253,16 @@ export async function syncOpenBuildingDues(
 ) {
   const building = await db.building.findUnique({
     where: { id: buildingId },
-    select: { dueAmount: true, dueDay: true, currency: true },
+    include: { site: true },
   });
 
-  if (building?.dueAmount == null) {
+  const effective = await resolveEffectiveBuildingConfig(building ?? { id: buildingId }, db);
+  if (effective.effectiveDueAmount == null) {
     return { updated: 0 };
   }
 
-  const effectiveDueDay = dueDay ?? building.dueDay ?? 1;
-  const effectiveCurrency = currency ?? building.currency ?? "TRY";
+  const effectiveDueDay = dueDay ?? effective.effectiveDueDay ?? 1;
+  const effectiveCurrency = currency ?? effective.effectiveCurrency ?? "TRY";
 
   const openDues = await db.due.findMany({
     where: {
@@ -349,6 +387,125 @@ export async function applyCarryForwardForExpense(expense, carryForwardPolicy, d
   return { carryForwardCount: paidApartmentIds.length };
 }
 
+export async function getPaidApartmentsForSiteMonth(siteId, month, year, db = prisma) {
+  const buildingIds = await getSiteBuildingIds(siteId, db);
+  if (buildingIds.length === 0) return [];
+
+  const paidDues = await db.due.findMany({
+    where: {
+      apartment: { buildingId: { in: buildingIds } },
+      month: parseInt(String(month), 10),
+      year: parseInt(String(year), 10),
+      status: "PAID",
+    },
+    select: { apartmentId: true },
+  });
+  return paidDues.map((d) => d.apartmentId);
+}
+
+export async function previewPaidImpactForSite(siteId, targetMonth, targetYear, perUnitAmount) {
+  const paidIds = await getPaidApartmentsForSiteMonth(siteId, targetMonth, targetYear);
+  if (paidIds.length === 0) return null;
+
+  const unit = roundMoney(perUnitAmount);
+  const totalUnpaidShare = roundMoney(unit * paidIds.length);
+  const next = nextPeriod(targetMonth, targetYear);
+
+  return {
+    requiresConfirmation: true,
+    paidApartmentCount: paidIds.length,
+    perUnitAmount: unit.toFixed(2),
+    totalUnpaidShare: totalUnpaidShare.toFixed(2),
+    message: `${paidIds.length} daire bu ay aidatını zaten ödedi. Site gider payı ₺${totalUnpaidShare.toFixed(2)} bir sonraki aya borç olarak eklensin mi?`,
+    nextPeriod: next,
+  };
+}
+
+export async function applyCarryForwardForSiteExpense(expense, carryForwardPolicy, db = prisma) {
+  if (carryForwardPolicy !== "CARRY_TO_NEXT_MONTH") {
+    return { carryForwardCount: 0 };
+  }
+
+  const paidApartmentIds = await getPaidApartmentsForSiteMonth(
+    expense.siteId,
+    expense.targetMonth,
+    expense.targetYear,
+    db
+  );
+
+  if (paidApartmentIds.length === 0) {
+    return { carryForwardCount: 0 };
+  }
+
+  const next = nextPeriod(expense.targetMonth, expense.targetYear);
+  const buildingIds = await getSiteBuildingIds(expense.siteId, db);
+  for (const buildingId of buildingIds) {
+    await ensureDuesForMonth(buildingId, next.month, next.year, db);
+  }
+
+  const perUnit = Number(expense.perUnitAmount);
+
+  for (const apartmentId of paidApartmentIds) {
+    await db.dueExpenseCarryforward.upsert({
+      where: {
+        siteExpenseId_apartmentId: {
+          siteExpenseId: expense.id,
+          apartmentId,
+        },
+      },
+      create: {
+        siteExpenseId: expense.id,
+        apartmentId,
+        fromMonth: expense.targetMonth,
+        fromYear: expense.targetYear,
+        toMonth: next.month,
+        toYear: next.year,
+        amount: perUnit,
+      },
+      update: {
+        amount: perUnit,
+        toMonth: next.month,
+        toYear: next.year,
+      },
+    });
+  }
+
+  const { recalculateAllSiteBuildingsForMonth } = await import(
+    "./siteExpenseAllocationService.js"
+  );
+  await recalculateAllSiteBuildingsForMonth(expense.siteId, next.month, next.year, db);
+
+  return { carryForwardCount: paidApartmentIds.length };
+}
+
+export async function removeCarryforwardsForSiteExpense(siteExpenseId, db = prisma) {
+  const rows = await db.dueExpenseCarryforward.findMany({
+    where: { siteExpenseId },
+    select: {
+      toMonth: true,
+      toYear: true,
+      apartment: { select: { building: { select: { siteId: true } } } },
+    },
+  });
+
+  await db.dueExpenseCarryforward.deleteMany({ where: { siteExpenseId } });
+
+  const siteId = rows[0]?.apartment?.building?.siteId;
+  const periods = new Map();
+  for (const row of rows) {
+    periods.set(`${row.toYear}-${row.toMonth}`, { month: row.toMonth, year: row.toYear });
+  }
+
+  if (siteId) {
+    const { recalculateAllSiteBuildingsForMonth } = await import(
+      "./siteExpenseAllocationService.js"
+    );
+    for (const { month, year } of periods.values()) {
+      await recalculateAllSiteBuildingsForMonth(siteId, month, year, db);
+    }
+  }
+}
+
 export async function removeCarryforwardsForExpense(expenseId, db = prisma) {
   const rows = await db.dueExpenseCarryforward.findMany({
     where: { expenseId },
@@ -398,11 +555,17 @@ export async function computeDueBreakdownsBatch(items, buildingId, db = prisma) 
 
   const building = await db.building.findUnique({
     where: { id: buildingId },
-    select: { dueAmount: true, currency: true },
+    include: { site: true },
   });
 
-  const baseAmount = building?.dueAmount != null ? Number(building.dueAmount) : 0;
-  const currency = building?.currency ?? "TRY";
+  const effective = await resolveEffectiveBuildingConfig(
+    building ?? { id: buildingId },
+    db
+  );
+  const baseAmount =
+    effective.effectiveDueAmount != null ? Number(effective.effectiveDueAmount) : 0;
+  const currency = effective.effectiveCurrency ?? "TRY";
+  const siteId = building?.siteId ?? null;
 
   // Benzersiz (month, year) kombinasyonlarını bul
   const periodSet = new Set();
@@ -412,6 +575,7 @@ export async function computeDueBreakdownsBatch(items, buildingId, db = prisma) 
 
   // Tüm periyotlar için expense ve carryforward'ları toplu çek
   const expenseCache = new Map(); // "month-year" -> expenseLines
+  const siteExpenseCache = new Map(); // "month-year" -> siteExpenseLines
   const carryforwardCache = new Map(); // "apartmentId-month-year" -> carryLines
 
   await Promise.all(
@@ -419,11 +583,26 @@ export async function computeDueBreakdownsBatch(items, buildingId, db = prisma) 
       const [m, y] = periodKey.split("-").map(Number);
 
       const expenses = await loadBuildingExpensesForMonth(db, buildingId, m, y);
-      expenseCache.set(periodKey, expenses.map((e) => ({
-        title: e.title,
-        amount: formatBreakdownMoney(e.perUnitAmount),
-        kind: "EXPENSE",
-      })));
+      expenseCache.set(
+        periodKey,
+        expenses.map((e) => ({
+          title: e.title,
+          amount: formatBreakdownMoney(e.perUnitAmount),
+          kind: "EXPENSE",
+        }))
+      );
+
+      if (siteId) {
+        const siteExpenses = await loadSiteExpensesForMonth(db, siteId, m, y);
+        siteExpenseCache.set(
+          periodKey,
+          siteExpenses.map((e) => ({
+            title: `Site ortak — ${e.title}`,
+            amount: formatBreakdownMoney(e.perUnitAmount),
+            kind: "SITE_EXPENSE",
+          }))
+        );
+      }
 
       // Bu periyottaki tüm apartmentId'ler için carryforward'ları toplu çek
       const aptIds = items
@@ -439,6 +618,7 @@ export async function computeDueBreakdownsBatch(items, buildingId, db = prisma) 
           },
           include: {
             expense: { select: { title: true } },
+            siteExpense: { select: { title: true } },
           },
           orderBy: { createdAt: "asc" },
         });
@@ -449,8 +629,9 @@ export async function computeDueBreakdownsBatch(items, buildingId, db = prisma) 
           if (!carryforwardCache.has(key)) {
             carryforwardCache.set(key, []);
           }
+          const sourceTitle = cf.expense?.title ?? cf.siteExpense?.title ?? "Gider";
           carryforwardCache.get(key).push({
-            title: `Önceki aydan devreden — ${cf.expense.title}`,
+            title: `Önceki aydan devreden — ${sourceTitle}`,
             amount: formatBreakdownMoney(cf.amount),
             kind: "CARRYFORWARD",
           });
@@ -466,8 +647,9 @@ export async function computeDueBreakdownsBatch(items, buildingId, db = prisma) 
     const cfKey = `${item.apartmentId}-${item.month}-${item.year}`;
 
     const expenseLines = expenseCache.get(periodKey) ?? [];
+    const siteExpenseLines = siteExpenseCache.get(periodKey) ?? [];
     const carryLines = carryforwardCache.get(cfKey) ?? [];
-    const allLines = [...expenseLines, ...carryLines];
+    const allLines = [...expenseLines, ...siteExpenseLines, ...carryLines];
     const extras = allLines.reduce((sum, line) => sum + Number(line.amount), 0);
     const total = roundMoney(baseAmount + extras);
 

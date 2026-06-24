@@ -132,6 +132,38 @@ enum SubscriptionStatus {
   TRIAL
 }
 
+model Site {
+  id                        String        @id @default(uuid())
+  name                      String
+  address                   String
+  city                      String
+  managerId                 String
+  manager                   User          @relation("SiteManager", fields: [managerId], references: [id])
+  dueAmount                 Decimal?      @db.Decimal(12, 2)
+  dueDay                    Int?
+  currency                  String        @default("TRY")
+  collectionIban            String?
+  collectionAccountTitle    String?
+  paymentReferenceTemplate  String?
+  buildings                 Building[]
+  expenses                  SiteExpense[]
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
+}
+
+model SiteExpense {
+  id          String   @id @default(uuid())
+  siteId      String
+  site        Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  title       String
+  amount      Decimal  @db.Decimal(12, 2)
+  expenseDate DateTime
+  category    String?
+  note        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Building {
   id          String      @id @default(uuid())
   name        String
@@ -139,6 +171,10 @@ model Building {
   city        String
   managerId   String
   manager     User        @relation("BuildingManager", fields: [managerId], references: [id])
+  siteId      String?
+  site        Site?       @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  blockLabel  String?
+  addressExtra String?
   apartments  Apartment[]
   expenses    Expense[]
   createdAt   DateTime    @default(now())
@@ -292,15 +328,35 @@ POST   /api/v1/auth/reset-password
 
 ### Buildings (Yönetici)
 ```
-GET    /api/v1/buildings
+GET    /api/v1/buildings                    # ?standalone=true → site altı olmayan binalar
 POST   /api/v1/buildings
 GET    /api/v1/buildings/:id
 PUT    /api/v1/buildings/:id
 DELETE /api/v1/buildings/:id
 PATCH  /api/v1/buildings/:id/collection    # Tahsilat IBAN
+GET    /api/v1/buildings/collection-presets  # Bina + site IBAN önerileri
 GET    /api/v1/buildings/:id/dekonts
 POST   /api/v1/buildings/:id/announcements
 ```
+
+### Sites (Yönetici — FAZ 8)
+```
+GET    /api/v1/sites
+POST   /api/v1/sites
+GET    /api/v1/sites/:id
+PUT    /api/v1/sites/:id
+DELETE /api/v1/sites/:id                     # Alt binalar cascade silinir
+PATCH  /api/v1/sites/:id/collection
+GET    /api/v1/sites/:id/buildings
+POST   /api/v1/sites/:id/buildings         # blockLabel zorunlu; name opsiyonel
+GET    /api/v1/sites/:id/expenses
+POST   /api/v1/sites/:id/expenses
+PUT    /api/v1/sites/:id/expenses/:expenseId
+DELETE /api/v1/sites/:id/expenses/:expenseId
+GET    /api/v1/sites/:id/reports           # PDF (type=monthly|annual)
+```
+
+**Kota:** Abonelik `usage.buildings` / `limits.buildings` — toplam bina sayısı (site içi bloklar dahil; site başlığı kotaya dahil değil).
 
 ### Apartments (Yönetici)
 ```

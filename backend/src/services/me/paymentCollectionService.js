@@ -1,5 +1,6 @@
 import { HttpError } from "../../utils/httpError.js";
 import { buildPaymentReference, findActiveUserById } from "./profileHelpers.js";
+import { resolveEffectiveBuildingConfig } from "../buildingConfigService.js";
 
 /**
  * Sakinin havale / dekont ödeme ekranı için tahsilat bilgisi (IBAN yalnızca okuma).
@@ -13,9 +14,29 @@ export async function getMyPaymentCollectionService(userId) {
           select: {
             id: true,
             name: true,
+            blockLabel: true,
             collectionIban: true,
             collectionAccountTitle: true,
             paymentReferenceTemplate: true,
+            dueAmount: true,
+            dueDay: true,
+            currency: true,
+            address: true,
+            city: true,
+            siteId: true,
+            site: {
+              select: {
+                name: true,
+                collectionIban: true,
+                collectionAccountTitle: true,
+                paymentReferenceTemplate: true,
+                dueAmount: true,
+                dueDay: true,
+                currency: true,
+                address: true,
+                city: true,
+              },
+            },
           },
         },
       },
@@ -28,20 +49,22 @@ export async function getMyPaymentCollectionService(userId) {
 
   const { apartment } = user;
   const building = apartment.building;
+  const effective = await resolveEffectiveBuildingConfig(building);
   const apartmentNumber = String(apartment.number);
   const paymentReference = buildPaymentReference(
-    building.paymentReferenceTemplate,
+    effective.effectivePaymentReferenceTemplate,
     apartmentNumber
   );
 
   return {
     buildingId: building.id,
-    buildingName: building.name,
+    buildingName: effective.displayName,
+    siteName: effective.siteName,
     apartmentNumber,
-    collectionIban: building.collectionIban,
-    collectionAccountTitle: building.collectionAccountTitle,
-    paymentReferenceTemplate: building.paymentReferenceTemplate,
+    collectionIban: effective.effectiveCollectionIban,
+    collectionAccountTitle: effective.effectiveCollectionAccountTitle,
+    paymentReferenceTemplate: effective.effectivePaymentReferenceTemplate,
     paymentReference,
-    isCollectionConfigured: Boolean(building.collectionIban),
+    isCollectionConfigured: Boolean(effective.effectiveCollectionIban),
   };
 }

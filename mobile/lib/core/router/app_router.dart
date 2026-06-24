@@ -37,6 +37,11 @@ import '../../features/profile/presentation/screens/profile_details_screen.dart'
 import '../../features/profile/presentation/screens/active_sessions_screen.dart';
 import '../../features/subscription/presentation/screens/subscription_screen.dart';
 import '../../features/subscription/presentation/providers/subscription_provider.dart';
+import '../../features/sites/presentation/screens/add_site_screen.dart';
+import '../../features/sites/presentation/screens/site_detail_screen.dart';
+import '../../features/sites/presentation/screens/add_site_building_screen.dart';
+import '../../features/reports/presentation/screens/site_report_screen.dart';
+import '../../features/reports/domain/entities/report_entity.dart';
 import '../../features/profile/presentation/screens/legal_document_screen.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
@@ -88,6 +93,53 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
     name: 'manager_add_building',
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) => const AddBuildingScreen(),
+  ),
+  GoRoute(
+    path: 'add-site',
+    name: 'manager_add_site',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const AddSiteScreen(),
+  ),
+  GoRoute(
+    path: 'sites/:siteId',
+    name: 'manager_site_detail',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => SiteDetailScreen(
+      siteId: state.pathParameters['siteId']!,
+    ),
+  ),
+  GoRoute(
+    path: 'sites/:siteId/add-building',
+    name: 'manager_add_site_building',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => AddSiteBuildingScreen(
+      siteId: state.pathParameters['siteId']!,
+    ),
+  ),
+  GoRoute(
+    path: 'sites/:siteId/expenses',
+    name: 'manager_site_expenses',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => SiteExpensesScreen(
+      siteId: state.pathParameters['siteId']!,
+      siteName: state.uri.queryParameters['name'] ?? '',
+    ),
+  ),
+  GoRoute(
+    path: 'sites/:siteId/report',
+    name: 'manager_site_report',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) {
+      final typeParam = state.uri.queryParameters['type'] ?? 'monthly';
+      final type = typeParam == 'annual'
+          ? ReportType.annual
+          : ReportType.monthly;
+      return SiteReportScreen(
+        siteId: state.pathParameters['siteId']!,
+        siteName: state.uri.queryParameters['name'] ?? '',
+        type: type,
+      );
+    },
   ),
   GoRoute(
     path: 'invite-code',

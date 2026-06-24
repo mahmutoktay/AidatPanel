@@ -157,3 +157,24 @@ final buildingsStoreProvider =
     AsyncNotifierProvider<BuildingsNotifier, List<BuildingEntity>>(
   BuildingsNotifier.new,
 );
+
+class StandaloneBuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
+  BuildingRepository get _repository => ref.read(buildingRepositoryProvider);
+
+  @override
+  Future<List<BuildingEntity>> build() async {
+    return _repository.fetchBuildings(standalone: true);
+  }
+
+  Future<void> loadBuildings() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => _repository.fetchBuildings(standalone: true),
+    );
+  }
+}
+
+final standaloneBuildingsStoreProvider =
+    AsyncNotifierProvider<StandaloneBuildingsNotifier, List<BuildingEntity>>(
+  StandaloneBuildingsNotifier.new,
+);

@@ -148,6 +148,29 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         status: subscription?.status,
                       ),
                       _StatusStrip(subscription: subscription),
+                      if (subscription?.usage != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Text(
+                            subscription!.limits?.buildings != null
+                                ? t.buildingUsageWithLimit
+                                    .replaceAll(
+                                      '{used}',
+                                      '${subscription.usage!.buildings}',
+                                    )
+                                    .replaceAll(
+                                      '{limit}',
+                                      '${subscription.limits!.buildings}',
+                                    )
+                                : t.buildingUsageSummary.replaceAll(
+                                    '{used}',
+                                    '${subscription.usage!.buildings}',
+                                  ),
+                            style: AppTypography.body1.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
                       if (!purchasesEnabled && !subscriptionState.isPurchasing)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),

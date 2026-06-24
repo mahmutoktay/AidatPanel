@@ -449,6 +449,12 @@ class Translations$common$en {
 	/// en: 'Which building to generate code for?'
 	String get whichBuildingForCode => 'Which building to generate code for?';
 
+	/// en: 'Which site should the code be for?'
+	String get whichSiteForCode => 'Which site should the code be for?';
+
+	/// en: 'Standalone buildings'
+	String get inviteStandaloneBuildings => 'Standalone buildings';
+
 	/// en: 'Which apartment to generate code for?'
 	String get whichApartmentForCode => 'Which apartment to generate code for?';
 
@@ -715,6 +721,9 @@ class Translations$common$en {
 
 	/// en: 'English'
 	String get englishLanguage => 'English';
+
+	/// en: 'Site'
+	String get stepSite => 'Site';
 
 	/// en: 'Building'
 	String get stepBuilding => 'Building';
@@ -1016,41 +1025,17 @@ class Translations$validation$en {
 
 	// Translations
 
-	/// en: 'Email address cannot be empty'
-	String get emailRequired => 'Email address cannot be empty';
+	/// en: 'This field is required'
+	String get field_required => 'This field is required';
 
-	/// en: 'Please enter a valid email address'
-	String get emailInvalid => 'Please enter a valid email address';
+	/// en: 'Value is too short'
+	String get field_too_short => 'Value is too short';
 
-	/// en: 'Email address is too long'
-	String get emailTooLong => 'Email address is too long';
+	/// en: 'Value is too long'
+	String get field_too_long => 'Value is too long';
 
-	/// en: 'Phone number cannot be empty'
-	String get phoneRequired => 'Phone number cannot be empty';
-
-	/// en: 'Phone number must be 10 digits'
-	String get phoneInvalid => 'Phone number must be 10 digits';
-
-	/// en: 'Password cannot be empty'
-	String get passwordRequired => 'Password cannot be empty';
-
-	/// en: 'Password must be at least 6 characters'
-	String get passwordTooShort => 'Password must be at least 6 characters';
-
-	/// en: 'Password is too long'
-	String get passwordTooLong => 'Password is too long';
-
-	/// en: 'Password must contain at least 1 uppercase letter'
-	String get passwordUppercaseRequired => 'Password must contain at least 1 uppercase letter';
-
-	/// en: 'Password must contain at least 1 lowercase letter'
-	String get passwordLowercaseRequired => 'Password must contain at least 1 lowercase letter';
-
-	/// en: 'Password must contain at least 1 number'
-	String get passwordNumberRequired => 'Password must contain at least 1 number';
-
-	/// en: 'Password must contain at least 1 special character'
-	String get passwordSpecialCharRequired => 'Password must contain at least 1 special character';
+	/// en: 'Please enter a valid value'
+	String get field_invalid => 'Please enter a valid value';
 }
 
 // Path: features
@@ -1061,6 +1046,7 @@ class Translations$features$en {
 
 	// Translations
 	late final Translations$features$buildings$en buildings = Translations$features$buildings$en._(_root);
+	late final Translations$features$sites$en sites = Translations$features$sites$en._(_root);
 	late final Translations$features$auth$en auth = Translations$features$auth$en._(_root);
 	late final Translations$features$apartments$en apartments = Translations$features$apartments$en._(_root);
 	late final Translations$features$tickets$en tickets = Translations$features$tickets$en._(_root);
@@ -1426,6 +1412,183 @@ class Translations$features$buildings$en {
 
 	late final Translations$features$buildings$collection$en collection = Translations$features$buildings$collection$en._(_root);
 	late final Translations$features$buildings$list$en list = Translations$features$buildings$list$en._(_root);
+}
+
+// Path: features.sites
+class Translations$features$sites$en {
+	Translations$features$sites$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Add New Site'
+	String get addSiteTitle => 'Add New Site';
+
+	/// en: 'Create Site'
+	String get createSite => 'Create Site';
+
+	/// en: 'Site name'
+	String get siteName => 'Site name';
+
+	/// en: 'e.g. Sunny Residence'
+	String get siteNameHint => 'e.g. Sunny Residence';
+
+	/// en: 'Site created successfully'
+	String get siteCreated => 'Site created successfully';
+
+	/// en: 'Could not add site'
+	String get siteCreateFailed => 'Could not add site';
+
+	/// en: 'My Sites'
+	String get mySites => 'My Sites';
+
+	/// en: 'Sites'
+	String get tabSites => 'Sites';
+
+	/// en: 'Buildings'
+	String get tabBuildings => 'Buildings';
+
+	/// en: 'No sites added yet'
+	String get emptySites => 'No sites added yet';
+
+	/// en: 'New Site'
+	String get newSite => 'New Site';
+
+	/// en: 'New Building'
+	String get newBuilding => 'New Building';
+
+	/// en: 'Site Details'
+	String get siteDetailTitle => 'Site Details';
+
+	/// en: 'Add Block'
+	String get addBlock => 'Add Block';
+
+	/// en: 'Add Block to Site'
+	String get addBlockTitle => 'Add Block to Site';
+
+	/// en: 'Create Block'
+	String get createBlock => 'Create Block';
+
+	/// en: 'Block added successfully'
+	String get blockCreated => 'Block added successfully';
+
+	/// en: 'Block details'
+	String get blockSection => 'Block details';
+
+	/// en: 'Block label'
+	String get blockLabel => 'Block label';
+
+	/// en: 'e.g. Block A'
+	String get blockLabelHint => 'e.g. Block A';
+
+	/// en: 'Building name (optional)'
+	String get blockNameOptional => 'Building name (optional)';
+
+	/// en: 'Uses block label if left empty'
+	String get blockNameHint => 'Uses block label if left empty';
+
+	/// en: 'Extra address'
+	String get addressExtra => 'Extra address';
+
+	/// en: 'e.g. Rear entrance, Gate 2'
+	String get addressExtraHint => 'e.g. Rear entrance, Gate 2';
+
+	/// en: 'Override site default due amount'
+	String get overrideDue => 'Override site default due amount';
+
+	/// en: 'When off, site due applies'
+	String get overrideDueHint => 'When off, site due applies';
+
+	/// en: 'Override site default IBAN'
+	String get overrideCollection => 'Override site default IBAN';
+
+	/// en: 'When off, site IBAN applies'
+	String get overrideCollectionHint => 'When off, site IBAN applies';
+
+	/// en: 'Blocks'
+	String get blocksTitle => 'Blocks';
+
+	/// en: 'No blocks added yet'
+	String get noBlocks => 'No blocks added yet';
+
+	/// en: '{count} units'
+	String get blockApartments => '{count} units';
+
+	/// en: 'Blocks'
+	String get blockCount => 'Blocks';
+
+	/// en: 'Units'
+	String get apartmentCount => 'Units';
+
+	/// en: 'Collected'
+	String get collectedAmount => 'Collected';
+
+	/// en: 'Expected'
+	String get expectedAmount => 'Expected';
+
+	/// en: 'Collection'
+	String get collectionRate => 'Collection';
+
+	/// en: '{collected} / {expected}'
+	String get collectedExpected => '{collected} / {expected}';
+
+	/// en: 'Common Expenses'
+	String get commonExpenses => 'Common Expenses';
+
+	/// en: 'Report'
+	String get report => 'Report';
+
+	/// en: 'Site report'
+	String get reportSheetTitle => 'Site report';
+
+	/// en: 'Monthly report (PDF)'
+	String get monthlyReport => 'Monthly report (PDF)';
+
+	/// en: 'Annual report (PDF)'
+	String get annualReport => 'Annual report (PDF)';
+
+	/// en: 'Site Common Expenses'
+	String get siteExpensesTitle => 'Site Common Expenses';
+
+	/// en: 'Add Common Expense'
+	String get addExpenseTitle => 'Add Common Expense';
+
+	/// en: 'Edit Expense'
+	String get editExpenseTitle => 'Edit Expense';
+
+	/// en: 'Add Expense'
+	String get addExpense => 'Add Expense';
+
+	/// en: 'Site expense added'
+	String get expenseCreated => 'Site expense added';
+
+	/// en: 'Site expense updated'
+	String get expenseUpdated => 'Site expense updated';
+
+	/// en: 'Confirmation required'
+	String get confirmExpenseTitle => 'Confirmation required';
+
+	/// en: 'Delete expense?'
+	String get deleteExpenseTitle => 'Delete expense?';
+
+	/// en: 'This site expense will be permanently deleted.'
+	String get deleteExpenseConfirm => 'This site expense will be permanently deleted.';
+
+	/// en: 'Site expense deleted'
+	String get deleteExpenseSuccess => 'Site expense deleted';
+
+	/// en: 'No expenses'
+	String get noExpenses => 'No expenses';
+
+	/// en: 'No common expenses for this month.'
+	String get noExpensesHint => 'No common expenses for this month.';
+
+	/// en: 'Total: {amount}'
+	String get totalExpenses => 'Total: {amount}';
+
+	/// en: 'Per unit: {amount}'
+	String get perUnitShare => 'Per unit: {amount}';
 }
 
 // Path: features.auth
@@ -2750,6 +2913,12 @@ class Translations$features$subscription$en {
 	/// en: 'Unlimited units'
 	String get featureUnlimitedUnits => 'Unlimited units';
 
+	/// en: 'Managed buildings: {used}'
+	String get buildingUsageSummary => 'Managed buildings: {used}';
+
+	/// en: 'Managed buildings: {used} / {limit}'
+	String get buildingUsageWithLimit => 'Managed buildings: {used} / {limit}';
+
 	/// en: 'Dues tracking'
 	String get featureDuesTracking => 'Dues tracking';
 
@@ -3442,6 +3611,8 @@ extension on Translations {
 			'common.buildingAddedSuccess' => 'Building added successfully',
 			'common.createInviteCode' => 'Create Invite Code',
 			'common.whichBuildingForCode' => 'Which building to generate code for?',
+			'common.whichSiteForCode' => 'Which site should the code be for?',
+			'common.inviteStandaloneBuildings' => 'Standalone buildings',
 			'common.whichApartmentForCode' => 'Which apartment to generate code for?',
 			'common.noApartmentsInBuilding' => 'No apartments added to this building yet',
 			'common.activeCodeBadge' => 'Active Code',
@@ -3531,6 +3702,7 @@ extension on Translations {
 			'common.apartmentLabel' => 'APT',
 			'common.turkishLanguage' => 'Türkçe',
 			'common.englishLanguage' => 'English',
+			'common.stepSite' => 'Site',
 			'common.stepBuilding' => 'Building',
 			'common.stepApartment' => 'Apartment',
 			'common.stepCode' => 'Code',
@@ -3628,18 +3800,10 @@ extension on Translations {
 			'common.resetPasswordFailed' => 'Could not reset password. The code may be invalid or expired.',
 			'common.resetPasswordSubmit' => 'Reset Password',
 			'common.backToLogin' => 'Back to login',
-			'validation.emailRequired' => 'Email address cannot be empty',
-			'validation.emailInvalid' => 'Please enter a valid email address',
-			'validation.emailTooLong' => 'Email address is too long',
-			'validation.phoneRequired' => 'Phone number cannot be empty',
-			'validation.phoneInvalid' => 'Phone number must be 10 digits',
-			'validation.passwordRequired' => 'Password cannot be empty',
-			'validation.passwordTooShort' => 'Password must be at least 6 characters',
-			'validation.passwordTooLong' => 'Password is too long',
-			'validation.passwordUppercaseRequired' => 'Password must contain at least 1 uppercase letter',
-			'validation.passwordLowercaseRequired' => 'Password must contain at least 1 lowercase letter',
-			'validation.passwordNumberRequired' => 'Password must contain at least 1 number',
-			'validation.passwordSpecialCharRequired' => 'Password must contain at least 1 special character',
+			'validation.field_required' => 'This field is required',
+			'validation.field_too_short' => 'Value is too short',
+			'validation.field_too_long' => 'Value is too long',
+			'validation.field_invalid' => 'Please enter a valid value',
 			'features.buildings.managerPanel' => 'Manager',
 			'features.buildings.buildingDetail' => 'Building Detail',
 			'features.buildings.addBuilding' => 'Add Building',
@@ -3736,6 +3900,64 @@ extension on Translations {
 			'features.buildings.list.unitsWaiting' => '{count} units waiting',
 			'features.buildings.list.allPaymentsComplete' => 'All payments complete',
 			'features.buildings.list.monthlyDuesShort' => 'Monthly Dues',
+			'features.sites.addSiteTitle' => 'Add New Site',
+			'features.sites.createSite' => 'Create Site',
+			'features.sites.siteName' => 'Site name',
+			'features.sites.siteNameHint' => 'e.g. Sunny Residence',
+			'features.sites.siteCreated' => 'Site created successfully',
+			'features.sites.siteCreateFailed' => 'Could not add site',
+			'features.sites.mySites' => 'My Sites',
+			'features.sites.tabSites' => 'Sites',
+			'features.sites.tabBuildings' => 'Buildings',
+			'features.sites.emptySites' => 'No sites added yet',
+			'features.sites.newSite' => 'New Site',
+			'features.sites.newBuilding' => 'New Building',
+			'features.sites.siteDetailTitle' => 'Site Details',
+			'features.sites.addBlock' => 'Add Block',
+			'features.sites.addBlockTitle' => 'Add Block to Site',
+			'features.sites.createBlock' => 'Create Block',
+			'features.sites.blockCreated' => 'Block added successfully',
+			'features.sites.blockSection' => 'Block details',
+			'features.sites.blockLabel' => 'Block label',
+			'features.sites.blockLabelHint' => 'e.g. Block A',
+			'features.sites.blockNameOptional' => 'Building name (optional)',
+			'features.sites.blockNameHint' => 'Uses block label if left empty',
+			'features.sites.addressExtra' => 'Extra address',
+			'features.sites.addressExtraHint' => 'e.g. Rear entrance, Gate 2',
+			'features.sites.overrideDue' => 'Override site default due amount',
+			'features.sites.overrideDueHint' => 'When off, site due applies',
+			'features.sites.overrideCollection' => 'Override site default IBAN',
+			'features.sites.overrideCollectionHint' => 'When off, site IBAN applies',
+			'features.sites.blocksTitle' => 'Blocks',
+			'features.sites.noBlocks' => 'No blocks added yet',
+			'features.sites.blockApartments' => '{count} units',
+			'features.sites.blockCount' => 'Blocks',
+			'features.sites.apartmentCount' => 'Units',
+			'features.sites.collectedAmount' => 'Collected',
+			'features.sites.expectedAmount' => 'Expected',
+			'features.sites.collectionRate' => 'Collection',
+			'features.sites.collectedExpected' => '{collected} / {expected}',
+			'features.sites.commonExpenses' => 'Common Expenses',
+			'features.sites.report' => 'Report',
+			'features.sites.reportSheetTitle' => 'Site report',
+			'features.sites.monthlyReport' => 'Monthly report (PDF)',
+			'features.sites.annualReport' => 'Annual report (PDF)',
+			'features.sites.siteExpensesTitle' => 'Site Common Expenses',
+			'features.sites.addExpenseTitle' => 'Add Common Expense',
+			'features.sites.editExpenseTitle' => 'Edit Expense',
+			'features.sites.addExpense' => 'Add Expense',
+			'features.sites.expenseCreated' => 'Site expense added',
+			'features.sites.expenseUpdated' => 'Site expense updated',
+			'features.sites.confirmExpenseTitle' => 'Confirmation required',
+			'features.sites.deleteExpenseTitle' => 'Delete expense?',
+			'features.sites.deleteExpenseConfirm' => 'This site expense will be permanently deleted.',
+			'features.sites.deleteExpenseSuccess' => 'Site expense deleted',
+			'features.sites.noExpenses' => 'No expenses',
+			'features.sites.noExpensesHint' => 'No common expenses for this month.',
+			'features.sites.totalExpenses' => 'Total: {amount}',
+			'features.sites.perUnitShare' => 'Per unit: {amount}',
+			_ => null,
+		} ?? switch (path) {
 			'features.auth.register' => 'Register',
 			'features.auth.login' => 'Login',
 			'features.auth.join' => 'Join',
@@ -3787,8 +4009,6 @@ extension on Translations {
 			'features.auth.invalidInviteCodeFormat' => 'Invalid invite code format (Ex: AP3-B12-A9F0)',
 			'features.auth.invalidPhoneFormat' => 'Enter a valid phone number (5XX XXX XX XX)',
 			'features.auth.inviteCodeAndPasswordRequired' => 'Invite code, name and password cannot be empty',
-			_ => null,
-		} ?? switch (path) {
 			'features.auth.invalidPhoneNumber' => 'Enter a valid phone number',
 			'features.auth.areYouManager' => 'Are you a manager? Register',
 			'features.apartments.residentPanel' => 'Resident',
@@ -4155,6 +4375,8 @@ extension on Translations {
 			'features.subscription.cycleMonthly' => 'Renews every month',
 			'features.subscription.cycleAnnual' => 'Renews every year',
 			'features.subscription.featureUnlimitedUnits' => 'Unlimited units',
+			'features.subscription.buildingUsageSummary' => 'Managed buildings: {used}',
+			'features.subscription.buildingUsageWithLimit' => 'Managed buildings: {used} / {limit}',
 			'features.subscription.featureDuesTracking' => 'Dues tracking',
 			'features.subscription.featureAdvancedReports' => 'Advanced reports',
 			'features.subscription.featurePrioritySupport' => 'Priority support',
@@ -4248,6 +4470,8 @@ extension on Translations {
 			'legal.contactBlock' => 'Data controller: Vefa Yazılım\nEmail: store@vefayazilim.com',
 			'legal.updatedLabel' => 'Last updated',
 			'legal.updatedDate' => 'June 2026',
+			_ => null,
+		} ?? switch (path) {
 			'legal.privacyIntro' => 'This policy explains how Vefa Yazılım processes your personal data when you use the AidatPanel mobile app. By continuing to use the app, you acknowledge that you have read this policy.',
 			'legal.privacyS1Title' => '1. Data controller',
 			'legal.privacyS1Body' => 'Your personal data is processed by Vefa Yazılım as the data controller for AidatPanel, in compliance with applicable data protection laws, including Turkish KVKK where applicable. For privacy and KVKK requests: store@vefayazilim.com',

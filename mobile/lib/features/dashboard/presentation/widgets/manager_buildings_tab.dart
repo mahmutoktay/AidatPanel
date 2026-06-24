@@ -178,18 +178,6 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
           child: SizedBox(
             height: AppSizes.buttonHeightPrimary,
             child: ElevatedButton.icon(
-              onPressed: _onAddBuildingPressed,
-              style: _actionButtonStyle(AppButtonStyles.elevatedPrimary()),
-              icon: const Icon(Icons.add_business),
-              label: Text(context.t.common.addBuilding),
-            ),
-          ),
-        ),
-        const SizedBox(width: AppSizes.spacingM),
-        Expanded(
-          child: SizedBox(
-            height: AppSizes.buttonHeightPrimary,
-            child: ElevatedButton.icon(
               onPressed: _onCreateInviteCodePressed,
               style: _actionButtonStyle(AppButtonStyles.elevatedAccent()),
               icon: const Icon(Icons.qr_code_2),
@@ -233,13 +221,13 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
 
   Future<void> _onRefresh() async {
     await Future.wait([
-      ref.read(buildingsStoreProvider.notifier).loadBuildings(),
+      ref.read(standaloneBuildingsStoreProvider.notifier).loadBuildings(),
       ref.refresh(allBuildingsDuesProvider.future),
     ]);
   }
 
   void _onRetryBuildings() {
-    ref.read(buildingsStoreProvider.notifier).loadBuildings();
+    ref.read(standaloneBuildingsStoreProvider.notifier).loadBuildings();
   }
 
   void _onAddBuildingPressed() {

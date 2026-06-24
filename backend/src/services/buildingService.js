@@ -3,6 +3,8 @@ import { buildDueRowsForApartments } from "../utils/dueGeneration.js";
 import { isValidTrIban, normalizeIban } from "../utils/iban.js";
 import { HttpError } from "../utils/httpError.js";
 import { assertManagerOwnsBuilding } from "../utils/access.js";
+import { assertCanAddBuilding } from "./buildingQuotaService.js";
+import { enrichBuildingWithEffective } from "./buildingConfigService.js";
 import {
   resolveListTake,
   resolvePageLimit,
@@ -59,19 +61,48 @@ export const createBuildingService = async ({
   dueDay = 1,
   currency = "TRY",
   managerId,
+  siteId = null,
+  blockLabel = null,
+  addressExtra = null,
   collectionIban,
   collectionAccountTitle,
   paymentReferenceTemplate,
+  inheritFromSite = false,
+  siteDefaults = null,
+  skipQuotaCheck = false,
 }) => {
-  const collectionData = collectionFieldsFromBody({
+  if (!skipQuotaCheck) {
+    await assertCanAddBuilding(managerId);
+  }
+
+  let effectiveDueAmount = dueAmount;
+  let effectiveDueDay = dueDay;
+  let effectiveCurrency = currency;
+  let effectiveCollection = {
     collectionIban,
     collectionAccountTitle,
     paymentReferenceTemplate,
-  });
+  };
+
+  if (inheritFromSite && siteDefaults) {
+    if (effectiveDueAmount == null && siteDefaults.dueAmount != null) {
+      effectiveDueAmount = Number(siteDefaults.dueAmount);
+    }
+    effectiveDueDay = dueDay ?? siteDefaults.dueDay ?? 1;
+    effectiveCurrency = currency ?? siteDefaults.currency ?? "TRY";
+    if (collectionIban === undefined && siteDefaults.collectionIban) {
+      effectiveCollection.collectionIban = siteDefaults.collectionIban;
+      effectiveCollection.collectionAccountTitle =
+        collectionAccountTitle ?? siteDefaults.collectionAccountTitle;
+      effectiveCollection.paymentReferenceTemplate =
+        paymentReferenceTemplate ?? siteDefaults.paymentReferenceTemplate;
+    }
+  }
+
+  const collectionData = collectionFieldsFromBody(effectiveCollection);
 
   return await prisma.$transaction(
     async (tx) => {
-      // 1. Building oluştur
       const building = await tx.building.create({
         data: {
           name,
@@ -79,11 +110,17 @@ export const createBuildingService = async ({
           city,
           totalFloors,
           apartmentsPerFloor,
-          dueAmount,
-          dueDay,
-          currency,
+          dueAmount: effectiveDueAmount ?? null,
+          dueDay: effectiveDueDay,
+          currency: effectiveCurrency,
           managerId,
+          siteId,
+          blockLabel,
+          addressExtra,
           ...collectionData,
+        },
+        include: {
+          site: true,
         },
       });
 
@@ -111,7 +148,7 @@ export const createBuildingService = async ({
       // 3. Aidatlar — bulunulan aydan yıl sonuna (toplu INSERT)
       const dueRows = buildDueRowsForApartments(
         apartments.map((a) => a.id),
-        { dueAmount, dueDay, currency }
+        { dueAmount: effectiveDueAmount, dueDay: effectiveDueDay, currency: effectiveCurrency }
       );
       if (dueRows.length > 0) {
         await tx.due.createMany({ data: dueRows });
@@ -123,6 +160,7 @@ export const createBuildingService = async ({
           apartments: {
             orderBy: { number: "asc" },
           },
+          site: true,
         },
       });
     },
@@ -139,6 +177,14 @@ export const getBuildingsService = async (managerId, filters = {}) => {
   const take = paginated ? pageLimit + 1 : pageLimit;
 
   let where = { managerId };
+
+  if (filters.standalone === true || filters.standalone === "true") {
+    where.siteId = null;
+  }
+
+  if (filters.siteId) {
+    where.siteId = filters.siteId;
+  }
 
   if (filters.search) {
     where.OR = [
@@ -170,16 +216,20 @@ export const getBuildingsService = async (managerId, filters = {}) => {
         where: { resident: { isNot: null } },
         select: { id: true },
       },
+      site: true,
     },
   });
 
-  const mapped = buildings.map(b => {
-    const { apartments, ...rest } = b;
-    return {
-      ...rest,
-      occupiedApartments: apartments.length,
-    };
-  });
+  const mapped = await Promise.all(
+    buildings.map(async (b) => {
+      const { apartments, site, ...rest } = b;
+      const base = {
+        ...rest,
+        occupiedApartments: apartments.length,
+      };
+      return enrichBuildingWithEffective({ ...base, site });
+    })
+  );
 
   return buildListResponse(filters, mapped, (b) => b);
 };
@@ -195,16 +245,18 @@ export const getBuildingByIdService = async (id, managerId) => {
         where: { resident: { isNot: null } },
         select: { id: true },
       },
+      site: true,
     },
   });
 
   if (!building) return null;
 
-  const { apartments, ...rest } = building;
-  return {
+  const { apartments, site, ...rest } = building;
+  return enrichBuildingWithEffective({
     ...rest,
+    site,
     occupiedApartments: apartments.length,
-  };
+  });
 };
 
 export const updateBuildingService = async (id, managerId, data) => {
@@ -237,6 +289,16 @@ export const deleteBuildingService = async (id, managerId) => {
         OR: [
           {
             expense: {
+              buildingId: id,
+            },
+          },
+          {
+            siteExpense: {
+              site: {
+                buildings: { some: { id } },
+              },
+            },
+            apartment: {
               buildingId: id,
             },
           },
@@ -359,9 +421,23 @@ export const getCollectionPresetsService = async (managerId) => {
     orderBy: { updatedAt: "desc" },
   });
 
+  const sites = await prisma.site.findMany({
+    where: {
+      managerId,
+      collectionIban: { not: null },
+    },
+    select: {
+      collectionIban: true,
+      collectionAccountTitle: true,
+      paymentReferenceTemplate: true,
+      updatedAt: true,
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+
   const byKey = new Map();
 
-  for (const b of buildings) {
+  for (const b of [...buildings, ...sites]) {
     const key = [
       b.collectionIban,
       b.collectionAccountTitle ?? "",

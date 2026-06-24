@@ -5,12 +5,16 @@ class SubscriptionModel {
   final String status;
   final String plan;
   final DateTime? currentPeriodEnd;
+  final int? usageBuildings;
+  final int? limitBuildings;
 
   const SubscriptionModel({
     this.id,
     required this.status,
     required this.plan,
     this.currentPeriodEnd,
+    this.usageBuildings,
+    this.limitBuildings,
   });
 
   factory SubscriptionModel.fromJson(Map<String, dynamic> json) {
@@ -20,11 +24,25 @@ class SubscriptionModel {
       end = DateTime.tryParse(endRaw);
     }
 
+    int? usageBuildings;
+    int? limitBuildings;
+    final usage = json['usage'];
+    if (usage is Map<String, dynamic>) {
+      usageBuildings = usage['buildings'] as int?;
+    }
+    final limits = json['limits'];
+    if (limits is Map<String, dynamic>) {
+      final raw = limits['buildings'];
+      limitBuildings = raw is int ? raw : null;
+    }
+
     return SubscriptionModel(
       id: json['id'] as String?,
       status: (json['status'] as String? ?? '').toUpperCase(),
       plan: json['plan'] as String? ?? '',
       currentPeriodEnd: end,
+      usageBuildings: usageBuildings,
+      limitBuildings: limitBuildings,
     );
   }
 
@@ -52,6 +70,10 @@ class SubscriptionModel {
       status: mapped,
       plan: plan,
       currentPeriodEnd: currentPeriodEnd,
+      usage: usageBuildings != null
+          ? SubscriptionUsageEntity(buildings: usageBuildings!)
+          : null,
+      limits: SubscriptionLimitsEntity(buildings: limitBuildings),
     );
   }
 }

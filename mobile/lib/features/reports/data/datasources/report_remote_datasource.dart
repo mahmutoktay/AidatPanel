@@ -28,15 +28,18 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
       query['month'] = params.month;
     }
 
+    final endpoint = params.isSiteReport
+        ? ApiConstants.siteReports(params.siteId!)
+        : ApiConstants.buildingReports(params.buildingId);
+
     if (kDebugMode) {
       debugPrint(
-        '[reports] GET ${ApiConstants.buildingReports(params.buildingId)} '
-        'base=${ApiConstants.baseUrl} query=$query',
+        '[reports] GET $endpoint base=${ApiConstants.baseUrl} query=$query',
       );
     }
 
     final response = await _dioClient.get<List<int>>(
-      ApiConstants.buildingReports(params.buildingId),
+      endpoint,
       queryParameters: query,
       options: Options(
         responseType: ResponseType.bytes,
@@ -67,16 +70,18 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
   }
 
   String _buildFileName(ReportDownloadParams params) {
-    final slug = params.buildingName
+    final label = params.isSiteReport ? params.siteName : params.buildingName;
+    final slug = (label ?? '')
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
         .replaceAll(RegExp(r'^-+|-+$'), '');
-    final safeSlug = slug.isEmpty ? 'bina' : slug;
+    final safeSlug = slug.isEmpty ? (params.isSiteReport ? 'site' : 'bina') : slug;
+    final prefix = params.isSiteReport ? 'site-rapor' : 'rapor';
     if (params.type == ReportType.annual) {
-      return 'rapor-yillik-$safeSlug-${params.year}.pdf';
+      return '$prefix-yillik-$safeSlug-${params.year}.pdf';
     }
     final m = (params.month ?? 1).toString().padLeft(2, '0');
-    return 'rapor-$safeSlug-${params.year}-$m.pdf';
+    return '$prefix-$safeSlug-${params.year}-$m.pdf';
   }
 
   String? _tryParseJsonErrorBytes(List<int> bytes) {

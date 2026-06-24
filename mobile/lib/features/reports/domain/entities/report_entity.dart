@@ -2,8 +2,10 @@ enum ReportType { monthly, annual }
 
 class ReportDownloadParams {
   const ReportDownloadParams({
-    required this.buildingId,
-    required this.buildingName,
+    this.buildingId = '',
+    this.buildingName = '',
+    this.siteId,
+    this.siteName,
     required this.type,
     required this.year,
     this.month,
@@ -11,9 +13,13 @@ class ReportDownloadParams {
 
   final String buildingId;
   final String buildingName;
+  final String? siteId;
+  final String? siteName;
   final ReportType type;
   final int year;
   final int? month;
+
+  bool get isSiteReport => siteId != null && siteId!.isNotEmpty;
 }
 
 class ReportFileResult {

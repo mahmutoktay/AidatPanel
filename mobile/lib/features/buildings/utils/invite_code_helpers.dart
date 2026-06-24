@@ -57,11 +57,39 @@ class InviteCodeHelpers {
     required ApartmentEntity apartment,
     required DateTime expiresAt,
   }) {
-    return 'AidatPanel davet kodu\n\n'
-        'Bina: ${building.name}\n'
-        'Daire: ${formatApartmentLabel(apartment.apartmentNumber)}\n'
-        'Kod: $code\n\n'
-        'Son kullanma: ${formatDate(expiresAt)} (7 gün geçerli)\n\n'
-        'AidatPanel uygulamasını indirip kayıt olurken bu kodu kullanabilirsiniz.';
+    final buffer = StringBuffer('AidatPanel davet kodu\n\n');
+    final siteName = building.siteName?.trim();
+    if (siteName != null && siteName.isNotEmpty) {
+      buffer.writeln('Site: $siteName');
+    }
+    final blockLabel = building.blockLabel?.trim();
+    if (blockLabel != null && blockLabel.isNotEmpty) {
+      buffer.writeln('Blok: $blockLabel');
+    }
+    buffer
+      ..writeln('Bina: ${building.displayName}')
+      ..writeln('Daire: ${formatApartmentLabel(apartment.apartmentNumber)}')
+      ..writeln('Kod: $code\n')
+      ..writeln('Son kullanma: ${formatDate(expiresAt)} (7 gün geçerli)\n')
+      ..write(
+        'AidatPanel uygulamasını indirip kayıt olurken bu kodu kullanabilirsiniz.',
+      );
+    return buffer.toString();
+  }
+
+  /// Sonuç ekranı alt başlığı: site + blok + daire.
+  static String resultSubtitle({
+    required BuildingEntity building,
+    required String apartmentLabel,
+  }) {
+    final siteName = building.siteName?.trim();
+    if (siteName != null && siteName.isNotEmpty) {
+      final block = building.blockLabel?.trim();
+      if (block != null && block.isNotEmpty) {
+        return '$siteName • $block • $apartmentLabel';
+      }
+      return '$siteName • ${building.displayName} • $apartmentLabel';
+    }
+    return '${building.displayName} • $apartmentLabel';
   }
 }
