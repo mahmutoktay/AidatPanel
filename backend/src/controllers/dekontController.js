@@ -160,7 +160,11 @@ export const getDekontFile = async (req, res, next) => {
       dekontLogError("GET /dekonts/:id/file stream", err, {
         dekontId: req.params.id,
       });
-      next(err);
+      if (res.headersSent) {
+        res.end();
+      } else {
+        next(err);
+      }
     });
     dekontLog("GET /dekonts/:id/file stream-start", {
       dekontId: dekont.id,

@@ -507,8 +507,6 @@ export async function uploadExpenseProofsService(expenseId, managerId, files) {
       parsedAmount: null,
       ocrReceiptsJson: null,
       receiptUrl: savedPaths.length > 0 ? savedPaths[0] : null,
-      amount: null,
-      perUnitAmount: null,
     };
 
     const updatedExpense = await prisma.expense.update({

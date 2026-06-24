@@ -92,7 +92,7 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
         collectionAccountTitle: collectionAccountTitle,
         paymentReferenceTemplate: paymentReferenceTemplate,
       );
-      final current = state.value ?? [];
+      final current = state.hasValue ? (state.value ?? <BuildingEntity>[]) : <BuildingEntity>[];
       state = AsyncValue.data([...current, building]);
       return building.id;
     } catch (e, st) {
@@ -108,7 +108,7 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
   /// rethrow ediyoruz, başarı durumunda listeyi yeniden yazıyoruz.
   Future<void> removeBuilding(String buildingId) async {
     await _repository.deleteBuilding(buildingId);
-    final current = state.value ?? [];
+    final List<BuildingEntity> current = state.hasValue ? (state.value ?? <BuildingEntity>[]) : <BuildingEntity>[];
     state = AsyncValue.data(
       current.where((b) => b.id != buildingId).toList(),
     );
@@ -128,7 +128,7 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
       address: address,
       city: city,
     );
-    final current = state.value ?? [];
+    final current = state.hasValue ? (state.value ?? <BuildingEntity>[]) : <BuildingEntity>[];
     state = AsyncValue.data(
       current.map((b) => b.id == id ? updated : b).toList(),
     );
@@ -146,7 +146,7 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
       collectionAccountTitle: collectionAccountTitle,
       paymentReferenceTemplate: paymentReferenceTemplate,
     );
-    final current = state.value ?? [];
+    final current = state.hasValue ? (state.value ?? <BuildingEntity>[]) : <BuildingEntity>[];
     state = AsyncValue.data(
       current.map((b) => b.id == id ? updated : b).toList(),
     );

@@ -6,27 +6,35 @@ const DEFAULT_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const STARTUP_DELAY_MS = 30_000;
 
 let timer = null;
+let isWorking = false;
 
 export async function runDueMaintenanceJob() {
-  const generated = await autoGenerateAllBuildingDuesService();
-  const overdue = await markOverdueDuesService();
+  if (isWorking) return { generated: { totalCreated: 0, buildingsProcessed: 0 }, overdue: { transitioned: 0, refreshed: 0 } };
+  isWorking = true;
 
-  if (generated.totalCreated > 0) {
-    logger.info({
-      type: "due_job_generated",
-      totalCreated: generated.totalCreated,
-      buildingsProcessed: generated.buildingsProcessed,
-    });
-  }
-  if (overdue.transitioned > 0 || overdue.refreshed > 0) {
-    logger.info({
-      type: "due_job_overdue",
-      transitioned: overdue.transitioned,
-      refreshed: overdue.refreshed,
-    });
-  }
+  try {
+    const generated = await autoGenerateAllBuildingDuesService();
+    const overdue = await markOverdueDuesService();
 
-  return { generated, overdue };
+    if (generated.totalCreated > 0) {
+      logger.info({
+        type: "due_job_generated",
+        totalCreated: generated.totalCreated,
+        buildingsProcessed: generated.buildingsProcessed,
+      });
+    }
+    if (overdue.transitioned > 0 || overdue.refreshed > 0) {
+      logger.info({
+        type: "due_job_overdue",
+        transitioned: overdue.transitioned,
+        refreshed: overdue.refreshed,
+      });
+    }
+
+    return { generated, overdue };
+  } finally {
+    isWorking = false;
+  }
 }
 
 /** @deprecated runDueMaintenanceJob kullanın */

@@ -95,14 +95,17 @@ class TokenRefreshService {
         accessToken: accessToken,
         refreshToken: rotatedRefresh,
       );
-    } on DioException {
-      await _secureStorage.clearAuth();
-      _onSessionExpiredGetter?.call()?.call();
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+        rethrow;
+      }
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
+        await _secureStorage.clearAuth();
+        _onSessionExpiredGetter?.call()?.call();
+      }
       return null;
-    } catch (_) {
-      await _secureStorage.clearAuth();
-      _onSessionExpiredGetter?.call()?.call();
-      return null;
+    } catch (e) {
+      rethrow;
     }
   }
 }

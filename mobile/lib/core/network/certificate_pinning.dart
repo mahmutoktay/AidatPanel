@@ -11,22 +11,34 @@ class CertificatePinning {
     'CERT_PINNING',
     defaultValue: true,
   );
-  static const String _defaultPin = String.fromEnvironment(
-    'CERT_PIN_SHA256',
-    defaultValue: 'sbmhsbTKB9yczL2ZifgL7++jUOlOINTSG+pcBLX3xmE=',
-  );
+  static const List<String> _defaultPins = [
+    String.fromEnvironment(
+      'CERT_PIN_SHA256',
+      defaultValue: 'sbmhsbTKB9yczL2ZifgL7++jUOlOINTSG+pcBLX3xmE=',
+    ),
+    String.fromEnvironment(
+      'CERT_PIN_SHA256_BACKUP',
+      defaultValue: 'Y9mvm0exBk1JoQ57fRE0cgQiacS71fONvF9f6U=', // placeholder
+    )
+  ];
 
   static bool shouldEnable({
     required String baseUrl,
     bool enabled = _defaultEnabled,
-    String pinSha256 = _defaultPin,
+    List<String> pinSha256s = _defaultPins,
   }) {
     if (!enabled || kIsWeb) return false;
-    final pin = normalizePin(pinSha256);
-    if (pin.isEmpty) return false;
+    final validPins = pinSha256s.map(normalizePin).where((p) => p.isNotEmpty).toList();
+    if (validPins.isEmpty) return false;
 
     final uri = Uri.tryParse(baseUrl);
-    if (uri == null || uri.scheme != 'https') return false;
+    if (uri == null) return false;
+    
+    if (uri.scheme != 'https') {
+      if (_isLocalHost(uri.host)) return false;
+      throw Exception('Yalnızca HTTPS kabul edilir');
+    }
+    
     if (_isLocalHost(uri.host)) return false;
 
     return true;
@@ -38,39 +50,44 @@ class CertificatePinning {
 
   static bool matchesCertificateSha256(
     X509Certificate certificate,
-    String expectedPin,
+    List<String> expectedPins,
   ) {
-    final normalizedExpected = normalizePin(expectedPin);
-    if (normalizedExpected.isEmpty) return false;
     final digest = sha256.convert(certificate.der).bytes;
     final certPin = base64.encode(digest);
-    return certPin == normalizedExpected;
+    
+    for (final expectedPin in expectedPins) {
+      final normalizedExpected = normalizePin(expectedPin);
+      if (normalizedExpected.isNotEmpty && certPin == normalizedExpected) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static void configureDio(
     Dio dio, {
     required String baseUrl,
     bool enabled = _defaultEnabled,
-    String pinSha256 = _defaultPin,
+    List<String> pinSha256s = _defaultPins,
   }) {
     if (!shouldEnable(
       baseUrl: baseUrl,
       enabled: enabled,
-      pinSha256: pinSha256,
+      pinSha256s: pinSha256s,
     )) {
       return;
     }
 
     final uri = Uri.parse(baseUrl);
-    final expectedPin = normalizePin(pinSha256);
     final adapter = dio.httpClientAdapter;
     if (adapter is! IOHttpClientAdapter) return;
 
     adapter.createHttpClient = () {
-      final client = HttpClient();
+      final context = SecurityContext(withTrustedRoots: false);
+      final client = HttpClient(context: context);
       client.badCertificateCallback = (cert, host, _) {
         if (host != uri.host) return false;
-        return matchesCertificateSha256(cert, expectedPin);
+        return matchesCertificateSha256(cert, pinSha256s);
       };
       return client;
     };

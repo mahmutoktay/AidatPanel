@@ -65,10 +65,10 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
       limit: paginated ? AppConstants.pageSize : null,
       paginated: paginated,
       extra: {
-        'month': ?month,
-        'year': ?year,
-        'status': ?status,
-      },
+        'month': month,
+        'year': year,
+        'status': status,
+      }..removeWhere((_, value) => value == null),
     );
   }
 
@@ -140,10 +140,10 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
       ApiConstants.buildingDueAmount(buildingId),
       data: {
         'dueAmount': dueAmount,
-        'dueDay': ?dueDay,
-        if (currency != null && currency.isNotEmpty) 'currency': currency,
+        'dueDay': dueDay,
+        'currency': currency,
         'affectCurrent': affectCurrent,
-      },
+      }..removeWhere((key, value) => value == null || (key == 'currency' && value is String && value.isEmpty)),
     );
   }
 

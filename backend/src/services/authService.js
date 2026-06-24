@@ -172,10 +172,13 @@ export async function refreshAccessTokenService(refreshToken, body = {}) {
     let finalSessionId = tokenSid;
 
     if (finalSessionId) {
-      const session = await tx.userSession.findFirst({
-        where: { id: finalSessionId, revokedAt: null },
-        select: { id: true, lastTokenHash: true },
-      });
+      // Row-Level Lock için raw SQL
+      const sessions = await tx.$queryRawUnsafe(
+        'SELECT id, "lastTokenHash" FROM "UserSession" WHERE id = $1 AND "revokedAt" IS NULL FOR UPDATE',
+        finalSessionId
+      );
+      const session = sessions[0];
+
       if (!session) {
         throw new HttpError(401, "Oturum sonlandırıldı. Lütfen tekrar giriş yapın.");
       }
