@@ -392,3 +392,9 @@ Tüm görevler `FAZ_DURUMU.md` içinde `[ ]` / `[x]` olarak işaretlenir. AI aja
 - Aktif fazın `[ ]` olan görevlerini `[x]` yapar.
 - Tamamlanan görevden sonra Furkan'dan onay alır (yanıt formatı: `ONAY: Furkan ✅ (YYYY-MM-DD)`).
 - İleriki fazların dosyalarına DOKUNMAZ.
+
+### 6.11 Commit Mesajı Dili (ZORUNLU)
+
+- Tüm commit mesajları **Türkçe** ve anlaşılır olmalıdır.
+- Teknik terimler İngilizce kalabilir ancak açıklayıcı cümleler Türkçe olmalıdır.
+- Örnek: `feat: aidat listesi filtresi eklendi` ✅ | `feat: add due filter` ❌
