@@ -2609,6 +2609,15 @@ class Translations$features$profile$en {
 	/// en: 'Cannot be edited here'
 	String get readOnlySection => 'Cannot be edited here';
 
+	/// en: 'At least one contact channel (Email or Phone) must be registered.'
+	String get contactRequired => 'At least one contact channel (Email or Phone) must be registered.';
+
+	/// en: 'Security Verification'
+	String get securityVerificationTitle => 'Security Verification';
+
+	/// en: 'You must enter your current password to change your email or phone number.'
+	String get securityVerificationMessage => 'You must enter your current password to change your email or phone number.';
+
 	/// en: 'Only name and phone can be updated. Other details are shown on the profile screen above.'
 	String get editSheetHint => 'Only name and phone can be updated. Other details are shown on the profile screen above.';
 
@@ -4102,6 +4111,9 @@ extension on Translations {
 			'features.profile.profileUpdateFailed' => 'Could not update profile. Please try again.',
 			'features.profile.profileLoadFailed' => 'Could not load profile.',
 			'features.profile.readOnlySection' => 'Cannot be edited here',
+			'features.profile.contactRequired' => 'At least one contact channel (Email or Phone) must be registered.',
+			'features.profile.securityVerificationTitle' => 'Security Verification',
+			'features.profile.securityVerificationMessage' => 'You must enter your current password to change your email or phone number.',
 			'features.profile.editSheetHint' => 'Only name and phone can be updated. Other details are shown on the profile screen above.',
 			'features.profile.photoSaved' => 'Profile photo saved for this account.',
 			'features.profile.photoRemoved' => 'Profile photo removed.',

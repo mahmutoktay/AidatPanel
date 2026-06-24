@@ -99,7 +99,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
       ref
           .read(toastProvider.notifier)
           .show(
-            'En az bir iletişim kanalı (E-posta veya Telefon) kayıtlı olmalıdır.',
+            t.features.profile.contactRequired,
             type: ToastType.error,
           );
       return;
@@ -152,12 +152,12 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
           backgroundColor: ProfileSettingsUi.background,
-          title: Text('Güvenlik Doğrulaması', style: ProfileSettingsUi.title),
+          title: Text(t.features.profile.securityVerificationTitle, style: ProfileSettingsUi.title),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'E-posta veya telefon numaranızı değiştirmek için mevcut şifrenizi girmelisiniz.',
+                t.features.profile.securityVerificationMessage,
                 style: ProfileSettingsUi.fieldValue,
               ),
               const SizedBox(height: 16),
@@ -384,7 +384,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                         final key = InputValidators.validateEmail(raw);
                         if (key == 'email_required') return null;
                         if (key == null) return null;
-                        return 'Geçerli bir e-posta adresi giriniz';
+                        return t.validation.emailInvalid;
                       },
                       showClearSuffix: true,
                       onChanged: (_) => setState(() {}),

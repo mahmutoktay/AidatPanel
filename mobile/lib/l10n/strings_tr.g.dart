@@ -996,6 +996,9 @@ class _Translations$features$profile$tr implements Translations$features$profile
 	@override String get profileUpdateFailed => 'Profil güncellenemedi. Lütfen tekrar deneyin.';
 	@override String get profileLoadFailed => 'Profil bilgileri yüklenemedi.';
 	@override String get readOnlySection => 'Buradan düzenlenemez';
+	@override String get contactRequired => 'En az bir iletişim kanalı (E-posta veya Telefon) kayıtlı olmalıdır.';
+	@override String get securityVerificationTitle => 'Güvenlik Doğrulaması';
+	@override String get securityVerificationMessage => 'E-posta veya telefon numaranızı değiştirmek için mevcut şifrenizi girmelisiniz.';
 	@override String get editSheetHint => 'Yalnızca ad ve telefon güncellenir. Diğer bilgiler yukarıdaki profil ekranında görünür.';
 	@override String get photoSaved => 'Profil fotoğrafı bu hesap için kaydedildi.';
 	@override String get photoRemoved => 'Profil fotoğrafı kaldırıldı.';
@@ -2094,6 +2097,9 @@ extension on TranslationsTr {
 			'features.profile.profileUpdateFailed' => 'Profil güncellenemedi. Lütfen tekrar deneyin.',
 			'features.profile.profileLoadFailed' => 'Profil bilgileri yüklenemedi.',
 			'features.profile.readOnlySection' => 'Buradan düzenlenemez',
+			'features.profile.contactRequired' => 'En az bir iletişim kanalı (E-posta veya Telefon) kayıtlı olmalıdır.',
+			'features.profile.securityVerificationTitle' => 'Güvenlik Doğrulaması',
+			'features.profile.securityVerificationMessage' => 'E-posta veya telefon numaranızı değiştirmek için mevcut şifrenizi girmelisiniz.',
 			'features.profile.editSheetHint' => 'Yalnızca ad ve telefon güncellenir. Diğer bilgiler yukarıdaki profil ekranında görünür.',
 			'features.profile.photoSaved' => 'Profil fotoğrafı bu hesap için kaydedildi.',
 			'features.profile.photoRemoved' => 'Profil fotoğrafı kaldırıldı.',
