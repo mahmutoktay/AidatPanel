@@ -136,6 +136,7 @@ flutter:
   assets:
     - assets/brand/app_logo.png
     - assets/profile/default_avatar.png
+    - assets/data/tr_locations.json
 
 flutter_launcher_icons:
   android: true

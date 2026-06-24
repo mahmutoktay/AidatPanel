@@ -64,13 +64,33 @@ class InviteCodeHelpers {
     required DateTime expiresAt,
   }) {
     final link = buildInviteLink(code);
+    final siteLine = building.siteName != null && building.siteName!.isNotEmpty
+        ? 'Site: ${building.siteName}\n'
+        : '';
+    final blockLine =
+        building.blockLabel != null && building.blockLabel!.isNotEmpty
+            ? 'Blok: ${building.blockLabel}\n'
+            : '';
     return 'AidatPanel davet\n\n'
+        '$siteLine'
         'Bina: ${building.name}\n'
+        '$blockLine'
         'Daire: ${formatApartmentLabel(apartment.apartmentNumber)}\n\n'
         'Katılmak için bağlantıya dokunun:\n$link\n\n'
         'Davet kodu: $code\n'
         'Son kullanma: ${formatDate(expiresAt)} (7 gün geçerli)\n\n'
         'Uygulama yüklü değilse bağlantıdan indirebilir, kurulumdan sonra '
         'aynı bağlantıya tekrar dokunarak kayıt olabilirsiniz.';
+  }
+
+  static String buildingListSubtitle(BuildingEntity building) {
+    if (building.siteName != null && building.siteName!.isNotEmpty) {
+      final block =
+          building.blockLabel != null && building.blockLabel!.isNotEmpty
+              ? ' · ${building.blockLabel}'
+              : '';
+      return '${building.siteName}$block · ${building.displayAddress}';
+    }
+    return building.displayAddress;
   }
 }

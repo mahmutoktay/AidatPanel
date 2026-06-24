@@ -300,7 +300,7 @@ class _BuildingPickerStep extends StatelessWidget {
           icon: Icons.apartment_rounded,
           iconColor: AppColors.primary,
           title: b.name,
-          subtitle: b.displayAddress,
+          subtitle: InviteCodeHelpers.buildingListSubtitle(b),
           onTap: () => onPick(b),
         );
       },
@@ -449,6 +449,18 @@ class _InviteBuildingBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (building.siteName != null &&
+                    building.siteName!.isNotEmpty) ...[
+                  Text(
+                    building.siteName!,
+                    style: ProfileSettingsUi.fieldLabel.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                ],
                 Text(
                   building.name,
                   style: ProfileSettingsUi.fieldValue.copyWith(
@@ -458,10 +470,10 @@ class _InviteBuildingBanner extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (building.displayAddress.isNotEmpty) ...[
+                if (InviteCodeHelpers.buildingListSubtitle(building).isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
-                    building.displayAddress,
+                    InviteCodeHelpers.buildingListSubtitle(building),
                     style: ProfileSettingsUi.fieldLabel.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,

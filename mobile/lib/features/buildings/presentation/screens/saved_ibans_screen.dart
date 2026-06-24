@@ -297,11 +297,24 @@ class _SavedIbanListTile extends StatelessWidget {
     );
     final details = CollectionPresetDisplay.detailLines(context, item.preset);
     final buildingLabel = item.buildings.isEmpty
-        ? t.savedIbansNoBuildingMatch
+        ? ''
         : t.savedIbansBuildingNames.replaceAll(
             '{names}',
             item.buildings.map((b) => b.name).join(', '),
           );
+    final siteLabel = item.sites.isEmpty
+        ? ''
+        : t.savedIbansSiteNames.replaceAll(
+            '{names}',
+            item.sites.map((s) => s.name).join(', '),
+          );
+    final usageLabel = [
+      if (siteLabel.isNotEmpty) siteLabel,
+      if (buildingLabel.isNotEmpty) buildingLabel,
+    ].join('\n');
+    final buildingLabelFallback = usageLabel.isEmpty
+        ? t.savedIbansNoBuildingMatch
+        : usageLabel;
 
     final cardRadius = BorderRadius.circular(DashboardScreenStyle.cardRadius);
     final cardDecoration = BoxDecoration(
@@ -356,7 +369,7 @@ class _SavedIbanListTile extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
-                      child: Text(buildingLabel, style: detailStyle),
+                      child: Text(buildingLabelFallback, style: detailStyle),
                     ),
                   ],
                 ),

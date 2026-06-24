@@ -4,6 +4,7 @@ import '../../auth/presentation/providers/auth_provider.dart';
 import '../../../core/utils/user_error_message.dart';
 import '../domain/entities/site_entity.dart';
 import '../../buildings/domain/entities/building_entity.dart';
+import 'datasources/site_expense_remote_datasource.dart';
 import 'datasources/site_remote_datasource.dart';
 import 'repositories/site_repository.dart';
 import 'repositories/site_repository_impl.dart';
@@ -12,9 +13,17 @@ final siteRemoteDataSourceProvider = Provider<SiteRemoteDataSource>((ref) {
   return SiteRemoteDataSourceImpl(dioClient: ref.watch(dioClientProvider));
 });
 
+final siteExpenseRemoteDataSourceProvider =
+    Provider<SiteExpenseRemoteDataSource>((ref) {
+  return SiteExpenseRemoteDataSourceImpl(
+    dioClient: ref.watch(dioClientProvider),
+  );
+});
+
 final siteRepositoryProvider = Provider<SiteRepository>((ref) {
   return SiteRepositoryImpl(
     remoteDataSource: ref.watch(siteRemoteDataSourceProvider),
+    expenseDataSource: ref.watch(siteExpenseRemoteDataSourceProvider),
   );
 });
 

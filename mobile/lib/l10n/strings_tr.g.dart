@@ -519,7 +519,7 @@ class _Translations$common$api$tr implements Translations$common$api$en {
 	@override String get recordConflict => 'Bu kayıt zaten mevcut.';
 	@override String get relatedRecordMissing => 'İşlem için gerekli bağlı kayıt bulunamadı.';
 	@override String get buildingAccessDenied => 'Bina bulunamadı veya bu binaya erişim yetkiniz yok.';
-	@override String get invalidIban => 'IBAN geçersiz. TR ile başlayan 26 haneli IBAN girin.';
+	@override String get invalidIban => 'IBAN geçersiz. TR ile başlayan 26 karakterli ve kontrol hanesi doğru bir IBAN girin.';
 	@override String get apartmentNoResident => 'Bu dairede çıkarılacak sakin yok.';
 	@override String get ticketClosedNote => 'Kapalı veya sonuçlanmış talebe not eklenemez.';
 	@override String get ticketClosedStatus => 'Kapatılmış talebin durumu değiştirilemez.';
@@ -615,6 +615,21 @@ class _Translations$features$sites$tr implements Translations$features$sites$en 
 	@override String get blockCount => 'blok';
 	@override String get addBlock => 'Blok Ekle';
 	@override String get emptySites => 'Henüz site eklenmedi. Sağ alttan yeni site ekleyebilirsiniz.';
+	@override String get siteExpensesTitle => 'Site Giderleri';
+	@override String get siteExpensesEmpty => 'Bu dönemde site ortak gideri yok.';
+	@override String get addSiteExpense => 'Site Gideri Ekle';
+	@override String get downloadSiteReport => 'Site Raporu';
+	@override String get perUnitShare => 'Daire başı: {amount} ₺';
+	@override String get apartmentCountLabel => '{count} daire';
+	@override String get blockLabel => 'Blok etiketi';
+	@override String get blockLabelHint => 'Örn: A Blok';
+	@override String get overrideDues => 'Aidat ayarları';
+	@override String get overrideDuesSwitch => 'Blok için özel aidat kullan';
+	@override String get overrideDuesHint => 'Kapalıyken site varsayılan aidatı uygulanır.';
+	@override String get overrideDuesHintWithDefault => 'Site varsayılanı: {amount} ₺/ay. Özel tutar için açın.';
+	@override String get overrideCollection => 'Tahsilat bilgileri';
+	@override String get overrideCollectionSwitch => 'Blok için özel IBAN kullan';
+	@override String get overrideCollectionHint => 'Kapalıyken site tahsilat bilgisi uygulanır.';
 }
 
 // Path: features.auth
@@ -1122,6 +1137,9 @@ class _Translations$features$subscription$tr implements Translations$features$su
 	@override String get purchaseMonthlyCta => 'Aylık aboneliği satın al';
 	@override String get purchaseAnnualCta => 'Yıllık aboneliği satın al';
 	@override String get kdvNote => 'Fiyatlara KDV dahil değildir · İstediğin zaman iptal edebilirsin';
+	@override String get managementUnitsTitle => 'Yönetim birimi kullanımı';
+	@override String get managementUnitsUsage => '{used} / {limit} yönetim birimi';
+	@override String get managementUnitsHint => 'Tekil binalar ve siteler kotayı tüketir; site içi bloklar tüketmez.';
 	@override String get guestUser => 'Kullanıcı';
 	@override String get priceUnavailable => '—';
 	@override String get loadingPlans => 'Planlar yükleniyor…';
@@ -1244,7 +1262,7 @@ class _Translations$features$buildings$collection$tr implements Translations$fea
 	@override String get detailUsedInBuildings => '{count} binada kullanılıyor';
 	@override String get ibanLabel => 'IBAN';
 	@override String get ibanHint => 'TR33 0006 1005 1978 6457 8413 26';
-	@override String get ibanInvalid => 'Geçerli bir Türkiye IBAN girin (TR + 24 rakam)';
+	@override String get ibanInvalid => 'Geçerli bir Türkiye IBAN girin. TR ile başlayan 26 karakter ve doğru kontrol hanesi gerekir.';
 	@override String get ibanRequiredIfOtherFilled => 'Alıcı veya açıklama girdiniz; geçerli IBAN girin';
 	@override String get accountTitleLabel => 'Hesap sahibi / alıcı unvanı';
 	@override String get accountTitleHint => 'Örn: Site Yönetimi';
@@ -1260,6 +1278,7 @@ class _Translations$features$buildings$collection$tr implements Translations$fea
 	@override String get savedIbansEmpty => 'Henüz kayıtlı IBAN yok. Bina eklerken tahsilat bilgisi tanımlayabilirsiniz.';
 	@override String get savedIbansNoBuildingMatch => 'Bu sete bağlı bina bulunamadı';
 	@override String get savedIbansBuildingNames => 'Binalar: {names}';
+	@override String get savedIbansSiteNames => 'Siteler: {names}';
 	@override String get savedIbansUpdateSuccess => '{count} bina için tahsilat bilgisi güncellendi';
 	@override String get savedIbansUpdateHint => 'Güncellenecek binalar: {names}';
 	@override String get editSavedIbanTitle => 'IBAN düzenle';
@@ -1391,7 +1410,7 @@ extension on TranslationsTr {
 			'common.api.recordConflict' => 'Bu kayıt zaten mevcut.',
 			'common.api.relatedRecordMissing' => 'İşlem için gerekli bağlı kayıt bulunamadı.',
 			'common.api.buildingAccessDenied' => 'Bina bulunamadı veya bu binaya erişim yetkiniz yok.',
-			'common.api.invalidIban' => 'IBAN geçersiz. TR ile başlayan 26 haneli IBAN girin.',
+			'common.api.invalidIban' => 'IBAN geçersiz. TR ile başlayan 26 karakterli ve kontrol hanesi doğru bir IBAN girin.',
 			'common.api.apartmentNoResident' => 'Bu dairede çıkarılacak sakin yok.',
 			'common.api.ticketClosedNote' => 'Kapalı veya sonuçlanmış talebe not eklenemez.',
 			'common.api.ticketClosedStatus' => 'Kapatılmış talebin durumu değiştirilemez.',
@@ -1753,7 +1772,7 @@ extension on TranslationsTr {
 			'features.buildings.collection.detailUsedInBuildings' => '{count} binada kullanılıyor',
 			'features.buildings.collection.ibanLabel' => 'IBAN',
 			'features.buildings.collection.ibanHint' => 'TR33 0006 1005 1978 6457 8413 26',
-			'features.buildings.collection.ibanInvalid' => 'Geçerli bir Türkiye IBAN girin (TR + 24 rakam)',
+			'features.buildings.collection.ibanInvalid' => 'Geçerli bir Türkiye IBAN girin. TR ile başlayan 26 karakter ve doğru kontrol hanesi gerekir.',
 			'features.buildings.collection.ibanRequiredIfOtherFilled' => 'Alıcı veya açıklama girdiniz; geçerli IBAN girin',
 			'features.buildings.collection.accountTitleLabel' => 'Hesap sahibi / alıcı unvanı',
 			'features.buildings.collection.accountTitleHint' => 'Örn: Site Yönetimi',
@@ -1769,6 +1788,7 @@ extension on TranslationsTr {
 			'features.buildings.collection.savedIbansEmpty' => 'Henüz kayıtlı IBAN yok. Bina eklerken tahsilat bilgisi tanımlayabilirsiniz.',
 			'features.buildings.collection.savedIbansNoBuildingMatch' => 'Bu sete bağlı bina bulunamadı',
 			'features.buildings.collection.savedIbansBuildingNames' => 'Binalar: {names}',
+			'features.buildings.collection.savedIbansSiteNames' => 'Siteler: {names}',
 			'features.buildings.collection.savedIbansUpdateSuccess' => '{count} bina için tahsilat bilgisi güncellendi',
 			'features.buildings.collection.savedIbansUpdateHint' => 'Güncellenecek binalar: {names}',
 			'features.buildings.collection.editSavedIbanTitle' => 'IBAN düzenle',
@@ -1819,14 +1839,29 @@ extension on TranslationsTr {
 			'features.sites.blockCount' => 'blok',
 			'features.sites.addBlock' => 'Blok Ekle',
 			'features.sites.emptySites' => 'Henüz site eklenmedi. Sağ alttan yeni site ekleyebilirsiniz.',
+			'features.sites.siteExpensesTitle' => 'Site Giderleri',
+			'features.sites.siteExpensesEmpty' => 'Bu dönemde site ortak gideri yok.',
+			'features.sites.addSiteExpense' => 'Site Gideri Ekle',
+			'features.sites.downloadSiteReport' => 'Site Raporu',
+			'features.sites.perUnitShare' => 'Daire başı: {amount} ₺',
+			_ => null,
+		} ?? switch (path) {
+			'features.sites.apartmentCountLabel' => '{count} daire',
+			'features.sites.blockLabel' => 'Blok etiketi',
+			'features.sites.blockLabelHint' => 'Örn: A Blok',
+			'features.sites.overrideDues' => 'Aidat ayarları',
+			'features.sites.overrideDuesSwitch' => 'Blok için özel aidat kullan',
+			'features.sites.overrideDuesHint' => 'Kapalıyken site varsayılan aidatı uygulanır.',
+			'features.sites.overrideDuesHintWithDefault' => 'Site varsayılanı: {amount} ₺/ay. Özel tutar için açın.',
+			'features.sites.overrideCollection' => 'Tahsilat bilgileri',
+			'features.sites.overrideCollectionSwitch' => 'Blok için özel IBAN kullan',
+			'features.sites.overrideCollectionHint' => 'Kapalıyken site tahsilat bilgisi uygulanır.',
 			'features.auth.register' => 'Kaydol',
 			'features.auth.login' => 'Giriş Yap',
 			'features.auth.join' => 'Katıl',
 			'features.auth.passwordRequired' => 'Şifre gerekli',
 			'features.auth.errorOccurred' => 'Bir hata oluştu',
 			'features.auth.registrationSuccess' => 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.',
-			_ => null,
-		} ?? switch (path) {
 			'features.auth.loginSuccess' => 'Giriş başarılı. Hoş geldiniz.',
 			'features.auth.appTitle' => 'AidatPanel',
 			'features.auth.appSubtitle' => 'Apartman Yönetim Sistemi',
@@ -2256,6 +2291,9 @@ extension on TranslationsTr {
 			'features.subscription.purchaseMonthlyCta' => 'Aylık aboneliği satın al',
 			'features.subscription.purchaseAnnualCta' => 'Yıllık aboneliği satın al',
 			'features.subscription.kdvNote' => 'Fiyatlara KDV dahil değildir · İstediğin zaman iptal edebilirsin',
+			'features.subscription.managementUnitsTitle' => 'Yönetim birimi kullanımı',
+			'features.subscription.managementUnitsUsage' => '{used} / {limit} yönetim birimi',
+			'features.subscription.managementUnitsHint' => 'Tekil binalar ve siteler kotayı tüketir; site içi bloklar tüketmez.',
 			'features.subscription.guestUser' => 'Kullanıcı',
 			'features.subscription.priceUnavailable' => '—',
 			'features.subscription.loadingPlans' => 'Planlar yükleniyor…',
@@ -2320,6 +2358,8 @@ extension on TranslationsTr {
 			'features.dashboard.overduePaymentsBadge' => '{count} gecikmiş ödeme',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} aidatı',
 			'features.faz2.sectionTitle' => 'Faz 2',
+			_ => null,
+		} ?? switch (path) {
 			'features.faz2.tickets' => 'Talepler',
 			'features.faz2.expenses' => 'Giderler',
 			'features.faz2.announcement' => 'Duyuru',
@@ -2339,8 +2379,6 @@ extension on TranslationsTr {
 			'legal.privacyS4Body' => 'Veriler güvenli sunucularda saklanır; iletişim HTTPS ile şifrelenir. Oturum bilgileri cihazınızda güvenli depolamada tutulur. Yasal zorunluluklar dışında veriler, hizmet ilişkisi süresince ve mevzuattaki süreler boyunca muhafaza edilir.',
 			'legal.privacyS5Title' => '5. Paylaşım',
 			'legal.privacyS5Body' => 'Kişisel verileriniz üçüncü taraflara satılmaz. Yalnızca hizmetin sunulması için gerekli altyapı sağlayıcıları (barındırma, bildirim servisi vb.) ve kanunen yetkili kurumlarla, mevzuata uygun şekilde paylaşılabilir.',
-			_ => null,
-		} ?? switch (path) {
 			'legal.privacyS6Title' => '6. Haklarınız',
 			'legal.privacyS6Body' => 'KVKK kapsamında verilerinize erişme, düzeltme, silme, işlemeyi kısıtlama ve itiraz etme haklarına sahipsiniz. Hesap kapatma (soft delete) Ayarlar üzerinden yapılabilir; yasal saklama gerektiren kayıtlar anonimleştirilerek tutulabilir. Başvurularınızı store@vefayazilim.com adresine iletebilirsiniz.',
 			'legal.kvkkIntro' => '6698 sayılı Kanun uyarınca Vefa Yazılım tarafından işlenen kişisel verilerinize ilişkin aydınlatma metnidir.',

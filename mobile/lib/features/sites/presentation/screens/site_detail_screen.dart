@@ -12,6 +12,7 @@ import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
 import '../../../buildings/presentation/widgets/building_summary_card.dart';
 import '../../data/sites_store.dart';
+import '../../../reports/presentation/widgets/report_download_sheet.dart';
 import '../../domain/entities/site_entity.dart';
 
 class SiteDetailScreen extends ConsumerWidget {
@@ -33,6 +34,26 @@ class SiteDetailScreen extends ConsumerWidget {
           siteAsync.value?.name ?? t.siteDetail,
           style: AppTypography.h3.copyWith(fontWeight: FontWeight.w800),
         ),
+        actions: [
+          if (siteAsync.value != null) ...[
+            IconButton(
+              onPressed: () => context.push(
+                '/manager-dashboard/sites/$siteId/expenses',
+              ),
+              icon: const Icon(Icons.receipt_long_outlined),
+              tooltip: t.siteExpensesTitle,
+            ),
+            IconButton(
+              onPressed: () => ReportDownloadSheet.showForSite(
+                context,
+                siteId: siteId,
+                siteName: siteAsync.value!.name,
+              ),
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              tooltip: t.downloadSiteReport,
+            ),
+          ],
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(

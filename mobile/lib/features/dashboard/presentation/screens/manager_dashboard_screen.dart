@@ -133,7 +133,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                     onRetryBuildings: () =>
                         ref.read(buildingsStoreProvider.notifier).loadBuildings(),
                   ),
-                  ManagerPropertiesTab(buildingsAsync: buildingsAsync),
+                  ManagerPropertiesTab(),
                   const ManagerDuesTab(),
                   const MenuTab(role: UserRole.manager),
                 ],

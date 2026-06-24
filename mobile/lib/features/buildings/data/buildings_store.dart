@@ -153,6 +153,13 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
   }
 }
 
+final standaloneBuildingsProvider =
+    FutureProvider.autoDispose<List<BuildingEntity>>((ref) async {
+  return ref.watch(buildingRepositoryProvider).fetchBuildings(
+        standaloneOnly: true,
+      );
+});
+
 final buildingsStoreProvider =
     AsyncNotifierProvider<BuildingsNotifier, List<BuildingEntity>>(
   BuildingsNotifier.new,

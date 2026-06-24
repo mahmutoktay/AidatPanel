@@ -5,6 +5,7 @@ import {
   endOfDueDayIstanbul,
   getIstanbulYearMonth,
 } from "../utils/trDueDate.js";
+import { resolveEffectiveBuildingConfig } from "../utils/effectiveBuildingConfig.js";
 
 export function roundMoney(value) {
   return Math.round(Number(value) * 100) / 100;
@@ -78,6 +79,25 @@ async function loadBuildingExpensesForMonth(db, buildingId, month, year) {
   });
 }
 
+async function loadSiteExpensesForMonth(db, siteId, month, year) {
+  if (!siteId) return [];
+
+  return db.siteExpense.findMany({
+    where: {
+      siteId,
+      targetMonth: parseInt(String(month), 10),
+      targetYear: parseInt(String(year), 10),
+      perUnitAmount: { not: null },
+    },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      title: true,
+      perUnitAmount: true,
+    },
+  });
+}
+
 async function loadCarryforwardsForApartment(db, apartmentId, month, year) {
   return db.dueExpenseCarryforward.findMany({
     where: {
@@ -87,9 +107,25 @@ async function loadCarryforwardsForApartment(db, apartmentId, month, year) {
     },
     include: {
       expense: { select: { title: true } },
+      siteExpense: { select: { title: true } },
     },
     orderBy: { createdAt: "asc" },
   });
+}
+
+function mapCarryforwardLine(c) {
+  if (c.siteExpense) {
+    return {
+      title: `Önceki aydan devreden (site) — ${c.siteExpense.title}`,
+      amount: formatBreakdownMoney(c.amount),
+      kind: "CARRYFORWARD",
+    };
+  }
+  return {
+    title: `Önceki aydan devreden — ${c.expense?.title ?? "Gider"}`,
+    amount: formatBreakdownMoney(c.amount),
+    kind: "CARRYFORWARD",
+  };
 }
 
 /**
@@ -98,11 +134,20 @@ async function loadCarryforwardsForApartment(db, apartmentId, month, year) {
 export async function computeDueBreakdown(apartmentId, month, year, buildingId, db = prisma) {
   const building = await db.building.findUnique({
     where: { id: buildingId },
-    select: { dueAmount: true, currency: true },
+    include: { site: true },
   });
 
-  const baseAmount = building?.dueAmount != null ? Number(building.dueAmount) : 0;
+  const effective = resolveEffectiveBuildingConfig(building ?? { id: buildingId });
+  const baseAmount =
+    effective.effectiveDueAmount != null ? Number(effective.effectiveDueAmount) : 0;
+
   const expenses = await loadBuildingExpensesForMonth(db, buildingId, month, year);
+  const siteExpenses = await loadSiteExpensesForMonth(
+    db,
+    building?.siteId ?? null,
+    month,
+    year
+  );
   const carryforwards = await loadCarryforwardsForApartment(db, apartmentId, month, year);
 
   const expenseLines = expenses.map((e) => ({
@@ -111,13 +156,15 @@ export async function computeDueBreakdown(apartmentId, month, year, buildingId, 
     kind: "EXPENSE",
   }));
 
-  const carryLines = carryforwards.map((c) => ({
-    title: `Önceki aydan devreden — ${c.expense.title}`,
-    amount: formatBreakdownMoney(c.amount),
-    kind: "CARRYFORWARD",
+  const siteExpenseLines = siteExpenses.map((e) => ({
+    title: `Site ortak — ${e.title}`,
+    amount: formatBreakdownMoney(e.perUnitAmount),
+    kind: "SITE_EXPENSE",
   }));
 
-  const allLines = [...expenseLines, ...carryLines];
+  const carryLines = carryforwards.map(mapCarryforwardLine);
+
+  const allLines = [...expenseLines, ...siteExpenseLines, ...carryLines];
   const extras = allLines.reduce((sum, line) => sum + Number(line.amount), 0);
   const total = roundMoney(baseAmount + extras);
 
@@ -125,7 +172,7 @@ export async function computeDueBreakdown(apartmentId, month, year, buildingId, 
     baseAmount: formatBreakdownMoney(baseAmount),
     expenseLines: allLines,
     total: formatBreakdownMoney(total),
-    currency: building?.currency ?? "TRY",
+    currency: effective.effectiveCurrency ?? "TRY",
   };
 }
 
@@ -146,10 +193,11 @@ export async function recalculateBuildingDuesForMonth(buildingId, month, year, d
 
   const building = await db.building.findUnique({
     where: { id: buildingId },
-    select: { dueAmount: true, currency: true },
+    include: { site: true },
   });
 
-  if (building?.dueAmount == null) {
+  const effective = resolveEffectiveBuildingConfig(building ?? { id: buildingId });
+  if (effective.effectiveDueAmount == null) {
     return { updated: 0 };
   }
 
@@ -175,7 +223,7 @@ export async function recalculateBuildingDuesForMonth(buildingId, month, year, d
       where: { id: due.id },
       data: {
         amount: breakdown.total,
-        currency: building.currency ?? "TRY",
+        currency: effective.effectiveCurrency ?? "TRY",
       },
     });
     updated += 1;
@@ -216,15 +264,16 @@ export async function syncOpenBuildingDues(
 ) {
   const building = await db.building.findUnique({
     where: { id: buildingId },
-    select: { dueAmount: true, dueDay: true, currency: true },
+    include: { site: true },
   });
 
-  if (building?.dueAmount == null) {
+  const effective = resolveEffectiveBuildingConfig(building ?? { id: buildingId });
+  if (effective.effectiveDueAmount == null) {
     return { updated: 0 };
   }
 
-  const effectiveDueDay = dueDay ?? building.dueDay ?? 1;
-  const effectiveCurrency = currency ?? building.currency ?? "TRY";
+  const effectiveDueDay = dueDay ?? effective.effectiveDueDay ?? 1;
+  const effectiveCurrency = currency ?? effective.effectiveCurrency ?? "TRY";
 
   const openDues = await db.due.findMany({
     where: {
@@ -398,11 +447,14 @@ export async function computeDueBreakdownsBatch(items, buildingId, db = prisma) 
 
   const building = await db.building.findUnique({
     where: { id: buildingId },
-    select: { dueAmount: true, currency: true },
+    include: { site: true },
   });
 
-  const baseAmount = building?.dueAmount != null ? Number(building.dueAmount) : 0;
-  const currency = building?.currency ?? "TRY";
+  const effective = resolveEffectiveBuildingConfig(building ?? { id: buildingId });
+  const baseAmount =
+    effective.effectiveDueAmount != null ? Number(effective.effectiveDueAmount) : 0;
+  const currency = effective.effectiveCurrency ?? "TRY";
+  const siteId = building?.siteId ?? null;
 
   // Benzersiz (month, year) kombinasyonlarını bul
   const periodSet = new Set();
@@ -419,11 +471,28 @@ export async function computeDueBreakdownsBatch(items, buildingId, db = prisma) 
       const [m, y] = periodKey.split("-").map(Number);
 
       const expenses = await loadBuildingExpensesForMonth(db, buildingId, m, y);
-      expenseCache.set(periodKey, expenses.map((e) => ({
-        title: e.title,
-        amount: formatBreakdownMoney(e.perUnitAmount),
-        kind: "EXPENSE",
-      })));
+      expenseCache.set(
+        periodKey,
+        expenses.map((e) => ({
+          title: e.title,
+          amount: formatBreakdownMoney(e.perUnitAmount),
+          kind: "EXPENSE",
+        }))
+      );
+
+      let siteExpenseLines = [];
+      if (siteId) {
+        const siteExpenses = await loadSiteExpensesForMonth(db, siteId, m, y);
+        siteExpenseLines = siteExpenses.map((e) => ({
+          title: `Site ortak — ${e.title}`,
+          amount: formatBreakdownMoney(e.perUnitAmount),
+          kind: "SITE_EXPENSE",
+        }));
+      }
+      expenseCache.set(periodKey, [
+        ...(expenseCache.get(periodKey) ?? []),
+        ...siteExpenseLines,
+      ]);
 
       // Bu periyottaki tüm apartmentId'ler için carryforward'ları toplu çek
       const aptIds = items
@@ -439,6 +508,7 @@ export async function computeDueBreakdownsBatch(items, buildingId, db = prisma) 
           },
           include: {
             expense: { select: { title: true } },
+            siteExpense: { select: { title: true } },
           },
           orderBy: { createdAt: "asc" },
         });
@@ -449,11 +519,7 @@ export async function computeDueBreakdownsBatch(items, buildingId, db = prisma) 
           if (!carryforwardCache.has(key)) {
             carryforwardCache.set(key, []);
           }
-          carryforwardCache.get(key).push({
-            title: `Önceki aydan devreden — ${cf.expense.title}`,
-            amount: formatBreakdownMoney(cf.amount),
-            kind: "CARRYFORWARD",
-          });
+          carryforwardCache.get(key).push(mapCarryforwardLine(cf));
         }
       }
     })

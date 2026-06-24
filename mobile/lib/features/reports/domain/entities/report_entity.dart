@@ -2,18 +2,25 @@ enum ReportType { monthly, annual }
 
 class ReportDownloadParams {
   const ReportDownloadParams({
-    required this.buildingId,
-    required this.buildingName,
+    this.buildingId,
+    this.siteId,
+    required this.displayName,
     required this.type,
     required this.year,
     this.month,
-  });
+  }) : assert(
+          (buildingId != null) != (siteId != null),
+          'buildingId veya siteId biri zorunlu',
+        );
 
-  final String buildingId;
-  final String buildingName;
+  final String? buildingId;
+  final String? siteId;
+  final String displayName;
   final ReportType type;
   final int year;
   final int? month;
+
+  bool get isSiteReport => siteId != null;
 }
 
 class ReportFileResult {

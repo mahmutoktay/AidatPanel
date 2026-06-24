@@ -31,6 +31,9 @@ import '../../features/buildings/presentation/screens/add_building_screen.dart';
 import '../../features/sites/presentation/screens/add_site_screen.dart';
 import '../../features/sites/presentation/screens/add_site_building_screen.dart';
 import '../../features/sites/presentation/screens/site_detail_screen.dart';
+import '../../features/sites/presentation/screens/site_expenses_screen.dart';
+import '../../features/sites/presentation/screens/site_expense_form_screen.dart';
+import '../../features/sites/domain/entities/site_expense_entity.dart';
 import '../../features/buildings/presentation/screens/building_residents_screen.dart';
 import '../../features/buildings/presentation/screens/invite_code_screen.dart';
 import '../../features/buildings/data/buildings_store.dart';
@@ -112,6 +115,28 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
         builder: (context, state) => AddSiteBuildingScreen(
           siteId: state.pathParameters['siteId']!,
         ),
+      ),
+      GoRoute(
+        path: 'expenses',
+        name: 'manager_site_expenses',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => SiteExpensesScreen(
+          siteId: state.pathParameters['siteId']!,
+        ),
+        routes: [
+          GoRoute(
+            path: 'form',
+            name: 'manager_site_expense_form',
+            parentNavigatorKey: rootNavigatorKey,
+            builder: (context, state) {
+              final expense = state.extra as SiteExpenseEntity?;
+              return SiteExpenseFormScreen(
+                siteId: state.pathParameters['siteId']!,
+                expense: expense,
+              );
+            },
+          ),
+        ],
       ),
     ],
   ),

@@ -148,6 +148,12 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         status: subscription?.status,
                       ),
                       _StatusStrip(subscription: subscription),
+                      if (subscription?.managementUnitsUsed != null &&
+                          subscription?.managementUnitsLimit != null)
+                        _ManagementUnitsCard(
+                          used: subscription!.managementUnitsUsed!,
+                          limit: subscription.managementUnitsLimit!,
+                        ),
                       if (!purchasesEnabled && !subscriptionState.isPurchasing)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
@@ -895,6 +901,67 @@ class _FeatureRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ManagementUnitsCard extends StatelessWidget {
+  final int used;
+  final int limit;
+
+  const _ManagementUnitsCard({
+    required this.used,
+    required this.limit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t.features.subscription;
+    final progress = limit > 0 ? (used / limit).clamp(0.0, 1.0) : 0.0;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.lineLight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            t.managementUnitsTitle,
+            style: AppTypography.body1.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            t.managementUnitsUsage
+                .replaceAll('{used}', '$used')
+                .replaceAll('{limit}', '$limit'),
+            style: AppTypography.body2.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 10,
+              backgroundColor: AppColors.fill,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            t.managementUnitsHint,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

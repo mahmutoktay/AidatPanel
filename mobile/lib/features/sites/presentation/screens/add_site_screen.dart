@@ -9,10 +9,10 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
-import '../../../../shared/widgets/premium_bottom_sheet.dart';
+import '../../../../shared/widgets/searchable_location_picker.dart';
 import '../../../../shared/widgets/show_due_day_picker.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
-import '../../../buildings/data/cities_data.dart';
+import '../../../buildings/data/turkish_locations.dart';
 import '../../../buildings/presentation/widgets/building_collection_fields.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../data/sites_store.dart';
@@ -38,6 +38,12 @@ class _AddSiteScreenState extends ConsumerState<AddSiteScreen> {
   int _selectedDueDay = 1;
   bool _pickingDueDay = false;
   bool _submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    TurkishLocations.ensureLoaded();
+  }
 
   @override
   void dispose() {
@@ -187,34 +193,26 @@ class _AddSiteScreenState extends ConsumerState<AddSiteScreen> {
   }
 
   void _showCityPicker() {
-    PremiumBottomSheetScaffold.show<void>(
-      context: context,
-      builder: (ctx) => _SearchablePicker(
-        title: context.t.common.selectCityTitle,
-        items: sortedCityNames,
-        selected: _selectedCity,
-        onSelected: (city) {
-          setState(() {
-            _selectedCity = city;
-            _selectedDistrict = null;
-          });
-        },
-      ),
+    SearchableLocationPicker.showCityPicker(
+      context,
+      selected: _selectedCity,
+      onSelected: (city) {
+        setState(() {
+          _selectedCity = city;
+          _selectedDistrict = null;
+        });
+      },
     );
   }
 
   void _showDistrictPicker() {
     final city = _selectedCity;
     if (city == null) return;
-    final districts = turkishCities[city] ?? const <String>[];
-    PremiumBottomSheetScaffold.show<void>(
-      context: context,
-      builder: (ctx) => _SearchablePicker(
-        title: context.t.common.selectDistrictTitle,
-        items: districts,
-        selected: _selectedDistrict,
-        onSelected: (district) => setState(() => _selectedDistrict = district),
-      ),
+    SearchableLocationPicker.showDistrictPicker(
+      context,
+      city: city,
+      selected: _selectedDistrict,
+      onSelected: (district) => setState(() => _selectedDistrict = district),
     );
   }
 
@@ -267,97 +265,11 @@ class _AddSiteScreenState extends ConsumerState<AddSiteScreen> {
     }
 
     await ref.read(buildingsStoreProvider.notifier).refreshBuildings();
+    if (!mounted) return;
     ref.read(toastProvider.notifier).show(
           context.t.features.sites.siteCreated,
           type: ToastType.success,
         );
     context.pop();
-  }
-}
-
-class _SearchablePicker extends StatefulWidget {
-  const _SearchablePicker({
-    required this.title,
-    required this.items,
-    required this.onSelected,
-    this.selected,
-  });
-
-  final String title;
-  final List<String> items;
-  final String? selected;
-  final ValueChanged<String> onSelected;
-
-  @override
-  State<_SearchablePicker> createState() => _SearchablePickerState();
-}
-
-class _SearchablePickerState extends State<_SearchablePicker> {
-  late List<String> _filtered;
-  final _searchController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _filtered = widget.items;
-    _searchController.addListener(_onSearch);
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _onSearch() {
-    final q = _searchController.text.trim().toLowerCase();
-    setState(() {
-      _filtered = q.isEmpty
-          ? widget.items
-          : widget.items.where((e) => e.toLowerCase().contains(q)).toList();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return PremiumBottomSheetScaffold(
-      title: widget.title,
-      child: Column(
-        children: [
-          MinimalTextField(
-            controller: _searchController,
-            label: context.t.common.search,
-            hint: context.t.common.search,
-            icon: Icons.search,
-          ),
-          const SizedBox(height: AppSizes.spacingM),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final item = _filtered[index];
-                final selected = item == widget.selected;
-                return ListTile(
-                  minTileHeight: AppSizes.minTouchTarget,
-                  title: Text(
-                    item,
-                    style: ProfileSettingsUi.fieldValue.copyWith(
-                      fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
-                    ),
-                  ),
-                  trailing: selected
-                      ? Icon(Icons.check_circle, color: AppColors.primary)
-                      : null,
-                  onTap: () {
-                    widget.onSelected(item);
-                    Navigator.of(context).pop();
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

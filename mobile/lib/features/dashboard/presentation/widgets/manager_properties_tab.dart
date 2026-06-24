@@ -4,19 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../buildings/domain/entities/building_entity.dart';
 import '../widgets/manager_buildings_tab.dart';
 import '../../../sites/presentation/widgets/manager_sites_tab.dart';
 
 enum PropertiesSegment { sites, buildings }
 
 class ManagerPropertiesTab extends ConsumerStatefulWidget {
-  const ManagerPropertiesTab({
-    super.key,
-    required this.buildingsAsync,
-  });
-
-  final AsyncValue<List<BuildingEntity>> buildingsAsync;
+  const ManagerPropertiesTab({super.key});
 
   @override
   ConsumerState<ManagerPropertiesTab> createState() =>
@@ -70,9 +64,8 @@ class _ManagerPropertiesTabState extends ConsumerState<ManagerPropertiesTab> {
             switchOutCurve: Curves.easeInOut,
             child: _segment == PropertiesSegment.sites
                 ? const ManagerSitesTab(key: ValueKey('sites_tab'))
-                : ManagerBuildingsTab(
-                    key: const ValueKey('buildings_tab'),
-                    buildingsAsync: widget.buildingsAsync,
+                : const ManagerBuildingsTab(
+                    key: ValueKey('buildings_tab'),
                   ),
           ),
         ),

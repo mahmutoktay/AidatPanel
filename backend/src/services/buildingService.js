@@ -366,44 +366,68 @@ export const updateBuildingCollectionService = async (id, managerId, body) => {
  * Yöneticinin mevcut binalarından benzersiz tahsilat şablonları (yeni bina formu önerileri).
  */
 export const getCollectionPresetsService = async (managerId) => {
-  const buildings = await prisma.building.findMany({
-    where: {
-      managerId,
-      collectionIban: { not: null },
-    },
-    select: {
-      collectionIban: true,
-      collectionAccountTitle: true,
-      paymentReferenceTemplate: true,
-      updatedAt: true,
-    },
-    orderBy: { updatedAt: "desc" },
-  });
+  const [buildings, sites] = await Promise.all([
+    prisma.building.findMany({
+      where: {
+        managerId,
+        collectionIban: { not: null },
+      },
+      select: {
+        collectionIban: true,
+        collectionAccountTitle: true,
+        paymentReferenceTemplate: true,
+        updatedAt: true,
+      },
+      orderBy: { updatedAt: "desc" },
+    }),
+    prisma.site.findMany({
+      where: {
+        managerId,
+        collectionIban: { not: null },
+      },
+      select: {
+        collectionIban: true,
+        collectionAccountTitle: true,
+        paymentReferenceTemplate: true,
+        updatedAt: true,
+      },
+      orderBy: { updatedAt: "desc" },
+    }),
+  ]);
 
   const byKey = new Map();
 
-  for (const b of buildings) {
+  const mergePreset = (row, source) => {
     const key = [
-      b.collectionIban,
-      b.collectionAccountTitle ?? "",
-      b.paymentReferenceTemplate ?? "",
+      row.collectionIban,
+      row.collectionAccountTitle ?? "",
+      row.paymentReferenceTemplate ?? "",
     ].join("\0");
 
     const existing = byKey.get(key);
     if (!existing) {
       byKey.set(key, {
-        collectionIban: b.collectionIban,
-        collectionAccountTitle: b.collectionAccountTitle,
-        paymentReferenceTemplate: b.paymentReferenceTemplate,
-        lastUsedAt: b.updatedAt,
-        buildingCount: 1,
+        collectionIban: row.collectionIban,
+        collectionAccountTitle: row.collectionAccountTitle,
+        paymentReferenceTemplate: row.paymentReferenceTemplate,
+        lastUsedAt: row.updatedAt,
+        buildingCount: source === "building" ? 1 : 0,
+        siteCount: source === "site" ? 1 : 0,
       });
     } else {
-      existing.buildingCount += 1;
-      if (b.updatedAt > existing.lastUsedAt) {
-        existing.lastUsedAt = b.updatedAt;
+      if (source === "building") existing.buildingCount += 1;
+      if (source === "site") existing.siteCount += 1;
+      if (row.updatedAt > existing.lastUsedAt) {
+        existing.lastUsedAt = row.updatedAt;
       }
     }
+  };
+
+  for (const b of buildings) {
+    mergePreset(b, "building");
+  }
+  for (const s of sites) {
+    mergePreset(s, "site");
   }
 
   return [...byKey.values()].sort(

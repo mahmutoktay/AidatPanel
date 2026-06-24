@@ -48,6 +48,13 @@ class ApiConstants {
       '$apiVersion/sites/$siteId/collection';
   static String siteBuildings(String siteId) =>
       '$apiVersion/sites/$siteId/buildings';
+  static String siteExpenses(String siteId) =>
+      '$apiVersion/sites/$siteId/expenses';
+  static String siteExpensesSummary(String siteId) =>
+      '$apiVersion/sites/$siteId/expenses/summary';
+  static String siteExpense(String expenseId) =>
+      '$apiVersion/site-expenses/$expenseId';
+  static String siteReports(String siteId) => '$apiVersion/sites/$siteId/reports';
   static String buildingApartments(String buildingId) =>
       '$apiVersion/buildings/$buildingId/apartments';
   static String buildingDues(String buildingId) =>

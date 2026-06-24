@@ -17,9 +17,23 @@ import '../providers/report_provider.dart';
 import '../screens/report_preview_screen.dart';
 
 class ReportDownloadSheet extends ConsumerStatefulWidget {
-  const ReportDownloadSheet({super.key, required this.building});
+  const ReportDownloadSheet({
+    super.key,
+    this.building,
+    this.siteId,
+    this.siteName,
+  }) : assert(
+          (building != null) != (siteId != null && siteName != null),
+          'building veya siteId+siteName gerekli',
+        );
 
-  final BuildingEntity building;
+  final BuildingEntity? building;
+  final String? siteId;
+  final String? siteName;
+
+  String get _displayName => building?.name ?? siteName!;
+
+  bool get _isSite => siteId != null;
 
   static Future<void> show(
     BuildContext context, {
@@ -28,6 +42,17 @@ class ReportDownloadSheet extends ConsumerStatefulWidget {
     return PremiumBottomSheetScaffold.show<void>(
       context: context,
       builder: (_) => ReportDownloadSheet(building: building),
+    );
+  }
+
+  static Future<void> showForSite(
+    BuildContext context, {
+    required String siteId,
+    required String siteName,
+  }) {
+    return PremiumBottomSheetScaffold.show<void>(
+      context: context,
+      builder: (_) => ReportDownloadSheet(siteId: siteId, siteName: siteName),
     );
   }
 
@@ -57,10 +82,10 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
 
   String _previewSubtitle(BuildContext context) {
     if (_type == ReportType.annual) {
-      return '${widget.building.name} · $_year';
+      return '${widget._displayName} · $_year';
     }
     final monthLabel = localizedMonthName(context, _month);
-    return '${widget.building.name} · $monthLabel $_year';
+    return '${widget._displayName} · $monthLabel $_year';
   }
 
   String _periodSummary(BuildContext context) {
@@ -132,8 +157,9 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
     try {
       final result = await ref.read(reportServiceProvider).fetchReport(
             ReportDownloadParams(
-              buildingId: widget.building.id,
-              buildingName: widget.building.name,
+              buildingId: widget.building?.id,
+              siteId: widget.siteId,
+              displayName: widget._displayName,
               type: _type,
               year: _year,
               month: _type == ReportType.monthly ? _month : null,
@@ -166,6 +192,7 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.reports;
+    final sheetTitle = widget._isSite ? context.t.features.sites.downloadSiteReport : t.sheetTitle;
 
     return PremiumBottomSheetScaffold(
       scrollable: false,
@@ -203,7 +230,7 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    t.sheetTitle,
+                    sheetTitle,
                     style: AppTypography.h3.copyWith(
                       fontWeight: FontWeight.w800,
                       fontSize: 20,
@@ -211,7 +238,7 @@ class _ReportDownloadSheetState extends ConsumerState<ReportDownloadSheet> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    widget.building.name,
+                    widget._displayName,
                     style: AppTypography.body2.copyWith(
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.w500,

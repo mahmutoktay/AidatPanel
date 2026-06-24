@@ -8,11 +8,11 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
-import '../../../../shared/widgets/premium_bottom_sheet.dart';
+import '../../../../shared/widgets/searchable_location_picker.dart';
 import '../../../../shared/widgets/show_due_day_picker.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
-import '../../data/cities_data.dart';
+import '../../data/turkish_locations.dart';
 import '../widgets/building_collection_fields.dart';
 
 /// Backend `buildingService.createBuildingService` Zod aralıkları (Tur 5 §10/2):
@@ -46,6 +46,12 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   int _selectedDueDay = 1;
   bool _pickingDueDay = false;
   bool _submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    TurkishLocations.ensureLoaded();
+  }
 
   @override
   void dispose() {
@@ -262,34 +268,28 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   }
 
   void _showCityPicker() {
-    PremiumBottomSheetScaffold.show<void>(
-      context: context,
-      builder: (ctx) => _SearchablePicker(
-        title: context.t.common.selectCityTitle,
-        items: sortedCityNames,
-        selected: _selectedCity,
-        onSelected: (city) {
-          setState(() {
-            _selectedCity = city;
-            _selectedDistrict = null;
-          });
-        },
-      ),
+    SearchableLocationPicker.showCityPicker(
+      context,
+      selected: _selectedCity,
+      onSelected: (city) {
+        setState(() {
+          _selectedCity = city;
+          _selectedDistrict = null;
+        });
+      },
     );
   }
 
   void _showDistrictPicker() {
-    final districts = turkishCities[_selectedCity] ?? const [];
-    PremiumBottomSheetScaffold.show<void>(
-      context: context,
-      builder: (ctx) => _SearchablePicker(
-        title: context.t.common.selectDistrictTitle,
-        items: districts,
-        selected: _selectedDistrict,
-        onSelected: (district) {
-          setState(() => _selectedDistrict = district);
-        },
-      ),
+    final city = _selectedCity;
+    if (city == null) return;
+    SearchableLocationPicker.showDistrictPicker(
+      context,
+      city: city,
+      selected: _selectedDistrict,
+      onSelected: (district) {
+        setState(() => _selectedDistrict = district);
+      },
     );
   }
 
@@ -382,157 +382,5 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
-  }
-}
-
-class _SearchablePicker extends StatefulWidget {
-  final String title;
-  final List<String> items;
-  final String? selected;
-  final ValueChanged<String> onSelected;
-
-  const _SearchablePicker({
-    required this.title,
-    required this.items,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  @override
-  State<_SearchablePicker> createState() => _SearchablePickerState();
-}
-
-class _SearchablePickerState extends State<_SearchablePicker> {
-  String _query = '';
-
-  @override
-  Widget build(BuildContext context) {
-    final filtered = widget.items
-        .where((s) => s.toLowerCase().contains(_query.toLowerCase()))
-        .toList();
-
-    return DraggableScrollableSheet(
-      initialChildSize: 0.75,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      expand: false,
-      builder: (_, scrollController) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: AppSizes.spacingS),
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.lineLight,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSizes.dashboardScreenPaddingHorizontal,
-              AppSizes.spacingM,
-              AppSizes.dashboardScreenPaddingHorizontal,
-              AppSizes.spacingS,
-            ),
-            child: Text(widget.title, style: ProfileSettingsUi.title),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.dashboardScreenPaddingHorizontal,
-            ),
-            child: MinimalSearchField(
-              hint: context.t.common.search,
-              onChanged: (v) => setState(() => _query = v),
-            ),
-          ),
-          const SizedBox(height: AppSizes.spacingS),
-          Expanded(
-            child: filtered.isEmpty
-                ? Center(
-                    child: Text(
-                      context.t.common.noResults,
-                      style: ProfileSettingsUi.handle,
-                    ),
-                  )
-                : ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.dashboardScreenPaddingHorizontal,
-                    ),
-                    itemCount: filtered.length,
-                    itemBuilder: (_, index) {
-                      final item = filtered[index];
-                      final isSelected = item == widget.selected;
-                      return Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: AppSizes.spacingXS,
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {
-                              widget.onSelected(item);
-                              context.pop();
-                            },
-                            borderRadius: BorderRadius.circular(
-                              ProfileSettingsUi.fieldRadius,
-                            ),
-                            child: Container(
-                              constraints: const BoxConstraints(
-                                minHeight: AppSizes.minTouchTarget,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSizes.spacingM,
-                                vertical: AppSizes.spacingS,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? ProfileSettingsUi.background
-                                    : ProfileSettingsUi.fieldFill,
-                                borderRadius: BorderRadius.circular(
-                                  ProfileSettingsUi.fieldRadius,
-                                ),
-                                border: isSelected
-                                    ? Border.all(
-                                        color: ProfileSettingsUi.ink,
-                                        width:
-                                            ProfileSettingsUi.fieldFocusBorderWidth,
-                                      )
-                                    : null,
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      item,
-                                      style: ProfileSettingsUi.fieldValue
-                                          .copyWith(
-                                        fontWeight: isSelected
-                                            ? FontWeight.w700
-                                            : FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                  if (isSelected)
-                                    const Icon(
-                                      Icons.check_rounded,
-                                      color: AppColors.statusGreen,
-                                      size: 22,
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
-    );
   }
 }

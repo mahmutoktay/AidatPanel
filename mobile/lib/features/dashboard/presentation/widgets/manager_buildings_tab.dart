@@ -25,12 +25,7 @@ import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 
 class ManagerBuildingsTab extends ConsumerStatefulWidget {
-  final AsyncValue<List<BuildingEntity>> buildingsAsync;
-
-  const ManagerBuildingsTab({
-    super.key,
-    required this.buildingsAsync,
-  });
+  const ManagerBuildingsTab({super.key});
 
   @override
   ConsumerState<ManagerBuildingsTab> createState() =>
@@ -51,7 +46,7 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final buildingsAsync = widget.buildingsAsync;
+    final buildingsAsync = ref.watch(standaloneBuildingsProvider);
     final allDuesAsync = ref.watch(allBuildingsDuesProvider);
     final allDues = allDuesAsync.value ?? const <String, List<DueEntity>>{};
 
@@ -88,7 +83,6 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
     required bool isRefreshing,
   }) {
     final items = buildings
-        .where((b) => b.isStandalone)
         .map(
           (building) => BuildingListItemModel.fromEntity(
             building: building,
@@ -154,9 +148,7 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
                 itemCount: sortedItems.length,
                 itemBuilder: (context, index) {
                   final item = sortedItems[index];
-                  final building = buildings
-                      .where((b) => b.isStandalone)
-                      .firstWhere(
+                  final building = buildings.firstWhere(
                     (b) => b.id == item.id,
                   );
                   return BuildingListCard(
@@ -227,14 +219,15 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
   }
 
   Future<void> _onRefresh() async {
-    await Future.wait([
-      ref.read(buildingsStoreProvider.notifier).loadBuildings(),
-      ref.refresh(allBuildingsDuesProvider.future),
-    ]);
+    ref.invalidate(standaloneBuildingsProvider);
+    await ref.read(buildingsStoreProvider.notifier).loadBuildings();
+    await ref.refresh(standaloneBuildingsProvider.future);
+    await ref.refresh(allBuildingsDuesProvider.future);
   }
 
   void _onRetryBuildings() {
-    ref.read(buildingsStoreProvider.notifier).loadBuildings();
+    ref.invalidate(standaloneBuildingsProvider);
+    ref.refresh(standaloneBuildingsProvider);
   }
 
   void _onAddBuildingPressed() {

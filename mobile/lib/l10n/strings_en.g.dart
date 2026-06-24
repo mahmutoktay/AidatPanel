@@ -1341,8 +1341,8 @@ class Translations$common$api$en {
 	/// en: 'Building not found or you do not have access.'
 	String get buildingAccessDenied => 'Building not found or you do not have access.';
 
-	/// en: 'Invalid IBAN. Enter a 26-digit TR IBAN.'
-	String get invalidIban => 'Invalid IBAN. Enter a 26-digit TR IBAN.';
+	/// en: 'Invalid IBAN. Enter a 26-character TR IBAN with valid check digits.'
+	String get invalidIban => 'Invalid IBAN. Enter a 26-character TR IBAN with valid check digits.';
 
 	/// en: 'There is no resident to remove from this apartment.'
 	String get apartmentNoResident => 'There is no resident to remove from this apartment.';
@@ -1571,6 +1571,51 @@ class Translations$features$sites$en {
 
 	/// en: 'No sites yet. Use the button at the bottom right to add one.'
 	String get emptySites => 'No sites yet. Use the button at the bottom right to add one.';
+
+	/// en: 'Site Expenses'
+	String get siteExpensesTitle => 'Site Expenses';
+
+	/// en: 'No shared site expenses for this period.'
+	String get siteExpensesEmpty => 'No shared site expenses for this period.';
+
+	/// en: 'Add Site Expense'
+	String get addSiteExpense => 'Add Site Expense';
+
+	/// en: 'Site Report'
+	String get downloadSiteReport => 'Site Report';
+
+	/// en: 'Per unit: {amount} TRY'
+	String get perUnitShare => 'Per unit: {amount} TRY';
+
+	/// en: '{count} units'
+	String get apartmentCountLabel => '{count} units';
+
+	/// en: 'Block label'
+	String get blockLabel => 'Block label';
+
+	/// en: 'e.g. Block A'
+	String get blockLabelHint => 'e.g. Block A';
+
+	/// en: 'Dues settings'
+	String get overrideDues => 'Dues settings';
+
+	/// en: 'Use custom dues for this block'
+	String get overrideDuesSwitch => 'Use custom dues for this block';
+
+	/// en: 'When off, the site default dues apply.'
+	String get overrideDuesHint => 'When off, the site default dues apply.';
+
+	/// en: 'Site default: {amount} TRY/month. Turn on to override.'
+	String get overrideDuesHintWithDefault => 'Site default: {amount} TRY/month. Turn on to override.';
+
+	/// en: 'Collection details'
+	String get overrideCollection => 'Collection details';
+
+	/// en: 'Use custom IBAN for this block'
+	String get overrideCollectionSwitch => 'Use custom IBAN for this block';
+
+	/// en: 'When off, the site collection details apply.'
+	String get overrideCollectionHint => 'When off, the site collection details apply.';
 }
 
 // Path: features.auth
@@ -2949,6 +2994,15 @@ class Translations$features$subscription$en {
 	/// en: 'Prices exclude VAT · Cancel anytime'
 	String get kdvNote => 'Prices exclude VAT · Cancel anytime';
 
+	/// en: 'Management unit usage'
+	String get managementUnitsTitle => 'Management unit usage';
+
+	/// en: '{used} / {limit} management units'
+	String get managementUnitsUsage => '{used} / {limit} management units';
+
+	/// en: 'Standalone buildings and sites count toward quota; blocks inside a site do not.'
+	String get managementUnitsHint => 'Standalone buildings and sites count toward quota; blocks inside a site do not.';
+
 	/// en: 'User'
 	String get guestUser => 'User';
 
@@ -3243,8 +3297,8 @@ class Translations$features$buildings$collection$en {
 	/// en: 'TR33 0006 1005 1978 6457 8413 26'
 	String get ibanHint => 'TR33 0006 1005 1978 6457 8413 26';
 
-	/// en: 'Enter a valid Turkish IBAN (TR + 24 digits)'
-	String get ibanInvalid => 'Enter a valid Turkish IBAN (TR + 24 digits)';
+	/// en: 'Enter a valid Turkish IBAN (26 characters starting with TR, correct check digits).'
+	String get ibanInvalid => 'Enter a valid Turkish IBAN (26 characters starting with TR, correct check digits).';
 
 	/// en: 'You entered account title or reference; enter a valid IBAN'
 	String get ibanRequiredIfOtherFilled => 'You entered account title or reference; enter a valid IBAN';
@@ -3290,6 +3344,9 @@ class Translations$features$buildings$collection$en {
 
 	/// en: 'Buildings: {names}'
 	String get savedIbansBuildingNames => 'Buildings: {names}';
+
+	/// en: 'Sites: {names}'
+	String get savedIbansSiteNames => 'Sites: {names}';
 
 	/// en: 'Collection updated for {count} building(s)'
 	String get savedIbansUpdateSuccess => 'Collection updated for {count} building(s)';
@@ -3489,7 +3546,7 @@ extension on Translations {
 			'common.api.recordConflict' => 'This record already exists.',
 			'common.api.relatedRecordMissing' => 'A related record required for this action was not found.',
 			'common.api.buildingAccessDenied' => 'Building not found or you do not have access.',
-			'common.api.invalidIban' => 'Invalid IBAN. Enter a 26-digit TR IBAN.',
+			'common.api.invalidIban' => 'Invalid IBAN. Enter a 26-character TR IBAN with valid check digits.',
 			'common.api.apartmentNoResident' => 'There is no resident to remove from this apartment.',
 			'common.api.ticketClosedNote' => 'Notes cannot be added to a closed or resolved ticket.',
 			'common.api.ticketClosedStatus' => 'Status of a closed ticket cannot be changed.',
@@ -3851,7 +3908,7 @@ extension on Translations {
 			'features.buildings.collection.detailUsedInBuildings' => 'Used in {count} buildings',
 			'features.buildings.collection.ibanLabel' => 'IBAN',
 			'features.buildings.collection.ibanHint' => 'TR33 0006 1005 1978 6457 8413 26',
-			'features.buildings.collection.ibanInvalid' => 'Enter a valid Turkish IBAN (TR + 24 digits)',
+			'features.buildings.collection.ibanInvalid' => 'Enter a valid Turkish IBAN (26 characters starting with TR, correct check digits).',
 			'features.buildings.collection.ibanRequiredIfOtherFilled' => 'You entered account title or reference; enter a valid IBAN',
 			'features.buildings.collection.accountTitleLabel' => 'Account holder name',
 			'features.buildings.collection.accountTitleHint' => 'e.g. Building Management',
@@ -3867,6 +3924,7 @@ extension on Translations {
 			'features.buildings.collection.savedIbansEmpty' => 'No saved IBAN yet. You can add collection details when creating a building.',
 			'features.buildings.collection.savedIbansNoBuildingMatch' => 'No building linked to this set',
 			'features.buildings.collection.savedIbansBuildingNames' => 'Buildings: {names}',
+			'features.buildings.collection.savedIbansSiteNames' => 'Sites: {names}',
 			'features.buildings.collection.savedIbansUpdateSuccess' => 'Collection updated for {count} building(s)',
 			'features.buildings.collection.savedIbansUpdateHint' => 'Will update: {names}',
 			'features.buildings.collection.editSavedIbanTitle' => 'Edit IBAN',
@@ -3917,14 +3975,29 @@ extension on Translations {
 			'features.sites.blockCount' => 'blocks',
 			'features.sites.addBlock' => 'Add Block',
 			'features.sites.emptySites' => 'No sites yet. Use the button at the bottom right to add one.',
+			'features.sites.siteExpensesTitle' => 'Site Expenses',
+			'features.sites.siteExpensesEmpty' => 'No shared site expenses for this period.',
+			'features.sites.addSiteExpense' => 'Add Site Expense',
+			'features.sites.downloadSiteReport' => 'Site Report',
+			'features.sites.perUnitShare' => 'Per unit: {amount} TRY',
+			_ => null,
+		} ?? switch (path) {
+			'features.sites.apartmentCountLabel' => '{count} units',
+			'features.sites.blockLabel' => 'Block label',
+			'features.sites.blockLabelHint' => 'e.g. Block A',
+			'features.sites.overrideDues' => 'Dues settings',
+			'features.sites.overrideDuesSwitch' => 'Use custom dues for this block',
+			'features.sites.overrideDuesHint' => 'When off, the site default dues apply.',
+			'features.sites.overrideDuesHintWithDefault' => 'Site default: {amount} TRY/month. Turn on to override.',
+			'features.sites.overrideCollection' => 'Collection details',
+			'features.sites.overrideCollectionSwitch' => 'Use custom IBAN for this block',
+			'features.sites.overrideCollectionHint' => 'When off, the site collection details apply.',
 			'features.auth.register' => 'Register',
 			'features.auth.login' => 'Login',
 			'features.auth.join' => 'Join',
 			'features.auth.passwordRequired' => 'Password required',
 			'features.auth.errorOccurred' => 'An error occurred',
 			'features.auth.registrationSuccess' => 'Account created. You can now log in.',
-			_ => null,
-		} ?? switch (path) {
 			'features.auth.loginSuccess' => 'Signed in successfully. Welcome.',
 			'features.auth.appTitle' => 'AidatPanel',
 			'features.auth.appSubtitle' => 'Apartment Management System',
@@ -4354,6 +4427,9 @@ extension on Translations {
 			'features.subscription.purchaseMonthlyCta' => 'Subscribe monthly',
 			'features.subscription.purchaseAnnualCta' => 'Subscribe annually',
 			'features.subscription.kdvNote' => 'Prices exclude VAT · Cancel anytime',
+			'features.subscription.managementUnitsTitle' => 'Management unit usage',
+			'features.subscription.managementUnitsUsage' => '{used} / {limit} management units',
+			'features.subscription.managementUnitsHint' => 'Standalone buildings and sites count toward quota; blocks inside a site do not.',
 			'features.subscription.guestUser' => 'User',
 			'features.subscription.priceUnavailable' => '—',
 			'features.subscription.loadingPlans' => 'Loading plans…',
@@ -4418,6 +4494,8 @@ extension on Translations {
 			'features.dashboard.overduePaymentsBadge' => '{count} overdue payment(s)',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} dues',
 			'features.faz2.sectionTitle' => 'Phase 2',
+			_ => null,
+		} ?? switch (path) {
 			'features.faz2.tickets' => 'Requests',
 			'features.faz2.expenses' => 'Expenses',
 			'features.faz2.announcement' => 'Announce',
@@ -4437,8 +4515,6 @@ extension on Translations {
 			'legal.privacyS4Body' => 'Data is stored on secure servers; communication uses HTTPS. Session data is kept in secure device storage. Data is retained for the service relationship and as required by law.',
 			'legal.privacyS5Title' => '5. Sharing',
 			'legal.privacyS5Body' => 'We do not sell your data. It may be shared only with infrastructure providers necessary to run the service (hosting, push notifications, etc.) and authorities when legally required.',
-			_ => null,
-		} ?? switch (path) {
 			'legal.privacyS6Title' => '6. Your rights',
 			'legal.privacyS6Body' => 'You may request access, correction, deletion, or restriction of processing. Account closure (soft delete) is available in Settings; records that must be kept by law may be stored in anonymized form. Submit requests to store@vefayazilim.com.',
 			'legal.kvkkIntro' => 'This notice is provided under Turkish Personal Data Protection Law No. 6698 (KVKK) for processing by Vefa Yazılım.',

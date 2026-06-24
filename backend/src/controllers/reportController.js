@@ -4,6 +4,10 @@ import {
   getAnnualReportData,
 } from "../services/reportDataService.js";
 import {
+  getSiteMonthlyReportData,
+  getSiteAnnualReportData,
+} from "../services/siteReportDataService.js";
+import {
   buildMonthlyReportPdf,
   buildAnnualReportPdf,
 } from "../services/reportPdfService.js";
@@ -49,6 +53,42 @@ export const getBuildingReport = async (req, res, next) => {
       buffer = await buildAnnualReportPdf(data);
       const slug = sanitizeFilenamePart(data.building.name);
       filename = `rapor-yillik-${slug}-${data.period.year}.pdf`;
+    } else {
+      throw new HttpError(400, "Gecerli bir rapor turu secin (monthly veya annual).");
+    }
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Cache-Control", "private, no-store");
+    res.setHeader("Content-Length", String(buffer.length));
+    res.status(200).send(buffer);
+  } catch (err) {
+    handleHttp(err, res, next);
+  }
+};
+
+export const getSiteReport = async (req, res, next) => {
+  try {
+    const { id: siteId } = req.params;
+    const { type, month, year } = req.query;
+
+    let buffer;
+    let filename;
+
+    if (type === "monthly") {
+      const data = await getSiteMonthlyReportData(siteId, req.user.id, {
+        month,
+        year,
+      });
+      buffer = await buildMonthlyReportPdf(data);
+      const m = String(data.period.month).padStart(2, "0");
+      const slug = sanitizeFilenamePart(data.building.name);
+      filename = `site-rapor-${slug}-${data.period.year}-${m}.pdf`;
+    } else if (type === "annual") {
+      const data = await getSiteAnnualReportData(siteId, req.user.id, { year });
+      buffer = await buildAnnualReportPdf(data);
+      const slug = sanitizeFilenamePart(data.building.name);
+      filename = `site-rapor-yillik-${slug}-${data.period.year}.pdf`;
     } else {
       throw new HttpError(400, "Gecerli bir rapor turu secin (monthly veya annual).");
     }

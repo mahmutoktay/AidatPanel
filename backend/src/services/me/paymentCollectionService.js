@@ -1,8 +1,10 @@
 import { HttpError } from "../../utils/httpError.js";
 import { buildPaymentReference, findActiveUserById } from "./profileHelpers.js";
+import { resolveEffectiveBuildingConfig } from "../../utils/effectiveBuildingConfig.js";
 
 /**
  * Sakinin havale / dekont ödeme ekranı için tahsilat bilgisi (IBAN yalnızca okuma).
+ * Site varsayılan IBAN bina override yoksa kullanılır.
  */
 export async function getMyPaymentCollectionService(userId) {
   const user = await findActiveUserById(userId, {
@@ -13,9 +15,33 @@ export async function getMyPaymentCollectionService(userId) {
           select: {
             id: true,
             name: true,
+            siteId: true,
+            blockLabel: true,
+            address: true,
+            addressExtra: true,
+            city: true,
+            dueAmount: true,
+            dueDay: true,
+            currency: true,
             collectionIban: true,
             collectionAccountTitle: true,
             paymentReferenceTemplate: true,
+            collectionVerifiedAt: true,
+            site: {
+              select: {
+                id: true,
+                name: true,
+                address: true,
+                city: true,
+                dueAmount: true,
+                dueDay: true,
+                currency: true,
+                collectionIban: true,
+                collectionAccountTitle: true,
+                paymentReferenceTemplate: true,
+                collectionVerifiedAt: true,
+              },
+            },
           },
         },
       },
@@ -27,21 +53,30 @@ export async function getMyPaymentCollectionService(userId) {
   }
 
   const { apartment } = user;
-  const building = apartment.building;
+  const effective = resolveEffectiveBuildingConfig(apartment.building);
   const apartmentNumber = String(apartment.number);
   const paymentReference = buildPaymentReference(
-    building.paymentReferenceTemplate,
+    effective.effectivePaymentReferenceTemplate,
     apartmentNumber
   );
 
+  const displayName =
+    effective.siteName && effective.blockLabel
+      ? `${effective.siteName} — ${effective.blockLabel}`
+      : effective.siteName
+        ? `${effective.siteName} — ${effective.name}`
+        : effective.name;
+
   return {
-    buildingId: building.id,
-    buildingName: building.name,
+    buildingId: effective.id,
+    buildingName: displayName,
+    siteId: effective.siteId,
+    siteName: effective.siteName,
     apartmentNumber,
-    collectionIban: building.collectionIban,
-    collectionAccountTitle: building.collectionAccountTitle,
-    paymentReferenceTemplate: building.paymentReferenceTemplate,
+    collectionIban: effective.effectiveCollectionIban,
+    collectionAccountTitle: effective.effectiveCollectionAccountTitle,
+    paymentReferenceTemplate: effective.effectivePaymentReferenceTemplate,
     paymentReference,
-    isCollectionConfigured: Boolean(building.collectionIban),
+    isCollectionConfigured: effective.isCollectionConfigured,
   };
 }
