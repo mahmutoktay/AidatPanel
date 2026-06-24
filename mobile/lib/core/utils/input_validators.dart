@@ -92,19 +92,19 @@ class InputValidators {
   /// Name validation (first and last name)
   static String? validateName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Ad soyad boş bırakılamaz';
+      return 'name_required';
     }
 
     if (value.length < 2) {
-      return 'Ad soyad en az 2 karakter olmalıdır';
+      return 'name_too_short';
     }
 
     if (value.length > 50) {
-      return 'Ad soyad çok uzun';
+      return 'name_too_long';
     }
 
     if (!nameRegex.hasMatch(value.trim())) {
-      return 'Geçerli bir ad soyad giriniz';
+      return 'name_invalid';
     }
 
     return null;
@@ -113,15 +113,15 @@ class InputValidators {
   /// Building name validation
   static String? validateBuildingName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Bina adı boş bırakılamaz';
+      return 'building_name_required';
     }
 
     if (value.length < 3) {
-      return 'Bina adı en az 3 karakter olmalıdır';
+      return 'building_name_too_short';
     }
 
     if (value.length > 100) {
-      return 'Bina adı çok uzun';
+      return 'building_name_too_long';
     }
 
     return null;
@@ -130,15 +130,15 @@ class InputValidators {
   /// Address validation
   static String? validateAddress(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Adres boş bırakılamaz';
+      return 'address_required';
     }
 
     if (value.length < 10) {
-      return 'Adres en az 10 karakter olmalıdır';
+      return 'address_too_short';
     }
 
     if (value.length > 200) {
-      return 'Adres çok uzun';
+      return 'address_too_long';
     }
 
     return null;
@@ -147,11 +147,11 @@ class InputValidators {
   /// Apartment number validation
   static String? validateApartmentNumber(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Daire numarası boş bırakılamaz';
+      return 'apartment_number_required';
     }
 
     if (value.length > 10) {
-      return 'Daire numarası çok uzun';
+      return 'apartment_number_too_long';
     }
 
     return null;
@@ -160,20 +160,20 @@ class InputValidators {
   /// Amount validation (for dues, payments, etc.)
   static String? validateAmount(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Tutar boş bırakılamaz';
+      return 'amount_required';
     }
 
     final amount = double.tryParse(value);
     if (amount == null) {
-      return 'Geçerli bir tutar giriniz';
+      return 'amount_invalid';
     }
 
     if (amount < 0) {
-      return 'Tutar negatif olamaz';
+      return 'amount_negative';
     }
 
     if (amount > 1000000) {
-      return 'Tutar çok büyük';
+      return 'amount_too_large';
     }
 
     return null;
@@ -228,15 +228,15 @@ class InputValidators {
     switch (strength) {
       case 0:
       case 1:
-        return 'Zayıf';
+        return 'password_strength_weak';
       case 2:
       case 3:
-        return 'Orta';
+        return 'password_strength_medium';
       case 4:
       case 5:
-        return 'Güçlü';
+        return 'password_strength_strong';
       default:
-        return 'Bilinmeyen';
+        return 'password_strength_unknown';
     }
   }
 
