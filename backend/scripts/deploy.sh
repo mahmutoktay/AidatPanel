@@ -141,7 +141,7 @@ if [[ "$RESTART_ONLY" != true ]]; then
     PARENT="${REMOTE_PATH%/backend}"
     [[ "$PARENT" == "$REMOTE_PATH" ]] && PARENT="$(dirname "$REMOTE_PATH")"
     echo ">> Git deploy: uzak repodan cekiliyor..."
-    ssh_cmd "cd '$PARENT' && git fetch origin && git checkout $GIT_BRANCH && git pull origin $GIT_BRANCH"
+    ssh_cmd "cd '$PARENT' && git fetch origin && git checkout '$GIT_BRANCH' && git pull origin '$GIT_BRANCH'"
   else
     echo ">> Sync deploy (tar): backend/ -> $REMOTE_PATH"
     TAR_FILE="$(temp_tar_file)"
@@ -149,7 +149,7 @@ if [[ "$RESTART_ONLY" != true ]]; then
       --exclude=node_modules \
       --exclude=.env \
       --exclude=.env.* \
-      --exclude='uploads/dekonts/*' \
+      --exclude='uploads/dekonts/**' \
       --exclude='*-firebase-adminsdk-*.json' \
       --exclude=scripts/deploy.local.json \
       --exclude=e2e-data \
@@ -193,7 +193,7 @@ pm2 save"
     fi
   elif [[ "$RESTART_METHOD" == "pm2" ]]; then
     echo ">> Process kontrolu (pm2)..."
-    ssh_cmd "source ~/.nvm/nvm.sh 2>/dev/null || true; pm2 describe '$PM2_NAME' | head -10"
+    ssh_cmd "source ~/.nvm/nvm.sh 2>/dev/null || true; pm2 describe '$PM2_NAME' 2>/dev/null || true" | head -10
   fi
 
   echo ""
