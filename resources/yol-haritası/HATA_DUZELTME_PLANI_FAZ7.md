@@ -90,7 +90,7 @@ Bu belge, analiz aşamasında tespit edilen hataların atomik düzeyde parçalar
   2. Eğer `e is DioException` ve `e.type == DioExceptionType.connectionError` vb. ise `throw e;` diyerek hatayı yukarı ilet ve `clearAuth()`'u atla.
   3. Yalnızca backend'den dönen ret (status 401) durumunda auth state'ini temizle.
 
-### 3.2. Clean Architecture: Repository Katmanının Atlanması (Devam Ediyor)
+### ~~3.2. Clean Architecture: Repository Katmanının Atlanması~~ ✅
 - **Etkilenen Dosyalar:** `ReportsNotifier`, `SubscriptionNotifier`, `ProfileNotifier`, `DekontProvider`, `TicketsNotifier`
 - **Hata Türü:** Architecture Violation
 - **Kök Neden:** Provider'ların direkt Data Source çağırması.

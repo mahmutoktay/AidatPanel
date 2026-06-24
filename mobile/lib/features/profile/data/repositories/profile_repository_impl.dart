@@ -1,7 +1,7 @@
 import '../../../../core/network/api_exception.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../datasources/profile_remote_datasource.dart';
-import 'profile_repository.dart';
+import '../../domain/repositories/profile_repository.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource _remoteDataSource;

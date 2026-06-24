@@ -29,7 +29,7 @@ import '../core/utils/iban_utils.dart';
 import '../features/dues/domain/entities/due_entity.dart';
 import '../features/dues/domain/entities/due_remind_result.dart';
 import '../features/dues/domain/repositories/dues_repository.dart';
-import '../features/profile/data/repositories/profile_repository.dart';
+import '../features/profile/domain/repositories/profile_repository.dart';
 import '../features/subscription/domain/entities/subscription_entity.dart';
 import '../features/subscription/domain/repositories/subscription_repository.dart';
 import '../features/tickets/domain/entities/ticket_entity.dart';

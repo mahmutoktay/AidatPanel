@@ -4,7 +4,7 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../data/repositories/profile_repository.dart';
+import '../../domain/repositories/profile_repository.dart';
 import 'profile_provider.dart';
 
 class ProfileState {
