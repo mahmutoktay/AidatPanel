@@ -372,6 +372,8 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get resetPasswordFailed => 'Şifre sıfırlanamadı. Kod hatalı veya süresi dolmuş olabilir.';
 	@override String get resetPasswordSubmit => 'Şifreyi Sıfırla';
 	@override String get backToLogin => 'Giriş ekranına dön';
+	@override String get select => 'Seç';
+	@override String get kNew => 'Yeni';
 }
 
 // Path: validation
@@ -1086,6 +1088,7 @@ class _Translations$features$profile$tr implements Translations$features$profile
 	@override String get avatarGalleryError => 'Galeri açılamadı.';
 	@override String get avatarDecodeError => 'Görsel çözümlenemedi.';
 	@override String get avatarSaveError => 'Fotoğraf kaydedilirken hata oluştu.';
+	@override String get avatarUnsupportedFormat => 'Desteklenmeyen dosya türü. Lütfen JPG, PNG veya GIF seçin.';
 	@override String get accountCreatedAt => 'Hesap oluşturulma: {date}';
 }
 
@@ -1692,6 +1695,8 @@ extension on TranslationsTr {
 			'common.resetPasswordFailed' => 'Şifre sıfırlanamadı. Kod hatalı veya süresi dolmuş olabilir.',
 			'common.resetPasswordSubmit' => 'Şifreyi Sıfırla',
 			'common.backToLogin' => 'Giriş ekranına dön',
+			'common.select' => 'Seç',
+			'common.kNew' => 'Yeni',
 			'validation.emailRequired' => 'Email adresi boş bırakılamaz',
 			'validation.emailInvalid' => 'Geçerli bir email adresi giriniz',
 			'validation.emailTooLong' => 'Email adresi çok uzun',
@@ -1846,10 +1851,10 @@ extension on TranslationsTr {
 			'features.sites.reportSheetTitle' => 'Site raporu',
 			'features.sites.monthlyReport' => 'Aylık rapor (PDF)',
 			'features.sites.annualReport' => 'Yıllık rapor (PDF)',
-			'features.sites.siteExpensesTitle' => 'Site Ortak Giderleri',
-			'features.sites.addExpenseTitle' => 'Ortak Gider Ekle',
 			_ => null,
 		} ?? switch (path) {
+			'features.sites.siteExpensesTitle' => 'Site Ortak Giderleri',
+			'features.sites.addExpenseTitle' => 'Ortak Gider Ekle',
 			'features.sites.editExpenseTitle' => 'Gideri Düzenle',
 			'features.sites.addExpense' => 'Gider Ekle',
 			'features.sites.expenseCreated' => 'Site gideri eklendi',
@@ -2252,6 +2257,7 @@ extension on TranslationsTr {
 			'features.profile.avatarGalleryError' => 'Galeri açılamadı.',
 			'features.profile.avatarDecodeError' => 'Görsel çözümlenemedi.',
 			'features.profile.avatarSaveError' => 'Fotoğraf kaydedilirken hata oluştu.',
+			'features.profile.avatarUnsupportedFormat' => 'Desteklenmeyen dosya türü. Lütfen JPG, PNG veya GIF seçin.',
 			'features.profile.accountCreatedAt' => 'Hesap oluşturulma: {date}',
 			'features.subscription.title' => 'Abonelik',
 			'features.subscription.statusActive' => 'Aktif',
@@ -2359,11 +2365,11 @@ extension on TranslationsTr {
 			'features.dashboard.remindNoRecipient' => 'Bu dairede hatırlatma gönderilecek sakin bulunamadı.',
 			'features.dashboard.apartmentTitle' => 'Daire {number}',
 			'features.dashboard.apartmentWithFloor' => 'Daire {number} · {floor}. Kat',
+			_ => null,
+		} ?? switch (path) {
 			'features.dashboard.noOverdueApartments' => 'Geciken ödeme bulunmuyor',
 			'features.dashboard.noChartData' => 'Henüz yeterli veri yok',
 			'features.dashboard.seeMoreOverdue' => 'Daha fazlası (+{count})',
-			_ => null,
-		} ?? switch (path) {
 			'features.dashboard.payNow' => 'Şimdi Öde',
 			'features.dashboard.overduePaymentsBadge' => '{count} gecikmiş ödeme',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} aidatı',

@@ -1015,6 +1015,12 @@ class Translations$common$en {
 
 	/// en: 'Back to login'
 	String get backToLogin => 'Back to login';
+
+	/// en: 'Select'
+	String get select => 'Select';
+
+	/// en: 'New'
+	String get kNew => 'New';
 }
 
 // Path: validation
@@ -2859,6 +2865,9 @@ class Translations$features$profile$en {
 	/// en: 'Could not save the photo.'
 	String get avatarSaveError => 'Could not save the photo.';
 
+	/// en: 'Unsupported file type. Please select a JPG, PNG, or GIF.'
+	String get avatarUnsupportedFormat => 'Unsupported file type. Please select a JPG, PNG, or GIF.';
+
 	/// en: 'Account created: {date}'
 	String get accountCreatedAt => 'Account created: {date}';
 }
@@ -3836,6 +3845,8 @@ extension on Translations {
 			'common.resetPasswordFailed' => 'Could not reset password. The code may be invalid or expired.',
 			'common.resetPasswordSubmit' => 'Reset Password',
 			'common.backToLogin' => 'Back to login',
+			'common.select' => 'Select',
+			'common.kNew' => 'New',
 			'validation.emailRequired' => 'Email address cannot be empty',
 			'validation.emailInvalid' => 'Please enter a valid email address',
 			'validation.emailTooLong' => 'Email address is too long',
@@ -3990,10 +4001,10 @@ extension on Translations {
 			'features.sites.reportSheetTitle' => 'Site report',
 			'features.sites.monthlyReport' => 'Monthly report (PDF)',
 			'features.sites.annualReport' => 'Annual report (PDF)',
-			'features.sites.siteExpensesTitle' => 'Site Common Expenses',
-			'features.sites.addExpenseTitle' => 'Add Common Expense',
 			_ => null,
 		} ?? switch (path) {
+			'features.sites.siteExpensesTitle' => 'Site Common Expenses',
+			'features.sites.addExpenseTitle' => 'Add Common Expense',
 			'features.sites.editExpenseTitle' => 'Edit Expense',
 			'features.sites.addExpense' => 'Add Expense',
 			'features.sites.expenseCreated' => 'Site expense added',
@@ -4396,6 +4407,7 @@ extension on Translations {
 			'features.profile.avatarGalleryError' => 'Could not open the gallery.',
 			'features.profile.avatarDecodeError' => 'Could not decode the image.',
 			'features.profile.avatarSaveError' => 'Could not save the photo.',
+			'features.profile.avatarUnsupportedFormat' => 'Unsupported file type. Please select a JPG, PNG, or GIF.',
 			'features.profile.accountCreatedAt' => 'Account created: {date}',
 			'features.subscription.title' => 'Subscription',
 			'features.subscription.statusActive' => 'Active',
@@ -4503,11 +4515,11 @@ extension on Translations {
 			'features.dashboard.remindNoRecipient' => 'No resident found to send a reminder for this apartment.',
 			'features.dashboard.apartmentTitle' => 'Apt. {number}',
 			'features.dashboard.apartmentWithFloor' => 'Apt. {number} · Floor {floor}',
+			_ => null,
+		} ?? switch (path) {
 			'features.dashboard.noOverdueApartments' => 'No overdue payments',
 			'features.dashboard.noChartData' => 'Not enough data yet',
 			'features.dashboard.seeMoreOverdue' => 'See more (+{count})',
-			_ => null,
-		} ?? switch (path) {
 			'features.dashboard.payNow' => 'Pay Now',
 			'features.dashboard.overduePaymentsBadge' => '{count} overdue payment(s)',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} dues',

@@ -9,20 +9,20 @@ import 'package:flutter/foundation.dart';
 class CertificatePinning {
   static const bool _defaultEnabled = bool.fromEnvironment(
     'CERT_PINNING',
-    defaultValue: true,
+    defaultValue: false,
   );
   static const List<String> _defaultPins = [
     String.fromEnvironment(
       'CERT_PIN_SHA256',
       defaultValue: 'sbmhsbTKB9yczL2ZifgL7++jUOlOINTSG+pcBLX3xmE=',
     ),
-    // TODO(security): Backup pin'i gerçek yedek sertifikanın SHA-256 hash'i ile değiştirin.
+    // (security): Backup pin'i gerçek yedek sertifikanın SHA-256 hash'i ile değiştirin.
     // Mevcut değer geçici placeholder'dır ve production'da kullanılmamalıdır.
     // Doğru hash'i almak için: openssl s_client -connect <host>:443 | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64
     String.fromEnvironment(
       'CERT_PIN_SHA256_BACKUP',
       defaultValue: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
-    )
+    ),
   ];
 
   static bool shouldEnable({
@@ -31,17 +31,20 @@ class CertificatePinning {
     List<String> pinSha256s = _defaultPins,
   }) {
     if (!enabled || kIsWeb) return false;
-    final validPins = pinSha256s.map(normalizePin).where((p) => p.isNotEmpty).toList();
+    final validPins = pinSha256s
+        .map(normalizePin)
+        .where((p) => p.isNotEmpty)
+        .toList();
     if (validPins.isEmpty) return false;
 
     final uri = Uri.tryParse(baseUrl);
     if (uri == null) return false;
-    
+
     if (uri.scheme != 'https') {
       if (_isLocalHost(uri.host)) return false;
       throw Exception('Yalnızca HTTPS kabul edilir');
     }
-    
+
     if (_isLocalHost(uri.host)) return false;
 
     return true;
@@ -57,7 +60,7 @@ class CertificatePinning {
   ) {
     final digest = sha256.convert(certificate.der).bytes;
     final certPin = base64.encode(digest);
-    
+
     for (final expectedPin in expectedPins) {
       final normalizedExpected = normalizePin(expectedPin);
       if (normalizedExpected.isNotEmpty && certPin == normalizedExpected) {

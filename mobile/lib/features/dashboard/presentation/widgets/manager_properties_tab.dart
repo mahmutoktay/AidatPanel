@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../l10n/strings.g.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
+import '../widgets/manager_buildings_tab.dart';
+import 'property_type_selector.dart';
 import '../../../sites/presentation/widgets/buildings_expandable_fab.dart';
 import '../../../sites/presentation/widgets/manager_sites_tab.dart';
-import '../widgets/manager_buildings_tab.dart';
+import 'property_type_picker_sheet.dart';
 
-/// Siteler | Binalar alt sekmeleri + genişleyen FAB.
+/// Siteler | Binalar geçişi için premium seçici.
 class ManagerPropertiesTab extends ConsumerStatefulWidget {
   final AsyncValue<List<BuildingEntity>> standaloneBuildingsAsync;
 
@@ -24,59 +23,37 @@ class ManagerPropertiesTab extends ConsumerStatefulWidget {
       _ManagerPropertiesTabState();
 }
 
-class _ManagerPropertiesTabState extends ConsumerState<ManagerPropertiesTab>
-    with SingleTickerProviderStateMixin {
-  late final TabController _innerTabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _innerTabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _innerTabController.dispose();
-    super.dispose();
-  }
+class _ManagerPropertiesTabState extends ConsumerState<ManagerPropertiesTab> {
+  PropertyType _selectedType = PropertyType.sites;
 
   @override
   Widget build(BuildContext context) {
-    final t = context.t.features.sites;
-
     return Stack(
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: AppSizes.screenBodyScrollPadding.copyWith(
-                top: 0,
-                bottom: AppSizes.spacingS,
+children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: PropertyTypeSelector(
+                  selectedType: _selectedType,
+                  onChanged: (type) => setState(() => _selectedType = type),
+                ),
               ),
-              child: TabBar(
-                controller: _innerTabController,
-                labelColor: AppColors.primary,
-                unselectedLabelColor: AppColors.mutedText,
-                indicatorColor: AppColors.primary,
-                labelStyle: AppTypography.button.copyWith(fontSize: 16),
-                unselectedLabelStyle:
-                    AppTypography.body1.copyWith(fontSize: 16),
-                tabs: [
-                  Tab(text: t.tabSites),
-                  Tab(text: t.tabBuildings),
-                ],
-              ),
-            ),
+              const SizedBox(height: 8.0),
             Expanded(
-              child: TabBarView(
-                controller: _innerTabController,
-                children: [
-                  const ManagerSitesTab(),
-                  ManagerBuildingsTab(
-                    buildingsAsync: widget.standaloneBuildingsAsync,
-                  ),
-                ],
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                child: _selectedType == PropertyType.sites
+                    ? ManagerSitesTab(
+                        key: const ValueKey(PropertyType.sites),
+                      )
+                    : ManagerBuildingsTab(
+                        key: const ValueKey(PropertyType.buildings),
+                        buildingsAsync: widget.standaloneBuildingsAsync,
+                      ),
               ),
             ),
           ],

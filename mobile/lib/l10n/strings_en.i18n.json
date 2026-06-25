@@ -360,7 +360,9 @@
     "resetPasswordSuccess": "Your password has been reset. You can sign in with your new password.",
     "resetPasswordFailed": "Could not reset password. The code may be invalid or expired.",
     "resetPasswordSubmit": "Reset Password",
-    "backToLogin": "Back to login"
+    "backToLogin": "Back to login",
+    "select": "Select",
+    "new": "New"
   },
   "validation": {
     "emailRequired": "Email address cannot be empty",
@@ -944,6 +946,7 @@
       "avatarGalleryError": "Could not open the gallery.",
       "avatarDecodeError": "Could not decode the image.",
       "avatarSaveError": "Could not save the photo.",
+      "avatarUnsupportedFormat": "Unsupported file type. Please select a JPG, PNG, or GIF.",
       "accountCreatedAt": "Account created: {date}"
     },
     "subscription": {

@@ -360,7 +360,9 @@
     "resetPasswordSuccess": "Şifreniz sıfırlandı. Yeni şifrenizle giriş yapabilirsiniz.",
     "resetPasswordFailed": "Şifre sıfırlanamadı. Kod hatalı veya süresi dolmuş olabilir.",
     "resetPasswordSubmit": "Şifreyi Sıfırla",
-    "backToLogin": "Giriş ekranına dön"
+    "backToLogin": "Giriş ekranına dön",
+    "select": "Seç",
+    "new": "Yeni"
   },
   "validation": {
     "emailRequired": "Email adresi boş bırakılamaz",
@@ -944,6 +946,7 @@
       "avatarGalleryError": "Galeri açılamadı.",
       "avatarDecodeError": "Görsel çözümlenemedi.",
       "avatarSaveError": "Fotoğraf kaydedilirken hata oluştu.",
+      "avatarUnsupportedFormat": "Desteklenmeyen dosya türü. Lütfen JPG, PNG veya GIF seçin.",
       "accountCreatedAt": "Hesap oluşturulma: {date}"
     },
     "subscription": {

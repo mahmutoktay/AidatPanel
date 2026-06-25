@@ -32,7 +32,13 @@ class _BuildingsExpandableFabState extends State<BuildingsExpandableFab>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: _duration);
+    _controller = AnimationController(vsync: this, duration: _duration)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed ||
+            status == AnimationStatus.dismissed) {
+          setState(() {});
+        }
+      });
     _expandAnimation = CurvedAnimation(parent: _controller, curve: _curve);
   }
 
@@ -98,9 +104,20 @@ class _BuildingsExpandableFabState extends State<BuildingsExpandableFab>
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         for (var i = 0; i < actions.length; i++)
-          SizeTransition(
-            sizeFactor: _expandAnimation,
-            alignment: Alignment.bottomCenter,
+          AnimatedBuilder(
+            animation: _expandAnimation,
+            builder: (context, child) {
+              final isCompleted = _controller.isCompleted;
+              final align = Align(
+                alignment: Alignment.bottomCenter,
+                heightFactor: _expandAnimation.value,
+                child: child,
+              );
+              if (isCompleted) {
+                return align;
+              }
+              return ClipRect(child: align);
+            },
             child: FadeTransition(
               opacity: _expandAnimation,
               child: Padding(
@@ -109,13 +126,16 @@ class _BuildingsExpandableFabState extends State<BuildingsExpandableFab>
               ),
             ),
           ),
-        FloatingActionButton(
+        FloatingActionButton.extended(
           onPressed: _toggle,
-          child: AnimatedRotation(
+          icon: AnimatedRotation(
             turns: _open ? 0.125 : 0,
             duration: _duration,
             curve: _curve,
             child: Icon(_open ? Icons.close : Icons.add),
+          ),
+          label: Text(
+            _open ? context.t.common.close : context.t.common.kNew,
           ),
         ),
       ],
@@ -142,45 +162,43 @@ class _MiniFabAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: action.onTap,
-        borderRadius: BorderRadius.circular(28),
-        child: Container(
-          constraints: const BoxConstraints(
-            minHeight: AppSizes.minTouchTarget,
-            minWidth: AppSizes.minTouchTarget,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.inkDark.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.spacingM,
-            vertical: AppSizes.spacingS,
-          ),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.inkDark.withValues(alpha: 0.08),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(action.icon, color: AppColors.primary, size: 22),
-              const SizedBox(width: AppSizes.spacingS),
-              Text(
-                action.label,
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                  color: AppColors.inkDark,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: action.onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 10,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(action.icon, color: AppColors.primary, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  action.label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: AppColors.inkDark,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

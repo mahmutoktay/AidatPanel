@@ -124,6 +124,30 @@ object PluginRegistrant {
 
         )
 
+        addPluginReflective(
+            flutterEngine,
+            "io.flutter.plugins.firebase.crashlytics.FlutterFirebaseCrashlyticsPlugin",
+            "firebase_crashlytics"
+        )
+
+        addPluginReflective(
+            flutterEngine,
+            "io.flutter.plugins.firebase.analytics.FlutterFirebaseAnalyticsPlugin",
+            "firebase_analytics"
+        )
+
+        addPluginReflective(
+            flutterEngine,
+            "dev.fluttercommunity.plus.device_info.DeviceInfoPlusPlugin",
+            "device_info_plus"
+        )
+
+        addPluginReflective(
+            flutterEngine,
+            "com.tekartik.sqflite.SqflitePlugin",
+            "sqflite_android"
+        )
+
     }
 
 
