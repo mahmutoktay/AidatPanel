@@ -191,9 +191,12 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                 if (isLoading && dues.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: const LinearProgressIndicator(minHeight: 3),
+                    child: LinearProgressIndicator(
+                      minHeight: 2,
+                      backgroundColor: AppColors.lineLight,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.statusBlue,
+                      ),
                     ),
                   ),
               ]),
@@ -508,9 +511,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     if (_initialized || buildings.isEmpty) return;
     _initialized = true;
     final firstId = buildings.first.id;
-    ref.read(selectedBuildingIdProvider.notifier).select(firstId);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      ref.read(selectedBuildingIdProvider.notifier).select(firstId);
       _reloadDues();
     });
   }

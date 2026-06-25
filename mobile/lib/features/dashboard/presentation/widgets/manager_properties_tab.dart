@@ -40,7 +40,7 @@ children: [
                   onChanged: (type) => setState(() => _selectedType = type),
                 ),
               ),
-              const SizedBox(height: 8.0),
+              const SizedBox(height: 4.0),
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),

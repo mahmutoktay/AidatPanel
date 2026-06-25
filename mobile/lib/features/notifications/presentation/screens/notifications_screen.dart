@@ -194,9 +194,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
             ),
             if (state.isLoading && state.items.isNotEmpty) ...[
               const SizedBox(height: AppSizes.spacingS),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: const LinearProgressIndicator(minHeight: 3),
+              LinearProgressIndicator(
+                minHeight: 2,
+                backgroundColor: AppColors.lineLight,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppColors.statusBlue,
+                ),
               ),
             ],
           ],

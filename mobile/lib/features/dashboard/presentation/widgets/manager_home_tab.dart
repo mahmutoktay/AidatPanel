@@ -168,7 +168,13 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
                 const SizedBox(height: AppSizes.spacingS),
               ],
               if (isRefreshing)
-                const LinearProgressIndicator(minHeight: 2),
+                LinearProgressIndicator(
+                  minHeight: 2,
+                  backgroundColor: AppColors.lineLight,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.statusBlue,
+                  ),
+                ),
               if (isRefreshing) const SizedBox(height: AppSizes.spacingS),
               ManagerSummaryStatsGrid(stats: summaryStats),
               const SizedBox(height: AppSizes.spacingM),

@@ -568,11 +568,15 @@ class MinimalSearchField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final bool autofocus;
 
+  /// Sheet içinde beyaz zemin, normal formda varsayılan.
+  final bool whiteBackground;
+
   const MinimalSearchField({
     super.key,
     required this.hint,
     required this.onChanged,
     this.autofocus = false,
+    this.whiteBackground = false,
   });
 
   @override
@@ -580,7 +584,7 @@ class MinimalSearchField extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
       decoration: BoxDecoration(
-        color: ProfileSettingsUi.fieldFill,
+        color: whiteBackground ? AppColors.surface : ProfileSettingsUi.fieldFill,
         borderRadius: BorderRadius.circular(ProfileSettingsUi.fieldRadius),
       ),
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),

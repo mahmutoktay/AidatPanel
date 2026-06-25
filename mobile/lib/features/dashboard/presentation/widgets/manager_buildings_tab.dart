@@ -107,7 +107,7 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverPadding(
-            padding: AppSizes.screenBodyScrollPadding.copyWith(bottom: 0),
+            padding: AppSizes.screenBodyScrollPadding.copyWith(top: AppSizes.spacingS, bottom: 0),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 _buildActionButtons(context),

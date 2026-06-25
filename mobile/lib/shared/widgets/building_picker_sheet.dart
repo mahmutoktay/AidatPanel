@@ -85,126 +85,84 @@ class _BuildingPickerSheetState extends State<BuildingPickerSheet> {
         widget.includeAllOption && _query.trim().isEmpty;
     final listCount = filtered.length + (showAllOption ? 1 : 0);
 
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.72,
-      minChildSize: 0.45,
-      maxChildSize: 0.92,
-      builder: (_, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(PremiumBottomSheetScaffold.topRadius),
+    return PremiumBottomSheetScaffold(
+      title: t.selectBuilding,
+      showCloseButton: true,
+      onClose: () => Navigator.of(context).pop(
+        const BuildingPickerResult.cancelled(),
+      ),
+      scrollable: true,
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
+            child: MinimalSearchField(
+              hint: t.searchBuildings,
+              autofocus: widget.buildings.length > 8,
+              whiteBackground: true,
+              onChanged: (value) => setState(() => _query = value),
             ),
           ),
-          child: Column(
-            children: [
-              const SizedBox(height: AppSizes.spacingS),
-              const PremiumSheetHandle(),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSizes.spacingL,
-                  AppSizes.spacingM,
-                  AppSizes.spacingS,
-                  AppSizes.spacingS,
+          const SizedBox(height: AppSizes.spacingS),
+          if (listCount == 0)
+            Padding(
+              padding: const EdgeInsets.all(AppSizes.spacingL),
+              child: Text(
+                context.t.common.noResults,
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.mutedText,
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        t.selectBuilding,
-                        style: AppTypography.h3.copyWith(
-                          color: AppColors.inkDark,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(
-                        const BuildingPickerResult.cancelled(),
-                      ),
-                      icon: const Icon(Icons.close_rounded),
-                      tooltip: context.t.common.cancelBtn,
-                    ),
-                  ],
-                ),
+                textAlign: TextAlign.center,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
-                child: MinimalSearchField(
-                  hint: t.searchBuildings,
-                  autofocus: widget.buildings.length > 8,
-                  onChanged: (value) => setState(() => _query = value),
-                ),
-              ),
-            const SizedBox(height: AppSizes.spacingS),
-            Expanded(
-              child: listCount == 0
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppSizes.spacingL),
-                        child: Text(
-                          context.t.common.noResults,
-                          style: AppTypography.body1.copyWith(
-                            color: AppColors.mutedText,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    )
-                  : ListView.builder(
-                      controller: scrollController,
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSizes.spacingM,
-                        0,
-                        AppSizes.spacingM,
-                        AppSizes.spacingL,
-                      ),
-                      itemCount: listCount,
-                      itemBuilder: (_, index) {
-                        if (showAllOption && index == 0) {
-                          return _BuildingPickerTile(
-                            title: t.allBuildings,
-                            subtitle: t.allBuildingsSummary.replaceAll(
-                              '{count}',
-                              '${widget.buildings.length}',
-                            ),
-                            selected: widget.selectedBuildingId == null,
-                            leadingIcon: Icons.grid_view_rounded,
-                            onTap: () => Navigator.of(context).pop(
-                              const BuildingPickerResult.allBuildings(),
-                            ),
-                          );
-                        }
-
-                        final buildingIndex =
-                            showAllOption ? index - 1 : index;
-                        final building = filtered[buildingIndex];
-                        final apartmentLabel = t.buildingUnitsSummary
-                            .replaceAll(
-                              '{apartments}',
-                              '${building.totalApartments}',
-                            );
-
-                        return _BuildingPickerTile(
-                          title: building.name,
-                          subtitle: building.displayAddress.isNotEmpty
-                              ? '${building.displayAddress} · $apartmentLabel'
-                              : apartmentLabel,
-                          selected: widget.selectedBuildingId == building.id,
-                          leadingIcon: Icons.apartment_rounded,
-                          onTap: () => Navigator.of(context).pop(
-                            BuildingPickerResult.building(building.id),
-                          ),
-                        );
-                      },
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: AppSizes.spacingL),
+              itemCount: listCount,
+              itemBuilder: (_, index) {
+                if (showAllOption && index == 0) {
+                  return _BuildingPickerTile(
+                    title: t.allBuildings,
+                    subtitle: t.allBuildingsSummary.replaceAll(
+                      '{count}',
+                      '${widget.buildings.length}',
                     ),
+                    selected: widget.selectedBuildingId == null,
+                    leadingIcon: Icons.grid_view_rounded,
+                    onTap: () => Navigator.of(context).pop(
+                      const BuildingPickerResult.allBuildings(),
+                    ),
+                  );
+                }
+
+                final buildingIndex =
+                    showAllOption ? index - 1 : index;
+                final building = filtered[buildingIndex];
+                final apartmentLabel = t.buildingUnitsSummary
+                    .replaceAll(
+                      '{apartments}',
+                      '${building.totalApartments}',
+                    );
+
+                return _BuildingPickerTile(
+                  title: building.name,
+                  subtitle: building.displayAddress.isNotEmpty
+                      ? '${building.displayAddress} · $apartmentLabel'
+                      : apartmentLabel,
+                  selected: widget.selectedBuildingId == building.id,
+                  leadingIcon: Icons.apartment_rounded,
+                  onTap: () => Navigator.of(context).pop(
+                    BuildingPickerResult.building(building.id),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
@@ -226,25 +184,22 @@ class _BuildingPickerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: selected
-          ? AppColors.primary.withValues(alpha: 0.06)
-          : Colors.transparent,
-      borderRadius: BorderRadius.circular(14),
-      child: PremiumActionSheetTile(
-        icon: leadingIcon,
-        label: title,
-        subtitle: subtitle,
-        iconColor: AppColors.statusBlue,
-        trailing: selected
-            ? const Icon(
-                Icons.check_circle_rounded,
-                color: AppColors.statusGreen,
-                size: 22,
-              )
-            : null,
-        onTap: onTap,
-      ),
+    return PremiumActionSheetTile(
+      icon: leadingIcon,
+      label: title,
+      subtitle: subtitle,
+      iconColor: AppColors.statusBlue,
+      iconBackground: selected
+          ? AppColors.statusBlue.withValues(alpha: 0.15)
+          : null,
+      trailing: selected
+          ? const Icon(
+              Icons.check_circle_rounded,
+              color: AppColors.statusGreen,
+              size: 22,
+            )
+          : null,
+      onTap: onTap,
     );
   }
 }
