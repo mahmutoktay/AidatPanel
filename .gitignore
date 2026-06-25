@@ -10,5 +10,8 @@
 .env.local
 .env.test
 
+# Plans / analysis reports
+plans/
+
 # Dependencies
 node_modules/
