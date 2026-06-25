@@ -1,5 +1,6 @@
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
+import { logger } from "../config/logger.js";
 import { assertManagerOwnsSite } from "../utils/access.js";
 import {
   collectionFieldsFromBody,
@@ -102,8 +103,8 @@ export async function getSitesService(managerId, filters = {}) {
         const agg = await getSiteAggregationService(site.id, managerId, { month, year });
         collectedAmount = agg.collectedAmount;
         expectedAmount = agg.expectedAmount;
-      } catch {
-        // ignore aggregation errors for list
+      } catch (err) {
+        logger.warn({ siteId: site.id, err: err.message }, "Site aggregation hesaplanamadi");
       }
 
       const { buildings, _count, ...rest } = site;
@@ -176,9 +177,9 @@ export async function deleteSiteService(id, managerId) {
     select: { id: true },
   });
 
-  for (const b of buildings) {
-    await deleteBuildingService(b.id, managerId);
-  }
+  await Promise.all(
+    buildings.map((b) => deleteBuildingService(b.id, managerId))
+  );
 
   await prisma.siteExpense.deleteMany({ where: { siteId: id } });
 

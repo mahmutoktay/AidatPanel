@@ -72,7 +72,15 @@ router.post(
   validate(siteSchemas.createSiteExpense),
   createSiteExpense
 );
-router.put("/:siteId/expenses/:expenseId", updateSiteExpense);
-router.delete("/:siteId/expenses/:expenseId", deleteSiteExpense);
+router.put(
+  "/:siteId/expenses/:expenseId",
+  validate(siteSchemas.updateSiteExpense),
+  updateSiteExpense
+);
+router.delete(
+  "/:siteId/expenses/:expenseId",
+  validate(siteSchemas.deleteSiteExpense),
+  deleteSiteExpense
+);
 
 export default router;

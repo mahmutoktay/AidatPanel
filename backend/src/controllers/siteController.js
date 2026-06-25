@@ -59,8 +59,8 @@ export const getSiteBuildings = asyncHandler(async (req, res) => {
 
 export const getSiteAggregation = asyncHandler(async (req, res) => {
   const now = new Date();
-  const month = req.query.month ? parseInt(String(req.query.month), 10) : now.getMonth() + 1;
-  const year = req.query.year ? parseInt(String(req.query.year), 10) : now.getFullYear();
+  const month = req.query.month ?? now.getMonth() + 1;
+  const year = req.query.year ?? now.getFullYear();
   const data = await getSiteAggregationService(req.params.id, req.user.id, {
     month,
     year,

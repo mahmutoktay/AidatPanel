@@ -43,7 +43,7 @@ export async function resolveEffectiveBuildingConfig(building, db = prisma) {
   const displayName =
     building.name?.trim() ||
     building.blockLabel?.trim() ||
-    building.name;
+    "Bina";
 
   return {
     effectiveDueAmount,

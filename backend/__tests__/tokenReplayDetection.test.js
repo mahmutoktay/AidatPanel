@@ -4,34 +4,28 @@ import jwt from "jsonwebtoken";
 
 const REFRESH_SECRET = "test-refresh-secret-32-chars-min!!";
 
-// --- Mocks ---
+function hashToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+const mockTx = {
+  $queryRawUnsafe: jest.fn(),
+  userSession: { update: jest.fn(), create: jest.fn(), updateMany: jest.fn() },
+  user: { update: jest.fn() },
+};
+
+const mockPrisma = {
+  user: { findFirst: jest.fn(), update: jest.fn() },
+  userSession: { update: jest.fn(), updateMany: jest.fn() },
+  $transaction: jest.fn(),
+};
 
 jest.unstable_mockModule("../src/config/db.js", () => ({
-  prisma: {
-    user: {
-      findFirst: jest.fn(),
-      update: jest.fn(),
-    },
-    userSession: {
-      update: jest.fn(),
-      updateMany: jest.fn(),
-    },
-  },
+  prisma: mockPrisma,
 }));
 
 jest.unstable_mockModule("../src/realtime/realtimeHub.js", () => ({
   publishToUser: jest.fn(),
-}));
-
-jest.unstable_mockModule("../src/services/sessionService.js", () => ({
-  assertSessionActive: jest.fn(),
-  createSession: jest.fn(),
-  revokeOtherSessions: jest.fn(),
-  touchSession: jest.fn(),
-}));
-
-jest.unstable_mockModule("../src/services/inviteCodeService.js", () => ({
-  validateInviteCode: jest.fn(),
 }));
 
 jest.unstable_mockModule("../src/utils/generateTokens.js", () => ({
@@ -40,12 +34,9 @@ jest.unstable_mockModule("../src/utils/generateTokens.js", () => ({
 }));
 
 const { prisma } = await import("../src/config/db.js");
-const { assertSessionActive, touchSession } = await import(
-  "../src/services/sessionService.js"
+const { refreshAccessTokenService } = await import(
+  "../src/services/authService.js"
 );
-const { refreshAccessTokenService } = await import("../src/services/authService.js");
-
-// --- Helpers ---
 
 function makeRefreshToken(userId, sessionId, rv = 0) {
   return jwt.sign(
@@ -55,16 +46,13 @@ function makeRefreshToken(userId, sessionId, rv = 0) {
   );
 }
 
-function hashToken(token) {
-  return crypto.createHash("sha256").update(token).digest("hex");
-}
-
-// --- Tests ---
-
 describe("authService — token replay detection", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.REFRESH_TOKEN_SECRET = REFRESH_SECRET;
+    // restoreMocks:true resets jest.fn() implementations —
+    // $transaction callback'i her test öncesinde yeniden bağlanmalı.
+    mockPrisma.$transaction.mockImplementation((cb) => cb(mockTx));
   });
 
   test("refresh succeeds when token hash matches", async () => {
@@ -78,18 +66,18 @@ describe("authService — token replay detection", () => {
       refreshTokenVersion: 0,
     });
 
-    assertSessionActive.mockResolvedValue({ id: "s1", lastTokenHash: tokenHash });
-    touchSession.mockResolvedValue(undefined);
-    prisma.userSession.update.mockResolvedValue({});
+    mockTx.$queryRawUnsafe.mockResolvedValue([
+      { id: "s1", lastTokenHash: tokenHash },
+    ]);
+    mockTx.userSession.update.mockResolvedValue({});
 
     const result = await refreshAccessTokenService(token, {});
 
-    // touchSession called (not revoked)
-    expect(touchSession).toHaveBeenCalledWith("s1");
-    // No revoke triggered
+    expect(mockTx.$queryRawUnsafe).toHaveBeenCalled();
+    expect(mockTx.userSession.update).toHaveBeenCalled();
+    expect(mockTx.user.update).not.toHaveBeenCalled();
     expect(prisma.userSession.updateMany).not.toHaveBeenCalled();
-    // rv match → refreshTokenVersion NOT incremented
-    expect(prisma.user.update).not.toHaveBeenCalled();
+    expect(result).toBeTruthy();
   });
 
   test("replay attack: old token hash mismatch → revoke all sessions", async () => {
@@ -103,27 +91,25 @@ describe("authService — token replay detection", () => {
       refreshTokenVersion: 0,
     });
 
-    assertSessionActive.mockResolvedValue({ id: "s1", lastTokenHash: differentHash });
-    prisma.user.update.mockResolvedValue({});
-    prisma.userSession.updateMany.mockResolvedValue({ count: 2 });
+    mockTx.$queryRawUnsafe.mockResolvedValue([
+      { id: "s1", lastTokenHash: differentHash },
+    ]);
 
-    await expect(refreshAccessTokenService(oldToken, {})).rejects.toMatchObject({
-      statusCode: 401,
-      message: expect.stringContaining("Şüpheli"),
-    });
+    await expect(refreshAccessTokenService(oldToken, {})).rejects.toMatchObject(
+      {
+        statusCode: 401,
+        message: expect.stringContaining("Şüpheli"),
+      }
+    );
 
-    // All sessions revoked
-    expect(prisma.userSession.updateMany).toHaveBeenCalledWith({
-      where: { userId: "u1", revokedAt: null },
-      data: { revokedAt: expect.any(Date) },
-    });
-    // refreshTokenVersion incremented
-    expect(prisma.user.update).toHaveBeenCalledWith({
+    expect(mockTx.user.update).toHaveBeenCalledWith({
       where: { id: "u1" },
       data: { refreshTokenVersion: { increment: 1 } },
     });
-    // touchSession should NOT have been called
-    expect(touchSession).not.toHaveBeenCalled();
+    expect(mockTx.userSession.updateMany).toHaveBeenCalledWith({
+      where: { userId: "u1", revokedAt: null },
+      data: { revokedAt: expect.any(Date) },
+    });
   });
 
   test("first refresh with no stored hash (null) → skip replay check", async () => {
@@ -136,14 +122,15 @@ describe("authService — token replay detection", () => {
       refreshTokenVersion: 0,
     });
 
-    assertSessionActive.mockResolvedValue({ id: "s1", lastTokenHash: null });
-    touchSession.mockResolvedValue(undefined);
-    prisma.userSession.update.mockResolvedValue({});
+    mockTx.$queryRawUnsafe.mockResolvedValue([
+      { id: "s1", lastTokenHash: null },
+    ]);
+    mockTx.userSession.update.mockResolvedValue({});
 
     const result = await refreshAccessTokenService(token, {});
-    // No revoke triggered
+
+    expect(mockTx.$queryRawUnsafe).toHaveBeenCalled();
+    expect(mockTx.userSession.update).toHaveBeenCalled();
     expect(prisma.userSession.updateMany).not.toHaveBeenCalled();
-    // touchSession called normally
-    expect(touchSession).toHaveBeenCalledWith("s1");
   });
 });

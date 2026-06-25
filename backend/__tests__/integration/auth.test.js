@@ -9,14 +9,14 @@ import { jest } from "@jest/globals";
 import request from "supertest";
 
 // --- Mocks ---
-jest.unstable_mockModule("../src/middlewares/rateLimitMiddleware.js", () => ({
+jest.unstable_mockModule("../../src/middlewares/rateLimitMiddleware.js", () => ({
   authLimiter: (_req, _res, next) => next(),
   apiLimiter: (_req, _res, next) => next(),
   dekontUploadLimiter: (_req, _res, next) => next(),
   strictLimiter: (_req, _res, next) => next(),
 }));
 
-const { createTestApp } = await import("../../test-utils/testApp.js");
+const { createTestApp } = await import("../test-utils/testApp.js");
 
 describe("Auth Flow - Integration", () => {
   let app;

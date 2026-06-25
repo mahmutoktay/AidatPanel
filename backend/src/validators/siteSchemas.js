@@ -125,4 +125,33 @@ export const siteSchemas = {
       carryForwardPolicy: z.enum(["NONE", "CARRY_TO_NEXT_MONTH"]).optional(),
     }),
   },
+
+  updateSiteExpense: {
+    params: z.object({
+      siteId: z.string().uuid(),
+      expenseId: z.string().uuid(),
+    }),
+    body: z.object({
+      title: z.string().min(1).max(200).optional(),
+      amount: z.number().positive().optional(),
+      category: z.string().optional(),
+      date: z.string().datetime({ offset: true }).or(z.string().date()).optional(),
+      note: z.string().max(500).optional().nullable(),
+    }),
+  },
+
+  deleteSiteExpense: {
+    params: z.object({
+      siteId: z.string().uuid(),
+      expenseId: z.string().uuid(),
+    }),
+  },
+
+  aggregation: {
+    params: z.object({ id: z.string().uuid() }),
+    query: z.object({
+      month: z.coerce.number().int().min(1).max(12).optional(),
+      year: z.coerce.number().int().min(2000).max(2100).optional(),
+    }).optional(),
+  },
 };

@@ -89,11 +89,15 @@ class SitesNotifier extends AsyncNotifier<List<SiteEntity>> {
   }
 
   Future<void> removeSite(String siteId) async {
-    await _repository.deleteSite(siteId);
-    final current = state.asData?.value ?? <SiteEntity>[];
-    state = AsyncValue.data(
-      current.where((s) => s.id != siteId).toList(),
-    );
+    try {
+      await _repository.deleteSite(siteId);
+      final current = state.asData?.value ?? <SiteEntity>[];
+      state = AsyncValue.data(
+        current.where((s) => s.id != siteId).toList(),
+      );
+    } catch (e, st) {
+      state = AsyncValue.error(wrapAsyncStateError(e), st);
+    }
   }
 }
 

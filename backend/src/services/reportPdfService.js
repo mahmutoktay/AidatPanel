@@ -426,7 +426,7 @@ export async function buildMonthlySiteReportPdf(data) {
     { label: "Durum", width: CONTENT_WIDTH - 340 },
   ];
   y = drawTableHeader(doc, fontPath, y, cols);
-  data.dues.rows.slice(0, 40).forEach((row, i) => {
+  data.dues.rows.forEach((row, i) => {
     y = drawTableRow(
       doc,
       fontPath,
