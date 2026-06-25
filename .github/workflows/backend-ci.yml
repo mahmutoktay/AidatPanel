@@ -34,7 +34,7 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: postgresql://test:test@localhost:5432/aidatpanel_test
+      DATABASE_URL: postgresql://test:test@127.0.0.1:5432/aidatpanel_test
       JWT_SECRET: ci-test-jwt-secret-minimum-32-chars
       REFRESH_TOKEN_SECRET: ci-test-refresh-secret-minimum-32-chars
       NODE_ENV: test
