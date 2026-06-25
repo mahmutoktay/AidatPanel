@@ -1,0 +1,14 @@
+# IDE / Editor
+.vscode/
+
+# AI assistant configs
+.roo/
+.kilo/
+
+# Environment
+.env
+.env.local
+.env.test
+
+# Dependencies
+node_modules/

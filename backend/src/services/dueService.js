@@ -192,7 +192,7 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
     if (!resident) {
       throw new HttpError(400, "Sakin atanmamış dairelerin aidatları 'Ödendi' yapılamaz.");
     }
-    updateData.paidAt = paidAt ? new Date(paidAt) : new Date();
+    updateData.paidAt = (paidAt && !isNaN(Date.parse(paidAt))) ? new Date(paidAt) : new Date();
     updateData.overdueDays = 0;
   } else if (status === "WAIVED") {
     updateData.paidAt = null;

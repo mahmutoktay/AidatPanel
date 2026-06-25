@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/providers/navigation_provider.dart';
+
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
@@ -28,7 +30,6 @@ class ManagerTicketsScreen extends ConsumerStatefulWidget {
 
 class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
   final ScrollController _scrollController = ScrollController();
-  String? _buildingId;
   TicketStatus? _statusFilter;
 
   @override
@@ -55,7 +56,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
 
   Future<void> _openTicket(String ticketId) async {
     await context.push('/tickets/$ticketId');
-    final id = _buildingId;
+    final id = ref.read(selectedBuildingIdProvider);
     if (id != null && mounted) {
       await _load(id);
       ref.invalidate(managerOpenTicketsCountProvider);
@@ -137,10 +138,11 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     final t = context.t.features.tickets;
     final filtered = _filteredTickets(state.tickets);
 
-    if (_buildingId == null && buildings.isNotEmpty) {
+    final buildingId = ref.watch(selectedBuildingIdProvider);
+    if (buildingId == null && buildings.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        setState(() => _buildingId = buildings.first.id);
+        ref.read(selectedBuildingIdProvider.notifier).select(buildings.first.id);
         _load(buildings.first.id);
       });
     }
@@ -156,9 +158,9 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                 children: [
                   DashboardSingleBuildingSelector(
                     buildings: buildings,
-                    selectedBuildingId: _buildingId,
+                    selectedBuildingId: buildingId,
                     onSelected: (id) {
-                      setState(() => _buildingId = id);
+                      ref.read(selectedBuildingIdProvider.notifier).select(id);
                       _load(id);
                     },
                   ),
@@ -171,7 +173,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
               ),
         list: RefreshIndicator(
           onRefresh: () async {
-            final id = _buildingId;
+            final id = ref.read(selectedBuildingIdProvider);
             if (id != null) await _load(id);
           },
           child: _buildList(context, state, filtered),
@@ -210,7 +212,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                   const SizedBox(height: AppSizes.spacingM),
                   FilledButton(
                     onPressed: () {
-                      final id = _buildingId;
+                      final id = ref.read(selectedBuildingIdProvider);
                       if (id != null) _load(id);
                     },
                     child: Text(context.t.common.tryAgain),

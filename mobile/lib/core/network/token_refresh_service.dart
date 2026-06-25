@@ -104,8 +104,6 @@ class TokenRefreshService {
         _onSessionExpiredGetter?.call()?.call();
       }
       return null;
-    } catch (e) {
-      rethrow;
     }
   }
 }

@@ -4,6 +4,7 @@ config();
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import expressRequestId from "express-request-id";
 import fs from "fs";
 import { connectDB, disconnectDB, prisma } from "./src/config/db.js";
 import { initFirebase } from "./src/config/firebase.js";
@@ -39,6 +40,9 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   : ['http://localhost:3000', 'http://localhost:4200'];
 
 // GÜVENLİK MIDDLEWARE'LERİ
+// Request ID — her isteğe benzersiz ID atar (req.id)
+app.use(expressRequestId());
+
 // Helmet - HTTP başlıklarını güvenli hale getirir
 app.use(helmet());
 

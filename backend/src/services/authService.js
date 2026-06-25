@@ -293,11 +293,7 @@ export async function joinWithInviteCodeService(body) {
  * Tek cihaz çıkışı — POST /auth/logout
  */
 export async function logoutService(userId, sessionId) {
-  await prisma.user.update({
-    where: { id: userId },
-    data: { fcmToken: null },
-  });
-
+  // Sadece bu session'ı sonlandır, tüm cihazların FCM token'ını silme
   if (sessionId) {
     await prisma.userSession.updateMany({
       where: { id: sessionId, userId, revokedAt: null },

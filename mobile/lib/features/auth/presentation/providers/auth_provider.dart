@@ -13,19 +13,19 @@ import '../../../profile/presentation/providers/profile_notifier.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../core/utils/input_validators.dart';
 
-/// Oturum sonlandığında callback almak için global değişken.
+/// Oturum sonlandığında callback almak için Provider.
 /// DioClient > TokenRefreshService token yenileyemezse bu callback tetiklenir.
-/// AuthNotifier kurulumda bu callback'i kendine bağlar.
 typedef SessionExpiredCallback = void Function();
-SessionExpiredCallback? onSessionExpired;
+
+/// Provider üzerinden erişilebilir session expired callback.
+final onSessionExpiredProvider = Provider<SessionExpiredCallback?>((ref) => null);
 
 final secureStorageProvider = Provider((ref) => SecureStorage());
 
 final dioClientProvider = Provider((ref) {
   return DioClient(
     secureStorage: ref.watch(secureStorageProvider),
-    // Getter olarak iletilir: çağrı anında güncel değer alınır.
-    onSessionExpiredGetter: () => onSessionExpired,
+    onSessionExpiredGetter: () => ref.read(onSessionExpiredProvider),
   );
 });
 
@@ -97,17 +97,6 @@ class AuthNotifier extends Notifier<AuthState> {
 
   @override
   AuthState build() {
-    // Oturum sonlanınca (başka cihazdan çıkış, refresh başarısız vb.)
-    // state'i sıfırla ve hata mesajı koy (UI bildirim gösterecek).
-    // Not: Dil bağımsız mesaj l10n dosyasında; burada yedek olarak İngilizce
-    // kullanılır, app_router.dart l10n sürümünü gösterir.
-    onSessionExpired = () {
-      state = const AuthState(
-        logoutReason: LogoutReason.otherDevices,
-        isAuthenticated: false,
-        isManualLogout: false,
-      );
-    };
     return const AuthState();
   }
 

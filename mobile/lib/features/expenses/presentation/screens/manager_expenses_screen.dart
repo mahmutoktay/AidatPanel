@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/providers/navigation_provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -32,7 +34,6 @@ class ManagerExpensesScreen extends ConsumerStatefulWidget {
 
 class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
   final ScrollController _scrollController = ScrollController();
-  String? _buildingId;
   late int _month;
   late int _year;
 
@@ -56,7 +57,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
   }
 
   void _load() {
-    final id = _buildingId;
+    final id = ref.read(selectedBuildingIdProvider);
     if (id == null) return;
     ref
         .read(expensesNotifierProvider.notifier)
@@ -64,7 +65,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
   }
 
   Future<void> _openForm({ExpenseEntity? expense}) async {
-    final id = _buildingId;
+    final id = ref.read(selectedBuildingIdProvider);
     if (id == null) return;
     final ok = await context.push<bool>(
       '/manager-dashboard/expenses/form?buildingId=${Uri.encodeComponent(id)}',
@@ -185,10 +186,11 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     final state = ref.watch(expensesNotifierProvider);
     final t = context.t.features.expenses;
 
-    if (_buildingId == null && buildings.isNotEmpty) {
+    final buildingId = ref.watch(selectedBuildingIdProvider);
+    if (buildingId == null && buildings.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        setState(() => _buildingId = buildings.first.id);
+        ref.read(selectedBuildingIdProvider.notifier).select(buildings.first.id);
         _load();
       });
     }
@@ -199,7 +201,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
       actions: [
         IconButton(
           icon: Icon(Icons.add, color: AppColors.inkDark),
-          onPressed: _buildingId == null ? null : () => _openForm(),
+          onPressed: buildingId == null ? null : () => _openForm(),
         ),
       ],
       body: DashboardListScreenBody(
@@ -210,9 +212,9 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
                 children: [
                   DashboardSingleBuildingSelector(
                     buildings: buildings,
-                    selectedBuildingId: _buildingId,
+                    selectedBuildingId: buildingId,
                     onSelected: (id) {
-                      setState(() => _buildingId = id);
+                      ref.read(selectedBuildingIdProvider.notifier).select(id);
                       _load();
                     },
                   ),

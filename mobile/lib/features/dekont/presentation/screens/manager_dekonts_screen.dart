@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/providers/navigation_provider.dart';
+
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/utils/pagination_scroll.dart';
@@ -26,7 +28,6 @@ class ManagerDekontsScreen extends ConsumerStatefulWidget {
 
 class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
   final ScrollController _scrollController = ScrollController();
-  String? _buildingId;
   String? _filterKey;
 
   @override
@@ -46,7 +47,7 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
   }
 
   Future<void> _load() async {
-    final id = _buildingId;
+    final id = ref.read(selectedBuildingIdProvider);
     if (id == null) return;
     await ref
         .read(managerDekontsNotifierProvider.notifier)
@@ -131,10 +132,11 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
     final state = ref.watch(managerDekontsNotifierProvider);
     final t = context.t.features.dekont;
 
-    if (_buildingId == null && buildings.isNotEmpty) {
+    final buildingId = ref.watch(selectedBuildingIdProvider);
+    if (buildingId == null && buildings.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        setState(() => _buildingId = buildings.first.id);
+        ref.read(selectedBuildingIdProvider.notifier).select(buildings.first.id);
         _load();
       });
     }
@@ -150,9 +152,9 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
                 children: [
                   DashboardSingleBuildingSelector(
                     buildings: buildings,
-                    selectedBuildingId: _buildingId,
+                    selectedBuildingId: buildingId,
                     onSelected: (id) {
-                      setState(() => _buildingId = id);
+                      ref.read(selectedBuildingIdProvider.notifier).select(id);
                       _load();
                     },
                   ),

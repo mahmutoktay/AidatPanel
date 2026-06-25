@@ -43,13 +43,13 @@ function serializeExpense(expense) {
   return {
     ...expense,
     amount: expense.amount != null
-      ? (expense.amount?.toString?.() ?? String(expense.amount))
+      ? Number(expense.amount)
       : null,
     perUnitAmount: expense.perUnitAmount != null
-      ? (expense.perUnitAmount?.toString?.() ?? String(expense.perUnitAmount))
+      ? Number(expense.perUnitAmount)
       : null,
     parsedAmount: expense.parsedAmount != null
-      ? (expense.parsedAmount?.toString?.() ?? String(expense.parsedAmount))
+      ? Number(expense.parsedAmount)
       : null,
     receiptUrl: expense.receiptUrl
       ? `/api/v1/expenses/${expense.id}/file/${expense.receiptUrl.split("/").pop()}`
