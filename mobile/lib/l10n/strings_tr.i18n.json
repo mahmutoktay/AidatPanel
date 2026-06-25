@@ -374,7 +374,11 @@
     "passwordUppercaseRequired": "Şifrede en az 1 büyük harf olmalıdır",
     "passwordLowercaseRequired": "Şifrede en az 1 küçük harf olmalıdır",
     "passwordNumberRequired": "Şifrede en az 1 rakam olmalıdır",
-    "passwordSpecialCharRequired": "Şifrede en az 1 özel karakter olmalıdır"
+    "passwordSpecialCharRequired": "Şifrede en az 1 özel karakter olmalıdır",
+    "field_required": "Bu alan boş bırakılamaz",
+    "field_too_short": "Girilen değer çok kısa",
+    "field_too_long": "Girilen değer çok uzun",
+    "field_invalid": "Geçerli bir değer giriniz"
   },
   "features": {
     "buildings": {
@@ -1108,11 +1112,5 @@
     "apartment_label": "Daire: {value}",
     "code_value": "Kod: {value}",
     "expiry_date": "Son kullanma: {value}"
-  },
-  "validation": {
-    "field_required": "Bu alan boş bırakılamaz",
-    "field_too_short": "Girilen değer çok kısa",
-    "field_too_long": "Girilen değer çok uzun",
-    "field_invalid": "Geçerli bir değer giriniz"
   }
 }

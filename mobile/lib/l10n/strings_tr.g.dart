@@ -381,6 +381,18 @@ class _Translations$validation$tr implements Translations$validation$en {
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
+	@override String get emailRequired => 'Email adresi boş bırakılamaz';
+	@override String get emailInvalid => 'Geçerli bir email adresi giriniz';
+	@override String get emailTooLong => 'Email adresi çok uzun';
+	@override String get phoneRequired => 'Telefon numarası boş bırakılamaz';
+	@override String get phoneInvalid => 'Telefon numarası 10 haneli olmalıdır';
+	@override String get passwordRequired => 'Şifre boş bırakılamaz';
+	@override String get passwordTooShort => 'Şifre en az 6 karakter olmalıdır';
+	@override String get passwordTooLong => 'Şifre çok uzun';
+	@override String get passwordUppercaseRequired => 'Şifrede en az 1 büyük harf olmalıdır';
+	@override String get passwordLowercaseRequired => 'Şifrede en az 1 küçük harf olmalıdır';
+	@override String get passwordNumberRequired => 'Şifrede en az 1 rakam olmalıdır';
+	@override String get passwordSpecialCharRequired => 'Şifrede en az 1 özel karakter olmalıdır';
 	@override String get field_required => 'Bu alan boş bırakılamaz';
 	@override String get field_too_short => 'Girilen değer çok kısa';
 	@override String get field_too_long => 'Girilen değer çok uzun';
@@ -1680,6 +1692,18 @@ extension on TranslationsTr {
 			'common.resetPasswordFailed' => 'Şifre sıfırlanamadı. Kod hatalı veya süresi dolmuş olabilir.',
 			'common.resetPasswordSubmit' => 'Şifreyi Sıfırla',
 			'common.backToLogin' => 'Giriş ekranına dön',
+			'validation.emailRequired' => 'Email adresi boş bırakılamaz',
+			'validation.emailInvalid' => 'Geçerli bir email adresi giriniz',
+			'validation.emailTooLong' => 'Email adresi çok uzun',
+			'validation.phoneRequired' => 'Telefon numarası boş bırakılamaz',
+			'validation.phoneInvalid' => 'Telefon numarası 10 haneli olmalıdır',
+			'validation.passwordRequired' => 'Şifre boş bırakılamaz',
+			'validation.passwordTooShort' => 'Şifre en az 6 karakter olmalıdır',
+			'validation.passwordTooLong' => 'Şifre çok uzun',
+			'validation.passwordUppercaseRequired' => 'Şifrede en az 1 büyük harf olmalıdır',
+			'validation.passwordLowercaseRequired' => 'Şifrede en az 1 küçük harf olmalıdır',
+			'validation.passwordNumberRequired' => 'Şifrede en az 1 rakam olmalıdır',
+			'validation.passwordSpecialCharRequired' => 'Şifrede en az 1 özel karakter olmalıdır',
 			'validation.field_required' => 'Bu alan boş bırakılamaz',
 			'validation.field_too_short' => 'Girilen değer çok kısa',
 			'validation.field_too_long' => 'Girilen değer çok uzun',
@@ -1824,6 +1848,8 @@ extension on TranslationsTr {
 			'features.sites.annualReport' => 'Yıllık rapor (PDF)',
 			'features.sites.siteExpensesTitle' => 'Site Ortak Giderleri',
 			'features.sites.addExpenseTitle' => 'Ortak Gider Ekle',
+			_ => null,
+		} ?? switch (path) {
 			'features.sites.editExpenseTitle' => 'Gideri Düzenle',
 			'features.sites.addExpense' => 'Gider Ekle',
 			'features.sites.expenseCreated' => 'Site gideri eklendi',
@@ -1836,8 +1862,6 @@ extension on TranslationsTr {
 			'features.sites.noExpensesHint' => 'Bu ay için ortak gider kaydı bulunmuyor.',
 			'features.sites.totalExpenses' => 'Toplam: {amount}',
 			'features.sites.perUnitShare' => 'Daire payı: {amount}',
-			_ => null,
-		} ?? switch (path) {
 			'features.auth.register' => 'Kaydol',
 			'features.auth.login' => 'Giriş Yap',
 			'features.auth.join' => 'Katıl',
@@ -2338,6 +2362,8 @@ extension on TranslationsTr {
 			'features.dashboard.noOverdueApartments' => 'Geciken ödeme bulunmuyor',
 			'features.dashboard.noChartData' => 'Henüz yeterli veri yok',
 			'features.dashboard.seeMoreOverdue' => 'Daha fazlası (+{count})',
+			_ => null,
+		} ?? switch (path) {
 			'features.dashboard.payNow' => 'Şimdi Öde',
 			'features.dashboard.overduePaymentsBadge' => '{count} gecikmiş ödeme',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} aidatı',
@@ -2350,8 +2376,6 @@ extension on TranslationsTr {
 			'legal.contactBlock' => 'Veri sorumlusu: Vefa Yazılım\nE-posta: store@vefayazilim.com',
 			'legal.updatedLabel' => 'Son güncelleme',
 			'legal.updatedDate' => 'Haziran 2026',
-			_ => null,
-		} ?? switch (path) {
 			'legal.privacyIntro' => 'Bu metin, Vefa Yazılım tarafından sunulan AidatPanel mobil uygulamasını kullanırken kişisel verilerinizin nasıl işlendiğini açıklar. Uygulamayı kullanmaya devam ederek bu politikayı okuduğunuzu kabul etmiş sayılırsınız.',
 			'legal.privacyS1Title' => '1. Veri sorumlusu',
 			'legal.privacyS1Body' => 'AidatPanel hizmeti kapsamında kişisel verileriniz, veri sorumlusu Vefa Yazılım tarafından 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) ve ilgili mevzuata uygun olarak işlenir. KVKK ve gizlilik talepleriniz için: store@vefayazilim.com',

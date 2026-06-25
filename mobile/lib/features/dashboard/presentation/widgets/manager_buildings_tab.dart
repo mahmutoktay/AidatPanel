@@ -230,9 +230,6 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
     ref.read(standaloneBuildingsStoreProvider.notifier).loadBuildings();
   }
 
-  void _onAddBuildingPressed() {
-    context.push('/manager-dashboard/add-building');
-  }
 
   void _onCreateInviteCodePressed() {
     context.push('/manager-dashboard/invite-code');

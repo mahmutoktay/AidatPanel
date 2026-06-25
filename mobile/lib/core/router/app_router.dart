@@ -40,6 +40,7 @@ import '../../features/subscription/presentation/providers/subscription_provider
 import '../../features/sites/presentation/screens/add_site_screen.dart';
 import '../../features/sites/presentation/screens/site_detail_screen.dart';
 import '../../features/sites/presentation/screens/add_site_building_screen.dart';
+import '../../features/sites/presentation/screens/site_expenses_screen.dart';
 import '../../features/reports/presentation/screens/site_report_screen.dart';
 import '../../features/reports/domain/entities/report_entity.dart';
 import '../../features/profile/presentation/screens/legal_document_screen.dart';
@@ -122,7 +123,6 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) => SiteExpensesScreen(
       siteId: state.pathParameters['siteId']!,
-      siteName: state.uri.queryParameters['name'] ?? '',
     ),
   ),
   GoRoute(

@@ -374,7 +374,11 @@
     "passwordUppercaseRequired": "Password must contain at least 1 uppercase letter",
     "passwordLowercaseRequired": "Password must contain at least 1 lowercase letter",
     "passwordNumberRequired": "Password must contain at least 1 number",
-    "passwordSpecialCharRequired": "Password must contain at least 1 special character"
+    "passwordSpecialCharRequired": "Password must contain at least 1 special character",
+    "field_required": "This field is required",
+    "field_too_short": "Value is too short",
+    "field_too_long": "Value is too long",
+    "field_invalid": "Please enter a valid value"
   },
   "features": {
     "buildings": {
@@ -1108,11 +1112,5 @@
     "apartment_label": "Apartment: {value}",
     "code_value": "Code: {value}",
     "expiry_date": "Expires at: {value}"
-  },
-  "validation": {
-    "field_required": "This field is required",
-    "field_too_short": "Value is too short",
-    "field_too_long": "Value is too long",
-    "field_invalid": "Please enter a valid value"
   }
 }

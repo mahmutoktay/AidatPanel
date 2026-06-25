@@ -1025,6 +1025,42 @@ class Translations$validation$en {
 
 	// Translations
 
+	/// en: 'Email address cannot be empty'
+	String get emailRequired => 'Email address cannot be empty';
+
+	/// en: 'Please enter a valid email address'
+	String get emailInvalid => 'Please enter a valid email address';
+
+	/// en: 'Email address is too long'
+	String get emailTooLong => 'Email address is too long';
+
+	/// en: 'Phone number cannot be empty'
+	String get phoneRequired => 'Phone number cannot be empty';
+
+	/// en: 'Phone number must be 10 digits'
+	String get phoneInvalid => 'Phone number must be 10 digits';
+
+	/// en: 'Password cannot be empty'
+	String get passwordRequired => 'Password cannot be empty';
+
+	/// en: 'Password must be at least 6 characters'
+	String get passwordTooShort => 'Password must be at least 6 characters';
+
+	/// en: 'Password is too long'
+	String get passwordTooLong => 'Password is too long';
+
+	/// en: 'Password must contain at least 1 uppercase letter'
+	String get passwordUppercaseRequired => 'Password must contain at least 1 uppercase letter';
+
+	/// en: 'Password must contain at least 1 lowercase letter'
+	String get passwordLowercaseRequired => 'Password must contain at least 1 lowercase letter';
+
+	/// en: 'Password must contain at least 1 number'
+	String get passwordNumberRequired => 'Password must contain at least 1 number';
+
+	/// en: 'Password must contain at least 1 special character'
+	String get passwordSpecialCharRequired => 'Password must contain at least 1 special character';
+
 	/// en: 'This field is required'
 	String get field_required => 'This field is required';
 
@@ -3800,6 +3836,18 @@ extension on Translations {
 			'common.resetPasswordFailed' => 'Could not reset password. The code may be invalid or expired.',
 			'common.resetPasswordSubmit' => 'Reset Password',
 			'common.backToLogin' => 'Back to login',
+			'validation.emailRequired' => 'Email address cannot be empty',
+			'validation.emailInvalid' => 'Please enter a valid email address',
+			'validation.emailTooLong' => 'Email address is too long',
+			'validation.phoneRequired' => 'Phone number cannot be empty',
+			'validation.phoneInvalid' => 'Phone number must be 10 digits',
+			'validation.passwordRequired' => 'Password cannot be empty',
+			'validation.passwordTooShort' => 'Password must be at least 6 characters',
+			'validation.passwordTooLong' => 'Password is too long',
+			'validation.passwordUppercaseRequired' => 'Password must contain at least 1 uppercase letter',
+			'validation.passwordLowercaseRequired' => 'Password must contain at least 1 lowercase letter',
+			'validation.passwordNumberRequired' => 'Password must contain at least 1 number',
+			'validation.passwordSpecialCharRequired' => 'Password must contain at least 1 special character',
 			'validation.field_required' => 'This field is required',
 			'validation.field_too_short' => 'Value is too short',
 			'validation.field_too_long' => 'Value is too long',
@@ -3944,6 +3992,8 @@ extension on Translations {
 			'features.sites.annualReport' => 'Annual report (PDF)',
 			'features.sites.siteExpensesTitle' => 'Site Common Expenses',
 			'features.sites.addExpenseTitle' => 'Add Common Expense',
+			_ => null,
+		} ?? switch (path) {
 			'features.sites.editExpenseTitle' => 'Edit Expense',
 			'features.sites.addExpense' => 'Add Expense',
 			'features.sites.expenseCreated' => 'Site expense added',
@@ -3956,8 +4006,6 @@ extension on Translations {
 			'features.sites.noExpensesHint' => 'No common expenses for this month.',
 			'features.sites.totalExpenses' => 'Total: {amount}',
 			'features.sites.perUnitShare' => 'Per unit: {amount}',
-			_ => null,
-		} ?? switch (path) {
 			'features.auth.register' => 'Register',
 			'features.auth.login' => 'Login',
 			'features.auth.join' => 'Join',
@@ -4458,6 +4506,8 @@ extension on Translations {
 			'features.dashboard.noOverdueApartments' => 'No overdue payments',
 			'features.dashboard.noChartData' => 'Not enough data yet',
 			'features.dashboard.seeMoreOverdue' => 'See more (+{count})',
+			_ => null,
+		} ?? switch (path) {
 			'features.dashboard.payNow' => 'Pay Now',
 			'features.dashboard.overduePaymentsBadge' => '{count} overdue payment(s)',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} dues',
@@ -4470,8 +4520,6 @@ extension on Translations {
 			'legal.contactBlock' => 'Data controller: Vefa Yazılım\nEmail: store@vefayazilim.com',
 			'legal.updatedLabel' => 'Last updated',
 			'legal.updatedDate' => 'June 2026',
-			_ => null,
-		} ?? switch (path) {
 			'legal.privacyIntro' => 'This policy explains how Vefa Yazılım processes your personal data when you use the AidatPanel mobile app. By continuing to use the app, you acknowledge that you have read this policy.',
 			'legal.privacyS1Title' => '1. Data controller',
 			'legal.privacyS1Body' => 'Your personal data is processed by Vefa Yazılım as the data controller for AidatPanel, in compliance with applicable data protection laws, including Turkish KVKK where applicable. For privacy and KVKK requests: store@vefayazilim.com',

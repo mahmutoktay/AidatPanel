@@ -360,7 +360,7 @@ class MockBuildingRepository implements BuildingRepository {
   MockBuildingRepository(this.apartments);
 
   @override
-  Future<List<BuildingEntity>> fetchBuildings() async {
+  Future<List<BuildingEntity>> fetchBuildings({bool standalone = false}) async {
     await Future.delayed(_delay);
     return List.unmodifiable(_buildings);
   }

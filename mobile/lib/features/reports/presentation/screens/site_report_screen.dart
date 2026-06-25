@@ -43,13 +43,10 @@ class _SiteReportScreenState extends ConsumerState<SiteReportScreen> {
       final result =
           await ref.read(reportServiceProvider).fetchReport(params);
       if (!mounted) return;
-      await Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => ReportPreviewScreen(
-            fileName: result.fileName,
-            bytes: result.bytes,
-          ),
-        ),
+      await ReportPreviewScreen.open(
+        context,
+        result: result,
+        subtitle: widget.siteName,
       );
     } catch (e) {
       if (!mounted) return;
@@ -68,7 +65,7 @@ class _SiteReportScreenState extends ConsumerState<SiteReportScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(color: AppColors.primary),
+            CircularProgressIndicator(color: AppColors.primary),
             const SizedBox(height: 16),
             Text(context.t.features.reports.downloading),
           ],
