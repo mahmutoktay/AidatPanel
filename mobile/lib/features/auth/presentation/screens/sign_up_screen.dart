@@ -14,6 +14,7 @@ import '../../../../shared/widgets/auth_screen_shell.dart';
 import '../widgets/auth_brand_header.dart';
 import '../../../../shared/widgets/password_criterion.dart';
 import '../../../../shared/widgets/password_field.dart';
+import '../../../../shared/widgets/app_back_button.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/sign_up_role_toggle.dart';
@@ -225,10 +226,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       if (phoneError != null) {
         ref
             .read(toastProvider.notifier)
-            .show(
-              context.t.validation.phoneInvalid,
-              type: ToastType.error,
-            );
+            .show(context.t.validation.phoneInvalid, type: ToastType.error);
         return;
       }
     }
@@ -553,26 +551,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       wrapInCard: false,
       leading: Padding(
         padding: const EdgeInsets.only(left: 18, top: 16),
-        child: GestureDetector(
-          onTap: isLoading ? null : () => context.pop(),
-          child: Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0x14000000), // siyah %8
-                width: 0.5,
-              ),
-            ),
-            alignment: Alignment.center,
-            child: const Icon(
-              Icons.chevron_left_rounded,
-              color: Color(0xFF333333),
-              size: 18,
-            ),
-          ),
+        child: AppBackButton(
+          enabled: !isLoading,
+          onPressed: () => context.pop(),
         ),
       ),
       child: Column(
@@ -589,9 +570,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           const SizedBox(height: AppSizes.spacingL),
           Text(
             formTitle,
-            style: AppTypography.h2.copyWith(
-              color: AppColors.inkDark,
-            ),
+            style: AppTypography.h2.copyWith(color: AppColors.inkDark),
           ),
           const SizedBox(height: AppSizes.spacingL),
           AnimatedSwitcher(

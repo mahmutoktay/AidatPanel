@@ -12,6 +12,7 @@ import '../../../../features/profile/presentation/theme/profile_settings_ui.dart
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/auth_screen_shell.dart';
 import '../../../../shared/widgets/auth_form_styles.dart';
+import '../../../../shared/widgets/app_back_button.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../providers/auth_provider.dart';
 
@@ -35,8 +36,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _codeController = TextEditingController();
   final _newPwController = TextEditingController();
   final _confirmPwController = TextEditingController();
-  static final _resetCodeAlphabet =
-      RegExp(r'^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{6}$');
+  static final _resetCodeAlphabet = RegExp(
+    r'^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{6}$',
+  );
   bool _obscureNew = true;
   bool _obscureConfirm = true;
   bool _submitting = false;
@@ -87,7 +89,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       );
       if (!mounted) return;
 
-      ref.read(toastProvider.notifier).show(
+      ref
+          .read(toastProvider.notifier)
+          .show(
             context.t.common.resetPasswordSuccess,
             type: ToastType.success,
             duration: const Duration(seconds: 5),
@@ -95,17 +99,18 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       context.go('/login');
     } on ApiException catch (e) {
       if (!mounted) return;
-      ref.read(toastProvider.notifier).show(
+      ref
+          .read(toastProvider.notifier)
+          .show(
             userFacingError(e),
             type: ToastType.error,
             duration: const Duration(seconds: 6),
           );
     } catch (_) {
       if (!mounted) return;
-      ref.read(toastProvider.notifier).show(
-            context.t.common.resetPasswordFailed,
-            type: ToastType.error,
-          );
+      ref
+          .read(toastProvider.notifier)
+          .show(context.t.common.resetPasswordFailed, type: ToastType.error);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -119,26 +124,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       wrapInCard: false,
       leading: Padding(
         padding: const EdgeInsets.only(left: 18, top: 16),
-        child: GestureDetector(
-          onTap: _submitting ? null : () => context.pop(),
-          child: Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0x14000000), // siyah %8
-                width: 0.5,
-              ),
-            ),
-            alignment: Alignment.center,
-            child: const Icon(
-              Icons.chevron_left_rounded,
-              color: Color(0xFF333333),
-              size: 18,
-            ),
-          ),
+        child: AppBackButton(
+          enabled: !_submitting,
+          onPressed: () => context.pop(),
         ),
       ),
       child: Form(
@@ -320,10 +308,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF15140F),
                   backgroundColor: Colors.white,
-                  side: const BorderSide(
-                    color: Color(0xFFE7E4DA),
-                    width: 1.5,
-                  ),
+                  side: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),

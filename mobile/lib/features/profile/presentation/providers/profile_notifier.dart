@@ -1,5 +1,8 @@
+import 'package:flutter/painting.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -61,6 +64,7 @@ class ProfileNotifier extends Notifier<ProfileState> {
       final user = await _repository.getProfile();
       await ref.read(authStateProvider.notifier).syncCachedUser(user);
       state = state.copyWith(isLoading: false, user: user, clearError: true);
+      _precacheProfileImage(user.profilePicture);
     } on ApiException catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -107,6 +111,17 @@ class ProfileNotifier extends Notifier<ProfileState> {
       );
       return false;
     }
+  }
+
+  /// Profil resmini [CachedNetworkImageProvider] ile arka planda önbelleğe alır.
+  /// Ayarlar tab'ına geçildiğinde görsel hazır olur, loading spinner gösterilmez.
+  void _precacheProfileImage(String? profilePicture) {
+    if (profilePicture == null || profilePicture.isEmpty) return;
+    final url = '${ApiConstants.baseUrl}/uploads/avatars/$profilePicture';
+    final provider = CachedNetworkImageProvider(url);
+    // Fire-and-forget: CachedNetworkImageProvider image'ı cache'e yazar.
+    // Stream kısa ömürlü, GC toplar, listener leak olmaz.
+    provider.resolve(ImageConfiguration.empty);
   }
 
   Future<bool> uploadAvatar(String filePath) async {

@@ -8,9 +8,8 @@ import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../theme/dashboard_screen_style.dart';
+import 'app_back_button.dart';
 import 'notification_icon_button.dart';
-import 'circular_back_button.dart';
-import 'minimal_form_widgets.dart';
 
 /// Dashboard dışı push ekranları için ortak scaffold (flat AppBar + gri arka plan).
 class DashboardSecondaryScaffold extends ConsumerWidget {
@@ -82,13 +81,14 @@ class DashboardSecondaryScaffold extends ConsumerWidget {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        leading: leading ??
+        leading:
+            leading ??
             (useMinimalBackButton
                 ? Padding(
                     padding: const EdgeInsets.only(left: 8),
-                    child: MinimalBackButton(onPressed: backHandler),
+                    child: AppBackButton(onPressed: backHandler),
                   )
-                : CircularBackButton(onPressed: backHandler)),
+                : AppBackButton(onPressed: backHandler)),
         title: Text(title, style: ProfileSettingsUi.title),
         actions: appBarActions.isEmpty ? null : appBarActions,
         bottom: bottom,
@@ -99,7 +99,8 @@ class DashboardSecondaryScaffold extends ConsumerWidget {
       bottomNavigationBar: bottomNavigationBar,
     );
 
-    final needsPopScope = !canPop ||
+    final needsPopScope =
+        !canPop ||
         (_handlesSystemBack && backHandler != null) ||
         onPopInvokedWithResult != null;
     if (needsPopScope) {

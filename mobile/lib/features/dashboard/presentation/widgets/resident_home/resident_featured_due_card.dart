@@ -42,12 +42,10 @@ class ResidentFeaturedDueCard extends StatelessWidget {
         ? '$periodLabel · $dueDateSuffix'
         : periodLabel;
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: isDark ? AppColors.fill : AppColors.inkDark,
+        color: AppColors.darkCard,
         borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
         boxShadow: DashboardScreenStyle.cardShadow,
       ),
@@ -95,7 +93,7 @@ class ResidentFeaturedDueCard extends StatelessWidget {
           Text(
             amountText,
             style: AppTypography.h1.copyWith(
-              color: isDark ? AppColors.textPrimary : Colors.white,
+              color: Colors.white,
               fontWeight: FontWeight.w800,
               fontSize: 36,
               height: 1.1,
@@ -105,9 +103,7 @@ class ResidentFeaturedDueCard extends StatelessWidget {
           Text(
             subtitle,
             style: AppTypography.body2.copyWith(
-              color: isDark
-                  ? AppColors.textSecondary
-                  : Colors.white.withValues(alpha: 0.72),
+              color: Colors.white.withValues(alpha: 0.72),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -117,10 +113,8 @@ class ResidentFeaturedDueCard extends StatelessWidget {
             child: FilledButton(
               onPressed: onPay,
               style: FilledButton.styleFrom(
-                backgroundColor: isDark ? AppColors.actionButton : Colors.white,
-                foregroundColor: isDark
-                    ? AppColors.actionButtonForeground
-                    : AppColors.textPrimary,
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.darkCard,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(
@@ -131,9 +125,7 @@ class ResidentFeaturedDueCard extends StatelessWidget {
               child: Text(
                 dashT.payNow,
                 style: AppTypography.button.copyWith(
-                  color: isDark
-                      ? AppColors.actionButtonForeground
-                      : AppColors.textPrimary,
+                  color: AppColors.darkCard,
                   fontWeight: FontWeight.w800,
                 ),
               ),

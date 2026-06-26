@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,6 +36,8 @@ class ManagerExpensesScreen extends ConsumerStatefulWidget {
 
 class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
   final ScrollController _scrollController = ScrollController();
+  String? _lastRequestedBuildingId;
+  String? _pendingSyncBuildingId;
   late int _month;
   late int _year;
 
@@ -48,19 +52,6 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
       () => ref.read(expensesNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(expensesNotifierProvider).canLoadMore,
     );
-    // İlk bina seçimi ve veri yüklemeyi burada tetikle.
-    // build() içinde değil.
-    Future.microtask(() {
-      if (!mounted) return;
-      final buildings = ref.read(buildingsStoreProvider).value ?? [];
-      final selectedId = ref.read(selectedBuildingIdProvider);
-      if (selectedId == null && buildings.isNotEmpty) {
-        ref.read(selectedBuildingIdProvider.notifier).select(buildings.first.id);
-        _load();
-      } else if (selectedId != null) {
-        _load();
-      }
-    });
   }
 
   @override
@@ -69,12 +60,59 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     super.dispose();
   }
 
-  void _load() {
+  void _syncSelectedBuildingAndLoad(
+    List<BuildingEntity> buildings,
+    String? selectedBuildingId,
+  ) {
+    if (buildings.isEmpty) return;
+
+    final selectedExists =
+        selectedBuildingId != null &&
+        buildings.any((building) => building.id == selectedBuildingId);
+    final effectiveId = selectedExists
+        ? selectedBuildingId
+        : buildings.first.id;
+
+    if (_lastRequestedBuildingId == effectiveId && selectedExists) return;
+    if (_pendingSyncBuildingId == effectiveId) return;
+
+    _pendingSyncBuildingId = effectiveId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pendingSyncBuildingId = null;
+      if (!mounted) return;
+
+      final latestBuildings = ref.read(buildingsStoreProvider).value ?? [];
+      if (latestBuildings.isEmpty) return;
+
+      final latestSelectedId = ref.read(selectedBuildingIdProvider);
+      final latestSelectedExists =
+          latestSelectedId != null &&
+          latestBuildings.any((building) => building.id == latestSelectedId);
+      final id = latestSelectedExists
+          ? latestSelectedId
+          : latestBuildings.first.id;
+
+      if (!latestSelectedExists) {
+        ref.read(selectedBuildingIdProvider.notifier).select(id);
+      }
+      if (_lastRequestedBuildingId == id) return;
+
+      _lastRequestedBuildingId = id;
+      unawaited(_loadBuilding(id));
+    });
+  }
+
+  Future<void> _loadBuilding(String buildingId) {
+    _lastRequestedBuildingId = buildingId;
+    return ref
+        .read(expensesNotifierProvider.notifier)
+        .load(buildingId, month: _month, year: _year);
+  }
+
+  Future<void> _load() async {
     final id = ref.read(selectedBuildingIdProvider);
     if (id == null) return;
-    ref
-        .read(expensesNotifierProvider.notifier)
-        .load(id, month: _month, year: _year);
+    await _loadBuilding(id);
   }
 
   Future<void> _openForm({ExpenseEntity? expense}) async {
@@ -84,7 +122,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
       '/manager-dashboard/expenses/form?buildingId=${Uri.encodeComponent(id)}',
       extra: expense,
     );
-    if (ok == true && mounted) _load();
+    if (ok == true && mounted) unawaited(_load());
   }
 
   Future<void> _confirmDelete(ExpenseEntity expense) async {
@@ -200,8 +238,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     final t = context.t.features.expenses;
 
     final buildingId = ref.watch(selectedBuildingIdProvider);
-    // İlk seçim initState'te Future.microtask ile yapılıyor.
-    // build() içinde sadece runtime guard (bina listesi boş değilse)
+    _syncSelectedBuildingAndLoad(buildings, buildingId);
 
     return DashboardSecondaryScaffold(
       title: t.title,
@@ -223,7 +260,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
                     selectedBuildingId: buildingId,
                     onSelected: (id) {
                       ref.read(selectedBuildingIdProvider.notifier).select(id);
-                      _load();
+                      unawaited(_load());
                     },
                   ),
                   const SizedBox(height: AppSizes.spacingM),
@@ -238,7 +275,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
                 ],
               ),
         list: RefreshIndicator(
-          onRefresh: () async => _load(),
+          onRefresh: _load,
           child: _buildList(context, state),
         ),
       ),
@@ -271,7 +308,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
                   Text(state.error!, textAlign: TextAlign.center),
                   const SizedBox(height: AppSizes.spacingM),
                   FilledButton(
-                    onPressed: _load,
+                    onPressed: () => unawaited(_load()),
                     child: Text(context.t.common.tryAgain),
                   ),
                 ],

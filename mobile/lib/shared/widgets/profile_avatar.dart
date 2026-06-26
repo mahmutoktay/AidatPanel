@@ -62,6 +62,9 @@ class ProfileAvatar extends ConsumerWidget {
             child: const CircularProgressIndicator(strokeWidth: 2),
           ),
         ),
+        // Önbellekten geliyorsa placeholder fade geçişini atla
+        fadeInDuration: Duration.zero,
+        fadeOutDuration: Duration.zero,
       );
     } else {
       avatarChild = _buildChild(profileState, hasPicture, fontSize);

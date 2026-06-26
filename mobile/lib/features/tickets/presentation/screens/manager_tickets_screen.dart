@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,6 +33,8 @@ class ManagerTicketsScreen extends ConsumerStatefulWidget {
 
 class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
   final ScrollController _scrollController = ScrollController();
+  String? _lastRequestedBuildingId;
+  String? _pendingSyncBuildingId;
 
   @override
   void initState() {
@@ -40,16 +44,6 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
       () => ref.read(ticketsNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(ticketsNotifierProvider).canLoadMore,
     );
-    // İlk bina seçimi — build dışında, post-frame yerine microtask
-    Future.microtask(() {
-      if (!mounted) return;
-      final buildings = ref.read(buildingsStoreProvider).value ?? [];
-      final buildingId = ref.read(selectedBuildingIdProvider);
-      if (buildingId == null && buildings.isNotEmpty) {
-        ref.read(selectedBuildingIdProvider.notifier).select(buildings.first.id);
-        _load(buildings.first.id);
-      }
-    });
   }
 
   @override
@@ -58,7 +52,50 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     super.dispose();
   }
 
+  void _syncSelectedBuildingAndLoad(
+    List<BuildingEntity> buildings,
+    String? selectedBuildingId,
+  ) {
+    if (buildings.isEmpty) return;
+
+    final selectedExists =
+        selectedBuildingId != null &&
+        buildings.any((building) => building.id == selectedBuildingId);
+    final effectiveId = selectedExists
+        ? selectedBuildingId
+        : buildings.first.id;
+
+    if (_lastRequestedBuildingId == effectiveId && selectedExists) return;
+    if (_pendingSyncBuildingId == effectiveId) return;
+
+    _pendingSyncBuildingId = effectiveId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pendingSyncBuildingId = null;
+      if (!mounted) return;
+
+      final latestBuildings = ref.read(buildingsStoreProvider).value ?? [];
+      if (latestBuildings.isEmpty) return;
+
+      final latestSelectedId = ref.read(selectedBuildingIdProvider);
+      final latestSelectedExists =
+          latestSelectedId != null &&
+          latestBuildings.any((building) => building.id == latestSelectedId);
+      final id = latestSelectedExists
+          ? latestSelectedId
+          : latestBuildings.first.id;
+
+      if (!latestSelectedExists) {
+        ref.read(selectedBuildingIdProvider.notifier).select(id);
+      }
+      if (_lastRequestedBuildingId == id) return;
+
+      _lastRequestedBuildingId = id;
+      unawaited(_load(id));
+    });
+  }
+
   Future<void> _load(String buildingId) {
+    _lastRequestedBuildingId = buildingId;
     return ref
         .read(ticketsNotifierProvider.notifier)
         .loadBuildingTickets(buildingId);
@@ -153,6 +190,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     final filtered = _filteredTickets(state.tickets);
 
     final buildingId = ref.watch(selectedBuildingIdProvider);
+    _syncSelectedBuildingAndLoad(buildings, buildingId);
 
     return DashboardSecondaryScaffold(
       title: t.managerTitle,
@@ -168,12 +206,13 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                     selectedBuildingId: buildingId,
                     onSelected: (id) {
                       ref.read(selectedBuildingIdProvider.notifier).select(id);
-                      _load(id);
+                      unawaited(_load(id));
                     },
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                   PremiumFilterButton(
-                    hasActiveFilters: ref.watch(managerTicketFilterProvider) != null,
+                    hasActiveFilters:
+                        ref.watch(managerTicketFilterProvider) != null,
                     onPressed: _openFilterSheet,
                   ),
                 ],
