@@ -16,7 +16,6 @@ import '../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../l10n/strings.g.dart';
 import 'premium_bottom_sheet.dart';
 import 'profile_avatar.dart';
-import 'profile_avatar_actions.dart';
 import 'toast_overlay.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
@@ -56,7 +55,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             if (user != null) ...[
               _SettingsProfileHeader(
                 user: user,
-                onAvatarTap: () => handleProfileAvatarTap(context, ref),
+                onAvatarTap: () {},
                 onProfileTap: () {
                   final path = user.role == UserRole.manager
                       ? '/manager-dashboard/profile'

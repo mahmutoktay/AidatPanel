@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
@@ -262,32 +263,46 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   }
 
   void _showCityPicker() {
-    PremiumBottomSheetScaffold.show<void>(
-      context: context,
-      builder: (ctx) => _SearchablePicker(
-        title: context.t.common.selectCityTitle,
-        items: sortedCityNames,
-        selected: _selectedCity,
-        onSelected: (city) {
-          setState(() {
-            _selectedCity = city;
-            _selectedDistrict = null;
-          });
-        },
-      ),
+    _showPickerSheet(
+      title: context.t.common.selectCityTitle,
+      items: sortedCityNames,
+      selected: _selectedCity,
+      onSelected: (city) {
+        setState(() {
+          _selectedCity = city;
+          _selectedDistrict = null;
+        });
+      },
     );
   }
 
   void _showDistrictPicker() {
     final districts = turkishCities[_selectedCity] ?? const [];
+    _showPickerSheet(
+      title: context.t.common.selectDistrictTitle,
+      items: districts,
+      selected: _selectedDistrict,
+      onSelected: (district) {
+        setState(() => _selectedDistrict = district);
+      },
+    );
+  }
+
+  void _showPickerSheet({
+    required String title,
+    required List<String> items,
+    String? selected,
+    required ValueChanged<String> onSelected,
+  }) {
     PremiumBottomSheetScaffold.show<void>(
       context: context,
-      builder: (ctx) => _SearchablePicker(
-        title: context.t.common.selectDistrictTitle,
-        items: districts,
-        selected: _selectedDistrict,
-        onSelected: (district) {
-          setState(() => _selectedDistrict = district);
+      builder: (_) => _CityDistrictPickerSheet(
+        title: title,
+        items: items,
+        selected: selected,
+        onSelected: (value) {
+          onSelected(value);
+          Navigator.of(context).pop();
         },
       ),
     );
@@ -385,13 +400,13 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   }
 }
 
-class _SearchablePicker extends StatefulWidget {
+class _CityDistrictPickerSheet extends StatefulWidget {
   final String title;
   final List<String> items;
   final String? selected;
   final ValueChanged<String> onSelected;
 
-  const _SearchablePicker({
+  const _CityDistrictPickerSheet({
     required this.title,
     required this.items,
     required this.selected,
@@ -399,138 +414,81 @@ class _SearchablePicker extends StatefulWidget {
   });
 
   @override
-  State<_SearchablePicker> createState() => _SearchablePickerState();
+  State<_CityDistrictPickerSheet> createState() =>
+      _CityDistrictPickerSheetState();
 }
 
-class _SearchablePickerState extends State<_SearchablePicker> {
+class _CityDistrictPickerSheetState extends State<_CityDistrictPickerSheet> {
   String _query = '';
+
+  List<String> get _filtered {
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return widget.items;
+    return widget.items
+        .where((s) => s.toLowerCase().contains(q))
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final filtered = widget.items
-        .where((s) => s.toLowerCase().contains(_query.toLowerCase()))
-        .toList();
+    final filtered = _filtered;
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.75,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      expand: false,
-      builder: (_, scrollController) => Column(
+    return PremiumBottomSheetScaffold(
+      title: widget.title,
+      showCloseButton: true,
+      onClose: () => Navigator.of(context).pop(),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: AppSizes.spacingS),
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.lineLight,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSizes.dashboardScreenPaddingHorizontal,
-              AppSizes.spacingM,
-              AppSizes.dashboardScreenPaddingHorizontal,
-              AppSizes.spacingS,
-            ),
-            child: Text(widget.title, style: ProfileSettingsUi.title),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.dashboardScreenPaddingHorizontal,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
             child: MinimalSearchField(
               hint: context.t.common.search,
-              onChanged: (v) => setState(() => _query = v),
+              autofocus: widget.items.length > 8,
+              whiteBackground: true,
+              onChanged: (value) => setState(() => _query = value),
             ),
           ),
           const SizedBox(height: AppSizes.spacingS),
-          Expanded(
-            child: filtered.isEmpty
-                ? Center(
-                    child: Text(
-                      context.t.common.noResults,
-                      style: ProfileSettingsUi.handle,
-                    ),
-                  )
-                : ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.dashboardScreenPaddingHorizontal,
-                    ),
-                    itemCount: filtered.length,
-                    itemBuilder: (_, index) {
-                      final item = filtered[index];
-                      final isSelected = item == widget.selected;
-                      return Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: AppSizes.spacingXS,
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {
-                              widget.onSelected(item);
-                              context.pop();
-                            },
-                            borderRadius: BorderRadius.circular(
-                              ProfileSettingsUi.fieldRadius,
-                            ),
-                            child: Container(
-                              constraints: const BoxConstraints(
-                                minHeight: AppSizes.minTouchTarget,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSizes.spacingM,
-                                vertical: AppSizes.spacingS,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? ProfileSettingsUi.background
-                                    : ProfileSettingsUi.fieldFill,
-                                borderRadius: BorderRadius.circular(
-                                  ProfileSettingsUi.fieldRadius,
-                                ),
-                                border: isSelected
-                                    ? Border.all(
-                                        color: ProfileSettingsUi.ink,
-                                        width:
-                                            ProfileSettingsUi.fieldFocusBorderWidth,
-                                      )
-                                    : null,
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      item,
-                                      style: ProfileSettingsUi.fieldValue
-                                          .copyWith(
-                                        fontWeight: isSelected
-                                            ? FontWeight.w700
-                                            : FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                  if (isSelected)
-                                    const Icon(
-                                      Icons.check_rounded,
-                                      color: AppColors.statusGreen,
-                                      size: 22,
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
+          if (filtered.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(AppSizes.spacingL),
+              child: Text(
+                context.t.common.noResults,
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.mutedText,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: AppSizes.spacingL),
+              itemCount: filtered.length,
+              itemBuilder: (_, index) {
+                final item = filtered[index];
+                return PremiumActionSheetTile(
+                  icon: Icons.location_on_outlined,
+                  label: item,
+                  iconColor: AppColors.statusBlue,
+                  iconBackground:
+                      widget.selected == item
+                          ? AppColors.statusBlue.withValues(alpha: 0.15)
+                          : null,
+                  trailing: widget.selected == item
+                      ? const Icon(
+                          Icons.check_circle_rounded,
+                          color: AppColors.statusGreen,
+                          size: 22,
+                        )
+                      : null,
+                  onTap: () => widget.onSelected(item),
+                );
+              },
+            ),
         ],
       ),
     );

@@ -10,13 +10,14 @@ import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/constants/api_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/profile/presentation/providers/profile_notifier.dart';
-import '../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../l10n/strings.g.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'premium_bottom_sheet.dart';
 import 'toast_overlay.dart';
 
@@ -57,11 +58,6 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
   bool _isGif = false;
   double _scaleToCover = 1.0;
   double _viewportWidth = _kCircleDiameter;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -190,25 +186,6 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
             .read(toastProvider.notifier)
             .show(
               context.t.features.profile.avatarPhotoProcessError,
-              type: ToastType.error,
-            );
-      }
-    }
-  }
-
-  Future<void> _pickFromCamera() async {
-    if (_isProcessing) return;
-    try {
-      final picked = await _picker.pickImage(source: ImageSource.camera);
-      if (picked != null) {
-        await _handlePickedFile(picked);
-      }
-    } catch (e) {
-      if (mounted) {
-        ref
-            .read(toastProvider.notifier)
-            .show(
-              context.t.features.profile.avatarCameraError,
               type: ToastType.error,
             );
       }
@@ -405,267 +382,209 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final profileT = context.t.features.profile;
     final user = ref.watch(authStateProvider.select((state) => state.user));
     final hasPhoto =
         user?.profilePicture != null && user!.profilePicture!.isNotEmpty;
-    final profileT = context.t.features.profile;
+    final avatarUrl = hasPhoto
+        ? '${ApiConstants.baseUrl}/uploads/avatars/${user.profilePicture}'
+        : null;
 
     return PremiumBottomSheetScaffold(
       scrollable: false,
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
+      title: context.t.features.profile.editTitle,
+      showCloseButton: true,
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Immersive crop viewport ──
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final viewportW = constraints.maxWidth;
-                _viewportWidth = viewportW;
-                return Container(
-                  width: viewportW,
-                  height: _kViewportH,
-                  decoration: BoxDecoration(
-                    color: AppColors.isDark
-                        ? const Color(0xFF0D1117)
-                        : const Color(0xFF161B22),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.06),
-                    ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Stack(
-                    children: [
-                      if (_imageFile != null && _imageInfo != null)
-                        InteractiveViewer(
-                          transformationController: _transformationController,
-                          minScale: 1.0,
-                          maxScale: 4.0,
-                          boundaryMargin: EdgeInsets.symmetric(
-                            horizontal: math.max(
-                              0.0,
-                              (viewportW - _kCircleDiameter) / 2.0,
-                            ),
-                          ),
-                          clipBehavior: Clip.none,
-                          constrained: false,
-                          child: SizedBox(
-                            width:
-                                _imageInfo!.width.toDouble() * _scaleToCover,
-                            height:
-                                _imageInfo!.height.toDouble() * _scaleToCover,
-                            child: Image.file(_imageFile!, fit: BoxFit.fill),
-                          ),
-                        )
-                      else if (_isProcessing)
-                        Center(
-                          child: SizedBox(
-                            width: 28,
-                            height: 28,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.white.withValues(alpha: 0.4),
-                            ),
-                          ),
-                        )
-                      else
-                        Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 72,
-                                height: 72,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withValues(alpha: 0.06),
-                                ),
-                                child: Icon(
-                                  Icons.add_a_photo_rounded,
-                                  size: 32,
-                                  color: Colors.white.withValues(alpha: 0.25),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                profileT.avatarCamera,
-                                style: AppTypography.caption.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.3),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                      // Crop overlay with circular cutout
-                      IgnorePointer(
-                        child: CustomPaint(
-                          size: Size(viewportW, _kViewportH),
-                          painter: _CircleCropOverlayPainter(
-                            circleDiameter: _kCircleDiameter,
-                            isDark: AppColors.isDark,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // ── Source picker row ──
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _SourceButton(
-                    icon: Icons.camera_alt_rounded,
-                    label: profileT.avatarCamera,
-                    onTap: _isProcessing ? null : _pickFromCamera,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _SourceButton(
-                    icon: Icons.photo_library_rounded,
-                    label: profileT.avatarGallery,
-                    onTap: _isProcessing ? null : _pickFromGallery,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // ── Save button ──
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: SizedBox(
-              width: double.infinity,
-              height: ProfileSettingsUi.buttonHeight,
-              child: ElevatedButton(
-                onPressed: _imageFile != null && !_isProcessing
-                    ? _saveImage
-                    : null,
-                style: ProfileSettingsUi.primaryButton,
-                child: _isProcessing && _imageFile != null
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(
-                        profileT.avatarSave,
-                        style: ProfileSettingsUi.buttonLabel,
-                      ),
-              ),
-            ),
-          ),
-
-          // ── Remove photo ──
-          if (hasPhoto) ...[
-            const SizedBox(height: 4),
-            TextButton(
-              onPressed: !_isProcessing ? _removeImage : null,
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.error,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 24,
-                ),
-                textStyle: AppTypography.label.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              child: _isProcessing && _imageFile == null
-                  ? SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.error,
-                      ),
-                    )
-                  : Text(profileT.avatarRemove),
-            ),
-          ] else
-            const SizedBox(height: 8),
+          const SizedBox(height: AppSizes.spacingM),
+          _buildCropArea(profileT, avatarUrl: avatarUrl, hasPhoto: hasPhoto),
         ],
+      ),
+      actions: PremiumSheetActions(
+        primaryLabel: profileT.avatarSave,
+        onPrimary: _imageFile != null && !_isProcessing ? _saveImage : null,
+        primaryLoading: _isProcessing && _imageFile != null,
       ),
     );
   }
-}
 
-// ─────────────────────────────────────────────
-// Premium source-pick button (Camera / Gallery)
-// ─────────────────────────────────────────────
-class _SourceButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
 
-  const _SourceButton({required this.icon, required this.label, this.onTap});
+  Widget _buildCropArea(
+    Translations$features$profile$en profileT, {
+    required String? avatarUrl,
+    required bool hasPhoto,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final viewportW = constraints.maxWidth;
+        _viewportWidth = viewportW;
+        final showCrop = _imageFile != null && _imageInfo != null;
+        final showServerPhoto = !showCrop && avatarUrl != null && _imageFile == null;
 
-  @override
-  Widget build(BuildContext context) {
-    final isEnabled = onTap != null;
-    return AnimatedOpacity(
-      opacity: isEnabled ? 1.0 : 0.45,
-      duration: const Duration(milliseconds: 200),
-      child: Material(
-        color: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: BorderSide(
-            color: AppColors.border.withValues(alpha: 0.15),
-            width: AppSizes.cardBorderWidth,
-          ),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+        return GestureDetector(
+          onTap: _isProcessing || showCrop
+              ? null
+              : _pickFromGallery,
+          child: Container(
+            width: viewportW,
+            height: _kViewportH,
+            decoration: BoxDecoration(
+              color: AppColors.isDark
+                  ? const Color(0xFF0D1117)
+                  : const Color(0xFF161B22),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.06),
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
               children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: AppColors.inkDark.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    icon,
-                    size: 18,
-                    color: AppColors.inkDark,
+                // InteractiveViewer (crop mode) — local file picked
+                if (showCrop)
+                  InteractiveViewer(
+                    transformationController: _transformationController,
+                    minScale: 1.0,
+                    maxScale: 4.0,
+                    boundaryMargin: EdgeInsets.symmetric(
+                      horizontal: math.max(
+                        0.0,
+                        (viewportW - _kCircleDiameter) / 2.0,
+                      ),
+                    ),
+                    clipBehavior: Clip.none,
+                    constrained: false,
+                    child: SizedBox(
+                      width: _imageInfo!.width.toDouble() * _scaleToCover,
+                      height: _imageInfo!.height.toDouble() * _scaleToCover,
+                      child: Image.file(_imageFile!, fit: BoxFit.fill),
+                    ),
+                  )
+                // Server photo (preview) — centered square matching circle size
+                else if (showServerPhoto)
+                  Center(
+                    child: SizedBox(
+                      width: _kCircleDiameter,
+                      height: _kCircleDiameter,
+                      child: ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: avatarUrl,
+                          width: _kCircleDiameter,
+                          height: _kCircleDiameter,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, url, error) =>
+                              _buildPlaceholder(profileT),
+                          placeholder: (context, url) => Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white.withValues(alpha: 0.4),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                // Processing
+                else if (_isProcessing)
+                  Center(
+                    child: SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white.withValues(alpha: 0.4),
+                      ),
+                    ),
+                  )
+                // Empty placeholder
+                else
+                  _buildPlaceholder(profileT),
+
+                // Crop overlay with circular cutout
+                IgnorePointer(
+                  child: CustomPaint(
+                    size: Size(viewportW, _kViewportH),
+                    painter: _CircleCropOverlayPainter(
+                      circleDiameter: _kCircleDiameter,
+                      isDark: AppColors.isDark,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Text(
-                  label,
-                  style: AppTypography.label.copyWith(
-                    color: AppColors.inkDark,
-                    fontWeight: FontWeight.w700,
+
+                // 🗑️ Remove button — top right when a photo is visible (server or local crop)
+                if (showServerPhoto || showCrop)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Material(
+                      color: AppColors.error.withValues(alpha: 0.9),
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: _isProcessing ? null : _removeImage,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          alignment: Alignment.center,
+                          child: _isProcessing
+                              ? SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.delete_outline_rounded,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
-        ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPlaceholder(Translations$features$profile$en profileT) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.06),
+            ),
+            child: Icon(
+              Icons.add_a_photo_rounded,
+              size: 32,
+              color: Colors.white.withValues(alpha: 0.25),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            profileT.avatarCamera,
+            style: AppTypography.caption.copyWith(
+              color: Colors.white.withValues(alpha: 0.3),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

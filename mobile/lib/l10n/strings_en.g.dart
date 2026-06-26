@@ -1491,6 +1491,12 @@ class Translations$features$sites$en {
 	/// en: 'Buildings'
 	String get tabBuildings => 'Buildings';
 
+	/// en: '{count} site'
+	String get siteCount => '{count} site';
+
+	/// en: '{count} building'
+	String get buildingCount => '{count} building';
+
 	/// en: 'No sites added yet'
 	String get emptySites => 'No sites added yet';
 
@@ -3968,6 +3974,8 @@ extension on Translations {
 			'features.sites.mySites' => 'My Sites',
 			'features.sites.tabSites' => 'Sites',
 			'features.sites.tabBuildings' => 'Buildings',
+			'features.sites.siteCount' => '{count} site',
+			'features.sites.buildingCount' => '{count} building',
 			'features.sites.emptySites' => 'No sites added yet',
 			'features.sites.newSite' => 'New Site',
 			'features.sites.newBuilding' => 'New Building',
@@ -3999,10 +4007,10 @@ extension on Translations {
 			'features.sites.commonExpenses' => 'Common Expenses',
 			'features.sites.report' => 'Report',
 			'features.sites.reportSheetTitle' => 'Site report',
-			'features.sites.monthlyReport' => 'Monthly report (PDF)',
-			'features.sites.annualReport' => 'Annual report (PDF)',
 			_ => null,
 		} ?? switch (path) {
+			'features.sites.monthlyReport' => 'Monthly report (PDF)',
+			'features.sites.annualReport' => 'Annual report (PDF)',
 			'features.sites.siteExpensesTitle' => 'Site Common Expenses',
 			'features.sites.addExpenseTitle' => 'Add Common Expense',
 			'features.sites.editExpenseTitle' => 'Edit Expense',
@@ -4513,10 +4521,10 @@ extension on Translations {
 			'features.dashboard.remindAllSent' => 'Reminders sent to {count} residents.',
 			'features.dashboard.remindCooldown' => 'A reminder was already sent for this due within the last 24 hours.',
 			'features.dashboard.remindNoRecipient' => 'No resident found to send a reminder for this apartment.',
-			'features.dashboard.apartmentTitle' => 'Apt. {number}',
-			'features.dashboard.apartmentWithFloor' => 'Apt. {number} · Floor {floor}',
 			_ => null,
 		} ?? switch (path) {
+			'features.dashboard.apartmentTitle' => 'Apt. {number}',
+			'features.dashboard.apartmentWithFloor' => 'Apt. {number} · Floor {floor}',
 			'features.dashboard.noOverdueApartments' => 'No overdue payments',
 			'features.dashboard.noChartData' => 'Not enough data yet',
 			'features.dashboard.seeMoreOverdue' => 'See more (+{count})',

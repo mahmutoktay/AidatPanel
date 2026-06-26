@@ -19,7 +19,7 @@ export const authMiddleware = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Hesap ve session geçerlilik kontrolü (DB sorgusu başarısız olursa token'a güven)
+    // Hesap ve session geçerlilik kontrolü — DB hatası durumunda fail-closed
     try {
       const user = await prisma.user.findFirst({
         where: { id: decoded.id, deletedAt: null },
@@ -41,7 +41,11 @@ export const authMiddleware = async (req, res, next) => {
         }
       }
     } catch (dbErr) {
-      logger.warn({ type: "auth_middleware_db_fallback", err: dbErr?.message }, "DB query failed, falling back to JWT trust");
+      logger.error({ type: "auth_middleware_db_failed", err: dbErr?.message });
+      return res.status(503).json({
+        success: false,
+        message: "Kimlik doğrulama şu anda yapılamıyor. Lütfen daha sonra tekrar deneyin.",
+      });
     }
 
     req.user = { id: decoded.id, role: decoded.role, sessionId: decoded.sid ?? null };

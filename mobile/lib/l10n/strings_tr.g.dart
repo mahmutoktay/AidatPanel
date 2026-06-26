@@ -588,6 +588,8 @@ class _Translations$features$sites$tr implements Translations$features$sites$en 
 	@override String get mySites => 'Sitelerim';
 	@override String get tabSites => 'Siteler';
 	@override String get tabBuildings => 'Binalar';
+	@override String get siteCount => '{count} site';
+	@override String get buildingCount => '{count} bina';
 	@override String get emptySites => 'Henüz site eklenmedi';
 	@override String get newSite => 'Yeni Site';
 	@override String get newBuilding => 'Yeni Bina';
@@ -1818,6 +1820,8 @@ extension on TranslationsTr {
 			'features.sites.mySites' => 'Sitelerim',
 			'features.sites.tabSites' => 'Siteler',
 			'features.sites.tabBuildings' => 'Binalar',
+			'features.sites.siteCount' => '{count} site',
+			'features.sites.buildingCount' => '{count} bina',
 			'features.sites.emptySites' => 'Henüz site eklenmedi',
 			'features.sites.newSite' => 'Yeni Site',
 			'features.sites.newBuilding' => 'Yeni Bina',
@@ -1849,10 +1853,10 @@ extension on TranslationsTr {
 			'features.sites.commonExpenses' => 'Ortak Giderler',
 			'features.sites.report' => 'Rapor',
 			'features.sites.reportSheetTitle' => 'Site raporu',
-			'features.sites.monthlyReport' => 'Aylık rapor (PDF)',
-			'features.sites.annualReport' => 'Yıllık rapor (PDF)',
 			_ => null,
 		} ?? switch (path) {
+			'features.sites.monthlyReport' => 'Aylık rapor (PDF)',
+			'features.sites.annualReport' => 'Yıllık rapor (PDF)',
 			'features.sites.siteExpensesTitle' => 'Site Ortak Giderleri',
 			'features.sites.addExpenseTitle' => 'Ortak Gider Ekle',
 			'features.sites.editExpenseTitle' => 'Gideri Düzenle',
@@ -2363,10 +2367,10 @@ extension on TranslationsTr {
 			'features.dashboard.remindAllSent' => '{count} sakine hatırlatma gönderildi.',
 			'features.dashboard.remindCooldown' => 'Bu aidat için son 24 saat içinde hatırlatma gönderildi.',
 			'features.dashboard.remindNoRecipient' => 'Bu dairede hatırlatma gönderilecek sakin bulunamadı.',
-			'features.dashboard.apartmentTitle' => 'Daire {number}',
-			'features.dashboard.apartmentWithFloor' => 'Daire {number} · {floor}. Kat',
 			_ => null,
 		} ?? switch (path) {
+			'features.dashboard.apartmentTitle' => 'Daire {number}',
+			'features.dashboard.apartmentWithFloor' => 'Daire {number} · {floor}. Kat',
 			'features.dashboard.noOverdueApartments' => 'Geciken ödeme bulunmuyor',
 			'features.dashboard.noChartData' => 'Henüz yeterli veri yok',
 			'features.dashboard.seeMoreOverdue' => 'Daha fazlası (+{count})',

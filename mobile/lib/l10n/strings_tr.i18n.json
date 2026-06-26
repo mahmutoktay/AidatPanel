@@ -495,6 +495,8 @@
       "mySites": "Sitelerim",
       "tabSites": "Siteler",
       "tabBuildings": "Binalar",
+      "siteCount": "{count} site",
+      "buildingCount": "{count} bina",
       "emptySites": "Henüz site eklenmedi",
       "newSite": "Yeni Site",
       "newBuilding": "Yeni Bina",

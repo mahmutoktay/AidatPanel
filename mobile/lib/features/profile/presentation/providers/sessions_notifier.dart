@@ -67,9 +67,16 @@ class SessionsNotifier extends Notifier<SessionsState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final sessions = await _repository.getSessions();
+      // Bu cihazın oturumu her zaman ilk sırada
+      final sorted = List<SessionEntity>.from(sessions)
+        ..sort((a, b) {
+          if (a.isCurrent) return -1;
+          if (b.isCurrent) return 1;
+          return 0;
+        });
       state = state.copyWith(
         isLoading: false,
-        sessions: sessions,
+        sessions: sorted,
         clearError: true,
       );
     } on ApiException catch (e) {

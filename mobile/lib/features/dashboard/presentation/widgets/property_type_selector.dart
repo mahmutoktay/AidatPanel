@@ -12,19 +12,24 @@ class PropertyTypeSelector extends StatelessWidget {
     super.key,
     required this.selectedType,
     required this.onChanged,
+    this.siteCount = 0,
+    this.buildingCount = 0,
   });
 
   final PropertyType selectedType;
   final ValueChanged<PropertyType> onChanged;
+  final int siteCount;
+  final int buildingCount;
 
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.sites;
 
-    final title = selectedType == PropertyType.sites ? t.tabSites : t.tabBuildings;
+    final title =
+        selectedType == PropertyType.sites ? t.tabSites : t.tabBuildings;
     final subtitle = selectedType == PropertyType.sites
-        ? t.mySites
-        : context.t.common.inviteStandaloneBuildings;
+        ? t.siteCount.replaceAll('{count}', '$siteCount')
+        : t.buildingCount.replaceAll('{count}', '$buildingCount');
 
     return Semantics(
       button: true,
@@ -36,6 +41,8 @@ class PropertyTypeSelector extends StatelessWidget {
             context,
             currentType: selectedType,
             onSelected: onChanged,
+            siteCount: siteCount,
+            buildingCount: buildingCount,
           ),
           borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
           child: Ink(

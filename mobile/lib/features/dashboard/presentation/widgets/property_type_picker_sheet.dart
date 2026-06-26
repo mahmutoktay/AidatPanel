@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../l10n/strings.g.dart';
 import '../../../../../shared/widgets/premium_bottom_sheet.dart';
 
@@ -13,21 +12,29 @@ class PropertyTypePickerSheet extends StatelessWidget {
     super.key,
     required this.currentType,
     required this.onSelected,
+    this.siteCount = 0,
+    this.buildingCount = 0,
   });
 
   final PropertyType currentType;
   final ValueChanged<PropertyType> onSelected;
+  final int siteCount;
+  final int buildingCount;
 
   static Future<void> show(
     BuildContext context, {
     required PropertyType currentType,
     required ValueChanged<PropertyType> onSelected,
+    int siteCount = 0,
+    int buildingCount = 0,
   }) {
     return PremiumBottomSheetScaffold.show<void>(
       context: context,
       builder: (_) => PropertyTypePickerSheet(
         currentType: currentType,
         onSelected: onSelected,
+        siteCount: siteCount,
+        buildingCount: buildingCount,
       ),
     );
   }
@@ -46,7 +53,7 @@ class PropertyTypePickerSheet extends StatelessWidget {
           PremiumActionSheetTile(
             icon: Icons.location_city_rounded,
             label: t.tabSites,
-            subtitle: t.mySites,
+            subtitle: t.siteCount.replaceAll('{count}', '$siteCount'),
             trailing: currentType == PropertyType.sites
                 ? const Icon(
                     Icons.check_circle_rounded,
@@ -63,7 +70,7 @@ class PropertyTypePickerSheet extends StatelessWidget {
           PremiumActionSheetTile(
             icon: Icons.apartment_rounded,
             label: t.tabBuildings,
-            subtitle: context.t.common.inviteStandaloneBuildings,
+            subtitle: t.buildingCount.replaceAll('{count}', '$buildingCount'),
             trailing: currentType == PropertyType.buildings
                 ? const Icon(
                     Icons.check_circle_rounded,
