@@ -8,6 +8,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/show_due_day_picker.dart';
@@ -63,34 +64,17 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: context.t.common.addBuildingNew,
       canPop: !_submitting,
-      child: Scaffold(
-        backgroundColor: AppColors.dashboardBackground,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          surfaceTintColor: Colors.transparent,
-          centerTitle: false,
-          titleSpacing: 0,
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: MinimalBackButton(
-              onPressed: _submitting ? null : () => context.pop(),
-            ),
-          ),
-          title: Text(
-            context.t.common.addBuildingNew,
-            style: ProfileSettingsUi.title,
-          ),
-        ),
-        bottomNavigationBar: MinimalStickyActionBar(
-          label: context.t.common.createBuilding,
-          loading: _submitting,
-          onPressed: _onSubmit,
-        ),
-        body: SafeArea(
+      useMinimalBackButton: true,
+      onBack: _submitting ? null : () => context.pop(),
+      bottomNavigationBar: MinimalStickyActionBar(
+        label: context.t.common.createBuilding,
+        loading: _submitting,
+        onPressed: _onSubmit,
+      ),
+      body: SafeArea(
           child: AbsorbPointer(
             absorbing: _submitting,
             child: Form(
@@ -244,7 +228,6 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
               ),
             ),
           ),
-        ),
       ),
     );
   }

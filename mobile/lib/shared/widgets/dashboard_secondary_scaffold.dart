@@ -10,6 +10,7 @@ import '../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../theme/dashboard_screen_style.dart';
 import 'notification_icon_button.dart';
 import 'circular_back_button.dart';
+import 'minimal_form_widgets.dart';
 
 /// Dashboard dışı push ekranları için ortak scaffold (flat AppBar + gri arka plan).
 class DashboardSecondaryScaffold extends ConsumerWidget {
@@ -24,6 +25,8 @@ class DashboardSecondaryScaffold extends ConsumerWidget {
   final String? fallbackRoute;
   final VoidCallback? onFallback;
   final PreferredSizeWidget? bottom;
+  final bool canPop;
+  final bool useMinimalBackButton;
 
   const DashboardSecondaryScaffold({
     super.key,
@@ -38,6 +41,8 @@ class DashboardSecondaryScaffold extends ConsumerWidget {
     this.fallbackRoute,
     this.onFallback,
     this.bottom,
+    this.canPop = true,
+    this.useMinimalBackButton = false,
   });
 
   bool get _handlesSystemBack => fallbackRoute != null || onFallback != null;
@@ -65,7 +70,7 @@ class DashboardSecondaryScaffold extends ConsumerWidget {
     ];
     final backHandler = _resolveBackHandler(context);
 
-    Widget child = Scaffold(
+    Widget scaffold = Scaffold(
       backgroundColor: AppColors.dashboardBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -73,7 +78,12 @@ class DashboardSecondaryScaffold extends ConsumerWidget {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        leading: CircularBackButton(onPressed: backHandler),
+        leading: useMinimalBackButton
+            ? Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: MinimalBackButton(onPressed: backHandler),
+              )
+            : CircularBackButton(onPressed: backHandler),
         title: Text(title, style: ProfileSettingsUi.title),
         actions: appBarActions.isEmpty ? null : appBarActions,
         bottom: bottom,
@@ -84,17 +94,24 @@ class DashboardSecondaryScaffold extends ConsumerWidget {
       bottomNavigationBar: bottomNavigationBar,
     );
 
+    if (!canPop || (_handlesSystemBack && backHandler != null)) {
+      scaffold = PopScope(
+        canPop: canPop,
+        child: scaffold,
+      );
+    }
+
     if (_handlesSystemBack && backHandler != null) {
-      child = BackButtonListener(
+      scaffold = BackButtonListener(
         onBackButtonPressed: () async {
           backHandler();
           return true;
         },
-        child: child,
+        child: scaffold,
       );
     }
 
-    return child;
+    return scaffold;
   }
 }
 
