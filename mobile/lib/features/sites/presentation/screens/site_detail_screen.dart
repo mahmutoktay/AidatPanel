@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/action_chevron.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,6 +13,7 @@ import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
+import '../../../buildings/presentation/utils/building_collection_status.dart';
 import '../../data/sites_store.dart';
 import '../../domain/entities/site_entity.dart';
 
@@ -41,7 +43,11 @@ class SiteDetailScreen extends ConsumerWidget {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: AppSizes.screenBodyScrollPadding,
             children: [
-              _SiteInfoCard(site: detail.site, aggregation: detail.aggregation),
+              _SiteIdentityCard(site: detail.site),
+              const SizedBox(height: AppSizes.spacingM),
+              _SiteStatsGrid(site: detail.site, aggregation: detail.aggregation),
+              const SizedBox(height: AppSizes.spacingM),
+              _SiteProgressCard(site: detail.site, aggregation: detail.aggregation),
               const SizedBox(height: AppSizes.spacingM),
               _ActionRow(
                 onExpenses: () => context.push(
@@ -136,95 +142,89 @@ class SiteDetailScreen extends ConsumerWidget {
   }
 }
 
-class _SiteInfoCard extends StatelessWidget {
+class _SiteIdentityCard extends StatelessWidget {
   final SiteEntity site;
-  final SiteAggregationEntity aggregation;
 
-  const _SiteInfoCard({
-    required this.site,
-    required this.aggregation,
-  });
+  const _SiteIdentityCard({required this.site});
 
   @override
   Widget build(BuildContext context) {
-    final t = context.t.features.sites;
-    final rate = aggregation.collectionRate.round();
-
-    return DashboardSurfaceCard(
-      child: Column(
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.inkDark.withValues(alpha: 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(AppSizes.spacingM),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(14),
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: AppColors.lineLight,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.location_city_rounded,
+              color: AppColors.inkDark,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  site.name,
+                  style: AppTypography.h3.copyWith(
+                    color: AppColors.inkDark,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 22,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                child: Icon(
-                  Icons.location_city_rounded,
-                  color: AppColors.primary,
-                  size: 26,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
+                const SizedBox(height: 6),
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      site.name,
-                      style: AppTypography.h4.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: AppColors.statusRed.withValues(alpha: 0.85),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      site.displayAddress,
-                      style: AppTypography.body2.copyWith(
-                        color: AppColors.textSecondary,
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        site.displayAddress,
+                        style: AppTypography.body2.copyWith(
+                          color: AppColors.mutedText,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 15,
+                          height: 1.35,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.spacingL),
-          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
-          const SizedBox(height: AppSizes.spacingL),
-          PremiumInfoCard(
-            children: [
-              PremiumInfoRow(
-                icon: Icons.apartment_outlined,
-                label: t.blockCount,
-                value: '${site.buildingCount}',
-              ),
-              PremiumInfoRow(
-                icon: Icons.door_front_door_outlined,
-                label: t.apartmentCount,
-                value: '${site.totalApartments}',
-              ),
-              PremiumInfoRow(
-                icon: Icons.payments_outlined,
-                label: t.collectedAmount,
-                value: AppCurrencyFormat.format(aggregation.collectedAmount),
-              ),
-              PremiumInfoRow(
-                icon: Icons.trending_up_outlined,
-                label: t.expectedAmount,
-                value: AppCurrencyFormat.format(aggregation.expectedAmount),
-              ),
-              PremiumInfoRow(
-                icon: Icons.percent_outlined,
-                label: t.collectionRate,
-                value: '%$rate',
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -346,11 +346,306 @@ class _BlockTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, color: AppColors.mutedText),
+                const ActionChevron(),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SiteStatsGrid extends StatelessWidget {
+  final SiteEntity site;
+  final SiteAggregationEntity aggregation;
+
+  const _SiteStatsGrid({
+    required this.site,
+    required this.aggregation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t.features.sites;
+    final rate = aggregation.collectionRate.round();
+
+    return Column(
+      children: [
+        // Üst sıra: blok, daire, tahsilat % — 3 kart yan yana
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _SiteDetailStatTile(
+                  data: _SiteStatTileData(
+                    icon: Icons.view_module_outlined,
+                    iconBg: AppColors.infoBg,
+                    iconColor: AppColors.chartBlue,
+                    value: '${site.buildingCount}',
+                    label: t.blockCount,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSizes.spacingS),
+              Expanded(
+                child: _SiteDetailStatTile(
+                  data: _SiteStatTileData(
+                    icon: Icons.door_front_door_outlined,
+                    iconBg: AppColors.infoBg,
+                    iconColor: AppColors.chartBlue,
+                    value: '${site.totalApartments}',
+                    label: t.apartmentCount,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSizes.spacingS),
+              Expanded(
+                child: _SiteDetailStatTile(
+                  data: _SiteStatTileData(
+                    icon: Icons.trending_up_outlined,
+                    iconBg: AppColors.successBg,
+                    iconColor: AppColors.statusGreen,
+                    value: '%$rate',
+                    label: t.collectionRate,
+                    valueColor: AppColors.statusGreen,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSizes.spacingS),
+        // Alt sıra: toplanan tutar — full genişlik, büyük font
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.inkDark.withValues(alpha: 0.04),
+                blurRadius: 14,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.warningBg,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.payments_outlined,
+                  color: AppColors.chartOrange,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.collectedAmount,
+                      style: AppTypography.label.copyWith(
+                        color: AppColors.mutedText,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      AppCurrencyFormat.format(aggregation.collectedAmount),
+                      style: AppTypography.h2.copyWith(
+                        color: AppColors.inkDark,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 26,
+                        height: 1.1,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SiteStatTileData {
+  final IconData icon;
+  final Color iconBg;
+  final Color iconColor;
+  final String value;
+  final String label;
+  final Color? valueColor;
+
+  const _SiteStatTileData({
+    required this.icon,
+    required this.iconBg,
+    required this.iconColor,
+    required this.value,
+    required this.label,
+    this.valueColor,
+  });
+}
+
+class _SiteDetailStatTile extends StatelessWidget {
+  final _SiteStatTileData data;
+
+  const _SiteDetailStatTile({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.inkDark.withValues(alpha: 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: data.iconBg,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: Icon(data.icon, color: data.iconColor, size: 18),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            data.value,
+            style: AppTypography.h3.copyWith(
+              color: data.valueColor ?? AppColors.inkDark,
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
+              height: 1.1,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            data.label,
+            style: AppTypography.label.copyWith(
+              color: AppColors.mutedText,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              height: 1.2,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SiteProgressCard extends StatelessWidget {
+  final SiteEntity site;
+  final SiteAggregationEntity aggregation;
+
+  const _SiteProgressCard({
+    required this.site,
+    required this.aggregation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t.features.sites;
+    final status = BuildingCollectionStatus.fromRate(aggregation.collectionRate);
+    final chip = resolveBuildingStatusChip(
+      context,
+      overdueCount: site.overdueCount,
+      pendingCount: site.pendingCount,
+    );
+    final progress = (aggregation.collectionRate / 100).clamp(0.0, 1.0);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.inkDark.withValues(alpha: 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(AppSizes.spacingM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: AppColors.lineLight,
+              valueColor: AlwaysStoppedAnimation<Color>(status.color),
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingS),
+          Text(
+            t.collectedExpected
+                .replaceAll('{collected}', AppCurrencyFormat.format(aggregation.collectedAmount))
+                .replaceAll('{expected}', AppCurrencyFormat.format(aggregation.expectedAmount)),
+            style: AppTypography.label.copyWith(
+              color: AppColors.mutedText,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: chip.backgroundColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${chip.emoji} ${chip.label}',
+                style: AppTypography.label.copyWith(
+                  color: chip.color,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

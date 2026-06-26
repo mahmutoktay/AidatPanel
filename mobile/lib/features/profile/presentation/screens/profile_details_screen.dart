@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/action_chevron.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/app_date_format.dart';
@@ -835,10 +836,8 @@ class _DangerTile extends StatelessWidget {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
+                const ActionChevron(
                   size: 22,
-                  color: AppColors.error.withValues(alpha: 0.55),
                 ),
               ],
             ),

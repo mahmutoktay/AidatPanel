@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/action_chevron.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
@@ -58,8 +59,8 @@ class _DueBreakdownSectionState extends State<DueBreakdownSection> {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(
-                  _expanded ? Icons.expand_less : Icons.expand_more,
+                ActionChevron(
+                  direction: _expanded ? ChevronDirection.down : ChevronDirection.right,
                   size: 18,
                   color: AppColors.primary,
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/action_chevron.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -44,10 +45,8 @@ class LogoutAllDevicesTile extends ConsumerWidget {
                     style: ProfileSettingsUi.rowTitle,
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
+                const ActionChevron(
                   size: 22,
-                  color: ProfileSettingsUi.muted,
                 ),
               ],
             ),

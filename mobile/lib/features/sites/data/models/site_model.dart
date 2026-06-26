@@ -16,6 +16,8 @@ class SiteModel {
   final int? occupiedApartments;
   final double? collectedAmount;
   final double? expectedAmount;
+  final int? overdueCount;
+  final int? pendingCount;
 
   const SiteModel({
     required this.id,
@@ -33,6 +35,8 @@ class SiteModel {
     this.occupiedApartments,
     this.collectedAmount,
     this.expectedAmount,
+    this.overdueCount,
+    this.pendingCount,
   });
 
   factory SiteModel.fromJson(Map<String, dynamic> json) {
@@ -52,6 +56,8 @@ class SiteModel {
       occupiedApartments: (json['occupiedApartments'] as num?)?.toInt(),
       collectedAmount: _toDouble(json['collectedAmount']),
       expectedAmount: _toDouble(json['expectedAmount']),
+      overdueCount: (json['overdueCount'] as num?)?.toInt(),
+      pendingCount: (json['pendingCount'] as num?)?.toInt(),
     );
   }
 
@@ -72,6 +78,8 @@ class SiteModel {
       occupiedApartments: occupiedApartments ?? 0,
       collectedAmount: collectedAmount ?? 0,
       expectedAmount: expectedAmount ?? 0,
+      overdueCount: overdueCount ?? 0,
+      pendingCount: pendingCount ?? 0,
     );
   }
 

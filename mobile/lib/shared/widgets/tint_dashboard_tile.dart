@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../widgets/action_chevron.dart';
 import '../../core/theme/app_typography.dart';
 import 'rolling_metric_value.dart';
 import 'count_badge.dart';
@@ -346,10 +347,8 @@ class _ExpandedActionBody extends StatelessWidget {
             color: countTint,
           ),
           const SizedBox(width: 4),
-          Icon(
-            Icons.chevron_right,
+          const ActionChevron(
             size: 22,
-            color: AppColors.textSecondary.withValues(alpha: 0.7),
           ),
         ],
       ),

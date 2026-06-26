@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/action_chevron.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -72,10 +73,8 @@ class DuesQuickAmountCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(
-                  Icons.chevron_right_rounded,
+                const ActionChevron(
                   size: 22,
-                  color: AppColors.mutedText.withValues(alpha: 0.7),
                 ),
               ],
             ),

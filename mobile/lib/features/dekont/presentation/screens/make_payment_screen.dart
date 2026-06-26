@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/action_chevron.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/utils/app_currency_format.dart';
@@ -230,9 +231,7 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: AppColors.textPrimary,
+                  const ActionChevron(
                     size: 20,
                   ),
                 ],

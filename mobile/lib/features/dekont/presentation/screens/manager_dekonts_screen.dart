@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../shared/providers/navigation_provider.dart';
 
+import '../../debug/dekont_debug_log.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/utils/pagination_scroll.dart';
@@ -42,17 +43,30 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
   }
 
   Future<void> _initialLoad() async {
-    final buildings = ref.read(buildingsStoreProvider).value ?? [];
+    final buildingsAsync = ref.read(buildingsStoreProvider);
+    final buildings = buildingsAsync.value ?? [];
     final buildingId = ref.read(selectedBuildingIdProvider);
+    dekontDebugLog('screen.managerDekonts.initialLoad', {
+      'buildingsState': buildingsAsync.runtimeType.toString(),
+      'buildingCount': buildings.length,
+      'selectedBuildingId': buildingId,
+    });
     if (buildingId == null && buildings.isNotEmpty) {
-      ref.read(selectedBuildingIdProvider.notifier).select(buildings.first.id);
+      final firstId = buildings.first.id;
+      dekontDebugLog('screen.managerDekonts.autoSelect', firstId);
+      ref.read(selectedBuildingIdProvider.notifier).select(firstId);
     }
     final id = ref.read(selectedBuildingIdProvider);
-    if (id != null) {
-      await ref
-          .read(managerDekontsNotifierProvider.notifier)
-          .loadBuilding(id, filterKey: ref.read(managerDekontFilterProvider));
+    if (id == null) {
+      dekontDebugLog(
+        'screen.managerDekonts.initialLoad skip',
+        'selectedBuildingId=null',
+      );
+      return;
     }
+    await ref
+        .read(managerDekontsNotifierProvider.notifier)
+        .loadBuilding(id, filterKey: ref.read(managerDekontFilterProvider));
   }
 
   @override
@@ -63,7 +77,17 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
 
   Future<void> _load() async {
     final id = ref.read(selectedBuildingIdProvider);
-    if (id == null) return;
+    dekontDebugLog('screen.managerDekonts.load', {
+      'selectedBuildingId': id,
+      'filterKey': ref.read(managerDekontFilterProvider),
+    });
+    if (id == null) {
+      dekontDebugLog(
+        'screen.managerDekonts.load skip',
+        'selectedBuildingId=null',
+      );
+      return;
+    }
     await ref
         .read(managerDekontsNotifierProvider.notifier)
         .loadBuilding(id, filterKey: ref.read(managerDekontFilterProvider));
@@ -149,6 +173,13 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
     final t = context.t.features.dekont;
 
     final buildingId = ref.watch(selectedBuildingIdProvider);
+    dekontDebugLog('screen.managerDekonts.build', {
+      'buildingCount': buildings.length,
+      'selectedBuildingId': buildingId,
+      'isLoading': state.isLoading,
+      'itemCount': state.dekonts.length,
+      'hasError': state.error != null,
+    });
 
     return DashboardSecondaryScaffold(
       title: t.managerTitle,
@@ -169,7 +200,8 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                   PremiumFilterButton(
-                    hasActiveFilters: ref.watch(managerDekontFilterProvider) != null,
+                    hasActiveFilters:
+                        ref.watch(managerDekontFilterProvider) != null,
                     onPressed: _openFilterSheet,
                   ),
                 ],

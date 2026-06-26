@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/action_chevron.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -112,10 +113,8 @@ class InviteSelectableTile extends StatelessWidget {
                     trailing!,
                   ] else ...[
                     const SizedBox(width: 4),
-                    Icon(
-                      Icons.chevron_right,
+                    const ActionChevron(
                       size: 22,
-                      color: AppColors.textSecondary.withValues(alpha: 0.7),
                     ),
                   ],
                 ],

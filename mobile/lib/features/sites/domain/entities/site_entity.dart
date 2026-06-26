@@ -19,6 +19,8 @@ class SiteEntity extends Equatable {
   final int occupiedApartments;
   final double collectedAmount;
   final double expectedAmount;
+  final int overdueCount;
+  final int pendingCount;
 
   const SiteEntity({
     required this.id,
@@ -36,6 +38,8 @@ class SiteEntity extends Equatable {
     this.occupiedApartments = 0,
     this.collectedAmount = 0,
     this.expectedAmount = 0,
+    this.overdueCount = 0,
+    this.pendingCount = 0,
   });
 
   bool get isCollectionConfigured => IbanUtils.isValidTrIban(collectionIban);
@@ -64,6 +68,8 @@ class SiteEntity extends Equatable {
     int? occupiedApartments,
     double? collectedAmount,
     double? expectedAmount,
+    int? overdueCount,
+    int? pendingCount,
   }) {
     return SiteEntity(
       id: id ?? this.id,
@@ -83,6 +89,8 @@ class SiteEntity extends Equatable {
       occupiedApartments: occupiedApartments ?? this.occupiedApartments,
       collectedAmount: collectedAmount ?? this.collectedAmount,
       expectedAmount: expectedAmount ?? this.expectedAmount,
+      overdueCount: overdueCount ?? this.overdueCount,
+      pendingCount: pendingCount ?? this.pendingCount,
     );
   }
 
@@ -103,6 +111,8 @@ class SiteEntity extends Equatable {
         occupiedApartments,
         collectedAmount,
         expectedAmount,
+        overdueCount,
+        pendingCount,
       ];
 }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,8 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../data/sites_store.dart';
+import 'delete_site_dialog.dart';
+import 'edit_site_bottom_sheet.dart';
 import 'site_list_card.dart';
 
 class ManagerSitesTab extends ConsumerWidget {
@@ -115,6 +119,13 @@ class ManagerSitesTab extends ConsumerWidget {
                     site: site,
                     onTap: () => context.push(
                       '/manager-dashboard/sites/${site.id}',
+                    ),
+                    onEdit: () => EditSiteBottomSheet.show(
+                      context,
+                      site: site,
+                    ),
+                    onDelete: () => unawaited(
+                      DeleteSiteDialog.show(context, site: site),
                     ),
                   );
                 },

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../widgets/action_chevron.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -435,10 +436,8 @@ class _SettingsProfileHeader extends StatelessWidget {
               customBorder: const CircleBorder(),
               child: Padding(
                 padding: EdgeInsets.all(8),
-                child: Icon(
-                  Icons.chevron_right,
+                child: const ActionChevron(
                   size: 22,
-                  color: AppColors.textSecondary,
                 ),
               ),
             ),
@@ -506,10 +505,8 @@ class _SettingsTile extends StatelessWidget {
                   const SizedBox(width: 8),
                 ],
                 if (showChevron)
-                  Icon(
-                    Icons.chevron_right,
+                  const ActionChevron(
                     size: 22,
-                    color: AppColors.textSecondary.withValues(alpha: 0.7),
                   ),
               ],
             ),

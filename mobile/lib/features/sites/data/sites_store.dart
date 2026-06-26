@@ -88,6 +88,35 @@ class SitesNotifier extends AsyncNotifier<List<SiteEntity>> {
     }
   }
 
+  Future<void> updateSite({
+    required String id,
+    String? name,
+    String? address,
+    String? city,
+    double? dueAmount,
+    int? dueDay,
+    String? currency,
+  }) async {
+    try {
+      final updated = await _repository.updateSite(
+        id: id,
+        name: name,
+        address: address,
+        city: city,
+        dueAmount: dueAmount,
+        dueDay: dueDay,
+        currency: currency,
+      );
+      final current = state.asData?.value ?? <SiteEntity>[];
+      state = AsyncValue.data(
+        current.map((s) => s.id == id ? updated : s).toList(),
+      );
+    } catch (e, st) {
+      state = AsyncValue.error(wrapAsyncStateError(e), st);
+      rethrow;
+    }
+  }
+
   Future<void> removeSite(String siteId) async {
     try {
       await _repository.deleteSite(siteId);

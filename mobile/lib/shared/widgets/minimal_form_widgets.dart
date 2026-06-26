@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'action_chevron.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -312,9 +313,9 @@ class MinimalPickerField extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: enabled ? ProfileSettingsUi.muted : ProfileSettingsUi.muted,
+              ActionChevron(
+                direction: ChevronDirection.down,
+                color: ProfileSettingsUi.muted,
                 size: AppSizes.iconSize,
               ),
             ],

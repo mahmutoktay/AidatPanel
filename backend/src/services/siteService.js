@@ -99,10 +99,14 @@ export async function getSitesService(managerId, filters = {}) {
 
       let collectedAmount = 0;
       let expectedAmount = 0;
+      let overdueCount = 0;
+      let pendingCount = 0;
       try {
         const agg = await getSiteAggregationService(site.id, managerId, { month, year });
         collectedAmount = agg.collectedAmount;
         expectedAmount = agg.expectedAmount;
+        overdueCount = agg.overdueCount ?? 0;
+        pendingCount = agg.pendingCount ?? 0;
       } catch (err) {
         logger.warn({ siteId: site.id, err: err.message }, "Site aggregation hesaplanamadi");
       }
@@ -115,6 +119,8 @@ export async function getSitesService(managerId, filters = {}) {
         occupiedApartments,
         collectedAmount,
         expectedAmount,
+        overdueCount,
+        pendingCount,
       };
     })
   );
