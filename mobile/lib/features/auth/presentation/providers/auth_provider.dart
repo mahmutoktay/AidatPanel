@@ -1,33 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/cache_invalidator.dart';
+import '../../../../core/providers/app_providers.dart';
 import '../../../../core/subscription/revenue_cat_service.dart';
 import '../../../../core/utils/user_error_message.dart';
-import '../../../../core/network/dio_client.dart';
-import '../../../../core/storage/secure_storage.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart'
     show AuthRepository, AuthRepositoryImpl;
 import '../../domain/entities/user_entity.dart';
 import '../../../profile/presentation/providers/profile_notifier.dart';
-import '../../../../l10n/strings.g.dart';
-import '../../../../core/utils/input_validators.dart';
 
-/// Oturum sonlandığında callback almak için Provider.
-/// DioClient > TokenRefreshService token yenileyemezse bu callback tetiklenir.
-typedef SessionExpiredCallback = void Function();
-
-/// Provider üzerinden erişilebilir session expired callback.
-final onSessionExpiredProvider = Provider<SessionExpiredCallback?>((ref) => null);
-
-final secureStorageProvider = Provider((ref) => SecureStorage());
-
-final dioClientProvider = Provider((ref) {
-  return DioClient(
-    secureStorage: ref.watch(secureStorageProvider),
-    onSessionExpiredGetter: () => ref.read(onSessionExpiredProvider),
-  );
-});
+export '../../../../core/providers/app_providers.dart'
+    show dioClientProvider, secureStorageProvider, onSessionExpiredProvider;
 
 final authRemoteDataSourceProvider = Provider((ref) {
   return AuthRemoteDataSourceImpl(dioClient: ref.watch(dioClientProvider));
@@ -107,53 +91,19 @@ class AuthNotifier extends Notifier<AuthState> {
     WidgetRef ref,
   ) async {
     if (state.isLoading) return;
-
-    final t = LocaleSettings.instance.currentTranslations;
-    String? identifierError;
-    String? passwordError;
-
-    if (isPhone) {
-      final phoneError = InputValidators.validatePhone(rawIdentifier);
-      identifierError = phoneError == null
-          ? null
-          : phoneError == 'phone_required'
-              ? t.validation.phoneRequired
-              : t.validation.phoneInvalid;
-    } else {
-      final emailError = InputValidators.validateEmail(rawIdentifier);
-      identifierError = emailError == null
-          ? null
-          : emailError == 'email_required'
-              ? t.validation.emailRequired
-              : emailError == 'email_invalid'
-                  ? t.validation.emailInvalid
-                  : t.validation.emailTooLong;
-    }
-
-    passwordError = password.isEmpty ? t.features.auth.passwordRequired : null;
-
-    if (identifierError != null || passwordError != null) {
-      String errorMessage = '';
-      if (identifierError != null) errorMessage += identifierError;
-      if (passwordError != null) {
-        if (errorMessage.isNotEmpty) errorMessage += '\n';
-        errorMessage += passwordError;
-      }
-      state = state.copyWith(isLoading: false, error: errorMessage);
-      return;
-    }
-
-    final identifier = isPhone ? '+90${rawIdentifier.trim()}' : rawIdentifier.trim();
+    final identifier = isPhone
+        ? (rawIdentifier.startsWith('+90')
+            ? rawIdentifier
+            : '+90$rawIdentifier')
+        : rawIdentifier.trim();
     await login(identifier, password, ref);
   }
 
-  /// `identifier` email **veya** telefon (Belge §3).
   Future<void> login(String identifier, String password, WidgetRef ref) async {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final user = await _authRepository.login(identifier, password);
-      // Reset tab index on successful login
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);
       await _onAuthenticated(ref, user);
@@ -212,7 +162,6 @@ class AuthNotifier extends Notifier<AuthState> {
         name,
         formattedPhone,
       );
-      // Reset tab index on successful join
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);
       await _onAuthenticated(ref, user);
@@ -237,13 +186,9 @@ class AuthNotifier extends Notifier<AuthState> {
     if (user.role == UserRole.manager) {
       await RevenueCatService.logIn(user.id);
     }
-    // Pre-emptively load the profile to fetch the latest avatar and user details.
     ref.read(profileNotifierProvider.notifier).loadProfile();
   }
 
-  /// Uygulama açılışında SecureStorage'daki oturumu geri yükler.
-  /// Splash bu future'ı bekleyip ardından yönlendirme yapar.
-  /// Profil / dil güncellemesi sonrası oturum kullanıcısını ve önbelleği senkronlar.
   Future<void> syncCachedUser(UserEntity user) async {
     await _authRepository.persistUser(user);
     if (state.isAuthenticated) {
@@ -266,7 +211,6 @@ class AuthNotifier extends Notifier<AuthState> {
           isLoading: false,
           clearError: true,
         );
-        // Pre-emptively load the profile to fetch the latest avatar and user details.
         ref.read(profileNotifierProvider.notifier).loadProfile();
       } else {
         state = AuthState();
@@ -280,7 +224,6 @@ class AuthNotifier extends Notifier<AuthState> {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      // Reset tab index on logout
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);
       ref.read(dioClientProvider).clearResponseCache();
@@ -313,7 +256,6 @@ class AuthNotifier extends Notifier<AuthState> {
     );
   }
 
-  /// Başka cihazdan oturum kapatıldığında — sessionExpired toast gösterilir.
   Future<void> logoutRemoteSession(WidgetRef ref) async {
     resetManagerTabIndex(ref);
     resetResidentTabIndex(ref);
@@ -333,7 +275,6 @@ class AuthNotifier extends Notifier<AuthState> {
     );
   }
 
-  /// Diğer cihazlardan çıkış — bu cihazda oturum devam eder.
   Future<void> logoutAllDevices(WidgetRef ref) async {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);

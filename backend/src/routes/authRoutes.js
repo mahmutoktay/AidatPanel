@@ -9,7 +9,7 @@ import {
   forgotPassword,
   resetPassword,
 } from "../controllers/authControllers.js";
-import { authLimiter } from "../middlewares/rateLimitMiddleware.js";
+import { authLimiter, strictLimiter } from "../middlewares/rateLimitMiddleware.js";
 import { validate, authSchemas } from "../middlewares/validate.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 
@@ -23,8 +23,8 @@ router.post("/register", validate(authSchemas.register), register);
 router.post("/login", validate(authSchemas.login), login);
 router.post("/refresh", validate(authSchemas.refreshToken), refreshToken);
 router.post("/join", validate(authSchemas.join), join);
-router.post("/forgot-password", validate(authSchemas.forgotPassword), forgotPassword);
-router.post("/reset-password", validate(authSchemas.resetPassword), resetPassword);
+router.post("/forgot-password", strictLimiter, validate(authSchemas.forgotPassword), forgotPassword);
+router.post("/reset-password", strictLimiter, validate(authSchemas.resetPassword), resetPassword);
 router.post("/logout", authMiddleware, logout);
 router.post("/logout-all-devices", authMiddleware, logoutAllDevices);
 

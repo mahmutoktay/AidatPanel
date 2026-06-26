@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 
 /// Input validation utilities for AidatPanel forms
 /// Provides comprehensive validation with Turkish error messages
+/// Backend `passwordSchema` in `shared.js` ile uyumludur.
 class InputValidators {
   // Regex patterns
   static final emailRegex = RegExp(
@@ -15,6 +16,9 @@ class InputValidators {
 
   static final nameRegex = RegExp(r'^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,50}$');
 
+  /// Backend [`passwordSchema`](backend/src/validators/shared.js) ile eşleşir.
+  /// En az 6 karakter, büyük harf, küçük harf, rakam, özel karakter (@$!%*?&.).
+  /// Maksimum 100 karakter (backend ile aynı).
   static final passwordRegex = RegExp(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{6,}$',
   );
@@ -66,7 +70,7 @@ class InputValidators {
       return 'password_too_short';
     }
 
-    if (value.length > 50) {
+    if (value.length > 100) {
       return 'password_too_long';
     }
 

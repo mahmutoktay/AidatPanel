@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { optionalPhone } from "./shared.js";
+import { optionalPhone, passwordSchema } from "./shared.js";
 
 const deviceMetaFields = {
   deviceLabel: z
@@ -23,10 +23,7 @@ export const authSchemas = {
         .max(50, "İsim en fazla 50 karakter olabilir"),
       email: z.string().email("Geçerli bir email adresi giriniz"),
       phone: optionalPhone,
-      password: z
-        .string()
-        .min(6, "Şifre en az 6 karakter olmalıdır")
-        .max(100, "Şifre en fazla 100 karakter olabilir"),
+      password: passwordSchema,
     }),
   },
 
@@ -53,10 +50,7 @@ export const authSchemas = {
         .max(50, "İsim en fazla 50 karakter olabilir"),
       email: z.string().email("Geçerli bir email adresi giriniz"),
       phone: optionalPhone,
-      password: z
-        .string()
-        .min(6, "Şifre en az 6 karakter olmalıdır")
-        .max(100, "Şifre en fazla 100 karakter olabilir"),
+      password: passwordSchema,
       inviteCode: z.preprocess(
         (v) => (typeof v === "string" ? v.trim().toUpperCase().replace(/\s+/g, "") : v),
         z
@@ -86,10 +80,7 @@ export const authSchemas = {
             "Geçersiz kod (6 karakter: rakam 2–9 ve büyük harf; 0, O, 1, I, L kullanılmaz)"
           )
       ),
-      password: z
-        .string()
-        .min(6, "Şifre en az 6 karakter olmalıdır")
-        .max(100, "Şifre en fazla 100 karakter olabilir"),
+      password: passwordSchema,
     }),
   },
 };

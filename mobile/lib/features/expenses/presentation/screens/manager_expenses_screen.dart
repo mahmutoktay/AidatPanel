@@ -17,8 +17,8 @@ import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../../shared/widgets/premium_filter_picker.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
+import '../../../../shared/widgets/building_selector_provider.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
-import '../../../buildings/data/buildings_store.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../providers/expenses_provider.dart';
 import '../utils/expense_labels.dart';
@@ -48,6 +48,19 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
       () => ref.read(expensesNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(expensesNotifierProvider).canLoadMore,
     );
+    // İlk bina seçimi ve veri yüklemeyi burada tetikle.
+    // build() içinde değil.
+    Future.microtask(() {
+      if (!mounted) return;
+      final buildings = ref.read(buildingsStoreProvider).value ?? [];
+      final selectedId = ref.read(selectedBuildingIdProvider);
+      if (selectedId == null && buildings.isNotEmpty) {
+        ref.read(selectedBuildingIdProvider.notifier).select(buildings.first.id);
+        _load();
+      } else if (selectedId != null) {
+        _load();
+      }
+    });
   }
 
   @override
@@ -187,13 +200,8 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     final t = context.t.features.expenses;
 
     final buildingId = ref.watch(selectedBuildingIdProvider);
-    if (buildingId == null && buildings.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        ref.read(selectedBuildingIdProvider.notifier).select(buildings.first.id);
-        _load();
-      });
-    }
+    // İlk seçim initState'te Future.microtask ile yapılıyor.
+    // build() içinde sadece runtime guard (bina listesi boş değilse)
 
     return DashboardSecondaryScaffold(
       title: t.title,

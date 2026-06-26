@@ -54,6 +54,10 @@ class ApiConstants {
       '$apiVersion/buildings/$buildingId/expenses';
   static String buildingExpensesSummary(String buildingId) =>
       '$apiVersion/buildings/$buildingId/expenses/summary';
+  static String buildingDashboardSummary(String buildingId) =>
+      '$apiVersion/buildings/$buildingId/dashboard-summary';
+  static const String buildingDashboardSummaryBatch =
+      '$apiVersion/buildings/dashboard-summary/batch';
   static String buildingTickets(String buildingId) =>
       '$apiVersion/buildings/$buildingId/tickets';
   static String buildingAnnouncements(String buildingId) =>

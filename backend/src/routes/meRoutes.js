@@ -19,6 +19,8 @@ import { getMySessions, revokeMySession } from "../controllers/sessionController
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireRoles } from "../middlewares/roleMiddleware.js";
 import { validate, dueSchemas, meSchemas, ticketSchemas, dekontSchemas } from "../middlewares/validate.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { HttpError } from "../utils/httpError.js";
 import multer from "multer";
 
 const upload = multer({
@@ -83,5 +85,18 @@ router.post(
 );
 
 router.delete("/profile-picture", deleteProfilePicture);
+
+/** GET /api/v1/me/profile-picture-file — auth korumalı avatar dosyası döndürür.
+ *  Flutter bu endpoint'i kullanarak public static mount'a bağımlılığı azaltır. */
+router.get("/profile-picture-file", asyncHandler(async (req, res) => {
+  const { getProfilePictureFileService } = await import("../services/me/profilePictureService.js");
+  const result = await getProfilePictureFileService(req.user.id);
+  if (!result) {
+    return res.status(404).json({ success: false, message: "Profil fotoğrafı bulunamadı." });
+  }
+  res.setHeader("Content-Type", result.mimeType);
+  res.setHeader("Cache-Control", "private, max-age=86400");
+  res.sendFile(result.absolutePath);
+}));
 
 export default router;

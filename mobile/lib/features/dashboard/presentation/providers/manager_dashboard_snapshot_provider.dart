@@ -4,28 +4,37 @@ import '../../../buildings/data/buildings_store.dart';
 import '../../../expenses/presentation/providers/expenses_provider.dart';
 import '../../../tickets/domain/entities/ticket_entity.dart';
 import '../../../tickets/presentation/providers/tickets_provider.dart';
+import '../../data/providers/dashboard_provider.dart';
 import '../../domain/entities/manager_dashboard_entities.dart';
 import '../utils/manager_dashboard_mapper.dart';
 
 /// Seçili bina için arıza talebi durum dağılımı (`null` = tüm binalar).
+/// Tek bina seçiliyken dashboard-summary endpoint'inden `openTicketCount`
+/// alınır, böylece tüm ticket listesini çekmek gerekmez (N+1 önlenir).
 final managerTicketStatusStatsProvider =
     FutureProvider.autoDispose.family<ManagerTicketStatusStats, String?>((
   ref,
   buildingId,
 ) async {
+  // Tek bina → dashboard-summary kullan (N+1 yok).
+  if (buildingId != null) {
+    final summary =
+        await ref.watch(buildingDashboardSummaryProvider(buildingId).future);
+    return ManagerTicketStatusStats(
+      openCount: summary.openTicketCount,
+      inProgressCount: 0,
+      resolvedCount: 0,
+    );
+  }
+
+  // Tüm binalar görünümü — eski yöntem korunur (backend aggregation yok).
   final buildings = ref.watch(buildingsStoreProvider).value ?? const [];
   if (buildings.isEmpty) return ManagerTicketStatusStats.empty;
-
-  final targetBuildings = ManagerDashboardMapper.filterBuildings(
-    buildings,
-    buildingId,
-  );
-  if (targetBuildings.isEmpty) return ManagerTicketStatusStats.empty;
 
   final repo = ref.watch(ticketRepositoryProvider);
   final tickets = <TicketEntity>[];
 
-  for (final building in targetBuildings) {
+  for (final building in buildings) {
     try {
       final result = await repo.getBuildingTickets(
         building.id,
@@ -41,22 +50,24 @@ final managerTicketStatusStatsProvider =
 });
 
 /// Seçili bina için bu ay toplam gider tutarı (`null` = tüm binalar).
+/// Tek bina seçiliyse mutlaka dashboard-summary endpoint'ini kullanır —
+/// fallback eski yönteme düşmez, böylece N+1 garantili engellenir.
+/// Çok bina görünümünde eski yöntem korunur.
 final managerMonthExpenseTotalProvider =
     FutureProvider.autoDispose.family<double, String?>((ref, buildingId) async {
+  if (buildingId != null) {
+    final summary = await ref.watch(buildingDashboardSummaryProvider(buildingId).future);
+    return summary.monthTotalExpense;
+  }
+
   final buildings = ref.watch(buildingsStoreProvider).value ?? const [];
   if (buildings.isEmpty) return 0;
-
-  final targetBuildings = ManagerDashboardMapper.filterBuildings(
-    buildings,
-    buildingId,
-  );
-  if (targetBuildings.isEmpty) return 0;
 
   final now = DateTime.now();
   final repo = ref.watch(expenseRepositoryProvider);
 
   final totals = await Future.wait<double>(
-    targetBuildings.map((building) async {
+    buildings.map((building) async {
       try {
         final summary = await repo.getSummary(
           building.id,

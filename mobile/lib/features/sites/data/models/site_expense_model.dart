@@ -117,7 +117,9 @@ class SiteExpenseSummaryModel {
   });
 
   factory SiteExpenseSummaryModel.fromJson(Map<String, dynamic> json) {
-    final totalRaw = json['total'];
+    // Backend artık totalAmount (numeric) veya eski total (string) dönebilir.
+    // Geçiş döneminde her ikisini de tolere et.
+    final totalRaw = json['totalAmount'] ?? json['total'];
     final total = totalRaw is num
         ? totalRaw.toDouble()
         : double.tryParse('$totalRaw') ?? 0;
@@ -167,6 +169,7 @@ class SiteExpenseCategorySummaryModel {
   });
 
   factory SiteExpenseCategorySummaryModel.fromJson(Map<String, dynamic> json) {
+    // Backend numeric döner; eski string formatını da toleransla parse et.
     final amountRaw = json['amount'];
     final amount = amountRaw is num
         ? amountRaw.toDouble()

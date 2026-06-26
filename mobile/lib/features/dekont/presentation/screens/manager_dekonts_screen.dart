@@ -13,9 +13,10 @@ import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../../shared/widgets/premium_filter_picker.dart';
+import '../../../../shared/widgets/building_selector_provider.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
-import '../../../buildings/data/buildings_store.dart';
 import '../providers/dekont_provider.dart';
+import '../providers/manager_dekont_filter_provider.dart';
 import '../widgets/dekont_list_card.dart';
 
 class ManagerDekontsScreen extends ConsumerStatefulWidget {
@@ -28,7 +29,6 @@ class ManagerDekontsScreen extends ConsumerStatefulWidget {
 
 class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
   final ScrollController _scrollController = ScrollController();
-  String? _filterKey;
 
   @override
   void initState() {
@@ -38,6 +38,21 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
       () => ref.read(managerDekontsNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(managerDekontsNotifierProvider).canLoadMore,
     );
+    Future.microtask(_initialLoad);
+  }
+
+  Future<void> _initialLoad() async {
+    final buildings = ref.read(buildingsStoreProvider).value ?? [];
+    final buildingId = ref.read(selectedBuildingIdProvider);
+    if (buildingId == null && buildings.isNotEmpty) {
+      ref.read(selectedBuildingIdProvider.notifier).select(buildings.first.id);
+    }
+    final id = ref.read(selectedBuildingIdProvider);
+    if (id != null) {
+      await ref
+          .read(managerDekontsNotifierProvider.notifier)
+          .loadBuilding(id, filterKey: ref.read(managerDekontFilterProvider));
+    }
   }
 
   @override
@@ -51,7 +66,7 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
     if (id == null) return;
     await ref
         .read(managerDekontsNotifierProvider.notifier)
-        .loadBuilding(id, filterKey: _filterKey);
+        .loadBuilding(id, filterKey: ref.read(managerDekontFilterProvider));
   }
 
   String _dekontFilterLabel(BuildContext context, String? key) {
@@ -69,7 +84,8 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
   }
 
   Future<void> _openFilterSheet() async {
-    var draftKey = _filterKey;
+    final currentKey = ref.read(managerDekontFilterProvider);
+    var draftKey = currentKey;
     final common = context.t.common;
     final t = context.t.features.dekont;
     final allToken = Object();
@@ -120,7 +136,7 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
         ),
       ],
       onApply: () {
-        setState(() => _filterKey = draftKey);
+        ref.read(managerDekontFilterProvider.notifier).select(draftKey);
         _load();
       },
     );
@@ -133,13 +149,6 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
     final t = context.t.features.dekont;
 
     final buildingId = ref.watch(selectedBuildingIdProvider);
-    if (buildingId == null && buildings.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        ref.read(selectedBuildingIdProvider.notifier).select(buildings.first.id);
-        _load();
-      });
-    }
 
     return DashboardSecondaryScaffold(
       title: t.managerTitle,
@@ -160,7 +169,7 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                   PremiumFilterButton(
-                    hasActiveFilters: _filterKey != null,
+                    hasActiveFilters: ref.watch(managerDekontFilterProvider) != null,
                     onPressed: _openFilterSheet,
                   ),
                 ],

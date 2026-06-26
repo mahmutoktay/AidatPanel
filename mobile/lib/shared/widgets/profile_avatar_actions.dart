@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as p; // ignore: depend_on_referenced_packages
 import 'package:path_provider/path_provider.dart';
 
 import '../../core/constants/api_constants.dart';

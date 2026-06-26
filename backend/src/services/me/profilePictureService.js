@@ -111,3 +111,36 @@ export async function deleteProfilePictureService(userId) {
 
   return toPublicUser(updatedUser);
 }
+
+/**
+ * Auth korumalı profil fotoğrafı dosyasını döndürür (public static mount alternatifi).
+ * @param {string} userId
+ * @returns {Promise<{absolutePath: string, mimeType: string}|null>}
+ */
+export async function getProfilePictureFileService(userId) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, profilePicture: true },
+  });
+
+  if (!user || !user.profilePicture) {
+    return null;
+  }
+
+  const ext = path.extname(user.profilePicture).toLowerCase();
+  const mimeType =
+    ext === ".gif" ? "image/gif" :
+    ext === ".png" ? "image/png" :
+    "image/jpeg";
+
+  const absolutePath = path.resolve(AVATAR_DIR, user.profilePicture);
+
+  // Dosyanın diskte var olduğunu kontrol et
+  try {
+    await fs.access(absolutePath);
+  } catch {
+    return null;
+  }
+
+  return { absolutePath, mimeType };
+}

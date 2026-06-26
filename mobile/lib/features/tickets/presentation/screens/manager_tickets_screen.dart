@@ -12,11 +12,12 @@ import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../../shared/widgets/premium_filter_picker.dart';
+import '../../../../shared/widgets/building_selector_provider.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
-import '../../../buildings/data/buildings_store.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/manager_open_tickets_count_provider.dart';
 import '../providers/tickets_provider.dart';
+import '../providers/manager_ticket_filter_provider.dart';
 import '../utils/ticket_labels.dart';
 import '../widgets/ticket_list_card.dart';
 
@@ -30,7 +31,6 @@ class ManagerTicketsScreen extends ConsumerStatefulWidget {
 
 class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
   final ScrollController _scrollController = ScrollController();
-  TicketStatus? _statusFilter;
 
   @override
   void initState() {
@@ -40,6 +40,16 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
       () => ref.read(ticketsNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(ticketsNotifierProvider).canLoadMore,
     );
+    // İlk bina seçimi — build dışında, post-frame yerine microtask
+    Future.microtask(() {
+      if (!mounted) return;
+      final buildings = ref.read(buildingsStoreProvider).value ?? [];
+      final buildingId = ref.read(selectedBuildingIdProvider);
+      if (buildingId == null && buildings.isNotEmpty) {
+        ref.read(selectedBuildingIdProvider.notifier).select(buildings.first.id);
+        _load(buildings.first.id);
+      }
+    });
   }
 
   @override
@@ -64,8 +74,9 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
   }
 
   List<TicketEntity> _filteredTickets(List<TicketEntity> tickets) {
-    if (_statusFilter == null) return tickets;
-    return tickets.where((t) => t.status == _statusFilter).toList();
+    final filterStatus = ref.watch(managerTicketFilterProvider);
+    if (filterStatus == null) return tickets;
+    return tickets.where((t) => t.status == filterStatus).toList();
   }
 
   String _statusFilterLabel(BuildContext context, TicketStatus? status) {
@@ -74,7 +85,8 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
   }
 
   Future<void> _openFilterSheet() async {
-    var draftStatus = _statusFilter;
+    final currentStatus = ref.read(managerTicketFilterProvider);
+    var draftStatus = currentStatus;
     final common = context.t.common;
 
     await PremiumFilterSheet.show(
@@ -127,7 +139,9 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
           ),
         ];
       },
-      onApply: () => setState(() => _statusFilter = draftStatus),
+      onApply: () {
+        ref.read(managerTicketFilterProvider.notifier).select(draftStatus);
+      },
     );
   }
 
@@ -139,13 +153,6 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     final filtered = _filteredTickets(state.tickets);
 
     final buildingId = ref.watch(selectedBuildingIdProvider);
-    if (buildingId == null && buildings.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        ref.read(selectedBuildingIdProvider.notifier).select(buildings.first.id);
-        _load(buildings.first.id);
-      });
-    }
 
     return DashboardSecondaryScaffold(
       title: t.managerTitle,
@@ -166,7 +173,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                   PremiumFilterButton(
-                    hasActiveFilters: _statusFilter != null,
+                    hasActiveFilters: ref.watch(managerTicketFilterProvider) != null,
                     onPressed: _openFilterSheet,
                   ),
                 ],

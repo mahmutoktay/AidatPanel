@@ -1,12 +1,16 @@
 import crypto from 'crypto';
+import { logger } from '../config/logger.js';
 
 export const revenueCatWebhookAuth = (req, res, next) => {
   const authHeader = req.headers.authorization;
   const webhookSecret = process.env.REVENUECAT_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
-    console.error('REVENUECAT_WEBHOOK_SECRET is not configured');
-    return res.status(500).json({ error: 'Server configuration error' });
+    logger.error({ type: 'revenuecat_webhook_secret_missing' });
+    return res.status(500).json({
+      success: false,
+      message: 'Webhook yapılandırılmamış.',
+    });
   }
 
   const expectedAuth = `Bearer ${webhookSecret}`;
@@ -17,7 +21,10 @@ export const revenueCatWebhookAuth = (req, res, next) => {
     expectedBuffer.length !== providedBuffer.length ||
     !crypto.timingSafeEqual(expectedBuffer, providedBuffer)
   ) {
-    return res.status(401).json({ error: 'Unauthorized webhook request' });
+    return res.status(401).json({
+      success: false,
+      message: 'Yetkisiz webhook isteği.',
+    });
   }
 
   next();

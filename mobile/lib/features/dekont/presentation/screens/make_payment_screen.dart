@@ -51,16 +51,40 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
             .selectDue(widget.preselectedDueId);
       }
 
-      final pendingFile = ref.read(pendingDekontFileProvider);
-      if (pendingFile != null) {
-        ref.read(makePaymentNotifierProvider.notifier).setPickedReceipt(
-              fileName: pendingFile['fileName'],
-              fileBytes: pendingFile['fileBytes'],
-              filePath: pendingFile['filePath'],
-            );
-        ref.read(pendingDekontFileProvider.notifier).update(null);
-      }
+      _setFromPendingFile();
     });
+  }
+
+  void _setFromPendingFile() {
+    final pendingFile = ref.read(pendingDekontFileProvider);
+    if (pendingFile == null) return;
+    final name = pendingFile['fileName'] as String? ?? '';
+    final bytes = pendingFile['fileBytes'] as List<int>?;
+    final path = pendingFile['filePath'] as String?;
+
+    if (name.isEmpty || bytes == null || bytes.isEmpty) {
+      ref.read(pendingDekontFileProvider.notifier).update(null);
+      return;
+    }
+
+    // Validate the file from share intent (show error if unsupported)
+    final t = context.t.features.dekont;
+    final validationError = UploadFileUtils.validateReceiptBytes(bytes, name);
+    if (validationError != null) {
+      ref.read(toastProvider.notifier).show(
+            _uploadValidationMessage(t, validationError),
+            type: ToastType.error,
+          );
+      ref.read(pendingDekontFileProvider.notifier).update(null);
+      return;
+    }
+
+    ref.read(makePaymentNotifierProvider.notifier).setPickedReceipt(
+          fileName: name,
+          fileBytes: bytes,
+          filePath: path,
+        );
+    ref.read(pendingDekontFileProvider.notifier).update(null);
   }
 
   Future<void> _pickFile() async {

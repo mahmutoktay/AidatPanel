@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers/app_providers.dart';
 import '../../../core/utils/user_error_message.dart';
-import '../../auth/presentation/providers/auth_provider.dart';
 import '../../buildings/domain/entities/building_entity.dart';
 import '../domain/entities/site_entity.dart';
 import '../domain/repositories/site_repository.dart';

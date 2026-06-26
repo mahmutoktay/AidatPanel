@@ -5,6 +5,7 @@ import {
   listPaginationFields,
   profileEmail,
   profilePhone,
+  passwordSchema,
 } from "./shared.js";
 
 export const meSchemas = {
@@ -37,10 +38,7 @@ export const meSchemas = {
   updatePassword: {
     body: z.object({
       currentPassword: z.string().min(1, "Mevcut şifre gereklidir"),
-      newPassword: z
-        .string()
-        .min(6, "Şifre en az 6 karakter olmalıdır")
-        .max(100, "Şifre en fazla 100 karakter olabilir"),
+      newPassword: passwordSchema,
     }),
   },
 

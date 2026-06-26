@@ -24,7 +24,7 @@ import { postBuildingAnnouncement } from "../controllers/announcementController.
 import { getDekontsByBuilding } from "../controllers/dekontController.js";
 import { patchBuildingCollection } from "../controllers/buildingCollectionController.js";
 import { getBuildingReport } from "../controllers/reportController.js";
-import { getDashboardSummary } from "../controllers/dashboardController.js";
+import { getDashboardSummary, getBatchDashboardSummary } from "../controllers/dashboardController.js";
 
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireRoles } from "../middlewares/roleMiddleware.js";
@@ -50,6 +50,7 @@ router.get("/collection-presets", getCollectionPresets);
 
 // Dashboard aggregation — tek endpoint'te tüm özet veriler (N+1 önleme)
 router.get("/:id/dashboard-summary", getDashboardSummary);
+router.post("/dashboard-summary/batch", getBatchDashboardSummary);
 
 // Aidatlar — /:id/... bina detayından önce (okunabilirlik; Express yine de doğru eşleştirir)
 router.get("/:id/dues", validate(dueSchemas.getByBuilding), getDuesByBuilding);

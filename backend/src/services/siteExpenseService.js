@@ -20,9 +20,9 @@ import { getSiteApartmentCount, recalculateAllSiteBuildingsForMonth } from "./si
 function serializeSiteExpense(expense) {
   return {
     ...expense,
-    amount: expense.amount != null ? String(expense.amount) : null,
-    perUnitAmount: expense.perUnitAmount != null ? String(expense.perUnitAmount) : null,
-    parsedAmount: expense.parsedAmount != null ? String(expense.parsedAmount) : null,
+    amount: expense.amount != null ? Number(expense.amount) : null,
+    perUnitAmount: expense.perUnitAmount != null ? Number(expense.perUnitAmount) : null,
+    parsedAmount: expense.parsedAmount != null ? Number(expense.parsedAmount) : null,
   };
 }
 
@@ -86,7 +86,7 @@ export async function getSiteExpenseSummaryService(siteId, managerId, { month, y
     total += amount;
     return {
       category: g.category,
-      amount: amount.toFixed(2),
+      amount: Number(amount.toFixed(2)),
       count: g._count._all,
     };
   });
@@ -96,7 +96,7 @@ export async function getSiteExpenseSummaryService(siteId, managerId, { month, y
     month: m,
     year: y,
     currency: site.currency ?? "TRY",
-    total: total.toFixed(2),
+    totalAmount: Number(total.toFixed(2)),
     byCategory,
   };
 }

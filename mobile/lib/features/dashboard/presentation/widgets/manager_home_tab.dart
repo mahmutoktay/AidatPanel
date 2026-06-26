@@ -48,6 +48,11 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
   String? _selectedBuildingId;
   String? _remindingDueId;
 
+  /// Sağlanan async değerlerden hatası olanların sayısı.
+  int _errorCount(List<AsyncValue<dynamic>> values) {
+    return values.where((v) => v.hasError).length;
+  }
+
   @override
   Widget build(BuildContext context) {
     final buildings = widget.buildingsAsync.value ?? const <BuildingEntity>[];
@@ -77,7 +82,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
     final monthAnnouncementsAsync =
         ref.watch(managerMonthAnnouncementsCountProvider);
 
-    _maybeShowTransientErrorHint([
+    final allAsyncValues = [
       widget.buildingsAsync,
       allDuesAsync,
       ticketStatsAsync,
@@ -86,7 +91,10 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
       pendingDekontsAsync,
       monthExpensesCountAsync,
       monthAnnouncementsAsync,
-    ]);
+    ];
+    final totalErrorCount = _errorCount(allAsyncValues);
+
+    _maybeShowTransientErrorHint(allAsyncValues);
 
     final languageCode = AppIntlLocale.fromContext(context);
     final now = DateTime.now();
@@ -176,6 +184,9 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
                   ),
                 ),
               if (isRefreshing) const SizedBox(height: AppSizes.spacingS),
+              if (totalErrorCount > 0)
+                _DataWarningBanner(errorCount: totalErrorCount),
+              if (totalErrorCount > 0) const SizedBox(height: AppSizes.spacingS),
               ManagerSummaryStatsGrid(stats: summaryStats),
               const SizedBox(height: AppSizes.spacingM),
               ManagerQuickActionsSection(
@@ -303,5 +314,39 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
       ref.read(buildingsStoreProvider.notifier).loadBuildings(),
       pollAndShowNotificationToasts(ref),
     ]);
+  }
+}
+
+/// Dashboard verisi kısmen hatalıysa gösterilen uyarı banner'ı.
+class _DataWarningBanner extends StatelessWidget {
+  final int errorCount;
+  const _DataWarningBanner({required this.errorCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.statusAmberBg,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.statusAmber),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.warning_amber_rounded,
+              size: 20, color: AppColors.statusAmber),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '$errorCount bölüm yüklenemedi. Çekerek yeniden dene.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.statusAmber,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

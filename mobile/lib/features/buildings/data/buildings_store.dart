@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers/app_providers.dart';
 import '../../../core/utils/user_error_message.dart';
-import '../../../features/auth/presentation/providers/auth_provider.dart';
 import '../domain/entities/building_entity.dart';
 import '../domain/entities/collection_preset_entity.dart';
 import 'datasources/building_remote_datasource.dart';
@@ -103,9 +103,6 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
     }
   }
 
-  /// Hata UI tarafında ele alınmalı; state'i bozarsak (AsyncValue.error)
-  /// kullanıcı bina listesini tamamen kaybeder. Bu yüzden hata olursa
-  /// rethrow ediyoruz, başarı durumunda listeyi yeniden yazıyoruz.
   Future<void> removeBuilding(String buildingId) async {
     await _repository.deleteBuilding(buildingId);
     final current = state.asData?.value ?? <BuildingEntity>[];
@@ -114,8 +111,6 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
     );
   }
 
-  /// Belge §5: PUT /buildings/:id body `name?`, `address?`, `city?`.
-  /// Hata olursa state'i bozmadan rethrow edilir; UI snackbar gösterir.
   Future<void> updateBuilding({
     required String id,
     String? name,
@@ -158,23 +153,9 @@ final buildingsStoreProvider =
   BuildingsNotifier.new,
 );
 
-class StandaloneBuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
-  BuildingRepository get _repository => ref.read(buildingRepositoryProvider);
-
-  @override
-  Future<List<BuildingEntity>> build() async {
-    return _repository.fetchBuildings(standalone: true);
-  }
-
-  Future<void> loadBuildings() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => _repository.fetchBuildings(standalone: true),
-    );
-  }
-}
-
+/// Bağımsız (standalone) bina listesi provider'ı.
+/// `buildingsStoreProvider`'dan ayrı bir instance tutar.
 final standaloneBuildingsStoreProvider =
-    AsyncNotifierProvider<StandaloneBuildingsNotifier, List<BuildingEntity>>(
-  StandaloneBuildingsNotifier.new,
+    AsyncNotifierProvider<BuildingsNotifier, List<BuildingEntity>>(
+  BuildingsNotifier.new,
 );

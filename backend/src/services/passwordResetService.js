@@ -107,9 +107,12 @@ export async function requestPasswordResetService(email) {
     throw new Error("Şifre sıfırlama kodu üretilemedi; lütfen tekrar deneyin.");
   }
 
-  /** test.py E2E: düz kod yalnızca bu dosyaya yazılır (üretimde env tanımlı olmamalı). */
+  /** E2E: düz kod yalnızca e2e testte loglanır (üretimde env tanımlı olmamalı).
+   *  KVKK: email ve kod içeriği dosyaya yazılmaz — yalnızca test assertion helper'ı
+   *  kullanıcıya ait hash ile doğrulama yapar. */
   const e2ePath = process.env.AIDATPANEL_E2E_RESET_LOG;
-  if (e2ePath) {
+  const isE2E = process.env.AIDATPANEL_E2E === "1";
+  if (e2ePath && isE2E) {
     try {
       const dir = dirname(e2ePath);
       if (dir && dir !== ".") {
@@ -118,8 +121,8 @@ export async function requestPasswordResetService(email) {
       await appendFile(
         e2ePath,
         `${JSON.stringify({
-          email: user.email,
-          code: plain,
+          userId: user.id,
+          tokenHash,
           createdAt: new Date().toISOString(),
         })}\n`,
         "utf8",
@@ -132,7 +135,7 @@ export async function requestPasswordResetService(email) {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     if (process.env.NODE_ENV === "development") {
-      logger.warn({ type: "password_reset_no_resend_key", token: plain });
+      logger.warn({ type: "password_reset_no_resend_key" });
     }
     return;
   }
@@ -151,7 +154,7 @@ export async function requestPasswordResetService(email) {
   `;
 
   await sendResendEmail({
-    to: user.email, // Resend domain doğrulama yapana kadar böyle kalacak.
+    to: user.email,
     subject: "AidatPanel — şifre sıfırlama",
     html,
   });
