@@ -204,74 +204,99 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
         paymentState.pickedFileBytes != null &&
         paymentState.selectedDueId != null;
 
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: t.makePaymentTitle,
       canPop: !busy,
-      child: Scaffold(
-        backgroundColor: AppColors.dashboardBackground,
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _MakePaymentTopBar(
-              onBack: busy ? null : () => Navigator.of(context).maybePop(),
-              onDekonts: busy ? null : () => context.push('/dekonts'),
+      onBack: busy ? null : () => Navigator.of(context).maybePop(),
+      showNotificationAction: false,
+      actions: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: busy ? null : () => context.push('/dekonts'),
+            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.spacingXS,
+                vertical: AppSizes.spacingXS,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    t.viewDekonts,
+                    style: AppTypography.body2.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.textPrimary,
+                    size: 20,
+                  ),
+                ],
+              ),
             ),
-            Expanded(
-              child: paymentState.isLoadingInfo
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: AppSizes.screenBodyScrollPadding.copyWith(
-                        top: AppSizes.spacingS,
-                        bottom: AppSizes.spacingXL,
+          ),
+        ),
+      ],
+      body: paymentState.isLoadingInfo
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: AppSizes.screenBodyScrollPadding.copyWith(
+                top: AppSizes.spacingS,
+                bottom: AppSizes.spacingXL,
+              ),
+              children: [
+                if (paymentState.collection != null &&
+                    !paymentState.collection!.isCollectionConfigured)
+                  Padding(
+                    padding: DashboardScreenStyle.listItemPadding,
+                    child: DashboardSurfaceCard(
+                      padding:
+                          const EdgeInsets.all(AppSizes.spacingM),
+                      child: Text(
+                        t.collectionNotConfigured,
+                        style: AppTypography.body2.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                      children: [
-                        if (paymentState.collection != null &&
-                            !paymentState.collection!.isCollectionConfigured)
-                          Padding(
-                            padding: DashboardScreenStyle.listItemPadding,
-                            child: DashboardSurfaceCard(
-                              padding:
-                                  const EdgeInsets.all(AppSizes.spacingM),
-                              child: Text(
-                                t.collectionNotConfigured,
-                                style: AppTypography.body2.copyWith(
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        DashboardSectionTitle(title: t.paymentInfoTitle),
-                        const SizedBox(height: AppSizes.spacingS),
-                        if (paymentState.collection != null) ...[
-                          CopyPaymentField(
-                            label: t.ibanLabel,
-                            value: paymentState.collection!.collectionIban,
-                            monospace: true,
-                          ),
-                          const SizedBox(height: AppSizes.spacingS),
-                          CopyPaymentField(
-                            label: t.accountTitleLabel,
-                            value:
-                                paymentState.collection!.collectionAccountTitle,
-                          ),
-                          const SizedBox(height: AppSizes.spacingS),
-                          CopyPaymentField(
-                            label: t.referenceLabel,
-                            value: paymentState.collection!.paymentReference,
-                          ),
-                        ] else if (paymentState.error != null)
-                          DashboardSurfaceCard(
-                            child: Text(
-                              userFacingError(paymentState.error!),
-                              style: AppTypography.body2.copyWith(
-                                color: AppColors.error,
-                              ),
-                            ),
-                          ),
-                        const SizedBox(height: AppSizes.spacingM),
-                        DashboardSectionTitle(title: t.selectDue),
-                        const SizedBox(height: AppSizes.spacingXS),
-                        Text(
+                    ),
+                  ),
+                DashboardSectionTitle(title: t.paymentInfoTitle),
+                const SizedBox(height: AppSizes.spacingS),
+                if (paymentState.collection != null) ...[
+                  CopyPaymentField(
+                    label: t.ibanLabel,
+                    value: paymentState.collection!.collectionIban,
+                    monospace: true,
+                  ),
+                  const SizedBox(height: AppSizes.spacingS),
+                  CopyPaymentField(
+                    label: t.accountTitleLabel,
+                    value:
+                        paymentState.collection!.collectionAccountTitle,
+                  ),
+                  const SizedBox(height: AppSizes.spacingS),
+                  CopyPaymentField(
+                    label: t.referenceLabel,
+                    value: paymentState.collection!.paymentReference,
+                  ),
+                ] else if (paymentState.error != null)
+                  DashboardSurfaceCard(
+                    child: Text(
+                      userFacingError(paymentState.error!),
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.error,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: AppSizes.spacingM),
+                DashboardSectionTitle(title: t.selectDue),
+                const SizedBox(height: AppSizes.spacingXS),
+                Text(
                           t.selectDueHint,
                           style: AppTypography.caption.copyWith(
                             color: AppColors.textSecondary,
@@ -339,15 +364,11 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
                           ),
                       ],
                     ),
-            ),
-          ],
-        ),
         bottomNavigationBar: _buildSubmitBar(
           context,
           busy: busy,
           canSubmit: canSubmit,
         ),
-      ),
     );
   }
 
@@ -416,115 +437,6 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
       bytes: Uint8List.fromList(bytes),
       fileName: filename,
       mimeType: mimeType,
-    );
-  }
-}
-
-class _MakePaymentTopBar extends StatelessWidget {
-  final VoidCallback? onBack;
-  final VoidCallback? onDekonts;
-
-  const _MakePaymentTopBar({
-    this.onBack,
-    this.onDekonts,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.t.features.dekont;
-
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSizes.dashboardScreenPaddingHorizontal,
-          AppSizes.spacingS,
-          AppSizes.dashboardScreenPaddingHorizontal,
-          AppSizes.spacingS,
-        ),
-        child: Row(
-          children: [
-            _CircularIconButton(
-              icon: Icons.chevron_left_rounded,
-              onPressed: onBack,
-            ),
-            Expanded(
-              child: Text(
-                t.makePaymentTitle,
-                textAlign: TextAlign.center,
-                style: ProfileSettingsUi.title,
-              ),
-            ),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onDekonts,
-                borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.spacingXS,
-                    vertical: AppSizes.spacingXS,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        t.viewDekonts,
-                        style: AppTypography.body2.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.textPrimary,
-                        size: 20,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CircularIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onPressed;
-
-  const _CircularIconButton({
-    required this.icon,
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: GestureDetector(
-        onTap: onPressed,
-        child: Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: const Color(0x14000000), // siyah %8
-              width: 0.5,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Icon(
-            icon,
-            color: const Color(0xFF333333),
-            size: 18,
-          ),
-        ),
-      ),
     );
   }
 }

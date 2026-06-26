@@ -75,33 +75,32 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
   Widget build(BuildContext context) {
     final t = context.t.features.tickets;
 
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: t.createTitle,
       canPop: !_submitting,
-      child: DashboardSecondaryScaffold(
-        title: t.createTitle,
-        onBack: _submitting ? () {} : null,
-        onFallback: () {
-          ref.read(residentTabIndexProvider.notifier).update(2);
-          context.go('/resident-dashboard');
-        },
-        bottomNavigationBar: MinimalStickyActionBar(
-          label: t.submit,
-          onPressed: _submit,
-          loading: _submitting,
-        ),
-        body: SafeArea(
-          child: AbsorbPointer(
-            absorbing: _submitting,
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: AppSizes.screenBodyScrollPadding.copyWith(
-                  top: AppSizes.spacingS,
-                  bottom: AppSizes.spacingXL,
-                ),
-                children: [
-                  MinimalPickerField(
+      onBack: _submitting ? () {} : null,
+      onFallback: () {
+        ref.read(residentTabIndexProvider.notifier).update(2);
+        context.go('/resident-dashboard');
+      },
+      bottomNavigationBar: MinimalStickyActionBar(
+        label: t.submit,
+        onPressed: _submit,
+        loading: _submitting,
+      ),
+      body: SafeArea(
+        child: AbsorbPointer(
+          absorbing: _submitting,
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: AppSizes.screenBodyScrollPadding.copyWith(
+                top: AppSizes.spacingS,
+                bottom: AppSizes.spacingXL,
+              ),
+              children: [
+                MinimalPickerField(
                     label: t.fieldCategory,
                     value: _category.label(context),
                     hint: t.fieldCategory,
@@ -152,7 +151,6 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
             ),
           ),
         ),
-      ),
     );
   }
 

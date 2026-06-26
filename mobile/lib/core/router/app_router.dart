@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../shared/widgets/dashboard_secondary_scaffold.dart';
+
 import '../../main.dart' show MyApp;
 import 'app_route_guard.dart';
 import '../../features/auth/domain/entities/user_entity.dart' show UserRole;
@@ -44,7 +46,6 @@ import '../../features/sites/presentation/screens/site_expenses_screen.dart';
 import '../../features/reports/presentation/screens/site_report_screen.dart';
 import '../../features/reports/domain/entities/report_entity.dart';
 import '../../features/profile/presentation/screens/legal_document_screen.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/utils/user_error_message.dart';
 import '../../l10n/strings.g.dart';
@@ -511,16 +512,8 @@ class _BuildingResidentsFallbackScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.dashboardBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        surfaceTintColor: Colors.transparent,
-        centerTitle: true,
-        title: Text(context.t.common.buildingDetail),
-      ),
+    return DashboardSecondaryScaffold(
+      title: context.t.common.buildingDetail,
       body: SafeArea(
         child: Padding(
           padding: AppSizes.screenBodyScrollPadding,

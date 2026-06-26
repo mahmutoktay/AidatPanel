@@ -7,6 +7,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/profile_avatar.dart';
 import '../../../../shared/widgets/profile_avatar_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -212,82 +213,27 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     final user = profileState.user ?? authUser;
     final subscriptionState = ref.watch(subscriptionNotifierProvider);
 
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: _editing ? context.t.features.profile.editTitle : context.t.features.profile.title,
       canPop: !profileState.isSaving,
-      child: Scaffold(
-        backgroundColor: AppColors.dashboardBackground,
-        appBar: _buildAppBar(context, user, profileState),
-        body: _buildBody(context, profileState, user, subscriptionState),
-        bottomNavigationBar: _editing && user != null
-            ? _buildSaveBar(context, profileState)
-            : null,
-      ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(
-    BuildContext context,
-    UserEntity? user,
-    ProfileState profileState,
-  ) {
-    final t = context.t;
-    final showEdit = user != null && !_editing && !profileState.isSaving;
-
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      surfaceTintColor: Colors.transparent,
-      centerTitle: true,
-      leading: Center(
-        child: GestureDetector(
-          onTap: profileState.isSaving
-              ? null
-              : (_editing ? _cancelEdit : () => Navigator.of(context).pop()),
-          child: Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0x14000000), // siyah %8
-                width: 0.5,
-              ),
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              _editing ? Icons.close_rounded : Icons.chevron_left_rounded,
-              color: const Color(0xFF333333),
-              size: 18,
-            ),
-          ),
-        ),
-      ),
-      title: Text(
-        _editing ? t.features.profile.editTitle : t.features.profile.title,
-        style: ProfileSettingsUi.title,
-      ),
+      leading: _editing
+          ? IconButton(
+              icon: const Icon(Icons.close_rounded),
+              onPressed: _cancelEdit,
+            )
+          : null,
       actions: [
-        if (showEdit)
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: TextButton.icon(
-              onPressed: _enterEdit,
-              icon: const Icon(Icons.edit_outlined, size: 20),
-              label: Text(
-                t.common.edit,
-                style: ProfileSettingsUi.fieldValue.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              style: TextButton.styleFrom(
-                minimumSize: const Size(48, 48),
-                foregroundColor: ProfileSettingsUi.ink,
-              ),
-            ),
+        if (user != null && !_editing && !profileState.isSaving)
+          TextButton.icon(
+            onPressed: _enterEdit,
+            icon: const Icon(Icons.edit_outlined, size: 20),
+            label: Text(context.t.common.edit),
           ),
       ],
+      body: _buildBody(context, profileState, user, subscriptionState),
+      bottomNavigationBar: _editing && user != null
+          ? _buildSaveBar(context, profileState)
+          : null,
     );
   }
 

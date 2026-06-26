@@ -9,7 +9,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/app_date_format.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/widgets/circular_back_button.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -66,8 +66,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     });
 
     if (subscriptionState.isLoading && subscriptionState.subscription == null) {
-      return Scaffold(
-        backgroundColor: AppColors.dashboardBackground,
+      return DashboardSecondaryScaffold(
+        title: t.title,
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -125,12 +125,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       (true, t.featurePrioritySupport),
     ];
 
-    return Scaffold(
-      backgroundColor: AppColors.dashboardBackground,
+    return DashboardSecondaryScaffold(
+      title: t.title,
       body: SafeArea(
         child: Column(
           children: [
-            _TopBar(title: t.title),
             Expanded(
               child: RefreshIndicator(
                 color: AppColors.primary,
@@ -241,32 +240,6 @@ String _formatMoney(
     symbol: symbol,
     decimalDigits: 0,
   ).format(amount);
-}
-
-class _TopBar extends StatelessWidget {
-  final String title;
-
-  const _TopBar({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16, left: 10, right: 18, bottom: 8),
-      child: Row(
-        children: [
-          const CircularBackButton(),
-          const SizedBox(width: 4),
-          Text(
-            title,
-            style: AppTypography.body1.copyWith(
-              fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _ProfileRow extends StatelessWidget {

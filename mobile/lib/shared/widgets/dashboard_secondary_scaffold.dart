@@ -27,6 +27,8 @@ class DashboardSecondaryScaffold extends ConsumerWidget {
   final PreferredSizeWidget? bottom;
   final bool canPop;
   final bool useMinimalBackButton;
+  final Widget? leading;
+  final PopInvokedWithResultCallback? onPopInvokedWithResult;
 
   const DashboardSecondaryScaffold({
     super.key,
@@ -43,6 +45,8 @@ class DashboardSecondaryScaffold extends ConsumerWidget {
     this.bottom,
     this.canPop = true,
     this.useMinimalBackButton = false,
+    this.leading,
+    this.onPopInvokedWithResult,
   });
 
   bool get _handlesSystemBack => fallbackRoute != null || onFallback != null;
@@ -78,12 +82,13 @@ class DashboardSecondaryScaffold extends ConsumerWidget {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        leading: useMinimalBackButton
-            ? Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: MinimalBackButton(onPressed: backHandler),
-              )
-            : CircularBackButton(onPressed: backHandler),
+        leading: leading ??
+            (useMinimalBackButton
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: MinimalBackButton(onPressed: backHandler),
+                  )
+                : CircularBackButton(onPressed: backHandler)),
         title: Text(title, style: ProfileSettingsUi.title),
         actions: appBarActions.isEmpty ? null : appBarActions,
         bottom: bottom,
@@ -94,9 +99,13 @@ class DashboardSecondaryScaffold extends ConsumerWidget {
       bottomNavigationBar: bottomNavigationBar,
     );
 
-    if (!canPop || (_handlesSystemBack && backHandler != null)) {
+    final needsPopScope = !canPop ||
+        (_handlesSystemBack && backHandler != null) ||
+        onPopInvokedWithResult != null;
+    if (needsPopScope) {
       scaffold = PopScope(
         canPop: canPop,
+        onPopInvokedWithResult: onPopInvokedWithResult,
         child: scaffold,
       );
     }

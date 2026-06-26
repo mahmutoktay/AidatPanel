@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../domain/entities/report_entity.dart';
 import '../providers/report_provider.dart';
 import '../screens/report_preview_screen.dart';
@@ -59,8 +60,8 @@ class _SiteReportScreenState extends ConsumerState<SiteReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.dashboardBackground,
+    return DashboardSecondaryScaffold(
+      title: context.t.features.reports.downloading,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

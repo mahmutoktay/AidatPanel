@@ -56,31 +56,29 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: context.t.common.createInviteCode,
       canPop: _step == 0,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         _onBackPressed();
       },
-      child: DashboardSecondaryScaffold(
-        title: context.t.common.createInviteCode,
-        onBack: _onBackPressed,
-        body: Column(
-          children: [
-            InviteStepIndicator(
-              currentStep: _step,
-              includeSiteStep: _hasSiteStep,
+      onBack: _onBackPressed,
+      body: Column(
+        children: [
+          InviteStepIndicator(
+            currentStep: _step,
+            includeSiteStep: _hasSiteStep,
+          ),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              switchInCurve: Curves.easeInOut,
+              switchOutCurve: Curves.easeInOut,
+              child: _buildStepContent(),
             ),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                switchInCurve: Curves.easeInOut,
-                switchOutCurve: Curves.easeInOut,
-                child: _buildStepContent(),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

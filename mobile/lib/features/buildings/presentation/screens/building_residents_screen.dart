@@ -9,6 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/selection_mode_widgets.dart';
 import '../../../../shared/widgets/async_error_widget.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -310,65 +311,54 @@ class _BuildingResidentsScreenState
     final hasOccupied =
         asyncApartments.value?.any((a) => a.isOccupied) ?? false;
 
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: _selectionMode
+          ? '$selectedCount ${context.t.common.selectedCountLabel}'
+          : context.t.common.buildingDetail,
       canPop: !_selectionMode,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         _exitSelectionMode();
       },
-      child: Scaffold(
-        backgroundColor: AppColors.dashboardBackground,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          surfaceTintColor: Colors.transparent,
-          centerTitle: true,
-          leading: _selectionMode
-              ? IconButton(
-                  tooltip: context.t.common.cancelBtn,
-                  icon: const Icon(Icons.close_rounded),
-                  onPressed: _exitSelectionMode,
-                )
-              : Center(
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).maybePop(),
-                    child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0x14000000), // siyah %8
-                          width: 0.5,
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        Icons.chevron_left_rounded,
-                        color: Color(0xFF333333),
-                        size: 18,
-                      ),
+      leading: _selectionMode
+          ? IconButton(
+              tooltip: context.t.common.cancelBtn,
+              icon: const Icon(Icons.close_rounded),
+              onPressed: _exitSelectionMode,
+            )
+          : Center(
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0x14000000), // siyah %8
+                      width: 0.5,
                     ),
                   ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.chevron_left_rounded,
+                    color: Color(0xFF333333),
+                    size: 18,
+                  ),
                 ),
-          title: Text(
-            _selectionMode
-                ? '$selectedCount ${context.t.common.selectedCountLabel}'
-                : context.t.common.buildingDetail,
-          ),
-        ),
-        floatingActionButtonLocation: selectionActionFabLocation,
-        floatingActionButton: _selectionMode && selectedCount > 0
-            ? SelectionActionFab(
-                onPressed: _confirmAndRemoveSelected,
-                backgroundColor: AppColors.warning,
-                icon: Icons.person_remove_outlined,
-                label: '${context.t.common.remove} ($selectedCount)',
-              )
-            : null,
-        body: asyncApartments.when(
+              ),
+            ),
+      floatingActionButtonLocation: selectionActionFabLocation,
+      floatingActionButton: _selectionMode && selectedCount > 0
+          ? SelectionActionFab(
+              onPressed: _confirmAndRemoveSelected,
+              backgroundColor: AppColors.warning,
+              icon: Icons.person_remove_outlined,
+              label: '${context.t.common.remove} ($selectedCount)',
+            )
+          : null,
+      body: asyncApartments.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => AsyncErrorWidget(
             message: userFacingError(e),
@@ -511,7 +501,6 @@ class _BuildingResidentsScreenState
             );
           },
         ),
-      ),
     );
   }
 
