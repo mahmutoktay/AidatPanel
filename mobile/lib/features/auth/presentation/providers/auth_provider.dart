@@ -9,6 +9,8 @@ import '../../data/repositories/auth_repository_impl.dart'
     show AuthRepository, AuthRepositoryImpl;
 import '../../domain/entities/user_entity.dart';
 import '../../../profile/presentation/providers/profile_notifier.dart';
+import '../../../../core/utils/input_validators.dart';
+import '../../../../l10n/strings.g.dart';
 
 export '../../../../core/providers/app_providers.dart'
     show dioClientProvider, secureStorageProvider, onSessionExpiredProvider;
@@ -91,6 +93,14 @@ class AuthNotifier extends Notifier<AuthState> {
     WidgetRef ref,
   ) async {
     if (state.isLoading) return;
+    if (password.isEmpty) {
+      state = state.copyWith(error: t.features.auth.passwordRequired);
+      return;
+    }
+    if (!isPhone && !InputValidators.emailRegex.hasMatch(rawIdentifier.trim())) {
+      state = state.copyWith(error: t.validation.emailInvalid);
+      return;
+    }
     final identifier = isPhone
         ? (rawIdentifier.startsWith('+90')
             ? rawIdentifier
