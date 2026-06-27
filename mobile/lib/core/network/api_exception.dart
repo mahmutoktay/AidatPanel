@@ -18,35 +18,28 @@ class ApiException implements Exception {
 }
 
 class NetworkException extends ApiException {
-  NetworkException({super.message = 'Ağ bağlantısı hatası'});
+  NetworkException({super.message = 'network_error'});
 }
 
 class UnauthorizedException extends ApiException {
-  UnauthorizedException({
-    super.message = 'Yetkisiz erişim',
-    super.responseData,
-  }) : super(statusCode: 401);
+  UnauthorizedException({super.message = 'unauthorized', super.responseData})
+    : super(statusCode: 401);
 }
 
 class NotFoundException extends ApiException {
-  NotFoundException({
-    super.message = 'Kaynak bulunamadı',
-    super.responseData,
-  }) : super(statusCode: 404);
+  NotFoundException({super.message = 'not_found', super.responseData})
+    : super(statusCode: 404);
 }
 
 class ServerException extends ApiException {
   ServerException({
-    super.message = 'Sunucu hatası',
+    super.message = 'server_error',
     super.responseData,
     int? statusCode,
   }) : super(statusCode: statusCode ?? 500);
 }
 
 class ValidationException extends ApiException {
-  ValidationException({
-    super.message = 'Doğrulama hatası',
-    super.responseData,
-  }) : super(statusCode: 422);
+  ValidationException({super.message = 'validation_error', super.responseData})
+    : super(statusCode: 422);
 }
-

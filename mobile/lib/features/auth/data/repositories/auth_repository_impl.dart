@@ -67,10 +67,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> _persistTokens(String accessToken, String refreshToken) async {
     await _secureStorage.saveToken(accessToken);
     await _secureStorage.saveRefreshToken(refreshToken);
-    await _secureStorage.saveTokenExpiry(
-      JwtUtils.parseExpiry(accessToken),
-    );
-    final sid = JwtUtils.parseSessionId(refreshToken) ??
+    await _secureStorage.saveTokenExpiry(JwtUtils.parseExpiry(accessToken));
+    final sid =
+        JwtUtils.parseSessionId(refreshToken) ??
         JwtUtils.parseSessionId(accessToken);
     if (sid != null) {
       await _secureStorage.saveSessionId(sid);
@@ -96,7 +95,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Giriş sırasında bir hata oluştu');
+      throw ApiException(message: 'auth_login_failed');
     }
   }
 
@@ -118,7 +117,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Kayıt sırasında bir hata oluştu');
+      throw ApiException(message: 'auth_register_failed');
     }
   }
 
@@ -150,7 +149,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Katılım sırasında bir hata oluştu');
+      throw ApiException(message: 'auth_join_failed');
     }
   }
 
@@ -176,9 +175,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(
-        message: 'Diğer cihazlardan çıkış yapılamadı, lütfen tekrar deneyin',
-      );
+      throw ApiException(message: 'auth_logout_all_devices_failed');
     } finally {
       _remoteDataSource.endSessionMutation();
     }
@@ -187,9 +184,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> _persistTokenPair(TokenRefreshResult tokens) async {
     final refresh = tokens.refreshToken;
     if (refresh == null || refresh.isEmpty) {
-      throw ApiException(
-        message: 'Diğer cihazlardan çıkış yapılamadı, lütfen tekrar deneyin',
-      );
+      throw ApiException(message: 'auth_logout_all_devices_failed');
     }
     await _persistTokens(tokens.accessToken, refresh);
   }
@@ -201,21 +196,18 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'İstek gönderilemedi, lütfen tekrar deneyin');
+      throw ApiException(message: 'auth_forgot_password_request_failed');
     }
   }
 
   @override
   Future<void> resetPassword(String token, String password) async {
     try {
-      await _remoteDataSource.resetPassword(
-        token: token,
-        password: password,
-      );
+      await _remoteDataSource.resetPassword(token: token, password: password);
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Şifre sıfırlanamadı, lütfen tekrar deneyin');
+      throw ApiException(message: 'auth_reset_password_failed');
     }
   }
 
@@ -276,7 +268,8 @@ class AuthRepositoryImpl implements AuthRepository {
       if (result.refreshToken != null && result.refreshToken!.isNotEmpty) {
         await _secureStorage.saveRefreshToken(result.refreshToken!);
       }
-      final sid = JwtUtils.parseSessionId(result.refreshToken ?? refreshToken) ??
+      final sid =
+          JwtUtils.parseSessionId(result.refreshToken ?? refreshToken) ??
           JwtUtils.parseSessionId(result.accessToken);
       if (sid != null) {
         await _secureStorage.saveSessionId(sid);

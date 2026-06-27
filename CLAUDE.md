@@ -398,3 +398,13 @@ Tüm görevler `FAZ_DURUMU.md` içinde `[ ]` / `[x]` olarak işaretlenir. AI aja
 - Tüm commit mesajları **Türkçe** ve anlaşılır olmalıdır.
 - Teknik terimler İngilizce kalabilir ancak açıklayıcı cümleler Türkçe olmalıdır.
 - Örnek: `feat: aidat listesi filtresi eklendi` ✅ | `feat: add due filter` ❌
+
+### 6.12 Dil ve Çeviri Mantığı (Slang i18n - ZORUNLU)
+
+```
+1. Mobil projesinde Ekranda (UI'da) gösterilen veya Toast ile basılan HİÇBİR YAZI (hata mesajları dahil) hardcoded (sabit) string olamaz. Tüm metinler `strings_tr.i18n.json` ve `strings_en.i18n.json` dosyalarına eklenip `context.t` üzerinden okunmalıdır.
+2. REPOSITORY ve DATASOURCE katmanlarında ASLA `context.t` veya çeviri (localization) çağrısı yapılamaz. Bu katmanlar, çevrilmemiş saf (raw) veya hata anahtarları (error key) döndürmelidir (örnek: "purchase_failed", "site_load_error").
+3. Çeviriler SADECE Presentation (UI / Widget / Provider) katmanında, tercihen `_resolveMessage(context, errorKey)` gibi bir haritalama (mapping) fonksiyonu kullanılarak çevrilir.
+4. JSON dosyalarına ekleme yapıldıktan sonra ZORUNLU OLARAK `dart run slang` komutu çalıştırılmalı ve `strings.g.dart` dosyası güncellenmelidir.
+5. Parametreli çeviriler için JSON içerisinde `{degisken}` formatı kullanılmalı ve UI tarafında `.replaceAll('{degisken}', deger)` şeklinde kullanılmalıdır.
+```

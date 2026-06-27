@@ -11,8 +11,8 @@ class BuildingRepositoryImpl implements BuildingRepository {
   BuildingRepositoryImpl({
     required BuildingRemoteDataSource remoteDataSource,
     required LocalCollectionPresetsStore localPresetsStore,
-  })  : _remoteDataSource = remoteDataSource,
-        _localPresetsStore = localPresetsStore;
+  }) : _remoteDataSource = remoteDataSource,
+       _localPresetsStore = localPresetsStore;
 
   final BuildingRemoteDataSource _remoteDataSource;
   final LocalCollectionPresetsStore _localPresetsStore;
@@ -41,13 +41,14 @@ class BuildingRepositoryImpl implements BuildingRepository {
   @override
   Future<List<BuildingEntity>> fetchBuildings({bool standalone = false}) async {
     try {
-      final models =
-          await _remoteDataSource.fetchBuildings(standalone: standalone);
+      final models = await _remoteDataSource.fetchBuildings(
+        standalone: standalone,
+      );
       return models.map((m) => m.toEntity()).toList();
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Binalar yüklenirken hata oluştu: $e');
+      throw ApiException(message: 'building_fetch_failed');
     }
   }
 
@@ -58,9 +59,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(
-        message: 'Tahsilat önerileri yüklenirken hata oluştu: $e',
-      );
+      throw ApiException(message: 'collection_presets_fetch_failed');
     }
   }
 
@@ -97,7 +96,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Bina eklenirken hata oluştu: $e');
+      throw ApiException(message: 'building_create_failed');
     }
   }
 
@@ -119,7 +118,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Bina güncellenirken hata oluştu: $e');
+      throw ApiException(message: 'building_update_failed');
     }
   }
 
@@ -142,9 +141,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(
-        message: 'Tahsilat bilgileri güncellenirken hata oluştu: $e',
-      );
+      throw ApiException(message: 'building_collection_update_failed');
     }
   }
 
@@ -159,9 +156,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
       final key = IbanUtils.normalize(matchIban);
       final buildings = await fetchBuildings();
       final matched = buildings
-          .where(
-            (b) => IbanUtils.normalize(b.collectionIban ?? '') == key,
-          )
+          .where((b) => IbanUtils.normalize(b.collectionIban ?? '') == key)
           .toList();
 
       if (matched.isEmpty) {
@@ -185,9 +180,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(
-        message: 'Tahsilat bilgileri güncellenirken hata oluştu: $e',
-      );
+      throw ApiException(message: 'building_collection_update_failed');
     }
   }
 
@@ -203,7 +196,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
         .toList();
     if (existing.isEmpty) {
       throw ApiException(
-        message: 'Bu IBAN için güncellenecek kayıt bulunamadı',
+        message: 'collection_preset_not_found',
         statusCode: 404,
       );
     }
@@ -212,7 +205,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
         ? ''
         : IbanUtils.normalize(collectionIban);
     if (iban.isNotEmpty && !IbanUtils.isValidTrIban(iban)) {
-      throw ApiException(message: 'Geçerli bir TR IBAN girin');
+      throw ApiException(message: 'invalid_iban');
     }
 
     await _localPresetsStore.remove(matchIban);
@@ -222,12 +215,12 @@ class BuildingRepositoryImpl implements BuildingRepository {
           collectionIban: iban,
           collectionAccountTitle:
               (collectionAccountTitle?.trim().isEmpty ?? true)
-                  ? null
-                  : collectionAccountTitle!.trim(),
+              ? null
+              : collectionAccountTitle!.trim(),
           paymentReferenceTemplate:
               (paymentReferenceTemplate?.trim().isEmpty ?? true)
-                  ? null
-                  : paymentReferenceTemplate!.trim(),
+              ? null
+              : paymentReferenceTemplate!.trim(),
           lastUsedAt: DateTime.now(),
           buildingCount: 0,
         ),
@@ -245,11 +238,11 @@ class BuildingRepositoryImpl implements BuildingRepository {
     try {
       final key = IbanUtils.normalize(collectionIban);
       if (!IbanUtils.isValidTrIban(key)) {
-        throw ApiException(message: 'Geçerli bir TR IBAN girin');
+        throw ApiException(message: 'invalid_iban');
       }
       final presets = await _mergedPresets();
       if (presets.any((p) => IbanUtils.normalize(p.collectionIban) == key)) {
-        throw ApiException(message: 'Bu IBAN zaten kayıtlı');
+        throw ApiException(message: 'collection_iban_duplicate');
       }
 
       final entity = CollectionPresetEntity(
@@ -259,8 +252,8 @@ class BuildingRepositoryImpl implements BuildingRepository {
             : collectionAccountTitle!.trim(),
         paymentReferenceTemplate:
             (paymentReferenceTemplate?.trim().isEmpty ?? true)
-                ? null
-                : paymentReferenceTemplate!.trim(),
+            ? null
+            : paymentReferenceTemplate!.trim(),
         lastUsedAt: DateTime.now(),
         buildingCount: 0,
       );
@@ -269,7 +262,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'IBAN kaydedilirken hata oluştu: $e');
+      throw ApiException(message: 'collection_preset_save_failed');
     }
   }
 
@@ -296,7 +289,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
 
       if (buildingsCleared == 0 && !orphanPresetRemoved) {
         throw ApiException(
-          message: 'Silinecek IBAN kaydı bulunamadı',
+          message: 'collection_preset_not_found',
           statusCode: 404,
         );
       }
@@ -308,7 +301,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'IBAN silinirken hata oluştu: $e');
+      throw ApiException(message: 'collection_preset_delete_failed');
     }
   }
 
@@ -330,10 +323,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
     }
     if (presetsRemoved == 0) {
       throw lastError ??
-          ApiException(
-            message: 'Silinecek IBAN kaydı bulunamadı',
-            statusCode: 404,
-          );
+          ApiException(message: 'collection_preset_not_found', statusCode: 404);
     }
     return SavedIbanBulkDeleteResult(
       presetsRemoved: presetsRemoved,
@@ -348,7 +338,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Bina silinirken hata oluştu: $e');
+      throw ApiException(message: 'building_delete_failed');
     }
   }
 }

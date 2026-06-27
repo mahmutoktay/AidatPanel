@@ -1,6 +1,7 @@
 class AppConstants {
   // App info
   static const String appName = 'AidatPanel';
+  static const String devAppName = 'AidatPanel (DEV)';
   static String appVersion =
       '0.1.5'; // Runtime'da package_info_plus'tan güncellenecek
 
@@ -13,13 +14,16 @@ class AppConstants {
   static const String themeKey = 'theme_preference';
   static const String fcmTokenKey = 'fcm_token';
   static const String sessionIdKey = 'session_id';
+
   /// Yönetici kayıtlı IBAN şablonları (backend yalnızca binalardan türetir; yetim setler cihazda).
   static const String localCollectionPresetsKey = 'local_collection_presets_v1';
+
   /// userId → fotoğraf referansı (çıkışta silinmez; backend yokken yerel).
   static const String profilePhotosKey = 'profile_photos_v1';
 
   // Timeouts
   static const Duration apiTimeout = Duration(seconds: 30);
+
   /// Dekont / makbuz multipart — ana API timeout'undan ayrı (FAZ 5).
   static const Duration uploadTimeout = Duration(minutes: 3);
   static const Duration tokenRefreshThreshold = Duration(minutes: 5);

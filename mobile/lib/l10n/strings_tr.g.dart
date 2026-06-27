@@ -90,6 +90,9 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get themeDark => 'Koyu';
 	@override String get themeSystem => 'Sistem';
 	@override String get themeSheetDescription => 'Uygulamanın görünümünü buradan değiştirebilirsiniz.';
+	@override String get themeLightSubtitle => 'Light';
+	@override String get themeDarkSubtitle => 'Dark';
+	@override String get themeSystemSubtitle => 'System';
 	@override String get turkish => 'Türkçe';
 	@override String get notifications => 'Bildirimler';
 	@override String get info => 'Bilgi';
@@ -274,6 +277,8 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get apartmentLabel => 'DAİRE';
 	@override String get turkishLanguage => 'Türkçe';
 	@override String get englishLanguage => 'English';
+	@override String get turkishLanguageSubtitle => 'Turkish';
+	@override String get englishLanguageSubtitle => 'İngilizce';
 	@override String get stepSite => 'Site';
 	@override String get stepBuilding => 'Bina';
 	@override String get stepApartment => 'Daire';
@@ -339,6 +344,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get changePasswordFailed => 'Şifre değiştirilemedi. Lütfen tekrar deneyin.';
 	@override String get changePasswordWrongCurrent => 'Mevcut şifre hatalı.';
 	@override String get languageSheetDescription => 'Uygulama dilini buradan değiştirebilirsiniz.';
+	@override late final _Translations$common$friendlyError$tr friendlyError = _Translations$common$friendlyError$tr._(_root);
 	@override String get newPasswordHint => 'Büyük harf, küçük harf ve rakam içermeli';
 	@override String get passwordStrengthUnspecified => 'Belirtilmemiş';
 	@override String get passwordStrengthWeak => 'Zayıf';
@@ -374,6 +380,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get backToLogin => 'Giriş ekranına dön';
 	@override String get select => 'Seç';
 	@override String get kNew => 'Yeni';
+	@override late final _Translations$common$errorKeys$tr errorKeys = _Translations$common$errorKeys$tr._(_root);
 }
 
 // Path: validation
@@ -532,6 +539,114 @@ class _Translations$common$documentPreview$tr implements Translations$common$doc
 	@override String get share => 'Paylaş';
 	@override String get pdfUnavailable => 'PDF bu cihazda açılamadı. Paylaş ile başka bir uygulamada açabilirsiniz.';
 	@override String get pinchHint => 'İki parmakla yakınlaştırıp kaydırın';
+}
+
+// Path: common.friendlyError
+class _Translations$common$friendlyError$tr implements Translations$common$friendlyError$en {
+	_Translations$common$friendlyError$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get networkTitle => 'İnternet bağlantısı yok';
+	@override String get networkMessage => 'Telefonunuzun internete bağlı olduğundan emin olup tekrar deneyin.';
+	@override String get unauthorizedTitle => 'Oturum sona erdi';
+	@override String get unauthorizedMessage => 'Lütfen uygulamayı kapatıp tekrar giriş yapın.';
+	@override String get serverTitle => 'Sunucuya ulaşılamıyor';
+	@override String get serverMessage => 'Biraz sonra tekrar deneyebilir misiniz?';
+	@override String get genericTitle => 'Bu sayfa açılamadı';
+	@override String get genericMessage => 'Lütfen uygulamayı kapatıp tekrar açın.';
+	@override String get debugOnlyLabel => 'Sadece geliştirici görür (debug):';
+}
+
+// Path: common.errorKeys
+class _Translations$common$errorKeys$tr implements Translations$common$errorKeys$en {
+	_Translations$common$errorKeys$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get authLoginFailed => 'Giriş sırasında bir sorun oluştu. Lütfen tekrar deneyin.';
+	@override String get authRegisterFailed => 'Kayıt sırasında bir sorun oluştu. Lütfen tekrar deneyin.';
+	@override String get authJoinFailed => 'Katılım sırasında bir sorun oluştu. Lütfen tekrar deneyin.';
+	@override String get authLogoutAllDevicesFailed => 'Diğer cihazlardan çıkış yapılamadı. Lütfen tekrar deneyin.';
+	@override String get authForgotPasswordRequestFailed => 'İstek gönderilemedi. Lütfen tekrar deneyin.';
+	@override String get authResetPasswordFailed => 'Şifre sıfırlanamadı. Lütfen tekrar deneyin.';
+	@override String get dashboardSummaryFetchFailed => 'Dashboard özeti alınamadı. Lütfen tekrar deneyin.';
+	@override String get dashboardCollectionFetchFailed => 'Tahsilat özeti alınamadı. Lütfen tekrar deneyin.';
+	@override String get buildingFetchFailed => 'Binalar yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get collectionPresetsFetchFailed => 'Tahsilat önerileri yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get buildingCreateFailed => 'Bina eklenemedi. Lütfen tekrar deneyin.';
+	@override String get buildingUpdateFailed => 'Bina güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get buildingCollectionUpdateFailed => 'Tahsilat bilgileri güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get collectionPresetNotFound => 'Güncellenecek veya silinecek IBAN kaydı bulunamadı.';
+	@override String get collectionPresetSaveFailed => 'IBAN kaydedilemedi. Lütfen tekrar deneyin.';
+	@override String get collectionPresetDeleteFailed => 'IBAN silinemedi. Lütfen tekrar deneyin.';
+	@override String get buildingDeleteFailed => 'Bina silinemedi. Lütfen tekrar deneyin.';
+	@override String get inviteCodeCreateFailed => 'Davet kodu oluşturulamadı. Lütfen tekrar deneyin.';
+	@override String get apartmentsFetchFailed => 'Daireler yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get apartmentCreateFailed => 'Daire eklenemedi. Lütfen tekrar deneyin.';
+	@override String get apartmentUpdateFailed => 'Daire güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get apartmentDeleteFailed => 'Daire silinemedi. Lütfen tekrar deneyin.';
+	@override String get residentRemoveFailed => 'Sakin çıkarılamadı. Lütfen tekrar deneyin.';
+	@override String get buildingDuesFetchFailed => 'Aidat listesi alınamadı. Lütfen tekrar deneyin.';
+	@override String get myDuesFetchFailed => 'Aidatlarınız alınamadı. Lütfen tekrar deneyin.';
+	@override String get dueStatusUpdateFailed => 'Aidat durumu güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get dueAmountUpdateFailed => 'Aidat tutarı güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get dueReminderFailed => 'Hatırlatma gönderilemedi. Lütfen tekrar deneyin.';
+	@override String get myTicketsFetchFailed => 'Talepler alınamadı. Lütfen tekrar deneyin.';
+	@override String get buildingTicketsFetchFailed => 'Bina talepleri alınamadı. Lütfen tekrar deneyin.';
+	@override String get ticketDetailFetchFailed => 'Talep detayı alınamadı. Lütfen tekrar deneyin.';
+	@override String get ticketCreateFailed => 'Talep oluşturulamadı. Lütfen tekrar deneyin.';
+	@override String get ticketNoteAddFailed => 'Not eklenemedi. Lütfen tekrar deneyin.';
+	@override String get ticketStatusUpdateFailed => 'Talep durumu güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get expensesFetchFailed => 'Gider listesi alınamadı. Lütfen tekrar deneyin.';
+	@override String get expenseSummaryFetchFailed => 'Gider özeti alınamadı. Lütfen tekrar deneyin.';
+	@override String get expenseCreateFailed => 'Gider kaydedilemedi. Lütfen tekrar deneyin.';
+	@override String get expenseUpdateFailed => 'Gider güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get expenseDeleteFailed => 'Gider silinemedi. Lütfen tekrar deneyin.';
+	@override String get expenseReceiptsUploadFailed => 'Makbuzlar yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get profileFetchFailed => 'Profil bilgileri alınamadı. Lütfen tekrar deneyin.';
+	@override String get profileUpdateFailed => 'Profil güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get languageUpdateFailed => 'Dil tercihi kaydedilemedi. Lütfen tekrar deneyin.';
+	@override String get passwordChangeFailed => 'Şifre değiştirilemedi. Lütfen tekrar deneyin.';
+	@override String get accountDeleteFailed => 'Hesap kapatılamadı. Lütfen tekrar deneyin.';
+	@override String get profilePictureUploadFailed => 'Profil fotoğrafı yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get profilePictureDeleteFailed => 'Profil fotoğrafı silinemedi. Lütfen tekrar deneyin.';
+	@override String get notificationCountFetchFailed => 'Bildirim sayısı alınamadı. Lütfen tekrar deneyin.';
+	@override String get notificationsFetchFailed => 'Bildirimler alınamadı. Lütfen tekrar deneyin.';
+	@override String get announcementCountFetchFailed => 'Duyuru sayısı alınamadı. Lütfen tekrar deneyin.';
+	@override String get notificationMarkReadFailed => 'Bildirim okunamadı. Lütfen tekrar deneyin.';
+	@override String get notificationsMarkAllReadFailed => 'Bildirimler okunamadı. Lütfen tekrar deneyin.';
+	@override String get announcementSendFailed => 'Duyuru gönderilemedi. Lütfen tekrar deneyin.';
+	@override String get sitesFetchFailed => 'Siteler yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteDetailFetchFailed => 'Site detayı yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteBuildingsFetchFailed => 'Bloklar yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteCreateFailed => 'Site eklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteUpdateFailed => 'Site güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get siteCollectionUpdateFailed => 'Site tahsilat bilgileri güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get siteDeleteFailed => 'Site silinemedi. Lütfen tekrar deneyin.';
+	@override String get siteBuildingCreateFailed => 'Blok eklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteExpensesFetchFailed => 'Site giderleri yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteExpenseSummaryFetchFailed => 'Site gider özeti yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteExpenseCreateFailed => 'Site gideri eklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteExpenseUpdateFailed => 'Site gideri güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get siteExpenseDeleteFailed => 'Site gideri silinemedi. Lütfen tekrar deneyin.';
+	@override String get subscriptionFetchFailed => 'Abonelik bilgisi alınamadı. Lütfen tekrar deneyin.';
+	@override String get invalidExpenseResponse => 'Gider bilgisi okunamadı. Lütfen tekrar deneyin.';
+	@override String get invalidSiteExpenseResponse => 'Site gider bilgisi okunamadı. Lütfen tekrar deneyin.';
+	@override String get unsupportedFileType => 'Bu dosya türü desteklenmiyor.';
+	@override String get dekontUploadFailed => 'Dekont yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get serverResponseUnreadable => 'Sunucu yanıtı okunamadı. Lütfen tekrar deneyin.';
+	@override String get dekontResponseMissing => 'Dekont yanıtı eksik. Lütfen tekrar deneyin.';
+	@override String get dekontResponseParseFailed => 'Dekont yanıtı işlenemedi. Lütfen tekrar deneyin.';
+	@override String get reportFileEmpty => 'Rapor dosyası boş geldi. Lütfen tekrar deneyin.';
+	@override String get downloadStarted => 'İndirme başlatıldı...';
+	@override String get downloadSavedToGallery => 'Görsel telefonunuzun Galerisine (AidatPanel albümüne) kaydedildi.';
+	@override String get downloadSavedToDownloads => 'Dekont, telefonunuzun İndirilenler (Downloads) klasörüne kaydedildi.';
+	@override String get downloadFallbackShare => 'Paylaşım ekranı açıldı, buradan Dosyalara Kaydet diyebilirsiniz.';
+	@override String get downloadError => 'Dosya indirilirken bir hata oluştu.';
+	@override String get galleryPermissionDenied => 'Galeriye erişim izni reddedildi.';
 }
 
 // Path: features.buildings
@@ -1380,6 +1495,9 @@ extension on TranslationsTr {
 			'common.themeDark' => 'Koyu',
 			'common.themeSystem' => 'Sistem',
 			'common.themeSheetDescription' => 'Uygulamanın görünümünü buradan değiştirebilirsiniz.',
+			'common.themeLightSubtitle' => 'Light',
+			'common.themeDarkSubtitle' => 'Dark',
+			'common.themeSystemSubtitle' => 'System',
 			'common.turkish' => 'Türkçe',
 			'common.notifications' => 'Bildirimler',
 			'common.info' => 'Bilgi',
@@ -1599,6 +1717,8 @@ extension on TranslationsTr {
 			'common.apartmentLabel' => 'DAİRE',
 			'common.turkishLanguage' => 'Türkçe',
 			'common.englishLanguage' => 'English',
+			'common.turkishLanguageSubtitle' => 'Turkish',
+			'common.englishLanguageSubtitle' => 'İngilizce',
 			'common.stepSite' => 'Site',
 			'common.stepBuilding' => 'Bina',
 			'common.stepApartment' => 'Daire',
@@ -1664,6 +1784,15 @@ extension on TranslationsTr {
 			'common.changePasswordFailed' => 'Şifre değiştirilemedi. Lütfen tekrar deneyin.',
 			'common.changePasswordWrongCurrent' => 'Mevcut şifre hatalı.',
 			'common.languageSheetDescription' => 'Uygulama dilini buradan değiştirebilirsiniz.',
+			'common.friendlyError.networkTitle' => 'İnternet bağlantısı yok',
+			'common.friendlyError.networkMessage' => 'Telefonunuzun internete bağlı olduğundan emin olup tekrar deneyin.',
+			'common.friendlyError.unauthorizedTitle' => 'Oturum sona erdi',
+			'common.friendlyError.unauthorizedMessage' => 'Lütfen uygulamayı kapatıp tekrar giriş yapın.',
+			'common.friendlyError.serverTitle' => 'Sunucuya ulaşılamıyor',
+			'common.friendlyError.serverMessage' => 'Biraz sonra tekrar deneyebilir misiniz?',
+			'common.friendlyError.genericTitle' => 'Bu sayfa açılamadı',
+			'common.friendlyError.genericMessage' => 'Lütfen uygulamayı kapatıp tekrar açın.',
+			'common.friendlyError.debugOnlyLabel' => 'Sadece geliştirici görür (debug):',
 			'common.newPasswordHint' => 'Büyük harf, küçük harf ve rakam içermeli',
 			'common.passwordStrengthUnspecified' => 'Belirtilmemiş',
 			'common.passwordStrengthWeak' => 'Zayıf',
@@ -1699,6 +1828,87 @@ extension on TranslationsTr {
 			'common.backToLogin' => 'Giriş ekranına dön',
 			'common.select' => 'Seç',
 			'common.kNew' => 'Yeni',
+			'common.errorKeys.authLoginFailed' => 'Giriş sırasında bir sorun oluştu. Lütfen tekrar deneyin.',
+			'common.errorKeys.authRegisterFailed' => 'Kayıt sırasında bir sorun oluştu. Lütfen tekrar deneyin.',
+			'common.errorKeys.authJoinFailed' => 'Katılım sırasında bir sorun oluştu. Lütfen tekrar deneyin.',
+			'common.errorKeys.authLogoutAllDevicesFailed' => 'Diğer cihazlardan çıkış yapılamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.authForgotPasswordRequestFailed' => 'İstek gönderilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.authResetPasswordFailed' => 'Şifre sıfırlanamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.dashboardSummaryFetchFailed' => 'Dashboard özeti alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.dashboardCollectionFetchFailed' => 'Tahsilat özeti alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingFetchFailed' => 'Binalar yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.collectionPresetsFetchFailed' => 'Tahsilat önerileri yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingCreateFailed' => 'Bina eklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingUpdateFailed' => 'Bina güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingCollectionUpdateFailed' => 'Tahsilat bilgileri güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.collectionPresetNotFound' => 'Güncellenecek veya silinecek IBAN kaydı bulunamadı.',
+			'common.errorKeys.collectionPresetSaveFailed' => 'IBAN kaydedilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.collectionPresetDeleteFailed' => 'IBAN silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingDeleteFailed' => 'Bina silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.inviteCodeCreateFailed' => 'Davet kodu oluşturulamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.apartmentsFetchFailed' => 'Daireler yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.apartmentCreateFailed' => 'Daire eklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.apartmentUpdateFailed' => 'Daire güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.apartmentDeleteFailed' => 'Daire silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.residentRemoveFailed' => 'Sakin çıkarılamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingDuesFetchFailed' => 'Aidat listesi alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.myDuesFetchFailed' => 'Aidatlarınız alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.dueStatusUpdateFailed' => 'Aidat durumu güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.dueAmountUpdateFailed' => 'Aidat tutarı güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.dueReminderFailed' => 'Hatırlatma gönderilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.myTicketsFetchFailed' => 'Talepler alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingTicketsFetchFailed' => 'Bina talepleri alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.ticketDetailFetchFailed' => 'Talep detayı alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.ticketCreateFailed' => 'Talep oluşturulamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.ticketNoteAddFailed' => 'Not eklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.ticketStatusUpdateFailed' => 'Talep durumu güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.expensesFetchFailed' => 'Gider listesi alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.expenseSummaryFetchFailed' => 'Gider özeti alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.expenseCreateFailed' => 'Gider kaydedilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.expenseUpdateFailed' => 'Gider güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.expenseDeleteFailed' => 'Gider silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.expenseReceiptsUploadFailed' => 'Makbuzlar yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.profileFetchFailed' => 'Profil bilgileri alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.profileUpdateFailed' => 'Profil güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.languageUpdateFailed' => 'Dil tercihi kaydedilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.passwordChangeFailed' => 'Şifre değiştirilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.accountDeleteFailed' => 'Hesap kapatılamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.profilePictureUploadFailed' => 'Profil fotoğrafı yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.profilePictureDeleteFailed' => 'Profil fotoğrafı silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.notificationCountFetchFailed' => 'Bildirim sayısı alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.notificationsFetchFailed' => 'Bildirimler alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.announcementCountFetchFailed' => 'Duyuru sayısı alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.notificationMarkReadFailed' => 'Bildirim okunamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.notificationsMarkAllReadFailed' => 'Bildirimler okunamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.announcementSendFailed' => 'Duyuru gönderilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.sitesFetchFailed' => 'Siteler yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteDetailFetchFailed' => 'Site detayı yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteBuildingsFetchFailed' => 'Bloklar yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteCreateFailed' => 'Site eklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteUpdateFailed' => 'Site güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteCollectionUpdateFailed' => 'Site tahsilat bilgileri güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteDeleteFailed' => 'Site silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteBuildingCreateFailed' => 'Blok eklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteExpensesFetchFailed' => 'Site giderleri yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteExpenseSummaryFetchFailed' => 'Site gider özeti yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteExpenseCreateFailed' => 'Site gideri eklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteExpenseUpdateFailed' => 'Site gideri güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteExpenseDeleteFailed' => 'Site gideri silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.subscriptionFetchFailed' => 'Abonelik bilgisi alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.invalidExpenseResponse' => 'Gider bilgisi okunamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.invalidSiteExpenseResponse' => 'Site gider bilgisi okunamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.unsupportedFileType' => 'Bu dosya türü desteklenmiyor.',
+			'common.errorKeys.dekontUploadFailed' => 'Dekont yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.serverResponseUnreadable' => 'Sunucu yanıtı okunamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.dekontResponseMissing' => 'Dekont yanıtı eksik. Lütfen tekrar deneyin.',
+			'common.errorKeys.dekontResponseParseFailed' => 'Dekont yanıtı işlenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.reportFileEmpty' => 'Rapor dosyası boş geldi. Lütfen tekrar deneyin.',
+			'common.errorKeys.downloadStarted' => 'İndirme başlatıldı...',
+			'common.errorKeys.downloadSavedToGallery' => 'Görsel telefonunuzun Galerisine (AidatPanel albümüne) kaydedildi.',
+			'common.errorKeys.downloadSavedToDownloads' => 'Dekont, telefonunuzun İndirilenler (Downloads) klasörüne kaydedildi.',
+			'common.errorKeys.downloadFallbackShare' => 'Paylaşım ekranı açıldı, buradan Dosyalara Kaydet diyebilirsiniz.',
+			'common.errorKeys.downloadError' => 'Dosya indirilirken bir hata oluştu.',
+			'common.errorKeys.galleryPermissionDenied' => 'Galeriye erişim izni reddedildi.',
 			'validation.emailRequired' => 'Email adresi boş bırakılamaz',
 			'validation.emailInvalid' => 'Geçerli bir email adresi giriniz',
 			'validation.emailTooLong' => 'Email adresi çok uzun',
@@ -1758,6 +1968,8 @@ extension on TranslationsTr {
 			'features.buildings.collection.detailReferenceDaireAidat' => 'Havale açıklaması: Daire no + aidat',
 			'features.buildings.collection.detailReferenceAidat' => 'Havale açıklaması: Aidat (daire no otomatik)',
 			'features.buildings.collection.detailReferenceHavale' => 'Havale açıklaması: Daire numarası ile havale',
+			_ => null,
+		} ?? switch (path) {
 			'features.buildings.collection.detailUsedInBuildings' => '{count} binada kullanılıyor',
 			'features.buildings.collection.ibanLabel' => 'IBAN',
 			'features.buildings.collection.ibanHint' => 'TR33 0006 1005 1978 6457 8413 26',
@@ -1853,8 +2065,6 @@ extension on TranslationsTr {
 			'features.sites.commonExpenses' => 'Ortak Giderler',
 			'features.sites.report' => 'Rapor',
 			'features.sites.reportSheetTitle' => 'Site raporu',
-			_ => null,
-		} ?? switch (path) {
 			'features.sites.monthlyReport' => 'Aylık rapor (PDF)',
 			'features.sites.annualReport' => 'Yıllık rapor (PDF)',
 			'features.sites.siteExpensesTitle' => 'Site Ortak Giderleri',
@@ -2272,6 +2482,8 @@ extension on TranslationsTr {
 			'features.subscription.planMonthly' => 'Aylık plan',
 			'features.subscription.planAnnual' => 'Yıllık plan',
 			'features.subscription.planUnknown' => 'Plan',
+			_ => null,
+		} ?? switch (path) {
 			'features.subscription.renewsOn' => 'Yenileme: {date}',
 			'features.subscription.noSubscription' => 'Henüz abonelik kaydı yok.',
 			'features.subscription.backendPending' => 'Abonelik sunucuya henüz bağlanmadı. Satın alma yakında açılacak.',
@@ -2367,8 +2579,6 @@ extension on TranslationsTr {
 			'features.dashboard.remindAllSent' => '{count} sakine hatırlatma gönderildi.',
 			'features.dashboard.remindCooldown' => 'Bu aidat için son 24 saat içinde hatırlatma gönderildi.',
 			'features.dashboard.remindNoRecipient' => 'Bu dairede hatırlatma gönderilecek sakin bulunamadı.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dashboard.apartmentTitle' => 'Daire {number}',
 			'features.dashboard.apartmentWithFloor' => 'Daire {number} · {floor}. Kat',
 			'features.dashboard.noOverdueApartments' => 'Geciken ödeme bulunmuyor',

@@ -1,5 +1,5 @@
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
-import { DUE_PAID_RESIDENT } from "../constants/notificationTemplates.js";
+import { NOTIFICATION_CODES } from "../constants/notificationCatalog.js";
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
 import { userPublicSelect } from "./meService.js";
@@ -218,8 +218,8 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
   if (status === "PAID" && previousStatus !== "PAID" && resident) {
     await createForUsers([resident.id], {
       type: NOTIFICATION_TYPES.DUE_PAID,
-      title: DUE_PAID_RESIDENT.title,
-      body: DUE_PAID_RESIDENT.body(due.month, due.year),
+      code: NOTIFICATION_CODES.DUE_PAID_RESIDENT,
+      params: { month: due.month, year: due.year },
       data: {
         dueId: due.id,
         buildingId: due.apartment.buildingId,

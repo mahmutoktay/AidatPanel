@@ -36,7 +36,7 @@ class DuesRepositoryImpl implements DuesRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Aidat listesi alınırken bir hata oluştu');
+      throw ApiException(message: 'building_dues_fetch_failed');
     }
   }
 
@@ -63,7 +63,7 @@ class DuesRepositoryImpl implements DuesRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Aidatlarınız alınırken bir hata oluştu');
+      throw ApiException(message: 'my_dues_fetch_failed');
     }
   }
 
@@ -83,9 +83,7 @@ class DuesRepositoryImpl implements DuesRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(
-        message: 'Aidat durumu güncellenirken bir hata oluştu',
-      );
+      throw ApiException(message: 'due_status_update_failed');
     }
   }
 
@@ -108,9 +106,7 @@ class DuesRepositoryImpl implements DuesRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(
-        message: 'Aidat tutarı güncellenirken bir hata oluştu',
-      );
+      throw ApiException(message: 'due_amount_update_failed');
     }
   }
 
@@ -127,9 +123,7 @@ class DuesRepositoryImpl implements DuesRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(
-        message: 'Hatırlatma gönderilirken bir hata oluştu',
-      );
+      throw ApiException(message: 'due_reminder_failed');
     }
   }
 

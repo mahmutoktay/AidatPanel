@@ -7,7 +7,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
   final NotificationDataSource _remote;
 
   NotificationRepositoryImpl({required NotificationDataSource remote})
-      : _remote = remote;
+    : _remote = remote;
 
   @override
   Future<int> fetchUnreadCount() async {
@@ -20,7 +20,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
       }
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Bildirim sayısı alınırken bir hata oluştu');
+      throw ApiException(message: 'notification_count_fetch_failed');
     }
   }
 
@@ -39,7 +39,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Bildirimler alınırken bir hata oluştu');
+      throw ApiException(message: 'notifications_fetch_failed');
     }
   }
 
@@ -62,7 +62,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Duyuru sayısı alınırken bir hata oluştu');
+      throw ApiException(message: 'announcement_count_fetch_failed');
     }
   }
 
@@ -73,7 +73,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Bildirim okunurken bir hata oluştu');
+      throw ApiException(message: 'notification_mark_read_failed');
     }
   }
 
@@ -84,7 +84,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Bildirimler okunurken bir hata oluştu');
+      throw ApiException(message: 'notifications_mark_all_read_failed');
     }
   }
 
@@ -103,7 +103,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Duyuru gönderilirken bir hata oluştu');
+      throw ApiException(message: 'announcement_send_failed');
     }
   }
 }

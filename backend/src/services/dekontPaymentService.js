@@ -2,7 +2,7 @@ import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
 import { createForUsers } from "./notificationService.js";
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
-import { DEKONT_PAYMENT_APPLIED_RESIDENT } from "../constants/notificationTemplates.js";
+import { NOTIFICATION_CODES } from "../constants/notificationCatalog.js";
 import { dekontListSelect } from "../utils/dekontFormat.js";
 
 export async function applyDekontPayment({ dekontId, managerId, dueId, note }) {
@@ -98,8 +98,8 @@ export async function applyDekontPayment({ dekontId, managerId, dueId, note }) {
   if (resident) {
     await createForUsers([resident.id], {
       type: NOTIFICATION_TYPES.DEKONT_PAYMENT_APPLIED,
-      title: DEKONT_PAYMENT_APPLIED_RESIDENT.title,
-      body: DEKONT_PAYMENT_APPLIED_RESIDENT.body(due.month, due.year),
+      code: NOTIFICATION_CODES.DEKONT_PAYMENT_APPLIED_RESIDENT,
+      params: { month: due.month, year: due.year },
       data: {
         dekontId: dekont.id,
         dueId: due.id,

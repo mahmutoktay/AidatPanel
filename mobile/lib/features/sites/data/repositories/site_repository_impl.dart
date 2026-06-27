@@ -13,8 +13,8 @@ class SiteRepositoryImpl implements SiteRepository {
   SiteRepositoryImpl({
     required SiteRemoteDataSource remoteDataSource,
     required SiteExpenseRemoteDataSource expenseRemoteDataSource,
-  })  : _remoteDataSource = remoteDataSource,
-        _expenseRemoteDataSource = expenseRemoteDataSource;
+  }) : _remoteDataSource = remoteDataSource,
+       _expenseRemoteDataSource = expenseRemoteDataSource;
 
   final SiteRemoteDataSource _remoteDataSource;
   final SiteExpenseRemoteDataSource _expenseRemoteDataSource;
@@ -27,7 +27,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Siteler yüklenirken hata oluştu: $e');
+      throw ApiException(message: 'sites_fetch_failed');
     }
   }
 
@@ -39,11 +39,12 @@ class SiteRepositoryImpl implements SiteRepository {
       final buildingsRaw = json['buildings'];
       final buildings = buildingsRaw is List
           ? buildingsRaw
-              .map(
-                (b) => BuildingModel.fromJson(b as Map<String, dynamic>)
-                    .toEntity(),
-              )
-              .toList()
+                .map(
+                  (b) => BuildingModel.fromJson(
+                    b as Map<String, dynamic>,
+                  ).toEntity(),
+                )
+                .toList()
           : <BuildingEntity>[];
       final aggregationRaw = json['aggregation'];
       final aggregation = aggregationRaw is Map<String, dynamic>
@@ -63,7 +64,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Site detayı yüklenirken hata oluştu: $e');
+      throw ApiException(message: 'site_detail_fetch_failed');
     }
   }
 
@@ -75,7 +76,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Bloklar yüklenirken hata oluştu: $e');
+      throw ApiException(message: 'site_buildings_fetch_failed');
     }
   }
 
@@ -107,7 +108,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Site eklenirken hata oluştu: $e');
+      throw ApiException(message: 'site_create_failed');
     }
   }
 
@@ -135,7 +136,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Site güncellenirken hata oluştu: $e');
+      throw ApiException(message: 'site_update_failed');
     }
   }
 
@@ -157,9 +158,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(
-        message: 'Site tahsilat bilgileri güncellenirken hata oluştu: $e',
-      );
+      throw ApiException(message: 'site_collection_update_failed');
     }
   }
 
@@ -170,7 +169,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Site silinirken hata oluştu: $e');
+      throw ApiException(message: 'site_delete_failed');
     }
   }
 
@@ -208,7 +207,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Blok eklenirken hata oluştu: $e');
+      throw ApiException(message: 'site_building_create_failed');
     }
   }
 
@@ -231,7 +230,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Site giderleri yüklenirken hata oluştu: $e');
+      throw ApiException(message: 'site_expenses_fetch_failed');
     }
   }
 
@@ -251,9 +250,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(
-        message: 'Site gider özeti yüklenirken hata oluştu: $e',
-      );
+      throw ApiException(message: 'site_expense_summary_fetch_failed');
     }
   }
 
@@ -288,7 +285,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Site gideri eklenirken hata oluştu: $e');
+      throw ApiException(message: 'site_expense_create_failed');
     }
   }
 
@@ -316,7 +313,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Site gideri güncellenirken hata oluştu: $e');
+      throw ApiException(message: 'site_expense_update_failed');
     }
   }
 
@@ -327,7 +324,7 @@ class SiteRepositoryImpl implements SiteRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Site gideri silinirken hata oluştu: $e');
+      throw ApiException(message: 'site_expense_delete_failed');
     }
   }
 }

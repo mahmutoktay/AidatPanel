@@ -36,7 +36,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Gider listesi alınırken bir hata oluştu');
+      throw ApiException(message: 'expenses_fetch_failed');
     }
   }
 
@@ -63,7 +63,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Gider listesi alınırken bir hata oluştu');
+      throw ApiException(message: 'expenses_fetch_failed');
     }
   }
 
@@ -83,7 +83,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Gider özeti alınırken bir hata oluştu');
+      throw ApiException(message: 'expense_summary_fetch_failed');
     }
   }
 
@@ -138,7 +138,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Gider kaydedilirken bir hata oluştu');
+      throw ApiException(message: 'expense_create_failed');
     }
   }
 
@@ -168,7 +168,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Gider güncellenirken bir hata oluştu');
+      throw ApiException(message: 'expense_update_failed');
     }
   }
 
@@ -179,7 +179,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Gider silinirken bir hata oluştu');
+      throw ApiException(message: 'expense_delete_failed');
     }
   }
 
@@ -194,7 +194,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Makbuzlar yüklenirken bir hata oluştu');
+      throw ApiException(message: 'expense_receipts_upload_failed');
     }
   }
 

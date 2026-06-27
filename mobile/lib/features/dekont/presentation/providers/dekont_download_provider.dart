@@ -32,12 +32,12 @@ class DekontDownloadService {
 
       if (isImage) {
         await _saveImageToGallery(bytes, finalName);
-        return 'Görsel telefonunuzun Galerisine (AidatPanel albümüne) kaydedildi.';
+        return 'download_saved_to_gallery';
       } else {
         return await _savePdfToDownloads(bytes, finalName);
       }
     } catch (e) {
-      throw Exception('Dosya indirilirken bir hata oluştu: $e');
+      throw Exception('download_error');
     }
   }
 
@@ -46,7 +46,7 @@ class DekontDownloadService {
     if (!hasAccess) {
       final granted = await Gal.requestAccess(toAlbum: true);
       if (!granted) {
-        throw Exception('Galeriye erişim izni reddedildi.');
+        throw Exception('gallery_permission_denied');
       }
     }
 
@@ -75,14 +75,14 @@ class DekontDownloadService {
         }
 
         await file.writeAsBytes(bytes);
-        return 'Dekont, telefonunuzun İndirilenler (Downloads) klasörüne kaydedildi.';
+        return 'download_saved_to_downloads';
       } catch (_) {
         await _fallbackShare(bytes, fileName);
-        return 'Paylaşım ekranı açıldı, buradan Dosyalara Kaydet diyebilirsiniz.';
+        return 'download_fallback_share';
       }
     } else {
       await _fallbackShare(bytes, fileName);
-      return 'Paylaşım ekranı açıldı, buradan Dosyalara Kaydet diyebilirsiniz.';
+      return 'download_fallback_share';
     }
   }
 

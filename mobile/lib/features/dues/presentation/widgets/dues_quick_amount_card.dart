@@ -182,8 +182,7 @@ class _DuesAmountUpdateSheetState extends State<DuesAmountUpdateSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final currencySymbol =
-        LocaleSettings.currentLocale == AppLocale.tr ? '₺' : r'$';
+    const currencySymbol = '₺';
     final t = context.t.common;
 
     return PremiumBottomSheetScaffold(

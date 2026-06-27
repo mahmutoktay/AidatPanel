@@ -7,7 +7,7 @@ class ApartmentRepositoryImpl implements ApartmentRepository {
   final ApartmentRemoteDataSource _remoteDataSource;
 
   ApartmentRepositoryImpl({required ApartmentRemoteDataSource remoteDataSource})
-      : _remoteDataSource = remoteDataSource;
+    : _remoteDataSource = remoteDataSource;
 
   @override
   Future<List<ApartmentEntity>> fetchApartments(String buildingId) async {
@@ -17,7 +17,7 @@ class ApartmentRepositoryImpl implements ApartmentRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Daireler yüklenirken hata oluştu: $e');
+      throw ApiException(message: 'apartments_fetch_failed');
     }
   }
 
@@ -37,7 +37,7 @@ class ApartmentRepositoryImpl implements ApartmentRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Daire eklenirken hata oluştu: $e');
+      throw ApiException(message: 'apartment_create_failed');
     }
   }
 
@@ -59,7 +59,7 @@ class ApartmentRepositoryImpl implements ApartmentRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Daire güncellenirken hata oluştu: $e');
+      throw ApiException(message: 'apartment_update_failed');
     }
   }
 
@@ -73,7 +73,7 @@ class ApartmentRepositoryImpl implements ApartmentRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Daire silinirken hata oluştu: $e');
+      throw ApiException(message: 'apartment_delete_failed');
     }
   }
 
@@ -91,7 +91,7 @@ class ApartmentRepositoryImpl implements ApartmentRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Sakin çıkarılırken hata oluştu: $e');
+      throw ApiException(message: 'resident_remove_failed');
     }
   }
 }

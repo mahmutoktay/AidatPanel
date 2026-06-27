@@ -12,9 +12,9 @@ enum ExpenseCarryForwardPolicyApi { carryToNextMonth, warnOnly }
 
 extension ExpenseCarryForwardPolicyApiX on ExpenseCarryForwardPolicyApi {
   String get apiValue => switch (this) {
-        ExpenseCarryForwardPolicyApi.carryToNextMonth => 'CARRY_TO_NEXT_MONTH',
-        ExpenseCarryForwardPolicyApi.warnOnly => 'WARN_ONLY',
-      };
+    ExpenseCarryForwardPolicyApi.carryToNextMonth => 'CARRY_TO_NEXT_MONTH',
+    ExpenseCarryForwardPolicyApi.warnOnly => 'WARN_ONLY',
+  };
 }
 
 abstract class ExpenseDataSource {
@@ -91,11 +91,7 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
       cursor: cursor,
       limit: AppConstants.pageSize,
       paginated: paginated,
-      extra: {
-        'month': ?month,
-        'year': ?year,
-        'category': ?category,
-      },
+      extra: {'month': ?month, 'year': ?year, 'category': ?category},
     );
 
     final response = await _dioClient.get(
@@ -117,11 +113,7 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
       cursor: cursor,
       limit: AppConstants.pageSize,
       paginated: paginated,
-      extra: {
-        'month': ?month,
-        'year': ?year,
-        'category': ?category,
-      },
+      extra: {'month': ?month, 'year': ?year, 'category': ?category},
     );
 
     final response = await _dioClient.get(
@@ -177,7 +169,7 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
 
     final data = response.data['data'];
     if (data is! Map<String, dynamic>) {
-      throw StateError('Geçersiz gider yanıtı');
+      throw StateError('invalid_expense_response');
     }
 
     if (data['requiresConfirmation'] == true) {
@@ -185,11 +177,14 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
       return ExpenseCreateOutcome(
         preview: ExpensePaidImpactPreview(
           message: (data['message'] ?? '') as String,
-          paidApartmentCount: (data['paidApartmentCount'] as num?)?.toInt() ?? 0,
+          paidApartmentCount:
+              (data['paidApartmentCount'] as num?)?.toInt() ?? 0,
           perUnitAmount: '${data['perUnitAmount'] ?? '0'}',
           totalUnpaidShare: '${data['totalUnpaidShare'] ?? '0'}',
           nextMonth: next is Map ? (next['month'] as num?)?.toInt() ?? 1 : 1,
-          nextYear: next is Map ? (next['year'] as num?)?.toInt() ?? DateTime.now().year : DateTime.now().year,
+          nextYear: next is Map
+              ? (next['year'] as num?)?.toInt() ?? DateTime.now().year
+              : DateTime.now().year,
           pastMonthWarning: data['pastMonthWarning'] == true,
         ),
       );
@@ -197,7 +192,7 @@ class ExpenseRemoteDataSource implements ExpenseDataSource {
 
     final expenseJson = data['expense'] ?? data;
     if (expenseJson is! Map<String, dynamic>) {
-      throw StateError('Geçersiz gider yanıtı');
+      throw StateError('invalid_expense_response');
     }
 
     final warningsRaw = data['warnings'];

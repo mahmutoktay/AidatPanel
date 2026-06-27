@@ -2,10 +2,7 @@ import '../../l10n/strings.g.dart';
 import '../network/api_exception.dart';
 
 /// API hata bağlamı — dekont modülünde öncelikli eşleştirme.
-enum ApiMessageContext {
-  general,
-  dekont,
-}
+enum ApiMessageContext { general, dekont }
 
 String _lower(String value) => value.trim().toLowerCase();
 
@@ -34,6 +31,9 @@ String mapApiUserMessage(
   final msg = _norm(raw);
   final code = error.statusCode;
 
+  final keyedMessage = _mapErrorKey(t, raw);
+  if (keyedMessage != null) return keyedMessage;
+
   if (context == ApiMessageContext.dekont) {
     final dekontMsg = _mapDekont(t, raw, msg, code, error);
     if (dekontMsg != null) return dekontMsg;
@@ -43,7 +43,8 @@ String mapApiUserMessage(
     return api.serviceUnavailable;
   }
 
-  final domain = _mapProfile(c, api, raw, msg, code) ??
+  final domain =
+      _mapProfile(c, api, raw, msg, code) ??
       _mapAuth(api, raw, msg, code) ??
       _mapBuilding(c, api, raw, msg, code) ??
       _mapApartment(c, api, raw, msg, code) ??
@@ -88,7 +89,10 @@ String mapApiUserMessage(
       (code == 400 && (_has(raw, 'validasyon') || _has(raw, 'geçersiz')))) {
     final errors = error.responseData?['errors'];
     if (errors is List && errors.isNotEmpty) {
-      final messages = errors.map((e) => e['message']?.toString() ?? '').where((m) => m.isNotEmpty).join(', ');
+      final messages = errors
+          .map((e) => e['message']?.toString() ?? '')
+          .where((m) => m.isNotEmpty)
+          .join(', ');
       if (messages.isNotEmpty) return messages;
     }
     return api.validationError;
@@ -114,6 +118,190 @@ String mapApiUserMessage(
   }
 
   return api.genericError;
+}
+
+String? _mapErrorKey(Translations t, String raw) {
+  final c = t.common;
+  final e = c.errorKeys;
+  switch (raw) {
+    case 'auth_login_failed':
+      return e.authLoginFailed;
+    case 'auth_register_failed':
+      return e.authRegisterFailed;
+    case 'auth_join_failed':
+      return e.authJoinFailed;
+    case 'auth_logout_all_devices_failed':
+      return e.authLogoutAllDevicesFailed;
+    case 'auth_forgot_password_request_failed':
+      return e.authForgotPasswordRequestFailed;
+    case 'auth_reset_password_failed':
+      return e.authResetPasswordFailed;
+    case 'dashboard_summary_fetch_failed':
+      return e.dashboardSummaryFetchFailed;
+    case 'dashboard_collection_fetch_failed':
+      return e.dashboardCollectionFetchFailed;
+    case 'building_fetch_failed':
+      return e.buildingFetchFailed;
+    case 'collection_presets_fetch_failed':
+      return e.collectionPresetsFetchFailed;
+    case 'building_create_failed':
+      return e.buildingCreateFailed;
+    case 'building_update_failed':
+      return e.buildingUpdateFailed;
+    case 'building_collection_update_failed':
+      return e.buildingCollectionUpdateFailed;
+    case 'collection_preset_not_found':
+      return e.collectionPresetNotFound;
+    case 'invalid_iban':
+      return c.api.invalidIban;
+    case 'collection_iban_duplicate':
+      return t.features.buildings.collection.ibanAlreadyExists;
+    case 'collection_preset_save_failed':
+      return e.collectionPresetSaveFailed;
+    case 'collection_preset_delete_failed':
+      return e.collectionPresetDeleteFailed;
+    case 'building_delete_failed':
+      return e.buildingDeleteFailed;
+    case 'invite_code_create_failed':
+      return e.inviteCodeCreateFailed;
+    case 'apartments_fetch_failed':
+      return e.apartmentsFetchFailed;
+    case 'apartment_create_failed':
+      return e.apartmentCreateFailed;
+    case 'apartment_update_failed':
+      return e.apartmentUpdateFailed;
+    case 'apartment_delete_failed':
+      return e.apartmentDeleteFailed;
+    case 'resident_remove_failed':
+      return e.residentRemoveFailed;
+    case 'building_dues_fetch_failed':
+      return e.buildingDuesFetchFailed;
+    case 'my_dues_fetch_failed':
+      return e.myDuesFetchFailed;
+    case 'due_status_update_failed':
+      return e.dueStatusUpdateFailed;
+    case 'due_amount_update_failed':
+      return e.dueAmountUpdateFailed;
+    case 'due_reminder_failed':
+      return e.dueReminderFailed;
+    case 'my_tickets_fetch_failed':
+      return e.myTicketsFetchFailed;
+    case 'building_tickets_fetch_failed':
+      return e.buildingTicketsFetchFailed;
+    case 'ticket_detail_fetch_failed':
+      return e.ticketDetailFetchFailed;
+    case 'ticket_create_failed':
+      return e.ticketCreateFailed;
+    case 'ticket_note_add_failed':
+      return e.ticketNoteAddFailed;
+    case 'ticket_status_update_failed':
+      return e.ticketStatusUpdateFailed;
+    case 'expenses_fetch_failed':
+      return e.expensesFetchFailed;
+    case 'expense_summary_fetch_failed':
+      return e.expenseSummaryFetchFailed;
+    case 'expense_create_failed':
+      return e.expenseCreateFailed;
+    case 'expense_update_failed':
+      return e.expenseUpdateFailed;
+    case 'expense_delete_failed':
+      return e.expenseDeleteFailed;
+    case 'expense_receipts_upload_failed':
+      return e.expenseReceiptsUploadFailed;
+    case 'profile_fetch_failed':
+      return e.profileFetchFailed;
+    case 'profile_update_failed':
+      return e.profileUpdateFailed;
+    case 'language_update_failed':
+      return e.languageUpdateFailed;
+    case 'password_change_failed':
+      return e.passwordChangeFailed;
+    case 'account_delete_failed':
+      return e.accountDeleteFailed;
+    case 'profile_picture_upload_failed':
+      return e.profilePictureUploadFailed;
+    case 'profile_picture_delete_failed':
+      return e.profilePictureDeleteFailed;
+    case 'notification_count_fetch_failed':
+      return e.notificationCountFetchFailed;
+    case 'notifications_fetch_failed':
+      return e.notificationsFetchFailed;
+    case 'announcement_count_fetch_failed':
+      return e.announcementCountFetchFailed;
+    case 'notification_mark_read_failed':
+      return e.notificationMarkReadFailed;
+    case 'notifications_mark_all_read_failed':
+      return e.notificationsMarkAllReadFailed;
+    case 'announcement_send_failed':
+      return e.announcementSendFailed;
+    case 'sites_fetch_failed':
+      return e.sitesFetchFailed;
+    case 'site_detail_fetch_failed':
+      return e.siteDetailFetchFailed;
+    case 'site_buildings_fetch_failed':
+      return e.siteBuildingsFetchFailed;
+    case 'site_create_failed':
+      return e.siteCreateFailed;
+    case 'site_update_failed':
+      return e.siteUpdateFailed;
+    case 'site_collection_update_failed':
+      return e.siteCollectionUpdateFailed;
+    case 'site_delete_failed':
+      return e.siteDeleteFailed;
+    case 'site_building_create_failed':
+      return e.siteBuildingCreateFailed;
+    case 'site_expenses_fetch_failed':
+      return e.siteExpensesFetchFailed;
+    case 'site_expense_summary_fetch_failed':
+      return e.siteExpenseSummaryFetchFailed;
+    case 'site_expense_create_failed':
+      return e.siteExpenseCreateFailed;
+    case 'site_expense_update_failed':
+      return e.siteExpenseUpdateFailed;
+    case 'site_expense_delete_failed':
+      return e.siteExpenseDeleteFailed;
+    case 'subscription_fetch_failed':
+      return e.subscriptionFetchFailed;
+    case 'invalid_expense_response':
+      return e.invalidExpenseResponse;
+    case 'invalid_site_expense_response':
+      return e.invalidSiteExpenseResponse;
+    case 'file_empty':
+      return t.features.dekont.fileEmpty;
+    case 'unsupported_file_type':
+      return e.unsupportedFileType;
+    case 'dekont_upload_failed':
+      return e.dekontUploadFailed;
+    case 'server_response_unreadable':
+      return e.serverResponseUnreadable;
+    case 'dekont_response_missing':
+      return e.dekontResponseMissing;
+    case 'dekont_response_parse_failed':
+      return e.dekontResponseParseFailed;
+    case 'dekont_file_not_found':
+      return t.features.dekont.errorFileDownload;
+    case 'report_file_empty':
+      return e.reportFileEmpty;
+    case 'network_error':
+      return c.api.networkError;
+    case 'unauthorized':
+      return c.api.unauthorized;
+    case 'not_found':
+      return c.api.notFound;
+    case 'server_error':
+      return c.api.serverError;
+    case 'validation_error':
+      return c.api.validationError;
+    case 'building_not_found':
+      return c.api.buildingAccessDenied;
+    case 'apartment_not_found':
+      return c.api.notFound;
+    case 'due_not_found':
+      return c.api.dueNotFound;
+    case 'ticket_not_found':
+      return c.api.notFound;
+  }
+  return null;
 }
 
 String? _mapAuth(dynamic api, String raw, String msg, int? code) {
@@ -146,8 +334,7 @@ String? _mapAuth(dynamic api, String raw, String msg, int? code) {
 }
 
 String? _mapProfile(dynamic c, dynamic api, String raw, String msg, int? code) {
-  if (_has(raw, 'mevcut şifre hatalı') ||
-      _has(raw, 'current password')) {
+  if (_has(raw, 'mevcut şifre hatalı') || _has(raw, 'current password')) {
     return c.changePasswordWrongCurrent as String;
   }
   if (code == 409 &&
@@ -159,15 +346,22 @@ String? _mapProfile(dynamic c, dynamic api, String raw, String msg, int? code) {
   if (_has(raw, 'telefon numarası zaten kullanılıyor')) {
     return api.duplicatePhone as String;
   }
-  if (_has(raw, 'en az biri mutlaka bulunmalıdır') || _has(raw, 'min_contact_required')) {
+  if (_has(raw, 'en az biri mutlaka bulunmalıdır') ||
+      _has(raw, 'min_contact_required')) {
     return raw;
   }
   return null;
 }
 
-String? _mapBuilding(dynamic c, dynamic api, String raw, String msg, int? code) {
+String? _mapBuilding(
+  dynamic c,
+  dynamic api,
+  String raw,
+  String msg,
+  int? code,
+) {
   if (_has(raw, 'bu iban zaten kayıtlı')) {
-    return c.features.buildings.collection.ibanAlreadyExists as String;
+    return api.recordConflict as String;
   }
   if (_has(raw, 'geçersiz tr iban') || _has(raw, 'geçersiz iban')) {
     return api.invalidIban as String;
@@ -186,7 +380,13 @@ String? _mapBuilding(dynamic c, dynamic api, String raw, String msg, int? code) 
   return null;
 }
 
-String? _mapApartment(dynamic c, dynamic api, String raw, String msg, int? code) {
+String? _mapApartment(
+  dynamic c,
+  dynamic api,
+  String raw,
+  String msg,
+  int? code,
+) {
   if (_has(raw, 'kayıtlı sakin yok') || _has(raw, 'no resident')) {
     return api.apartmentNoResident as String;
   }
@@ -374,9 +574,7 @@ String? _mapDekont(
   }
 
   if (code == 404 &&
-      (_has(raw, 'dosya') ||
-          _has(raw, 'dekont') ||
-          _has(raw, 'bulunamadı'))) {
+      (_has(raw, 'dosya') || _has(raw, 'dekont') || _has(raw, 'bulunamadı'))) {
     return d.errorFileDownload;
   }
 
@@ -408,4 +606,3 @@ bool isDekontDuplicateError(ApiException e) {
       _has(e.message, 'daha önce yüklenmiş') ||
       _has(e.message, 'zaten yüklenmiş');
 }
-

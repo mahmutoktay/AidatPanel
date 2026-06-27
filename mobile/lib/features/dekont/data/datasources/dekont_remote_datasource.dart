@@ -100,7 +100,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
     String? dueId,
   }) async {
     if ((filePath == null || filePath.isEmpty) && fileBytes.isEmpty) {
-      throw ApiException(message: 'Dosya boş');
+      throw ApiException(message: 'file_empty');
     }
 
     final safeName = UploadFileUtils.safeFileName(
@@ -110,7 +110,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
     final ext = UploadFileUtils.extensionFromPath(safeName);
     final mime = UploadFileUtils.mimeTypeForExtension(ext);
     if (mime == null) {
-      throw ApiException(message: 'Desteklenmeyen dosya türü');
+      throw ApiException(message: 'unsupported_file_type');
     }
 
     FormData buildForm() {
@@ -151,7 +151,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
         );
         if (code != null && code >= 400) {
           throw ApiException(
-            message: 'Dekont yüklenemedi',
+            message: 'dekont_upload_failed',
             statusCode: code,
             responseData: response.data is Map
                 ? Map<String, dynamic>.from(response.data as Map)
@@ -182,7 +182,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
       }
     }
 
-    throw lastError ?? ApiException(message: 'Dekont yüklenemedi');
+    throw lastError ?? ApiException(message: 'dekont_upload_failed');
   }
 
   /// Hata durumunda sunucu JSON döndürdüyse (bytes olarak) mesajı çıkar.
@@ -213,11 +213,11 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
       try {
         value = jsonDecode(value);
       } catch (_) {
-        throw ApiException(message: 'Sunucu yanıtı okunamadı');
+        throw ApiException(message: 'server_response_unreadable');
       }
     }
     if (value is! Map) {
-      throw ApiException(message: 'Sunucu yanıtı okunamadı');
+      throw ApiException(message: 'server_response_unreadable');
     }
     return Map<String, dynamic>.from(value);
   }
@@ -226,7 +226,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
     final body = _decodeBody(raw);
     final data = body['data'];
     if (data is! Map) {
-      throw ApiException(message: 'Dekont yanıtı eksik');
+      throw ApiException(message: 'dekont_response_missing');
     }
     return Map<String, dynamic>.from(data);
   }
@@ -246,7 +246,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
       throw ApiException(
         message: (body['message'] as String?)?.trim().isNotEmpty == true
             ? body['message'] as String
-            : 'Dekont yüklenemedi',
+            : 'dekont_upload_failed',
         statusCode: statusCode,
       );
     }
@@ -258,7 +258,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
         data = body;
       } else {
         throw ApiException(
-          message: 'Dekont yanıtı eksik',
+          message: 'dekont_response_missing',
           statusCode: statusCode,
         );
       }
@@ -271,7 +271,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
         debugPrint('[dekont-upload] parse hata: $e\n$st\npayload: $data');
       }
       throw ApiException(
-        message: 'Dekont yanıtı işlenemedi',
+        message: 'dekont_response_parse_failed',
         statusCode: statusCode,
       );
     }
@@ -423,7 +423,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
         final bytes = response.data ?? [];
         if (bytes.isEmpty) {
           throw ApiException(
-            message: 'Dekont dosyası bulunamadı',
+            message: 'dekont_file_not_found',
             statusCode: response.statusCode,
           );
         }
@@ -451,7 +451,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
         rethrow;
       }
     }
-    throw lastError ?? ApiException(message: 'Dekont dosyası bulunamadı');
+    throw lastError ?? ApiException(message: 'dekont_file_not_found');
   }
 
   bool _hasFilePendingMessage(String message) {

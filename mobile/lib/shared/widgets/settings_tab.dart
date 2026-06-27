@@ -179,7 +179,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             PremiumActionSheetTile(
               icon: Icons.light_mode_rounded,
               label: t.common.themeLight,
-              subtitle: 'Light',
+              subtitle: t.common.themeLightSubtitle,
               trailing: currentTheme == AppThemePreference.light
                   ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                   : null,
@@ -192,7 +192,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             PremiumActionSheetTile(
               icon: Icons.dark_mode_rounded,
               label: t.common.themeDark,
-              subtitle: 'Dark',
+              subtitle: t.common.themeDarkSubtitle,
               trailing: currentTheme == AppThemePreference.dark
                   ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                   : null,
@@ -205,7 +205,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             PremiumActionSheetTile(
               icon: Icons.brightness_auto_rounded,
               label: t.common.themeSystem,
-              subtitle: 'System',
+              subtitle: t.common.themeSystemSubtitle,
               trailing: currentTheme == AppThemePreference.system
                   ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                   : null,
@@ -240,8 +240,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             const SizedBox(height: AppSizes.spacingL),
             PremiumActionSheetTile(
               icon: Icons.language_rounded,
-              label: 'Türkçe',
-              subtitle: 'Turkish',
+              label: t.common.turkishLanguage,
+              subtitle: t.common.turkishLanguageSubtitle,
               trailing: currentLocale == AppLocale.tr
                   ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                   : null,
@@ -261,8 +261,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             ),
             PremiumActionSheetTile(
               icon: Icons.translate_rounded,
-              label: 'English',
-              subtitle: 'İngilizce',
+              label: t.common.englishLanguage,
+              subtitle: t.common.englishLanguageSubtitle,
               trailing: currentLocale == AppLocale.en
                   ? Icon(Icons.check_rounded, color: AppColors.inkDark)
                   : null,
@@ -436,9 +436,7 @@ class _SettingsProfileHeader extends StatelessWidget {
               customBorder: const CircleBorder(),
               child: Padding(
                 padding: EdgeInsets.all(8),
-                child: const ActionChevron(
-                  size: 22,
-                ),
+                child: const ActionChevron(size: 22),
               ),
             ),
           ),
@@ -504,10 +502,7 @@ class _SettingsTile extends StatelessWidget {
                   Text(trailing!, style: ProfileSettingsUi.rowTrailing),
                   const SizedBox(width: 8),
                 ],
-                if (showChevron)
-                  const ActionChevron(
-                    size: 22,
-                  ),
+                if (showChevron) const ActionChevron(size: 22),
               ],
             ),
           ),

@@ -172,6 +172,15 @@ class Translations$common$en {
 	/// en: 'You can change the app appearance here.'
 	String get themeSheetDescription => 'You can change the app appearance here.';
 
+	/// en: 'Light'
+	String get themeLightSubtitle => 'Light';
+
+	/// en: 'Dark'
+	String get themeDarkSubtitle => 'Dark';
+
+	/// en: 'System'
+	String get themeSystemSubtitle => 'System';
+
 	/// en: 'Turkish'
 	String get turkish => 'Turkish';
 
@@ -722,6 +731,12 @@ class Translations$common$en {
 	/// en: 'English'
 	String get englishLanguage => 'English';
 
+	/// en: 'Turkish'
+	String get turkishLanguageSubtitle => 'Turkish';
+
+	/// en: 'İngilizce'
+	String get englishLanguageSubtitle => 'İngilizce';
+
 	/// en: 'Site'
 	String get stepSite => 'Site';
 
@@ -917,6 +932,8 @@ class Translations$common$en {
 	/// en: 'You can change the application language here.'
 	String get languageSheetDescription => 'You can change the application language here.';
 
+	late final Translations$common$friendlyError$en friendlyError = Translations$common$friendlyError$en._(_root);
+
 	/// en: 'Must include uppercase, lowercase, and a number'
 	String get newPasswordHint => 'Must include uppercase, lowercase, and a number';
 
@@ -1021,6 +1038,8 @@ class Translations$common$en {
 
 	/// en: 'New'
 	String get kNew => 'New';
+
+	late final Translations$common$errorKeys$en errorKeys = Translations$common$errorKeys$en._(_root);
 }
 
 // Path: validation
@@ -1361,6 +1380,294 @@ class Translations$common$documentPreview$en {
 
 	/// en: 'Pinch to zoom and drag to pan'
 	String get pinchHint => 'Pinch to zoom and drag to pan';
+}
+
+// Path: common.friendlyError
+class Translations$common$friendlyError$en {
+	Translations$common$friendlyError$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'No internet connection'
+	String get networkTitle => 'No internet connection';
+
+	/// en: 'Please make sure your phone is connected to the internet and try again.'
+	String get networkMessage => 'Please make sure your phone is connected to the internet and try again.';
+
+	/// en: 'Session ended'
+	String get unauthorizedTitle => 'Session ended';
+
+	/// en: 'Please close the app and sign in again.'
+	String get unauthorizedMessage => 'Please close the app and sign in again.';
+
+	/// en: 'Cannot reach the server'
+	String get serverTitle => 'Cannot reach the server';
+
+	/// en: 'Please try again in a moment.'
+	String get serverMessage => 'Please try again in a moment.';
+
+	/// en: 'This page could not be opened'
+	String get genericTitle => 'This page could not be opened';
+
+	/// en: 'Please close and reopen the app.'
+	String get genericMessage => 'Please close and reopen the app.';
+
+	/// en: 'Visible to developers only (debug):'
+	String get debugOnlyLabel => 'Visible to developers only (debug):';
+}
+
+// Path: common.errorKeys
+class Translations$common$errorKeys$en {
+	Translations$common$errorKeys$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'There was a problem signing in. Please try again.'
+	String get authLoginFailed => 'There was a problem signing in. Please try again.';
+
+	/// en: 'There was a problem creating your account. Please try again.'
+	String get authRegisterFailed => 'There was a problem creating your account. Please try again.';
+
+	/// en: 'There was a problem joining the apartment. Please try again.'
+	String get authJoinFailed => 'There was a problem joining the apartment. Please try again.';
+
+	/// en: 'Could not sign out other devices. Please try again.'
+	String get authLogoutAllDevicesFailed => 'Could not sign out other devices. Please try again.';
+
+	/// en: 'Could not send the request. Please try again.'
+	String get authForgotPasswordRequestFailed => 'Could not send the request. Please try again.';
+
+	/// en: 'Could not reset your password. Please try again.'
+	String get authResetPasswordFailed => 'Could not reset your password. Please try again.';
+
+	/// en: 'Could not load the dashboard summary. Please try again.'
+	String get dashboardSummaryFetchFailed => 'Could not load the dashboard summary. Please try again.';
+
+	/// en: 'Could not load the collection summary. Please try again.'
+	String get dashboardCollectionFetchFailed => 'Could not load the collection summary. Please try again.';
+
+	/// en: 'Could not load buildings. Please try again.'
+	String get buildingFetchFailed => 'Could not load buildings. Please try again.';
+
+	/// en: 'Could not load collection suggestions. Please try again.'
+	String get collectionPresetsFetchFailed => 'Could not load collection suggestions. Please try again.';
+
+	/// en: 'Could not add the building. Please try again.'
+	String get buildingCreateFailed => 'Could not add the building. Please try again.';
+
+	/// en: 'Could not update the building. Please try again.'
+	String get buildingUpdateFailed => 'Could not update the building. Please try again.';
+
+	/// en: 'Could not update collection details. Please try again.'
+	String get buildingCollectionUpdateFailed => 'Could not update collection details. Please try again.';
+
+	/// en: 'No IBAN record was found to update or delete.'
+	String get collectionPresetNotFound => 'No IBAN record was found to update or delete.';
+
+	/// en: 'Could not save the IBAN. Please try again.'
+	String get collectionPresetSaveFailed => 'Could not save the IBAN. Please try again.';
+
+	/// en: 'Could not delete the IBAN. Please try again.'
+	String get collectionPresetDeleteFailed => 'Could not delete the IBAN. Please try again.';
+
+	/// en: 'Could not delete the building. Please try again.'
+	String get buildingDeleteFailed => 'Could not delete the building. Please try again.';
+
+	/// en: 'Could not create the invite code. Please try again.'
+	String get inviteCodeCreateFailed => 'Could not create the invite code. Please try again.';
+
+	/// en: 'Could not load apartments. Please try again.'
+	String get apartmentsFetchFailed => 'Could not load apartments. Please try again.';
+
+	/// en: 'Could not add the apartment. Please try again.'
+	String get apartmentCreateFailed => 'Could not add the apartment. Please try again.';
+
+	/// en: 'Could not update the apartment. Please try again.'
+	String get apartmentUpdateFailed => 'Could not update the apartment. Please try again.';
+
+	/// en: 'Could not delete the apartment. Please try again.'
+	String get apartmentDeleteFailed => 'Could not delete the apartment. Please try again.';
+
+	/// en: 'Could not remove the resident. Please try again.'
+	String get residentRemoveFailed => 'Could not remove the resident. Please try again.';
+
+	/// en: 'Could not load the dues list. Please try again.'
+	String get buildingDuesFetchFailed => 'Could not load the dues list. Please try again.';
+
+	/// en: 'Could not load your dues. Please try again.'
+	String get myDuesFetchFailed => 'Could not load your dues. Please try again.';
+
+	/// en: 'Could not update the due status. Please try again.'
+	String get dueStatusUpdateFailed => 'Could not update the due status. Please try again.';
+
+	/// en: 'Could not update the due amount. Please try again.'
+	String get dueAmountUpdateFailed => 'Could not update the due amount. Please try again.';
+
+	/// en: 'Could not send the reminder. Please try again.'
+	String get dueReminderFailed => 'Could not send the reminder. Please try again.';
+
+	/// en: 'Could not load requests. Please try again.'
+	String get myTicketsFetchFailed => 'Could not load requests. Please try again.';
+
+	/// en: 'Could not load building requests. Please try again.'
+	String get buildingTicketsFetchFailed => 'Could not load building requests. Please try again.';
+
+	/// en: 'Could not load request details. Please try again.'
+	String get ticketDetailFetchFailed => 'Could not load request details. Please try again.';
+
+	/// en: 'Could not create the request. Please try again.'
+	String get ticketCreateFailed => 'Could not create the request. Please try again.';
+
+	/// en: 'Could not add the note. Please try again.'
+	String get ticketNoteAddFailed => 'Could not add the note. Please try again.';
+
+	/// en: 'Could not update the request status. Please try again.'
+	String get ticketStatusUpdateFailed => 'Could not update the request status. Please try again.';
+
+	/// en: 'Could not load expenses. Please try again.'
+	String get expensesFetchFailed => 'Could not load expenses. Please try again.';
+
+	/// en: 'Could not load the expense summary. Please try again.'
+	String get expenseSummaryFetchFailed => 'Could not load the expense summary. Please try again.';
+
+	/// en: 'Could not save the expense. Please try again.'
+	String get expenseCreateFailed => 'Could not save the expense. Please try again.';
+
+	/// en: 'Could not update the expense. Please try again.'
+	String get expenseUpdateFailed => 'Could not update the expense. Please try again.';
+
+	/// en: 'Could not delete the expense. Please try again.'
+	String get expenseDeleteFailed => 'Could not delete the expense. Please try again.';
+
+	/// en: 'Could not upload receipts. Please try again.'
+	String get expenseReceiptsUploadFailed => 'Could not upload receipts. Please try again.';
+
+	/// en: 'Could not load profile information. Please try again.'
+	String get profileFetchFailed => 'Could not load profile information. Please try again.';
+
+	/// en: 'Could not update the profile. Please try again.'
+	String get profileUpdateFailed => 'Could not update the profile. Please try again.';
+
+	/// en: 'Could not save the language preference. Please try again.'
+	String get languageUpdateFailed => 'Could not save the language preference. Please try again.';
+
+	/// en: 'Could not change the password. Please try again.'
+	String get passwordChangeFailed => 'Could not change the password. Please try again.';
+
+	/// en: 'Could not close the account. Please try again.'
+	String get accountDeleteFailed => 'Could not close the account. Please try again.';
+
+	/// en: 'Could not upload the profile photo. Please try again.'
+	String get profilePictureUploadFailed => 'Could not upload the profile photo. Please try again.';
+
+	/// en: 'Could not remove the profile photo. Please try again.'
+	String get profilePictureDeleteFailed => 'Could not remove the profile photo. Please try again.';
+
+	/// en: 'Could not load the notification count. Please try again.'
+	String get notificationCountFetchFailed => 'Could not load the notification count. Please try again.';
+
+	/// en: 'Could not load notifications. Please try again.'
+	String get notificationsFetchFailed => 'Could not load notifications. Please try again.';
+
+	/// en: 'Could not load the announcement count. Please try again.'
+	String get announcementCountFetchFailed => 'Could not load the announcement count. Please try again.';
+
+	/// en: 'Could not mark the notification as read. Please try again.'
+	String get notificationMarkReadFailed => 'Could not mark the notification as read. Please try again.';
+
+	/// en: 'Could not mark notifications as read. Please try again.'
+	String get notificationsMarkAllReadFailed => 'Could not mark notifications as read. Please try again.';
+
+	/// en: 'Could not send the announcement. Please try again.'
+	String get announcementSendFailed => 'Could not send the announcement. Please try again.';
+
+	/// en: 'Could not load sites. Please try again.'
+	String get sitesFetchFailed => 'Could not load sites. Please try again.';
+
+	/// en: 'Could not load site details. Please try again.'
+	String get siteDetailFetchFailed => 'Could not load site details. Please try again.';
+
+	/// en: 'Could not load blocks. Please try again.'
+	String get siteBuildingsFetchFailed => 'Could not load blocks. Please try again.';
+
+	/// en: 'Could not add the site. Please try again.'
+	String get siteCreateFailed => 'Could not add the site. Please try again.';
+
+	/// en: 'Could not update the site. Please try again.'
+	String get siteUpdateFailed => 'Could not update the site. Please try again.';
+
+	/// en: 'Could not update site collection details. Please try again.'
+	String get siteCollectionUpdateFailed => 'Could not update site collection details. Please try again.';
+
+	/// en: 'Could not delete the site. Please try again.'
+	String get siteDeleteFailed => 'Could not delete the site. Please try again.';
+
+	/// en: 'Could not add the block. Please try again.'
+	String get siteBuildingCreateFailed => 'Could not add the block. Please try again.';
+
+	/// en: 'Could not load site expenses. Please try again.'
+	String get siteExpensesFetchFailed => 'Could not load site expenses. Please try again.';
+
+	/// en: 'Could not load the site expense summary. Please try again.'
+	String get siteExpenseSummaryFetchFailed => 'Could not load the site expense summary. Please try again.';
+
+	/// en: 'Could not add the site expense. Please try again.'
+	String get siteExpenseCreateFailed => 'Could not add the site expense. Please try again.';
+
+	/// en: 'Could not update the site expense. Please try again.'
+	String get siteExpenseUpdateFailed => 'Could not update the site expense. Please try again.';
+
+	/// en: 'Could not delete the site expense. Please try again.'
+	String get siteExpenseDeleteFailed => 'Could not delete the site expense. Please try again.';
+
+	/// en: 'Could not load subscription information. Please try again.'
+	String get subscriptionFetchFailed => 'Could not load subscription information. Please try again.';
+
+	/// en: 'Could not read expense information. Please try again.'
+	String get invalidExpenseResponse => 'Could not read expense information. Please try again.';
+
+	/// en: 'Could not read site expense information. Please try again.'
+	String get invalidSiteExpenseResponse => 'Could not read site expense information. Please try again.';
+
+	/// en: 'This file type is not supported.'
+	String get unsupportedFileType => 'This file type is not supported.';
+
+	/// en: 'Could not upload the receipt. Please try again.'
+	String get dekontUploadFailed => 'Could not upload the receipt. Please try again.';
+
+	/// en: 'Could not read the server response. Please try again.'
+	String get serverResponseUnreadable => 'Could not read the server response. Please try again.';
+
+	/// en: 'The receipt response is incomplete. Please try again.'
+	String get dekontResponseMissing => 'The receipt response is incomplete. Please try again.';
+
+	/// en: 'Could not process the receipt response. Please try again.'
+	String get dekontResponseParseFailed => 'Could not process the receipt response. Please try again.';
+
+	/// en: 'The report file was empty. Please try again.'
+	String get reportFileEmpty => 'The report file was empty. Please try again.';
+
+	/// en: 'Download started...'
+	String get downloadStarted => 'Download started...';
+
+	/// en: 'Saved to your phone's Gallery (AidatPanel album).'
+	String get downloadSavedToGallery => 'Saved to your phone\'s Gallery (AidatPanel album).';
+
+	/// en: 'Receipt saved to your Downloads folder.'
+	String get downloadSavedToDownloads => 'Receipt saved to your Downloads folder.';
+
+	/// en: 'Share screen opened. You can save it to Files from there.'
+	String get downloadFallbackShare => 'Share screen opened. You can save it to Files from there.';
+
+	/// en: 'An error occurred while downloading the file.'
+	String get downloadError => 'An error occurred while downloading the file.';
+
+	/// en: 'Gallery access permission was denied.'
+	String get galleryPermissionDenied => 'Gallery access permission was denied.';
 }
 
 // Path: features.buildings
@@ -3534,6 +3841,9 @@ extension on Translations {
 			'common.themeDark' => 'Dark',
 			'common.themeSystem' => 'System',
 			'common.themeSheetDescription' => 'You can change the app appearance here.',
+			'common.themeLightSubtitle' => 'Light',
+			'common.themeDarkSubtitle' => 'Dark',
+			'common.themeSystemSubtitle' => 'System',
 			'common.turkish' => 'Turkish',
 			'common.notifications' => 'Notifications',
 			'common.info' => 'Info',
@@ -3753,6 +4063,8 @@ extension on Translations {
 			'common.apartmentLabel' => 'APT',
 			'common.turkishLanguage' => 'Türkçe',
 			'common.englishLanguage' => 'English',
+			'common.turkishLanguageSubtitle' => 'Turkish',
+			'common.englishLanguageSubtitle' => 'İngilizce',
 			'common.stepSite' => 'Site',
 			'common.stepBuilding' => 'Building',
 			'common.stepApartment' => 'Apartment',
@@ -3818,6 +4130,15 @@ extension on Translations {
 			'common.changePasswordFailed' => 'Could not change password. Please try again.',
 			'common.changePasswordWrongCurrent' => 'Current password is incorrect.',
 			'common.languageSheetDescription' => 'You can change the application language here.',
+			'common.friendlyError.networkTitle' => 'No internet connection',
+			'common.friendlyError.networkMessage' => 'Please make sure your phone is connected to the internet and try again.',
+			'common.friendlyError.unauthorizedTitle' => 'Session ended',
+			'common.friendlyError.unauthorizedMessage' => 'Please close the app and sign in again.',
+			'common.friendlyError.serverTitle' => 'Cannot reach the server',
+			'common.friendlyError.serverMessage' => 'Please try again in a moment.',
+			'common.friendlyError.genericTitle' => 'This page could not be opened',
+			'common.friendlyError.genericMessage' => 'Please close and reopen the app.',
+			'common.friendlyError.debugOnlyLabel' => 'Visible to developers only (debug):',
 			'common.newPasswordHint' => 'Must include uppercase, lowercase, and a number',
 			'common.passwordStrengthUnspecified' => 'Not specified',
 			'common.passwordStrengthWeak' => 'Weak',
@@ -3853,6 +4174,87 @@ extension on Translations {
 			'common.backToLogin' => 'Back to login',
 			'common.select' => 'Select',
 			'common.kNew' => 'New',
+			'common.errorKeys.authLoginFailed' => 'There was a problem signing in. Please try again.',
+			'common.errorKeys.authRegisterFailed' => 'There was a problem creating your account. Please try again.',
+			'common.errorKeys.authJoinFailed' => 'There was a problem joining the apartment. Please try again.',
+			'common.errorKeys.authLogoutAllDevicesFailed' => 'Could not sign out other devices. Please try again.',
+			'common.errorKeys.authForgotPasswordRequestFailed' => 'Could not send the request. Please try again.',
+			'common.errorKeys.authResetPasswordFailed' => 'Could not reset your password. Please try again.',
+			'common.errorKeys.dashboardSummaryFetchFailed' => 'Could not load the dashboard summary. Please try again.',
+			'common.errorKeys.dashboardCollectionFetchFailed' => 'Could not load the collection summary. Please try again.',
+			'common.errorKeys.buildingFetchFailed' => 'Could not load buildings. Please try again.',
+			'common.errorKeys.collectionPresetsFetchFailed' => 'Could not load collection suggestions. Please try again.',
+			'common.errorKeys.buildingCreateFailed' => 'Could not add the building. Please try again.',
+			'common.errorKeys.buildingUpdateFailed' => 'Could not update the building. Please try again.',
+			'common.errorKeys.buildingCollectionUpdateFailed' => 'Could not update collection details. Please try again.',
+			'common.errorKeys.collectionPresetNotFound' => 'No IBAN record was found to update or delete.',
+			'common.errorKeys.collectionPresetSaveFailed' => 'Could not save the IBAN. Please try again.',
+			'common.errorKeys.collectionPresetDeleteFailed' => 'Could not delete the IBAN. Please try again.',
+			'common.errorKeys.buildingDeleteFailed' => 'Could not delete the building. Please try again.',
+			'common.errorKeys.inviteCodeCreateFailed' => 'Could not create the invite code. Please try again.',
+			'common.errorKeys.apartmentsFetchFailed' => 'Could not load apartments. Please try again.',
+			'common.errorKeys.apartmentCreateFailed' => 'Could not add the apartment. Please try again.',
+			'common.errorKeys.apartmentUpdateFailed' => 'Could not update the apartment. Please try again.',
+			'common.errorKeys.apartmentDeleteFailed' => 'Could not delete the apartment. Please try again.',
+			'common.errorKeys.residentRemoveFailed' => 'Could not remove the resident. Please try again.',
+			'common.errorKeys.buildingDuesFetchFailed' => 'Could not load the dues list. Please try again.',
+			'common.errorKeys.myDuesFetchFailed' => 'Could not load your dues. Please try again.',
+			'common.errorKeys.dueStatusUpdateFailed' => 'Could not update the due status. Please try again.',
+			'common.errorKeys.dueAmountUpdateFailed' => 'Could not update the due amount. Please try again.',
+			'common.errorKeys.dueReminderFailed' => 'Could not send the reminder. Please try again.',
+			'common.errorKeys.myTicketsFetchFailed' => 'Could not load requests. Please try again.',
+			'common.errorKeys.buildingTicketsFetchFailed' => 'Could not load building requests. Please try again.',
+			'common.errorKeys.ticketDetailFetchFailed' => 'Could not load request details. Please try again.',
+			'common.errorKeys.ticketCreateFailed' => 'Could not create the request. Please try again.',
+			'common.errorKeys.ticketNoteAddFailed' => 'Could not add the note. Please try again.',
+			'common.errorKeys.ticketStatusUpdateFailed' => 'Could not update the request status. Please try again.',
+			'common.errorKeys.expensesFetchFailed' => 'Could not load expenses. Please try again.',
+			'common.errorKeys.expenseSummaryFetchFailed' => 'Could not load the expense summary. Please try again.',
+			'common.errorKeys.expenseCreateFailed' => 'Could not save the expense. Please try again.',
+			'common.errorKeys.expenseUpdateFailed' => 'Could not update the expense. Please try again.',
+			'common.errorKeys.expenseDeleteFailed' => 'Could not delete the expense. Please try again.',
+			'common.errorKeys.expenseReceiptsUploadFailed' => 'Could not upload receipts. Please try again.',
+			'common.errorKeys.profileFetchFailed' => 'Could not load profile information. Please try again.',
+			'common.errorKeys.profileUpdateFailed' => 'Could not update the profile. Please try again.',
+			'common.errorKeys.languageUpdateFailed' => 'Could not save the language preference. Please try again.',
+			'common.errorKeys.passwordChangeFailed' => 'Could not change the password. Please try again.',
+			'common.errorKeys.accountDeleteFailed' => 'Could not close the account. Please try again.',
+			'common.errorKeys.profilePictureUploadFailed' => 'Could not upload the profile photo. Please try again.',
+			'common.errorKeys.profilePictureDeleteFailed' => 'Could not remove the profile photo. Please try again.',
+			'common.errorKeys.notificationCountFetchFailed' => 'Could not load the notification count. Please try again.',
+			'common.errorKeys.notificationsFetchFailed' => 'Could not load notifications. Please try again.',
+			'common.errorKeys.announcementCountFetchFailed' => 'Could not load the announcement count. Please try again.',
+			'common.errorKeys.notificationMarkReadFailed' => 'Could not mark the notification as read. Please try again.',
+			'common.errorKeys.notificationsMarkAllReadFailed' => 'Could not mark notifications as read. Please try again.',
+			'common.errorKeys.announcementSendFailed' => 'Could not send the announcement. Please try again.',
+			'common.errorKeys.sitesFetchFailed' => 'Could not load sites. Please try again.',
+			'common.errorKeys.siteDetailFetchFailed' => 'Could not load site details. Please try again.',
+			'common.errorKeys.siteBuildingsFetchFailed' => 'Could not load blocks. Please try again.',
+			'common.errorKeys.siteCreateFailed' => 'Could not add the site. Please try again.',
+			'common.errorKeys.siteUpdateFailed' => 'Could not update the site. Please try again.',
+			'common.errorKeys.siteCollectionUpdateFailed' => 'Could not update site collection details. Please try again.',
+			'common.errorKeys.siteDeleteFailed' => 'Could not delete the site. Please try again.',
+			'common.errorKeys.siteBuildingCreateFailed' => 'Could not add the block. Please try again.',
+			'common.errorKeys.siteExpensesFetchFailed' => 'Could not load site expenses. Please try again.',
+			'common.errorKeys.siteExpenseSummaryFetchFailed' => 'Could not load the site expense summary. Please try again.',
+			'common.errorKeys.siteExpenseCreateFailed' => 'Could not add the site expense. Please try again.',
+			'common.errorKeys.siteExpenseUpdateFailed' => 'Could not update the site expense. Please try again.',
+			'common.errorKeys.siteExpenseDeleteFailed' => 'Could not delete the site expense. Please try again.',
+			'common.errorKeys.subscriptionFetchFailed' => 'Could not load subscription information. Please try again.',
+			'common.errorKeys.invalidExpenseResponse' => 'Could not read expense information. Please try again.',
+			'common.errorKeys.invalidSiteExpenseResponse' => 'Could not read site expense information. Please try again.',
+			'common.errorKeys.unsupportedFileType' => 'This file type is not supported.',
+			'common.errorKeys.dekontUploadFailed' => 'Could not upload the receipt. Please try again.',
+			'common.errorKeys.serverResponseUnreadable' => 'Could not read the server response. Please try again.',
+			'common.errorKeys.dekontResponseMissing' => 'The receipt response is incomplete. Please try again.',
+			'common.errorKeys.dekontResponseParseFailed' => 'Could not process the receipt response. Please try again.',
+			'common.errorKeys.reportFileEmpty' => 'The report file was empty. Please try again.',
+			'common.errorKeys.downloadStarted' => 'Download started...',
+			'common.errorKeys.downloadSavedToGallery' => 'Saved to your phone\'s Gallery (AidatPanel album).',
+			'common.errorKeys.downloadSavedToDownloads' => 'Receipt saved to your Downloads folder.',
+			'common.errorKeys.downloadFallbackShare' => 'Share screen opened. You can save it to Files from there.',
+			'common.errorKeys.downloadError' => 'An error occurred while downloading the file.',
+			'common.errorKeys.galleryPermissionDenied' => 'Gallery access permission was denied.',
 			'validation.emailRequired' => 'Email address cannot be empty',
 			'validation.emailInvalid' => 'Please enter a valid email address',
 			'validation.emailTooLong' => 'Email address is too long',
@@ -3912,6 +4314,8 @@ extension on Translations {
 			'features.buildings.collection.detailReferenceDaireAidat' => 'Transfer reference: Apt. no + dues',
 			'features.buildings.collection.detailReferenceAidat' => 'Transfer reference: Dues (apt. no added automatically)',
 			'features.buildings.collection.detailReferenceHavale' => 'Transfer reference: Apartment number on transfer',
+			_ => null,
+		} ?? switch (path) {
 			'features.buildings.collection.detailUsedInBuildings' => 'Used in {count} buildings',
 			'features.buildings.collection.ibanLabel' => 'IBAN',
 			'features.buildings.collection.ibanHint' => 'TR33 0006 1005 1978 6457 8413 26',
@@ -4007,8 +4411,6 @@ extension on Translations {
 			'features.sites.commonExpenses' => 'Common Expenses',
 			'features.sites.report' => 'Report',
 			'features.sites.reportSheetTitle' => 'Site report',
-			_ => null,
-		} ?? switch (path) {
 			'features.sites.monthlyReport' => 'Monthly report (PDF)',
 			'features.sites.annualReport' => 'Annual report (PDF)',
 			'features.sites.siteExpensesTitle' => 'Site Common Expenses',
@@ -4426,6 +4828,8 @@ extension on Translations {
 			'features.subscription.planMonthly' => 'Monthly plan',
 			'features.subscription.planAnnual' => 'Annual plan',
 			'features.subscription.planUnknown' => 'Plan',
+			_ => null,
+		} ?? switch (path) {
 			'features.subscription.renewsOn' => 'Renews: {date}',
 			'features.subscription.noSubscription' => 'No subscription on file yet.',
 			'features.subscription.backendPending' => 'Subscription is not connected to the server yet. Purchases coming soon.',
@@ -4521,8 +4925,6 @@ extension on Translations {
 			'features.dashboard.remindAllSent' => 'Reminders sent to {count} residents.',
 			'features.dashboard.remindCooldown' => 'A reminder was already sent for this due within the last 24 hours.',
 			'features.dashboard.remindNoRecipient' => 'No resident found to send a reminder for this apartment.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dashboard.apartmentTitle' => 'Apt. {number}',
 			'features.dashboard.apartmentWithFloor' => 'Apt. {number} · Floor {floor}',
 			'features.dashboard.noOverdueApartments' => 'No overdue payments',

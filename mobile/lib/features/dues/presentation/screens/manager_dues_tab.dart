@@ -694,10 +694,10 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   }
 
   String _currencyCode() {
-    return LocaleSettings.currentLocale == AppLocale.tr ? 'TRY' : 'USD';
+    return 'TRY';
   }
 
   String _currencySymbol() {
-    return LocaleSettings.currentLocale == AppLocale.tr ? '₺' : r'$';
+    return '₺';
   }
 }

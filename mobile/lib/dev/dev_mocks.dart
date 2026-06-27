@@ -47,6 +47,12 @@ class MockState {
 
 const _delay = Duration(milliseconds: 200);
 
+// Dev preview seed data: kullanıcı tarafından/backend tarafından gelen örnek veri gibi
+// davranır; uygulama UI metni olmadığı için i18n anahtarına bağlanmaz.
+const _mockTicketElevatorNoiseTitle = 'Asansör gürültüsü';
+const _mockTicketElevatorNoiseDescription =
+    'Gece geç saatlerde asansör ses yapıyor.';
+
 class MockAuthRepository implements AuthRepository {
   /// null = çıkış yapılmış; splash login ekranına gider.
   static UserEntity? _sessionUser;
@@ -543,7 +549,7 @@ class MockBuildingRepository implements BuildingRepository {
     await Future.delayed(_delay);
     final idx = _buildings.indexWhere((b) => b.id == id);
     if (idx == -1) {
-      throw ApiException(message: 'Bina bulunamadı', statusCode: 404);
+      throw ApiException(message: 'building_not_found', statusCode: 404);
     }
     final updated = _buildings[idx].copyWith(
       name: name,
@@ -564,7 +570,7 @@ class MockBuildingRepository implements BuildingRepository {
     await Future.delayed(_delay);
     final idx = _buildings.indexWhere((b) => b.id == id);
     if (idx == -1) {
-      throw ApiException(message: 'Bina bulunamadı', statusCode: 404);
+      throw ApiException(message: 'building_not_found', statusCode: 404);
     }
     final iban = collectionIban != null && collectionIban.isNotEmpty
         ? IbanUtils.normalize(collectionIban)
@@ -591,10 +597,10 @@ class MockBuildingRepository implements BuildingRepository {
     await Future.delayed(_delay);
     final key = IbanUtils.normalize(collectionIban);
     if (!IbanUtils.isValidTrIban(key)) {
-      throw ApiException(message: 'Geçerli bir TR IBAN girin');
+      throw ApiException(message: 'invalid_iban');
     }
     if (_hasPresetKey(key)) {
-      throw ApiException(message: 'Bu IBAN zaten kayıtlı');
+      throw ApiException(message: 'collection_iban_duplicate');
     }
     final entity = CollectionPresetEntity(
       collectionIban: key,
@@ -633,7 +639,7 @@ class MockBuildingRepository implements BuildingRepository {
     final orphanPresetRemoved = _removeExtraPreset(key);
     if (buildingsCleared == 0 && !orphanPresetRemoved) {
       throw ApiException(
-        message: 'Silinecek IBAN kaydı bulunamadı',
+        message: 'collection_preset_not_found',
         statusCode: 404,
       );
     }
@@ -662,10 +668,7 @@ class MockBuildingRepository implements BuildingRepository {
     }
     if (presetsRemoved == 0) {
       throw lastError ??
-          ApiException(
-            message: 'Silinecek IBAN kaydı bulunamadı',
-            statusCode: 404,
-          );
+          ApiException(message: 'collection_preset_not_found', statusCode: 404);
     }
     return SavedIbanBulkDeleteResult(
       presetsRemoved: presetsRemoved,
@@ -707,10 +710,7 @@ class MockBuildingRepository implements BuildingRepository {
       return 0;
     }
 
-    throw ApiException(
-      message: 'Bu IBAN için güncellenecek kayıt bulunamadı',
-      statusCode: 404,
-    );
+    throw ApiException(message: 'collection_preset_not_found', statusCode: 404);
   }
 
   @override
@@ -873,11 +873,11 @@ class MockApartmentRepository implements ApartmentRepository {
     await Future.delayed(_delay);
     final list = _byBuilding[buildingId];
     if (list == null) {
-      throw ApiException(message: 'Bina bulunamadı', statusCode: 404);
+      throw ApiException(message: 'building_not_found', statusCode: 404);
     }
     final idx = list.indexWhere((a) => a.id == id);
     if (idx == -1) {
-      throw ApiException(message: 'Daire bulunamadı', statusCode: 404);
+      throw ApiException(message: 'apartment_not_found', statusCode: 404);
     }
     final updated = list[idx].copyWith(apartmentNumber: number, floor: floor);
     list[idx] = updated;
@@ -895,7 +895,7 @@ class MockApartmentRepository implements ApartmentRepository {
     final apt = list.firstWhere(
       (a) => a.id == id,
       orElse: () =>
-          throw ApiException(message: 'Daire bulunamadı', statusCode: 404),
+          throw ApiException(message: 'apartment_not_found', statusCode: 404),
     );
     if (apt.resident != null) {
       // Belge §6: sakin atanmış daire silinince FK ihlali (dues vs.) gelebilir.
@@ -920,11 +920,11 @@ class MockApartmentRepository implements ApartmentRepository {
     await Future.delayed(_delay);
     final list = _byBuilding[buildingId];
     if (list == null) {
-      throw ApiException(message: 'Bina bulunamadı', statusCode: 404);
+      throw ApiException(message: 'building_not_found', statusCode: 404);
     }
     final idx = list.indexWhere((a) => a.id == apartmentId);
     if (idx == -1) {
-      throw ApiException(message: 'Daire bulunamadı', statusCode: 404);
+      throw ApiException(message: 'apartment_not_found', statusCode: 404);
     }
     if (list[idx].resident == null) {
       throw ApiException(
@@ -1146,11 +1146,11 @@ class MockDuesRepository implements DuesRepository {
     await Future.delayed(_delay);
     final list = _byBuilding[buildingId];
     if (list == null) {
-      throw ApiException(message: 'Bina bulunamadı', statusCode: 404);
+      throw ApiException(message: 'building_not_found', statusCode: 404);
     }
     final idx = list.indexWhere((d) => d.id == dueId);
     if (idx == -1) {
-      throw ApiException(message: 'Aidat bulunamadı', statusCode: 404);
+      throw ApiException(message: 'due_not_found', statusCode: 404);
     }
     final old = list[idx];
     final now = DateTime.now();
@@ -1252,8 +1252,8 @@ class MockTicketRepository implements TicketRepository {
         id: 'ticket_seed_1',
         apartmentId: 'a1_1',
         userId: 'dev_resident_1',
-        title: 'Asansör gürültüsü',
-        description: 'Gece geç saatlerde asansör ses yapıyor.',
+        title: _mockTicketElevatorNoiseTitle,
+        description: _mockTicketElevatorNoiseDescription,
         category: TicketCategory.complaint,
         status: TicketStatus.open,
         createdAt: now.subtract(const Duration(days: 2)),
@@ -1301,7 +1301,7 @@ class MockTicketRepository implements TicketRepository {
     await Future.delayed(_delay);
     return _tickets.firstWhere(
       (t) => t.id == ticketId,
-      orElse: () => throw ApiException(message: 'Talep bulunamadı'),
+      orElse: () => throw ApiException(message: 'ticket_not_found'),
     );
   }
 
@@ -1312,7 +1312,7 @@ class MockTicketRepository implements TicketRepository {
   }) async {
     await Future.delayed(_delay);
     final idx = _tickets.indexWhere((t) => t.id == ticketId);
-    if (idx < 0) throw ApiException(message: 'Talep bulunamadı');
+    if (idx < 0) throw ApiException(message: 'ticket_not_found');
     final old = _tickets[idx];
     final update = TicketUpdateEntity(
       id: MockState.nextId('tup'),
@@ -1344,7 +1344,7 @@ class MockTicketRepository implements TicketRepository {
   }) async {
     await Future.delayed(_delay);
     final idx = _tickets.indexWhere((t) => t.id == ticketId);
-    if (idx < 0) throw ApiException(message: 'Talep bulunamadı');
+    if (idx < 0) throw ApiException(message: 'ticket_not_found');
     final old = _tickets[idx];
     _tickets[idx] = TicketEntity(
       id: old.id,

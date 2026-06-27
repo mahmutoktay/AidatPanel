@@ -53,7 +53,7 @@ class SiteExpenseRemoteDataSourceImpl implements SiteExpenseRemoteDataSource {
   final DioClient _dioClient;
 
   SiteExpenseRemoteDataSourceImpl({required DioClient dioClient})
-      : _dioClient = dioClient;
+    : _dioClient = dioClient;
 
   @override
   Future<PaginatedListResult<SiteExpenseModel>> fetchSiteExpenses(
@@ -68,21 +68,14 @@ class SiteExpenseRemoteDataSourceImpl implements SiteExpenseRemoteDataSource {
       cursor: cursor,
       limit: AppConstants.pageSize,
       paginated: paginated,
-      extra: {
-        'month': ?month,
-        'year': ?year,
-        'category': ?category,
-      },
+      extra: {'month': ?month, 'year': ?year, 'category': ?category},
     );
 
     final response = await _dioClient.get(
       ApiConstants.siteExpenses(siteId),
       queryParameters: query,
     );
-    return parsePaginatedList(
-      response.data['data'],
-      SiteExpenseModel.fromJson,
-    );
+    return parsePaginatedList(response.data['data'], SiteExpenseModel.fromJson);
   }
 
   @override
@@ -132,7 +125,7 @@ class SiteExpenseRemoteDataSourceImpl implements SiteExpenseRemoteDataSource {
 
     final data = response.data['data'];
     if (data is! Map<String, dynamic>) {
-      throw StateError('Geçersiz site gideri yanıtı');
+      throw StateError('invalid_site_expense_response');
     }
 
     if (data['paidApartmentCount'] != null || data['message'] != null) {
@@ -144,8 +137,7 @@ class SiteExpenseRemoteDataSourceImpl implements SiteExpenseRemoteDataSource {
               (data['paidApartmentCount'] as num?)?.toInt() ?? 0,
           perUnitAmount: '${data['perUnitAmount'] ?? '0'}',
           totalUnpaidShare: '${data['totalUnpaidShare'] ?? '0'}',
-          nextMonth:
-              next is Map ? (next['month'] as num?)?.toInt() ?? 1 : 1,
+          nextMonth: next is Map ? (next['month'] as num?)?.toInt() ?? 1 : 1,
           nextYear: next is Map
               ? (next['year'] as num?)?.toInt() ?? DateTime.now().year
               : DateTime.now().year,
@@ -156,7 +148,7 @@ class SiteExpenseRemoteDataSourceImpl implements SiteExpenseRemoteDataSource {
 
     final expenseJson = data['expense'] ?? data;
     if (expenseJson is! Map<String, dynamic>) {
-      throw StateError('Geçersiz site gideri yanıtı');
+      throw StateError('invalid_site_expense_response');
     }
 
     final warningsRaw = data['warnings'];

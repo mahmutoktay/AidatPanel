@@ -18,8 +18,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(
-          message: 'Dashboard özeti alınırken bir hata oluştu');
+      throw ApiException(message: 'dashboard_summary_fetch_failed');
     }
   }
 
@@ -32,8 +31,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(
-          message: 'Tahsilat özeti alınırken bir hata oluştu');
+      throw ApiException(message: 'dashboard_collection_fetch_failed');
     }
   }
 
@@ -47,8 +45,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(
-          message: 'Dashboard özeti alınırken bir hata oluştu');
+      throw ApiException(message: 'dashboard_summary_fetch_failed');
     }
   }
 }

@@ -10,6 +10,21 @@ import '../features/notifications/domain/entities/notification_entity.dart';
 
 const _delay = Duration(milliseconds: 200);
 
+// Dev preview seed data: kullanıcı/backend kaynaklı örnek veri gibi davranır;
+// datasource katmanında localization çağrısı yapılmadığı için i18n'e bağlanmaz.
+const _mockExpenseElevatorMaintenanceTitle = 'Asansör bakımı';
+const _mockExpenseCleaningTitle = 'Temizlik';
+const _mockExpenseElectricityBillTitle = 'Elektrik faturası';
+const _mockExpenseAnnualContractNote = 'Yıllık sözleşme';
+const _mockNotificationNewTicketTitle = 'Yeni talep';
+const _mockNotificationElevatorNoiseBody =
+    'Asansör gürültüsü — Çamlık Apartmanı';
+const _mockNotificationWaterOutageTitle = 'Su kesintisi';
+const _mockNotificationWaterOutageBody =
+    'Yarın 10:00–14:00 arası planlı bakım.';
+const _mockNotificationDevPreviewTitle = 'Dev preview';
+const _mockNotificationDevPreviewBody = 'Bildirim kutusu — mock veri';
+
 class MockExpenseDataSource implements ExpenseDataSource {
   final Map<String, List<ExpenseModel>> _byBuilding = {};
 
@@ -20,20 +35,20 @@ class MockExpenseDataSource implements ExpenseDataSource {
       ExpenseModel(
         id: 'exp_seed_1',
         buildingId: 'b1',
-        title: 'Asansör bakımı',
+        title: _mockExpenseElevatorMaintenanceTitle,
         amount: 4500,
         category: 'ELEVATOR',
         date: DateTime(now.year, now.month, 5),
         targetMonth: now.month,
         targetYear: now.year,
         perUnitAmount: 1125,
-        note: 'Yıllık sözleşme',
+        note: _mockExpenseAnnualContractNote,
         createdAt: now.subtract(const Duration(days: 3)),
       ),
       ExpenseModel(
         id: 'exp_seed_2',
         buildingId: 'b1',
-        title: 'Temizlik',
+        title: _mockExpenseCleaningTitle,
         amount: 1200,
         category: 'CLEANING',
         date: DateTime(now.year, now.month, 12),
@@ -47,7 +62,7 @@ class MockExpenseDataSource implements ExpenseDataSource {
       ExpenseModel(
         id: 'exp_seed_3',
         buildingId: 'b2',
-        title: 'Elektrik faturası',
+        title: _mockExpenseElectricityBillTitle,
         amount: 3200.5,
         category: 'ELECTRICITY',
         date: DateTime(now.year, now.month, 8),
@@ -264,8 +279,8 @@ class MockNotificationDataSource implements NotificationDataSource {
       NotificationEntity(
         id: 'n_seed_ticket_created',
         userId: 'dev_manager_1',
-        title: 'Yeni talep',
-        body: 'Asansör gürültüsü — Çamlık Apartmanı',
+        title: _mockNotificationNewTicketTitle,
+        body: _mockNotificationElevatorNoiseBody,
         type: NotificationType.ticketCreated,
         isRead: false,
         data: {
@@ -282,8 +297,8 @@ class MockNotificationDataSource implements NotificationDataSource {
       NotificationEntity(
         id: 'n_seed_announcement',
         userId: 'dev_manager_1',
-        title: 'Su kesintisi',
-        body: 'Yarın 10:00–14:00 arası planlı bakım.',
+        title: _mockNotificationWaterOutageTitle,
+        body: _mockNotificationWaterOutageBody,
         type: NotificationType.announcement,
         isRead: true,
         data: {
@@ -296,8 +311,8 @@ class MockNotificationDataSource implements NotificationDataSource {
       NotificationEntity(
         id: 'n_seed_system',
         userId: 'dev_manager_1',
-        title: 'Dev preview',
-        body: 'Bildirim kutusu — mock veri',
+        title: _mockNotificationDevPreviewTitle,
+        body: _mockNotificationDevPreviewBody,
         type: NotificationType.system,
         isRead: false,
         data: {'type': 'SYSTEM', 'route': '/notifications'},

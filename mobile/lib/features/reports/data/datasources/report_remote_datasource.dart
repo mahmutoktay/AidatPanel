@@ -14,7 +14,7 @@ abstract class ReportRemoteDataSource {
 
 class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
   ReportRemoteDataSourceImpl({required DioClient dioClient})
-      : _dioClient = dioClient;
+    : _dioClient = dioClient;
 
   final DioClient _dioClient;
 
@@ -50,23 +50,17 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     final bytes = response.data ?? [];
     if (bytes.isEmpty) {
       throw ApiException(
-        message: 'Rapor dosyası boş',
+        message: 'report_file_empty',
         statusCode: response.statusCode,
       );
     }
 
     final jsonError = _tryParseJsonErrorBytes(bytes);
     if (jsonError != null) {
-      throw ApiException(
-        message: jsonError,
-        statusCode: response.statusCode,
-      );
+      throw ApiException(message: jsonError, statusCode: response.statusCode);
     }
 
-    return ReportFileResult(
-      bytes: bytes,
-      fileName: _buildFileName(params),
-    );
+    return ReportFileResult(bytes: bytes, fileName: _buildFileName(params));
   }
 
   String _buildFileName(ReportDownloadParams params) {
@@ -75,7 +69,9 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
         .replaceAll(RegExp(r'^-+|-+$'), '');
-    final safeSlug = slug.isEmpty ? (params.isSiteReport ? 'site' : 'bina') : slug;
+    final safeSlug = slug.isEmpty
+        ? (params.isSiteReport ? 'site' : 'bina')
+        : slug;
     final prefix = params.isSiteReport ? 'site-rapor' : 'rapor';
     if (params.type == ReportType.annual) {
       return '$prefix-yillik-$safeSlug-${params.year}.pdf';

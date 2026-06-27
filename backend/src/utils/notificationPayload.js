@@ -13,6 +13,7 @@ export function buildPushData(notification) {
   return {
     type: String(notification.type),
     notificationId: String(notification.id),
+    code: String(notification.code ?? ""),
     title: String(notification.title ?? ""),
     body: String(notification.body ?? ""),
     ...Object.fromEntries(
@@ -27,6 +28,7 @@ export function formatNotificationRow(row) {
   return {
     id: row.id,
     userId: row.userId,
+    code: row.code,
     title: row.title,
     body: row.body,
     type: row.type,

@@ -26,25 +26,45 @@ void main() async {
   try {
     await initFirebase();
   } catch (e, st) {
-    developer.log('initFirebase başarısız', name: 'main', error: e, stackTrace: st);
+    developer.log(
+      'initFirebase başarısız',
+      name: 'main',
+      error: e,
+      stackTrace: st,
+    );
   }
   // Error handlers — Firebase init sonrası (Crashlytics Firebase'e bağımlı)
   await _installErrorHandlers();
   try {
     await initAppInfo();
   } catch (e, st) {
-    developer.log('initAppInfo başarısız', name: 'main', error: e, stackTrace: st);
+    developer.log(
+      'initAppInfo başarısız',
+      name: 'main',
+      error: e,
+      stackTrace: st,
+    );
   }
   try {
     await initLocale();
   } catch (e, st) {
-    developer.log('initLocale başarısız', name: 'main', error: e, stackTrace: st);
+    developer.log(
+      'initLocale başarısız',
+      name: 'main',
+      error: e,
+      stackTrace: st,
+    );
     LocaleSettings.setLocale(AppLocale.tr);
   }
   try {
     await initTheme();
   } catch (e, st) {
-    developer.log('initTheme başarısız', name: 'main', error: e, stackTrace: st);
+    developer.log(
+      'initTheme başarısız',
+      name: 'main',
+      error: e,
+      stackTrace: st,
+    );
   }
   try {
     await initDateFormatting();
@@ -77,8 +97,9 @@ Future<void> _installErrorHandlers() async {
 
   if (useCrashlytics) {
     try {
-      await FirebaseCrashlytics.instance
-          .setCrashlyticsCollectionEnabled(!kDebugMode);
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+        !kDebugMode,
+      );
     } catch (_) {
       // Crashlytics kullanılamazsa sessizce generic handler'lara düş.
     }
@@ -213,7 +234,7 @@ class _MyAppContentState extends ConsumerState<_MyAppContent>
     final router = ref.watch(appRouterProvider);
     return TranslationProvider(
       child: MaterialApp.router(
-        title: 'AidatPanel',
+        title: AppConstants.appName,
         theme: AppTheme.lightTheme(),
         darkTheme: AppTheme.darkTheme(),
         themeMode: resolveThemeMode(themePref),
