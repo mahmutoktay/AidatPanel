@@ -15,21 +15,9 @@ abstract final class DashboardScreenStyle {
   static const double statTilePadding = 10;
   static const double navActivePillRadius = 20;
 
-  static List<BoxShadow> get cardShadow => [
-        BoxShadow(
-          color: AppColors.inkDark.withValues(alpha: 0.04),
-          blurRadius: 14,
-          offset: const Offset(0, 4),
-        ),
-      ];
+  static List<BoxShadow> get cardShadow => [];
 
-  static List<BoxShadow> get subtleShadow => [
-        BoxShadow(
-          color: AppColors.primary.withValues(alpha: 0.05),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-      ];
+  static List<BoxShadow> get subtleShadow => [];
 
   static BoxDecoration whiteCard({Color? color}) => BoxDecoration(
         color: color ?? AppColors.surface,

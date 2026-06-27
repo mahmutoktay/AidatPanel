@@ -10,8 +10,8 @@ abstract final class AppDatePickerTheme {
   static DatePickerThemeData dataFor(AppColorPalette palette) =>
       DatePickerThemeData(
         backgroundColor: palette.surface,
-        elevation: 8,
-        shadowColor: Colors.black26,
+        elevation: 0,
+        shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.dialogRadius),
@@ -75,8 +75,8 @@ abstract final class AppDatePickerTheme {
   ) =>
       base.copyWith(
         backgroundColor: palette.surface,
-        elevation: 8,
-        shadowColor: Colors.black26,
+        elevation: 0,
+        shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.dialogRadius),

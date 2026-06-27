@@ -1,16 +1,15 @@
-import { SUBSCRIPTION_PRODUCT_IDS } from "../constants/subscriptionConstants.js";
+import { PRODUCT_ID_PLAN_MAP } from "../constants/subscriptionConstants.js";
 
 /**
- * RevenueCat product_id → plan ("monthly" | "annual").
+ * RevenueCat product_id → plan ("monthly" | "annual" | etc.).
+ * PRODUCT_ID_PLAN_MAP regex sırasına göre eşleşme yapar.
  */
 export function mapProductIdToPlan(productId) {
-  const id = String(productId ?? "").toLowerCase();
-  if (
-    id === SUBSCRIPTION_PRODUCT_IDS.annual ||
-    id.includes("annual") ||
-    id.includes("yearly")
-  ) {
-    return "annual";
+  const id = String(productId ?? "");
+  for (const [regex, plan] of PRODUCT_ID_PLAN_MAP) {
+    if (regex.test(id)) {
+      return plan;
+    }
   }
   return "monthly";
 }

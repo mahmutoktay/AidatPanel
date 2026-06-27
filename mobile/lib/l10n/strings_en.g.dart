@@ -3351,6 +3351,69 @@ class Translations$features$subscription$en {
 
 	/// en: 'Purchases are not enabled in this build yet.'
 	String get purchasesDisabledHint => 'Purchases are not enabled in this build yet.';
+
+	/// en: '1-5 Buildings Plan'
+	String get plan1To5 => '1-5 Buildings Plan';
+
+	/// en: '5-20 Buildings Plan'
+	String get plan5To20 => '5-20 Buildings Plan';
+
+	/// en: '20-50 Buildings Plan'
+	String get plan20To50 => '20-50 Buildings Plan';
+
+	/// en: '50+ Buildings (Custom)'
+	String get plan50Plus => '50+ Buildings (Custom)';
+
+	/// en: 'Coming Soon'
+	String get comingSoon => 'Coming Soon';
+
+	/// en: 'Contact Us'
+	String get contactUs => 'Contact Us';
+
+	/// en: 'Contact us for custom pricing.'
+	String get contactUsDesc => 'Contact us for custom pricing.';
+
+	/// en: 'Plans'
+	String get sectionPlans => 'Plans';
+
+	/// en: 'Manage 1-5 Buildings'
+	String get feature1To5 => 'Manage 1-5 Buildings';
+
+	/// en: 'Manage 5-20 Buildings'
+	String get feature5To20 => 'Manage 5-20 Buildings';
+
+	/// en: 'Manage 20-50 Buildings'
+	String get feature20To50 => 'Manage 20-50 Buildings';
+
+	/// en: 'Unlimited Building Management'
+	String get feature50Plus => 'Unlimited Building Management';
+
+	/// en: 'Dedicated Account Manager'
+	String get featureCustomSupport => 'Dedicated Account Manager';
+
+	/// en: 'Monthly'
+	String get toggleMonthly => 'Monthly';
+
+	/// en: 'Annual'
+	String get toggleAnnual => 'Annual';
+
+	/// en: 'Your Current Plan'
+	String get currentPlanBadge => 'Your Current Plan';
+
+	/// en: 'Building Usage'
+	String get buildingProgress => 'Building Usage';
+
+	/// en: 'Basic Plan'
+	String get planBasic => 'Basic Plan';
+
+	/// en: 'Manage 1 Building'
+	String get featureBasicBuildings => 'Manage 1 Building';
+
+	/// en: 'Basic Reports'
+	String get featureBasicReports => 'Basic Reports';
+
+	/// en: 'Lifetime'
+	String get statusUnlimited => 'Lifetime';
 }
 
 // Path: features.reports
@@ -4874,6 +4937,27 @@ extension on Translations {
 			'features.subscription.priceUnavailable' => '—',
 			'features.subscription.loadingPlans' => 'Loading plans…',
 			'features.subscription.purchasesDisabledHint' => 'Purchases are not enabled in this build yet.',
+			'features.subscription.plan1To5' => '1-5 Buildings Plan',
+			'features.subscription.plan5To20' => '5-20 Buildings Plan',
+			'features.subscription.plan20To50' => '20-50 Buildings Plan',
+			'features.subscription.plan50Plus' => '50+ Buildings (Custom)',
+			'features.subscription.comingSoon' => 'Coming Soon',
+			'features.subscription.contactUs' => 'Contact Us',
+			'features.subscription.contactUsDesc' => 'Contact us for custom pricing.',
+			'features.subscription.sectionPlans' => 'Plans',
+			'features.subscription.feature1To5' => 'Manage 1-5 Buildings',
+			'features.subscription.feature5To20' => 'Manage 5-20 Buildings',
+			'features.subscription.feature20To50' => 'Manage 20-50 Buildings',
+			'features.subscription.feature50Plus' => 'Unlimited Building Management',
+			'features.subscription.featureCustomSupport' => 'Dedicated Account Manager',
+			'features.subscription.toggleMonthly' => 'Monthly',
+			'features.subscription.toggleAnnual' => 'Annual',
+			'features.subscription.currentPlanBadge' => 'Your Current Plan',
+			'features.subscription.buildingProgress' => 'Building Usage',
+			'features.subscription.planBasic' => 'Basic Plan',
+			'features.subscription.featureBasicBuildings' => 'Manage 1 Building',
+			'features.subscription.featureBasicReports' => 'Basic Reports',
+			'features.subscription.statusUnlimited' => 'Lifetime',
 			'features.reports.menuDownload' => 'Download report',
 			'features.reports.sheetTitle' => 'PDF report',
 			'features.reports.reportTypeLabel' => 'Report type',

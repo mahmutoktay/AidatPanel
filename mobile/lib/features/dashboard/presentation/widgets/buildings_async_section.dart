@@ -137,7 +137,7 @@ class _BuildingsErrorPlaceholder extends StatelessWidget {
               label: Text(context.t.common.tryAgain),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.actionButton,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.actionButtonForeground,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSizes.buttonRadius),
                 ),

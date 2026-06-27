@@ -17,13 +17,7 @@ class BuildingsSummaryStrip extends StatelessWidget {
   static const _labelHeight = 18.0;
   static const _valueLabelGap = 6.0;
 
-  static List<BoxShadow> get _cardShadow => [
-        BoxShadow(
-          color: AppColors.inkDark.withValues(alpha: 0.04),
-          blurRadius: 14,
-          offset: const Offset(0, 4),
-        ),
-      ];
+  static List<BoxShadow> get _cardShadow => [];
 
   @override
   Widget build(BuildContext context) {

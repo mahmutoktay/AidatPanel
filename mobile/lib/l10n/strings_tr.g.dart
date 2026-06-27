@@ -1269,6 +1269,27 @@ class _Translations$features$subscription$tr implements Translations$features$su
 	@override String get priceUnavailable => '—';
 	@override String get loadingPlans => 'Planlar yükleniyor…';
 	@override String get purchasesDisabledHint => 'Satın alma bu sürümde henüz etkin değil.';
+	@override String get plan1To5 => '1-5 Bina Paketi';
+	@override String get plan5To20 => '5-20 Bina Paketi';
+	@override String get plan20To50 => '20-50 Bina Paketi';
+	@override String get plan50Plus => '50+ Bina (Özel)';
+	@override String get comingSoon => 'Yakında';
+	@override String get contactUs => 'İletişime Geçin';
+	@override String get contactUsDesc => 'Özel fiyatlandırma için bizimle iletişime geçin.';
+	@override String get sectionPlans => 'Paketler';
+	@override String get feature1To5 => '1-5 Bina Yönetimi';
+	@override String get feature5To20 => '5-20 Bina Yönetimi';
+	@override String get feature20To50 => '20-50 Bina Yönetimi';
+	@override String get feature50Plus => 'Sınırsız Bina Yönetimi';
+	@override String get featureCustomSupport => 'Özel Müşteri Temsilcisi';
+	@override String get toggleMonthly => 'Aylık';
+	@override String get toggleAnnual => 'Yıllık';
+	@override String get currentPlanBadge => 'Mevcut Planınız';
+	@override String get buildingProgress => 'Bina Kullanımı';
+	@override String get planBasic => 'Temel Paket';
+	@override String get featureBasicBuildings => '1 Bina Yönetimi';
+	@override String get featureBasicReports => 'Temel Raporlar';
+	@override String get statusUnlimited => 'Süresiz';
 }
 
 // Path: features.reports
@@ -2528,6 +2549,27 @@ extension on TranslationsTr {
 			'features.subscription.priceUnavailable' => '—',
 			'features.subscription.loadingPlans' => 'Planlar yükleniyor…',
 			'features.subscription.purchasesDisabledHint' => 'Satın alma bu sürümde henüz etkin değil.',
+			'features.subscription.plan1To5' => '1-5 Bina Paketi',
+			'features.subscription.plan5To20' => '5-20 Bina Paketi',
+			'features.subscription.plan20To50' => '20-50 Bina Paketi',
+			'features.subscription.plan50Plus' => '50+ Bina (Özel)',
+			'features.subscription.comingSoon' => 'Yakında',
+			'features.subscription.contactUs' => 'İletişime Geçin',
+			'features.subscription.contactUsDesc' => 'Özel fiyatlandırma için bizimle iletişime geçin.',
+			'features.subscription.sectionPlans' => 'Paketler',
+			'features.subscription.feature1To5' => '1-5 Bina Yönetimi',
+			'features.subscription.feature5To20' => '5-20 Bina Yönetimi',
+			'features.subscription.feature20To50' => '20-50 Bina Yönetimi',
+			'features.subscription.feature50Plus' => 'Sınırsız Bina Yönetimi',
+			'features.subscription.featureCustomSupport' => 'Özel Müşteri Temsilcisi',
+			'features.subscription.toggleMonthly' => 'Aylık',
+			'features.subscription.toggleAnnual' => 'Yıllık',
+			'features.subscription.currentPlanBadge' => 'Mevcut Planınız',
+			'features.subscription.buildingProgress' => 'Bina Kullanımı',
+			'features.subscription.planBasic' => 'Temel Paket',
+			'features.subscription.featureBasicBuildings' => '1 Bina Yönetimi',
+			'features.subscription.featureBasicReports' => 'Temel Raporlar',
+			'features.subscription.statusUnlimited' => 'Süresiz',
 			'features.reports.menuDownload' => 'Rapor indir',
 			'features.reports.sheetTitle' => 'PDF rapor',
 			'features.reports.reportTypeLabel' => 'Rapor türü',

@@ -227,19 +227,19 @@ class TicketDetailManagerActions extends StatelessWidget {
                     ? onSubmit
                     : null,
                 icon: submitting
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: AppColors.actionButtonForeground,
                         ),
                       )
                     : const Icon(Icons.check_circle_outline, size: 20),
                 label: Text(t.confirmChanges),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.actionButton,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.actionButtonForeground,
                   padding: const EdgeInsets.symmetric(horizontal: 28),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),

@@ -44,8 +44,11 @@ class SelectionActionFab extends StatelessWidget {
     return FloatingActionButton.extended(
       onPressed: onPressed,
       backgroundColor: backgroundColor,
-      foregroundColor: Colors.white,
-      elevation: 4,
+      foregroundColor: backgroundColor == AppColors.actionButton
+          ? AppColors.actionButtonForeground
+          : Colors.white,
+      elevation: 0,
+      highlightElevation: 0,
       icon: Icon(icon),
       label: Text(
         label,

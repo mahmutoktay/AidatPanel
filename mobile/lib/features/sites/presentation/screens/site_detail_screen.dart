@@ -153,13 +153,7 @@ class _SiteIdentityCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.inkDark.withValues(alpha: 0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: const [],
       ),
       padding: const EdgeInsets.all(AppSizes.spacingM),
       child: Row(
@@ -422,13 +416,7 @@ class _SiteStatsGrid extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.inkDark.withValues(alpha: 0.04),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: const [],
           ),
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -512,13 +500,7 @@ class _SiteDetailStatTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.inkDark.withValues(alpha: 0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: const [],
       ),
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -589,13 +571,7 @@ class _SiteProgressCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.inkDark.withValues(alpha: 0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: const [],
       ),
       padding: const EdgeInsets.all(AppSizes.spacingM),
       child: Column(

@@ -35,13 +35,7 @@ class SiteListCard extends StatelessWidget {
   static double get metricsBlockWidth =>
       metricCol1Width + metricCol2Width + metricCol3Width + (2 * metricGap);
 
-  static List<BoxShadow> get cardShadow => [
-        BoxShadow(
-          color: AppColors.inkDark.withValues(alpha: 0.04),
-          blurRadius: 14,
-          offset: const Offset(0, 4),
-        ),
-      ];
+  static List<BoxShadow> get cardShadow => [];
 
   @override
   Widget build(BuildContext context) {

@@ -91,13 +91,7 @@ class PremiumBottomSheetScaffold extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(topRadius),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.inkDark.withValues(alpha: 0.12),
-            blurRadius: 24,
-            offset: const Offset(0, -4),
-          ),
-        ],
+        boxShadow: const [],
       ),
       child: SafeArea(
         top: false,

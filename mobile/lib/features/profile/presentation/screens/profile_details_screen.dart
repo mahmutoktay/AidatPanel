@@ -496,13 +496,7 @@ class _ProfileSurfaceCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: const [],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -578,12 +572,12 @@ class _ProfileHero extends StatelessWidget {
                     child: InkWell(
                       onTap: onAvatarTap,
                       customBorder: const CircleBorder(),
-                      child: const Padding(
-                        padding: EdgeInsets.all(6),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
                         child: Icon(
                           Icons.photo_camera_outlined,
                           size: 14,
-                          color: Colors.white,
+                          color: AppColors.actionButtonForeground,
                         ),
                       ),
                     ),
@@ -745,24 +739,27 @@ class _InfoTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSizes.spacingM,
-        vertical: 12,
+        vertical: 6,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            size: ProfileSettingsUi.iconSize,
-            color: ProfileSettingsUi.ink,
+          Padding(
+            padding: const EdgeInsets.only(left: 40),
+            child: Text(label, style: ProfileSettingsUi.fieldLabel),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: ProfileSettingsUi.fieldLabel),
-                const SizedBox(height: 2),
-                Text(
+          const SizedBox(height: 2),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: ProfileSettingsUi.iconSize,
+                color: ProfileSettingsUi.ink,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
                   value,
                   style: ProfileSettingsUi.fieldValue.copyWith(
                     color: isEmpty
@@ -774,18 +771,18 @@ class _InfoTile extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
-          ),
-          if (locked)
-            Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Icon(
-                Icons.lock_outline,
-                size: 18,
-                color: ProfileSettingsUi.muted.withValues(alpha: 0.7),
               ),
-            ),
+              if (locked)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Icon(
+                    Icons.lock_outline,
+                    size: 18,
+                    color: ProfileSettingsUi.muted.withValues(alpha: 0.7),
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );
@@ -893,24 +890,27 @@ class _InlineField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSizes.spacingM,
-        vertical: 12,
+        vertical: 6,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            size: ProfileSettingsUi.iconSize,
-            color: ProfileSettingsUi.ink,
+          Padding(
+            padding: const EdgeInsets.only(left: 40),
+            child: Text(label, style: ProfileSettingsUi.fieldLabel),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: ProfileSettingsUi.fieldLabel),
-                const SizedBox(height: 2),
-                TextFormField(
+          const SizedBox(height: 2),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: ProfileSettingsUi.iconSize,
+                color: ProfileSettingsUi.ink,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
                   controller: controller,
                   enabled: enabled,
                   textCapitalization: textCapitalization,
@@ -934,16 +934,16 @@ class _InlineField extends StatelessWidget {
                     helperStyle: ProfileSettingsUi.fieldLabel.copyWith(
                       fontSize: 12,
                     ),
-                    counterText: '',
+                    counterText: maxLength != null ? '' : null,
                     suffixIcon:
                         showClearSuffix && enabled && controller.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.close, size: 20),
+                            icon: const Icon(Icons.close, size: 18),
                             color: ProfileSettingsUi.muted,
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(
-                              minWidth: 40,
-                              minHeight: 40,
+                              minWidth: 24,
+                              minHeight: 24,
                             ),
                             visualDensity: VisualDensity.compact,
                             style: IconButton.styleFrom(
@@ -956,8 +956,8 @@ class _InlineField extends StatelessWidget {
                           )
                         : null,
                     suffixIconConstraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 40,
+                      minWidth: 24,
+                      minHeight: 24,
                     ),
                     contentPadding: EdgeInsets.zero,
                     border: borderless,
@@ -968,8 +968,8 @@ class _InlineField extends StatelessWidget {
                     focusedErrorBorder: borderless,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

@@ -21,6 +21,11 @@ class AppTheme {
       brightness: brightness,
       primaryColor: palette.primary,
       scaffoldBackgroundColor: palette.dashboardBackground,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      focusColor: Colors.transparent,
+      splashFactory: NoSplash.splashFactory,
       colorScheme: isDark
           ? ColorScheme.dark(
               primary: palette.primary,
@@ -68,7 +73,18 @@ class AppTheme {
             color: palette.actionButtonForeground,
           ),
           elevation: 0,
+          shadowColor: Colors.transparent,
         ),
+      ),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        elevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        highlightElevation: 0,
+        disabledElevation: 0,
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        splashColor: Colors.transparent,
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: AppButtonStyles.outlinedPrimary(
@@ -133,6 +149,14 @@ class AppTheme {
         ),
         labelLarge:
             AppTypography.label.copyWith(color: palette.textPrimary),
+      ),
+      cardTheme: const CardThemeData(
+        elevation: 0,
+        shadowColor: Colors.transparent,
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        elevation: 0,
+        shadowColor: Colors.transparent,
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: palette.surface,

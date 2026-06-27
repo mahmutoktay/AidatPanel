@@ -22,11 +22,6 @@ class DashboardNotificationButton extends ConsumerWidget {
         child: Container(
           width: AppSizes.minTouchTarget,
           height: AppSizes.minTouchTarget,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            shape: BoxShape.circle,
-            boxShadow: DashboardScreenStyle.cardShadow,
-          ),
           alignment: Alignment.center,
           child: const NotificationIconBody(
             size: 24,

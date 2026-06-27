@@ -8,7 +8,7 @@ class MainActivity : FlutterActivity() {
     private val systemChannel = "com.aidatpanel.app/system"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
-        PluginRegistrant.register(flutterEngine)
+        super.configureFlutterEngine(flutterEngine)
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, systemChannel)
             .setMethodCallHandler { call, result ->

@@ -148,6 +148,12 @@ object PluginRegistrant {
             "sqflite_android"
         )
 
+        addPluginReflective(
+            flutterEngine,
+            "io.flutter.plugins.urllauncher.UrlLauncherPlugin",
+            "url_launcher_android"
+        )
+
     }
 
 

@@ -82,13 +82,7 @@ class NotificationListTile extends StatelessWidget {
                   : AppColors.border.withValues(alpha: 0.1),
               width: 1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: const [],
           ),
           child: Material(
             color: Colors.transparent,
@@ -208,7 +202,6 @@ class _IconBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: visual.background,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: visual.color.withValues(alpha: 0.25)),
       ),
       child: Icon(visual.icon, color: visual.color, size: 24),
     );
