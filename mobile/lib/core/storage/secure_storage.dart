@@ -99,6 +99,7 @@ class SecureStorage {
     final theme = await getTheme();
     final profilePhotos = await getProfilePhotosMap();
     final localPresets = await readRaw(AppConstants.localCollectionPresetsKey);
+    final loginHints = await readRaw(AppConstants.loginHintsKey);
     await _storage.deleteAll();
     if (language != null) await saveLanguage(language);
     if (theme != null) await saveTheme(theme);
@@ -107,6 +108,9 @@ class SecureStorage {
     }
     if (localPresets != null && localPresets.isNotEmpty) {
       await writeRaw(AppConstants.localCollectionPresetsKey, localPresets);
+    }
+    if (loginHints != null && loginHints.isNotEmpty) {
+      await writeRaw(AppConstants.loginHintsKey, loginHints);
     }
   }
 
@@ -159,4 +163,9 @@ class SecureStorage {
     map.remove(userId);
     await saveProfilePhotosMap(map);
   }
+
+  Future<String?> getLoginHintsRaw() => readRaw(AppConstants.loginHintsKey);
+
+  Future<void> saveLoginHintsRaw(String value) =>
+      writeRaw(AppConstants.loginHintsKey, value);
 }

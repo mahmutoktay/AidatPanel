@@ -9,6 +9,8 @@ import {
   DEKONT_UPLOAD_MAX_REQUESTS,
   STRICT_WINDOW_MS,
   STRICT_MAX_REQUESTS,
+  OTP_WINDOW_MS,
+  OTP_MAX_REQUESTS,
 } from "../constants/limiterConstants.js";
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -86,6 +88,27 @@ export const dekontUploadLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => req.user?.id || req.ip,
+});
+
+/**
+ * OTP gönder/doğrula — telefon başına limit (authRouteKey ile IP paylaşımı yok).
+ */
+const otpMaxRequests =
+  Number(process.env.OTP_RATE_LIMIT_MAX) ||
+  (process.env.NODE_ENV === "production" ? OTP_MAX_REQUESTS : 30);
+
+export const otpLimiter = rateLimit({
+  windowMs: OTP_WINDOW_MS,
+  max: otpMaxRequests,
+  keyGenerator: authRouteKey,
+  skip: () => isE2E,
+  message: {
+    success: false,
+    message:
+      "Çok fazla doğrulama kodu isteği. Lütfen kısa süre bekleyip tekrar deneyin.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 /**

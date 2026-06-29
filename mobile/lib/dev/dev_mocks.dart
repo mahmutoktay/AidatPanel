@@ -21,6 +21,7 @@ import '../features/apartments/domain/entities/resident_info.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart'
     show AuthRepository;
 import '../features/auth/domain/entities/user_entity.dart';
+import '../features/auth/domain/entities/saved_login_hint.dart';
 import '../features/buildings/data/repositories/building_repository.dart';
 import '../features/buildings/domain/entities/building_entity.dart';
 import '../features/buildings/domain/entities/collection_preset_entity.dart';
@@ -61,7 +62,7 @@ class MockAuthRepository implements AuthRepository {
     id: 'dev_manager_1',
     email: 'dev@aidatpanel.com',
     name: 'Dev Yönetici',
-    phone: '+905551112233',
+    phone: '5551112233',
     role: UserRole.manager,
     language: 'tr',
   );
@@ -70,7 +71,7 @@ class MockAuthRepository implements AuthRepository {
     id: 'dev_resident_1',
     email: 'resident@dev',
     name: 'Dev Sakin',
-    phone: '+905559998877',
+    phone: '5559998877',
     role: UserRole.resident,
     language: 'tr',
     apartmentId: 'a1_1',
@@ -108,7 +109,7 @@ class MockAuthRepository implements AuthRepository {
 
   @override
   Future<void> register(
-    String email,
+    String? email,
     String password,
     String name,
     String? phone,
@@ -166,6 +167,44 @@ class MockAuthRepository implements AuthRepository {
       throw ApiException(message: 'Invalid or expired token', statusCode: 400);
     }
   }
+
+  @override
+  Future<void> sendOtp({
+    String? phone,
+    String? email,
+    required String purpose,
+  }) async {
+    await Future.delayed(_delay);
+  }
+
+  @override
+  Future<UserEntity> verifyOtp({
+    String? phone,
+    String? email,
+    required String code,
+    required String purpose,
+    Map<String, dynamic>? payload,
+    String? name,
+    String? password,
+    String? inviteCode,
+  }) async {
+    await Future.delayed(_delay);
+    if (purpose.contains('resident')) {
+      _sessionUser = _devResident;
+      return _devResident;
+    }
+    _sessionUser = _devManager;
+    return _devManager;
+  }
+
+  @override
+  Future<String> validateInvite(String inviteCode) async {
+    await Future.delayed(_delay);
+    return 'Dev Site';
+  }
+
+  @override
+  Future<SavedLoginHint?> getSavedLoginHint(UserRole role) async => null;
 }
 
 /// Tur 5 §10/4-5 — `PUT /me/password` ve `DELETE /me` mock implementasyonu.

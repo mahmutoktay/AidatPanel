@@ -18,6 +18,7 @@ import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../../dues/presentation/screens/resident_dues_tab.dart';
 import '../../../tickets/presentation/providers/tickets_provider.dart';
 import '../../../tickets/presentation/screens/resident_tickets_tab.dart';
+import '../widgets/resident_home/resident_home_colors.dart';
 import '../widgets/resident_home/resident_home_tab.dart';
 
 class ResidentDashboardScreen extends ConsumerStatefulWidget {
@@ -115,7 +116,12 @@ class _ResidentDashboardScreenState
         ref.watch(authStateProvider.select((state) => state.user?.name)) ??
         context.t.common.user;
     final isSettings = selectedTab == 3;
-    final title = isSettings ? t.settings : t.resident;
+    final title = switch (selectedTab) {
+      3 => t.mySettings,
+      2 => t.issues,
+      1 => t.dues,
+      _ => t.resident,
+    };
 
     return DashboardBackHandler(
       dashboardRootPath: '/resident-dashboard',
@@ -137,7 +143,7 @@ class _ResidentDashboardScreenState
             duration: AppBackNavigation.exitGracePeriod,
           ),
       child: Scaffold(
-        backgroundColor: AppColors.dashboardBackground,
+        backgroundColor: AppColors.surface,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -174,6 +180,8 @@ class _ResidentDashboardScreenState
         ),
         bottomNavigationBar: DashboardBottomNavBar(
           selectedIndex: selectedTab,
+          selectedAccentColor: ResidentHomeColors.blue,
+          showSelectionPill: false,
           onDestinationSelected: (index) {
             ref.read(residentTabIndexProvider.notifier).update(index);
             _tabController.animateTo(
@@ -189,8 +197,8 @@ class _ResidentDashboardScreenState
               label: t.home,
             ),
             DashboardNavDestination(
-              icon: Icons.receipt_outlined,
-              selectedIcon: Icons.receipt,
+              icon: Icons.account_balance_wallet_outlined,
+              selectedIcon: Icons.account_balance_wallet,
               label: t.dues,
             ),
             DashboardNavDestination(
@@ -201,7 +209,7 @@ class _ResidentDashboardScreenState
             DashboardNavDestination(
               icon: Icons.settings_outlined,
               selectedIcon: Icons.settings,
-              label: t.settings,
+              label: t.mySettings,
             ),
           ],
         ),

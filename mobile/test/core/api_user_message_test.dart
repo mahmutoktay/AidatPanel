@@ -88,5 +88,30 @@ void main() {
         'İşlem şu an yapılamıyor. Lütfen biraz sonra tekrar deneyin.',
       );
     });
+
+    test('OTP rate limit dekont metnine dönüşmez', () {
+      expect(
+        mapApiUserMessage(
+          ApiException(
+            message:
+                'Bu işlem için saatlik limit aşıldı. Lütfen daha sonra tekrar deneyin.',
+            statusCode: 429,
+          ),
+        ),
+        'Çok fazla deneme yaptınız. Lütfen kısa süre bekleyip tekrar deneyin.',
+      );
+    });
+
+    test('dekont yükleme rate limit', () {
+      expect(
+        mapApiUserMessage(
+          ApiException(
+            message: 'Dekont yükleme limitine ulaştınız. Lütfen bir saat sonra tekrar deneyin.',
+            statusCode: 429,
+          ),
+        ),
+        'Kısa sürede çok fazla dekont yüklediniz. Lütfen bir süre bekleyin.',
+      );
+    });
   });
 }

@@ -1,7 +1,8 @@
 import 'package:aidatpanel/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:aidatpanel/features/auth/domain/entities/user_entity.dart';
+import 'package:aidatpanel/features/auth/domain/entities/saved_login_hint.dart';
+import 'package:aidatpanel/features/auth/presentation/onboarding/auth_onboarding_screen.dart';
 import 'package:aidatpanel/features/auth/presentation/providers/auth_provider.dart';
-import 'package:aidatpanel/features/auth/presentation/screens/login_screen.dart';
 import 'package:aidatpanel/l10n/strings.g.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,10 +14,12 @@ void main() {
     LocaleSettings.setLocale(AppLocale.tr);
   });
 
-  testWidgets('LoginScreen temel bileşenleri render eder', (tester) async {
+  testWidgets('AuthOnboardingScreen temel bileşenleri render eder', (tester) async {
     final router = GoRouter(
       initialLocation: '/',
-      routes: [GoRoute(path: '/', builder: (_, _) => const LoginScreen())],
+      routes: [
+        GoRoute(path: '/', builder: (_, _) => const AuthOnboardingScreen()),
+      ],
     );
 
     await tester.pumpWidget(
@@ -31,10 +34,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('email')), findsOneWidget);
-    expect(find.byType(TextField), findsNWidgets(2));
-    expect(find.byType(ElevatedButton), findsOneWidget);
-    expect(find.text(t.features.auth.login), findsWidgets);
+    expect(find.text(t.features.auth.onboarding.step1Title), findsOneWidget);
+    expect(find.text(t.common.manager), findsOneWidget);
+    expect(find.text(t.common.resident), findsOneWidget);
   });
 }
 
@@ -58,7 +60,12 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<UserEntity> login(String identifier, String password) async {
-    throw UnimplementedError();
+    return const UserEntity(
+      id: 'u1',
+      email: 'test@aidatpanel.com',
+      name: 'Test',
+      role: UserRole.resident,
+    );
   }
 
   @override
@@ -72,7 +79,7 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> register(
-    String email,
+    String? email,
     String password,
     String name,
     String? phone,
@@ -83,4 +90,31 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<UserEntity?> restoreSession() async => null;
+
+  @override
+  Future<void> sendOtp({
+    String? phone,
+    String? email,
+    required String purpose,
+  }) async {}
+
+  @override
+  Future<UserEntity> verifyOtp({
+    String? phone,
+    String? email,
+    required String code,
+    required String purpose,
+    Map<String, dynamic>? payload,
+    String? name,
+    String? password,
+    String? inviteCode,
+  }) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String> validateInvite(String inviteCode) async => 'Test';
+
+  @override
+  Future<SavedLoginHint?> getSavedLoginHint(UserRole role) async => null;
 }

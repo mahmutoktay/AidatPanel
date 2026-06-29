@@ -62,4 +62,31 @@ describe("authRouteKey", () => {
     const key = authRouteKey({ path: "/login", body: {}, ip });
     expect(key).toBe(ip);
   });
+
+  test("otp send telefon bazlı", () => {
+    const key = authRouteKey({
+      path: "/otp/send",
+      body: { phone: "+905551234567" },
+      ip,
+    });
+    expect(key).toBe("otp-send:5551234567");
+  });
+
+  test("otp verify telefon bazlı", () => {
+    const key = authRouteKey({
+      path: "/otp/verify",
+      body: { phone: "05551234567" },
+      ip,
+    });
+    expect(key).toBe("otp-verify:5551234567");
+  });
+
+  test("invite validate kod bazlı", () => {
+    const key = authRouteKey({
+      path: "/invite/validate",
+      body: { inviteCode: " abc123 " },
+      ip,
+    });
+    expect(key).toBe("invite:ABC123");
+  });
 });

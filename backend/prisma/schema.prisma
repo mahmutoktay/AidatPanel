@@ -16,7 +16,7 @@ model User {
   email        String?  @unique
   passwordHash String
   name         String
-  phone        String?  @unique
+  phone        String?
   role         UserRole @default(RESIDENT)
   fcmToken     String?
   language     String   @default("tr")
@@ -46,6 +46,7 @@ model User {
   sessions            UserSession[]
   promoGrants         PromoGrant[]
 
+  @@unique([phone, role])
   @@index([apartmentId])
   @@index([role, deletedAt, createdAt])
 }
@@ -79,6 +80,23 @@ model PasswordResetToken {
   createdAt DateTime  @default(now())
 
   @@index([userId])
+}
+
+/// SMS OTP — telefon doğrulama (sakin/yönetici giriş ve kayıt).
+model PhoneOtpToken {
+  id        String    @id @default(uuid())
+  phone     String?
+  email     String?
+  purpose   String
+  tokenHash String    @unique
+  payload   Json?
+  expiresAt DateTime
+  usedAt    DateTime?
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  @@index([phone, purpose])
+  @@index([email, purpose])
 }
 
 enum UserRole {

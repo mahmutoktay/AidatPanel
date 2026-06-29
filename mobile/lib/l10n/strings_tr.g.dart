@@ -148,7 +148,28 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get makePayment => 'Ödeme Yap';
 	@override String get bills => 'Faturalar';
 	@override String get support => 'Destek';
-	@override String get quickActions => 'Hızlı işlemler';
+	@override String get quickActions => 'Hızlı İşlemler';
+	@override String get myApplications => 'Başvurularım';
+	@override String get myAnnouncements => 'Duyurularım';
+	@override String get debtAndPay => 'Borç ve Öde';
+	@override String get duesStatus => 'Aidat Durumu';
+	@override String get accountSummary => 'Hesap Özeti';
+	@override String get accountSummarySubtitle => 'Dönem özetini ve detay';
+	@override String get myReceiptsSubtitle => 'Ödeme dekontlarınız';
+	@override String get myPaymentRequestSubtitle => 'Ödeme talebi oluşturun';
+	@override String get mySettings => 'Ayarlarım';
+	@override String get myReceipts => 'Dekontlarım';
+	@override String get myPaymentRequest => 'Ödeme Talebi';
+	@override String get duesHistory => 'Geçmişler';
+	@override String get addRequest => 'Talep Ekle';
+	@override String get payDebt => 'Borcu Öde';
+	@override String get tabAll => 'Tümü';
+	@override String get tabFaults => 'Arızalar';
+	@override String get tabRequests => 'Talepler';
+	@override String get apartmentNo => 'Daire No';
+	@override String get fullName => 'Ad Soyad';
+	@override String get debtAmount => 'Borç';
+	@override String get lastDueDate => 'Son Ödeme Tarihi';
 	@override String get residentName => 'Sakin Adı';
 	@override String get addBuildingNew => 'Yeni Bina Ekle';
 	@override String get basicInfo => 'Temel Bilgiler';
@@ -814,6 +835,7 @@ class _Translations$features$auth$tr implements Translations$features$auth$en {
 	@override String get inviteCodeAndPasswordRequired => 'Davet kodu, ad ve şifre boş bırakılamaz';
 	@override String get invalidPhoneNumber => 'Geçerli bir telefon numarası giriniz';
 	@override String get areYouManager => 'Yönetici misiniz? Kaydolun';
+	@override late final _Translations$features$auth$onboarding$tr onboarding = _Translations$features$auth$onboarding$tr._(_root);
 }
 
 // Path: features.apartments
@@ -836,10 +858,16 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	@override String get myTickets => 'Taleplerim';
 	@override String get newTicket => 'Yeni Talep';
 	@override String get createTitle => 'Arıza / Talep Bildir';
-	@override String get fieldTitle => 'Başlık';
-	@override String get fieldTitleHint => 'Örn: Asansör arızası';
+	@override String get reportFaultTitle => 'Arıza Bildir';
+	@override String get myApplicationsTitle => 'Başvurularım';
+	@override String get fieldTitle => 'Konu';
+	@override String get fieldTitleHint => 'Kısa bir tanım girin.';
+	@override String get fieldDetail => 'Detaylandırın';
+	@override String get fieldDetailHint => 'Sorunu kısaca özetleyin.';
 	@override String get fieldDescription => 'Açıklama';
-	@override String get fieldDescriptionHint => 'Sorunu kısaca anlatın';
+	@override String get fieldDescriptionHint => 'Ayrıntılı açıklama yazın…';
+	@override String get attachmentHint => 'Fotoğraf, video veya belge ekleyin… PNG, JPG — en fazla 5 MB.';
+	@override String get attachmentComingSoon => 'Dosya ekleme yakında aktif olacak.';
 	@override String get fieldCategory => 'Kategori';
 	@override String get categoryComplaint => 'Şikayet';
 	@override String get categoryRequest => 'Talep';
@@ -906,6 +934,13 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 
 	// Translations
 	@override String get makePaymentTitle => 'Ödeme Yap';
+	@override String get payDebtTitle => 'Borcu Öde';
+	@override String get paymentMethodTitle => 'Ödeme Yöntemi';
+	@override String get paymentMethodCard => 'Kredi / Banka Kartı';
+	@override String get paymentMethodEft => 'Havale / EFT';
+	@override String get paymentMethodDekont => 'Dekont Yükle';
+	@override String get paymentCardComingSoon => 'Kart ile ödeme yakında eklenecek.';
+	@override String get uploadReceiptHint => 'Dekont yükleyin (jpg, png, webp, PDF — en fazla 5 MB).';
 	@override String get myDekontsTitle => 'Dekontlarım';
 	@override String get managerTitle => 'Dekont İnceleme';
 	@override String get reviewAction => 'Dekont İncele';
@@ -1368,6 +1403,7 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get payNow => 'Şimdi Öde';
 	@override String get overduePaymentsBadge => '{count} gecikmiş ödeme';
 	@override String get featuredDuePeriod => '{month} {year} aidatı';
+	@override String get residentDebtAndPaySubtitle => 'Ödeme yaparak ödeyin.';
 }
 
 // Path: features.faz2
@@ -1468,6 +1504,94 @@ class _Translations$features$buildings$list$tr implements Translations$features$
 	@override String get unitsWaiting => '{count} daire bekliyor';
 	@override String get allPaymentsComplete => 'Tüm ödemeler tamam';
 	@override String get monthlyDuesShort => 'Aylık Aidat';
+}
+
+// Path: features.auth.onboarding
+class _Translations$features$auth$onboarding$tr implements Translations$features$auth$onboarding$en {
+	_Translations$features$auth$onboarding$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get stepProgress => 'Adım {current} / {total}';
+	@override String get continueButton => 'Devam Et';
+	@override String get goToPanel => 'Panele Git';
+	@override String get secureNote => 'Bilgileriniz güvenle korunur.';
+	@override String get step1Title => 'Giriş türünü seçin';
+	@override String get step1Subtitle => 'Devam etmek için rolünüzü seçin.';
+	@override String get step1ManagerHint => 'Apartman veya site yönetiyorsanız burayı seçin.';
+	@override String get step1ResidentHint => 'Apartman sakiniyim, daireme giriş yapacağım.';
+	@override String get step1ReturningLogin => 'Daha önce giriş yaptım';
+	@override String get step1ReturningLoginManager => 'Yönetici olarak daha önce giriş yaptım';
+	@override String get step1ReturningLoginResident => 'Sakin olarak daha önce giriş yaptım';
+	@override String get step1ReturningLoginHint => '{name} · {contact}';
+	@override String get step1LegacyEmailLogin => 'E-posta ve şifremle girmek istiyorum';
+	@override String get step2Title => 'İletişim Bilgilerinizi Giriniz';
+	@override String get step2Subtitle => 'Devam etmek için telefon numaranızı veya e-posta adresinizi girin.';
+	@override String get step2SubtitlePhone => 'Size doğrulama kodu göndereceğiz.';
+	@override String get step2SubtitleEmail => 'E-postanıza doğrulama kodu göndereceğiz.';
+	@override String get step3OtpTitle => 'Doğrulama Kodu';
+	@override String get step3OtpSubtitlePhone => '{phone} numarasına gönderilen 6 haneli kodu giriniz.';
+	@override String get step3OtpSubtitleEmail => '{email} adresine gönderilen 6 haneli kodu giriniz.';
+	@override String get step3OtpSubtitle => '6 haneli kodu aşağıya girin.';
+	@override String get step3OtpSentTo => 'Kod {phone} numarasına gönderildi.';
+	@override String get step3ResendOtp => 'Kodu yeniden gönder ({seconds} sn)';
+	@override String get step3ResendOtpReady => 'Kodu yeniden gönder';
+	@override String get step3PasswordTitle => 'Şifrenizi yazın';
+	@override String get step3RegisterPasswordTitle => 'Şifrenizi belirleyin';
+	@override String get step3SecureVerify => 'Güvenli doğrulama ile hesabınızı koruyoruz.';
+	@override String get step3DevOtpHint => 'SMS gelmezse bilgisayarda backend terminalinde otp_dev satırına bakın.';
+	@override String get step4InviteTitle => 'Davet Kodunuzu Giriniz';
+	@override String get step4InviteSubtitle => 'Yöneticinizin size verdiği kodu buraya girin.';
+	@override String get step4InviteHint => 'Davet kodunuzu yönetimden veya yöneticinizden alabilirsiniz.';
+	@override String get step4ManagerInviteTitle => 'Davet Kodunuzu Giriniz';
+	@override String get step4ManagerInviteSubtitle => 'Yönetici hesabınızı site veya apartman yönetimine bağlamak için davet kodunuzu giriniz.';
+	@override String get step4ManagerInviteInfo => 'Davet kodunuzu yönetimden veya yöneticinizden alabilirsiniz.';
+	@override String get step4ManagerPrimaryLink => 'Hayır, ben yöneticiyim';
+	@override String get step4ManagerPrimaryHint => 'Apartman veya siteyi siz yönetecekseniz bunu seçin.';
+	@override String get step4InviteValidated => 'Davet geçerli: {label}';
+	@override String get step5Title => 'Yönetici Olarak Yapabilecekleriniz';
+	@override String get step5ManagerSubtitle => 'AidatPanel ile sitenizi kolayca yönetin, sakinlerinize daha iyi hizmet verin.';
+	@override String get step5ResidentTitle => 'Sakin Olarak Yapabilecekleriniz';
+	@override String get step5ResidentSubtitle => 'Aidat ve ödemelerinizi buradan takip edin.';
+	@override String get step5ManagerAnnounceTitle => 'Duyuruları yönetin';
+	@override String get step5ManagerAnnounceBody => 'Tüm sakinlere hızlıca duyuru gönderebilirsiniz.';
+	@override String get step5ManagerDuesTitle => 'Aidat takibi';
+	@override String get step5ManagerDuesBody => 'Tahsilatları takip edin, ödemeleri görüntüleyin.';
+	@override String get step5ManagerResidentsTitle => 'Sakin yönetimi';
+	@override String get step5ManagerResidentsBody => 'Sakin bilgilerini yönetin, iletişimi kolaylaştırın.';
+	@override String get step5ManagerReportsTitle => 'Raporlama';
+	@override String get step5ManagerReportsBody => 'Detaylı raporlar ile site finansal durumunu izleyin.';
+	@override String get step5ResidentDuesTitle => 'Aidatınızı görün';
+	@override String get step5ResidentDuesBody => 'Güncel borcunuzu ve geçmiş ödemelerinizi takip edin.';
+	@override String get step5ResidentDekontTitle => 'Dekont yükleyin';
+	@override String get step5ResidentDekontBody => 'Ödeme dekontunuzu fotoğraf veya PDF olarak gönderin.';
+	@override String get step5ResidentTicketsTitle => 'Arıza bildirin';
+	@override String get step5ResidentTicketsBody => 'Site içi sorunları kolayca yönetime iletin.';
+	@override String get step5ResidentNotifyTitle => 'Bildirim alın';
+	@override String get step5ResidentNotifyBody => 'Duyuru ve aidat hatırlatmalarından haberdar olun.';
+	@override String get step6ManagerTitle => 'Kurulum tamamlandı';
+	@override String get step6ManagerSubtitle => 'Yönetici paneline hoş geldiniz! Artık sitenizi yönetmeye başlayabilir, sakinlerinize daha iyi hizmet sunabilirsiniz.';
+	@override String get step6ResidentTitle => 'Giriş tamamlandı';
+	@override String get step6ResidentSubtitle => 'Aidat ve ödemelerinizi buradan takip edebilirsiniz.';
+	@override String get otpInvalid => 'Kod yanlış. Tekrar deneyin.';
+	@override String get otpExpired => 'Kod süresi doldu. Yeni kod isteyin.';
+	@override String get phoneInvalid => 'Geçerli bir telefon numarası girin (5XX XXX XX XX).';
+	@override String get inviteInvalid => 'Davet kodu geçersiz veya süresi dolmuş.';
+	@override String get otpSendFailed => 'Kod gönderilemedi. Lütfen tekrar deneyin.';
+	@override String get phoneOtpDisabledHint => 'Telefon ile giriş yakında. Şimdilik e-posta ile devam edebilirsiniz.';
+	@override String get residentLoginTitle => 'Sakin Girişi';
+	@override String get residentLoginSubtitle => 'Bilgilerinizi girerek devam edin.';
+	@override String get residentSendCodeButton => 'Kod Gönder';
+	@override String get residentPhoneVerifyNote => 'Telefon numaranız doğrulanarak kod gönderilecektir.';
+	@override String get residentOtpSubtitle => 'Telefonunuza gelen 6 haneli kodu girin.';
+	@override String get residentResendPrompt => 'Kod gelmedi mi?';
+	@override String get residentResendLink => 'Tekrar gönder';
+	@override String get residentInviteSubtitle => 'Yöneticinizden aldığınız davet kodunu girerek devam etmenizi rica ederiz.';
+	@override String get residentJoinButton => 'Apartmana Katıl';
+	@override String get residentInviteCodeLabel => 'Davet Kodu';
+	@override String get residentInviteCodeHint => 'Örn: APF-45532';
+	@override String get residentNameRequired => 'Lütfen ad soyadınızı girin.';
 }
 
 /// The flat map containing all translations for locale <tr>.
@@ -1610,7 +1734,28 @@ extension on TranslationsTr {
 			'common.makePayment' => 'Ödeme Yap',
 			'common.bills' => 'Faturalar',
 			'common.support' => 'Destek',
-			'common.quickActions' => 'Hızlı işlemler',
+			'common.quickActions' => 'Hızlı İşlemler',
+			'common.myApplications' => 'Başvurularım',
+			'common.myAnnouncements' => 'Duyurularım',
+			'common.debtAndPay' => 'Borç ve Öde',
+			'common.duesStatus' => 'Aidat Durumu',
+			'common.accountSummary' => 'Hesap Özeti',
+			'common.accountSummarySubtitle' => 'Dönem özetini ve detay',
+			'common.myReceiptsSubtitle' => 'Ödeme dekontlarınız',
+			'common.myPaymentRequestSubtitle' => 'Ödeme talebi oluşturun',
+			'common.mySettings' => 'Ayarlarım',
+			'common.myReceipts' => 'Dekontlarım',
+			'common.myPaymentRequest' => 'Ödeme Talebi',
+			'common.duesHistory' => 'Geçmişler',
+			'common.addRequest' => 'Talep Ekle',
+			'common.payDebt' => 'Borcu Öde',
+			'common.tabAll' => 'Tümü',
+			'common.tabFaults' => 'Arızalar',
+			'common.tabRequests' => 'Talepler',
+			'common.apartmentNo' => 'Daire No',
+			'common.fullName' => 'Ad Soyad',
+			'common.debtAmount' => 'Borç',
+			'common.lastDueDate' => 'Son Ödeme Tarihi',
 			'common.residentName' => 'Sakin Adı',
 			'common.addBuildingNew' => 'Yeni Bina Ekle',
 			'common.basicInfo' => 'Temel Bilgiler',
@@ -1969,6 +2114,8 @@ extension on TranslationsTr {
 			'features.buildings.codeReady' => 'Davet Kodu Hazır',
 			'features.buildings.code' => 'KOD',
 			'features.buildings.validFor7Days' => '7 gün geçerli',
+			_ => null,
+		} ?? switch (path) {
 			'features.buildings.expiresAt' => 'Son kullanma:',
 			'features.buildings.remaining' => 'Kalan:',
 			'features.buildings.activeCodeNote' => 'Bu kod aktifken aynı daireye yeni kod üretilemez. Yeni kod için önce mevcut kodu iptal etmelisin.',
@@ -1990,8 +2137,6 @@ extension on TranslationsTr {
 			'features.buildings.collection.detailReferenceDaireAidat' => 'Havale açıklaması: Daire no + aidat',
 			'features.buildings.collection.detailReferenceAidat' => 'Havale açıklaması: Aidat (daire no otomatik)',
 			'features.buildings.collection.detailReferenceHavale' => 'Havale açıklaması: Daire numarası ile havale',
-			_ => null,
-		} ?? switch (path) {
 			'features.buildings.collection.detailUsedInBuildings' => '{count} binada kullanılıyor',
 			'features.buildings.collection.ibanLabel' => 'IBAN',
 			'features.buildings.collection.ibanHint' => 'TR33 0006 1005 1978 6457 8413 26',
@@ -2156,14 +2301,99 @@ extension on TranslationsTr {
 			'features.auth.inviteCodeAndPasswordRequired' => 'Davet kodu, ad ve şifre boş bırakılamaz',
 			'features.auth.invalidPhoneNumber' => 'Geçerli bir telefon numarası giriniz',
 			'features.auth.areYouManager' => 'Yönetici misiniz? Kaydolun',
+			'features.auth.onboarding.stepProgress' => 'Adım {current} / {total}',
+			'features.auth.onboarding.continueButton' => 'Devam Et',
+			'features.auth.onboarding.goToPanel' => 'Panele Git',
+			'features.auth.onboarding.secureNote' => 'Bilgileriniz güvenle korunur.',
+			'features.auth.onboarding.step1Title' => 'Giriş türünü seçin',
+			'features.auth.onboarding.step1Subtitle' => 'Devam etmek için rolünüzü seçin.',
+			'features.auth.onboarding.step1ManagerHint' => 'Apartman veya site yönetiyorsanız burayı seçin.',
+			'features.auth.onboarding.step1ResidentHint' => 'Apartman sakiniyim, daireme giriş yapacağım.',
+			'features.auth.onboarding.step1ReturningLogin' => 'Daha önce giriş yaptım',
+			'features.auth.onboarding.step1ReturningLoginManager' => 'Yönetici olarak daha önce giriş yaptım',
+			'features.auth.onboarding.step1ReturningLoginResident' => 'Sakin olarak daha önce giriş yaptım',
+			'features.auth.onboarding.step1ReturningLoginHint' => '{name} · {contact}',
+			'features.auth.onboarding.step1LegacyEmailLogin' => 'E-posta ve şifremle girmek istiyorum',
+			'features.auth.onboarding.step2Title' => 'İletişim Bilgilerinizi Giriniz',
+			'features.auth.onboarding.step2Subtitle' => 'Devam etmek için telefon numaranızı veya e-posta adresinizi girin.',
+			'features.auth.onboarding.step2SubtitlePhone' => 'Size doğrulama kodu göndereceğiz.',
+			'features.auth.onboarding.step2SubtitleEmail' => 'E-postanıza doğrulama kodu göndereceğiz.',
+			'features.auth.onboarding.step3OtpTitle' => 'Doğrulama Kodu',
+			'features.auth.onboarding.step3OtpSubtitlePhone' => '{phone} numarasına gönderilen 6 haneli kodu giriniz.',
+			'features.auth.onboarding.step3OtpSubtitleEmail' => '{email} adresine gönderilen 6 haneli kodu giriniz.',
+			'features.auth.onboarding.step3OtpSubtitle' => '6 haneli kodu aşağıya girin.',
+			'features.auth.onboarding.step3OtpSentTo' => 'Kod {phone} numarasına gönderildi.',
+			'features.auth.onboarding.step3ResendOtp' => 'Kodu yeniden gönder ({seconds} sn)',
+			'features.auth.onboarding.step3ResendOtpReady' => 'Kodu yeniden gönder',
+			'features.auth.onboarding.step3PasswordTitle' => 'Şifrenizi yazın',
+			'features.auth.onboarding.step3RegisterPasswordTitle' => 'Şifrenizi belirleyin',
+			'features.auth.onboarding.step3SecureVerify' => 'Güvenli doğrulama ile hesabınızı koruyoruz.',
+			'features.auth.onboarding.step3DevOtpHint' => 'SMS gelmezse bilgisayarda backend terminalinde otp_dev satırına bakın.',
+			'features.auth.onboarding.step4InviteTitle' => 'Davet Kodunuzu Giriniz',
+			'features.auth.onboarding.step4InviteSubtitle' => 'Yöneticinizin size verdiği kodu buraya girin.',
+			'features.auth.onboarding.step4InviteHint' => 'Davet kodunuzu yönetimden veya yöneticinizden alabilirsiniz.',
+			'features.auth.onboarding.step4ManagerInviteTitle' => 'Davet Kodunuzu Giriniz',
+			'features.auth.onboarding.step4ManagerInviteSubtitle' => 'Yönetici hesabınızı site veya apartman yönetimine bağlamak için davet kodunuzu giriniz.',
+			'features.auth.onboarding.step4ManagerInviteInfo' => 'Davet kodunuzu yönetimden veya yöneticinizden alabilirsiniz.',
+			'features.auth.onboarding.step4ManagerPrimaryLink' => 'Hayır, ben yöneticiyim',
+			'features.auth.onboarding.step4ManagerPrimaryHint' => 'Apartman veya siteyi siz yönetecekseniz bunu seçin.',
+			'features.auth.onboarding.step4InviteValidated' => 'Davet geçerli: {label}',
+			'features.auth.onboarding.step5Title' => 'Yönetici Olarak Yapabilecekleriniz',
+			'features.auth.onboarding.step5ManagerSubtitle' => 'AidatPanel ile sitenizi kolayca yönetin, sakinlerinize daha iyi hizmet verin.',
+			'features.auth.onboarding.step5ResidentTitle' => 'Sakin Olarak Yapabilecekleriniz',
+			'features.auth.onboarding.step5ResidentSubtitle' => 'Aidat ve ödemelerinizi buradan takip edin.',
+			'features.auth.onboarding.step5ManagerAnnounceTitle' => 'Duyuruları yönetin',
+			'features.auth.onboarding.step5ManagerAnnounceBody' => 'Tüm sakinlere hızlıca duyuru gönderebilirsiniz.',
+			'features.auth.onboarding.step5ManagerDuesTitle' => 'Aidat takibi',
+			'features.auth.onboarding.step5ManagerDuesBody' => 'Tahsilatları takip edin, ödemeleri görüntüleyin.',
+			'features.auth.onboarding.step5ManagerResidentsTitle' => 'Sakin yönetimi',
+			'features.auth.onboarding.step5ManagerResidentsBody' => 'Sakin bilgilerini yönetin, iletişimi kolaylaştırın.',
+			'features.auth.onboarding.step5ManagerReportsTitle' => 'Raporlama',
+			'features.auth.onboarding.step5ManagerReportsBody' => 'Detaylı raporlar ile site finansal durumunu izleyin.',
+			'features.auth.onboarding.step5ResidentDuesTitle' => 'Aidatınızı görün',
+			'features.auth.onboarding.step5ResidentDuesBody' => 'Güncel borcunuzu ve geçmiş ödemelerinizi takip edin.',
+			'features.auth.onboarding.step5ResidentDekontTitle' => 'Dekont yükleyin',
+			'features.auth.onboarding.step5ResidentDekontBody' => 'Ödeme dekontunuzu fotoğraf veya PDF olarak gönderin.',
+			'features.auth.onboarding.step5ResidentTicketsTitle' => 'Arıza bildirin',
+			'features.auth.onboarding.step5ResidentTicketsBody' => 'Site içi sorunları kolayca yönetime iletin.',
+			'features.auth.onboarding.step5ResidentNotifyTitle' => 'Bildirim alın',
+			'features.auth.onboarding.step5ResidentNotifyBody' => 'Duyuru ve aidat hatırlatmalarından haberdar olun.',
+			'features.auth.onboarding.step6ManagerTitle' => 'Kurulum tamamlandı',
+			'features.auth.onboarding.step6ManagerSubtitle' => 'Yönetici paneline hoş geldiniz! Artık sitenizi yönetmeye başlayabilir, sakinlerinize daha iyi hizmet sunabilirsiniz.',
+			'features.auth.onboarding.step6ResidentTitle' => 'Giriş tamamlandı',
+			'features.auth.onboarding.step6ResidentSubtitle' => 'Aidat ve ödemelerinizi buradan takip edebilirsiniz.',
+			'features.auth.onboarding.otpInvalid' => 'Kod yanlış. Tekrar deneyin.',
+			'features.auth.onboarding.otpExpired' => 'Kod süresi doldu. Yeni kod isteyin.',
+			'features.auth.onboarding.phoneInvalid' => 'Geçerli bir telefon numarası girin (5XX XXX XX XX).',
+			'features.auth.onboarding.inviteInvalid' => 'Davet kodu geçersiz veya süresi dolmuş.',
+			'features.auth.onboarding.otpSendFailed' => 'Kod gönderilemedi. Lütfen tekrar deneyin.',
+			'features.auth.onboarding.phoneOtpDisabledHint' => 'Telefon ile giriş yakında. Şimdilik e-posta ile devam edebilirsiniz.',
+			'features.auth.onboarding.residentLoginTitle' => 'Sakin Girişi',
+			'features.auth.onboarding.residentLoginSubtitle' => 'Bilgilerinizi girerek devam edin.',
+			'features.auth.onboarding.residentSendCodeButton' => 'Kod Gönder',
+			'features.auth.onboarding.residentPhoneVerifyNote' => 'Telefon numaranız doğrulanarak kod gönderilecektir.',
+			'features.auth.onboarding.residentOtpSubtitle' => 'Telefonunuza gelen 6 haneli kodu girin.',
+			'features.auth.onboarding.residentResendPrompt' => 'Kod gelmedi mi?',
+			'features.auth.onboarding.residentResendLink' => 'Tekrar gönder',
+			'features.auth.onboarding.residentInviteSubtitle' => 'Yöneticinizden aldığınız davet kodunu girerek devam etmenizi rica ederiz.',
+			'features.auth.onboarding.residentJoinButton' => 'Apartmana Katıl',
+			'features.auth.onboarding.residentInviteCodeLabel' => 'Davet Kodu',
+			'features.auth.onboarding.residentInviteCodeHint' => 'Örn: APF-45532',
+			'features.auth.onboarding.residentNameRequired' => 'Lütfen ad soyadınızı girin.',
 			'features.apartments.residentPanel' => 'Sakin',
 			'features.tickets.myTickets' => 'Taleplerim',
 			'features.tickets.newTicket' => 'Yeni Talep',
 			'features.tickets.createTitle' => 'Arıza / Talep Bildir',
-			'features.tickets.fieldTitle' => 'Başlık',
-			'features.tickets.fieldTitleHint' => 'Örn: Asansör arızası',
+			'features.tickets.reportFaultTitle' => 'Arıza Bildir',
+			'features.tickets.myApplicationsTitle' => 'Başvurularım',
+			'features.tickets.fieldTitle' => 'Konu',
+			'features.tickets.fieldTitleHint' => 'Kısa bir tanım girin.',
+			'features.tickets.fieldDetail' => 'Detaylandırın',
+			'features.tickets.fieldDetailHint' => 'Sorunu kısaca özetleyin.',
 			'features.tickets.fieldDescription' => 'Açıklama',
-			'features.tickets.fieldDescriptionHint' => 'Sorunu kısaca anlatın',
+			'features.tickets.fieldDescriptionHint' => 'Ayrıntılı açıklama yazın…',
+			'features.tickets.attachmentHint' => 'Fotoğraf, video veya belge ekleyin… PNG, JPG — en fazla 5 MB.',
+			'features.tickets.attachmentComingSoon' => 'Dosya ekleme yakında aktif olacak.',
 			'features.tickets.fieldCategory' => 'Kategori',
 			'features.tickets.categoryComplaint' => 'Şikayet',
 			'features.tickets.categoryRequest' => 'Talep',
@@ -2221,6 +2451,13 @@ extension on TranslationsTr {
 			'features.tickets.templateResolvedCheck' => 'Çözüldü / kontrol',
 			'features.tickets.templateResolvedCheckText' => 'Sorun giderildi, kontrol sağlandı.',
 			'features.dekont.makePaymentTitle' => 'Ödeme Yap',
+			'features.dekont.payDebtTitle' => 'Borcu Öde',
+			'features.dekont.paymentMethodTitle' => 'Ödeme Yöntemi',
+			'features.dekont.paymentMethodCard' => 'Kredi / Banka Kartı',
+			'features.dekont.paymentMethodEft' => 'Havale / EFT',
+			'features.dekont.paymentMethodDekont' => 'Dekont Yükle',
+			'features.dekont.paymentCardComingSoon' => 'Kart ile ödeme yakında eklenecek.',
+			'features.dekont.uploadReceiptHint' => 'Dekont yükleyin (jpg, png, webp, PDF — en fazla 5 MB).',
 			'features.dekont.myDekontsTitle' => 'Dekontlarım',
 			'features.dekont.managerTitle' => 'Dekont İnceleme',
 			'features.dekont.reviewAction' => 'Dekont İncele',
@@ -2391,6 +2628,8 @@ extension on TranslationsTr {
 			'features.expenses.viewReceipt' => 'Makbuzu gör',
 			'features.expenses.receiptMissing' => 'Makbuz yüklenmemiş',
 			'features.expenses.targetMonthLabel' => 'Aidata yansıyacağı ay',
+			_ => null,
+		} ?? switch (path) {
 			'features.expenses.targetThisMonth' => 'Bu ay',
 			'features.expenses.targetNextMonth' => 'Sonraki ay',
 			'features.expenses.targetSpecificMonth' => 'Belirli ay',
@@ -2504,8 +2743,6 @@ extension on TranslationsTr {
 			'features.subscription.statusUnknown' => 'Bilinmiyor',
 			'features.subscription.planMonthly' => 'Aylık plan',
 			'features.subscription.planAnnual' => 'Yıllık plan',
-			_ => null,
-		} ?? switch (path) {
 			'features.subscription.planUnknown' => 'Plan',
 			'features.subscription.renewsOn' => 'Yenileme: {date}',
 			'features.subscription.noSubscription' => 'Henüz abonelik kaydı yok.',
@@ -2631,6 +2868,7 @@ extension on TranslationsTr {
 			'features.dashboard.payNow' => 'Şimdi Öde',
 			'features.dashboard.overduePaymentsBadge' => '{count} gecikmiş ödeme',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} aidatı',
+			'features.dashboard.residentDebtAndPaySubtitle' => 'Ödeme yaparak ödeyin.',
 			'features.faz2.sectionTitle' => 'Faz 2',
 			'features.faz2.tickets' => 'Talepler',
 			'features.faz2.expenses' => 'Giderler',

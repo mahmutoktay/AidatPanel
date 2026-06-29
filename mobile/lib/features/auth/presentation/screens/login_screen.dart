@@ -66,7 +66,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.read(authStateProvider.notifier).submitLogin(
           _identifierController.text,
           _passwordController.text,
-          _usePhoneLogin,
           ref,
         );
   }

@@ -10,6 +10,7 @@ import '../../data/repositories/auth_repository_impl.dart'
 import '../../domain/entities/user_entity.dart';
 import '../../../profile/presentation/providers/profile_notifier.dart';
 import '../../../../core/utils/input_validators.dart';
+import '../../../../core/utils/phone_utils.dart';
 import '../../../../l10n/strings.g.dart';
 
 export '../../../../core/providers/app_providers.dart'
@@ -89,7 +90,6 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> submitLogin(
     String rawIdentifier,
     String password,
-    bool isPhone,
     WidgetRef ref,
   ) async {
     if (state.isLoading) return;
@@ -97,15 +97,17 @@ class AuthNotifier extends Notifier<AuthState> {
       state = state.copyWith(error: t.features.auth.passwordRequired);
       return;
     }
-    if (!isPhone && !InputValidators.emailRegex.hasMatch(rawIdentifier.trim())) {
+    final isPhone = !rawIdentifier.contains('@');
+    if (!isPhone &&
+        !InputValidators.emailRegex.hasMatch(rawIdentifier.trim())) {
       state = state.copyWith(error: t.validation.emailInvalid);
       return;
     }
-    final identifier = isPhone
-        ? (rawIdentifier.startsWith('+90')
-            ? rawIdentifier
-            : '+90$rawIdentifier')
-        : rawIdentifier.trim();
+    if (isPhone && PhoneUtils.normalizeTrPhone(rawIdentifier) == null) {
+      state = state.copyWith(error: t.features.auth.onboarding.phoneInvalid);
+      return;
+    }
+    final identifier = PhoneUtils.normalizeLoginIdentifier(rawIdentifier);
     await login(identifier, password, ref);
   }
 
@@ -129,7 +131,7 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> register(
-    String email,
+    String? email,
     String password,
     String name,
     String? phone,
@@ -137,10 +139,13 @@ class AuthNotifier extends Notifier<AuthState> {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final formattedPhone = (phone != null && phone.trim().isNotEmpty)
-          ? (phone.trim().startsWith('+90') ? phone.trim() : '+90${phone.trim()}')
-          : null;
-      await _authRepository.register(email, password, name, formattedPhone);
+      final normalizedPhone = PhoneUtils.normalizeTrPhone(phone);
+      await _authRepository.register(
+        email?.trim().isEmpty == true ? null : email?.trim(),
+        password,
+        name,
+        normalizedPhone,
+      );
       state = state.copyWith(
         isLoading: false,
         registrationSuccess: true,
@@ -162,9 +167,7 @@ class AuthNotifier extends Notifier<AuthState> {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final formattedPhone = (phone != null && phone.trim().isNotEmpty)
-          ? (phone.trim().startsWith('+90') ? phone.trim() : '+90${phone.trim()}')
-          : null;
+      final formattedPhone = PhoneUtils.normalizeTrPhone(phone);
       final user = await _authRepository.join(
         inviteCode,
         email,
@@ -184,6 +187,70 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
     }
+  }
+
+  Future<void> sendOtp({
+    String? phone,
+    String? email,
+    required String purpose,
+  }) async {
+    if (state.isLoading) return;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      await _authRepository.sendOtp(
+        phone: phone,
+        email: email,
+        purpose: purpose,
+      );
+      state = state.copyWith(isLoading: false, clearError: true);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  Future<UserEntity> verifyOtpAndAuthenticate({
+    String? phone,
+    String? email,
+    required String code,
+    required String purpose,
+    Map<String, dynamic>? payload,
+    String? name,
+    String? password,
+    String? inviteCode,
+    required WidgetRef ref,
+  }) async {
+    if (state.isLoading) return Future.error('loading');
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final user = await _authRepository.verifyOtp(
+        phone: phone,
+        email: email,
+        code: code,
+        purpose: purpose,
+        payload: payload,
+        name: name,
+        password: password,
+        inviteCode: inviteCode,
+      );
+      resetManagerTabIndex(ref);
+      resetResidentTabIndex(ref);
+      await _onAuthenticated(ref, user);
+      state = state.copyWith(
+        isLoading: false,
+        user: user,
+        isAuthenticated: true,
+        clearError: true,
+      );
+      return user;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  Future<String> validateInviteCode(String code) async {
+    return _authRepository.validateInvite(code);
   }
 
   Future<void> _onAuthenticated(WidgetRef ref, UserEntity user) async {
