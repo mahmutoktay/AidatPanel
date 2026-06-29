@@ -1,5 +1,6 @@
 import { prisma } from "../../config/db.js";
 import { HttpError } from "../../utils/httpError.js";
+import { adminDisplayEmail, adminDisplayPhone, adminDisplayName } from "../../utils/piiMasking.js";
 
 export async function getDekontSummaryService() {
   const statusGroups = await prisma.dekont.groupBy({
@@ -74,6 +75,7 @@ export async function listAdminResidentsService({ page = 1, limit = 25, q }) {
     where.OR = [
       { name: { contains: q, mode: "insensitive" } },
       { email: { contains: q, mode: "insensitive" } },
+      { phone: { contains: q } },
     ];
   }
 
@@ -88,6 +90,7 @@ export async function listAdminResidentsService({ page = 1, limit = 25, q }) {
         id: true,
         name: true,
         email: true,
+        phone: true,
         createdAt: true,
         apartment: {
           select: {
@@ -100,7 +103,20 @@ export async function listAdminResidentsService({ page = 1, limit = 25, q }) {
     prisma.user.count({ where }),
   ]);
 
-  return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
+  return {
+    items: items.map((u) => ({
+      id: u.id,
+      name: adminDisplayName(u.name),
+      email: adminDisplayEmail(u.email),
+      phone: adminDisplayPhone(u.phone),
+      createdAt: u.createdAt,
+      apartment: u.apartment,
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 }
 
 export async function getPaymentHabitsService(userId) {

@@ -3,22 +3,26 @@
 
 <div class="card mb-6">
   <div class="card__header">
-    <div><h3 class="card__title">Aktif Kullanıcılar</h3><p class="card__subtitle">Son <%= filters.days || 30 %> gün</p></div>
+    <div><h3 class="card__title">Günlük Aktif Kullanıcı</h3><p class="card__subtitle">Son <%= filters.days || 30 %> gün — yönetici ve sakin</p></div>
   </div>
   <div class="chart-container"><canvas id="analyticsChart"></canvas></div>
 </div>
 
-<div class="card mb-6">
+<div class="card mb-6" id="broadcast" x-data="{ preview: null }">
   <div class="card__header">
-    <div><h3 class="card__title">Segment Bildirimi</h3><p class="card__subtitle">Hedef kitleye push bildirim gönderin</p></div>
+    <div><h3 class="card__title">Segment Bildirimi</h3><p class="card__subtitle">Mobil uygulama kullanıcılarına push bildirim gönderin (admin panel bildirimi değil)</p></div>
   </div>
-  <form method="post" action="/analytics/broadcast" class="form-grid form-grid--2">
-    <div class="form-group"><label>Başlık</label><input class="form-control" name="title" required placeholder="Bildirim başlığı"></div>
-    <div class="form-group"><label>Rol filtresi</label><select class="form-control" name="segmentRole"><option value="">Tümü</option><option value="MANAGER">Yönetici</option><option value="RESIDENT">Sakin</option></select></div>
-    <div class="form-group" style="grid-column:1/-1"><label>Mesaj</label><textarea class="form-control" name="body" required rows="3" placeholder="Bildirim metni"></textarea></div>
-    <div class="form-group"><label>Plan</label><input class="form-control" name="segmentPlan" placeholder="monthly veya annual"></div>
-    <div class="form-group"><label>Şehir</label><input class="form-control" name="segmentCity" placeholder="İstanbul"></div>
-    <div><button type="submit" class="btn btn--primary">Bildirim Gönder</button></div>
+  <form method="post" action="/analytics/broadcast" class="form-grid form-grid--2" id="broadcastForm">
+    <div class="form-group"><label>Başlık</label><input class="form-control" name="title" required></div>
+    <div class="form-group"><label>Rol</label><select class="form-control" name="segmentRole" id="segmentRole"><option value="">Tümü</option><option value="MANAGER">Yönetici</option><option value="RESIDENT">Sakin</option></select></div>
+    <div class="form-group" style="grid-column:1/-1"><label>Mesaj</label><textarea class="form-control" name="body" required rows="3"></textarea></div>
+    <div class="form-group"><label>Plan</label><input class="form-control" name="segmentPlan" id="segmentPlan"></div>
+    <div class="form-group"><label>Şehir</label><input class="form-control" name="segmentCity" id="segmentCity"></div>
+    <div class="cluster cluster--3">
+      <button type="button" class="btn btn--secondary" @click="fetch('/analytics/preview-segment', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({segmentRole:document.getElementById('segmentRole').value,segmentPlan:document.getElementById('segmentPlan').value,segmentCity:document.getElementById('segmentCity').value})}).then(r=>r.json()).then(j=>{preview=j.data?.recipientCount})">Önizleme</button>
+      <button type="submit" class="btn btn--primary">Gönder</button>
+      <span class="text-muted" x-show="preview !== null" x-text="'~' + preview + ' kullanıcı'"></span>
+    </div>
   </form>
 </div>
 

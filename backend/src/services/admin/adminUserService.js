@@ -1,6 +1,6 @@
 import { prisma } from "../../config/db.js";
 import { HttpError } from "../../utils/httpError.js";
-import { maskEmail, maskPhone, maskName } from "../../utils/piiMasking.js";
+import { maskEmail, maskPhone, adminDisplayEmail, adminDisplayPhone, adminDisplayName } from "../../utils/piiMasking.js";
 import { writeAdminAuditLog } from "./adminAuditService.js";
 import { requestPasswordResetService } from "../passwordResetService.js";
 import { revokeAllUserSessions } from "../sessionService.js";
@@ -57,9 +57,9 @@ export async function listAdminUsersService({ q, role, deleted, hasSubscription,
   return {
     items: users.map((u) => ({
       id: u.id,
-      name: maskName(u.name),
-      email: maskEmail(u.email),
-      phone: maskPhone(u.phone),
+      name: adminDisplayName(u.name),
+      email: adminDisplayEmail(u.email),
+      phone: adminDisplayPhone(u.phone),
       role: u.role,
       isDeleted: !!u.deletedAt,
       createdAt: u.createdAt,

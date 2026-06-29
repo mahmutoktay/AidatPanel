@@ -13,8 +13,11 @@ router.post("/:id/read", async (req, res) => {
 });
 
 router.post("/read-all", async (req, res) => {
-  const { json } = await adminApi("/notifications", { cookies: cookieHeader(req) });
-  const unread = (json?.data || []).filter((n) => !n.isRead);
+  const { json } = await adminApi("/notifications", {
+    cookies: cookieHeader(req),
+    query: { unreadOnly: "true" },
+  });
+  const unread = json?.data || [];
   await Promise.all(
     unread.map((n) =>
       adminApi(`/notifications/${n.id}/read`, { method: "PATCH", cookies: cookieHeader(req) })

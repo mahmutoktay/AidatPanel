@@ -15,32 +15,35 @@ router.get("/", async (req, res) => {
   ]);
 
   await renderPage(res, "subscriptions-body", {
-    title: "Abonelikler",
+    title: "Büyüme & Abonelik",
     admin: req.admin,
     subscriptions: subs.json?.data?.items || [],
     pagination: subs.json?.data || {},
     promos: promos.json?.data?.items || [],
     filters: { plan, status, platform, city, expiringWithinDays },
-    currentPath: "/subscriptions",
+    currentPath: "/growth",
   });
 });
 
 router.post("/grant", async (req, res) => {
-  const { userId, durationDays, plan, reason } = req.body;
-  await adminApi(`/subscriptions/${userId}/grant`, {
+  const { contact, durationDays, plan, reason } = req.body;
+  const result = await adminApi("/subscriptions/grant", {
     method: "POST",
     cookies: cookieHeader(req),
-    body: { durationDays: Number(durationDays), plan, reason },
+    body: { contact, durationDays: Number(durationDays), plan, reason },
   });
-  res.redirect("/subscriptions?msg=granted");
+  if (!result.ok) {
+    return res.redirect(`/growth?msg=error&detail=${encodeURIComponent(result.json?.message || "İşlem başarısız")}`);
+  }
+  res.redirect("/growth?msg=granted");
 });
 
 router.post("/promos", async (req, res) => {
-  await adminApi("/promos", {
+  const result = await adminApi("/promos", {
     method: "POST",
     cookies: cookieHeader(req),
     body: {
-      userId: req.body.userId,
+      contact: req.body.contact,
       type: req.body.type,
       plan: req.body.plan,
       durationDays: req.body.durationDays ? Number(req.body.durationDays) : undefined,
@@ -48,7 +51,10 @@ router.post("/promos", async (req, res) => {
       reason: req.body.reason,
     },
   });
-  res.redirect("/subscriptions?msg=promo");
+  if (!result.ok) {
+    return res.redirect(`/growth?msg=error&detail=${encodeURIComponent(result.json?.message || "İşlem başarısız")}`);
+  }
+  res.redirect("/growth?msg=promo");
 });
 
 export default router;

@@ -1,7 +1,7 @@
 <%- include('flash') %>
 
-<a href="/users" class="btn btn--ghost btn--sm mb-4">
-  <%- include('icon', { name: 'arrowLeft' }) %> Üyelere dön
+<a href="/explorer?focus=<%= user.id %>" class="btn btn--ghost btn--sm mb-4">
+  <%- include('icon', { name: 'arrowLeft' }) %> Gezgine dön
 </a>
 
 <div class="detail-grid detail-grid--2 mb-4">
@@ -32,7 +32,7 @@
         <h3 class="card__title">Abonelik</h3>
         <p class="card__subtitle">Mevcut plan bilgisi</p>
       </div>
-      <span class="badge badge--<%= user.subscription.status === 'ACTIVE' ? 'success' : 'warning' %>"><%= user.subscription.status %></span>
+      <span class="badge badge--<%= user.subscription.status === 'ACTIVE' ? 'success' : 'warning' %>"><%= typeof labels !== 'undefined' ? (labels.SUBSCRIPTION_STATUS_TR[user.subscription.status] || user.subscription.status) : user.subscription.status %></span>
     </div>
     <ul class="info-list">
       <li><span class="info-list__label">Plan</span><span class="info-list__value"><%= user.subscription.plan %></span></li>
@@ -62,6 +62,58 @@
         <% }) %>
       </tbody>
     </table>
+  </div>
+</div>
+<% } %>
+
+<% if (!user.deletedAt) { %>
+<div class="card mb-4" x-data="{ showGrant: false, showPromo: false, promoType: 'FREE_PERIOD' }">
+  <div class="card__header">
+    <div>
+      <h3 class="card__title">Abonelik & Promosyon</h3>
+      <p class="card__subtitle">Bu kullanıcı için hızlı işlemler</p>
+    </div>
+  </div>
+  <div class="action-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
+    <% if (user.role === 'MANAGER') { %>
+    <button type="button" class="action-tile" @click="showGrant = !showGrant; showPromo = false">
+      <span class="action-tile__label">Abonelik Hediye Et</span>
+      <span class="action-tile__desc">Manuel tanımlama</span>
+    </button>
+    <% } %>
+    <button type="button" class="action-tile" @click="showPromo = !showPromo; showGrant = false">
+      <span class="action-tile__label">Promosyon Oluştur</span>
+      <span class="action-tile__desc">Ücretsiz süre / indirim</span>
+    </button>
+  </div>
+
+  <% if (user.role === 'MANAGER') { %>
+  <div class="mt-4" x-show="showGrant" x-cloak>
+    <form method="post" action="/users/<%= user.id %>/grant" class="form-grid form-grid--2">
+      <div class="form-group"><label>Süre (gün)</label><input class="form-control" type="number" name="durationDays" value="30" min="1"></div>
+      <div class="form-group"><label>Plan</label><select class="form-control" name="plan"><option value="monthly">Aylık</option><option value="annual">Yıllık</option></select></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Gerekçe</label><input class="form-control" name="reason" required minlength="3"></div>
+      <div><button type="submit" class="btn btn--primary btn--sm">Abonelik Tanımla</button></div>
+    </form>
+  </div>
+  <% } %>
+
+  <div class="mt-4" x-show="showPromo" x-cloak>
+    <form method="post" action="/users/<%= user.id %>/promo" class="form-grid form-grid--2">
+      <input type="hidden" name="userId" value="<%= user.id %>">
+      <div class="form-group">
+        <label>Promo türü</label>
+        <select class="form-control" name="type" x-model="promoType">
+          <option value="FREE_PERIOD">Ücretsiz süre</option>
+          <option value="DISCOUNT_PERCENT">İndirim yüzdesi</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Plan</label><select class="form-control" name="plan"><option value="monthly">Aylık</option><option value="annual">Yıllık</option></select></div>
+      <div class="form-group" x-show="promoType === 'FREE_PERIOD'"><label>Süre (gün)</label><input class="form-control" type="number" name="durationDays" value="30" min="1"></div>
+      <div class="form-group" x-show="promoType === 'DISCOUNT_PERCENT'"><label>İndirim (%)</label><input class="form-control" type="number" name="discountPercent" min="1" max="100"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Gerekçe</label><input class="form-control" name="reason" required minlength="3"></div>
+      <div><button type="submit" class="btn btn--primary btn--sm">Promosyon Oluştur</button></div>
+    </form>
   </div>
 </div>
 <% } %>

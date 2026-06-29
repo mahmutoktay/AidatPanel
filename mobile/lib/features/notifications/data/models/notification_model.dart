@@ -6,6 +6,7 @@ class NotificationModel {
   final String title;
   final String body;
   final String type;
+  final String? code;
   final bool isRead;
   final Map<String, dynamic>? data;
   final DateTime createdAt;
@@ -16,6 +17,7 @@ class NotificationModel {
     required this.title,
     required this.body,
     required this.type,
+    this.code,
     required this.isRead,
     this.data,
     required this.createdAt,
@@ -34,6 +36,7 @@ class NotificationModel {
       title: (json['title'] ?? '') as String,
       body: (json['body'] ?? '') as String,
       type: (json['type'] ?? 'SYSTEM') as String,
+      code: json['code']?.toString(),
       isRead: json['isRead'] == true,
       data: data,
       createdAt: _parseDate(json['createdAt']),
@@ -53,6 +56,7 @@ class NotificationModel {
         title: title,
         body: body,
         type: _parseType(type),
+        code: code,
         isRead: isRead,
         data: data,
         createdAt: createdAt,

@@ -44,12 +44,20 @@ router.post("/broadcast", async (req, res) => {
   res.redirect("/analytics?msg=sent");
 });
 
-router.post("/notifications/:id/read", async (req, res) => {
-  await adminApi(`/notifications/${req.params.id}/read`, {
-    method: "PATCH",
+router.post("/preview-segment", async (req, res) => {
+  const { segmentRole, segmentPlan, segmentCity } = req.body;
+  const { json, ok } = await adminApi("/notifications/preview", {
+    method: "POST",
     cookies: cookieHeader(req),
+    body: {
+      segment: {
+        role: segmentRole || undefined,
+        plan: segmentPlan || undefined,
+        city: segmentCity || undefined,
+      },
+    },
   });
-  res.redirect("/analytics");
+  res.status(ok ? 200 : 400).json(json);
 });
 
 export default router;

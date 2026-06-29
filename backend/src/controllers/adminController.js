@@ -14,6 +14,7 @@ import {
 import {
   listAdminSubscriptionsService,
   grantSubscriptionService,
+  resolveUserByContact,
   listPromoGrantsService,
   createPromoGrantService,
 } from "../services/admin/adminSubscriptionService.js";
@@ -31,6 +32,18 @@ import {
   broadcastNotificationService,
 } from "../services/admin/adminAnalyticsService.js";
 import { listAdminAuditLogs } from "../services/admin/adminAuditService.js";
+import {
+  getDashboardAlertsService,
+  getDashboardInsightsService,
+  getDashboardSegmentsService,
+  previewBroadcastSegmentService,
+} from "../services/admin/adminDashboardService.js";
+import {
+  listHierarchyManagers,
+  getHierarchyManagerDetail,
+  getHierarchyBuildingDetail,
+  getHierarchyApartmentDetail,
+} from "../services/admin/adminHierarchyService.js";
 import {
   createBackupService,
   listBackupsService,
@@ -133,6 +146,12 @@ export const grantSubscription = asyncHandler(async (req, res) => {
   res.json({ success: true, message: "Abonelik tanımlandı.", data });
 });
 
+export const grantSubscriptionByContact = asyncHandler(async (req, res) => {
+  const user = await resolveUserByContact(req.body.contact);
+  const data = await grantSubscriptionService(req.admin.id, user.id, req.body, clientIp(req));
+  res.json({ success: true, message: "Abonelik tanımlandı.", data });
+});
+
 export const listPromos = asyncHandler(async (req, res) => {
   const data = await listPromoGrantsService(req.query);
   res.json({ success: true, data });
@@ -165,6 +184,46 @@ export const paymentHabits = asyncHandler(async (req, res) => {
 
 export const dashboardKpis = asyncHandler(async (req, res) => {
   const data = await getDashboardKpisService();
+  res.json({ success: true, data });
+});
+
+export const dashboardAlerts = asyncHandler(async (req, res) => {
+  const data = await getDashboardAlertsService();
+  res.json({ success: true, data });
+});
+
+export const dashboardInsights = asyncHandler(async (req, res) => {
+  const data = await getDashboardInsightsService();
+  res.json({ success: true, data });
+});
+
+export const dashboardSegments = asyncHandler(async (req, res) => {
+  const data = await getDashboardSegmentsService();
+  res.json({ success: true, data });
+});
+
+export const hierarchyManagers = asyncHandler(async (req, res) => {
+  const data = await listHierarchyManagers(req.query);
+  res.json({ success: true, data });
+});
+
+export const hierarchyManagerDetail = asyncHandler(async (req, res) => {
+  const data = await getHierarchyManagerDetail(req.admin.id, req.params.id, clientIp(req));
+  res.json({ success: true, data });
+});
+
+export const hierarchyBuildingDetail = asyncHandler(async (req, res) => {
+  const data = await getHierarchyBuildingDetail(req.admin.id, req.params.id, clientIp(req));
+  res.json({ success: true, data });
+});
+
+export const hierarchyApartmentDetail = asyncHandler(async (req, res) => {
+  const data = await getHierarchyApartmentDetail(req.admin.id, req.params.id, clientIp(req));
+  res.json({ success: true, data });
+});
+
+export const previewBroadcast = asyncHandler(async (req, res) => {
+  const data = await previewBroadcastSegmentService(req.body.segment);
   res.json({ success: true, data });
 });
 

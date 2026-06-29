@@ -3031,6 +3031,9 @@ class Translations$features$notifications$en {
 	/// en: 'System'
 	String get typeSystem => 'System';
 
+	/// en: 'AidatPanel Team'
+	String get typeAidatPanelTeam => 'AidatPanel Team';
+
 	/// en: 'Notification'
 	String get typeOther => 'Notification';
 
@@ -4834,6 +4837,7 @@ extension on Translations {
 			'features.notifications.typeDekontPaymentApplied' => 'Receipt approved',
 			'features.notifications.typeExpenseAdded' => 'New expense',
 			'features.notifications.typeSystem' => 'System',
+			'features.notifications.typeAidatPanelTeam' => 'AidatPanel Team',
 			'features.notifications.typeOther' => 'Notification',
 			'features.notifications.allApartmentsTag' => 'All apartments',
 			'features.notifications.sendTitle' => 'Announcement to residents',
@@ -4890,9 +4894,9 @@ extension on Translations {
 			'features.subscription.statusUnknown' => 'Unknown',
 			'features.subscription.planMonthly' => 'Monthly plan',
 			'features.subscription.planAnnual' => 'Annual plan',
-			'features.subscription.planUnknown' => 'Plan',
 			_ => null,
 		} ?? switch (path) {
+			'features.subscription.planUnknown' => 'Plan',
 			'features.subscription.renewsOn' => 'Renews: {date}',
 			'features.subscription.noSubscription' => 'No subscription on file yet.',
 			'features.subscription.backendPending' => 'Subscription is not connected to the server yet. Purchases coming soon.',

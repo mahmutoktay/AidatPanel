@@ -444,6 +444,38 @@ a:hover { color: var(--color-primary-hover); }
 }
 
 /* ── Notifications dropdown ── */
+.notif-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  background: transparent;
+}
+
+.notification-dropdown__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+  position: sticky;
+  top: 0;
+  background: var(--color-bg-elevated);
+  z-index: 1;
+}
+
+.notification-dropdown__title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.notification-dropdown__actions {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border-subtle);
+  text-align: right;
+}
+
 .notification-dropdown {
   position: absolute;
   right: 0;
@@ -455,7 +487,7 @@ a:hover { color: var(--color-primary-hover); }
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
-  z-index: 60;
+  z-index: 71;
 }
 
 .notification-item {

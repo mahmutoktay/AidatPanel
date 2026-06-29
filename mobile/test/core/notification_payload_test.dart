@@ -73,5 +73,28 @@ void main() {
         '/manager-dashboard?tab=dues&dueId=due-42&buildingId=b1',
       );
     });
+
+    test('SYSTEM subscription grant opens manager subscription screen', () {
+      const p = NotificationPayload(
+        type: 'SYSTEM',
+        code: 'subscription_granted_admin',
+        route: '/subscription',
+      );
+      expect(
+        p.resolveNavigationPath(role: UserRole.manager),
+        '/manager-dashboard/subscription',
+      );
+    });
+
+    test('SYSTEM normalizes legacy subscription route typo', () {
+      const p = NotificationPayload(
+        type: 'SYSTEM',
+        route: '/subcription',
+      );
+      expect(
+        p.resolveNavigationPath(role: UserRole.manager),
+        '/manager-dashboard/subscription',
+      );
+    });
   });
 }

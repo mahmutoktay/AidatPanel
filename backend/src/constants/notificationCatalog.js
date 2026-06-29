@@ -14,6 +14,7 @@ export const NOTIFICATION_CODES = Object.freeze({
   EXPENSE_ADDED_RESIDENT: "expense_added_resident",
   DEV_SEED: "dev_seed",
   ANNOUNCEMENT_CUSTOM: "announcement_custom",
+  SUBSCRIPTION_GRANTED_ADMIN: "subscription_granted_admin",
   LEGACY_NOTIFICATION: "legacy_notification",
 });
 
@@ -235,6 +236,33 @@ export const NOTIFICATION_CATALOG = Object.freeze({
     en: Object.freeze({
       title: (params) => text(params, "title", "Announcement"),
       body: (params) => text(params, "body", ""),
+    }),
+  }),
+
+  [NOTIFICATION_CODES.SUBSCRIPTION_GRANTED_ADMIN]: Object.freeze({
+    tr: Object.freeze({
+      title: () => "Aboneliğiniz Tanımlandı",
+      body: (params) => {
+        const plan = text(params, "plan", "Aylık");
+        const days = text(params, "durationDays", "");
+        const endDate = text(params, "endDate", "");
+        if (endDate) {
+          return `${plan} aboneliğiniz ${days ? `${days} gün süreyle ` : ""}aktif edildi. Bitiş: ${endDate}.`;
+        }
+        return `${plan} aboneliğiniz aktif edildi.`;
+      },
+    }),
+    en: Object.freeze({
+      title: () => "Your Subscription Is Active",
+      body: (params) => {
+        const plan = text(params, "plan", "Monthly");
+        const days = text(params, "durationDays", "");
+        const endDate = text(params, "endDate", "");
+        if (endDate) {
+          return `Your ${plan} subscription is active${days ? ` for ${days} days` : ""}. Expires: ${endDate}.`;
+        }
+        return `Your ${plan} subscription is now active.`;
+      },
     }),
   }),
 

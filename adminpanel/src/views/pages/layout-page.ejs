@@ -9,12 +9,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/layout.css">
   <link rel="stylesheet" href="/css/components.css">
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="/css/patterns.css">
+  <link rel="stylesheet" href="/css/utilities.css">
+  <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
   <% if (typeof includeCharts !== 'undefined' && includeCharts) { %>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <% } %>
 </head>
 <body>
-  <%- include('../partials/shell', { title, admin, currentPath, notifications, content }) %>
+  <%- include('../partials/shell', { title, admin, currentPath, notifications, labels, content }) %>
 </body>
 </html>

@@ -1,14 +1,43 @@
 import { spawn } from "node:child_process";
 import crypto from "node:crypto";
 import { createWriteStream } from "node:fs";
+import { existsSync } from "node:fs";
 import { mkdir, stat } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { createGzip } from "node:zlib";
+import { pipeline } from "node:stream/promises";
 import { prisma } from "../../config/db.js";
 import { HttpError } from "../../utils/httpError.js";
 import { writeAdminAuditLog } from "./adminAuditService.js";
+import { logger } from "../../config/logger.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const backendRoot = path.resolve(__dirname, "../../..");
 
 function getBackupDir() {
-  return process.env.ADMIN_BACKUP_DIR || "/var/backups/aidatpanel";
+  if (process.env.ADMIN_BACKUP_DIR) return process.env.ADMIN_BACKUP_DIR;
+  return path.join(backendRoot, "backups", "admin");
+}
+
+function resolvePgDumpBinary() {
+  if (process.env.PG_DUMP_PATH && existsSync(process.env.PG_DUMP_PATH)) {
+    return process.env.PG_DUMP_PATH;
+  }
+  if (process.platform === "win32") {
+    for (const ver of ["17", "16", "15", "14", "13"]) {
+      const candidate = `C:\\Program Files\\PostgreSQL\\${ver}\\bin\\pg_dump.exe`;
+      if (existsSync(candidate)) return candidate;
+    }
+  }
+  return "pg_dump";
+}
+
+function serializeBackup(row) {
+  return {
+    ...row,
+    sizeBytes: row.sizeBytes != null ? Number(row.sizeBytes) : null,
+  };
 }
 
 function parseDatabaseUrl() {
@@ -48,26 +77,47 @@ export async function createBackupService(adminId, ipAddress) {
     });
   });
 
-  return record;
+  return serializeBackup(record);
 }
 
 function runPgDump(filepath, backupId) {
   return new Promise((resolve, reject) => {
+    const pgDumpBin = resolvePgDumpBinary();
     const dbUrl = parseDatabaseUrl();
     const args = ["--dbname", dbUrl, "--no-owner", "--no-acl"];
-    const gzip = spawn("gzip", ["-c"], { stdio: ["pipe", "pipe", "pipe"] });
-    const pgDump = spawn("pg_dump", args, { stdio: ["ignore", "pipe", "pipe"] });
+
+    const pgDump = spawn(pgDumpBin, args, {
+      stdio: ["ignore", "pipe", "pipe"],
+      shell: process.platform === "win32" && pgDumpBin === "pg_dump",
+    });
 
     const out = createWriteStream(filepath);
-    pgDump.stdout.pipe(gzip.stdin);
-    gzip.stdout.pipe(out);
+    const gzip = createGzip();
 
     let errMsg = "";
-    pgDump.stderr.on("data", (d) => { errMsg += d.toString(); });
-    gzip.stderr.on("data", (d) => { errMsg += d.toString(); });
+    pgDump.stderr.on("data", (d) => {
+      errMsg += d.toString();
+    });
 
-    out.on("finish", async () => {
+    const fail = async (error) => {
+      const message =
+        error?.code === "ENOENT"
+          ? "pg_dump bulunamadı. PostgreSQL istemci araçlarını kurun veya PG_DUMP_PATH tanımlayın."
+          : error?.message || errMsg || "Yedekleme başarısız.";
+      logger.warn({ type: "admin_backup_failed", backupId, message });
       try {
+        await prisma.dbBackup.update({
+          where: { id: backupId },
+          data: { status: "FAILED", errorMessage: message.slice(0, 500) },
+        });
+      } catch {
+        /* ignore */
+      }
+      reject(new Error(message));
+    };
+
+    pipeline(pgDump.stdout, gzip, out)
+      .then(async () => {
         const st = await stat(filepath);
         await prisma.dbBackup.update({
           where: { id: backupId },
@@ -78,25 +128,25 @@ function runPgDump(filepath, backupId) {
           },
         });
         resolve();
-      } catch (e) {
-        reject(e);
-      }
-    });
+      })
+      .catch(fail);
 
-    out.on("error", reject);
-    pgDump.on("error", reject);
+    pgDump.on("error", fail);
     pgDump.on("close", (code) => {
-      if (code !== 0) reject(new Error(errMsg || `pg_dump exit ${code}`));
+      if (code !== 0 && code !== null) {
+        fail(new Error(errMsg || `pg_dump çıkış kodu ${code}`));
+      }
     });
   });
 }
 
 export async function listBackupsService() {
-  return prisma.dbBackup.findMany({
+  const rows = await prisma.dbBackup.findMany({
     orderBy: { createdAt: "desc" },
     take: 50,
     include: { createdBy: { select: { name: true, email: true } } },
   });
+  return rows.map(serializeBackup);
 }
 
 export async function generateDownloadTokenService(adminId, backupId, ipAddress) {

@@ -1,4 +1,5 @@
-<div class="app-shell" x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false">
+<% const navActive = (p) => (p === '/' ? currentPath === '/' : currentPath === p || currentPath.startsWith(p + '/')); %>
+<div class="app-shell" x-data="{ sidebarOpen: false, notifOpen: false }" @keydown.escape.window="sidebarOpen = false; notifOpen = false">
   <div class="sidebar-backdrop" :class="{ 'is-open': sidebarOpen }" @click="sidebarOpen = false" aria-hidden="true"></div>
 
   <aside class="sidebar" :class="{ 'is-open': sidebarOpen }" aria-label="Ana menü">
@@ -12,38 +13,37 @@
 
     <nav class="sidebar__nav">
       <div class="sidebar__section">
-        <span class="sidebar__section-label">Genel</span>
-        <a href="/" class="sidebar__link" aria-current="<%= currentPath === '/' ? 'page' : 'false' %>">
-          <%- include('icon', { name: 'dashboard' }) %><span class="sidebar__label">Dashboard</span>
+        <a href="/" class="sidebar__link" aria-current="<%= navActive('/') ? 'page' : 'false' %>">
+          <%- include('icon', { name: 'dashboard' }) %><span class="sidebar__label">Komuta Merkezi</span>
         </a>
-        <a href="/users" class="sidebar__link" aria-current="<%= currentPath === '/users' ? 'page' : 'false' %>">
-          <%- include('icon', { name: 'users' }) %><span class="sidebar__label">Üyeler</span>
+        <a href="/explorer" class="sidebar__link" aria-current="<%= navActive('/explorer') ? 'page' : 'false' %>">
+          <%- include('icon', { name: 'users' }) %><span class="sidebar__label">Müşteri Gezgini</span>
         </a>
-        <a href="/subscriptions" class="sidebar__link" aria-current="<%= currentPath === '/subscriptions' ? 'page' : 'false' %>">
-          <%- include('icon', { name: 'subscription' }) %><span class="sidebar__label">Abonelikler</span>
+        <a href="/search" class="sidebar__link" aria-current="<%= navActive('/search') ? 'page' : 'false' %>">
+          <%- include('icon', { name: 'search' }) %><span class="sidebar__label">Arama</span>
         </a>
       </div>
 
       <div class="sidebar__section">
-        <span class="sidebar__section-label">Raporlar</span>
-        <a href="/reports/dekonts" class="sidebar__link" aria-current="<%= currentPath === '/reports/dekonts' ? 'page' : 'false' %>">
-          <%- include('icon', { name: 'dekont' }) %><span class="sidebar__label">Dekontlar</span>
+        <span class="sidebar__section-label">İş</span>
+        <a href="/growth" class="sidebar__link" aria-current="<%= navActive('/growth') ? 'page' : 'false' %>">
+          <%- include('icon', { name: 'subscription' }) %><span class="sidebar__label">Büyüme & Abonelik</span>
         </a>
-        <a href="/reports/residents" class="sidebar__link" aria-current="<%= currentPath === '/reports/residents' ? 'page' : 'false' %>">
-          <%- include('icon', { name: 'residents' }) %><span class="sidebar__label">Sakinler</span>
+        <a href="/ops/dekonts" class="sidebar__link" aria-current="<%= navActive('/ops') ? 'page' : 'false' %>">
+          <%- include('icon', { name: 'dekont' }) %><span class="sidebar__label">Operasyon</span>
         </a>
-        <a href="/analytics" class="sidebar__link" aria-current="<%= currentPath === '/analytics' ? 'page' : 'false' %>">
+        <a href="/analytics" class="sidebar__link" aria-current="<%= navActive('/analytics') ? 'page' : 'false' %>">
           <%- include('icon', { name: 'analytics' }) %><span class="sidebar__label">Analitik</span>
         </a>
       </div>
 
       <div class="sidebar__section">
         <span class="sidebar__section-label">Sistem</span>
-        <a href="/audit" class="sidebar__link" aria-current="<%= currentPath === '/audit' ? 'page' : 'false' %>">
+        <a href="/audit" class="sidebar__link" aria-current="<%= navActive('/audit') ? 'page' : 'false' %>">
           <%- include('icon', { name: 'shield' }) %><span class="sidebar__label">Denetim Kayıtları</span>
         </a>
         <% if (admin.role === 'SUPER_ADMIN') { %>
-        <a href="/backups" class="sidebar__link" aria-current="<%= currentPath === '/backups' ? 'page' : 'false' %>">
+        <a href="/backups" class="sidebar__link" aria-current="<%= navActive('/backups') ? 'page' : 'false' %>">
           <%- include('icon', { name: 'backup' }) %><span class="sidebar__label">Yedekler</span>
         </a>
         <% } %>
@@ -69,22 +69,32 @@
         </button>
         <h1 class="topbar__title"><%= title %></h1>
       </div>
-      <div class="topbar__actions" x-data="{ open: false }">
-        <button type="button" class="icon-btn" @click="open = !open" aria-label="Bildirimler" :aria-expanded="open">
+
+      <form class="command-search" method="get" action="/search" role="search">
+        <input class="command-search__input" type="search" name="q" placeholder="Müşteri ara…" aria-label="Müşteri ara">
+        <span class="command-search__kbd">Enter</span>
+      </form>
+
+      <div class="topbar__actions">
+        <div class="notif-root" @click.outside="notifOpen = false">
+        <button type="button" class="icon-btn" @click.stop="notifOpen = !notifOpen" aria-label="Bildirimler" :aria-expanded="notifOpen">
           <%- include('icon', { name: 'bell' }) %>
           <% const unread = (typeof notifications !== 'undefined' ? notifications : []).filter(n => !n.isRead).length %>
           <% if (unread > 0) { %><span class="icon-btn__badge"><%= unread > 9 ? '9+' : unread %></span><% } %>
         </button>
-        <div class="notification-dropdown" x-show="open" @click.outside="open = false" x-cloak x-transition>
+        <div class="notification-dropdown" x-show="notifOpen" x-cloak>
+          <div class="notification-dropdown__header">
+            <span class="notification-dropdown__title">Bildirimler</span>
+            <button type="button" class="btn btn--ghost btn--sm" @click="notifOpen = false" aria-label="Kapat">✕</button>
+          </div>
           <% const notifs = typeof notifications !== 'undefined' ? notifications.slice(0, 8) : [] %>
           <% if (notifs.length === 0) { %>
             <div class="empty-state" style="padding:2rem 1rem">
               <p class="empty-state__title">Bildirim yok</p>
-              <p style="margin:0;font-size:var(--font-size-sm)">Yeni bildirim geldiğinde burada görünür.</p>
             </div>
           <% } else { %>
             <% if (unread > 0) { %>
-            <div style="padding:var(--space-2) var(--space-3);border-bottom:1px solid var(--color-border-subtle);text-align:right">
+            <div class="notification-dropdown__actions">
               <form method="post" action="/notifications/read-all" style="margin:0;display:inline">
                 <button type="submit" class="btn btn--ghost btn--sm">Tümünü okundu işaretle</button>
               </form>
@@ -100,16 +110,13 @@
                 </form>
               </div>
             <% }) %>
-            <div style="padding:var(--space-3);text-align:center;border-top:1px solid var(--color-border-subtle)">
-              <a href="/analytics" class="btn btn--ghost btn--sm">Tümünü gör</a>
-            </div>
           <% } %>
+        </div>
         </div>
         <span class="topbar__user-chip truncate"><%= admin.name %></span>
         <form action="/auth/logout" method="post" style="margin:0">
           <button type="submit" class="btn btn--secondary btn--sm" title="Çıkış">
             <%- include('icon', { name: 'logout' }) %>
-            <span class="sidebar__label">Çıkış</span>
           </button>
         </form>
       </div>
@@ -120,3 +127,5 @@
     </main>
   </div>
 </div>
+
+<style>[x-cloak]{display:none!important}</style>

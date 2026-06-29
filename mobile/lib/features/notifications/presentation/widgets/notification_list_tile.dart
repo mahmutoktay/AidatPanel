@@ -27,7 +27,7 @@ class NotificationListTile extends StatelessWidget {
     final visual = notificationVisual(n.type);
     final unread = !n.isRead;
     final timeStr = notificationRelativeTime(context, n.createdAt);
-    final typeLabel = n.type.label(context).trim();
+    final typeLabel = n.senderLabel(context).trim();
     final title = n.title.trim();
     final apt = notificationTileApartmentLabel(n);
     final amount = notificationTileAmount(n);

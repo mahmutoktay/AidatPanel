@@ -1,6 +1,35 @@
 import { prisma } from "../../config/db.js";
 import { HttpError } from "../../utils/httpError.js";
 import { writeAdminAuditLog } from "./adminAuditService.js";
+import { adminDisplayEmail } from "../../utils/piiMasking.js";
+import { createForUsers } from "../notificationService.js";
+import { NOTIFICATION_CODES } from "../../constants/notificationCatalog.js";
+import { NOTIFICATION_TYPES } from "../../constants/notificationConstants.js";
+import { logger } from "../../config/logger.js";
+
+const PLAN_LABEL_TR = { monthly: "Aylık", annual: "Yıllık" };
+
+export async function resolveUserByContact(contact) {
+  const raw = String(contact || "").trim();
+  if (raw.length < 3) {
+    throw new HttpError(400, "Geçerli bir e-posta veya telefon girin.");
+  }
+
+  const digits = raw.replace(/\D/g, "");
+  const or = [{ email: { equals: raw, mode: "insensitive" } }];
+  if (digits.length >= 7) or.push({ phone: { contains: digits } });
+  if (/^[0-9a-f-]{36}$/i.test(raw)) or.push({ id: raw });
+
+  const user = await prisma.user.findFirst({
+    where: { deletedAt: null, OR: or },
+  });
+
+  if (!user) {
+    throw new HttpError(404, "Bu e-posta veya telefon ile kayıtlı kullanıcı bulunamadı.");
+  }
+
+  return user;
+}
 
 export async function listAdminSubscriptionsService({
   plan,
@@ -54,7 +83,16 @@ export async function listAdminSubscriptionsService({
     prisma.subscription.count({ where }),
   ]);
 
-  return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
+  return {
+    items: items.map((s) => ({
+      ...s,
+      user: s.user ? { ...s.user, email: adminDisplayEmail(s.user.email) } : null,
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 }
 
 export async function grantSubscriptionService(adminId, userId, body, ipAddress) {
@@ -124,6 +162,29 @@ export async function grantSubscriptionService(adminId, userId, body, ipAddress)
     ipAddress,
   });
 
+  try {
+    const endDate = subscription.currentPeriodEnd.toLocaleDateString("tr-TR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    await createForUsers([userId], {
+      type: NOTIFICATION_TYPES.SYSTEM,
+      code: NOTIFICATION_CODES.SUBSCRIPTION_GRANTED_ADMIN,
+      params: {
+        plan: PLAN_LABEL_TR[plan] || plan,
+        durationDays: String(durationDays),
+        endDate,
+      },
+      data: {
+        route: "/manager-dashboard/subscription",
+        subscriptionId: subscription.id,
+      },
+    });
+  } catch (err) {
+    logger.warn({ type: "subscription_grant_notify_failed", userId, error: err.message });
+  }
+
   return subscription;
 }
 
@@ -145,26 +206,28 @@ export async function listPromoGrantsService({ page = 1, limit = 25 }) {
 }
 
 export async function createPromoGrantService(adminId, body, ipAddress) {
-  const { userId, type, plan, durationDays, discountPercent, reason, expiresAt } = body;
-  if (!userId || !type || !reason) {
-    throw new HttpError(400, "userId, type ve reason zorunludur.");
+  const { userId, contact, type, plan, durationDays, discountPercent, reason, expiresAt } = body;
+  if ((!userId && !contact) || !type || !reason) {
+    throw new HttpError(400, "Kullanıcı (e-posta/telefon) ve gerekçe zorunludur.");
   }
+
+  const resolvedUserId = userId || (await resolveUserByContact(contact)).id;
 
   if (type === "FREE_PERIOD" && durationDays) {
     return grantSubscriptionService(
       adminId,
-      userId,
+      resolvedUserId,
       { durationDays, plan, reason },
       ipAddress
     );
   }
 
-  const user = await prisma.user.findFirst({ where: { id: userId, deletedAt: null } });
+  const user = await prisma.user.findFirst({ where: { id: resolvedUserId, deletedAt: null } });
   if (!user) throw new HttpError(404, "Kullanıcı bulunamadı.");
 
   const grant = await prisma.promoGrant.create({
     data: {
-      userId,
+      userId: resolvedUserId,
       grantedById: adminId,
       type,
       plan: plan ?? null,
@@ -179,7 +242,7 @@ export async function createPromoGrantService(adminId, body, ipAddress) {
     adminId,
     action: "PROMO_CREATE",
     targetType: "User",
-    targetId: userId,
+    targetId: resolvedUserId,
     metadata: { type, durationDays, discountPercent },
     ipAddress,
   });

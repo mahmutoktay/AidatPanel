@@ -7,8 +7,7 @@
   "scripts": {
     "dev": "node --watch src/app.js",
     "start": "node src/app.js",
-    "test:responsive": "playwright test",
-    "install":"npm install -y && npm update -y && npm upgrade -y"
+    "test:responsive": "playwright test"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",
@@ -19,5 +18,11 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0"
-  }
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

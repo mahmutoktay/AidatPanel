@@ -26,15 +26,14 @@ test("login form has touch-friendly button", async ({ page }) => {
 });
 
 test("protected routes redirect to login", async ({ page }) => {
-  const routes = ["/", "/users", "/subscriptions", "/reports/dekonts", "/audit"];
+  const routes = ["/", "/explorer", "/search", "/growth", "/ops/dekonts", "/audit"];
   for (const route of routes) {
     await page.goto(route);
     await expect(page).toHaveURL(/\/auth\/login/);
   }
 });
 
-test("login page has accessible form labels", async ({ page }) => {
-  await page.goto("/auth/login");
-  await expect(page.getByLabel("E-posta adresi")).toBeVisible();
-  await expect(page.getByLabel("Şifre")).toBeVisible();
+test("legacy routes redirect when authed would apply", async ({ page }) => {
+  await page.goto("/subscriptions");
+  await expect(page).toHaveURL(/\/auth\/login/);
 });

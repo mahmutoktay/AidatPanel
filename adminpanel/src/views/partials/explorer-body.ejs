@@ -1,0 +1,285 @@
+<%- include('flash') %>
+<%- include('page-header', { title: 'Müşteri Gezgini', description: 'Yönetici → bina → daire → sakin hiyerarşisinde gezinin.' }) %>
+
+<div
+  class="explorer-layout"
+  x-data="customerExplorer"
+  x-init="init()"
+>
+  <div class="explorer-tree">
+    <div class="explorer-tree__header">Organizasyon</div>
+    <div class="explorer-tree__body">
+      <template x-if="loadingManagers">
+        <div class="tree-loading">Yöneticiler yükleniyor…</div>
+      </template>
+      <template x-if="!loadingManagers && loadError">
+        <div class="empty-state" style="padding:1.5rem 1rem">
+          <p class="empty-state__title" x-text="loadError"></p>
+          <button type="button" class="btn btn--secondary btn--sm mt-4" @click="loadManagers()">Tekrar dene</button>
+        </div>
+      </template>
+      <template x-if="!loadingManagers && !loadError && managers.length === 0">
+        <div class="empty-state" style="padding:1.5rem 1rem">
+          <p class="empty-state__title">Kayıtlı yönetici yok</p>
+          <p class="text-muted">Sistemde henüz aktif yönetici bulunmuyor.</p>
+        </div>
+      </template>
+      <template x-for="mgr in managers" :key="mgr.id">
+        <div>
+          <button type="button" class="tree-node" :class="{ 'is-active': selected?.type === 'manager' && selected?.id === mgr.id }" @click="selectManager(mgr)">
+            <span class="tree-node__toggle" @click.stop="toggleManager(mgr.id)" x-text="expandedManagers[mgr.id] ? '▼' : '▶'"></span>
+            <span class="tree-node__content">
+              <span class="tree-node__label" x-text="mgr.name"></span>
+              <span class="tree-node__meta" x-text="[mgr.email, mgr.phone, mgr.city].filter(Boolean).join(' · ')"></span>
+            </span>
+            <span class="tree-node__badge" x-text="mgr.buildingCount + ' bina'"></span>
+          </button>
+          <div class="tree-children" x-show="expandedManagers[mgr.id]">
+            <template x-if="loadingBuildings[mgr.id]">
+              <div class="tree-loading">Binalar…</div>
+            </template>
+            <template x-for="b in (buildingsByManager[mgr.id] || [])" :key="b.id">
+              <div>
+                <button type="button" class="tree-node" :class="{ 'is-active': selected?.type === 'building' && selected?.id === b.id }" @click="selectBuilding(b, mgr)">
+                  <span class="tree-node__toggle" @click.stop="toggleBuilding(b.id)" x-text="expandedBuildings[b.id] ? '▼' : '▶'"></span>
+                  <span class="tree-node__label" x-text="b.name"></span>
+                </button>
+                <div class="tree-children" x-show="expandedBuildings[b.id]">
+                  <template x-if="loadingApts[b.id]">
+                    <div class="tree-loading">Daireler…</div>
+                  </template>
+                  <template x-for="a in (apartmentsByBuilding[b.id] || [])" :key="a.id">
+                    <button type="button" class="tree-node" :class="{ 'is-active': selected?.type === 'apartment' && selected?.id === a.id }" @click="selectApartment(a, b, mgr)">
+                      <span class="tree-node__toggle">·</span>
+                      <span class="tree-node__label" x-text="'Daire ' + a.number"></span>
+                      <span class="tree-node__badge" x-show="a.hasOverdue">gecikmiş</span>
+                    </button>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <div class="detail-pane" :class="{ 'detail-pane--empty': !detail }">
+    <template x-if="!detail && !detailLoading">
+      <div>
+        <p class="text-muted">Sol ağaçtan bir yönetici, bina veya daire seçin.</p>
+      </div>
+    </template>
+    <template x-if="detailLoading">
+      <div class="tree-loading">Yükleniyor…</div>
+    </template>
+    <template x-if="detail && !detailLoading">
+      <div>
+        <nav class="breadcrumb" aria-label="Konum">
+          <template x-for="(crumb, i) in breadcrumbs" :key="i">
+            <span x-show="i > 0" class="breadcrumb__sep">›</span>
+            <span :class="i === breadcrumbs.length - 1 ? 'breadcrumb__current' : 'breadcrumb__link'" x-text="crumb"></span>
+          </template>
+        </nav>
+
+        <template x-if="detailType === 'manager'">
+          <div>
+            <h3 class="card__title" x-text="detail.name"></h3>
+            <p class="text-secondary" x-text="detail.email || '—'"></p>
+            <ul class="info-list mt-4">
+              <li><span class="info-list__label">Abonelik</span><span class="info-list__value" x-text="detail.subscription?.status || 'Yok'"></span></li>
+              <li><span class="info-list__label">Bina sayısı</span><span class="info-list__value" x-text="detail.managedBuildings?.length || 0"></span></li>
+            </ul>
+            <a :href="'/users/' + detail.id" class="btn btn--secondary btn--sm mt-4">Tam profil</a>
+          </div>
+        </template>
+
+        <template x-if="detailType === 'building'">
+          <div>
+            <h3 class="card__title" x-text="detail.name"></h3>
+            <p class="text-secondary" x-text="(detail.city || '') + (detail.district ? ', ' + detail.district : '')"></p>
+            <p class="text-muted mt-2">Yönetici: <span x-text="detail.manager?.name"></span></p>
+            <p class="text-muted">Daire sayısı: <span x-text="detail.apartments?.length || 0"></span></p>
+          </div>
+        </template>
+
+        <template x-if="detailType === 'apartment'">
+          <div>
+            <h3 class="card__title" x-text="'Daire ' + detail.number"></h3>
+            <p class="text-secondary" x-text="detail.building?.name"></p>
+            <template x-if="detail.resident && !detail.resident.deletedAt">
+              <div>
+                <ul class="info-list mt-4">
+                  <li><span class="info-list__label">Sakin</span><span class="info-list__value" x-text="detail.resident.name"></span></li>
+                  <li><span class="info-list__label">E-posta</span><span class="info-list__value" x-text="detail.resident.email || '—'"></span></li>
+                </ul>
+                <template x-if="detail.paymentHabits">
+                  <div class="insight-grid mt-4" style="grid-template-columns:repeat(2,1fr)">
+                    <div class="insight-card">
+                      <div class="insight-card__label">Zamanında ödeme</div>
+                      <div class="insight-card__value" x-text="(detail.paymentHabits.onTimeRate ?? '—') + (detail.paymentHabits.onTimeRate != null ? '%' : '')"></div>
+                    </div>
+                    <div class="insight-card">
+                      <div class="insight-card__label">Gecikmiş</div>
+                      <div class="insight-card__value" x-text="detail.paymentHabits.overdueCount"></div>
+                    </div>
+                  </div>
+                </template>
+                <a :href="'/users/' + detail.resident.id" class="btn btn--secondary btn--sm mt-4">Sakin profili</a>
+              </div>
+            </template>
+            <template x-if="!detail.resident || detail.resident.deletedAt">
+              <p class="text-muted mt-4">Bu dairede kayıtlı sakin yok.</p>
+            </template>
+          </div>
+        </template>
+      </div>
+    </template>
+  </div>
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+  Alpine.data('customerExplorer', () => buildCustomerExplorer(
+    <%- JSON.stringify(focus || '') %>,
+    <%- JSON.stringify(typeof initialManagers !== 'undefined' ? initialManagers : []) %>,
+    <%- JSON.stringify(typeof managersError !== 'undefined' && managersError ? managersError : null) %>
+  ));
+});
+
+function buildCustomerExplorer(focusId, initialManagers, initialError) {
+  return {
+    focusId,
+    managers: Array.isArray(initialManagers) ? initialManagers : [],
+    loadingManagers: false,
+    loadError: initialError || null,
+    expandedManagers: {},
+    expandedBuildings: {},
+    buildingsByManager: {},
+    apartmentsByBuilding: {},
+    loadingBuildings: {},
+    loadingApts: {},
+    selected: null,
+    detail: null,
+    detailType: null,
+    detailLoading: false,
+    breadcrumbs: [],
+
+    async init() {
+      if (!this.managers.length && !this.loadError) {
+        await this.loadManagers();
+      }
+      if (this.focusId) {
+        const mgr = this.managers.find((m) => m.id === this.focusId);
+        if (mgr) await this.selectManager(mgr);
+      }
+    },
+
+    async loadManagers() {
+      this.loadingManagers = true;
+      this.loadError = null;
+      try {
+        const res = await fetch('/explorer/api/managers?limit=50', { credentials: 'same-origin' });
+        const json = await res.json();
+        if (!res.ok || json.success === false) {
+          this.loadError = json.message || 'Yöneticiler yüklenemedi.';
+          this.managers = [];
+          return;
+        }
+        this.managers = json.data?.items || [];
+      } catch {
+        this.loadError = 'Bağlantı hatası. Lütfen tekrar deneyin.';
+        this.managers = [];
+      } finally {
+        this.loadingManagers = false;
+      }
+    },
+
+    async toggleManager(id) {
+      this.expandedManagers[id] = !this.expandedManagers[id];
+      if (this.expandedManagers[id] && !this.buildingsByManager[id]) {
+        await this.fetchManagerBuildings(id);
+      }
+    },
+
+    async fetchManagerBuildings(managerId) {
+      this.loadingBuildings[managerId] = true;
+      try {
+        const res = await fetch('/explorer/api/managers/' + managerId, { credentials: 'same-origin' });
+        const json = await res.json();
+        this.buildingsByManager[managerId] = json.data?.managedBuildings || [];
+      } finally {
+        this.loadingBuildings[managerId] = false;
+      }
+    },
+
+    async toggleBuilding(id) {
+      this.expandedBuildings[id] = !this.expandedBuildings[id];
+      if (this.expandedBuildings[id] && !this.apartmentsByBuilding[id]) {
+        await this.fetchBuildingApartments(id);
+      }
+    },
+
+    async fetchBuildingApartments(buildingId) {
+      this.loadingApts[buildingId] = true;
+      try {
+        const res = await fetch('/explorer/api/buildings/' + buildingId, { credentials: 'same-origin' });
+        const json = await res.json();
+        this.apartmentsByBuilding[buildingId] = json.data?.apartments || [];
+      } finally {
+        this.loadingApts[buildingId] = false;
+      }
+    },
+
+    async selectManager(mgr) {
+      this.selected = { type: 'manager', id: mgr.id };
+      this.detailLoading = true;
+      try {
+        const res = await fetch('/explorer/api/managers/' + mgr.id, { credentials: 'same-origin' });
+        const json = await res.json();
+        this.detail = json.data;
+        this.detailType = 'manager';
+        this.breadcrumbs = [mgr.name];
+        if (!this.expandedManagers[mgr.id]) {
+          this.expandedManagers[mgr.id] = true;
+          await this.fetchManagerBuildings(mgr.id);
+        }
+      } finally {
+        this.detailLoading = false;
+      }
+    },
+
+    async selectBuilding(b, mgr) {
+      this.selected = { type: 'building', id: b.id };
+      this.detailLoading = true;
+      try {
+        const res = await fetch('/explorer/api/buildings/' + b.id, { credentials: 'same-origin' });
+        const json = await res.json();
+        this.detail = json.data;
+        this.detailType = 'building';
+        this.breadcrumbs = [mgr.name, b.name];
+        if (!this.expandedBuildings[b.id]) {
+          this.expandedBuildings[b.id] = true;
+          await this.fetchBuildingApartments(b.id);
+        }
+      } finally {
+        this.detailLoading = false;
+      }
+    },
+
+    async selectApartment(a, b, mgr) {
+      this.selected = { type: 'apartment', id: a.id };
+      this.detailLoading = true;
+      try {
+        const res = await fetch('/explorer/api/apartments/' + a.id, { credentials: 'same-origin' });
+        const json = await res.json();
+        this.detail = json.data;
+        this.detailType = 'apartment';
+        this.breadcrumbs = [mgr.name, b.name, 'Daire ' + a.number];
+      } finally {
+        this.detailLoading = false;
+      }
+    },
+  };
+}
+</script>

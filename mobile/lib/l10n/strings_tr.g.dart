@@ -1150,6 +1150,7 @@ class _Translations$features$notifications$tr implements Translations$features$n
 	@override String get typeDekontPaymentApplied => 'Dekont onaylandı';
 	@override String get typeExpenseAdded => 'Yeni gider';
 	@override String get typeSystem => 'Sistem';
+	@override String get typeAidatPanelTeam => 'AidatPanel Ekibi';
 	@override String get typeOther => 'Bildirim';
 	@override String get allApartmentsTag => 'Tüm daireler';
 	@override String get sendTitle => 'Sakinlere Duyuru';
@@ -2446,6 +2447,7 @@ extension on TranslationsTr {
 			'features.notifications.typeDekontPaymentApplied' => 'Dekont onaylandı',
 			'features.notifications.typeExpenseAdded' => 'Yeni gider',
 			'features.notifications.typeSystem' => 'Sistem',
+			'features.notifications.typeAidatPanelTeam' => 'AidatPanel Ekibi',
 			'features.notifications.typeOther' => 'Bildirim',
 			'features.notifications.allApartmentsTag' => 'Tüm daireler',
 			'features.notifications.sendTitle' => 'Sakinlere Duyuru',
@@ -2502,9 +2504,9 @@ extension on TranslationsTr {
 			'features.subscription.statusUnknown' => 'Bilinmiyor',
 			'features.subscription.planMonthly' => 'Aylık plan',
 			'features.subscription.planAnnual' => 'Yıllık plan',
-			'features.subscription.planUnknown' => 'Plan',
 			_ => null,
 		} ?? switch (path) {
+			'features.subscription.planUnknown' => 'Plan',
 			'features.subscription.renewsOn' => 'Yenileme: {date}',
 			'features.subscription.noSubscription' => 'Henüz abonelik kaydı yok.',
 			'features.subscription.backendPending' => 'Abonelik sunucuya henüz bağlanmadı. Satın alma yakında açılacak.',

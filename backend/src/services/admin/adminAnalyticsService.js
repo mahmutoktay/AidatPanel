@@ -1,6 +1,11 @@
 import { prisma } from "../../config/db.js";
 import { HttpError } from "../../utils/httpError.js";
 import { writeAdminAuditLog } from "./adminAuditService.js";
+import { createForUsers } from "../notificationService.js";
+import { NOTIFICATION_CODES } from "../../constants/notificationCatalog.js";
+import { NOTIFICATION_TYPES } from "../../constants/notificationConstants.js";
+
+const BROADCAST_BATCH_SIZE = 200;
 
 export async function aggregateUserActivityDaily() {
   const today = new Date();
@@ -85,9 +90,9 @@ export async function markNotificationReadService(adminId, notificationId) {
 
 export async function broadcastNotificationService(adminId, body, ipAddress) {
   const { title, body: msg, segment = {} } = body;
-  if (!title || !msg) throw new HttpError(400, "title ve body zorunludur.");
+  if (!title || !msg) throw new HttpError(400, "Başlık ve mesaj zorunludur.");
 
-  const userWhere = { deletedAt: null, fcmToken: { not: null } };
+  const userWhere = { deletedAt: null };
   if (segment.role) userWhere.role = segment.role;
   if (segment.plan || segment.expiringWithinDays) {
     userWhere.subscription = {};
@@ -106,27 +111,54 @@ export async function broadcastNotificationService(adminId, body, ipAddress) {
   const users = await prisma.user.findMany({
     where: userWhere,
     select: { id: true, fcmToken: true },
-    take: 500,
+    take: 2000,
   });
 
-  await prisma.adminNotification.create({
-    data: {
-      adminId,
-      title,
-      body: msg,
-      type: "BROADCAST",
-      metadata: { recipientCount: users.length, segment },
-    },
-  });
+  if (users.length === 0) {
+    return { recipientCount: 0, pushSent: 0, pushFailed: 0, note: "Hedef kitlede kullanıcı bulunamadı." };
+  }
+
+  const userIds = users.map((u) => u.id);
+  let pushSent = 0;
+  let pushFailed = 0;
+  let pushSkipped = 0;
+  let dbCount = 0;
+
+  for (let i = 0; i < userIds.length; i += BROADCAST_BATCH_SIZE) {
+    const batch = userIds.slice(i, i + BROADCAST_BATCH_SIZE);
+    const result = await createForUsers(batch, {
+      type: NOTIFICATION_TYPES.ANNOUNCEMENT,
+      code: NOTIFICATION_CODES.ANNOUNCEMENT_CUSTOM,
+      params: { title, body: msg },
+      data: { source: "admin_broadcast", segment },
+    });
+    pushSent += result.pushSent;
+    pushFailed += result.pushFailed;
+    pushSkipped += result.pushSkipped;
+    dbCount += result.dbCount;
+  }
 
   await writeAdminAuditLog({
     adminId,
     action: "NOTIFICATION_BROADCAST",
-    metadata: { recipientCount: users.length },
+    metadata: {
+      recipientCount: users.length,
+      pushSent,
+      pushFailed,
+      pushSkipped,
+      segment,
+    },
     ipAddress,
   });
 
-  return { recipientCount: users.length, note: "FCM gönderimi admin broadcast kaydı oluşturuldu." };
+  return {
+    recipientCount: users.length,
+    pushSent,
+    pushFailed,
+    pushSkipped,
+    dbCount,
+    note: "Bildirimler mobil uygulama kullanıcılarına gönderildi.",
+  };
 }
 
 export async function createSystemAdminNotification({ title, body, metadata }) {

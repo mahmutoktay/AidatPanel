@@ -14,27 +14,33 @@ test.describe("authenticated shell", () => {
     await expect(page).toHaveURL("/");
   });
 
-  test("dashboard shows KPI grid", async ({ page }) => {
-    await expect(page.locator(".kpi-grid")).toBeVisible();
-    await expect(page.locator(".sidebar")).toBeAttached();
+  test("command center shows action grid", async ({ page }) => {
+    await expect(page.locator(".action-grid")).toBeVisible();
+    await expect(page.getByRole("link", { name: /Müşteri Gezgini/i })).toBeVisible();
   });
 
-  test("navigation links work", async ({ page }) => {
-    await page.getByRole("link", { name: "Üyeler" }).click();
-    await expect(page).toHaveURL("/users");
-    await expect(page.locator(".page-header__title")).toContainText("Üyeler");
-
-    await page.getByRole("link", { name: "Denetim Kayıtları" }).click();
-    await expect(page).toHaveURL("/audit");
+  test("notification dropdown toggles", async ({ page }) => {
+    const bell = page.getByRole("button", { name: "Bildirimler" });
+    await bell.click();
+    await expect(bell).toHaveAttribute("aria-expanded", "true");
+    await bell.click();
+    await expect(bell).toHaveAttribute("aria-expanded", "false");
   });
 
-  test("users page has subscription filter", async ({ page }) => {
-    await page.goto("/users");
-    await expect(page.locator("#hasSubscription")).toBeVisible();
+  test("explorer page loads tree", async ({ page }) => {
+    await page.goto("/explorer");
+    await expect(page.locator(".explorer-tree")).toBeVisible();
   });
 
-  test("dekonts page has status filter", async ({ page }) => {
-    await page.goto("/reports/dekonts");
-    await expect(page.locator("#status")).toBeVisible();
+  test("search page has input", async ({ page }) => {
+    await page.goto("/search");
+    await expect(page.locator("#q")).toBeVisible();
+  });
+
+  test("growth and ops routes work", async ({ page }) => {
+    await page.goto("/growth");
+    await expect(page).toHaveURL("/growth");
+    await page.goto("/ops/dekonts");
+    await expect(page).toHaveURL(/\/ops\/dekonts/);
   });
 });

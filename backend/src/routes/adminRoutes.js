@@ -10,6 +10,7 @@ import {
   closeUserAccount,
   listSubscriptions,
   grantSubscription,
+  grantSubscriptionByContact,
   listPromos,
   createPromo,
   dekontSummary,
@@ -17,6 +18,14 @@ import {
   listResidents,
   paymentHabits,
   dashboardKpis,
+  dashboardAlerts,
+  dashboardInsights,
+  dashboardSegments,
+  hierarchyManagers,
+  hierarchyManagerDetail,
+  hierarchyBuildingDetail,
+  hierarchyApartmentDetail,
+  previewBroadcast,
   activeUsers,
   listNotifications,
   readNotification,
@@ -43,6 +52,14 @@ router.use(adminAuthMiddleware);
 router.post("/auth/logout", adminLogout);
 router.get("/auth/me", adminMe);
 router.get("/dashboard/kpis", dashboardKpis);
+router.get("/dashboard/alerts", dashboardAlerts);
+router.get("/dashboard/insights", dashboardInsights);
+router.get("/dashboard/segments", dashboardSegments);
+
+router.get("/hierarchy/managers", validate(adminSchemas.listManagers), hierarchyManagers);
+router.get("/hierarchy/managers/:id", hierarchyManagerDetail);
+router.get("/hierarchy/buildings/:id", hierarchyBuildingDetail);
+router.get("/hierarchy/apartments/:id", hierarchyApartmentDetail);
 
 router.get("/users", validate(adminSchemas.listUsers), listUsers);
 router.get("/users/:id", getUser);
@@ -50,6 +67,7 @@ router.post("/users/:id/reset-password", strictLimiter, resetUserPassword);
 router.post("/users/:id/close-account", strictLimiter, requireSuperAdmin, validate(adminSchemas.closeAccount), closeUserAccount);
 
 router.get("/subscriptions", listSubscriptions);
+router.post("/subscriptions/grant", strictLimiter, validate(adminSchemas.grantByContact), grantSubscriptionByContact);
 router.post("/subscriptions/:userId/grant", strictLimiter, validate(adminSchemas.grantSubscription), grantSubscription);
 
 router.get("/promos", listPromos);
@@ -66,6 +84,7 @@ router.get("/analytics/active-users", validate(adminSchemas.analytics), activeUs
 router.get("/notifications", listNotifications);
 router.patch("/notifications/:id/read", readNotification);
 router.post("/notifications/broadcast", strictLimiter, validate(adminSchemas.broadcast), broadcastNotification);
+router.post("/notifications/preview", validate(adminSchemas.broadcastPreview), previewBroadcast);
 
 router.get("/audit-logs", listAuditLogs);
 

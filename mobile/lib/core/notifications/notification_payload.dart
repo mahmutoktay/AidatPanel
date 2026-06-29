@@ -11,6 +11,7 @@ class NotificationPayload {
   final String? status;
   final String? route;
   final String? sessionId;
+  final String? code;
 
   const NotificationPayload({
     this.type,
@@ -22,6 +23,7 @@ class NotificationPayload {
     this.status,
     this.route,
     this.sessionId,
+    this.code,
   });
 
   factory NotificationPayload.fromFcmData(Map<String, dynamic> data) {
@@ -41,8 +43,25 @@ class NotificationPayload {
       status: str(data['status']),
       route: str(data['route']),
       sessionId: str(data['sessionId']),
+      code: str(data['code']),
     );
   }
+
+  static const _managerSubscriptionPath = '/manager-dashboard/subscription';
+
+  static String? _normalizeRoute(String? route) {
+    if (route == null || route.isEmpty) return route;
+    if (route == '/subscription' ||
+        route == '/subcription' ||
+        route.endsWith('/subscription')) {
+      return _managerSubscriptionPath;
+    }
+    return route;
+  }
+
+  bool get _isSubscriptionNavigation =>
+      code == 'subscription_granted_admin' ||
+      (route != null && route!.contains('subscription'));
 
   String _dashboardPath({
     required String basePath,
@@ -83,7 +102,7 @@ class NotificationPayload {
         if (did != null) return '/dekonts/$did';
         return role == UserRole.manager ? '/manager/dekonts' : '/dekonts';
       case 'ANNOUNCEMENT':
-        return route ?? '/notifications';
+        return _normalizeRoute(route) ?? '/notifications';
       case 'DUE_PAID':
       case 'DUE_REMINDER':
       case 'EXPENSE_ADDED':
@@ -100,10 +119,14 @@ class NotificationPayload {
           role: role,
         );
       default:
+        if (_isSubscriptionNavigation) return _managerSubscriptionPath;
         if (normalized == 'SYSTEM' && did != null) {
           return '/dekonts/$did';
         }
-        if (route != null && route!.isNotEmpty) return route;
+        final normalizedRoute = _normalizeRoute(route);
+        if (normalizedRoute != null && normalizedRoute.isNotEmpty) {
+          return normalizedRoute;
+        }
         return '/notifications';
     }
   }

@@ -122,7 +122,7 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      n.type.label(context),
+                      n.senderLabel(context),
                       style: AppTypography.caption.copyWith(
                         color: visual.color,
                         fontWeight: FontWeight.w800,

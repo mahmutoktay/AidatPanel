@@ -36,14 +36,25 @@ export const adminSchemas = {
     }),
   },
   createPromo: {
+    body: z
+      .object({
+        userId: z.string().uuid().optional(),
+        contact: z.string().min(3).optional(),
+        type: z.enum(["FREE_PERIOD", "DISCOUNT_PERCENT"]),
+        plan: z.string().optional(),
+        durationDays: z.coerce.number().int().optional(),
+        discountPercent: z.coerce.number().int().min(1).max(100).optional(),
+        reason: z.string().min(3),
+        expiresAt: z.string().datetime().optional(),
+      })
+      .refine((d) => d.userId || d.contact, { message: "Kullanıcı ID veya e-posta/telefon gerekli." }),
+  },
+  grantByContact: {
     body: z.object({
-      userId: z.string().uuid(),
-      type: z.enum(["FREE_PERIOD", "DISCOUNT_PERCENT"]),
-      plan: z.string().optional(),
-      durationDays: z.coerce.number().int().optional(),
-      discountPercent: z.coerce.number().int().min(1).max(100).optional(),
+      contact: z.string().min(3),
+      durationDays: z.coerce.number().int().min(1).max(730),
+      plan: z.enum(["monthly", "annual"]).optional(),
       reason: z.string().min(3),
-      expiresAt: z.string().datetime().optional(),
     }),
   },
   broadcast: {
@@ -73,6 +84,25 @@ export const adminSchemas = {
       period: z.enum(["day", "month"]).optional(),
       role: z.enum(["MANAGER", "RESIDENT"]).optional(),
       days: z.coerce.number().int().min(7).max(365).optional(),
+    }),
+  },
+  listManagers: {
+    query: z.object({
+      q: z.string().optional(),
+      page: z.coerce.number().int().min(1).optional(),
+      limit: z.coerce.number().int().min(1).max(100).optional(),
+    }),
+  },
+  broadcastPreview: {
+    body: z.object({
+      segment: z
+        .object({
+          role: z.enum(["MANAGER", "RESIDENT"]).optional(),
+          plan: z.string().optional(),
+          city: z.string().optional(),
+          expiringWithinDays: z.coerce.number().int().optional(),
+        })
+        .optional(),
     }),
   },
 };

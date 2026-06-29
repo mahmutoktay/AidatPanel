@@ -1,7 +1,7 @@
 {
   "name": "aidatpanel",
   "version": "1.0.0",
-  "description": "",
+  "description": "Türk apartman ve site yöneticileri için aidat yönetim platformunun Node.js API'si (Express 5, Prisma 7, PostgreSQL).",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
@@ -13,9 +13,7 @@
     "test:dekont-regex": "node tools/parseDekontSamples.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "seed:admin": "node scripts/seed-admin.js",
-    "postinstall": "prisma migrate deploy && prisma generate && prisma db push",
-    "install":"npm install -y && npm update -y && npm upgrade -y"
+    "seed:admin": "node scripts/seed-admin.js"
   },
   "keywords": [],
   "author": "",

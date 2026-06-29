@@ -12,14 +12,26 @@ export async function adminApi(path, { method = "GET", body, cookies, query } = 
   if (body) headers["Content-Type"] = "application/json";
   if (cookies) headers.Cookie = cookies;
 
-  const res = await fetch(url, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  try {
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
 
-  const json = await res.json().catch(() => ({}));
-  return { status: res.status, ok: res.ok, json, headers: res.headers };
+    const json = await res.json().catch(() => ({}));
+    return { status: res.status, ok: res.ok, json, headers: res.headers };
+  } catch (err) {
+    return {
+      status: 0,
+      ok: false,
+      json: {
+        success: false,
+        message: `API bağlantı hatası: ${err.message}. Backend adresi: ${API_BASE}`,
+      },
+      fetchError: true,
+    };
+  }
 }
 
 export function cookieHeader(req) {
