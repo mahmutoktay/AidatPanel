@@ -1,0 +1,119 @@
+<%- include('flash') %>
+<%- include('page-header', { title: 'Abonelikler', description: 'Aktif planları görüntüleyin, promo tanımlayın ve süresi dolacak abonelikleri takip edin.' }) %>
+
+<div class="card mb-6">
+  <div class="card__header">
+    <div>
+      <h3 class="card__title">Abonelik Hediye Et</h3>
+      <p class="card__subtitle">Kullanıcı ID ile manuel abonelik tanımlama</p>
+    </div>
+  </div>
+  <form method="post" action="/subscriptions/grant" class="form-grid form-grid--2">
+    <div class="form-group"><label>Kullanıcı ID</label><input class="form-control" name="userId" required placeholder="ör. clx..."></div>
+    <div class="form-group"><label>Süre (gün)</label><input class="form-control" type="number" name="durationDays" value="30" min="1"></div>
+    <div class="form-group"><label>Plan</label><select class="form-control" name="plan"><option value="monthly">Aylık</option><option value="annual">Yıllık</option></select></div>
+    <div class="form-group"><label>Gerekçe</label><input class="form-control" name="reason" required minlength="3" placeholder="Promo nedeni"></div>
+    <div><button type="submit" class="btn btn--primary">Abonelik Tanımla</button></div>
+  </form>
+</div>
+
+<div class="card mb-6" x-data="{ promoType: 'FREE_PERIOD' }">
+  <div class="card__header">
+    <div>
+      <h3 class="card__title">Promosyon Oluştur</h3>
+      <p class="card__subtitle">Ücretsiz süre veya indirim promosyonu tanımlayın</p>
+    </div>
+  </div>
+  <form method="post" action="/subscriptions/promos" class="form-grid form-grid--2">
+    <div class="form-group"><label>Kullanıcı ID</label><input class="form-control" name="userId" required placeholder="UUID"></div>
+    <div class="form-group">
+      <label>Promo türü</label>
+      <select class="form-control" name="type" x-model="promoType">
+        <option value="FREE_PERIOD">Ücretsiz süre</option>
+        <option value="DISCOUNT_PERCENT">İndirim yüzdesi</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Plan</label><select class="form-control" name="plan"><option value="monthly">Aylık</option><option value="annual">Yıllık</option></select></div>
+    <div class="form-group" x-show="promoType === 'FREE_PERIOD'">
+      <label>Süre (gün)</label>
+      <input class="form-control" type="number" name="durationDays" value="30" min="1" :required="promoType === 'FREE_PERIOD'">
+    </div>
+    <div class="form-group" x-show="promoType === 'DISCOUNT_PERCENT'">
+      <label>İndirim (%)</label>
+      <input class="form-control" type="number" name="discountPercent" min="1" max="100" placeholder="20" :required="promoType === 'DISCOUNT_PERCENT'">
+    </div>
+    <div class="form-group" style="grid-column:1/-1"><label>Gerekçe</label><input class="form-control" name="reason" required minlength="3" placeholder="Promosyon gerekçesi"></div>
+    <div><button type="submit" class="btn btn--primary">Promosyon Oluştur</button></div>
+  </form>
+</div>
+
+<div class="filter-panel" x-data="{ open: false }" :class="{ 'is-open': open }">
+  <button type="button" class="filter-panel__toggle mobile-only" @click="open = !open"><span>Filtreler</span><span>▼</span></button>
+  <form class="filter-panel__body" method="get">
+    <div class="form-group" style="margin:0;min-width:120px">
+      <label>Plan</label>
+      <select class="form-control" name="plan">
+        <option value="">Tümü</option>
+        <option value="monthly" <%= filters.plan === 'monthly' ? 'selected' : '' %>>Aylık</option>
+        <option value="annual" <%= filters.plan === 'annual' ? 'selected' : '' %>>Yıllık</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:120px">
+      <label>Durum</label>
+      <select class="form-control" name="status">
+        <option value="">Tümü</option>
+        <option value="ACTIVE" <%= filters.status === 'ACTIVE' ? 'selected' : '' %>>Aktif</option>
+        <option value="EXPIRED" <%= filters.status === 'EXPIRED' ? 'selected' : '' %>>Süresi Dolmuş</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:120px">
+      <label>Bitiş (gün içinde)</label>
+      <input class="form-control" name="expiringWithinDays" type="number" placeholder="7" value="<%= filters.expiringWithinDays || '' %>">
+    </div>
+    <button type="submit" class="btn btn--primary">Filtrele</button>
+  </form>
+</div>
+
+<% if (!subscriptions.length) { %>
+<div class="card"><div class="empty-state"><p class="empty-state__title">Abonelik bulunamadı</p></div></div>
+<% } else { %>
+<div class="data-table-wrap">
+  <table class="data-table">
+    <thead><tr><th>Kullanıcı</th><th>Plan</th><th>Durum</th><th>Bitiş</th><th>Platform</th></tr></thead>
+    <tbody>
+      <% subscriptions.forEach(s => { %>
+      <tr>
+        <td><strong><%= s.user?.name || '—' %></strong></td>
+        <td><%= s.plan === 'monthly' ? 'Aylık' : s.plan === 'annual' ? 'Yıllık' : s.plan %></td>
+        <td><span class="badge badge--<%= s.status === 'ACTIVE' ? 'success' : 'warning' %>"><%= s.status === 'ACTIVE' ? 'Aktif' : s.status %></span></td>
+        <td><%= new Date(s.currentPeriodEnd).toLocaleDateString('tr-TR') %></td>
+        <td class="text-secondary"><%= s.platform || '—' %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<div class="data-cards">
+  <% subscriptions.forEach(s => { %>
+  <div class="data-card">
+    <div class="data-card__header"><h3 class="data-card__title"><%= s.user?.name %></h3><span class="badge badge--<%= s.status === 'ACTIVE' ? 'success' : 'warning' %>"><%= s.status %></span></div>
+    <p class="data-card__meta"><%= s.plan %> · <%= new Date(s.currentPeriodEnd).toLocaleDateString('tr-TR') %></p>
+  </div>
+  <% }) %>
+</div>
+<% } %>
+
+<%- include('./pagination', { pagination, basePath: '/subscriptions', query: filters }) %>
+
+<% if (promos.length) { %>
+<h3 class="section-title">Son Promosyonlar</h3>
+<ul class="promo-list">
+  <% promos.forEach(p => { %>
+  <li>
+    <span class="promo-list__reason"><%= p.reason %></span>
+    <span class="promo-list__meta"><%= p.type %> · <%= new Date(p.createdAt).toLocaleDateString('tr-TR') %></span>
+  </li>
+  <% }) %>
+</ul>
+<% } %>

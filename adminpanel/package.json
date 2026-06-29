@@ -1,0 +1,23 @@
+{
+  "name": "aidatpanel-admin",
+  "version": "1.0.0",
+  "description": "AidatPanel internal admin panel",
+  "type": "module",
+  "main": "src/app.js",
+  "scripts": {
+    "dev": "node --watch src/app.js",
+    "start": "node src/app.js",
+    "test:responsive": "playwright test",
+    "install":"npm install -y && npm update -y && npm upgrade -y"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "ejs": "^3.1.10",
+    "express": "^5.2.1",
+    "helmet": "^8.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

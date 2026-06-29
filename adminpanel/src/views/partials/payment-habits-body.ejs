@@ -1,0 +1,37 @@
+<a href="/reports/residents" class="btn btn--ghost btn--sm mb-4">
+  <%- include('icon', { name: 'arrowLeft' }) %> Sakinlere dön
+</a>
+
+<div class="card mb-4">
+  <div class="card__header">
+    <div>
+      <h2 class="card__title"><%= habits.name %></h2>
+      <p class="card__subtitle">Ödeme alışkanlığı özeti</p>
+    </div>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="card card--kpi card--kpi--blue">
+    <div class="card__top"><span class="card__label">Toplam Aidat</span></div>
+    <p class="card__value"><%= habits.totalDues %></p>
+  </div>
+  <div class="card card--kpi card--kpi--green">
+    <div class="card__top"><span class="card__label">Ödenen</span></div>
+    <p class="card__value"><%= habits.paidCount %></p>
+  </div>
+  <div class="card card--kpi card--kpi--purple">
+    <div class="card__top"><span class="card__label">Zamanında Ödeme</span></div>
+    <p class="card__value"><%= habits.onTimeRate != null ? habits.onTimeRate + '%' : '—' %></p>
+  </div>
+  <div class="card card--kpi card--kpi--amber">
+    <div class="card__top"><span class="card__label">Ort. Gecikme (gün)</span></div>
+    <p class="card__value"><%= habits.avgDelayDays ?? '—' %></p>
+  </div>
+</div>
+
+<div class="card mt-4">
+  <ul class="info-list">
+    <li><span class="info-list__label">Gecikmiş aidat sayısı</span><span class="info-list__value"><%= habits.overdueCount %></span></li>
+  </ul>
+</div>

@@ -1,0 +1,8 @@
+<% if (typeof title !== 'undefined' && title) { %>
+<div class="page-header">
+  <h2 class="page-header__title"><%= title %></h2>
+  <% if (typeof description !== 'undefined' && description) { %>
+    <p class="page-header__desc"><%= description %></p>
+  <% } %>
+</div>
+<% } %>

@@ -1,0 +1,14 @@
+<% const flashMessages = {
+  granted: { type: 'success', text: 'Abonelik başarıyla tanımlandı.' },
+  promo: { type: 'success', text: 'Promosyon oluşturuldu.' },
+  sent: { type: 'success', text: 'Bildirim gönderildi.' },
+  reset: { type: 'success', text: 'Şifre sıfırlama e-postası gönderildi.' },
+  closed: { type: 'success', text: 'Hesap kapatıldı.' },
+  backup: { type: 'success', text: 'Yedekleme başlatıldı.' },
+  started: { type: 'success', text: 'Yedekleme işlemi başlatıldı.' },
+  error: { type: 'error', text: 'İndirme bağlantısı oluşturulamadı.' },
+}; %>
+<% const msg = typeof flash !== 'undefined' ? flash : (typeof queryMsg !== 'undefined' && flashMessages[queryMsg] ? flashMessages[queryMsg] : null); %>
+<% if (msg) { %>
+<div class="alert alert--<%= msg.type %>"><%= msg.text %></div>
+<% } %>

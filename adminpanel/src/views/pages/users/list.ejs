@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> — AidatPanel Admin</title>
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+<body>
+  <% const contentHtml = include('../partials/users-list-body', { users, pagination, filters }) %>
+  <%- include('../partials/shell', { title, admin, currentPath: '/users', notifications: [], content: contentHtml }) %>
+</body>
+</html>

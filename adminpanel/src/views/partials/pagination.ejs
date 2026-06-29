@@ -1,0 +1,12 @@
+<% if (pagination && pagination.totalPages > 1) { %>
+<nav class="pagination" aria-label="Sayfalama">
+  <% const page = pagination.page || 1; %>
+  <% if (page > 1) { %>
+    <a class="btn btn--secondary" href="<%= basePath %>?<%= new URLSearchParams({ ...query, page: page - 1 }).toString() %>">Önceki</a>
+  <% } %>
+  <span class="pagination__info">Sayfa <%= page %> / <%= pagination.totalPages %></span>
+  <% if (page < pagination.totalPages) { %>
+    <a class="btn btn--secondary" href="<%= basePath %>?<%= new URLSearchParams({ ...query, page: page + 1 }).toString() %>">Sonraki</a>
+  <% } %>
+</nav>
+<% } %>

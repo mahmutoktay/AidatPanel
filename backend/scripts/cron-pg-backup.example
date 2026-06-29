@@ -1,0 +1,2 @@
+# Her gece 03:00 — VPS otomasyon yedeklemesi (panel yedeklerinden ayrı dizin)
+0 3 * * * root mkdir -p /var/backups/aidatpanel-cron && pg_dump "$DATABASE_URL" --no-owner --no-acl | gzip > /var/backups/aidatpanel-cron/aidatpanel-$(date +\%Y\%m\%d-\%H\%M).sql.gz 2>> /var/log/aidatpanel-backup.log

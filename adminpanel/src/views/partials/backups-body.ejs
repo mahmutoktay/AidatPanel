@@ -1,0 +1,51 @@
+<%- include('flash') %>
+<%- include('page-header', { title: 'Veritabanı Yedekleri', description: 'Yedekler yalnızca indirilebilir. Geri yükleme SSH üzerinden yapılır.' }) %>
+
+<div class="alert alert--info mb-6">
+  Geri yükleme işlemi güvenlik nedeniyle web panelinden yapılamaz. SSH: <code>backend/scripts/restore-db.sh</code>
+</div>
+
+<form method="post" action="/backups/create" class="mb-6">
+  <button type="submit" class="btn btn--primary">
+    <%- include('icon', { name: 'backup' }) %> Veritabanını Yedekle
+  </button>
+</form>
+
+<% if (!backups.length) { %>
+<div class="card"><div class="empty-state"><p class="empty-state__title">Henüz yedek yok</p><p>İlk yedeği oluşturmak için yukarıdaki butonu kullanın.</p></div></div>
+<% } else { %>
+<div class="data-table-wrap">
+  <table class="data-table">
+    <thead><tr><th>Dosya</th><th>Durum</th><th>Boyut</th><th>Tarih</th><th></th></tr></thead>
+    <tbody>
+      <% backups.forEach(b => { %>
+      <tr>
+        <td class="truncate" style="max-width:240px"><strong><%= b.filename %></strong></td>
+        <td><span class="badge badge--<%= b.status === 'COMPLETED' ? 'success' : b.status === 'FAILED' ? 'danger' : 'warning' %>"><%= b.status %></span></td>
+        <td class="text-secondary"><%= b.sizeBytes ? (Number(b.sizeBytes) / 1024 / 1024).toFixed(2) + ' MB' : '—' %></td>
+        <td class="text-secondary"><%= new Date(b.createdAt).toLocaleString('tr-TR') %></td>
+        <td>
+          <% if (b.status === 'COMPLETED') { %>
+          <form method="post" action="/backups/<%= b.id %>/download-token" style="display:inline">
+            <button type="submit" class="btn btn--secondary btn--sm"><%- include('icon', { name: 'download' }) %> İndir</button>
+          </form>
+          <% } %>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<div class="data-cards">
+  <% backups.forEach(b => { %>
+  <div class="data-card">
+    <div class="data-card__header"><h3 class="data-card__title truncate"><%= b.filename %></h3><span class="badge badge--<%= b.status === 'COMPLETED' ? 'success' : 'warning' %>"><%= b.status %></span></div>
+    <p class="data-card__meta"><%= b.sizeBytes ? (Number(b.sizeBytes) / 1024 / 1024).toFixed(2) + ' MB' : '—' %> · <%= new Date(b.createdAt).toLocaleString('tr-TR') %></p>
+    <% if (b.status === 'COMPLETED') { %>
+    <form method="post" action="/backups/<%= b.id %>/download-token" class="mt-4"><button type="submit" class="btn btn--secondary btn--sm">İndir</button></form>
+    <% } %>
+  </div>
+  <% }) %>
+</div>
+<% } %>

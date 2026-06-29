@@ -44,8 +44,10 @@ model User {
   uploadedDekonts     Dekont[]
   reviewedDekonts     Dekont[]     @relation("DekontReviewer")
   sessions            UserSession[]
+  promoGrants         PromoGrant[]
 
   @@index([apartmentId])
+  @@index([role, deletedAt, createdAt])
 }
 
 /// Cihaz bazlı oturum takibi — login/join'de oluşur; revoke ile sonlandırılır.
@@ -63,6 +65,7 @@ model UserSession {
 
   @@index([userId])
   @@index([userId, revokedAt])
+  @@index([lastSeenAt])
 }
 
 /// Şifre sıfırlama: düz metin token yalnızca e-postada; DB'de SHA-256 özeti.
@@ -97,6 +100,7 @@ model Subscription {
   updatedAt          DateTime           @updatedAt
 
   @@index([userId])
+  @@index([status, currentPeriodEnd])
 }
 
 enum SubscriptionStatus {
@@ -111,6 +115,7 @@ model Site {
   name                     String
   address                  String
   city                     String
+  district                 String?
   managerId                String
   manager                  User          @relation("SiteManager", fields: [managerId], references: [id])
   buildings                Building[]
@@ -136,6 +141,7 @@ model Building {
   name              String
   address           String
   city              String
+  district          String?
   totalFloors       Int?
   apartmentsPerFloor Int?
   managerId         String
@@ -476,8 +482,111 @@ model Dekont {
   @@index([buildingId, createdAt])
   @@index([uploadedById])
   @@index([status])
+  @@index([status, createdAt])
   @@index([apartmentId])
   @@index([fileHash])
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  SUPPORT
+}
+
+model AdminUser {
+  id            String              @id @default(uuid())
+  email         String              @unique
+  passwordHash  String
+  name          String
+  role          AdminRole           @default(SUPPORT)
+  isActive      Boolean             @default(true)
+  fcmToken      String?
+  lastLoginAt   DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  auditLogs     AdminAuditLog[]
+  promoGrants   PromoGrant[]
+  notifications AdminNotification[]
+  dbBackups     DbBackup[]
+}
+
+model AdminAuditLog {
+  id         String    @id @default(uuid())
+  adminId    String
+  admin      AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  action     String
+  targetType String?
+  targetId   String?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime  @default(now())
+
+  @@index([adminId, createdAt])
+  @@index([action, createdAt])
+}
+
+enum PromoType {
+  FREE_PERIOD
+  DISCOUNT_PERCENT
+}
+
+model PromoGrant {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  grantedById     String
+  grantedBy       AdminUser @relation(fields: [grantedById], references: [id])
+  type            PromoType
+  plan            String?
+  durationDays    Int?
+  discountPercent Int?
+  reason          String
+  expiresAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([userId])
+  @@index([grantedById])
+}
+
+model UserActivityDaily {
+  id          String   @id @default(uuid())
+  date        DateTime @db.Date
+  role        UserRole
+  activeUsers Int
+  createdAt   DateTime @default(now())
+
+  @@unique([date, role])
+  @@index([date])
+}
+
+model AdminNotification {
+  id        String     @id @default(uuid())
+  adminId   String?
+  admin     AdminUser? @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  type      String     @default("SYSTEM")
+  isRead    Boolean    @default(false)
+  metadata  Json?
+  createdAt DateTime   @default(now())
+
+  @@index([adminId, isRead, createdAt])
+}
+
+model DbBackup {
+  id                     String    @id @default(uuid())
+  filename               String
+  sizeBytes              BigInt?
+  status                 String    @default("PENDING")
+  createdById            String
+  createdBy              AdminUser @relation(fields: [createdById], references: [id])
+  errorMessage           String?
+  downloadTokenHash      String?
+  downloadTokenExpiresAt DateTime?
+  createdAt              DateTime  @default(now())
+  completedAt            DateTime?
+
+  @@index([createdById, createdAt])
+  @@index([status])
 }
 
 model DuePayment {

@@ -20,12 +20,15 @@ import expenseRoutes from "./src/routes/expenseRoutes.js";
 import dekontRoutes from "./src/routes/dekontRoutes.js";
 import subscriptionRoutes from "./src/routes/subscriptionRoutes.js";
 import siteRoutes from "./src/routes/siteRoutes.js";
+import adminRoutes from "./src/routes/adminRoutes.js";
+import cookieParser from "cookie-parser";
 import { apiLimiter } from "./src/middlewares/rateLimitMiddleware.js";
 import { errorHandler, notFoundHandler } from "./src/middlewares/errorHandler.js";
 import { logger, requestLogger } from "./src/config/logger.js";
 import { attachWebSocketServer } from "./src/realtime/wsGateway.js";
 import { ensureDekontStorageDirs } from "./src/utils/ensureDekontStorage.js";
 import { startDueAutoGenerateScheduler } from "./src/jobs/dueAutoGenerateJob.js";
+import { startAdminActivityScheduler } from "./src/jobs/adminActivityJob.js";
 
 const app = express();
 
@@ -58,6 +61,7 @@ app.use(cors({
 app.use("/api/v1", apiLimiter);
 
 // BODY PARSING MIDDLEWARE'I
+app.use(cookieParser());
 app.use(express.json());
 
 // Request logging — development'da pretty print, production'da JSON stdout
@@ -84,6 +88,7 @@ app.use("/api/v1/buildings/:buildingId/apartments", apartmentRoutes);
 app.use("/api/v1/apartments/:apartmentId/invite-code", inviteCodeRoutes);
 app.use("/api/v1/me", meRoutes);
 app.use("/api/v1/subscription", subscriptionRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 app.use("/uploads/avatars", express.static("uploads/avatars"));
 
@@ -119,6 +124,7 @@ async function bootstrap() {
   });
   attachWebSocketServer(server);
   startDueAutoGenerateScheduler();
+  startAdminActivityScheduler();
 }
 
 bootstrap().catch((err) => {
