@@ -39,6 +39,25 @@ abstract class AuthRemoteDataSource {
     required String token,
     required String password,
   });
+
+  Future<void> sendOtp({
+    String? phone,
+    String? email,
+    required String purpose,
+  });
+
+  Future<LoginResponse> verifyOtp({
+    String? phone,
+    String? email,
+    required String code,
+    required String purpose,
+    Map<String, dynamic>? payload,
+    String? name,
+    String? password,
+    String? inviteCode,
+  });
+
+  Future<String> validateInviteCode(String inviteCode);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -134,5 +153,60 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       ApiConstants.resetPassword,
       data: {'token': token, 'password': password},
     );
+  }
+
+  @override
+  Future<void> sendOtp({
+    String? phone,
+    String? email,
+    required String purpose,
+  }) async {
+    await _dioClient.post(
+      ApiConstants.otpSend,
+      data: {
+        if (phone != null) 'phone': phone,
+        if (email != null) 'email': email,
+        'purpose': purpose,
+      },
+    );
+  }
+
+  @override
+  Future<LoginResponse> verifyOtp({
+    String? phone,
+    String? email,
+    required String code,
+    required String purpose,
+    Map<String, dynamic>? payload,
+    String? name,
+    String? password,
+    String? inviteCode,
+  }) async {
+    final device = await DeviceInfoService.currentDeviceMeta();
+    final response = await _dioClient.post(
+      ApiConstants.otpVerify,
+      data: {
+        if (phone != null) 'phone': phone,
+        if (email != null) 'email': email,
+        'code': code,
+        'purpose': purpose,
+        if (payload != null) 'payload': payload,
+        if (name != null) 'name': name,
+        if (password != null) 'password': password,
+        if (inviteCode != null) 'inviteCode': inviteCode,
+        ...device.toJson(),
+      },
+    );
+    return LoginResponse.fromJson(response.data['data']);
+  }
+
+  @override
+  Future<String> validateInviteCode(String inviteCode) async {
+    final response = await _dioClient.post(
+      ApiConstants.inviteValidate,
+      data: {'inviteCode': inviteCode},
+    );
+    final data = response.data['data'] as Map<String, dynamic>;
+    return data['label'] as String? ?? '';
   }
 }

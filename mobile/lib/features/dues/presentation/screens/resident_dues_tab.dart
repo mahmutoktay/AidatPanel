@@ -7,8 +7,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../expenses/presentation/providers/expenses_provider.dart';
-import '../../../expenses/presentation/widgets/expense_list_item_card.dart';
+import '../../domain/entities/due_entity.dart';
 import '../../domain/resident_dues_list.dart';
 import '../providers/dues_provider.dart';
 import '../widgets/dues_action_card.dart';
@@ -25,9 +24,8 @@ class ResidentDuesTab extends ConsumerStatefulWidget {
 class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
     with AutomaticKeepAliveClientMixin {
   final ScrollController _scrollController = ScrollController();
-  bool _requestedExpenses = false;
   bool _loadMoreInFlight = false;
-  int _selectedSegment = 0; // 0: Aidatlar, 1: Giderler
+  int _selectedSegment = 0;
 
   @override
   bool get wantKeepAlive => true;
@@ -41,10 +39,7 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
       _onScrollNearEnd,
       canLoad: () {
         if (_loadMoreInFlight) return false;
-        if (_selectedSegment == 0) {
-          return ref.read(duesNotifierProvider).canLoadMore;
-        }
-        return ref.read(expensesNotifierProvider).canLoadMore;
+        return ref.read(duesNotifierProvider).canLoadMore;
       },
     );
   }
@@ -58,35 +53,14 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
   }
 
   void _onScrollNearEnd() {
-    if (_loadMoreInFlight) return;
-
-    if (_selectedSegment == 0) {
-      final duesState = ref.read(duesNotifierProvider);
-      if (!duesState.canLoadMore) return;
-      _loadMoreInFlight = true;
-      ref
-          .read(duesNotifierProvider.notifier)
-          .loadMoreMyDues()
-          .whenComplete(() => _loadMoreInFlight = false);
-      return;
-    }
-
-    final expensesState = ref.read(expensesNotifierProvider);
-    if (!expensesState.canLoadMore) return;
+    if (_loadMoreInFlight || _selectedSegment != 1) return;
+    final duesState = ref.read(duesNotifierProvider);
+    if (!duesState.canLoadMore) return;
     _loadMoreInFlight = true;
     ref
-        .read(expensesNotifierProvider.notifier)
-        .loadMore()
+        .read(duesNotifierProvider.notifier)
+        .loadMoreMyDues()
         .whenComplete(() => _loadMoreInFlight = false);
-  }
-
-  void _onSegmentChanged(int index) {
-    if (_selectedSegment == index) return;
-    setState(() => _selectedSegment = index);
-    if (index == 1 && !_requestedExpenses) {
-      _requestedExpenses = true;
-      ref.read(expensesNotifierProvider.notifier).loadMyExpenses();
-    }
   }
 
   @override
@@ -100,12 +74,10 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
     super.build(context);
 
     final duesState = ref.watch(duesNotifierProvider);
-    final expensesState = ref.watch(expensesNotifierProvider);
-    final contentItems = _buildContentItems(
-      context,
-      duesState,
-      expensesState,
-    );
+    final split = splitResidentDuesForDisplay(duesState.dues);
+    final displayDues =
+        _selectedSegment == 0 ? split.current : split.past;
+    final contentItems = _buildDueItems(context, displayDues, duesState);
 
     return ColoredBox(
       color: AppColors.dashboardBackground,
@@ -123,128 +95,73 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
                 _buildActionCards(context),
                 const SizedBox(height: AppSizes.spacingS),
                 DuesSegmentToggle(
-                    segments: [
-                      context.t.common.dues,
-                      context.t.features.expenses.title,
-                    ],
-                    selectedIndex: _selectedSegment,
-                    onChanged: _onSegmentChanged,
-                  ),
+                  segments: [
+                    context.t.common.dues,
+                    context.t.common.duesHistory,
+                  ],
+                  selectedIndex: _selectedSegment,
+                  onChanged: (index) => setState(() => _selectedSegment = index),
+                ),
+                if (_selectedSegment == 0) ...[
                   const SizedBox(height: AppSizes.spacingM),
+                  Text(
+                    context.t.common.currentPeriodDue,
+                    style: AppTypography.h4.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                    ),
+                  ),
                 ],
-              ),
+                const SizedBox(height: AppSizes.spacingM),
+              ],
             ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  if (_selectedSegment == 0) {
-                    await ref
-                        .read(duesNotifierProvider.notifier)
-                        .loadMyDues();
-                  } else {
-                    await ref
-                        .read(expensesNotifierProvider.notifier)
-                        .loadMyExpenses();
-                  }
-                },
-                color: AppColors.primary,
-                child: contentItems.isEmpty
-                    ? ListView(
-                        controller: _scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: AppSizes.screenBodyScrollPadding.copyWith(
-                          top: 0,
-                        ),
-                        children: [
-                          _buildContentState(
-                            context,
-                            duesState,
-                            expensesState,
-                          ),
-                        ],
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: AppSizes.screenBodyScrollPadding.copyWith(
-                          top: 0,
-                          bottom: AppSizes.spacingXL,
-                        ),
-                        itemCount: contentItems.length,
-                        itemBuilder: (context, index) =>
-                            contentItems[index],
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () =>
+                  ref.read(duesNotifierProvider.notifier).loadMyDues(),
+              color: AppColors.primary,
+              child: contentItems.isEmpty
+                  ? ListView(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: AppSizes.screenBodyScrollPadding.copyWith(
+                        top: 0,
                       ),
-              ),
+                      children: [
+                        _buildEmptyState(context, duesState),
+                      ],
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: AppSizes.screenBodyScrollPadding.copyWith(
+                        top: 0,
+                        bottom: AppSizes.spacingXL,
+                      ),
+                      itemCount: contentItems.length,
+                      itemBuilder: (context, index) => contentItems[index],
+                    ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildContentState(
-    BuildContext context,
-    DuesState duesState,
-    ExpensesState expensesState,
-  ) {
-    if (_selectedSegment == 0) {
-      if (duesState.isLoading) {
-        return const Padding(
-          padding: EdgeInsets.only(top: AppSizes.spacingXL),
-          child: Center(child: CircularProgressIndicator()),
-        );
-      }
-      return Padding(
-        padding: const EdgeInsets.only(top: AppSizes.spacingXL),
-        child: Center(
-          child: Text(
-            context.t.common.noDuesYet,
-            style: AppTypography.body1.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (expensesState.isLoading) {
+  Widget _buildEmptyState(BuildContext context, DuesState duesState) {
+    if (duesState.isLoading) {
       return const Padding(
         padding: EdgeInsets.only(top: AppSizes.spacingXL),
         child: Center(child: CircularProgressIndicator()),
       );
     }
-
-    if (expensesState.error != null) {
-      return Padding(
-        padding: const EdgeInsets.only(top: AppSizes.spacingXL),
-        child: Center(
-          child: Column(
-            children: [
-              Text(
-                expensesState.error!,
-                style: AppTypography.body1.copyWith(color: AppColors.error),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSizes.spacingM),
-              FilledButton(
-                onPressed: () {
-                  _requestedExpenses = false;
-                  ref
-                      .read(expensesNotifierProvider.notifier)
-                      .loadMyExpenses();
-                },
-                child: Text(context.t.common.tryAgain),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.spacingXL),
       child: Center(
         child: Text(
-          context.t.features.expenses.emptyTitle,
+          context.t.common.noDuesYet,
           style: AppTypography.body1.copyWith(
             color: AppColors.textSecondary,
           ),
@@ -253,63 +170,18 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
     );
   }
 
-  List<Widget> _buildContentItems(
+  List<Widget> _buildDueItems(
     BuildContext context,
+    List<DueEntity> dues,
     DuesState duesState,
-    ExpensesState expensesState,
   ) {
-    if (_selectedSegment == 0) {
-      if (duesState.isLoading || duesState.dues.isEmpty) {
-        return const [];
-      }
-
-      final split = splitResidentDuesForDisplay(duesState.dues);
-      final items = <Widget>[];
-
-      if (split.current.isNotEmpty) {
-        items.add(_sectionTitle(context.t.common.currentPeriodDue));
-        items.add(const SizedBox(height: AppSizes.spacingS));
-        for (final due in split.current) {
-          items.add(ResidentDueListCard(due: due));
-        }
-      }
-
-      if (split.past.isNotEmpty) {
-        if (split.current.isNotEmpty) {
-          items.add(const SizedBox(height: AppSizes.spacingL));
-        }
-        items.add(_sectionTitle(context.t.common.myPastDues));
-        items.add(const SizedBox(height: AppSizes.spacingS));
-        for (final due in split.past) {
-          items.add(ResidentDueListCard(due: due));
-        }
-      }
-
-      if (duesState.isLoadingMore) {
-        items.add(const Padding(
-          padding: EdgeInsets.symmetric(vertical: AppSizes.spacingM),
-          child: Center(child: CircularProgressIndicator()),
-        ));
-      }
-
-      return items;
-    }
-
-    if (expensesState.isLoading ||
-        expensesState.expenses.isEmpty ||
-        expensesState.error != null) {
-      return const [];
-    }
+    if (duesState.isLoading || dues.isEmpty) return const [];
 
     final items = <Widget>[
-      for (final expense in expensesState.expenses)
-        Padding(
-          padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
-          child: ExpenseListItemCard(expense: expense),
-        ),
+      for (final due in dues) ResidentDueListCard(due: due),
     ];
 
-    if (expensesState.isLoadingMore) {
+    if (duesState.isLoadingMore && _selectedSegment == 1) {
       items.add(const Padding(
         padding: EdgeInsets.symmetric(vertical: AppSizes.spacingM),
         child: Center(child: CircularProgressIndicator()),
@@ -317,17 +189,6 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
     }
 
     return items;
-  }
-
-  Widget _sectionTitle(String title) {
-    return Text(
-      title,
-      style: AppTypography.h4.copyWith(
-        color: AppColors.textPrimary,
-        fontWeight: FontWeight.w800,
-        fontSize: 18,
-      ),
-    );
   }
 
   Widget _buildActionCards(BuildContext context) {
@@ -338,9 +199,9 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
         Expanded(
           child: DuesActionCard(
             icon: Icons.credit_card_outlined,
-            label: dekontT.makePaymentTitle,
-            iconBg: AppColors.fill,
-            iconColor: AppColors.textPrimary,
+            label: context.t.common.makePayment,
+            iconBg: AppColors.primary.withValues(alpha: 0.1),
+            iconColor: AppColors.primary,
             onTap: () => context.push('/resident-dashboard/payment'),
           ),
         ),
@@ -349,8 +210,8 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
           child: DuesActionCard(
             icon: Icons.receipt_long_outlined,
             label: dekontT.viewDekonts,
-            iconBg: AppColors.fill,
-            iconColor: AppColors.textPrimary,
+            iconBg: AppColors.primary.withValues(alpha: 0.1),
+            iconColor: AppColors.primary,
             onTap: () => context.push('/resident-dashboard/dekonts'),
           ),
         ),

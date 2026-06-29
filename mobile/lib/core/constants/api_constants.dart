@@ -1,10 +1,41 @@
 class ApiConstants {
-  /// Yerel backend: `flutter run --dart-define=API_BASE_URL=http://127.0.0.1:4200`
-  /// Android emülatör: `http://10.0.2.2:4200` · fiziksel cihaz: `http://<PC_IP>:4200`
-  static const String baseUrl = String.fromEnvironment(
+  /// `main_local.dart` çağrısı ile runtime override (dart-define gerekmez).
+  static String? _runtimeBaseUrlOverride;
+
+  /// Android emülatör → PC localhost:4200
+  static void enableLocalBackend([
+    String url = 'http://10.0.2.2:4200',
+  ]) {
+    _runtimeBaseUrlOverride = url;
+  }
+
+  static const bool useLocalBackend = bool.fromEnvironment(
+    'USE_LOCAL_BACKEND',
+    defaultValue: false,
+  );
+
+  static const String localBaseUrl = String.fromEnvironment(
+    'LOCAL_API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:4200',
+  );
+
+  static const String _productionBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'https://api.aidatpanel.com',
   );
+
+  static String get baseUrl {
+    if (_runtimeBaseUrlOverride != null) {
+      return _runtimeBaseUrlOverride!;
+    }
+    if (useLocalBackend) {
+      return localBaseUrl;
+    }
+    return _productionBaseUrl;
+  }
+
+  static bool get isLocalBackend =>
+      _runtimeBaseUrlOverride != null || useLocalBackend;
 
   static const String apiVersion = '/api/v1';
 
@@ -29,6 +60,9 @@ class ApiConstants {
   static const String logoutAllDevices =
       '$apiVersion/auth/logout-all-devices';
   static const String join = '$apiVersion/auth/join';
+  static const String otpSend = '$apiVersion/auth/otp/send';
+  static const String otpVerify = '$apiVersion/auth/otp/verify';
+  static const String inviteValidate = '$apiVersion/auth/invite/validate';
   static const String forgotPassword = '$apiVersion/auth/forgot-password';
   static const String resetPassword = '$apiVersion/auth/reset-password';
 

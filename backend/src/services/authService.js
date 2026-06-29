@@ -9,6 +9,10 @@ import {
   createSession,
   revokeOtherSessions,
 } from "./sessionService.js";
+import {
+  normalizeTrPhone,
+  normalizeLoginIdentifier,
+} from "../utils/normalizeTrPhone.js";
 
 /** Refresh token'ın SHA-256 özeti — DB'de saklanır, replay tespiti için. */
 function hashToken(token) {
@@ -52,10 +56,10 @@ async function assertEmailAvailable(email) {
   }
 }
 
-async function assertPhoneAvailable(phone) {
+async function assertPhoneAvailable(phone, role) {
   if (!phone) return;
   const existing = await prisma.user.findFirst({
-    where: { phone, deletedAt: null },
+    where: { phone, role, deletedAt: null },
   });
   if (existing) {
     throw new HttpError(409, "Bu telefon numarası zaten kullanılıyor.");
@@ -63,27 +67,41 @@ async function assertPhoneAvailable(phone) {
 }
 
 async function findActiveUserByIdentifier(identifier) {
-  const isEmail = identifier.includes("@");
+  const normalized = normalizeLoginIdentifier(identifier);
+  const isEmail = normalized.includes("@");
   return prisma.user.findFirst({
     where: isEmail
-      ? { email: identifier, deletedAt: null }
-      : { phone: identifier, deletedAt: null },
+      ? { email: normalized, deletedAt: null }
+      : { phone: normalized, deletedAt: null },
   });
+}
+
+function assertMinContactRequired(email, phone) {
+  if (!email && !phone) {
+    throw new HttpError(400, "E-posta veya telefon numarası gereklidir.");
+  }
 }
 
 /**
  * Yönetici kaydı — POST /auth/register
  */
 export async function registerService({ name, email, phone, password }) {
-  await assertEmailAvailable(email);
-  await assertPhoneAvailable(phone);
+  const normalizedPhone = phone ? normalizeTrPhone(phone) : null;
+  if (normalizedPhone === null && phone) {
+    throw new HttpError(400, "Geçerli bir telefon numarası giriniz.");
+  }
+  const normalizedEmail = email?.trim().toLowerCase() || null;
+
+  assertMinContactRequired(normalizedEmail, normalizedPhone);
+  if (normalizedEmail) await assertEmailAvailable(normalizedEmail);
+  if (normalizedPhone) await assertPhoneAvailable(normalizedPhone, "MANAGER");
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
     data: {
       name,
-      email,
-      phone,
+      email: normalizedEmail,
+      phone: normalizedPhone,
       passwordHash: hashedPassword,
       role: "MANAGER",
     },
@@ -106,7 +124,8 @@ export async function registerService({ name, email, phone, password }) {
  * Giriş — POST /auth/login
  */
 export async function loginService(body) {
-  const { identifier, password } = body;
+  const { password } = body;
+  const identifier = normalizeLoginIdentifier(body.identifier);
   const user = await findActiveUserByIdentifier(identifier);
 
   if (!user) {
@@ -233,7 +252,11 @@ export async function refreshAccessTokenService(refreshToken, body = {}) {
  * Davet koduyla sakin kaydı — POST /auth/join
  */
 export async function joinWithInviteCodeService(body) {
-  const { name, email, phone, password, inviteCode } = body;
+  const { name, email, password, inviteCode } = body;
+  const phone = body.phone ? normalizeTrPhone(body.phone) : null;
+  if (body.phone && !phone) {
+    throw new HttpError(400, "Geçerli bir telefon numarası giriniz.");
+  }
   let inviteCodeData;
   try {
     inviteCodeData = await validateInviteCode(inviteCode);
@@ -242,7 +265,7 @@ export async function joinWithInviteCodeService(body) {
   }
 
   await assertEmailAvailable(email);
-  await assertPhoneAvailable(phone);
+  await assertPhoneAvailable(phone, "RESIDENT");
 
   const hashedPassword = await bcrypt.hash(password, 10);
 

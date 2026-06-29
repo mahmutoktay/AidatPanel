@@ -21,6 +21,9 @@ class AppConstants {
   /// userId → fotoğraf referansı (çıkışta silinmez; backend yokken yerel).
   static const String profilePhotosKey = 'profile_photos_v1';
 
+  /// Rol başına son giriş bilgisi (çıkışta silinmez).
+  static const String loginHintsKey = 'login_hints_v1';
+
   // Timeouts
   static const Duration apiTimeout = Duration(seconds: 30);
 

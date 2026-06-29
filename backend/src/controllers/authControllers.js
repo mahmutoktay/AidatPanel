@@ -7,6 +7,11 @@ import {
   logoutAllDevicesService,
 } from "../services/authService.js";
 import {
+  sendOtpService,
+  verifyOtpService,
+  validateInvitePublicService,
+} from "../services/otpService.js";
+import {
   requestPasswordResetService,
   resetPasswordWithTokenService,
 } from "../services/passwordResetService.js";
@@ -79,5 +84,39 @@ export const resetPassword = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "Şifreniz güncellendi. Yeni şifreyle giriş yapabilirsiniz.",
+  });
+});
+
+export const sendOtp = asyncHandler(async (req, res) => {
+  await sendOtpService(req.body);
+  res.status(200).json({
+    success: true,
+    message: "Doğrulama kodu gönderildi.",
+    data: { sent: true },
+  });
+});
+
+export const verifyOtp = asyncHandler(async (req, res) => {
+  const data = await verifyOtpService(req.body);
+  res.status(200).json({
+    success: true,
+    message: purposeSuccessMessage(req.body.purpose),
+    data,
+  });
+});
+
+function purposeSuccessMessage(purpose) {
+  if (purpose === "resident_join" || purpose === "manager_register") {
+    return "Hesabınız oluşturuldu.";
+  }
+  return "Giriş başarılı.";
+}
+
+export const validateInvite = asyncHandler(async (req, res) => {
+  const data = await validateInvitePublicService(req.body.inviteCode);
+  res.status(200).json({
+    success: true,
+    message: "Davet kodu geçerli.",
+    data,
   });
 });

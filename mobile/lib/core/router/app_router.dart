@@ -9,10 +9,9 @@ import '../../main.dart' show MyApp;
 import 'app_route_guard.dart';
 import '../../features/auth/domain/entities/user_entity.dart' show UserRole;
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/onboarding/auth_onboarding_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
-import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
-import '../../features/auth/presentation/screens/sign_up_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/dashboard/presentation/screens/manager_dashboard_screen.dart';
 import '../../features/dashboard/presentation/screens/manager_overdue_apartments_screen.dart';
@@ -299,30 +298,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/login',
         name: 'login',
         builder: (context, state) {
-          return const LoginScreen();
+          final q = state.uri.queryParameters;
+          return AuthOnboardingScreen(
+            initialRole: parseAuthRole(q['role']),
+            initialFlow: parseAuthFlow(q['flow']),
+            skipRoleStep: q['role'] != null || q['flow'] != null,
+          );
         },
       ),
       GoRoute(
         path: '/sign-up',
         name: 'sign_up',
-        builder: (context, state) {
+        redirect: (_, state) {
           final role = state.uri.queryParameters['role'];
-          return SignUpScreen(initialIsManager: role == 'manager');
+          if (role == 'manager') {
+            return '/login?role=manager&flow=register';
+          }
+          return '/login?role=resident&flow=join';
         },
       ),
       GoRoute(
         path: '/register',
         name: 'register',
-        builder: (context, state) {
-          return const SignUpScreen(initialIsManager: true);
-        },
+        redirect: (_, __) => '/login?role=manager&flow=register',
       ),
       GoRoute(
         path: '/join',
         name: 'join',
-        builder: (context, state) {
-          return const SignUpScreen();
-        },
+        redirect: (_, __) => '/login?role=resident&flow=join',
       ),
       GoRoute(
         path: '/forgot-password',

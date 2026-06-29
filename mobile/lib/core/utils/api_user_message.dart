@@ -330,6 +330,12 @@ String? _mapAuth(dynamic api, String raw, String msg, int? code) {
       _has(raw, 'reset token')) {
     return api.resetTokenInvalid as String;
   }
+  if (_has(raw, 'saatlik limit') ||
+      _has(raw, 'çok fazla giriş denemesi') ||
+      _has(raw, 'doğrulama kodu isteği') ||
+      _has(raw, 'çok fazla doğrulama')) {
+    return api.rateLimit as String;
+  }
   return null;
 }
 
@@ -476,9 +482,9 @@ String? _mapDekont(
     return d.errorUploadDuplicate;
   }
 
-  if (code == 429 ||
+  if (_has(raw, 'dekont yükleme limit') ||
       _has(raw, 'çok fazla yükleme') ||
-      (_has(raw, 'çok fazla') && _has(raw, 'istek'))) {
+      (_has(raw, 'çok fazla') && _has(raw, 'dekont'))) {
     return d.errorUploadRateLimit;
   }
 

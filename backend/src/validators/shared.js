@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { LIST_MAX_ROWS } from "../utils/listQuery.js";
+import { normalizeTrPhone } from "../utils/normalizeTrPhone.js";
 
 /**
  * Ortak şifre şeması — Flutter InputValidators.passwordRegex ile uyumlu.
@@ -32,12 +33,20 @@ export const listPaginationFields = {
 };
 
 export const optionalPhone = z.preprocess(
-  (v) => (v === "" || v === null || v === undefined ? undefined : v),
+  (v) => {
+    if (v === "" || v === null || v === undefined) return undefined;
+    return normalizeTrPhone(String(v)) ?? v;
+  },
   z
     .string()
-    .min(10, "Telefon numarası en az 10 karakter olmalıdır")
-    .max(15, "Telefon numarası en fazla 15 karakter olabilir")
+    .regex(/^5[0-9]{9}$/, "Geçerli bir telefon numarası giriniz (10 hane)")
     .optional()
+);
+
+/** OTP / zorunlu telefon alanları */
+export const normalizedPhoneSchema = z.preprocess(
+  (v) => normalizeTrPhone(typeof v === "string" ? v : ""),
+  z.string().regex(/^5[0-9]{9}$/, "Geçerli bir telefon numarası giriniz")
 );
 
 /** PUT /me — `phone: null` veya boş string profilden telefonu siler (meService). */
@@ -45,15 +54,15 @@ export const profilePhone = z.preprocess(
   (v) => {
     if (v === "") return null;
     if (v === undefined) return undefined;
-    return v;
+    if (v === null) return null;
+    return normalizeTrPhone(String(v)) ?? v;
   },
   z
     .union([
       z.null(),
       z
         .string()
-        .min(10, "Telefon numarası en az 10 karakter olmalıdır")
-        .max(15, "Telefon numarası en fazla 15 karakter olabilir"),
+        .regex(/^5[0-9]{9}$/, "Geçerli bir telefon numarası giriniz (10 hane)"),
     ])
     .optional()
 );

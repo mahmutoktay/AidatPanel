@@ -53,3 +53,13 @@ export const STRICT_WINDOW_MS = 60 * 60 * 1000;
 
 /** Strict limiter için maksimum istek (IP başına, saatlik) */
 export const STRICT_MAX_REQUESTS = 3;
+
+// =============================================================================
+// OTP Limiter
+// =============================================================================
+
+/** OTP gönder/doğrula için pencere: 15 dakika (ms) */
+export const OTP_WINDOW_MS = 15 * 60 * 1000;
+
+/** OTP için maksimum istek (telefon başına, pencere başına) */
+export const OTP_MAX_REQUESTS = 5;

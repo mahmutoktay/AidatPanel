@@ -37,7 +37,7 @@ async function main() {
     create: {
       email: "yonetici@aidatpanel.test",
       name: "Test Yönetici",
-      phone: "+905551234567",
+      phone: "5551234567",
       passwordHash: hashedPassword,
       role: "MANAGER",
     },
@@ -112,7 +112,7 @@ async function main() {
     create: {
       email: "sakin@aidatpanel.test",
       name: "Test Sakin",
-      phone: "+905559876543",
+      phone: "5559876543",
       passwordHash: hashedPassword,
       role: "RESIDENT",
       apartmentId: "seed-apt-1",
