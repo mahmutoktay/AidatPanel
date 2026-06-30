@@ -29,8 +29,9 @@ subprojects {
 }
 
 // evaluationDependsOn'dan ÖNCE: pdfx vb. eklentilerde Java/Kotlin JVM 17 hizası (Kotlin 2.x + AGP 8).
+// file_picker hariç: K2 + dairesel FileUtils/FilePickerDelegate referansı derleme hatası (#2070).
 subprojects {
-    if (name == "app") return@subprojects
+    if (name == "app" || name == "file_picker") return@subprojects
     afterEvaluate {
         extensions.findByType<LibraryExtension>()?.compileOptions?.apply {
             sourceCompatibility = JavaVersion.VERSION_17
