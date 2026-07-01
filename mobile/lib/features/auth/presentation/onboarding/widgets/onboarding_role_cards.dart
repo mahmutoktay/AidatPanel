@@ -5,7 +5,7 @@ import '../../../../../core/theme/app_sizes.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../domain/entities/user_entity.dart';
 
-/// Adım 1 — büyük rol kartları (referans görsel).
+/// Adım 1 — büyük rol kartları.
 class OnboardingRoleCards extends StatelessWidget {
   const OnboardingRoleCards({
     super.key,
@@ -30,14 +30,14 @@ class OnboardingRoleCards extends StatelessWidget {
       children: [
         _RoleCard(
           label: managerLabel,
-          icon: Icons.person_outline,
+          icon: Icons.apartment_outlined,
           selected: selectedRole == UserRole.manager,
           onTap: enabled ? onManagerTap : null,
         ),
         const SizedBox(height: AppSizes.spacingM),
         _RoleCard(
           label: residentLabel,
-          icon: Icons.person_outline,
+          icon: Icons.home_outlined,
           selected: selectedRole == UserRole.resident,
           onTap: enabled ? onResidentTap : null,
         ),
@@ -61,10 +61,27 @@ class _RoleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = selected ? Colors.white : AppColors.textPrimary;
-    final iconColor = selected ? Colors.white : AppColors.textSecondary;
-    final bg = selected ? AppColors.primary : AppColors.surface;
-    final borderColor = selected ? AppColors.primary : AppColors.border;
+    final isDark = AppColors.isDark;
+
+    final Color bg;
+    final Color fg;
+    final Color iconColor;
+    final Color borderColor;
+    final double borderWidth;
+
+    if (selected) {
+      bg = isDark ? Colors.white : AppColors.primary;
+      fg = isDark ? const Color(0xFF111111) : Colors.white;
+      iconColor = fg;
+      borderColor = Colors.transparent;
+      borderWidth = 0;
+    } else {
+      bg = isDark ? AppColors.darkCard : AppColors.surface;
+      fg = AppColors.textPrimary;
+      iconColor = AppColors.textSecondary;
+      borderColor = isDark ? Colors.white.withValues(alpha: 0.35) : AppColors.border;
+      borderWidth = 1.5;
+    }
 
     return Semantics(
       button: true,
@@ -73,15 +90,15 @@ class _RoleCard extends StatelessWidget {
       child: Material(
         color: bg,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        elevation: selected ? 2 : 0,
-        shadowColor: AppColors.primary.withValues(alpha: 0.25),
+        elevation: selected ? (isDark ? 0 : 2) : 0,
+        shadowColor: AppColors.primary.withValues(alpha: 0.2),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(AppSizes.cardRadius),
           child: Container(
             width: double.infinity,
             constraints: const BoxConstraints(
-              minHeight: AppSizes.minTouchTargetComfort + 8,
+              minHeight: AppSizes.buttonHeightPrimary,
             ),
             padding: const EdgeInsets.symmetric(
               horizontal: AppSizes.spacingL,
@@ -89,18 +106,23 @@ class _RoleCard extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-              border: Border.all(color: borderColor, width: selected ? 0 : 1),
+              border: borderWidth > 0
+                  ? Border.all(color: borderColor, width: borderWidth)
+                  : null,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon, size: AppSizes.iconSizeLarge, color: iconColor),
                 const SizedBox(width: AppSizes.spacingM),
-                Text(
-                  label,
-                  style: AppTypography.h3.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: fg,
+                Flexible(
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.h3.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: fg,
+                    ),
                   ),
                 ),
               ],

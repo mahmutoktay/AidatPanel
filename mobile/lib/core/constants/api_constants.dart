@@ -55,6 +55,7 @@ class ApiConstants {
   // Auth endpoints
   static const String register = '$apiVersion/auth/register';
   static const String login = '$apiVersion/auth/login';
+  static const String checkIdentifier = '$apiVersion/auth/check-identifier';
   static const String refresh = '$apiVersion/auth/refresh';
   static const String logout = '$apiVersion/auth/logout';
   static const String logoutAllDevices =
@@ -62,6 +63,8 @@ class ApiConstants {
   static const String join = '$apiVersion/auth/join';
   static const String otpSend = '$apiVersion/auth/otp/send';
   static const String otpVerify = '$apiVersion/auth/otp/verify';
+  static const String otpCompleteResidentJoin =
+      '$apiVersion/auth/otp/complete-resident-join';
   static const String inviteValidate = '$apiVersion/auth/invite/validate';
   static const String forgotPassword = '$apiVersion/auth/forgot-password';
   static const String resetPassword = '$apiVersion/auth/reset-password';

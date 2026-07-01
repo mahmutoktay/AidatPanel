@@ -87,6 +87,11 @@ class AuthNotifier extends Notifier<AuthState> {
     return const AuthState();
   }
 
+  void dismissError() {
+    if (state.error == null) return;
+    state = state.copyWith(clearError: true);
+  }
+
   Future<void> submitLogin(
     String rawIdentifier,
     String password,
@@ -97,18 +102,111 @@ class AuthNotifier extends Notifier<AuthState> {
       state = state.copyWith(error: t.features.auth.passwordRequired);
       return;
     }
-    final isPhone = !rawIdentifier.contains('@');
-    if (!isPhone &&
-        !InputValidators.emailRegex.hasMatch(rawIdentifier.trim())) {
-      state = state.copyWith(error: t.validation.emailInvalid);
-      return;
-    }
-    if (isPhone && PhoneUtils.normalizeTrPhone(rawIdentifier) == null) {
-      state = state.copyWith(error: t.features.auth.onboarding.phoneInvalid);
+    final identifierError =
+        InputValidators.validateLoginIdentifier(rawIdentifier);
+    if (identifierError != null) {
+      state = state.copyWith(error: _identifierErrorMessage(identifierError));
       return;
     }
     final identifier = PhoneUtils.normalizeLoginIdentifier(rawIdentifier);
     await login(identifier, password, ref);
+  }
+
+  Future<void> registerAndLogin({
+    required String name,
+    required String rawIdentifier,
+    required String password,
+    required WidgetRef ref,
+  }) async {
+    if (state.isLoading) return;
+    final passwordError = InputValidators.validatePassword(password);
+    if (passwordError != null) {
+      state = state.copyWith(error: _passwordErrorMessage(passwordError));
+      return;
+    }
+    final identifierError =
+        InputValidators.validateLoginIdentifier(rawIdentifier);
+    if (identifierError != null) {
+      state = state.copyWith(error: _identifierErrorMessage(identifierError));
+      return;
+    }
+    final trimmed = rawIdentifier.trim();
+    final isEmail = trimmed.contains('@');
+    final email = isEmail ? trimmed.toLowerCase() : null;
+    final phone = isEmail ? null : PhoneUtils.normalizeTrPhone(trimmed);
+    final nameError = InputValidators.validateName(name);
+    if (nameError != null) {
+      state = state.copyWith(error: _nameErrorMessage(nameError));
+      return;
+    }
+    await register(email, password, name.trim(), phone);
+    if (state.error != null) return;
+    final identifier = PhoneUtils.normalizeLoginIdentifier(trimmed);
+    await login(identifier, password, ref);
+  }
+
+  Future<void> checkManagerIdentifier({
+    required String rawIdentifier,
+    required bool isRegister,
+  }) async {
+    if (state.isLoading) return;
+    final identifierError =
+        InputValidators.validateLoginIdentifier(rawIdentifier);
+    if (identifierError != null) {
+      state = state.copyWith(error: _identifierErrorMessage(identifierError));
+      return;
+    }
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      await _authRepository.checkIdentifier(
+        identifier: rawIdentifier.trim(),
+        purpose: isRegister ? 'manager_register' : 'manager_login',
+      );
+      state = state.copyWith(isLoading: false, clearError: true);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  String _passwordErrorMessage(String key) {
+    switch (key) {
+      case 'password_required':
+        return t.validation.passwordRequired;
+      case 'password_too_short':
+        return t.validation.passwordTooShort;
+      case 'password_too_long':
+        return t.validation.passwordTooLong;
+      case 'password_alphanumeric_required':
+        return t.validation.passwordAlphanumericRequired;
+      default:
+        return t.validation.passwordRequired;
+    }
+  }
+
+  String _identifierErrorMessage(String key) {
+    switch (key) {
+      case 'identifier_required':
+        return t.features.auth.onboarding.identifierRequired;
+      case 'phone_invalid_eleven_digits':
+        return t.features.auth.onboarding.phoneInvalidElevenDigits;
+      case 'email_invalid':
+        return t.validation.emailInvalid;
+      case 'phone_invalid':
+        return t.features.auth.onboarding.phoneInvalid;
+      default:
+        return t.features.auth.onboarding.identifierRequired;
+    }
+  }
+
+  String _nameErrorMessage(String key) {
+    switch (key) {
+      case 'name_required':
+      case 'name_too_short':
+        return t.features.auth.onboarding.residentNameRequired;
+      default:
+        return t.features.auth.onboarding.residentNameRequired;
+    }
   }
 
   Future<void> login(String identifier, String password, WidgetRef ref) async {
@@ -137,6 +235,11 @@ class AuthNotifier extends Notifier<AuthState> {
     String? phone,
   ) async {
     if (state.isLoading) return;
+    final passwordError = InputValidators.validatePassword(password);
+    if (passwordError != null) {
+      state = state.copyWith(error: _passwordErrorMessage(passwordError));
+      return;
+    }
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final normalizedPhone = PhoneUtils.normalizeTrPhone(phone);
@@ -193,6 +296,7 @@ class AuthNotifier extends Notifier<AuthState> {
     String? phone,
     String? email,
     required String purpose,
+    Map<String, dynamic>? payload,
   }) async {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
@@ -201,8 +305,60 @@ class AuthNotifier extends Notifier<AuthState> {
         phone: phone,
         email: email,
         purpose: purpose,
+        payload: payload,
       );
       state = state.copyWith(isLoading: false, clearError: true);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  Future<bool> verifyResidentJoinOtp({
+    required String phone,
+    required String code,
+    required String inviteCode,
+  }) async {
+    if (state.isLoading) return false;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final requireName = await _authRepository.verifyResidentJoinOtp(
+        phone: phone,
+        code: code,
+        inviteCode: inviteCode,
+      );
+      state = state.copyWith(isLoading: false, clearError: true);
+      return requireName;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  Future<UserEntity> completeResidentJoinAndAuthenticate({
+    required String phone,
+    required String name,
+    required String inviteCode,
+    required WidgetRef ref,
+  }) async {
+    if (state.isLoading) return Future.error('loading');
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final user = await _authRepository.completeResidentJoin(
+        phone: phone,
+        name: name,
+        inviteCode: inviteCode,
+      );
+      resetManagerTabIndex(ref);
+      resetResidentTabIndex(ref);
+      await _onAuthenticated(ref, user);
+      state = state.copyWith(
+        isLoading: false,
+        user: user,
+        isAuthenticated: true,
+        clearError: true,
+      );
+      return user;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
       rethrow;

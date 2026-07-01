@@ -1,6 +1,11 @@
 /// Auth onboarding adım kimlikleri (sabit sıra).
 enum AuthOnboardingStepId {
   role,
+  managerExperience,
+  residentExperience,
+  name,
+  identifier,
+  credentials,
   contact,
   verification,
   invite,

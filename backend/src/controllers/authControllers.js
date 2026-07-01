@@ -5,11 +5,13 @@ import {
   joinWithInviteCodeService,
   logoutService,
   logoutAllDevicesService,
+  checkIdentifierService,
 } from "../services/authService.js";
 import {
   sendOtpService,
   verifyOtpService,
   validateInvitePublicService,
+  completeResidentJoinService,
 } from "../services/otpService.js";
 import {
   requestPasswordResetService,
@@ -31,6 +33,15 @@ export const login = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "Giriş başarılı.",
+    data,
+  });
+});
+
+export const checkIdentifier = asyncHandler(async (req, res) => {
+  const data = await checkIdentifierService(req.body);
+  res.status(200).json({
+    success: true,
+    message: "İletişim bilgisi uygun.",
     data,
   });
 });
@@ -98,9 +109,22 @@ export const sendOtp = asyncHandler(async (req, res) => {
 
 export const verifyOtp = asyncHandler(async (req, res) => {
   const data = await verifyOtpService(req.body);
+  const message =
+    data?.requireName === true
+      ? "Telefon numaranız doğrulandı."
+      : purposeSuccessMessage(req.body.purpose);
   res.status(200).json({
     success: true,
-    message: purposeSuccessMessage(req.body.purpose),
+    message,
+    data,
+  });
+});
+
+export const completeResidentJoin = asyncHandler(async (req, res) => {
+  const data = await completeResidentJoinService(req.body);
+  res.status(200).json({
+    success: true,
+    message: "Hesabınız oluşturuldu.",
     data,
   });
 });

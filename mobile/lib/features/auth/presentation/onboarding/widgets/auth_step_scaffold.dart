@@ -19,6 +19,7 @@ class AuthStepScaffold extends StatelessWidget {
     this.secondary,
     this.centerBody = false,
     this.primaryTrailing,
+    this.showPrimaryBar = false,
   });
 
   final String title;
@@ -33,6 +34,9 @@ class AuthStepScaffold extends StatelessWidget {
   final bool centerBody;
   final Widget? primaryTrailing;
 
+  /// `true` ise birincil buton scaffold içinde gösterilir (varsayılan: dışarıda).
+  final bool showPrimaryBar;
+
   @override
   Widget build(BuildContext context) {
     final content = Column(
@@ -40,49 +44,65 @@ class AuthStepScaffold extends StatelessWidget {
           ? CrossAxisAlignment.center
           : CrossAxisAlignment.stretch,
       children: [
-        if (centerBody)
-          Text(title, style: AppTypography.h2, textAlign: TextAlign.center)
-        else
-          Text(title, style: AppTypography.h2),
-        if (subtitle != null) ...[
-          const SizedBox(height: AppSizes.spacingS),
-          Text(
-            subtitle!,
-            textAlign: centerBody ? TextAlign.center : TextAlign.start,
-            style: AppTypography.body1.copyWith(color: AppColors.textSecondary),
+        Expanded(
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Column(
+              crossAxisAlignment: centerBody
+                  ? CrossAxisAlignment.center
+                  : CrossAxisAlignment.stretch,
+              children: [
+                if (centerBody)
+                  Text(title, style: AppTypography.h2, textAlign: TextAlign.center)
+                else
+                  Text(title, style: AppTypography.h2),
+                if (subtitle != null) ...[
+                  const SizedBox(height: AppSizes.spacingS),
+                  Text(
+                    subtitle!,
+                    textAlign: centerBody ? TextAlign.center : TextAlign.start,
+                    style: AppTypography.body1.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: AppSizes.spacingL),
+                body,
+                if (footer != null) ...[
+                  const SizedBox(height: AppSizes.spacingM),
+                  footer!,
+                ],
+                if (secondary != null) ...[
+                  const SizedBox(height: AppSizes.spacingM),
+                  secondary!,
+                ],
+              ],
+            ),
+          ),
+        ),
+        if (showPrimaryBar) ...[
+          const SizedBox(height: AppSizes.spacingM),
+          AuthScreenShell.primaryBottomBar(
+            onPressed: primaryEnabled && !isLoading ? onPrimary : null,
+            child: isLoading
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(primaryLabel),
+                      if (primaryTrailing != null) ...[
+                        const SizedBox(width: AppSizes.spacingS),
+                        primaryTrailing!,
+                      ],
+                    ],
+                  ),
           ),
         ],
-        const SizedBox(height: AppSizes.spacingL),
-        body,
-        if (footer != null) ...[
-          const SizedBox(height: AppSizes.spacingM),
-          footer!,
-        ],
-        if (secondary != null) ...[
-          const SizedBox(height: AppSizes.spacingM),
-          secondary!,
-        ],
-        const SizedBox(height: AppSizes.spacingL),
-        AuthScreenShell.primaryBottomBar(
-          onPressed: primaryEnabled && !isLoading ? onPrimary : null,
-          child: isLoading
-              ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(primaryLabel),
-                    if (primaryTrailing != null) ...[
-                      const SizedBox(width: AppSizes.spacingS),
-                      primaryTrailing!,
-                    ],
-                  ],
-                ),
-        ),
       ],
     );
 

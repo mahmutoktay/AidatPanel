@@ -1,34 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
 import '../../../../../l10n/strings.g.dart';
+import '../../widgets/auth_brand_mark.dart';
 
-/// Adım 2+ üst logo şeridi — referans görseldeki kompakt marka alanı.
+/// Onboarding üst marka alanı — logo üstte, AidatPanel altta.
 class OnboardingCompactHeader extends StatelessWidget {
-  const OnboardingCompactHeader({super.key});
+  const OnboardingCompactHeader({
+    super.key,
+    this.size = AuthBrandMarkSize.standard,
+    this.showSubtitle = false,
+  });
 
-  static const String _logoAsset = 'assets/brand/app_logo.png';
+  final AuthBrandMarkSize size;
+  final bool showSubtitle;
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t.features.auth;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(_logoAsset, width: 36, height: 36, fit: BoxFit.contain),
-          const SizedBox(width: AppSizes.spacingS),
-          Text(
-            context.t.features.auth.appTitle,
-            style: GoogleFonts.archivoBlack(
-              fontSize: 20,
-              letterSpacing: 0.8,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
+      child: AuthBrandMark(
+        size: size,
+        showSubtitle: showSubtitle,
+        subtitle: t.appSubtitle,
       ),
     );
   }

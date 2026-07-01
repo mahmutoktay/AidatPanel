@@ -1,9 +1,45 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/phone_utils.dart';
 import '../../domain/entities/user_entity.dart';
 import 'auth_onboarding_models.dart';
 
-/// Yeni kullanıcı kayıt yolu — referans görseldeki 6 adım.
+/// Yönetici ilk kayıt — ad + iletişim + şifre.
+const _managerPasswordRegisterSteps = [
+  AuthOnboardingStepId.role,
+  AuthOnboardingStepId.managerExperience,
+  AuthOnboardingStepId.name,
+  AuthOnboardingStepId.identifier,
+  AuthOnboardingStepId.credentials,
+];
+
+/// Yönetici tekrar giriş — yalnızca iletişim + şifre.
+const _managerPasswordLoginSteps = [
+  AuthOnboardingStepId.role,
+  AuthOnboardingStepId.managerExperience,
+  AuthOnboardingStepId.identifier,
+  AuthOnboardingStepId.credentials,
+];
+
+/// Sakin tekrar giriş — telefon + OTP.
+const _residentLoginSteps = [
+  AuthOnboardingStepId.role,
+  AuthOnboardingStepId.residentExperience,
+  AuthOnboardingStepId.contact,
+  AuthOnboardingStepId.verification,
+];
+
+/// Sakin davet kodu ile katılım — davet + telefon + OTP + isim.
+const _residentJoinSteps = [
+  AuthOnboardingStepId.role,
+  AuthOnboardingStepId.residentExperience,
+  AuthOnboardingStepId.invite,
+  AuthOnboardingStepId.contact,
+  AuthOnboardingStepId.verification,
+  AuthOnboardingStepId.name,
+];
+
+/// Yeni kullanıcı kayıt yolu — OTP tabanlı (eski yönetici OTP yolu).
 const _defaultRegistrationSteps = [
   AuthOnboardingStepId.role,
   AuthOnboardingStepId.contact,
@@ -32,6 +68,8 @@ class AuthOnboardingState {
   final bool otpSent;
   final int otpResendSeconds;
   final String? errorMessage;
+  final bool joinOtpVerified;
+  final bool stepForward;
 
   const AuthOnboardingState({
     this.currentStepId = AuthOnboardingStepId.role,
@@ -52,6 +90,8 @@ class AuthOnboardingState {
     this.otpSent = false,
     this.otpResendSeconds = 0,
     this.errorMessage,
+    this.joinOtpVerified = false,
+    this.stepForward = true,
   });
 
   int get currentStepIndex {
@@ -60,6 +100,10 @@ class AuthOnboardingState {
   }
 
   int get totalSteps => visibleSteps.length;
+
+  bool get isManagerPasswordFlow =>
+      role == UserRole.manager &&
+      visibleSteps.contains(AuthOnboardingStepId.managerExperience);
 
   AuthOnboardingState copyWith({
     AuthOnboardingStepId? currentStepId,
@@ -80,8 +124,12 @@ class AuthOnboardingState {
     bool? otpSent,
     int? otpResendSeconds,
     String? errorMessage,
+    bool? joinOtpVerified,
+    bool? stepForward,
     bool clearError = false,
     bool clearInviteLabel = false,
+    bool clearPhone = false,
+    bool clearEmail = false,
   }) {
     return AuthOnboardingState(
       currentStepId: currentStepId ?? this.currentStepId,
@@ -90,8 +138,8 @@ class AuthOnboardingState {
       contact: contact ?? this.contact,
       flow: flow ?? this.flow,
       isFirstTimeSetup: isFirstTimeSetup ?? this.isFirstTimeSetup,
-      phone: phone ?? this.phone,
-      email: email ?? this.email,
+      phone: clearPhone ? null : (phone ?? this.phone),
+      email: clearEmail ? null : (email ?? this.email),
       name: name ?? this.name,
       inviteCode: inviteCode ?? this.inviteCode,
       otpCode: otpCode ?? this.otpCode,
@@ -102,6 +150,8 @@ class AuthOnboardingState {
       otpSent: otpSent ?? this.otpSent,
       otpResendSeconds: otpResendSeconds ?? this.otpResendSeconds,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      joinOtpVerified: joinOtpVerified ?? this.joinOtpVerified,
+      stepForward: stepForward ?? this.stepForward,
     );
   }
 }
@@ -148,6 +198,18 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
   }
 
   List<AuthOnboardingStepId> _computeVisibleSteps(AuthOnboardingState s) {
+    if (s.role == UserRole.manager && s.flow == AuthOnboardingFlow.register) {
+      return List<AuthOnboardingStepId>.from(_managerPasswordRegisterSteps);
+    }
+    if (s.role == UserRole.manager && s.flow == AuthOnboardingFlow.login) {
+      return List<AuthOnboardingStepId>.from(_managerPasswordLoginSteps);
+    }
+    if (s.role == UserRole.resident && s.flow == AuthOnboardingFlow.login) {
+      return List<AuthOnboardingStepId>.from(_residentLoginSteps);
+    }
+    if (s.flow == AuthOnboardingFlow.join && s.role == UserRole.resident) {
+      return List<AuthOnboardingStepId>.from(_residentJoinSteps);
+    }
     if (s.flow == AuthOnboardingFlow.legacyLogin ||
         (s.flow == AuthOnboardingFlow.login && s.contact == AuthContactChannel.email)) {
       return const [
@@ -161,14 +223,6 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
         AuthOnboardingStepId.role,
         AuthOnboardingStepId.contact,
         AuthOnboardingStepId.verification,
-      ];
-    }
-    if (s.flow == AuthOnboardingFlow.join && s.role == UserRole.resident) {
-      return const [
-        AuthOnboardingStepId.role,
-        AuthOnboardingStepId.contact,
-        AuthOnboardingStepId.verification,
-        AuthOnboardingStepId.invite,
       ];
     }
     return const [
@@ -185,10 +239,78 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
     state = state.copyWith(role: role, clearError: true);
   }
 
-  /// Rol kartına dokunulunca doğrudan ilgili akışa ve Adım 2'ye geç.
-  void pickManagerRole() => startManagerRegister();
+  /// Yönetici kartı — deneyim seçimine geç.
+  void pickManagerRole() {
+    state = state.copyWith(
+      role: UserRole.manager,
+      visibleSteps: const [
+        AuthOnboardingStepId.role,
+        AuthOnboardingStepId.managerExperience,
+      ],
+      clearError: true,
+    );
+    _goToStep(AuthOnboardingStepId.managerExperience);
+  }
 
-  void pickResidentRole() => startResidentJoin();
+  void pickResidentRole() {
+    state = state.copyWith(
+      role: UserRole.resident,
+      visibleSteps: const [
+        AuthOnboardingStepId.role,
+        AuthOnboardingStepId.residentExperience,
+      ],
+      clearError: true,
+    );
+    _goToStep(AuthOnboardingStepId.residentExperience);
+  }
+
+  void startResidentReturning() {
+    state = state.copyWith(
+      role: UserRole.resident,
+      flow: AuthOnboardingFlow.login,
+      contact: AuthContactChannel.phone,
+      isFirstTimeSetup: false,
+      joinOtpVerified: false,
+      visibleSteps: List<AuthOnboardingStepId>.from(_residentLoginSteps),
+      clearError: true,
+    );
+    _goToStep(AuthOnboardingStepId.contact);
+  }
+
+  void startResidentWithInvite() {
+    state = state.copyWith(
+      role: UserRole.resident,
+      flow: AuthOnboardingFlow.join,
+      contact: AuthContactChannel.phone,
+      isFirstTimeSetup: true,
+      joinOtpVerified: false,
+      visibleSteps: List<AuthOnboardingStepId>.from(_residentJoinSteps),
+      clearError: true,
+    );
+    _goToStep(AuthOnboardingStepId.invite);
+  }
+
+  void startManagerFirstTime() {
+    state = state.copyWith(
+      role: UserRole.manager,
+      flow: AuthOnboardingFlow.register,
+      isFirstTimeSetup: true,
+      visibleSteps: List<AuthOnboardingStepId>.from(_managerPasswordRegisterSteps),
+      clearError: true,
+    );
+    _goToStep(AuthOnboardingStepId.name);
+  }
+
+  void startManagerReturning() {
+    state = state.copyWith(
+      role: UserRole.manager,
+      flow: AuthOnboardingFlow.login,
+      isFirstTimeSetup: false,
+      visibleSteps: List<AuthOnboardingStepId>.from(_managerPasswordLoginSteps),
+      clearError: true,
+    );
+    _goToStep(AuthOnboardingStepId.identifier);
+  }
 
   void startReturningLoginForRole(UserRole role) {
     state = state.copyWith(
@@ -224,41 +346,10 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
   }
 
   void startManagerRegister() {
-    final next = state.copyWith(
-      role: UserRole.manager,
-      flow: AuthOnboardingFlow.register,
-      isFirstTimeSetup: true,
-      visibleSteps: _computeVisibleSteps(
-        state.copyWith(
-          role: UserRole.manager,
-          flow: AuthOnboardingFlow.register,
-          isFirstTimeSetup: true,
-        ),
-      ),
-      clearError: true,
-    );
-    state = next;
-    _goToStep(AuthOnboardingStepId.contact);
+    pickManagerRole();
   }
 
-  void startResidentJoin() {
-    final next = state.copyWith(
-      role: UserRole.resident,
-      flow: AuthOnboardingFlow.join,
-      contact: AuthContactChannel.phone,
-      isFirstTimeSetup: true,
-      visibleSteps: _computeVisibleSteps(
-        state.copyWith(
-          role: UserRole.resident,
-          flow: AuthOnboardingFlow.join,
-          isFirstTimeSetup: true,
-        ),
-      ),
-      clearError: true,
-    );
-    state = next;
-    _goToStep(AuthOnboardingStepId.contact);
-  }
+  void startResidentJoin() => startResidentWithInvite();
 
   void setContactChannel(AuthContactChannel channel) {
     final next = state.copyWith(contact: channel, clearError: true);
@@ -273,6 +364,30 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
     }
   }
 
+  void setName(String value) {
+    state = state.copyWith(name: value.trim(), clearError: true);
+  }
+
+  void setIdentifierFromRaw(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.contains('@')) {
+      state = state.copyWith(
+        email: trimmed.toLowerCase(),
+        clearPhone: true,
+        contact: AuthContactChannel.email,
+        clearError: true,
+      );
+      return;
+    }
+    final normalized = PhoneUtils.normalizeTrPhone(trimmed);
+    state = state.copyWith(
+      phone: normalized,
+      clearEmail: true,
+      contact: AuthContactChannel.phone,
+      clearError: true,
+    );
+  }
+
   void setPasswordFields({String? password, String? confirm}) {
     state = state.copyWith(
       password: password ?? state.password,
@@ -283,6 +398,14 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
 
   void setOtpCode(String code) {
     state = state.copyWith(otpCode: code, clearError: true);
+  }
+
+  void markJoinOtpVerified() {
+    state = state.copyWith(joinOtpVerified: true, clearError: true);
+  }
+
+  void setInviteCode(String code) {
+    state = state.copyWith(inviteCode: code.trim(), clearError: true);
   }
 
   void setInviteFields({String? inviteCode, String? name}) {
@@ -326,20 +449,26 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
   bool goBack() {
     final idx = state.currentStepIndex;
     if (idx <= 0) return false;
-    state = state.copyWith(currentStepId: state.visibleSteps[idx - 1]);
+    state = state.copyWith(
+      currentStepId: state.visibleSteps[idx - 1],
+      stepForward: false,
+    );
     return true;
   }
 
-  void _goToStep(AuthOnboardingStepId stepId) {
+  void _goToStep(AuthOnboardingStepId stepId, {bool forward = true}) {
     final steps = state.visibleSteps;
     if (!steps.contains(stepId)) return;
-    state = state.copyWith(currentStepId: stepId);
+    state = state.copyWith(currentStepId: stepId, stepForward: forward);
   }
 
   void goNextStep() {
     final idx = state.currentStepIndex;
     if (idx >= state.visibleSteps.length - 1) return;
-    state = state.copyWith(currentStepId: state.visibleSteps[idx + 1]);
+    state = state.copyWith(
+      currentStepId: state.visibleSteps[idx + 1],
+      stepForward: true,
+    );
   }
 
   void goToFeatures() => _goToStep(AuthOnboardingStepId.features);

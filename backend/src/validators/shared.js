@@ -4,16 +4,16 @@ import { normalizeTrPhone } from "../utils/normalizeTrPhone.js";
 
 /**
  * Ortak şifre şeması — Flutter InputValidators.passwordRegex ile uyumlu.
- * En az 6 karakter, büyük harf, küçük harf, rakam ve özel karakter (@$!%*?&.).
+ * En az 6 karakter, yalnızca harf ve rakam.
  */
 export const passwordSchema = z
   .string()
   .min(6, "Şifre en az 6 karakter olmalıdır")
   .max(100, "Şifre en fazla 100 karakter olabilir")
-  .regex(/[a-z]/, "Şifre en az bir küçük harf içermelidir")
-  .regex(/[A-Z]/, "Şifre en az bir büyük harf içermelidir")
-  .regex(/[0-9]/, "Şifre en az bir rakam içermelidir")
-  .regex(/[@$!%*?&.]/, "Şifre en az bir özel karakter (@$!%*?&.) içermelidir");
+  .regex(
+    /^[A-Za-z0-9]+$/,
+    "Şifre yalnızca harf ve rakam içermelidir"
+  );
 
 export const optionalListLimit = z.coerce
   .number()

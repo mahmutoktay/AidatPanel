@@ -132,6 +132,14 @@ export async function sendOtpService({ phone, email, purpose, payload }) {
       where: { ...contactWhere(contact), role, deletedAt: null },
     });
     if (!user) {
+      if (purpose === "resident_login") {
+        throw new HttpError(
+          404,
+          contact.email
+            ? "Bu e-posta adresiyle kayıtlı hesap bulunamadı."
+            : "Bu telefon numarasıyla kayıtlı hesap bulunamadı."
+        );
+      }
       return { sent: true };
     }
   }
@@ -256,12 +264,35 @@ export async function sendOtpService({ phone, email, purpose, payload }) {
     `AidatPanel doğrulama kodunuz: ${code}. 5 dakika geçerlidir.`
   );
 
+  // sendSms sağlayıcı yoksa { ok: true, dev: true } döner — prod'da SMS gitmemiş olur.
+  if (smsResult.dev) {
+    if (process.env.NODE_ENV === "production") {
+      logger.error({
+        type: "sms_dev_skip_in_production",
+        phone: contact.phone,
+        purpose,
+      });
+      throw new HttpError(
+        503,
+        "SMS gönderilemedi. Lütfen biraz sonra tekrar deneyin."
+      );
+    }
+    logger.info({ type: "otp_dev", phone: contact.phone, purpose, code });
+    logger.warn({
+      type: "otp_sms_dev_skip",
+      phone: contact.phone,
+      purpose,
+      hint: "Twilio Verify veya TWILIO_PHONE_FROM yapılandırın; kod yalnızca logda.",
+    });
+    return { sent: true, devFallback: true, channel: "dev" };
+  }
+
   if (process.env.NODE_ENV !== "production") {
     logger.info({ type: "otp_dev", phone: contact.phone, purpose, code });
   }
 
   if (!smsResult.ok) {
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV !== "production" && smsResult.dev) {
       logger.warn({
         type: "otp_sms_failed_dev_continue",
         phone: contact.phone,
@@ -269,6 +300,14 @@ export async function sendOtpService({ phone, email, purpose, payload }) {
         code: smsResult.code,
       });
       return { sent: true, devFallback: true };
+    }
+    if (process.env.NODE_ENV !== "production") {
+      logger.warn({
+        type: "otp_sms_failed",
+        phone: contact.phone,
+        error: smsResult.error,
+        code: smsResult.code,
+      });
     }
     if (smsResult.code === 21408) {
       throw new HttpError(
@@ -343,10 +382,84 @@ export async function verifyOtpService(body) {
   } else if (purpose === "manager_register") {
     result = await registerManagerWithOtp(contact, body, record.payload);
   } else if (purpose === "resident_join") {
-    result = await joinResidentWithOtp(contact, body, record.payload);
+    const inviteCode = body.inviteCode ?? record.payload?.inviteCode;
+    const name = body.name?.trim();
+    if (!inviteCode) {
+      throw new HttpError(400, "Davet kodu gereklidir.");
+    }
+    if (!name || name.length < 2) {
+      await validateInviteCode(inviteCode);
+      await prisma.phoneOtpToken.update({
+        where: { id: record.id },
+        data: {
+          payload: {
+            ...(record.payload && typeof record.payload === "object"
+              ? record.payload
+              : {}),
+            inviteCode,
+            joinOtpConfirmed: true,
+          },
+        },
+      });
+      return { requireName: true };
+    }
+    result = await joinResidentWithOtp(
+      contact,
+      body,
+      {
+        ...(record.payload && typeof record.payload === "object"
+          ? record.payload
+          : {}),
+        inviteCode,
+      }
+    );
   } else {
     throw new HttpError(400, "Geçersiz doğrulama isteği.");
   }
+
+  await prisma.phoneOtpToken.update({
+    where: { id: record.id },
+    data: { usedAt: new Date() },
+  });
+
+  return result;
+}
+
+/**
+ * POST /auth/otp/complete-resident-join — OTP doğrulandıktan sonra isim ile kaydı tamamlar.
+ */
+export async function completeResidentJoinService({ phone, name, inviteCode }) {
+  const contact = resolveOtpContact({ phone });
+  const trimmedName = name?.trim();
+  if (!trimmedName || trimmedName.length < 2) {
+    throw new HttpError(400, "İsim en az 2 karakter olmalıdır.");
+  }
+  if (!inviteCode) {
+    throw new HttpError(400, "Davet kodu gereklidir.");
+  }
+
+  const record = await prisma.phoneOtpToken.findFirst({
+    where: {
+      ...contactWhere(contact),
+      purpose: "resident_join",
+      usedAt: null,
+      expiresAt: { gt: new Date() },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const payload =
+    record?.payload && typeof record.payload === "object" ? record.payload : null;
+  if (!record || !payload?.joinOtpConfirmed) {
+    throw new HttpError(400, "Önce telefon doğrulamasını tamamlayın.");
+  }
+
+  const code = inviteCode ?? payload.inviteCode;
+  const result = await joinResidentWithOtp(
+    contact,
+    { name: trimmedName, inviteCode: code },
+    { ...payload, inviteCode: code }
+  );
 
   await prisma.phoneOtpToken.update({
     where: { id: record.id },

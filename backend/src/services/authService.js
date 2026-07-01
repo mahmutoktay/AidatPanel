@@ -83,6 +83,46 @@ function assertMinContactRequired(email, phone) {
 }
 
 /**
+ * POST /auth/check-identifier — kayıt/giriş öncesi e-posta veya telefon uygunluğu.
+ */
+export async function checkIdentifierService({ identifier, purpose }) {
+  const normalized = normalizeLoginIdentifier(identifier);
+  const isEmail = normalized.includes("@");
+
+  if (!normalized) {
+    throw new HttpError(400, "E-posta veya telefon numarası gereklidir.");
+  }
+
+  if (purpose === "manager_register") {
+    if (isEmail) {
+      await assertEmailAvailable(normalized);
+    } else {
+      await assertPhoneAvailable(normalized, "MANAGER");
+    }
+    return { ok: true };
+  }
+
+  if (purpose === "manager_login") {
+    const user = await prisma.user.findFirst({
+      where: isEmail
+        ? { email: normalized, deletedAt: null, role: "MANAGER" }
+        : { phone: normalized, deletedAt: null, role: "MANAGER" },
+    });
+    if (!user) {
+      throw new HttpError(
+        404,
+        isEmail
+          ? "Bu e-posta adresiyle kayıtlı hesap bulunamadı."
+          : "Bu telefon numarasıyla kayıtlı hesap bulunamadı."
+      );
+    }
+    return { ok: true };
+  }
+
+  throw new HttpError(400, "Geçersiz istek.");
+}
+
+/**
  * Yönetici kaydı — POST /auth/register
  */
 export async function registerService({ name, email, phone, password }) {

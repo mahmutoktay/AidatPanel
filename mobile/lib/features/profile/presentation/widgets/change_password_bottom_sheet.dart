@@ -251,14 +251,8 @@ class _ChangePasswordBottomSheetState
         return t.validation.passwordTooShort;
       case 'password_too_long':
         return t.validation.passwordTooLong;
-      case 'password_uppercase_required':
-        return t.validation.passwordUppercaseRequired;
-      case 'password_lowercase_required':
-        return t.validation.passwordLowercaseRequired;
-      case 'password_number_required':
-        return t.validation.passwordNumberRequired;
-      case 'password_special_char_required':
-        return t.validation.passwordSpecialCharRequired;
+      case 'password_alphanumeric_required':
+        return t.validation.passwordAlphanumericRequired;
       default:
         return t.validation.passwordRequired;
     }

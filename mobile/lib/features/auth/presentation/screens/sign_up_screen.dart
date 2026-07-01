@@ -249,13 +249,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           ? context.t.validation.passwordTooShort
           : passwordError == 'password_too_long'
           ? context.t.validation.passwordTooLong
-          : passwordError == 'password_uppercase_required'
-          ? context.t.validation.passwordUppercaseRequired
-          : passwordError == 'password_lowercase_required'
-          ? context.t.validation.passwordLowercaseRequired
-          : passwordError == 'password_number_required'
-          ? context.t.validation.passwordNumberRequired
-          : context.t.validation.passwordSpecialCharRequired;
+          : passwordError == 'password_alphanumeric_required'
+          ? context.t.validation.passwordAlphanumericRequired
+          : context.t.validation.passwordAlphanumericRequired;
       ref
           .read(toastProvider.notifier)
           .show(errorMessage, type: ToastType.error);

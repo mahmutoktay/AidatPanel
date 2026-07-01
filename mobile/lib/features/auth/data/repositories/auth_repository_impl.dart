@@ -5,6 +5,7 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/token_refresh_service.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/utils/jwt_utils.dart';
+import '../../../../core/utils/phone_utils.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/entities/saved_login_hint.dart';
 import '../datasources/auth_remote_datasource.dart';
@@ -16,6 +17,10 @@ import '../models/user_data.dart';
 abstract class AuthRepository {
   /// `identifier` email **veya** telefon olabilir (Belge §3).
   Future<UserEntity> login(String identifier, String password);
+  Future<void> checkIdentifier({
+    required String identifier,
+    required String purpose,
+  });
   Future<void> register(
     String? email,
     String password,
@@ -58,6 +63,7 @@ abstract class AuthRepository {
     String? phone,
     String? email,
     required String purpose,
+    Map<String, dynamic>? payload,
   });
 
   Future<UserEntity> verifyOtp({
@@ -72,6 +78,18 @@ abstract class AuthRepository {
   });
 
   Future<String> validateInvite(String inviteCode);
+
+  Future<bool> verifyResidentJoinOtp({
+    required String phone,
+    required String code,
+    required String inviteCode,
+  });
+
+  Future<UserEntity> completeResidentJoin({
+    required String phone,
+    required String name,
+    required String inviteCode,
+  });
 
   Future<SavedLoginHint?> getSavedLoginHint(UserRole role);
 }
@@ -159,6 +177,23 @@ class AuthRepositoryImpl implements AuthRepository {
       rethrow;
     } catch (_) {
       throw ApiException(message: 'auth_login_failed');
+    }
+  }
+
+  @override
+  Future<void> checkIdentifier({
+    required String identifier,
+    required String purpose,
+  }) async {
+    try {
+      await _remoteDataSource.checkIdentifier(
+        identifier: PhoneUtils.normalizeLoginIdentifier(identifier),
+        purpose: purpose,
+      );
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'identifier_check_failed');
     }
   }
 
@@ -358,12 +393,14 @@ class AuthRepositoryImpl implements AuthRepository {
     String? phone,
     String? email,
     required String purpose,
+    Map<String, dynamic>? payload,
   }) async {
     try {
       await _remoteDataSource.sendOtp(
         phone: phone,
         email: email,
         purpose: purpose,
+        payload: payload,
       );
     } on ApiException {
       rethrow;
@@ -414,6 +451,49 @@ class AuthRepositoryImpl implements AuthRepository {
       rethrow;
     } catch (_) {
       throw ApiException(message: 'invite_invalid');
+    }
+  }
+
+  @override
+  Future<bool> verifyResidentJoinOtp({
+    required String phone,
+    required String code,
+    required String inviteCode,
+  }) async {
+    try {
+      return await _remoteDataSource.verifyResidentJoinOtp(
+        phone: phone,
+        code: code,
+        inviteCode: inviteCode,
+      );
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'otp_verify_failed');
+    }
+  }
+
+  @override
+  Future<UserEntity> completeResidentJoin({
+    required String phone,
+    required String name,
+    required String inviteCode,
+  }) async {
+    try {
+      final response = await _remoteDataSource.completeResidentJoin(
+        phone: phone,
+        name: name,
+        inviteCode: inviteCode,
+      );
+      await _persistTokens(response.accessToken, response.refreshToken);
+      await _secureStorage.saveUser(jsonEncode(response.user.toJson()));
+      final user = response.user.toEntity();
+      await _saveLoginHintForUser(user);
+      return user;
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'otp_verify_failed');
     }
   }
 }

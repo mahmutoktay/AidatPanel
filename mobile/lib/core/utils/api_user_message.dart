@@ -126,6 +126,8 @@ String? _mapErrorKey(Translations t, String raw) {
   switch (raw) {
     case 'auth_login_failed':
       return e.authLoginFailed;
+    case 'identifier_check_failed':
+      return c.api.identifierCheckFailed;
     case 'auth_register_failed':
       return e.authRegisterFailed;
     case 'auth_join_failed':
@@ -305,12 +307,23 @@ String? _mapErrorKey(Translations t, String raw) {
 }
 
 String? _mapAuth(dynamic api, String raw, String msg, int? code) {
+  if (_has(raw, 'kayıtlı hesap bulunamadı') || _has(raw, 'hesap bulunamadı')) {
+    if (_has(raw, 'e-posta') || _has(raw, 'email')) {
+      return api.accountNotFoundEmail as String;
+    }
+    if (_has(raw, 'telefon')) {
+      return api.accountNotFoundPhone as String;
+    }
+    return api.notFound as String;
+  }
   if (_has(raw, 'email/telefon') ||
       (_has(raw, 'şifre hatalı') && !_has(raw, 'mevcut şifre')) ||
       _has(raw, 'invalid credentials')) {
     return api.invalidCredentials as String;
   }
-  if (_has(raw, 'email adresi zaten') || _has(raw, 'email already')) {
+  if (_has(raw, 'e-posta adresi zaten') ||
+      _has(raw, 'email adresi zaten') ||
+      _has(raw, 'email already')) {
     return api.duplicateEmail as String;
   }
   if (_has(raw, 'telefon numarası zaten') || _has(raw, 'phone already')) {
@@ -580,7 +593,9 @@ String? _mapDekont(
   }
 
   if (code == 404 &&
-      (_has(raw, 'dosya') || _has(raw, 'dekont') || _has(raw, 'bulunamadı'))) {
+      (_has(raw, 'dekont dosya') ||
+          _has(raw, 'dosyası bulunamadı') ||
+          (_has(raw, 'dekont') && _has(raw, 'bulunamadı')))) {
     return d.errorFileDownload;
   }
 

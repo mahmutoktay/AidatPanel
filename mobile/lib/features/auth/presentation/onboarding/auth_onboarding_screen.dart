@@ -15,23 +15,27 @@ import '../../../../core/utils/phone_utils.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/auth_screen_shell.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
-import '../../domain/entities/saved_login_hint.dart';
+import '../../../../shared/widgets/password_field.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_button.dart';
 import 'auth_onboarding_models.dart';
 import 'auth_onboarding_provider.dart';
-import 'saved_login_hints_provider.dart';
-import 'widgets/auth_progress_indicator.dart';
 import 'widgets/auth_step_scaffold.dart';
-import 'widgets/onboarding_buildings_illustration.dart';
+import '../widgets/auth_brand_mark.dart';
+import 'widgets/onboarding_buildings_backdrop.dart';
 import 'widgets/onboarding_compact_header.dart';
 import 'widgets/onboarding_feature_tile.dart';
+import 'widgets/onboarding_identifier_field.dart';
 import 'widgets/onboarding_info_banner.dart';
 import 'widgets/onboarding_role_cards.dart';
+import 'widgets/onboarding_role_step.dart';
 import 'widgets/onboarding_segment_tabs.dart';
+import 'widgets/onboarding_fixed_choice_layout.dart';
+import 'widgets/onboarding_step_transition.dart';
+import 'widgets/onboarding_step_actions.dart';
+import 'widgets/onboarding_step_scaffold.dart';
 import 'widgets/otp_input_row.dart';
-import '../widgets/auth_brand_header.dart';
 
 /// 6 adımlı auth onboarding — tek giriş noktası `/login`.
 class AuthOnboardingScreen extends ConsumerStatefulWidget {
@@ -55,6 +59,7 @@ class AuthOnboardingScreen extends ConsumerStatefulWidget {
 
 class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
   final _contactController = TextEditingController();
+  final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _inviteController = TextEditingController();
@@ -81,6 +86,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
   void dispose() {
     _otpTimer?.cancel();
     _contactController.dispose();
+    _identifierController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _inviteController.dispose();
@@ -112,49 +118,64 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
   bool _isResidentJoin(AuthOnboardingState ob) =>
       ob.flow == AuthOnboardingFlow.join && ob.role == UserRole.resident;
 
+  bool _isResidentLogin(AuthOnboardingState ob) =>
+      ob.role == UserRole.resident && ob.flow == AuthOnboardingFlow.login;
+
+  bool _isResidentOtpFlow(AuthOnboardingState ob) =>
+      ob.role == UserRole.resident &&
+      ob.visibleSteps.contains(AuthOnboardingStepId.residentExperience);
+
+  String? _validateResidentPhoneInput(String raw) {
+    final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length != 11 || !digits.startsWith('0')) {
+      return 'phone_invalid_eleven_digits';
+    }
+    if (PhoneUtils.normalizeTrPhone(digits) == null) {
+      return 'phone_invalid';
+    }
+    return null;
+  }
+
+  String _validationMessage(BuildContext context, String key) {
+    final t = context.t;
+    switch (key) {
+      case 'identifier_required':
+        return t.features.auth.onboarding.identifierRequired;
+      case 'phone_invalid_eleven_digits':
+        return t.features.auth.onboarding.phoneInvalidElevenDigits;
+      case 'email_invalid':
+        return t.validation.emailInvalid;
+      case 'phone_invalid':
+        return t.features.auth.onboarding.phoneInvalid;
+      case 'password_required':
+        return t.validation.passwordRequired;
+      case 'password_too_short':
+        return t.validation.passwordTooShort;
+      case 'password_too_long':
+        return t.validation.passwordTooLong;
+      case 'password_alphanumeric_required':
+        return t.validation.passwordAlphanumericRequired;
+      case 'name_required':
+      case 'name_too_short':
+      case 'name_invalid':
+        return t.features.auth.onboarding.residentNameRequired;
+      default:
+        return t.features.auth.errorOccurred;
+    }
+  }
+
+  String _identifierForState(AuthOnboardingState ob) {
+    if (ob.email != null && ob.email!.isNotEmpty) return ob.email!;
+    if (ob.phone != null && ob.phone!.isNotEmpty) return '0${ob.phone}';
+    return _identifierController.text.trim();
+  }
+
   String _maskEmail(String email) {
     final parts = email.split('@');
     if (parts.length != 2 || parts[0].isEmpty) return email;
     final local = parts[0];
     final head = local.length <= 2 ? local[0] : local.substring(0, 2);
     return '$head***@${parts[1]}';
-  }
-
-  String? _returningHintSubtitle(SavedLoginHint? hint, String template) {
-    if (hint == null || hint.name.trim().isEmpty) return null;
-    final contact = hint.phone != null && hint.phone!.isNotEmpty
-        ? '+90 ${PhoneUtils.maskDisplay(hint.phone!)}'
-        : hint.email != null && hint.email!.isNotEmpty
-            ? _maskEmail(hint.email!)
-            : '';
-    if (contact.isEmpty) return hint.name.trim();
-    return template
-        .replaceAll('{name}', hint.name.trim())
-        .replaceAll('{contact}', contact);
-  }
-
-  void _startReturningLogin(UserRole role, SavedLoginHint? hint) {
-    final onboarding = ref.read(authOnboardingProvider.notifier);
-    onboarding.startReturningLoginForRole(role);
-    _contactController.clear();
-    if (hint?.phone != null && hint!.phone!.isNotEmpty) {
-      onboarding.setContactChannel(AuthContactChannel.phone);
-      var digits = hint.phone!.replaceAll(RegExp(r'\D'), '');
-      if (digits.startsWith('90') && digits.length >= 12) {
-        digits = digits.substring(2);
-      } else if (digits.startsWith('0') && digits.length >= 11) {
-        digits = digits.substring(1);
-      }
-      if (digits.length > 10) {
-        digits = digits.substring(digits.length - 10);
-      }
-      _contactController.text = digits;
-      return;
-    }
-    if (hint?.email != null && hint!.email!.isNotEmpty) {
-      onboarding.setContactChannel(AuthContactChannel.email);
-      _contactController.text = hint.email!;
-    }
   }
 
   void _goDashboard(UserEntity user) {
@@ -171,15 +192,26 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
 
     switch (ob.currentStepId) {
       case AuthOnboardingStepId.role:
-        if (ob.role == null) {
-          onboarding.setError(context.t.features.auth.signUpSubtitle);
-          return;
-        }
-        if (ob.role == UserRole.manager) {
-          onboarding.startManagerRegister();
+        return;
+
+      case AuthOnboardingStepId.managerExperience:
+      case AuthOnboardingStepId.residentExperience:
+        return;
+
+      case AuthOnboardingStepId.name:
+        if (_isResidentJoin(ob) && ob.joinOtpVerified) {
+          await _handleResidentJoinNameStep(ob, auth);
         } else {
-          onboarding.startResidentJoin();
+          _handleManagerNameStep(ob, onboarding);
         }
+        return;
+
+      case AuthOnboardingStepId.identifier:
+        await _handleIdentifierStep(ob, onboarding, auth);
+        return;
+
+      case AuthOnboardingStepId.credentials:
+        await _handleCredentialsStep(ob, onboarding, auth);
         return;
 
       case AuthOnboardingStepId.contact:
@@ -212,21 +244,159 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
     }
   }
 
+  void _handleManagerNameStep(
+    AuthOnboardingState ob,
+    AuthOnboardingNotifier onboarding,
+  ) {
+    final name = _nameController.text.trim();
+    final nameError = InputValidators.validateName(name);
+    if (nameError != null) {
+      ref.read(toastProvider.notifier).show(
+            _validationMessage(context, nameError),
+            type: ToastType.error,
+          );
+      return;
+    }
+    onboarding.setName(name);
+    _identifierController.clear();
+    onboarding.goNextStep();
+  }
+
+  Future<void> _handleResidentJoinNameStep(
+    AuthOnboardingState ob,
+    AuthNotifier auth,
+  ) async {
+    final name = _nameController.text.trim();
+    final nameError = InputValidators.validateName(name);
+    if (nameError != null) {
+      ref.read(toastProvider.notifier).show(
+            _validationMessage(context, nameError),
+            type: ToastType.error,
+          );
+      return;
+    }
+    final phone = ob.phone;
+    final inviteCode = ob.inviteCode;
+    if (phone == null || inviteCode == null || inviteCode.isEmpty) return;
+    try {
+      final user = await auth.completeResidentJoinAndAuthenticate(
+        phone: phone,
+        name: name,
+        inviteCode: inviteCode,
+        ref: ref,
+      );
+      _goDashboard(user);
+    } catch (_) {}
+  }
+
+  Future<void> _handleIdentifierStep(
+    AuthOnboardingState ob,
+    AuthOnboardingNotifier onboarding,
+    AuthNotifier auth,
+  ) async {
+    final raw = _identifierController.text.trim();
+    final identifierError = InputValidators.validateLoginIdentifier(raw);
+    if (identifierError != null) {
+      ref.read(toastProvider.notifier).show(
+            _validationMessage(context, identifierError),
+            type: ToastType.error,
+          );
+      return;
+    }
+    onboarding.setIdentifierFromRaw(raw);
+    try {
+      await auth.checkManagerIdentifier(
+        rawIdentifier: raw,
+        isRegister: ob.flow == AuthOnboardingFlow.register,
+      );
+      _passwordController.clear();
+      _confirmPasswordController.clear();
+      onboarding.goNextStep();
+    } catch (_) {
+      // Hata ref.listen(authStateProvider) ile tek toast olarak gösterilir.
+    }
+  }
+
+  Future<void> _handleCredentialsStep(
+    AuthOnboardingState ob,
+    AuthOnboardingNotifier onboarding,
+    AuthNotifier auth,
+  ) async {
+    final password = _passwordController.text;
+    final identifier = _identifierForState(ob);
+
+    if (ob.flow == AuthOnboardingFlow.register) {
+      final passwordError = InputValidators.validatePassword(password);
+      if (passwordError != null) {
+        ref.read(toastProvider.notifier).show(
+              _validationMessage(context, passwordError),
+              type: ToastType.error,
+            );
+        return;
+      }
+      final confirm = _confirmPasswordController.text;
+      if (password != confirm) {
+        ref.read(toastProvider.notifier).show(
+              context.t.features.auth.passwordsDoNotMatch,
+              type: ToastType.error,
+            );
+        return;
+      }
+      final name = ob.name ?? _nameController.text.trim();
+      await auth.registerAndLogin(
+        name: name,
+        rawIdentifier: identifier,
+        password: password,
+        ref: ref,
+      );
+      final user = ref.read(authStateProvider).user;
+      if (user != null) _goDashboard(user);
+      return;
+    }
+
+    if (password.isEmpty) {
+      ref.read(toastProvider.notifier).show(
+            context.t.features.auth.passwordRequired,
+            type: ToastType.error,
+          );
+      return;
+    }
+
+    await auth.submitLogin(identifier, password, ref);
+    final user = ref.read(authStateProvider).user;
+    if (user != null) _goDashboard(user);
+  }
+
   Future<void> _handleContactStep(
     AuthOnboardingState ob,
     AuthOnboardingNotifier onboarding,
     AuthNotifier auth,
   ) async {
-    if (_isResidentJoin(ob)) {
-      final name = _nameController.text.trim();
-      if (name.length < 2) {
+    if (_isResidentOtpFlow(ob)) {
+      final raw = _contactController.text.trim();
+      final phoneError = _validateResidentPhoneInput(raw);
+      if (phoneError != null) {
         ref.read(toastProvider.notifier).show(
-              context.t.features.auth.onboarding.residentNameRequired,
+              _validationMessage(context, phoneError),
               type: ToastType.error,
             );
         return;
       }
-      onboarding.setInviteFields(name: name);
+      final phone = PhoneUtils.normalizeTrPhone(raw)!;
+      onboarding.setContactValue(phone);
+      try {
+        await auth.sendOtp(
+          phone: phone,
+          purpose: _otpPurpose(ob),
+          payload: _isResidentJoin(ob) && ob.inviteCode != null
+              ? {'inviteCode': ob.inviteCode}
+              : null,
+        );
+        onboarding.markOtpSent();
+        _startOtpTimer();
+        onboarding.goNextStep();
+      } catch (_) {}
+      return;
     }
 
     final raw = _contactController.text.trim();
@@ -250,13 +420,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
         onboarding.markOtpSent();
         _startOtpTimer();
         onboarding.goNextStep();
-      } catch (_) {
-        final err = ref.read(authStateProvider).error;
-        ref.read(toastProvider.notifier).show(
-              err ?? context.t.features.auth.onboarding.otpSendFailed,
-              type: ToastType.error,
-            );
-      }
+      } catch (_) {}
     } else {
       if (!InputValidators.emailRegex.hasMatch(raw)) {
         ref.read(toastProvider.notifier).show(
@@ -276,13 +440,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
         onboarding.markOtpSent();
         _startOtpTimer();
         onboarding.goNextStep();
-      } catch (_) {
-        final err = ref.read(authStateProvider).error;
-        ref.read(toastProvider.notifier).show(
-              err ?? context.t.features.auth.onboarding.otpSendFailed,
-              type: ToastType.error,
-            );
-      }
+      } catch (_) {}
     }
   }
 
@@ -302,8 +460,33 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
             );
         return;
       }
-      if (ob.flow == AuthOnboardingFlow.join) {
-        onboarding.goNextStep();
+      if (_isResidentJoin(ob)) {
+        final inviteCode = ob.inviteCode;
+        if (inviteCode == null || inviteCode.isEmpty) return;
+        try {
+          final requireName = await auth.verifyResidentJoinOtp(
+            phone: phone!,
+            code: code,
+            inviteCode: inviteCode,
+          );
+          if (requireName) {
+            onboarding.markJoinOtpVerified();
+            onboarding.goNextStep();
+          }
+        } catch (_) {}
+        return;
+      }
+      if (_isResidentLogin(ob)) {
+        try {
+          final user = await auth.verifyOtpAndAuthenticate(
+            phone: phone,
+            email: email,
+            code: code,
+            purpose: 'resident_login',
+            ref: ref,
+          );
+          _goDashboard(user);
+        } catch (_) {}
         return;
       }
       if (ob.flow == AuthOnboardingFlow.register &&
@@ -402,9 +585,8 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       return;
     }
 
-    if (ob.role == UserRole.resident) {
+    if (ob.role == UserRole.resident && ob.flow == AuthOnboardingFlow.join) {
       final invite = _inviteController.text.trim();
-      final name = (ob.name ?? _nameController.text.trim()).trim();
       if (invite.isEmpty) {
         ref.read(toastProvider.notifier).show(
               context.t.features.auth.onboarding.inviteInvalid,
@@ -412,43 +594,17 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
             );
         return;
       }
-      if (name.isEmpty) {
-        ref.read(toastProvider.notifier).show(
-              context.t.features.auth.onboarding.residentNameRequired,
-              type: ToastType.error,
-            );
-        return;
-      }
-      onboarding.setInviteFields(inviteCode: invite, name: name);
       try {
         final label = await auth.validateInviteCode(invite);
+        onboarding.setInviteCode(invite);
         onboarding.setInviteLabel(label);
+        onboarding.goNextStep();
       } catch (_) {
         ref.read(toastProvider.notifier).show(
               context.t.features.auth.onboarding.inviteInvalid,
               type: ToastType.error,
             );
-        return;
       }
-      final phone = ob.phone;
-      final email = ob.email;
-      final code = ob.otpCode;
-      if ((phone == null && email == null) || code == null) return;
-      try {
-        await auth.verifyOtpAndAuthenticate(
-          phone: phone,
-          email: email,
-          code: code,
-          purpose: 'resident_join',
-          inviteCode: invite,
-          name: name,
-          ref: ref,
-        );
-        final user = ref.read(authStateProvider).user;
-        if (user != null) {
-          _goDashboard(user);
-        }
-      } catch (_) {}
       return;
     }
 
@@ -468,7 +624,15 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
   Widget build(BuildContext context) {
     final ob = ref.watch(authOnboardingProvider);
     final authState = ref.watch(authStateProvider);
-    final onboarding = ref.read(authOnboardingProvider.notifier);
+
+    ref.listen(authOnboardingProvider.select((s) => s.currentStepId), (
+      prev,
+      next,
+    ) {
+      if (prev != null && prev != next) {
+        ref.read(authStateProvider.notifier).dismissError();
+      }
+    });
 
     ref.listen(authStateProvider, (prev, next) {
       if (next.error != null && next.error != prev?.error) {
@@ -479,40 +643,216 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       }
     });
 
+    final stepPadding = ob.currentStepId == AuthOnboardingStepId.role
+        ? const EdgeInsets.fromLTRB(
+            AppSizes.dashboardScreenPaddingHorizontal,
+            AppSizes.spacingL,
+            AppSizes.dashboardScreenPaddingHorizontal,
+            0,
+          )
+        : AppSizes.screenBodyScrollPadding;
+
     return AuthBackHandler(
       child: AuthScreenShell(
-        showBrandHeader: ob.currentStepId == AuthOnboardingStepId.role,
-        brandHeaderLayout: AuthBrandHeaderLayout.vertical,
+        showBrandHeader: false,
         wrapInCard: false,
-        leading: ob.currentStepIndex > 0
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: authState.isLoading
-                    ? null
-                    : () => onboarding.goBack(),
-              )
-            : null,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        scrollable: false,
+        padding: EdgeInsets.zero,
+        leading: null,
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          fit: StackFit.expand,
           children: [
-            if (ob.currentStepId != AuthOnboardingStepId.role)
-              const OnboardingCompactHeader(),
-            AuthProgressIndicator(
-              currentIndex: ob.currentStepIndex,
-              totalSteps: ob.totalSteps,
+            const Align(
+              alignment: Alignment.bottomCenter,
+              child: OnboardingBuildingsBackdrop(),
             ),
-            const SizedBox(height: AppSizes.spacingM),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: KeyedSubtree(
-                key: ValueKey(ob.currentStepId),
-                child: _buildStep(context, ob, authState.isLoading),
+            Padding(
+              padding: stepPadding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  OnboardingCompactHeader(
+                    size: ob.currentStepId == AuthOnboardingStepId.role
+                        ? AuthBrandMarkSize.hero
+                        : AuthBrandMarkSize.standard,
+                    showSubtitle:
+                        ob.currentStepId == AuthOnboardingStepId.role,
+                  ),
+                  const SizedBox(height: AppSizes.spacingS),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: AnimatedSwitcher(
+                            duration: onboardingStepTransitionDuration,
+                            switchInCurve: Curves.easeInOutCubic,
+                            switchOutCurve: Curves.easeInOutCubic,
+                            layoutBuilder: (currentChild, previousChildren) {
+                              return Stack(
+                                fit: StackFit.expand,
+                                alignment: Alignment.topCenter,
+                                children: [
+                                  ...previousChildren,
+                                  ?currentChild,
+                                ],
+                              );
+                            },
+                            transitionBuilder: (child, animation) {
+                              return onboardingStepTransition(child, animation);
+                            },
+                            child: KeyedSubtree(
+                              key: ValueKey(ob.currentStepId),
+                              child: SizedBox.expand(
+                                child: _buildStep(
+                                  context,
+                                  ob,
+                                  authState.isLoading,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        _buildStepActions(context, ob, authState.isLoading),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildStepActions(
+    BuildContext context,
+    AuthOnboardingState ob,
+    bool isLoading,
+  ) {
+    final tOb = context.t.features.auth.onboarding;
+    final tAuth = context.t.features.auth;
+    final onboarding = ref.read(authOnboardingProvider.notifier);
+
+    switch (ob.currentStepId) {
+      case AuthOnboardingStepId.role:
+        return const SizedBox.shrink();
+
+      case AuthOnboardingStepId.managerExperience:
+      case AuthOnboardingStepId.residentExperience:
+        return OnboardingStepActions(
+          onBack: isLoading ? null : onboarding.goBack,
+          backLabel: tOb.backButton,
+          isLoading: isLoading,
+        );
+
+      case AuthOnboardingStepId.name:
+        final isResidentWelcome = _isResidentJoin(ob) && ob.joinOtpVerified;
+        return OnboardingStepActions(
+          primaryLabel: isResidentWelcome
+              ? tOb.residentCompleteJoinButton
+              : tOb.continueButton,
+          onPrimary: _onContinue,
+          onBack: isLoading ? null : onboarding.goBack,
+          backLabel: tOb.backButton,
+          isLoading: isLoading,
+        );
+
+      case AuthOnboardingStepId.identifier:
+        return OnboardingStepActions(
+          primaryLabel: tOb.continueButton,
+          onPrimary: _onContinue,
+          onBack: isLoading ? null : onboarding.goBack,
+          backLabel: tOb.backButton,
+          isLoading: isLoading,
+        );
+
+      case AuthOnboardingStepId.credentials:
+        final isRegister = ob.flow == AuthOnboardingFlow.register;
+        return OnboardingStepActions(
+          primaryLabel: isRegister
+              ? tOb.managerCreateAccountButton
+              : tOb.managerLoginButton,
+          onPrimary: _onContinue,
+          onBack: isLoading ? null : onboarding.goBack,
+          backLabel: tOb.backButton,
+          isLoading: isLoading,
+        );
+
+      case AuthOnboardingStepId.contact:
+        if (_isResidentOtpFlow(ob)) {
+          return OnboardingStepActions(
+            primaryLabel: tOb.residentSendCodeButton,
+            onPrimary: _onContinue,
+            onBack: isLoading ? null : onboarding.goBack,
+            backLabel: tOb.backButton,
+            isLoading: isLoading,
+          );
+        }
+        return OnboardingStepActions(
+          primaryLabel: tOb.continueButton,
+          onPrimary: _onContinue,
+          isLoading: isLoading,
+        );
+
+      case AuthOnboardingStepId.verification:
+        if (_usesOtpChannel(ob) && _isResidentOtpFlow(ob)) {
+          return OnboardingStepActions(
+            primaryLabel: tOb.continueButton,
+            onPrimary: _onContinue,
+            onBack: isLoading ? null : onboarding.goBack,
+            backLabel: tOb.backButton,
+            isLoading: isLoading,
+          );
+        }
+        if (_usesOtpChannel(ob)) {
+          return OnboardingStepActions(
+            primaryLabel: tOb.continueButton,
+            onPrimary: _onContinue,
+            isLoading: isLoading,
+          );
+        }
+        final isRegisterFlow = ob.flow == AuthOnboardingFlow.register;
+        return OnboardingStepActions(
+          primaryLabel:
+              isRegisterFlow ? tOb.continueButton : tAuth.login,
+          onPrimary: _onContinue,
+          isLoading: isLoading,
+        );
+
+      case AuthOnboardingStepId.invite:
+        if (_isResidentJoin(ob)) {
+          return OnboardingStepActions(
+            primaryLabel: tOb.continueButton,
+            onPrimary: _onContinue,
+            onBack: isLoading ? null : onboarding.goBack,
+            backLabel: tOb.backButton,
+            isLoading: isLoading,
+          );
+        }
+        return OnboardingStepActions(
+          primaryLabel: tOb.continueButton,
+          onPrimary: _onContinue,
+          isLoading: isLoading,
+        );
+
+      case AuthOnboardingStepId.features:
+        return OnboardingStepActions(
+          primaryLabel: tOb.continueButton,
+          onPrimary: _onContinue,
+          isLoading: isLoading,
+        );
+
+      case AuthOnboardingStepId.complete:
+        return OnboardingStepActions(
+          primaryLabel: tOb.goToPanel,
+          onPrimary: _onContinue,
+          isLoading: isLoading,
+          primaryTrailing: const Icon(Icons.arrow_forward, size: 20),
+        );
+    }
   }
 
   Widget _buildStep(
@@ -525,148 +865,170 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
 
     switch (ob.currentStepId) {
       case AuthOnboardingStepId.role:
-        final savedHints = ref.watch(savedLoginHintsProvider).value;
-        final managerHint = savedHints?[UserRole.manager];
-        final residentHint = savedHints?[UserRole.resident];
-        return AuthStepScaffold(
+        return OnboardingRoleStep(
           title: tOb.step1Title,
-          subtitle: tOb.step1Subtitle,
-          primaryLabel: tOb.continueButton,
-          isLoading: isLoading,
-          onPrimary: ob.role == null ? null : _onContinue,
-          primaryEnabled: ob.role != null,
+          managerLabel: tOb.step1ManagerOption,
+          residentLabel: tOb.step1ResidentOption,
+          selectedRole: ob.role,
+          enabled: !isLoading,
+          onManagerTap: isLoading ? () {} : onboarding.pickManagerRole,
+          onResidentTap: isLoading ? () {} : onboarding.pickResidentRole,
+        );
+
+      case AuthOnboardingStepId.managerExperience:
+        return OnboardingFixedChoiceLayout(
+          title: tOb.managerExperienceTitle,
+          subtitle: tOb.managerExperienceSubtitle,
+          choices: OnboardingRoleCards(
+            selectedRole: null,
+            managerLabel: tOb.managerReturningOption,
+            residentLabel: tOb.managerFirstTimeOption,
+            enabled: !isLoading,
+            onManagerTap: isLoading ? () {} : onboarding.startManagerReturning,
+            onResidentTap: isLoading ? () {} : onboarding.startManagerFirstTime,
+          ),
+        );
+
+      case AuthOnboardingStepId.residentExperience:
+        return OnboardingFixedChoiceLayout(
+          title: tOb.residentExperienceTitle,
+          subtitle: tOb.residentExperienceSubtitle,
+          choices: OnboardingRoleCards(
+            selectedRole: null,
+            managerLabel: tOb.residentReturningOption,
+            residentLabel: tOb.residentInviteOption,
+            enabled: !isLoading,
+            onManagerTap: isLoading ? () {} : onboarding.startResidentReturning,
+            onResidentTap: isLoading ? () {} : onboarding.startResidentWithInvite,
+          ),
+        );
+
+      case AuthOnboardingStepId.name:
+        if (_isResidentJoin(ob) && ob.joinOtpVerified) {
+          return OnboardingStepScaffold(
+            title: tOb.residentWelcomeTitle,
+            subtitle: tOb.residentWelcomeSubtitle,
+            body: TextField(
+              controller: _nameController,
+              enabled: !isLoading,
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _onContinue(),
+              decoration: InputDecoration(
+                labelText: context.t.features.auth.name,
+                hintText: context.t.features.auth.nameHint,
+              ),
+            ),
+          );
+        }
+        if (_nameController.text.isEmpty && (ob.name?.isNotEmpty ?? false)) {
+          _nameController.text = ob.name!;
+        }
+        return OnboardingStepScaffold(
+          title: tOb.managerNameTitle,
+          subtitle: tOb.managerNameSubtitle,
+          body: TextField(
+            controller: _nameController,
+            enabled: !isLoading,
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _onContinue(),
+            decoration: InputDecoration(
+              labelText: context.t.features.auth.name,
+              hintText: context.t.features.auth.nameHint,
+            ),
+          ),
+        );
+
+      case AuthOnboardingStepId.identifier:
+        return OnboardingStepScaffold(
+          title: tOb.managerIdentifierTitle,
+          subtitle: tOb.managerIdentifierSubtitle,
+          body: OnboardingIdentifierField(
+            controller: _identifierController,
+            enabled: !isLoading,
+            labelText: tOb.managerIdentifierLabel,
+            hintText: tOb.managerIdentifierHint,
+            phoneNote: tOb.managerIdentifierPhoneNote,
+            onSubmitted: _onContinue,
+          ),
+        );
+
+      case AuthOnboardingStepId.credentials:
+        final isRegister = ob.flow == AuthOnboardingFlow.register;
+        return OnboardingStepScaffold(
+          title: isRegister
+              ? tOb.managerRegisterPasswordTitle
+              : tOb.managerLoginPasswordTitle,
+          subtitle: isRegister ? tOb.managerRegisterPasswordSubtitle : null,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              OnboardingRoleCards(
-                selectedRole: ob.role,
-                residentLabel: context.t.common.resident,
-                managerLabel: context.t.common.manager,
-                onResidentTap: isLoading
-                    ? () {}
-                    : onboarding.pickResidentRole,
-                onManagerTap: isLoading
-                    ? () {}
-                    : onboarding.pickManagerRole,
+              PasswordField(
+                controller: _passwordController,
+                labelText: context.t.features.auth.password,
+                hintText: context.t.features.auth.passwordHint,
                 enabled: !isLoading,
+                obscureText: _obscurePassword,
+                onToggleVisibility: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
               ),
-              const OnboardingBuildingsIllustration(),
-            ],
-          ),
-          secondary: Column(
-            children: [
-              AuthTextButton(
-                label: tOb.step1ReturningLoginManager,
-                subtitle: _returningHintSubtitle(
-                  managerHint,
-                  tOb.step1ReturningLoginHint,
+              if (isRegister) ...[
+                const SizedBox(height: AppSizes.spacingM),
+                PasswordField(
+                  controller: _confirmPasswordController,
+                  labelText: context.t.features.auth.confirmPassword,
+                  hintText: context.t.features.auth.passwordHint,
+                  enabled: !isLoading,
+                  obscureText: _obscureConfirmPassword,
+                  onToggleVisibility: () => setState(
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  ),
                 ),
-                onTap: isLoading
-                    ? null
-                    : () => _startReturningLogin(
-                          UserRole.manager,
-                          managerHint,
-                        ),
-              ),
-              AuthTextButton(
-                label: tOb.step1ReturningLoginResident,
-                subtitle: _returningHintSubtitle(
-                  residentHint,
-                  tOb.step1ReturningLoginHint,
-                ),
-                onTap: isLoading
-                    ? null
-                    : () => _startReturningLogin(
-                          UserRole.resident,
-                          residentHint,
-                        ),
-              ),
-              AuthTextButton(
-                label: tOb.step1LegacyEmailLogin,
-                onTap: isLoading ? null : onboarding.startLegacyEmailLogin,
-              ),
+              ],
             ],
           ),
         );
 
       case AuthOnboardingStepId.contact:
-        if (_isResidentJoin(ob)) {
-          return AuthStepScaffold(
-            title: tOb.residentLoginTitle,
-            subtitle: tOb.residentLoginSubtitle,
-            primaryLabel: tOb.residentSendCodeButton,
-            isLoading: isLoading,
-            onPrimary: _onContinue,
+        if (_isResidentOtpFlow(ob)) {
+          return OnboardingStepScaffold(
+            title: tOb.residentPhoneTitle,
+            subtitle: tOb.residentPhoneSubtitle,
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextField(
-                  controller: _nameController,
-                  enabled: !isLoading,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: InputDecoration(
-                    labelText: context.t.features.auth.name,
-                    hintText: context.t.features.auth.nameHint,
-                  ),
-                ),
-                const SizedBox(height: AppSizes.spacingM),
-                TextField(
                   controller: _contactController,
                   enabled: !isLoading,
                   keyboardType: TextInputType.phone,
-                  maxLength: 10,
+                  maxLength: 11,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: InputDecoration(
                     labelText: context.t.features.auth.phone,
-                    hintText: context.t.features.auth.phoneHint,
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.only(
-                        left: AppSizes.spacingM,
-                        right: AppSizes.spacingS,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '+90',
-                            style: AppTypography.body1.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Container(
-                            width: 1,
-                            height: 24,
-                            margin: const EdgeInsets.only(
-                              left: AppSizes.spacingS,
-                            ),
-                            color: AppColors.border,
-                          ),
-                        ],
-                      ),
-                    ),
-                    prefixIconConstraints: const BoxConstraints(minWidth: 72),
+                    hintText: '05XXXXXXXXX',
                     counterText: '',
                   ),
                 ),
-              ],
-            ),
-            footer: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.verified_user_outlined,
-                  size: 16,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: AppSizes.spacingXS),
-                Flexible(
-                  child: Text(
-                    tOb.residentPhoneVerifyNote,
-                    style: AppTypography.caption.copyWith(
+                const SizedBox(height: AppSizes.spacingS),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 16,
                       color: AppColors.textSecondary,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
+                    const SizedBox(width: AppSizes.spacingXS),
+                    Expanded(
+                      child: Text(
+                        tOb.managerIdentifierPhoneNote,
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -760,6 +1122,49 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
 
       case AuthOnboardingStepId.verification:
         if (_usesOtpChannel(ob)) {
+          if (_isResidentOtpFlow(ob)) {
+            final otpSubtitle = ob.phone != null
+                ? tOb.step3OtpSubtitlePhone.replaceAll(
+                    '{phone}',
+                    PhoneUtils.maskDisplay(ob.phone!),
+                  )
+                : tOb.residentOtpSubtitle;
+            return OnboardingStepScaffold(
+              title: tOb.step3OtpTitle,
+              subtitle: otpSubtitle,
+              body: Column(
+                children: [
+                  OtpInputRow(
+                    enabled: !isLoading,
+                    onChanged: onboarding.setOtpCode,
+                    onCompleted: (_) => _onContinue(),
+                  ),
+                  if (ApiConstants.isLocalBackend) ...[
+                    const SizedBox(height: AppSizes.spacingS),
+                    Text(
+                      tOb.step3DevOtpHint,
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                  const SizedBox(height: AppSizes.spacingM),
+                  _ResidentOtpResendRow(
+                    prompt: tOb.residentResendPrompt,
+                    linkLabel: ob.otpResendSeconds > 0
+                        ? tOb.step3ResendOtp.replaceAll(
+                            '{seconds}',
+                            '${ob.otpResendSeconds}',
+                          )
+                        : tOb.residentResendLink,
+                    enabled: ob.otpResendSeconds <= 0 && !isLoading,
+                    onResend: () => _resendOtp(ob, onboarding),
+                  ),
+                ],
+              ),
+            );
+          }
           final showManagerRegPassword = ob.flow == AuthOnboardingFlow.register &&
               ob.role == UserRole.manager;
           final isResidentJoin = _isResidentJoin(ob);
@@ -934,6 +1339,37 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       case AuthOnboardingStepId.invite:
         final isManager = ob.role == UserRole.manager;
         final isResidentJoin = _isResidentJoin(ob);
+        if (isResidentJoin) {
+          return OnboardingStepScaffold(
+            title: tOb.step4InviteTitle,
+            subtitle: tOb.residentInviteSubtitle,
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: _inviteController,
+                  enabled: !isLoading,
+                  textCapitalization: TextCapitalization.characters,
+                  decoration: InputDecoration(
+                    labelText: tOb.residentInviteCodeLabel,
+                    hintText: tOb.residentInviteCodeHint,
+                    prefixIcon: const Icon(Icons.card_giftcard_outlined),
+                  ),
+                ),
+                if (ob.inviteLabel != null) ...[
+                  const SizedBox(height: AppSizes.spacingS),
+                  Text(
+                    tOb.step4InviteValidated.replaceAll(
+                      '{label}',
+                      ob.inviteLabel!,
+                    ),
+                    style: AppTypography.body2.copyWith(color: AppColors.success),
+                  ),
+                ],
+              ],
+            ),
+          );
+        }
         return AuthStepScaffold(
           title: isManager ? tOb.step4ManagerInviteTitle : tOb.step4InviteTitle,
           subtitle: isManager

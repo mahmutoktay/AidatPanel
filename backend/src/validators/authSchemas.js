@@ -50,6 +50,13 @@ export const authSchemas = {
     }),
   },
 
+  checkIdentifier: {
+    body: z.object({
+      identifier: z.string().min(1, "E-posta veya telefon numarası gereklidir"),
+      purpose: z.enum(["manager_register", "manager_login"]),
+    }),
+  },
+
   refreshToken: {
     body: z.object({
       refreshToken: z.string().min(1, "Refresh token gereklidir"),
@@ -145,6 +152,21 @@ export const authSchemas = {
       .refine((d) => !(d.phone && d.email), {
         message: "Telefon veya e-posta gönderin, ikisini birden değil.",
       }),
+  },
+
+  completeResidentJoin: {
+    body: z.object({
+      phone: normalizedPhoneSchema,
+      name: z
+        .string()
+        .min(2, "İsim en az 2 karakter olmalıdır")
+        .max(50, "İsim en fazla 50 karakter olabilir"),
+      inviteCode: z.preprocess(
+        (v) => (typeof v === "string" ? v.trim().toUpperCase().replace(/\s+/g, "") : v),
+        z.string().min(1, "Davet kodu gereklidir").max(20)
+      ),
+      ...deviceMetaFields,
+    }),
   },
 
   inviteValidate: {

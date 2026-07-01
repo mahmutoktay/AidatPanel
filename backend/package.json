@@ -10,6 +10,7 @@
     "test:push": "node scripts/send-test-push.mjs",
     "test:sms": "node scripts/send-test-sms.mjs",
     "test:verify": "node scripts/send-test-verify.mjs",
+    "diagnose:twilio": "node scripts/diagnose-twilio.mjs",
     "test:email-otp": "node scripts/send-test-email-otp.mjs",
     "verify:firebase": "node scripts/diagnose-fcm.mjs",
     "diagnose:fcm": "node scripts/diagnose-fcm.mjs",

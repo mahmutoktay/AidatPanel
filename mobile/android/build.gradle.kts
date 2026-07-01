@@ -53,19 +53,23 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
-// :app GeneratedPluginRegistrant.java — Kotlin eklenti sınıfları önce derlensin.
+// :app PluginRegistrant.kt — Kotlin eklenti sınıfları önce derlensin (Java + Kotlin derleme).
 gradle.projectsEvaluated {
     val app = rootProject.findProject(":app") ?: return@projectsEvaluated
-    app.tasks.withType<JavaCompile>().configureEach {
+    val wirePluginKotlinCompileDeps: (org.gradle.api.Task) -> Unit = { task ->
         val variant = when {
-            name.contains("Debug", ignoreCase = true) -> "Debug"
+            task.name.contains("Debug", ignoreCase = true) -> "Debug"
             else -> "Release"
         }
         rootProject.subprojects.forEach { pluginProject ->
             if (pluginProject.name == "app") return@forEach
-            pluginProject.tasks.findByName("compile${variant}Kotlin")?.let { dependsOn(it) }
+            pluginProject.tasks.findByName("bundleLibCompileToJar${variant}")?.let {
+                task.dependsOn(it)
+            }
         }
     }
+    app.tasks.withType<JavaCompile>().configureEach(wirePluginKotlinCompileDeps)
+    app.tasks.withType<KotlinCompile>().configureEach(wirePluginKotlinCompileDeps)
 }
 
 tasks.register<Delete>("clean") {

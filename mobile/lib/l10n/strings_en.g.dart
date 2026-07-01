@@ -1137,6 +1137,9 @@ class Translations$validation$en {
 	/// en: 'Password is too long'
 	String get passwordTooLong => 'Password is too long';
 
+	/// en: 'Password must be at least 6 characters and contain only letters and numbers'
+	String get passwordAlphanumericRequired => 'Password must be at least 6 characters and contain only letters and numbers';
+
 	/// en: 'Password must contain at least 1 uppercase letter'
 	String get passwordUppercaseRequired => 'Password must contain at least 1 uppercase letter';
 
@@ -1356,6 +1359,15 @@ class Translations$common$api$en {
 
 	/// en: 'This phone number is already registered.'
 	String get duplicatePhone => 'This phone number is already registered.';
+
+	/// en: 'No account found with this email. Check your details or sign up.'
+	String get accountNotFoundEmail => 'No account found with this email. Check your details or sign up.';
+
+	/// en: 'No account found with this phone number. Check your details or sign up.'
+	String get accountNotFoundPhone => 'No account found with this phone number. Check your details or sign up.';
+
+	/// en: 'Could not verify email or phone. Please try again.'
+	String get identifierCheckFailed => 'Could not verify email or phone. Please try again.';
 
 	/// en: 'Invite code is invalid. Check the code and try again.'
 	String get invalidInviteCode => 'Invite code is invalid. Check the code and try again.';
@@ -3987,11 +3999,17 @@ class Translations$features$auth$onboarding$en {
 	/// en: 'Your information is securely protected.'
 	String get secureNote => 'Your information is securely protected.';
 
-	/// en: 'Choose how to sign in'
-	String get step1Title => 'Choose how to sign in';
+	/// en: 'Who will you use the app as?'
+	String get step1Title => 'Who will you use the app as?';
 
 	/// en: 'Select your role to continue.'
 	String get step1Subtitle => 'Select your role to continue.';
+
+	/// en: 'I am an apartment manager'
+	String get step1ManagerOption => 'I am an apartment manager';
+
+	/// en: 'I am an apartment resident'
+	String get step1ResidentOption => 'I am an apartment resident';
 
 	/// en: 'Select this if you manage an apartment or site.'
 	String get step1ManagerHint => 'Select this if you manage an apartment or site.';
@@ -4013,6 +4031,90 @@ class Translations$features$auth$onboarding$en {
 
 	/// en: 'Sign in with email and password'
 	String get step1LegacyEmailLogin => 'Sign in with email and password';
+
+	/// en: 'Back'
+	String get backButton => 'Back';
+
+	/// en: 'Welcome to AidatPanel'
+	String get managerExperienceTitle => 'Welcome to AidatPanel';
+
+	/// en: 'Have you registered before?'
+	String get managerExperienceSubtitle => 'Have you registered before?';
+
+	/// en: 'I have registered before'
+	String get managerReturningOption => 'I have registered before';
+
+	/// en: 'I am using the app for the first time'
+	String get managerFirstTimeOption => 'I am using the app for the first time';
+
+	/// en: 'What is your name?'
+	String get managerNameTitle => 'What is your name?';
+
+	/// en: 'How should we address you?'
+	String get managerNameSubtitle => 'How should we address you?';
+
+	/// en: 'Enter your email or phone'
+	String get managerIdentifierTitle => 'Enter your email or phone';
+
+	/// en: 'This will be used for sign-in.'
+	String get managerIdentifierSubtitle => 'This will be used for sign-in.';
+
+	/// en: 'Email or phone'
+	String get managerIdentifierLabel => 'Email or phone';
+
+	/// en: 'example@mail.com or 05321234567'
+	String get managerIdentifierHint => 'example@mail.com or 05321234567';
+
+	/// en: 'For phone, enter 11 digits starting with 0.'
+	String get managerIdentifierPhoneNote => 'For phone, enter 11 digits starting with 0.';
+
+	/// en: 'Enter your email or phone'
+	String get identifierRequired => 'Enter your email or phone';
+
+	/// en: 'Enter an 11-digit phone number starting with 0'
+	String get phoneInvalidElevenDigits => 'Enter an 11-digit phone number starting with 0';
+
+	/// en: 'Enter your password'
+	String get managerLoginPasswordTitle => 'Enter your password';
+
+	/// en: 'Set your password'
+	String get managerRegisterPasswordTitle => 'Set your password';
+
+	/// en: 'At least 6 characters; letters and numbers only.'
+	String get managerRegisterPasswordSubtitle => 'At least 6 characters; letters and numbers only.';
+
+	/// en: 'Create Account'
+	String get managerCreateAccountButton => 'Create Account';
+
+	/// en: 'Sign In'
+	String get managerLoginButton => 'Sign In';
+
+	/// en: 'Welcome to AidatPanel'
+	String get residentExperienceTitle => 'Welcome to AidatPanel';
+
+	/// en: 'How would you like to continue?'
+	String get residentExperienceSubtitle => 'How would you like to continue?';
+
+	/// en: 'I have signed in before'
+	String get residentReturningOption => 'I have signed in before';
+
+	/// en: 'I have an invite code'
+	String get residentInviteOption => 'I have an invite code';
+
+	/// en: 'Your phone number'
+	String get residentPhoneTitle => 'Your phone number';
+
+	/// en: 'We will send you a one-time sign-in code.'
+	String get residentPhoneSubtitle => 'We will send you a one-time sign-in code.';
+
+	/// en: 'Welcome!'
+	String get residentWelcomeTitle => 'Welcome!';
+
+	/// en: 'Your phone is verified. Please enter your name.'
+	String get residentWelcomeSubtitle => 'Your phone is verified. Please enter your name.';
+
+	/// en: 'Go to Dashboard'
+	String get residentCompleteJoinButton => 'Go to Dashboard';
 
 	/// en: 'Enter Your Contact Information'
 	String get step2Title => 'Enter Your Contact Information';
@@ -4295,6 +4397,9 @@ extension on Translations {
 			'common.api.invalidCredentials' => 'Email, phone, or password is incorrect. Please check and try again.',
 			'common.api.duplicateEmail' => 'This email is already registered. Try signing in.',
 			'common.api.duplicatePhone' => 'This phone number is already registered.',
+			'common.api.accountNotFoundEmail' => 'No account found with this email. Check your details or sign up.',
+			'common.api.accountNotFoundPhone' => 'No account found with this phone number. Check your details or sign up.',
+			'common.api.identifierCheckFailed' => 'Could not verify email or phone. Please try again.',
 			'common.api.invalidInviteCode' => 'Invite code is invalid. Check the code and try again.',
 			'common.api.inviteCodeUsed' => 'This invite code has already been used.',
 			'common.api.inviteCodeExpired' => 'This invite code has expired. Ask your manager for a new one.',
@@ -4703,6 +4808,7 @@ extension on Translations {
 			'validation.passwordRequired' => 'Password cannot be empty',
 			'validation.passwordTooShort' => 'Password must be at least 6 characters',
 			'validation.passwordTooLong' => 'Password is too long',
+			'validation.passwordAlphanumericRequired' => 'Password must be at least 6 characters and contain only letters and numbers',
 			'validation.passwordUppercaseRequired' => 'Password must contain at least 1 uppercase letter',
 			'validation.passwordLowercaseRequired' => 'Password must contain at least 1 lowercase letter',
 			'validation.passwordNumberRequired' => 'Password must contain at least 1 number',
@@ -4729,12 +4835,12 @@ extension on Translations {
 			'features.buildings.newCodePrefix' => 'If you generate a new code, ',
 			'features.buildings.oldUserRemoved' => 'the old user will be removed',
 			'features.buildings.currentCodePrefix' => 'The current code ',
+			_ => null,
+		} ?? switch (path) {
 			'features.buildings.codeInvalid' => 'will become invalid',
 			'features.buildings.codeReady' => 'Invite Code Ready',
 			'features.buildings.code' => 'CODE',
 			'features.buildings.validFor7Days' => 'Valid for 7 days',
-			_ => null,
-		} ?? switch (path) {
 			'features.buildings.expiresAt' => 'Expires at:',
 			'features.buildings.remaining' => 'Remaining:',
 			'features.buildings.activeCodeNote' => 'While this code is active, you cannot generate a new code for the same apartment. You must revoke the current code first.',
@@ -4924,8 +5030,10 @@ extension on Translations {
 			'features.auth.onboarding.continueButton' => 'Continue',
 			'features.auth.onboarding.goToPanel' => 'Go to panel',
 			'features.auth.onboarding.secureNote' => 'Your information is securely protected.',
-			'features.auth.onboarding.step1Title' => 'Choose how to sign in',
+			'features.auth.onboarding.step1Title' => 'Who will you use the app as?',
 			'features.auth.onboarding.step1Subtitle' => 'Select your role to continue.',
+			'features.auth.onboarding.step1ManagerOption' => 'I am an apartment manager',
+			'features.auth.onboarding.step1ResidentOption' => 'I am an apartment resident',
 			'features.auth.onboarding.step1ManagerHint' => 'Select this if you manage an apartment or site.',
 			'features.auth.onboarding.step1ResidentHint' => 'I am a resident signing in to my unit.',
 			'features.auth.onboarding.step1ReturningLogin' => 'I have signed in before',
@@ -4933,6 +5041,34 @@ extension on Translations {
 			'features.auth.onboarding.step1ReturningLoginResident' => 'I signed in before as resident',
 			'features.auth.onboarding.step1ReturningLoginHint' => '{name} · {contact}',
 			'features.auth.onboarding.step1LegacyEmailLogin' => 'Sign in with email and password',
+			'features.auth.onboarding.backButton' => 'Back',
+			'features.auth.onboarding.managerExperienceTitle' => 'Welcome to AidatPanel',
+			'features.auth.onboarding.managerExperienceSubtitle' => 'Have you registered before?',
+			'features.auth.onboarding.managerReturningOption' => 'I have registered before',
+			'features.auth.onboarding.managerFirstTimeOption' => 'I am using the app for the first time',
+			'features.auth.onboarding.managerNameTitle' => 'What is your name?',
+			'features.auth.onboarding.managerNameSubtitle' => 'How should we address you?',
+			'features.auth.onboarding.managerIdentifierTitle' => 'Enter your email or phone',
+			'features.auth.onboarding.managerIdentifierSubtitle' => 'This will be used for sign-in.',
+			'features.auth.onboarding.managerIdentifierLabel' => 'Email or phone',
+			'features.auth.onboarding.managerIdentifierHint' => 'example@mail.com or 05321234567',
+			'features.auth.onboarding.managerIdentifierPhoneNote' => 'For phone, enter 11 digits starting with 0.',
+			'features.auth.onboarding.identifierRequired' => 'Enter your email or phone',
+			'features.auth.onboarding.phoneInvalidElevenDigits' => 'Enter an 11-digit phone number starting with 0',
+			'features.auth.onboarding.managerLoginPasswordTitle' => 'Enter your password',
+			'features.auth.onboarding.managerRegisterPasswordTitle' => 'Set your password',
+			'features.auth.onboarding.managerRegisterPasswordSubtitle' => 'At least 6 characters; letters and numbers only.',
+			'features.auth.onboarding.managerCreateAccountButton' => 'Create Account',
+			'features.auth.onboarding.managerLoginButton' => 'Sign In',
+			'features.auth.onboarding.residentExperienceTitle' => 'Welcome to AidatPanel',
+			'features.auth.onboarding.residentExperienceSubtitle' => 'How would you like to continue?',
+			'features.auth.onboarding.residentReturningOption' => 'I have signed in before',
+			'features.auth.onboarding.residentInviteOption' => 'I have an invite code',
+			'features.auth.onboarding.residentPhoneTitle' => 'Your phone number',
+			'features.auth.onboarding.residentPhoneSubtitle' => 'We will send you a one-time sign-in code.',
+			'features.auth.onboarding.residentWelcomeTitle' => 'Welcome!',
+			'features.auth.onboarding.residentWelcomeSubtitle' => 'Your phone is verified. Please enter your name.',
+			'features.auth.onboarding.residentCompleteJoinButton' => 'Go to Dashboard',
 			'features.auth.onboarding.step2Title' => 'Enter Your Contact Information',
 			'features.auth.onboarding.step2Subtitle' => 'Enter your phone number or email address to continue.',
 			'features.auth.onboarding.step2SubtitlePhone' => 'We will send you a verification code.',
@@ -5213,6 +5349,8 @@ extension on Translations {
 			'features.expenses.categoryElevator' => 'Elevator',
 			'features.expenses.categoryElectricity' => 'Electricity',
 			'features.expenses.categoryWater' => 'Water',
+			_ => null,
+		} ?? switch (path) {
 			'features.expenses.categoryInsurance' => 'Insurance',
 			'features.expenses.categoryRepair' => 'Repair',
 			'features.expenses.categoryGarden' => 'Garden',
@@ -5247,8 +5385,6 @@ extension on Translations {
 			'features.expenses.viewReceipt' => 'View receipt',
 			'features.expenses.receiptMissing' => 'No receipt uploaded',
 			'features.expenses.targetMonthLabel' => 'Month applied to dues',
-			_ => null,
-		} ?? switch (path) {
 			'features.expenses.targetThisMonth' => 'This month',
 			'features.expenses.targetNextMonth' => 'Next month',
 			'features.expenses.targetSpecificMonth' => 'Pick month',

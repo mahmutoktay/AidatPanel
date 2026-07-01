@@ -18,6 +18,8 @@ class AuthScreenShell extends StatelessWidget {
   final EdgeInsetsGeometry? cardPadding;
   /// false ise form doğrudan gri arka plan üzerinde (login gibi).
   final bool wrapInCard;
+  /// false ise içerik kaydırılmaz; [Expanded] ile tam yükseklik kullanılır.
+  final bool scrollable;
 
   const AuthScreenShell({
     super.key,
@@ -30,6 +32,7 @@ class AuthScreenShell extends StatelessWidget {
     this.padding,
     this.cardPadding,
     this.wrapInCard = true,
+    this.scrollable = true,
   });
 
   /// Alt sabit birincil CTA — [ProfileSettingsUi.primaryButton] stili.
@@ -90,12 +93,17 @@ class AuthScreenShell extends StatelessWidget {
                   if (showBrandHeader)
                     AuthBrandHeader(layout: brandHeaderLayout),
                   Expanded(
-                    child: SingleChildScrollView(
-                      padding: scrollPadding,
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.manual,
-                      child: bodyContent,
-                    ),
+                    child: scrollable
+                        ? SingleChildScrollView(
+                            padding: scrollPadding,
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.manual,
+                            child: bodyContent,
+                          )
+                        : Padding(
+                            padding: scrollPadding,
+                            child: bodyContent,
+                          ),
                   ),
                 ],
               ),
