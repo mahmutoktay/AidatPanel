@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../../shared/providers/navigation_provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -15,8 +19,8 @@ import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../../shared/widgets/premium_filter_picker.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
+import '../../../../shared/widgets/building_selector_provider.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
-import '../../../buildings/data/buildings_store.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../providers/expenses_provider.dart';
 import '../utils/expense_labels.dart';
@@ -32,7 +36,8 @@ class ManagerExpensesScreen extends ConsumerStatefulWidget {
 
 class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
   final ScrollController _scrollController = ScrollController();
-  String? _buildingId;
+  String? _lastRequestedBuildingId;
+  String? _pendingSyncBuildingId;
   late int _month;
   late int _year;
 
@@ -55,22 +60,69 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     super.dispose();
   }
 
-  void _load() {
-    final id = _buildingId;
-    if (id == null) return;
-    ref
+  void _syncSelectedBuildingAndLoad(
+    List<BuildingEntity> buildings,
+    String? selectedBuildingId,
+  ) {
+    if (buildings.isEmpty) return;
+
+    final selectedExists =
+        selectedBuildingId != null &&
+        buildings.any((building) => building.id == selectedBuildingId);
+    final effectiveId = selectedExists
+        ? selectedBuildingId
+        : buildings.first.id;
+
+    if (_lastRequestedBuildingId == effectiveId && selectedExists) return;
+    if (_pendingSyncBuildingId == effectiveId) return;
+
+    _pendingSyncBuildingId = effectiveId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pendingSyncBuildingId = null;
+      if (!mounted) return;
+
+      final latestBuildings = ref.read(buildingsStoreProvider).value ?? [];
+      if (latestBuildings.isEmpty) return;
+
+      final latestSelectedId = ref.read(selectedBuildingIdProvider);
+      final latestSelectedExists =
+          latestSelectedId != null &&
+          latestBuildings.any((building) => building.id == latestSelectedId);
+      final id = latestSelectedExists
+          ? latestSelectedId
+          : latestBuildings.first.id;
+
+      if (!latestSelectedExists) {
+        ref.read(selectedBuildingIdProvider.notifier).select(id);
+      }
+      if (_lastRequestedBuildingId == id) return;
+
+      _lastRequestedBuildingId = id;
+      unawaited(_loadBuilding(id));
+    });
+  }
+
+  Future<void> _loadBuilding(String buildingId) {
+    _lastRequestedBuildingId = buildingId;
+    return ref
         .read(expensesNotifierProvider.notifier)
-        .load(id, month: _month, year: _year);
+        .load(buildingId, month: _month, year: _year);
+  }
+
+  Future<void> _load() async {
+    final id = ref.read(selectedBuildingIdProvider);
+    if (id == null) return;
+    await _loadBuilding(id);
   }
 
   Future<void> _openForm({ExpenseEntity? expense}) async {
-    final id = _buildingId;
+    final id = ref.read(selectedBuildingIdProvider);
     if (id == null) return;
     final ok = await context.push<bool>(
       '/manager-dashboard/expenses/form?buildingId=${Uri.encodeComponent(id)}',
       extra: expense,
     );
-    if (ok == true && mounted) _load();
+    if (ok == true && mounted) unawaited(_load());
   }
 
   Future<void> _confirmDelete(ExpenseEntity expense) async {
@@ -185,13 +237,8 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     final state = ref.watch(expensesNotifierProvider);
     final t = context.t.features.expenses;
 
-    if (_buildingId == null && buildings.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() => _buildingId = buildings.first.id);
-        _load();
-      });
-    }
+    final buildingId = ref.watch(selectedBuildingIdProvider);
+    _syncSelectedBuildingAndLoad(buildings, buildingId);
 
     return DashboardSecondaryScaffold(
       title: t.title,
@@ -199,7 +246,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
       actions: [
         IconButton(
           icon: Icon(Icons.add, color: AppColors.inkDark),
-          onPressed: _buildingId == null ? null : () => _openForm(),
+          onPressed: buildingId == null ? null : () => _openForm(),
         ),
       ],
       body: DashboardListScreenBody(
@@ -210,10 +257,10 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
                 children: [
                   DashboardSingleBuildingSelector(
                     buildings: buildings,
-                    selectedBuildingId: _buildingId,
+                    selectedBuildingId: buildingId,
                     onSelected: (id) {
-                      setState(() => _buildingId = id);
-                      _load();
+                      ref.read(selectedBuildingIdProvider.notifier).select(id);
+                      unawaited(_load());
                     },
                   ),
                   const SizedBox(height: AppSizes.spacingM),
@@ -228,7 +275,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
                 ],
               ),
         list: RefreshIndicator(
-          onRefresh: () async => _load(),
+          onRefresh: _load,
           child: _buildList(context, state),
         ),
       ),
@@ -261,7 +308,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
                   Text(state.error!, textAlign: TextAlign.center),
                   const SizedBox(height: AppSizes.spacingM),
                   FilledButton(
-                    onPressed: _load,
+                    onPressed: () => unawaited(_load()),
                     child: Text(context.t.common.tryAgain),
                   ),
                 ],

@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/searchable_location_picker.dart';
 import '../../../../shared/widgets/show_due_day_picker.dart';
@@ -68,34 +70,17 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: context.t.common.addBuildingNew,
       canPop: !_submitting,
-      child: Scaffold(
-        backgroundColor: AppColors.dashboardBackground,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          surfaceTintColor: Colors.transparent,
-          centerTitle: false,
-          titleSpacing: 0,
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: MinimalBackButton(
-              onPressed: _submitting ? null : () => context.pop(),
-            ),
-          ),
-          title: Text(
-            context.t.common.addBuildingNew,
-            style: ProfileSettingsUi.title,
-          ),
-        ),
-        bottomNavigationBar: MinimalStickyActionBar(
-          label: context.t.common.createBuilding,
-          loading: _submitting,
-          onPressed: _onSubmit,
-        ),
-        body: SafeArea(
+      useMinimalBackButton: true,
+      onBack: _submitting ? null : () => context.pop(),
+      bottomNavigationBar: MinimalStickyActionBar(
+        label: context.t.common.createBuilding,
+        loading: _submitting,
+        onPressed: _onSubmit,
+      ),
+      body: SafeArea(
           child: AbsorbPointer(
             absorbing: _submitting,
             child: Form(
@@ -249,7 +234,6 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
               ),
             ),
           ),
-        ),
       ),
     );
   }
@@ -268,8 +252,14 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   }
 
   void _showCityPicker() {
+<<<<<<< HEAD
     SearchableLocationPicker.showCityPicker(
       context,
+=======
+    _showPickerSheet(
+      title: context.t.common.selectCityTitle,
+      items: sortedCityNames,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
       selected: _selectedCity,
       onSelected: (city) {
         setState(() {
@@ -281,15 +271,45 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
   }
 
   void _showDistrictPicker() {
+<<<<<<< HEAD
     final city = _selectedCity;
     if (city == null) return;
     SearchableLocationPicker.showDistrictPicker(
       context,
       city: city,
+=======
+    final districts = turkishCities[_selectedCity] ?? const [];
+    _showPickerSheet(
+      title: context.t.common.selectDistrictTitle,
+      items: districts,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
       selected: _selectedDistrict,
       onSelected: (district) {
         setState(() => _selectedDistrict = district);
       },
+<<<<<<< HEAD
+=======
+    );
+  }
+
+  void _showPickerSheet({
+    required String title,
+    required List<String> items,
+    String? selected,
+    required ValueChanged<String> onSelected,
+  }) {
+    PremiumBottomSheetScaffold.show<void>(
+      context: context,
+      builder: (_) => _CityDistrictPickerSheet(
+        title: title,
+        items: items,
+        selected: selected,
+        onSelected: (value) {
+          onSelected(value);
+          Navigator.of(context).pop();
+        },
+      ),
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
     );
   }
 
@@ -384,3 +404,101 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
     }
   }
 }
+<<<<<<< HEAD
+=======
+
+class _CityDistrictPickerSheet extends StatefulWidget {
+  final String title;
+  final List<String> items;
+  final String? selected;
+  final ValueChanged<String> onSelected;
+
+  const _CityDistrictPickerSheet({
+    required this.title,
+    required this.items,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  @override
+  State<_CityDistrictPickerSheet> createState() =>
+      _CityDistrictPickerSheetState();
+}
+
+class _CityDistrictPickerSheetState extends State<_CityDistrictPickerSheet> {
+  String _query = '';
+
+  List<String> get _filtered {
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return widget.items;
+    return widget.items
+        .where((s) => s.toLowerCase().contains(q))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = _filtered;
+
+    return PremiumBottomSheetScaffold(
+      title: widget.title,
+      showCloseButton: true,
+      onClose: () => Navigator.of(context).pop(),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
+            child: MinimalSearchField(
+              hint: context.t.common.search,
+              autofocus: widget.items.length > 8,
+              whiteBackground: true,
+              onChanged: (value) => setState(() => _query = value),
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingS),
+          if (filtered.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(AppSizes.spacingL),
+              child: Text(
+                context.t.common.noResults,
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.mutedText,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: AppSizes.spacingL),
+              itemCount: filtered.length,
+              itemBuilder: (_, index) {
+                final item = filtered[index];
+                return PremiumActionSheetTile(
+                  icon: Icons.location_on_outlined,
+                  label: item,
+                  iconColor: AppColors.statusBlue,
+                  iconBackground:
+                      widget.selected == item
+                          ? AppColors.statusBlue.withValues(alpha: 0.15)
+                          : null,
+                  trailing: widget.selected == item
+                      ? const Icon(
+                          Icons.check_circle_rounded,
+                          color: AppColors.statusGreen,
+                          size: 22,
+                        )
+                      : null,
+                  onTap: () => widget.onSelected(item),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6

@@ -61,11 +61,11 @@ export async function assertEmailAvailableForUser(userId, email) {
   }
 }
 
-export async function assertPhoneAvailableForUser(userId, phone) {
+export async function assertPhoneAvailableForUser(userId, phone, role) {
   if (phone === null || phone === undefined) return;
 
   const taken = await prisma.user.findFirst({
-    where: { phone, NOT: { id: userId }, deletedAt: null },
+    where: { phone, role, NOT: { id: userId }, deletedAt: null },
     select: { id: true },
   });
   if (taken) {

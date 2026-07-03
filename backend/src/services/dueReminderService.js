@@ -1,5 +1,5 @@
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
-import { DUE_REMINDER_RESIDENT } from "../constants/notificationTemplates.js";
+import { NOTIFICATION_CODES } from "../constants/notificationCatalog.js";
 import { prisma } from "../config/db.js";
 import { assertManagerOwnsBuilding } from "../utils/access.js";
 import { createForUsers } from "./notificationService.js";
@@ -113,8 +113,8 @@ export async function remindBuildingDuesService(
 
     return createForUsers([residentId], {
       type: NOTIFICATION_TYPES.DUE_REMINDER,
-      title: DUE_REMINDER_RESIDENT.title,
-      body: DUE_REMINDER_RESIDENT.body(due.month, due.year, amount, currency),
+      code: NOTIFICATION_CODES.DUE_REMINDER_RESIDENT,
+      params: { month: due.month, year: due.year, amount, currency },
       data: {
         dueId: due.id,
         buildingId,

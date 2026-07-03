@@ -1,0 +1,71 @@
+<%- include('flash') %>
+<%- include('page-header', { title: 'Analitik & Bildirimler', description: 'Günlük aktif kullanıcı trendleri ve segment bazlı push bildirimleri.' }) %>
+
+<div class="card mb-6">
+  <div class="card__header">
+    <div><h3 class="card__title">Günlük Aktif Kullanıcı</h3><p class="card__subtitle">Son <%= filters.days || 30 %> gün — yönetici ve sakin</p></div>
+  </div>
+  <div class="chart-container"><canvas id="analyticsChart"></canvas></div>
+</div>
+
+<div class="card mb-6" id="broadcast" x-data="{ preview: null }">
+  <div class="card__header">
+    <div><h3 class="card__title">Segment Bildirimi</h3><p class="card__subtitle">Mobil uygulama kullanıcılarına push bildirim gönderin (admin panel bildirimi değil)</p></div>
+  </div>
+  <form method="post" action="/analytics/broadcast" class="form-grid form-grid--2" id="broadcastForm">
+    <div class="form-group"><label>Başlık</label><input class="form-control" name="title" required></div>
+    <div class="form-group"><label>Rol</label><select class="form-control" name="segmentRole" id="segmentRole"><option value="">Tümü</option><option value="MANAGER">Yönetici</option><option value="RESIDENT">Sakin</option></select></div>
+    <div class="form-group" style="grid-column:1/-1"><label>Mesaj</label><textarea class="form-control" name="body" required rows="3"></textarea></div>
+    <div class="form-group"><label>Plan</label><input class="form-control" name="segmentPlan" id="segmentPlan"></div>
+    <div class="form-group"><label>Şehir</label><input class="form-control" name="segmentCity" id="segmentCity"></div>
+    <div class="cluster cluster--3">
+      <button type="button" class="btn btn--secondary" @click="fetch('/analytics/preview-segment', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({segmentRole:document.getElementById('segmentRole').value,segmentPlan:document.getElementById('segmentPlan').value,segmentCity:document.getElementById('segmentCity').value})}).then(r=>r.json()).then(j=>{preview=j.data?.recipientCount})">Önizleme</button>
+      <button type="submit" class="btn btn--primary">Gönder</button>
+      <span class="text-muted" x-show="preview !== null" x-text="'~' + preview + ' kullanıcı'"></span>
+    </div>
+  </form>
+</div>
+
+<h3 class="section-title">Admin Bildirimleri</h3>
+<% if (!notifications.length) { %>
+<div class="card"><div class="empty-state"><p class="empty-state__title">Henüz bildirim yok</p></div></div>
+<% } else { %>
+<% notifications.forEach(n => { %>
+<div class="card mb-4" style="padding:var(--space-4)">
+  <div class="flex justify-between items-center gap-3">
+    <strong><%= n.title %></strong>
+    <div class="flex gap-2 items-center">
+      <% if (!n.isRead) { %><span class="badge badge--primary">Yeni</span><% } %>
+      <% if (!n.isRead) { %>
+      <form method="post" action="/notifications/<%= n.id %>/read" style="margin:0">
+        <button type="submit" class="btn btn--ghost btn--sm">Okundu</button>
+      </form>
+      <% } %>
+    </div>
+  </div>
+  <p class="text-secondary" style="margin:var(--space-2) 0"><%= n.body %></p>
+  <small class="text-muted"><%= new Date(n.createdAt).toLocaleString('tr-TR') %></small>
+</div>
+<% }) %>
+<% } %>
+
+<script>
+  (function(){
+    const data = <%- JSON.stringify(analytics || []) %>;
+    if (typeof Chart !== 'undefined' && data.length) {
+      Chart.defaults.color = '#a1a1aa';
+      const labels = [...new Set(data.map(d => d.date))];
+      new Chart(document.getElementById('analyticsChart'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label: 'Yönetici', data: labels.map(l => (data.find(d => d.date === l && d.role === 'MANAGER') || {}).activeUsers || 0), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.35 },
+            { label: 'Sakin', data: labels.map(l => (data.find(d => d.date === l && d.role === 'RESIDENT') || {}).activeUsers || 0), borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.35 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true } } }, scales: { y: { beginAtZero: true, grid: { color: '#27272a' } }, x: { grid: { display: false } } } }
+      });
+    }
+  })();
+</script>

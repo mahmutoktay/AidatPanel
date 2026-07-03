@@ -2,7 +2,11 @@ import { prisma } from "../config/db.js";
 import { recipientMatchesCollectionIban } from "../utils/iban.js";
 import { HttpError } from "../utils/httpError.js";
 import { dekontLog } from "../utils/dekontDebug.js";
+<<<<<<< HEAD
 import { resolveEffectiveBuildingConfig } from "../utils/effectiveBuildingConfig.js";
+=======
+import { resolveEffectiveBuildingConfig } from "./buildingConfigService.js";
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
 const AMOUNT_TOLERANCE = Number(process.env.DEKONT_AMOUNT_TOLERANCE) || 0.05;
 const GRACE_DAYS = Number(process.env.DEKONT_GRACE_DAYS) || 7;
@@ -47,14 +51,24 @@ export async function evaluateDekontBusinessRules(dekontId, parsed) {
     reasons: [],
   };
 
+<<<<<<< HEAD
   if (!collectionIban) {
+=======
+  const effective = await resolveEffectiveBuildingConfig(dekont.building);
+
+  if (!effective.effectiveCollectionIban) {
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
     result.reasons.push("collectionIban_missing");
     return result;
   }
 
   const recipientCheck = recipientMatchesCollectionIban({
     parsedReceiverIban: parsed?.receiverIban ?? dekont.receiverIban,
+<<<<<<< HEAD
     collectionIban,
+=======
+    collectionIban: effective.effectiveCollectionIban,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
     rawText: dekont.rawText,
   });
   result.recipientOk = recipientCheck.ok;

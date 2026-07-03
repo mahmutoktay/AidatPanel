@@ -97,3 +97,20 @@ export async function assertManagerOwnsSite(siteId, managerId) {
   }
   return site;
 }
+<<<<<<< HEAD
+=======
+
+/**
+ * Site gider kaydı — yönetici site sahibi mi?
+ */
+export async function assertManagerOwnsSiteExpense(siteExpenseId, managerId) {
+  const expense = await prisma.siteExpense.findUnique({
+    where: { id: siteExpenseId },
+    include: { site: { select: { managerId: true } } },
+  });
+  if (!expense || expense.site.managerId !== managerId) {
+    throw new HttpError(404, "Site gider kaydı bulunamadı.");
+  }
+  return expense;
+}
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6

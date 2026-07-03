@@ -93,6 +93,7 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
     final sortedItems = sortBuildingListItems(items, _sort);
     final totals = BuildingsSummaryTotals.fromItems(items);
 
+<<<<<<< HEAD
     return Stack(
       children: [
         BuildingsExpandableFabOverlay(
@@ -110,6 +111,21 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     BuildingsSummaryStrip(totals: totals),
+=======
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      color: AppColors.primary,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverPadding(
+            padding: AppSizes.screenBodyScrollPadding.copyWith(top: AppSizes.spacingS, bottom: 0),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _buildActionButtons(context),
+                const SizedBox(height: AppSizes.spacingM),
+                BuildingsSummaryStrip(totals: totals),
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
                 const SizedBox(height: AppSizes.spacingL),
                 _buildListHeader(context),
                 if (isRefreshing && buildings.isNotEmpty) ...[
@@ -166,6 +182,7 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
                 },
               ),
             ),
+<<<<<<< HEAD
             ],
           ),
         ),
@@ -182,6 +199,25 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
                 setState(() => _fabExpanded = expanded);
               }
             },
+=======
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: SizedBox(
+            height: AppSizes.buttonHeightPrimary,
+            child: ElevatedButton.icon(
+              onPressed: _onCreateInviteCodePressed,
+              style: _actionButtonStyle(AppButtonStyles.elevatedAccent()),
+              icon: const Icon(Icons.qr_code_2),
+              label: Text(context.t.common.inviteCode),
+            ),
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
           ),
         ),
       ],
@@ -219,6 +255,7 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
   }
 
   Future<void> _onRefresh() async {
+<<<<<<< HEAD
     ref.invalidate(standaloneBuildingsProvider);
     await ref.read(buildingsStoreProvider.notifier).loadBuildings();
     await ref.refresh(standaloneBuildingsProvider.future);
@@ -228,11 +265,18 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
   void _onRetryBuildings() {
     ref.invalidate(standaloneBuildingsProvider);
     ref.refresh(standaloneBuildingsProvider);
+=======
+    await Future.wait([
+      ref.read(standaloneBuildingsStoreProvider.notifier).loadBuildings(),
+      ref.refresh(allBuildingsDuesProvider.future),
+    ]);
   }
 
-  void _onAddBuildingPressed() {
-    context.push('/manager-dashboard/add-building');
+  void _onRetryBuildings() {
+    ref.read(standaloneBuildingsStoreProvider.notifier).loadBuildings();
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   }
+
 
   void _onBuildingTapped(BuildingEntity building) {
     context.push('/manager-dashboard/buildings/${building.id}');

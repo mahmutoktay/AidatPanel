@@ -15,8 +15,12 @@ export async function validateMulterDekontFile(file) {
   return { ok: false, code: 400, message: "Dosya okunamadı." };
 }
 
+import { logger } from "../config/logger.js";
+
 /** Geçici multer dosyasını güvenle sil */
 export async function cleanupMulterTempFile(file) {
   if (!file?.path) return;
-  await fs.promises.unlink(file.path).catch(() => {});
+  await fs.promises.unlink(file.path).catch((err) => {
+    logger.warn({ err, path: "[redacted]" }, "Multer temp dosya silinemedi");
+  });
 }

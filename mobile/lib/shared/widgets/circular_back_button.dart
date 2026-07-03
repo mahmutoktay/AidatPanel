@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
+<<<<<<< HEAD
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
+=======
+import 'app_back_button.dart';
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
-/// Dairesel geri butonu — görsel 38dp, dokunma alanı min 48dp.
+/// Eski kullanım adı; görsel uygulama [AppBackButton] üzerinden tekilleştirildi.
 class CircularBackButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
@@ -11,6 +15,7 @@ class CircularBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return SizedBox(
       width: AppSizes.minTouchTarget,
       height: AppSizes.minTouchTarget,
@@ -42,5 +47,8 @@ class CircularBackButton extends StatelessWidget {
         ),
       ),
     );
+=======
+    return AppBackButton(onPressed: onPressed);
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   }
 }

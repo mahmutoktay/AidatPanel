@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers/app_providers.dart';
 import '../../../core/utils/user_error_message.dart';
-import '../../../features/auth/presentation/providers/auth_provider.dart';
 import '../domain/entities/building_entity.dart';
 import '../domain/entities/collection_preset_entity.dart';
 import 'datasources/building_remote_datasource.dart';
@@ -92,7 +92,7 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
         collectionAccountTitle: collectionAccountTitle,
         paymentReferenceTemplate: paymentReferenceTemplate,
       );
-      final current = state.value ?? [];
+      final current = state.hasValue ? (state.value ?? <BuildingEntity>[]) : <BuildingEntity>[];
       state = AsyncValue.data([...current, building]);
       return building.id;
     } catch (e, st) {
@@ -103,19 +103,14 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
     }
   }
 
-  /// Hata UI tarafında ele alınmalı; state'i bozarsak (AsyncValue.error)
-  /// kullanıcı bina listesini tamamen kaybeder. Bu yüzden hata olursa
-  /// rethrow ediyoruz, başarı durumunda listeyi yeniden yazıyoruz.
   Future<void> removeBuilding(String buildingId) async {
     await _repository.deleteBuilding(buildingId);
-    final current = state.value ?? [];
+    final current = state.asData?.value ?? <BuildingEntity>[];
     state = AsyncValue.data(
       current.where((b) => b.id != buildingId).toList(),
     );
   }
 
-  /// Belge §5: PUT /buildings/:id body `name?`, `address?`, `city?`.
-  /// Hata olursa state'i bozmadan rethrow edilir; UI snackbar gösterir.
   Future<void> updateBuilding({
     required String id,
     String? name,
@@ -128,7 +123,7 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
       address: address,
       city: city,
     );
-    final current = state.value ?? [];
+    final current = state.hasValue ? (state.value ?? <BuildingEntity>[]) : <BuildingEntity>[];
     state = AsyncValue.data(
       current.map((b) => b.id == id ? updated : b).toList(),
     );
@@ -146,7 +141,7 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
       collectionAccountTitle: collectionAccountTitle,
       paymentReferenceTemplate: paymentReferenceTemplate,
     );
-    final current = state.value ?? [];
+    final current = state.hasValue ? (state.value ?? <BuildingEntity>[]) : <BuildingEntity>[];
     state = AsyncValue.data(
       current.map((b) => b.id == id ? updated : b).toList(),
     );
@@ -161,6 +156,13 @@ final standaloneBuildingsProvider =
 });
 
 final buildingsStoreProvider =
+    AsyncNotifierProvider<BuildingsNotifier, List<BuildingEntity>>(
+  BuildingsNotifier.new,
+);
+
+/// Bağımsız (standalone) bina listesi provider'ı.
+/// `buildingsStoreProvider`'dan ayrı bir instance tutar.
+final standaloneBuildingsStoreProvider =
     AsyncNotifierProvider<BuildingsNotifier, List<BuildingEntity>>(
   BuildingsNotifier.new,
 );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/action_chevron.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -272,10 +273,8 @@ class _DuesActionRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 2),
-              Icon(
-                Icons.chevron_right,
+              const ActionChevron(
                 size: 20,
-                color: AppColors.mutedText.withValues(alpha: 0.85),
               ),
             ],
           ),

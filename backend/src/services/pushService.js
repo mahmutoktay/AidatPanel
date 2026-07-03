@@ -77,7 +77,11 @@ export async function sendToToken(fcmToken, { title, body, data = {} }) {
       },
     });
     if (debugPush) {
+<<<<<<< HEAD
       logger.info({ type: "push_sent", eventType: fcmData.type ?? "?", tokenPrefix: fcmToken.slice(0, 12) });
+=======
+      logger.info({ type: "push_sent", eventType: fcmData.type ?? "?" });
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
     }
     return { sent: true };
   } catch (err) {
@@ -90,7 +94,10 @@ export async function sendToToken(fcmToken, { title, body, data = {} }) {
         type: "push_send_error",
         code: code || err.message,
         eventType: fcmData.type ?? "?",
+<<<<<<< HEAD
         tokenPrefix: fcmToken.slice(0, 20),
+=======
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
         adminProject: getFirebaseProjectId() ?? "?",
       });
       if (code === "messaging/mismatched-credential") {

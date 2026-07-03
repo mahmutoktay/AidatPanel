@@ -14,7 +14,7 @@ abstract class ReportRemoteDataSource {
 
 class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
   ReportRemoteDataSourceImpl({required DioClient dioClient})
-      : _dioClient = dioClient;
+    : _dioClient = dioClient;
 
   final DioClient _dioClient;
 
@@ -28,6 +28,7 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
       query['month'] = params.month;
     }
 
+<<<<<<< HEAD
     final path = params.isSiteReport
         ? ApiConstants.siteReports(params.siteId!)
         : ApiConstants.buildingReports(params.buildingId!);
@@ -35,11 +36,24 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     if (kDebugMode) {
       debugPrint(
         '[reports] GET $path base=${ApiConstants.baseUrl} query=$query',
+=======
+    final endpoint = params.isSiteReport
+        ? ApiConstants.siteReports(params.siteId!)
+        : ApiConstants.buildingReports(params.buildingId);
+
+    if (kDebugMode) {
+      debugPrint(
+        '[reports] GET $endpoint base=${ApiConstants.baseUrl} query=$query',
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
       );
     }
 
     final response = await _dioClient.get<List<int>>(
+<<<<<<< HEAD
       path,
+=======
+      endpoint,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
       queryParameters: query,
       options: Options(
         responseType: ResponseType.bytes,
@@ -50,32 +64,38 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     final bytes = response.data ?? [];
     if (bytes.isEmpty) {
       throw ApiException(
-        message: 'Rapor dosyası boş',
+        message: 'report_file_empty',
         statusCode: response.statusCode,
       );
     }
 
     final jsonError = _tryParseJsonErrorBytes(bytes);
     if (jsonError != null) {
-      throw ApiException(
-        message: jsonError,
-        statusCode: response.statusCode,
-      );
+      throw ApiException(message: jsonError, statusCode: response.statusCode);
     }
 
-    return ReportFileResult(
-      bytes: bytes,
-      fileName: _buildFileName(params),
-    );
+    return ReportFileResult(bytes: bytes, fileName: _buildFileName(params));
   }
 
   String _buildFileName(ReportDownloadParams params) {
+<<<<<<< HEAD
     final slug = params.displayName
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
         .replaceAll(RegExp(r'^-+|-+$'), '');
     final prefix = params.isSiteReport ? 'site-rapor' : 'rapor';
     final safeSlug = slug.isEmpty ? (params.isSiteReport ? 'site' : 'bina') : slug;
+=======
+    final label = params.isSiteReport ? params.siteName : params.buildingName;
+    final slug = (label ?? '')
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+    final safeSlug = slug.isEmpty
+        ? (params.isSiteReport ? 'site' : 'bina')
+        : slug;
+    final prefix = params.isSiteReport ? 'site-rapor' : 'rapor';
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
     if (params.type == ReportType.annual) {
       return '$prefix-yillik-$safeSlug-${params.year}.pdf';
     }

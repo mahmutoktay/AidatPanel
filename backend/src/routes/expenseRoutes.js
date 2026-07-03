@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireRoles } from "../middlewares/roleMiddleware.js";
 import { validate, expenseSchemas } from "../middlewares/validate.js";
+<<<<<<< HEAD
 import { updateExpense, deleteExpense, uploadExpenseProof, uploadExpenseProofs, getExpenseFile } from "../controllers/expenseController.js";
 import multer from "multer";
 import fs from "fs";
@@ -35,7 +36,18 @@ const upload = multer({
     cb(new Error("Desteklenmeyen dosya türü. PDF veya JPEG/PNG yükleyin."));
   },
 });
+=======
+import { createDiskUpload } from "../utils/createMulterUpload.js";
+import { logger } from "../config/logger.js";
+import {
+  updateExpense,
+  deleteExpense,
+  uploadExpenseProofs,
+  getExpenseFile,
+} from "../controllers/expenseController.js";
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
+const upload = createDiskUpload({ filenamePrefix: "exp_" });
 const router = Router();
 
 router.use(authMiddleware);

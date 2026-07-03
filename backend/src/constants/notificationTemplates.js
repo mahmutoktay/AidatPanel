@@ -1,52 +1,61 @@
 /** Bildirim başlık/gövde şablonları — tek kaynak (A12). */
 
 export const TICKET_CREATED_MANAGER = {
+  key: "ticket_created_manager",
   title: "Yeni Destek Talebi",
   body: (apartmentNumber, ticketTitle) =>
     `Daire ${apartmentNumber} yeni bir talep oluşturdu: "${ticketTitle}"`,
 };
 
 export const TICKET_UPDATE_NOTE = {
+  key: "ticket_update_note",
   title: "Talebinize Yanıt Geldi",
   body: (preview) => `Yöneticiniz talebinize bir not ekledi: "${preview}"`,
 };
 
 export const DUE_PAID_RESIDENT = {
+  key: "due_paid_resident",
   title: "Ödemeniz Başarıyla İşlendi ✓",
   body: (month, year) =>
     `${month}/${year} dönemi aidat ödemeniz başarıyla hesabınıza işlenmiştir.`,
 };
 
 export const DUE_REMINDER_RESIDENT = {
+  key: "due_reminder_resident",
   title: "Aidat Ödeme Hatırlatması",
   body: (month, year, amount, currency) =>
     `${month}/${year} dönemi aidat tutarınız (${amount} ${currency}) henüz ödenmemiştir. Lütfen ödemenizi gerçekleştiriniz.`,
 };
 
 export const DEKONT_RECEIVED_MANAGER = {
+  key: "dekont_received_manager",
   title: "Yeni Ödeme Bildirimi",
   body: (apartmentNumber, filename) =>
     `Daire ${apartmentNumber} tarafından yeni bir ödeme dekontu (${filename}) sisteme yüklendi.`,
 };
 
 export const DEKONT_NEEDS_REVIEW_MANAGER = {
+  key: "dekont_needs_review_manager",
   title: "Dekont İnceleme Bekliyor",
   body: (apartmentNumber) =>
     `Daire ${apartmentNumber} tarafından yüklenen dekont incelemenizi bekliyor.`,
 };
 
 export const DEKONT_PAYMENT_APPLIED_RESIDENT = {
+  key: "dekont_payment_applied_resident",
   title: "Ödemeniz Onaylandı ✓",
   body: (month, year) => `${month}/${year} dönemine ait aidat ödemeniz yöneticiniz tarafından onaylanmış ve hesabınıza işlenmiştir.`,
 };
 
 export const DEKONT_MATCHED_MANAGER = {
+  key: "dekont_matched_manager",
   title: "Dekont Otomatik Eşleştirildi",
   body: (apartmentNumber) =>
     `Daire ${apartmentNumber} dekontu sistem tarafından otomatik olarak eşleştirildi. Onayınızı bekliyor.`,
 };
 
 export const DEKONT_REJECTED_RESIDENT = {
+  key: "dekont_rejected_resident",
   title: "Dekontunuz Reddedildi",
   body: (reason) => reason
     ? `Yöneticiniz dekontunuzu şu gerekçeyle reddetti: "${reason}". Lütfen düzeltip tekrar yükleyiniz.`
@@ -54,6 +63,7 @@ export const DEKONT_REJECTED_RESIDENT = {
 };
 
 export const EXPENSE_ADDED_RESIDENT = {
+  key: "expense_added_resident",
   title: "Yeni Gider Eklendi",
   body: ({ title, month, year, amountStr, categoryLabel, splitMonths }) => {
     const period = `${month}/${year}`;

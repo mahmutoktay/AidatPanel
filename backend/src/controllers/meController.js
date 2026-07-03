@@ -10,118 +10,72 @@ import {
   uploadProfilePictureService,
   deleteProfilePictureService,
 } from "../services/meService.js";
-import { HttpError } from "../utils/httpError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-const handleHttp = (err, res, next) => {
-  if (err instanceof HttpError) {
-    return res.status(err.statusCode).json({
-      success: false,
-      message: err.message,
-    });
-  }
-  next(err);
-};
+export const getMyPaymentCollection = asyncHandler(async (req, res) => {
+  const data = await getMyPaymentCollectionService(req.user.id);
+  res.status(200).json({ success: true, data });
+});
 
-export const getMyPaymentCollection = async (req, res, next) => {
-  try {
-    const data = await getMyPaymentCollectionService(req.user.id);
-    res.status(200).json({ success: true, data });
-  } catch (err) {
-    handleHttp(err, res, next);
-  }
-};
+export const getMe = asyncHandler(async (req, res) => {
+  const data = await getProfileService(req.user.id);
+  res.status(200).json({ success: true, data });
+});
 
-export const getMe = async (req, res, next) => {
-  try {
-    const data = await getProfileService(req.user.id);
-    res.status(200).json({ success: true, data });
-  } catch (err) {
-    handleHttp(err, res, next);
-  }
-};
+export const updateMe = asyncHandler(async (req, res) => {
+  const data = await updateProfileService(req.user.id, req.body);
+  res.status(200).json({
+    success: true,
+    message: "Profil güncellendi.",
+    data,
+  });
+});
 
-export const updateMe = async (req, res, next) => {
-  try {
-    const data = await updateProfileService(req.user.id, req.body);
-    res.status(200).json({
-      success: true,
-      message: "Profil güncellendi.",
-      data,
-    });
-  } catch (err) {
-    handleHttp(err, res, next);
-  }
-};
+export const updatePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  await changePasswordService(req.user.id, currentPassword, newPassword);
+  res.status(200).json({
+    success: true,
+    message: "Şifre güncellendi. Diğer cihazlarda tekrar giriş yapmanız gerekebilir.",
+  });
+});
 
-export const updatePassword = async (req, res, next) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-    await changePasswordService(req.user.id, currentPassword, newPassword);
-    res.status(200).json({
-      success: true,
-      message: "Şifre güncellendi. Diğer cihazlarda tekrar giriş yapmanız gerekebilir.",
-    });
-  } catch (err) {
-    handleHttp(err, res, next);
-  }
-};
+export const updateLanguage = asyncHandler(async (req, res) => {
+  const data = await updateLanguageService(req.user.id, req.body.language);
+  res.status(200).json({
+    success: true,
+    message: "Dil güncellendi.",
+    data,
+  });
+});
 
-export const updateLanguage = async (req, res, next) => {
-  try {
-    const data = await updateLanguageService(req.user.id, req.body.language);
-    res.status(200).json({
-      success: true,
-      message: "Dil güncellendi.",
-      data,
-    });
-  } catch (err) {
-    handleHttp(err, res, next);
-  }
-};
+export const updateFcmToken = asyncHandler(async (req, res) => {
+  await updateFcmTokenService(req.user.id, req.body.fcmToken);
+  res.status(200).json({ success: true, message: NOTIFICATION_MESSAGES.FCM_SAVED });
+});
 
-export const updateFcmToken = async (req, res, next) => {
-  try {
-    await updateFcmTokenService(req.user.id, req.body.fcmToken);
-    res.status(200).json({ success: true, message: NOTIFICATION_MESSAGES.FCM_SAVED });
-  } catch (err) {
-    handleHttp(err, res, next);
-  }
-};
+export const deleteMe = asyncHandler(async (req, res) => {
+  await softDeleteAccountService(req.user.id);
+  res.status(200).json({
+    success: true,
+    message: "Hesabınız kapatıldı ve kişisel veriler maskelendi.",
+  });
+});
 
-export const deleteMe = async (req, res, next) => {
-  try {
-    await softDeleteAccountService(req.user.id);
-    res.status(200).json({
-      success: true,
-      message: "Hesabınız kapatıldı ve kişisel veriler maskelendi.",
-    });
-  } catch (err) {
-    handleHttp(err, res, next);
-  }
-};
+export const uploadProfilePicture = asyncHandler(async (req, res) => {
+  const data = await uploadProfilePictureService(req.user.id, req.file);
+  res.status(200).json({
+    success: true,
+    message: "Profil fotoğrafı güncellendi.",
+    data,
+  });
+});
 
-export const uploadProfilePicture = async (req, res, next) => {
-  try {
-    const data = await uploadProfilePictureService(req.user.id, req.file);
-    res.status(200).json({
-      success: true,
-      message: "Profil fotoğrafı güncellendi.",
-      data,
-    });
-  } catch (err) {
-    handleHttp(err, res, next);
-  }
-};
-
-export const deleteProfilePicture = async (req, res, next) => {
-  try {
-    const data = await deleteProfilePictureService(req.user.id);
-    res.status(200).json({
-      success: true,
-      message: "Profil fotoğrafı silindi.",
-      data,
-    });
-  } catch (err) {
-    handleHttp(err, res, next);
-  }
-};
+export const deleteProfilePicture = asyncHandler(async (req, res) => {
+  const data = await deleteProfilePictureService(req.user.id);
+  res.status(200).json({
+    success: true,
+    message: "Profil fotoğrafı silindi.",
+    data,
+  });
+});

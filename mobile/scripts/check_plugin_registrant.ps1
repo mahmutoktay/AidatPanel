@@ -15,12 +15,16 @@ $text = Get-Content $registrantFile -Raw
 
 # pub name -> PluginRegistrant.kt içinde aranacak alt dize
 $symbolByPlugin = @{
+    "device_info_plus"              = "device_info.DeviceInfoPlusPlugin"
     "file_picker"                   = "FilePickerPlugin"
+    "firebase_analytics"            = "firebase.analytics.FlutterFirebaseAnalyticsPlugin"
     "firebase_core"                 = "FlutterFirebaseCorePlugin"
+    "firebase_crashlytics"          = "firebase.crashlytics.FlutterFirebaseCrashlyticsPlugin"
     "firebase_messaging"            = "FlutterFirebaseMessagingPlugin"
     "flutter_local_notifications"   = "FlutterLocalNotificationsPlugin"
     "flutter_plugin_android_lifecycle" = "FlutterAndroidLifecyclePlugin"
     "flutter_secure_storage"        = "FlutterSecureStoragePlugin"
+    "gal"                           = "gal.GalPlugin"
     "image_picker_android"          = "ImagePickerPlugin"
     "jni"                           = "JniPlugin"
     "jni_flutter"                   = "JniFlutterPlugin"
@@ -29,11 +33,14 @@ $symbolByPlugin = @{
     "pdfx"                          = "PdfxPlugin"
     "permission_handler_android"      = "PermissionHandlerPlugin"
     "purchases_flutter"             = "PurchasesFlutterPlugin"
+    "receive_sharing_intent"        = "ReceiveSharingIntentPlugin"
     "share_plus"                    = "share.SharePlusPlugin"
+    "sqflite_android"               = "sqflite.SqflitePlugin"
 }
 
 $failed = @()
 foreach ($pluginName in $androidPlugins) {
+    if ($pluginName -eq "integration_test") { continue }
     $symbol = $symbolByPlugin[$pluginName]
     if (-not $symbol) {
         Write-Host "WARN: No symbol mapping for plugin '$pluginName' - update check_plugin_registrant.ps1" -ForegroundColor Yellow

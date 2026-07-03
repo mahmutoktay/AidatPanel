@@ -1,6 +1,7 @@
 import { prisma } from "../config/db.js";
 import { assertManagerOwnsBuilding } from "../utils/access.js";
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
+import { NOTIFICATION_CODES } from "../constants/notificationCatalog.js";
 import { createForUsers } from "./notificationService.js";
 
 /**
@@ -34,8 +35,8 @@ export async function sendBuildingAnnouncementService(
 
   const result = await createForUsers(userIds, {
     type: NOTIFICATION_TYPES.ANNOUNCEMENT,
-    title,
-    body,
+    code: NOTIFICATION_CODES.ANNOUNCEMENT_CUSTOM,
+    params: { title, body },
     data: {
       buildingId,
       route: "/resident-dashboard",

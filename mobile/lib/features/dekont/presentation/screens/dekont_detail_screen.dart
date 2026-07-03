@@ -159,28 +159,45 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
   }
 
   Future<void> _downloadDekont(DekontEntity dekont) async {
+    final t = context.t.common.errorKeys;
     ref
         .read(toastProvider.notifier)
-        .show('İndirme başlatıldı...', type: ToastType.info);
+        .show(t.downloadStarted, type: ToastType.info);
 
     try {
-      final message = await ref
+      final raw = await ref
           .read(dekontDownloadProvider)
           .downloadAndSave(dekont.id, dekont.mimeType, dekont.originalFilename);
 
       if (!mounted) return;
+      final msg = _downloadMessage(context, raw);
       ref
           .read(toastProvider.notifier)
           .show(
-            message,
+            msg,
             type: ToastType.success,
             duration: const Duration(seconds: 4),
           );
     } catch (e) {
       if (!mounted) return;
+      final msg = _downloadMessage(context, e.toString());
       ref
           .read(toastProvider.notifier)
-          .show(e.toString(), type: ToastType.error);
+          .show(msg, type: ToastType.error);
+    }
+  }
+
+  String _downloadMessage(BuildContext context, String key) {
+    final t = context.t.common.errorKeys;
+    switch (key) {
+      case 'download_saved_to_gallery':
+        return t.downloadSavedToGallery;
+      case 'download_saved_to_downloads':
+        return t.downloadSavedToDownloads;
+      case 'download_fallback_share':
+        return t.downloadFallbackShare;
+      default:
+        return t.downloadError;
     }
   }
 

@@ -1,7 +1,13 @@
+<<<<<<< HEAD
 import { randomUUID } from "node:crypto";
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
 import { assertManagerOwnsSite } from "../utils/access.js";
+=======
+import { prisma } from "../config/db.js";
+import { HttpError } from "../utils/httpError.js";
+import { assertManagerOwnsSite, assertManagerOwnsSiteExpense } from "../utils/access.js";
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 import {
   resolveListTake,
   resolvePageLimit,
@@ -10,6 +16,7 @@ import {
   mergeCreatedAtCursorWhere,
 } from "../utils/listQuery.js";
 import {
+<<<<<<< HEAD
   addMonthsFrom,
   isPastTargetMonth,
   splitAmount,
@@ -22,10 +29,20 @@ import {
   recalculateSiteDuesForMonth,
   removeCarryforwardsForSiteExpense,
 } from "./siteExpenseAllocationService.js";
+=======
+  computePerUnitAmount,
+  previewPaidImpactForSite,
+  applyCarryForwardForSiteExpense,
+  removeCarryforwardsForSiteExpense,
+  isPastTargetMonth,
+} from "./dueExpenseRecalcService.js";
+import { getSiteApartmentCount, recalculateAllSiteBuildingsForMonth } from "./siteExpenseAllocationService.js";
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
 function serializeSiteExpense(expense) {
   return {
     ...expense,
+<<<<<<< HEAD
     amount:
       expense.amount != null
         ? (expense.amount?.toString?.() ?? String(expense.amount))
@@ -38,19 +55,28 @@ function serializeSiteExpense(expense) {
       expense.parsedAmount != null
         ? (expense.parsedAmount?.toString?.() ?? String(expense.parsedAmount))
         : null,
+=======
+    amount: expense.amount != null ? Number(expense.amount) : null,
+    perUnitAmount: expense.perUnitAmount != null ? Number(expense.perUnitAmount) : null,
+    parsedAmount: expense.parsedAmount != null ? Number(expense.parsedAmount) : null,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   };
 }
 
 function buildListWhere(siteId, filters) {
   const where = { siteId };
   const { month, year, category } = filters;
+<<<<<<< HEAD
 
+=======
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   if (month && year) {
     where.targetMonth = parseInt(String(month), 10);
     where.targetYear = parseInt(String(year), 10);
   } else if (year) {
     where.targetYear = parseInt(String(year), 10);
   }
+<<<<<<< HEAD
 
   if (category) {
     where.category = category;
@@ -151,6 +177,12 @@ async function createSingleSiteExpenseWithRecalc(
   };
 }
 
+=======
+  if (category) where.category = category;
+  return where;
+}
+
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 export async function listSiteExpensesService(siteId, managerId, filters = {}) {
   await assertManagerOwnsSite(siteId, managerId);
 
@@ -169,6 +201,7 @@ export async function listSiteExpensesService(siteId, managerId, filters = {}) {
     );
   }
 
+<<<<<<< HEAD
   const orderBy = paginated
     ? [{ createdAt: "desc" }, { id: "desc" }]
     : [{ targetYear: "desc" }, { targetMonth: "desc" }];
@@ -176,6 +209,13 @@ export async function listSiteExpensesService(siteId, managerId, filters = {}) {
   const expenses = await prisma.siteExpense.findMany({
     where,
     orderBy,
+=======
+  const expenses = await prisma.siteExpense.findMany({
+    where,
+    orderBy: paginated
+      ? [{ createdAt: "desc" }, { id: "desc" }]
+      : [{ targetYear: "desc" }, { targetMonth: "desc" }],
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
     take,
   });
 
@@ -200,12 +240,17 @@ export async function getSiteExpenseSummaryService(siteId, managerId, { month, y
     total += amount;
     return {
       category: g.category,
+<<<<<<< HEAD
       amount: amount.toFixed(2),
+=======
+      amount: Number(amount.toFixed(2)),
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
       count: g._count._all,
     };
   });
 
   return {
+<<<<<<< HEAD
     month: m,
     year: y,
     totalAmount: total.toFixed(2),
@@ -218,6 +263,30 @@ export async function getSiteExpenseSummaryService(siteId, managerId, { month, y
 export async function createSiteExpenseService(siteId, managerId, body) {
   await assertManagerOwnsSite(siteId, managerId);
 
+=======
+    siteId: site.id,
+    month: m,
+    year: y,
+    currency: site.currency ?? "TRY",
+    totalAmount: Number(total.toFixed(2)),
+    byCategory,
+  };
+}
+
+export async function createSiteExpenseService(
+  siteId,
+  managerId,
+  body,
+  { carryForwardPolicy = "NONE", confirmPaidImpact = false } = {}
+) {
+  await assertManagerOwnsSite(siteId, managerId);
+
+  const apartmentCount = await getSiteApartmentCount(siteId);
+  if (apartmentCount <= 0) {
+    throw new HttpError(400, "Site altında daire bulunamadı. Önce blok ekleyin.");
+  }
+
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   const {
     title,
     amount,
@@ -226,6 +295,7 @@ export async function createSiteExpenseService(siteId, managerId, body) {
     note,
     targetMonth,
     targetYear,
+<<<<<<< HEAD
     splitMonths = 1,
     carryForwardPolicy = "WARN_ONLY",
     confirmPaidImpact = false,
@@ -344,11 +414,89 @@ export async function updateSiteExpenseService(expenseId, managerId, data) {
   if (expense.targetMonth !== oldMonth || expense.targetYear !== oldYear) {
     await recalculateSiteDuesForMonth(existing.siteId, oldMonth, oldYear);
   }
+=======
+  } = body;
+
+  const perUnitAmount = computePerUnitAmount(amount, apartmentCount);
+
+  if (!confirmPaidImpact) {
+    const preview = await previewPaidImpactForSite(
+      siteId,
+      targetMonth,
+      targetYear,
+      perUnitAmount
+    );
+    if (preview) {
+      return {
+        preview: {
+          ...preview,
+          pastMonthWarning: isPastTargetMonth(targetMonth, targetYear),
+        },
+      };
+    }
+  }
+
+  const expense = await prisma.siteExpense.create({
+    data: {
+      siteId,
+      title,
+      amount,
+      category,
+      date: new Date(date),
+      note: note ?? null,
+      targetMonth,
+      targetYear,
+      perUnitAmount,
+      storedPaths: [],
+    },
+  });
+
+  await recalculateAllSiteBuildingsForMonth(siteId, targetMonth, targetYear);
+
+  const carryResult = await applyCarryForwardForSiteExpense(
+    expense,
+    carryForwardPolicy
+  );
+
+  return {
+    expense: serializeSiteExpense(expense),
+    warnings: isPastTargetMonth(targetMonth, targetYear)
+      ? ["Geçmiş bir aya site gideri eklendi. Aidat tutarları güncellendi."]
+      : [],
+    carryForwardCount: carryResult.carryForwardCount,
+  };
+}
+
+export async function updateSiteExpenseService(expenseId, managerId, body) {
+  const existing = await assertManagerOwnsSiteExpense(expenseId, managerId);
+  const apartmentCount = await getSiteApartmentCount(existing.siteId);
+  const amount = body.amount != null ? body.amount : existing.amount;
+  const perUnitAmount =
+    amount != null ? computePerUnitAmount(Number(amount), apartmentCount) : null;
+
+  const expense = await prisma.siteExpense.update({
+    where: { id: expenseId },
+    data: {
+      ...body,
+      amount: amount != null ? amount : undefined,
+      perUnitAmount,
+      date: body.date ? new Date(body.date) : undefined,
+    },
+  });
+
+  await removeCarryforwardsForSiteExpense(expenseId);
+  await recalculateAllSiteBuildingsForMonth(
+    existing.siteId,
+    existing.targetMonth,
+    existing.targetYear
+  );
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
   return serializeSiteExpense(expense);
 }
 
 export async function deleteSiteExpenseService(expenseId, managerId) {
+<<<<<<< HEAD
   const expense = await prisma.siteExpense.findFirst({
     where: { id: expenseId, site: { managerId } },
   });
@@ -363,4 +511,14 @@ export async function deleteSiteExpenseService(expenseId, managerId) {
   await recalculateSiteDuesForMonth(siteId, targetMonth, targetYear);
 
   return { id: expenseId };
+=======
+  const existing = await assertManagerOwnsSiteExpense(expenseId, managerId);
+  await removeCarryforwardsForSiteExpense(expenseId);
+  await prisma.siteExpense.delete({ where: { id: expenseId } });
+  await recalculateAllSiteBuildingsForMonth(
+    existing.siteId,
+    existing.targetMonth,
+    existing.targetYear
+  );
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 }

@@ -1,23 +1,22 @@
 class RegisterRequest {
-  final String email;
+  final String? email;
   final String password;
   final String name;
   final String? phone;
 
   RegisterRequest({
-    required this.email,
+    this.email,
     required this.password,
     required this.name,
     this.phone,
   });
 
   Map<String, dynamic> toJson() {
-    final cleanPhone = phone?.trim();
     return {
-      'email': email,
+      if (email != null && email!.isNotEmpty) 'email': email,
+      if (phone != null && phone!.isNotEmpty) 'phone': phone,
       'password': password,
       'name': name,
-      if (cleanPhone != null && cleanPhone.isNotEmpty) 'phone': cleanPhone,
     };
   }
 }

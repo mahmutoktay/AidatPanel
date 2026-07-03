@@ -55,7 +55,7 @@ class AsyncErrorWidget extends StatelessWidget {
                 label: Text(context.t.features.buildings.tekrarDene),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.actionButton,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.actionButtonForeground,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

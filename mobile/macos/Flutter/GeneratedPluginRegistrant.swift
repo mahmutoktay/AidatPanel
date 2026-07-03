@@ -21,6 +21,10 @@ import pdfx
 import purchases_flutter
 import share_plus
 import sqflite_darwin
+<<<<<<< HEAD
+=======
+import url_launcher_macos
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   AppLinksMacosPlugin.register(with: registry.registrar(forPlugin: "AppLinksMacosPlugin"))
@@ -39,4 +43,8 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   PurchasesFlutterPlugin.register(with: registry.registrar(forPlugin: "PurchasesFlutterPlugin"))
   SharePlusMacosPlugin.register(with: registry.registrar(forPlugin: "SharePlusMacosPlugin"))
   SqflitePlugin.register(with: registry.registrar(forPlugin: "SqflitePlugin"))
+<<<<<<< HEAD
+=======
+  UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 }

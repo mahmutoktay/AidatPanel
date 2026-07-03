@@ -4,6 +4,7 @@ config();
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import expressRequestId from "express-request-id";
 import fs from "fs";
 import { connectDB, disconnectDB, prisma } from "./src/config/db.js";
 import { initFirebase } from "./src/config/firebase.js";
@@ -20,12 +21,16 @@ import apartmentTicketRoutes from "./src/routes/apartmentTicketRoutes.js";
 import expenseRoutes from "./src/routes/expenseRoutes.js";
 import dekontRoutes from "./src/routes/dekontRoutes.js";
 import subscriptionRoutes from "./src/routes/subscriptionRoutes.js";
+import siteRoutes from "./src/routes/siteRoutes.js";
+import adminRoutes from "./src/routes/adminRoutes.js";
+import cookieParser from "cookie-parser";
 import { apiLimiter } from "./src/middlewares/rateLimitMiddleware.js";
 import { errorHandler, notFoundHandler } from "./src/middlewares/errorHandler.js";
 import { logger, requestLogger } from "./src/config/logger.js";
 import { attachWebSocketServer } from "./src/realtime/wsGateway.js";
 import { ensureDekontStorageDirs } from "./src/utils/ensureDekontStorage.js";
 import { startDueAutoGenerateScheduler } from "./src/jobs/dueAutoGenerateJob.js";
+import { startAdminActivityScheduler } from "./src/jobs/adminActivityJob.js";
 
 const app = express();
 
@@ -40,6 +45,9 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   : ['http://localhost:3000', 'http://localhost:4200'];
 
 // GÜVENLİK MIDDLEWARE'LERİ
+// Request ID — her isteğe benzersiz ID atar (req.id)
+app.use(expressRequestId());
+
 // Helmet - HTTP başlıklarını güvenli hale getirir
 app.use(helmet());
 
@@ -55,6 +63,7 @@ app.use(cors({
 app.use("/api/v1", apiLimiter);
 
 // BODY PARSING MIDDLEWARE'I
+app.use(cookieParser());
 app.use(express.json());
 
 // Request logging — development'da pretty print, production'da JSON stdout
@@ -77,11 +86,15 @@ app.use("/api/v1/dekonts", dekontRoutes);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/buildings", buildingRoutes);
 app.use("/api/v1/sites", siteRoutes);
+<<<<<<< HEAD
 app.use("/api/v1/site-expenses", siteExpenseRoutes);
+=======
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 app.use("/api/v1/buildings/:buildingId/apartments", apartmentRoutes);
 app.use("/api/v1/apartments/:apartmentId/invite-code", inviteCodeRoutes);
 app.use("/api/v1/me", meRoutes);
 app.use("/api/v1/subscription", subscriptionRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 app.use("/uploads/avatars", express.static("uploads/avatars"));
 
@@ -117,6 +130,7 @@ async function bootstrap() {
   });
   attachWebSocketServer(server);
   startDueAutoGenerateScheduler();
+  startAdminActivityScheduler();
 }
 
 bootstrap().catch((err) => {

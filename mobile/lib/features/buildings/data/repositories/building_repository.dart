@@ -3,7 +3,11 @@ import '../../domain/entities/collection_preset_entity.dart';
 import '../../domain/entities/saved_iban_delete_result.dart';
 
 abstract class BuildingRepository {
+<<<<<<< HEAD
   Future<List<BuildingEntity>> fetchBuildings({bool standaloneOnly = false});
+=======
+  Future<List<BuildingEntity>> fetchBuildings({bool standalone = false});
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   Future<List<CollectionPresetEntity>> fetchCollectionPresets();
   Future<BuildingEntity> createBuilding({
     required String name,

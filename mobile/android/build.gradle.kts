@@ -29,8 +29,9 @@ subprojects {
 }
 
 // evaluationDependsOn'dan ÖNCE: pdfx vb. eklentilerde Java/Kotlin JVM 17 hizası (Kotlin 2.x + AGP 8).
+// file_picker hariç: K2 + dairesel FileUtils/FilePickerDelegate referansı derleme hatası (#2070).
 subprojects {
-    if (name == "app") return@subprojects
+    if (name == "app" || name == "file_picker") return@subprojects
     afterEvaluate {
         extensions.findByType<LibraryExtension>()?.compileOptions?.apply {
             sourceCompatibility = JavaVersion.VERSION_17
@@ -52,19 +53,23 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
-// :app GeneratedPluginRegistrant.java — Kotlin eklenti sınıfları önce derlensin.
+// :app PluginRegistrant.kt — Kotlin eklenti sınıfları önce derlensin (Java + Kotlin derleme).
 gradle.projectsEvaluated {
     val app = rootProject.findProject(":app") ?: return@projectsEvaluated
-    app.tasks.withType<JavaCompile>().configureEach {
+    val wirePluginKotlinCompileDeps: (org.gradle.api.Task) -> Unit = { task ->
         val variant = when {
-            name.contains("Debug", ignoreCase = true) -> "Debug"
+            task.name.contains("Debug", ignoreCase = true) -> "Debug"
             else -> "Release"
         }
         rootProject.subprojects.forEach { pluginProject ->
             if (pluginProject.name == "app") return@forEach
-            pluginProject.tasks.findByName("compile${variant}Kotlin")?.let { dependsOn(it) }
+            pluginProject.tasks.findByName("bundleLibCompileToJar${variant}")?.let {
+                task.dependsOn(it)
+            }
         }
     }
+    app.tasks.withType<JavaCompile>().configureEach(wirePluginKotlinCompileDeps)
+    app.tasks.withType<KotlinCompile>().configureEach(wirePluginKotlinCompileDeps)
 }
 
 tasks.register<Delete>("clean") {

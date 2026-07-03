@@ -1,0 +1,157 @@
+<%- include('flash') %>
+<% const _alerts = typeof alerts !== 'undefined' ? alerts : []; %>
+<% const _insights = typeof insights !== 'undefined' ? insights : {}; %>
+<% const _segments = typeof segments !== 'undefined' ? segments : {}; %>
+<% const _activeUsers = typeof activeUsers !== 'undefined' ? activeUsers : []; %>
+
+<% if (_alerts.length) { %>
+<div class="alert-strip">
+  <% _alerts.forEach(a => { %>
+  <a href="<%= a.href %>" class="alert-chip alert-chip--<%= a.severity %>">
+    <span><%= a.label %></span>
+    <span class="alert-chip__count"><%= a.count %></span>
+  </a>
+  <% }) %>
+</div>
+<% } %>
+
+<div class="action-grid mb-6">
+  <a href="/search" class="action-tile">
+    <div class="action-tile__icon"><%- include('icon', { name: 'search' }) %></div>
+    <span class="action-tile__label">Müşteri Ara</span>
+    <span class="action-tile__desc">Global arama</span>
+  </a>
+  <a href="/explorer" class="action-tile">
+    <div class="action-tile__icon"><%- include('icon', { name: 'users' }) %></div>
+    <span class="action-tile__label">Müşteri Gezgini</span>
+    <span class="action-tile__desc">Yönetici → bina → sakin</span>
+  </a>
+  <a href="/growth#grant" class="action-tile">
+    <div class="action-tile__icon"><%- include('icon', { name: 'subscription' }) %></div>
+    <span class="action-tile__label">Abonelik Tanımla</span>
+    <span class="action-tile__desc">Manuel grant</span>
+  </a>
+  <a href="/ops/dekonts?status=NEEDS_MANAGER_REVIEW" class="action-tile">
+    <div class="action-tile__icon"><%- include('icon', { name: 'dekont' }) %></div>
+    <span class="action-tile__label">Dekont Kuyruğu</span>
+    <span class="action-tile__desc">İnceleme bekleyenler</span>
+  </a>
+  <a href="/analytics#broadcast" class="action-tile">
+    <div class="action-tile__icon"><%- include('icon', { name: 'analytics' }) %></div>
+    <span class="action-tile__label">Segment Bildirimi</span>
+    <span class="action-tile__desc">Push gönder</span>
+  </a>
+  <a href="/audit" class="action-tile">
+    <div class="action-tile__icon"><%- include('icon', { name: 'shield' }) %></div>
+    <span class="action-tile__label">Denetim Kayıtları</span>
+    <span class="action-tile__desc">Admin işlem geçmişi</span>
+  </a>
+</div>
+
+<% const ins = _insights; %>
+<div class="insight-grid">
+  <% const kpis = [
+    { key: 'activeSubs', label: 'Aktif Abonelik' },
+    { key: 'estimatedMrr', label: 'Tahmini Aylık Gelir', suffix: ' ₺' },
+    { key: 'newSignups7d', label: 'Son 7 Gün Yeni Kayıt' },
+    { key: 'managerDau', label: 'Günlük Aktif Yönetici' },
+    { key: 'stickiness', label: 'Günlük / Aylık Aktif Oranı', suffix: '%' },
+    { key: 'ocrSuccessRate', label: 'Dekont Okuma Başarısı', suffix: '%' },
+    { key: 'churn30d', label: 'Son 30 Gün Abonelik Kaybı' },
+  ]; %>
+  <% kpis.forEach(k => { const item = ins[k.key]; if (!item) return; %>
+  <div class="insight-card">
+    <div class="insight-card__label"><%= k.label %></div>
+    <div class="insight-card__value tabular-nums"><%= item.value %><%= k.suffix || '' %></div>
+    <% if (item.change !== 0) { %>
+    <div class="insight-card__trend insight-card__trend--<%= item.trend %>"><%= item.change > 0 ? '+' : '' %><%= item.change %>% önceki dönem</div>
+    <% } %>
+  </div>
+  <% }) %>
+</div>
+
+<div class="chart-grid mb-6 mt-6">
+  <div class="card">
+    <div class="card__header"><div><h3 class="card__title">Günlük Aktif Kullanıcı</h3><p class="card__subtitle">Son 14 gün — yönetici ve sakin</p></div></div>
+    <div class="chart-container"><canvas id="dauChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card__header"><div><h3 class="card__title">Kayıt vs Abone</h3><p class="card__subtitle">Haftalık</p></div></div>
+    <div class="chart-container"><canvas id="signupChart"></canvas></div>
+  </div>
+</div>
+
+<div class="chart-grid mb-6">
+  <div class="card">
+    <div class="card__header"><div><h3 class="card__title">Plan Dağılımı</h3></div></div>
+    <div class="chart-container"><canvas id="planChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card__header"><div><h3 class="card__title">Top Şehirler</h3></div></div>
+    <% if (_segments.topCities && _segments.topCities.length) { %>
+    <div class="data-row-list">
+      <% _segments.topCities.forEach(c => { %>
+      <div class="data-row" style="cursor:default">
+        <div class="data-row__body">
+          <p class="data-row__title"><%= c.city %></p>
+          <p class="data-row__meta"><%= c.buildingCount %> bina · <%= c.activeSubs %> aktif abone</p>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <% } else { %>
+    <p class="text-muted">Veri yok</p>
+    <% } %>
+  </div>
+</div>
+
+<script>
+(function () {
+  if (typeof Chart === 'undefined') return;
+  Chart.defaults.color = '#a1a1aa';
+  Chart.defaults.borderColor = '#27272a';
+
+  const dauData = <%- JSON.stringify(_activeUsers) %>;
+  if (dauData.length) {
+    const labels = [...new Set(dauData.map(d => d.date))];
+    new Chart(document.getElementById('dauChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Yönetici', data: labels.map(l => (dauData.find(d => d.date === l && d.role === 'MANAGER') || {}).activeUsers || 0), borderColor: '#6366f1', tension: 0.35, fill: false },
+          { label: 'Sakin', data: labels.map(l => (dauData.find(d => d.date === l && d.role === 'RESIDENT') || {}).activeUsers || 0), borderColor: '#22c55e', tension: 0.35, fill: false }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, grid: { color: '#27272a' } }, x: { grid: { display: false } } } }
+    });
+  }
+
+  const weekly = <%- JSON.stringify(_segments.weeklySignups || []) %>;
+  if (weekly.length) {
+    new Chart(document.getElementById('signupChart'), {
+      type: 'bar',
+      data: {
+        labels: weekly.map(w => w.week),
+        datasets: [
+          { label: 'Kayıt', data: weekly.map(w => w.signups), backgroundColor: '#6366f1', borderRadius: 4 },
+          { label: 'Yeni abone', data: weekly.map(w => w.newSubs), backgroundColor: '#22c55e', borderRadius: 4 }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, grid: { color: '#27272a' } }, x: { grid: { display: false } } } }
+    });
+  }
+
+  const plans = <%- JSON.stringify(_segments.planDistribution || []) %>;
+  if (plans.length) {
+    new Chart(document.getElementById('planChart'), {
+      type: 'doughnut',
+      data: {
+        labels: plans.map(p => p.plan),
+        datasets: [{ data: plans.map(p => p.count), backgroundColor: ['#6366f1', '#8b5cf6', '#64748b'], borderWidth: 0 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+})();
+</script>

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_sizes.dart';
 import 'premium_bottom_sheet.dart';
 
 /// Tek seçimli alt picker seçeneği.
@@ -31,20 +32,25 @@ Future<T?> showPremiumSingleSelectPicker<T>({
     builder: (sheetContext) => PremiumBottomSheetScaffold(
       title: title,
       scrollable: true,
-      body: PremiumActionSheetList(
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final option in options)
+          for (var i = 0; i < options.length; i++) ...[
+            if (i > 0) SizedBox(height: AppSizes.spacingXS),
             PremiumActionSheetTile(
-              icon: option.icon,
-              label: option.label,
-              trailing: isSelected(selected, option.value)
-                  ? Icon(
-                      Icons.check_rounded,
-                      color: AppColors.inkDark,
+              icon: options[i].icon,
+              label: options[i].label,
+              trailing: isSelected(selected, options[i].value)
+                  ? const Icon(
+                      Icons.check_circle_rounded,
+                      color: AppColors.statusGreen,
+                      size: 22,
                     )
                   : null,
-              onTap: () => Navigator.pop(sheetContext, option.value),
+              onTap: () => Navigator.pop(sheetContext, options[i].value),
             ),
+          ],
         ],
       ),
     ),

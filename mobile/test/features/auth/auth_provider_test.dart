@@ -1,5 +1,6 @@
 import 'package:aidatpanel/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:aidatpanel/features/auth/domain/entities/user_entity.dart';
+import 'package:aidatpanel/features/auth/domain/entities/saved_login_hint.dart';
 import 'package:aidatpanel/features/auth/presentation/providers/auth_provider.dart';
 import 'package:aidatpanel/l10n/strings.g.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +34,7 @@ void main() {
       );
 
       final notifier = capturedRef.read(authStateProvider.notifier);
-      await notifier.submitLogin('kullanici@ornek.com', '', false, capturedRef);
+      await notifier.submitLogin('kullanici@ornek.com', '', capturedRef);
 
       final state = capturedRef.read(authStateProvider);
       expect(state.error, contains(t.features.auth.passwordRequired));
@@ -64,9 +65,8 @@ void main() {
 
       final notifier = capturedRef.read(authStateProvider.notifier);
       await notifier.submitLogin(
-        'gecersiz-email',
+        'bad@',
         'Deneme123!',
-        false,
         capturedRef,
       );
 
@@ -119,11 +119,38 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> register(
-    String email,
+    String? email,
     String password,
     String name,
     String? phone,
   ) async {}
+
+  @override
+  Future<void> sendOtp({
+    String? phone,
+    String? email,
+    required String purpose,
+  }) async {}
+
+  @override
+  Future<UserEntity> verifyOtp({
+    String? phone,
+    String? email,
+    required String code,
+    required String purpose,
+    Map<String, dynamic>? payload,
+    String? name,
+    String? password,
+    String? inviteCode,
+  }) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String> validateInvite(String inviteCode) async => 'Test';
+
+  @override
+  Future<SavedLoginHint?> getSavedLoginHint(UserRole role) async => null;
 
   @override
   Future<void> resetPassword(String token, String password) async {}

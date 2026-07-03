@@ -28,15 +28,19 @@ class DashboardBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final List<DashboardNavDestination> destinations;
+  final Color? selectedAccentColor;
+  final bool showSelectionPill;
 
   const DashboardBottomNavBar({
     super.key,
     required this.selectedIndex,
     required this.onDestinationSelected,
     required this.destinations,
+    this.selectedAccentColor,
+    this.showSelectionPill = true,
   });
 
-  static const double _barHeight = 48.0;
+  static const double _barHeight = 56.0;
   static const double _pillHorizontalInset = 4;
 
   @override
@@ -68,22 +72,23 @@ class DashboardBottomNavBar extends StatelessWidget {
                   fit: StackFit.expand,
                   clipBehavior: Clip.none,
                   children: [
-                    AnimatedPositioned(
-                      duration: DashboardNavAnimation.duration,
-                      curve: DashboardNavAnimation.curve,
-                      left: (selectedIndex * tabWidth) + _pillHorizontalInset,
-                      top: 0,
-                      bottom: 0,
-                      width: tabWidth - (_pillHorizontalInset * 2),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: AppColors.fill,
-                          borderRadius: BorderRadius.circular(
-                            DashboardScreenStyle.navActivePillRadius,
+                    if (showSelectionPill)
+                      AnimatedPositioned(
+                        duration: DashboardNavAnimation.duration,
+                        curve: DashboardNavAnimation.curve,
+                        left: (selectedIndex * tabWidth) + _pillHorizontalInset,
+                        top: 0,
+                        bottom: 0,
+                        width: tabWidth - (_pillHorizontalInset * 2),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: AppColors.fill,
+                            borderRadius: BorderRadius.circular(
+                              DashboardScreenStyle.navActivePillRadius,
+                            ),
                           ),
                         ),
                       ),
-                    ),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -92,6 +97,7 @@ class DashboardBottomNavBar extends StatelessWidget {
                             child: _NavItem(
                               destination: destinations[i],
                               selected: selectedIndex == i,
+                              selectedAccentColor: selectedAccentColor,
                               onTap: () => onDestinationSelected(i),
                             ),
                           ),
@@ -111,11 +117,13 @@ class DashboardBottomNavBar extends StatelessWidget {
 class _NavItem extends StatelessWidget {
   final DashboardNavDestination destination;
   final bool selected;
+  final Color? selectedAccentColor;
   final VoidCallback onTap;
 
   const _NavItem({
     required this.destination,
     required this.selected,
+    this.selectedAccentColor,
     required this.onTap,
   });
 
@@ -134,7 +142,7 @@ class _NavItem extends StatelessWidget {
         builder: (context, emphasis, _) {
           final color = Color.lerp(
             AppColors.mutedText,
-            AppColors.textPrimary,
+            selectedAccentColor ?? AppColors.textPrimary,
             emphasis,
           )!;
           final fontWeight = FontWeight.lerp(
@@ -148,35 +156,10 @@ class _NavItem extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  width: _iconSize,
-                  height: _iconSize,
-                  child: Center(
-                    child: AnimatedSwitcher(
-                      duration: DashboardNavAnimation.duration,
-                      switchInCurve: DashboardNavAnimation.curve,
-                      switchOutCurve: DashboardNavAnimation.curve,
-                      layoutBuilder: (currentChild, previousChildren) {
-                        return Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            ...previousChildren,
-                            ?currentChild,
-                          ],
-                        );
-                      },
-                      transitionBuilder: (child, animation) => FadeTransition(
-                        opacity: animation,
-                        child: child,
-                      ),
-                      child: Icon(
-                        selected ? destination.selectedIcon : destination.icon,
-                        key: ValueKey<bool>(selected),
-                        color: color,
-                        size: _iconSize,
-                      ),
-                    ),
-                  ),
+                Icon(
+                  selected ? destination.selectedIcon : destination.icon,
+                  color: color,
+                  size: _iconSize,
                 ),
                 const SizedBox(height: _iconLabelGap),
                 Text(

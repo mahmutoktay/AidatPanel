@@ -1,5 +1,5 @@
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
-import { DUE_PAID_RESIDENT } from "../constants/notificationTemplates.js";
+import { NOTIFICATION_CODES } from "../constants/notificationCatalog.js";
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
 import { userPublicSelect } from "./meService.js";
@@ -192,7 +192,7 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
     if (!resident) {
       throw new HttpError(400, "Sakin atanmamış dairelerin aidatları 'Ödendi' yapılamaz.");
     }
-    updateData.paidAt = paidAt ? new Date(paidAt) : new Date();
+    updateData.paidAt = (paidAt && !isNaN(Date.parse(paidAt))) ? new Date(paidAt) : new Date();
     updateData.overdueDays = 0;
   } else if (status === "WAIVED") {
     updateData.paidAt = null;
@@ -218,8 +218,13 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
   if (status === "PAID" && previousStatus !== "PAID" && resident) {
     await createForUsers([resident.id], {
       type: NOTIFICATION_TYPES.DUE_PAID,
+<<<<<<< HEAD
       title: DUE_PAID_RESIDENT.title,
       body: DUE_PAID_RESIDENT.body(due.month, due.year),
+=======
+      code: NOTIFICATION_CODES.DUE_PAID_RESIDENT,
+      params: { month: due.month, year: due.year },
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
       data: {
         dueId: due.id,
         buildingId: due.apartment.buildingId,

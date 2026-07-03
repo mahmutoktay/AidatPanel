@@ -66,6 +66,15 @@ extension NotificationTypeLabels on NotificationType {
   }
 }
 
+extension NotificationEntityLabels on NotificationEntity {
+  String senderLabel(BuildContext context) {
+    if (isFromAidatPanelTeam) {
+      return context.t.features.notifications.typeAidatPanelTeam;
+    }
+    return type.label(context);
+  }
+}
+
 extension NotificationEntityNavigation on NotificationEntity {
   NotificationPayload toPayload() {
     String? str(dynamic v) {
@@ -83,6 +92,7 @@ extension NotificationEntityNavigation on NotificationEntity {
       buildingId: str(data?['buildingId']),
       status: str(data?['status']),
       route: str(data?['route']),
+      code: code,
     );
   }
 }

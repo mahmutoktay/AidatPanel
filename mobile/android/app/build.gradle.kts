@@ -18,7 +18,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.aidatpanel.app"
-    compileSdk = 36
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -100,7 +100,7 @@ tasks.register<Delete>("deleteGeneratedPluginRegistrant") {
     delete(file("src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java"))
 }
 tasks.configureEach {
-    if (name.contains("compile") && name.contains("Java")) {
+    if (name.contains("compile") && (name.contains("Java") || name.contains("Kotlin"))) {
         dependsOn("deleteGeneratedPluginRegistrant")
     }
 }

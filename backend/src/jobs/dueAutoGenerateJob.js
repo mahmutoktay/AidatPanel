@@ -6,11 +6,13 @@ const DEFAULT_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const STARTUP_DELAY_MS = 30_000;
 
 let timer = null;
+let isWorking = false;
 
 export async function runDueMaintenanceJob() {
-  const generated = await autoGenerateAllBuildingDuesService();
-  const overdue = await markOverdueDuesService();
+  if (isWorking) return { generated: { totalCreated: 0, buildingsProcessed: 0 }, overdue: { transitioned: 0, refreshed: 0 } };
+  isWorking = true;
 
+<<<<<<< HEAD
   if (generated.totalCreated > 0) {
     logger.info({
       type: "due_job_generated",
@@ -25,8 +27,31 @@ export async function runDueMaintenanceJob() {
       refreshed: overdue.refreshed,
     });
   }
+=======
+  try {
+    const generated = await autoGenerateAllBuildingDuesService();
+    const overdue = await markOverdueDuesService();
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
-  return { generated, overdue };
+    if (generated.totalCreated > 0) {
+      logger.info({
+        type: "due_job_generated",
+        totalCreated: generated.totalCreated,
+        buildingsProcessed: generated.buildingsProcessed,
+      });
+    }
+    if (overdue.transitioned > 0 || overdue.refreshed > 0) {
+      logger.info({
+        type: "due_job_overdue",
+        transitioned: overdue.transitioned,
+        refreshed: overdue.refreshed,
+      });
+    }
+
+    return { generated, overdue };
+  } finally {
+    isWorking = false;
+  }
 }
 
 /** @deprecated runDueMaintenanceJob kullanın */
@@ -50,13 +75,22 @@ export function startDueAutoGenerateScheduler() {
   );
 
   const tick = () => {
+<<<<<<< HEAD
     runDueMaintenanceJob().catch((err) => {
       logger.error({ type: "due_job_error", err: err?.stack || err?.message });
     });
+=======
+    runDueMaintenanceJob()
+      .catch((err) => {
+        logger.error({ type: "due_job_error", err: err?.stack || err?.message });
+      })
+      .finally(() => {
+        timer = setTimeout(tick, intervalMs);
+      });
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   };
 
-  setTimeout(tick, STARTUP_DELAY_MS);
-  timer = setInterval(tick, intervalMs);
+  timer = setTimeout(tick, STARTUP_DELAY_MS);
 
   logger.info({
     type: "due_job_started",
@@ -66,7 +100,7 @@ export function startDueAutoGenerateScheduler() {
 
 export function stopDueAutoGenerateScheduler() {
   if (timer) {
-    clearInterval(timer);
+    clearTimeout(timer);
     timer = null;
   }
 }

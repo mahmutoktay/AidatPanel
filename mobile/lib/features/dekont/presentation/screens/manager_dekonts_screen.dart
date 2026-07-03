@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../../shared/providers/navigation_provider.dart';
 
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/user_error_message.dart';
@@ -11,9 +15,10 @@ import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../../shared/widgets/premium_filter_picker.dart';
+import '../../../../shared/widgets/building_selector_provider.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
-import '../../../buildings/data/buildings_store.dart';
 import '../providers/dekont_provider.dart';
+import '../providers/manager_dekont_filter_provider.dart';
 import '../widgets/dekont_list_card.dart';
 
 class ManagerDekontsScreen extends ConsumerStatefulWidget {
@@ -26,8 +31,8 @@ class ManagerDekontsScreen extends ConsumerStatefulWidget {
 
 class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
   final ScrollController _scrollController = ScrollController();
-  String? _buildingId;
-  String? _filterKey;
+  String? _lastRequestedBuildingId;
+  String? _pendingSyncBuildingId;
 
   @override
   void initState() {
@@ -45,12 +50,62 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
     super.dispose();
   }
 
-  Future<void> _load() async {
-    final id = _buildingId;
-    if (id == null) return;
-    await ref
+  void _syncSelectedBuildingAndLoad(
+    List<BuildingEntity> buildings,
+    String? selectedBuildingId,
+  ) {
+    if (buildings.isEmpty) return;
+
+    final selectedExists =
+        selectedBuildingId != null &&
+        buildings.any((building) => building.id == selectedBuildingId);
+    final effectiveId = selectedExists
+        ? selectedBuildingId
+        : buildings.first.id;
+
+    if (_lastRequestedBuildingId == effectiveId && selectedExists) return;
+    if (_pendingSyncBuildingId == effectiveId) return;
+
+    _pendingSyncBuildingId = effectiveId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pendingSyncBuildingId = null;
+      if (!mounted) return;
+
+      final latestBuildings = ref.read(buildingsStoreProvider).value ?? [];
+      if (latestBuildings.isEmpty) return;
+
+      final latestSelectedId = ref.read(selectedBuildingIdProvider);
+      final latestSelectedExists =
+          latestSelectedId != null &&
+          latestBuildings.any((building) => building.id == latestSelectedId);
+      final id = latestSelectedExists
+          ? latestSelectedId
+          : latestBuildings.first.id;
+
+      if (!latestSelectedExists) {
+        ref.read(selectedBuildingIdProvider.notifier).select(id);
+      }
+      if (_lastRequestedBuildingId == id) return;
+
+      _lastRequestedBuildingId = id;
+      unawaited(_loadBuilding(id));
+    });
+  }
+
+  Future<void> _loadBuilding(String buildingId) {
+    return ref
         .read(managerDekontsNotifierProvider.notifier)
-        .loadBuilding(id, filterKey: _filterKey);
+        .loadBuilding(
+          buildingId,
+          filterKey: ref.read(managerDekontFilterProvider),
+        );
+  }
+
+  Future<void> _load() async {
+    final id = ref.read(selectedBuildingIdProvider);
+    if (id == null) return;
+    _lastRequestedBuildingId = id;
+    await _loadBuilding(id);
   }
 
   String _dekontFilterLabel(BuildContext context, String? key) {
@@ -68,7 +123,8 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
   }
 
   Future<void> _openFilterSheet() async {
-    var draftKey = _filterKey;
+    final currentKey = ref.read(managerDekontFilterProvider);
+    var draftKey = currentKey;
     final common = context.t.common;
     final t = context.t.features.dekont;
     final allToken = Object();
@@ -119,7 +175,7 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
         ),
       ],
       onApply: () {
-        setState(() => _filterKey = draftKey);
+        ref.read(managerDekontFilterProvider.notifier).select(draftKey);
         _load();
       },
     );
@@ -131,13 +187,8 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
     final state = ref.watch(managerDekontsNotifierProvider);
     final t = context.t.features.dekont;
 
-    if (_buildingId == null && buildings.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() => _buildingId = buildings.first.id);
-        _load();
-      });
-    }
+    final buildingId = ref.watch(selectedBuildingIdProvider);
+    _syncSelectedBuildingAndLoad(buildings, buildingId);
 
     return DashboardSecondaryScaffold(
       title: t.managerTitle,
@@ -150,15 +201,16 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
                 children: [
                   DashboardSingleBuildingSelector(
                     buildings: buildings,
-                    selectedBuildingId: _buildingId,
+                    selectedBuildingId: buildingId,
                     onSelected: (id) {
-                      setState(() => _buildingId = id);
-                      _load();
+                      ref.read(selectedBuildingIdProvider.notifier).select(id);
+                      unawaited(_load());
                     },
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                   PremiumFilterButton(
-                    hasActiveFilters: _filterKey != null,
+                    hasActiveFilters:
+                        ref.watch(managerDekontFilterProvider) != null,
                     onPressed: _openFilterSheet,
                   ),
                 ],

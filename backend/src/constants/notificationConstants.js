@@ -35,7 +35,7 @@ export const NOTIFICATION_MESSAGES = Object.freeze({
 /** Development / E2E test bildirimi */
 export const DEV_SEED_NOTIFICATION = Object.freeze({
   type: NOTIFICATION_TYPES.SYSTEM,
-  title: "AidatPanel test bildirimi",
-  body: "Bildirim modülü çalışıyor — Postman veya mobil uygulama ile doğrulayabilirsiniz.",
+  code: "dev_seed",
+  params: {},
   data: { route: "/manager-dashboard" },
 });

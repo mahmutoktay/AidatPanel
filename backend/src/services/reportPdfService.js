@@ -394,3 +394,78 @@ export async function buildAnnualReportPdf(data) {
   doc.end();
   return bufferPromise;
 }
+
+export async function buildMonthlySiteReportPdf(data) {
+  const doc = new PDFDocument({ margin: MARGIN, size: "A4" });
+  const bufferPromise = bufferFromDoc(doc);
+  const fontPath = resolveFontPath();
+
+  let y = MARGIN;
+  applyFont(doc, fontPath, 18);
+  doc.fillColor("#111111").text("Site Aylik Rapor", MARGIN, y);
+  y += 28;
+  applyFont(doc, fontPath, 12);
+  doc.text(`${data.site.name} — ${data.period.month}/${data.period.year}`, MARGIN, y);
+  y += 24;
+
+  y = drawKeyValueRows(doc, fontPath, y, [
+    { label: "Adres", value: `${data.site.address}, ${data.site.city}` },
+    { label: "Blok sayisi", value: String(data.buildings.length) },
+    { label: "Daire", value: `${data.occupancy.occupied}/${data.occupancy.total}` },
+    { label: "Tahsil", value: data.dues.summary.collectedFormatted },
+    { label: "Site gideri", value: data.siteExpenses.totalAmountFormatted },
+    { label: "Net", value: data.financial.netFormatted },
+  ]);
+
+  y = drawSectionTitle(doc, fontPath, y, "Aidatlar");
+  const cols = [
+    { label: "Blok", width: 80 },
+    { label: "Daire", width: 60 },
+    { label: "Sakin", width: 120 },
+    { label: "Tutar", width: 80 },
+    { label: "Durum", width: CONTENT_WIDTH - 340 },
+  ];
+  y = drawTableHeader(doc, fontPath, y, cols);
+  data.dues.rows.forEach((row, i) => {
+    y = drawTableRow(
+      doc,
+      fontPath,
+      y,
+      cols,
+      [
+        row.buildingName,
+        row.apartmentNumber,
+        row.residentName,
+        row.amountFormatted,
+        DUE_STATUS_LABELS[row.status] ?? row.status,
+      ],
+      i % 2 === 1
+    );
+  });
+
+  doc.end();
+  return bufferPromise;
+}
+
+export async function buildAnnualSiteReportPdf(data) {
+  const doc = new PDFDocument({ margin: MARGIN, size: "A4" });
+  const bufferPromise = bufferFromDoc(doc);
+  const fontPath = resolveFontPath();
+
+  let y = MARGIN;
+  applyFont(doc, fontPath, 18);
+  doc.fillColor("#111111").text("Site Yillik Rapor", MARGIN, y);
+  y += 28;
+  applyFont(doc, fontPath, 12);
+  doc.text(`${data.site.name} — ${data.period.year}`, MARGIN, y);
+  y += 24;
+
+  y = drawKeyValueRows(doc, fontPath, y, [
+    { label: "Tahsil", value: data.yearSummary.collectedFormatted },
+    { label: "Gider", value: data.yearSummary.expensesFormatted },
+    { label: "Net", value: data.yearSummary.netFormatted },
+  ]);
+
+  doc.end();
+  return bufferPromise;
+}

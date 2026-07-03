@@ -9,6 +9,15 @@ import {
   createSession,
   revokeOtherSessions,
 } from "./sessionService.js";
+import {
+  normalizeTrPhone,
+  normalizeLoginIdentifier,
+} from "../utils/normalizeTrPhone.js";
+
+/** Refresh token'ın SHA-256 özeti — DB'de saklanır, replay tespiti için. */
+function hashToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
 
 /** Refresh token'ın SHA-256 özeti — DB'de saklanır, replay tespiti için. */
 function hashToken(token) {
@@ -52,10 +61,10 @@ async function assertEmailAvailable(email) {
   }
 }
 
-async function assertPhoneAvailable(phone) {
+async function assertPhoneAvailable(phone, role) {
   if (!phone) return;
   const existing = await prisma.user.findFirst({
-    where: { phone, deletedAt: null },
+    where: { phone, role, deletedAt: null },
   });
   if (existing) {
     throw new HttpError(409, "Bu telefon numarası zaten kullanılıyor.");
@@ -63,27 +72,81 @@ async function assertPhoneAvailable(phone) {
 }
 
 async function findActiveUserByIdentifier(identifier) {
-  const isEmail = identifier.includes("@");
+  const normalized = normalizeLoginIdentifier(identifier);
+  const isEmail = normalized.includes("@");
   return prisma.user.findFirst({
     where: isEmail
-      ? { email: identifier, deletedAt: null }
-      : { phone: identifier, deletedAt: null },
+      ? { email: normalized, deletedAt: null }
+      : { phone: normalized, deletedAt: null },
   });
+}
+
+function assertMinContactRequired(email, phone) {
+  if (!email && !phone) {
+    throw new HttpError(400, "E-posta veya telefon numarası gereklidir.");
+  }
+}
+
+/**
+ * POST /auth/check-identifier — kayıt/giriş öncesi e-posta veya telefon uygunluğu.
+ */
+export async function checkIdentifierService({ identifier, purpose }) {
+  const normalized = normalizeLoginIdentifier(identifier);
+  const isEmail = normalized.includes("@");
+
+  if (!normalized) {
+    throw new HttpError(400, "E-posta veya telefon numarası gereklidir.");
+  }
+
+  if (purpose === "manager_register") {
+    if (isEmail) {
+      await assertEmailAvailable(normalized);
+    } else {
+      await assertPhoneAvailable(normalized, "MANAGER");
+    }
+    return { ok: true };
+  }
+
+  if (purpose === "manager_login") {
+    const user = await prisma.user.findFirst({
+      where: isEmail
+        ? { email: normalized, deletedAt: null, role: "MANAGER" }
+        : { phone: normalized, deletedAt: null, role: "MANAGER" },
+    });
+    if (!user) {
+      throw new HttpError(
+        404,
+        isEmail
+          ? "Bu e-posta adresiyle kayıtlı hesap bulunamadı."
+          : "Bu telefon numarasıyla kayıtlı hesap bulunamadı."
+      );
+    }
+    return { ok: true };
+  }
+
+  throw new HttpError(400, "Geçersiz istek.");
 }
 
 /**
  * Yönetici kaydı — POST /auth/register
  */
 export async function registerService({ name, email, phone, password }) {
-  await assertEmailAvailable(email);
-  await assertPhoneAvailable(phone);
+  const normalizedPhone = phone ? normalizeTrPhone(phone) : null;
+  if (normalizedPhone === null && phone) {
+    throw new HttpError(400, "Geçerli bir telefon numarası giriniz.");
+  }
+  const normalizedEmail = email?.trim().toLowerCase() || null;
+
+  assertMinContactRequired(normalizedEmail, normalizedPhone);
+  if (normalizedEmail) await assertEmailAvailable(normalizedEmail);
+  if (normalizedPhone) await assertPhoneAvailable(normalizedPhone, "MANAGER");
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
     data: {
       name,
-      email,
-      phone,
+      email: normalizedEmail,
+      phone: normalizedPhone,
       passwordHash: hashedPassword,
       role: "MANAGER",
     },
@@ -106,7 +169,8 @@ export async function registerService({ name, email, phone, password }) {
  * Giriş — POST /auth/login
  */
 export async function loginService(body) {
-  const { identifier, password } = body;
+  const { password } = body;
+  const identifier = normalizeLoginIdentifier(body.identifier);
   const user = await findActiveUserByIdentifier(identifier);
 
   if (!user) {
@@ -172,10 +236,20 @@ export async function refreshAccessTokenService(refreshToken, body = {}) {
     let finalSessionId = tokenSid;
 
     if (finalSessionId) {
+<<<<<<< HEAD
       const session = await tx.userSession.findFirst({
         where: { id: finalSessionId, revokedAt: null },
         select: { id: true, lastTokenHash: true },
       });
+=======
+      // Row-Level Lock için raw SQL
+      const sessions = await tx.$queryRawUnsafe(
+        'SELECT id, "lastTokenHash" FROM "UserSession" WHERE id = $1 AND "revokedAt" IS NULL FOR UPDATE',
+        finalSessionId
+      );
+      const session = sessions[0];
+
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
       if (!session) {
         throw new HttpError(401, "Oturum sonlandırıldı. Lütfen tekrar giriş yapın.");
       }
@@ -230,7 +304,11 @@ export async function refreshAccessTokenService(refreshToken, body = {}) {
  * Davet koduyla sakin kaydı — POST /auth/join
  */
 export async function joinWithInviteCodeService(body) {
-  const { name, email, phone, password, inviteCode } = body;
+  const { name, email, password, inviteCode } = body;
+  const phone = body.phone ? normalizeTrPhone(body.phone) : null;
+  if (body.phone && !phone) {
+    throw new HttpError(400, "Geçerli bir telefon numarası giriniz.");
+  }
   let inviteCodeData;
   try {
     inviteCodeData = await validateInviteCode(inviteCode);
@@ -239,7 +317,7 @@ export async function joinWithInviteCodeService(body) {
   }
 
   await assertEmailAvailable(email);
-  await assertPhoneAvailable(phone);
+  await assertPhoneAvailable(phone, "RESIDENT");
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -290,11 +368,7 @@ export async function joinWithInviteCodeService(body) {
  * Tek cihaz çıkışı — POST /auth/logout
  */
 export async function logoutService(userId, sessionId) {
-  await prisma.user.update({
-    where: { id: userId },
-    data: { fcmToken: null },
-  });
-
+  // Sadece bu session'ı sonlandır, tüm cihazların FCM token'ını silme
   if (sessionId) {
     await prisma.userSession.updateMany({
       where: { id: sessionId, userId, revokedAt: null },

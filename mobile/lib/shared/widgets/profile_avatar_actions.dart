@@ -7,15 +7,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
+import 'package:path/path.dart' as p; // ignore: depend_on_referenced_packages
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/constants/api_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/profile/presentation/providers/profile_notifier.dart';
-import '../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../l10n/strings.g.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'premium_bottom_sheet.dart';
 import 'toast_overlay.dart';
 
@@ -53,13 +55,9 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
   File? _imageFile;
   ui.Image? _imageInfo;
   bool _isProcessing = false;
+  bool _isGif = false;
   double _scaleToCover = 1.0;
   double _viewportWidth = _kCircleDiameter;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -131,6 +129,11 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
     }
   }
 
+  /// Returns true when the file extension looks like a GIF.
+  bool _isGifFile(String filePath) {
+    return p.extension(filePath).toLowerCase() == '.gif';
+  }
+
   Future<void> _handlePickedFile(XFile picked) async {
     setState(() {
       _isProcessing = true;
@@ -142,6 +145,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
       // Clean up previous temp file if exists
       await _cleanupTempFile();
 
+<<<<<<< HEAD
       // Read original image bytes
       final bytes = await File(picked.path).readAsBytes();
 
@@ -149,20 +153,40 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
       final original = img.decodeImage(bytes);
       if (original == null) {
         throw Exception(t.avatarDecodeError);
+=======
+      final isGif = _isGifFile(picked.path);
+
+      if (isGif) {
+        // GIF: copy as-is to temp without re-encoding to preserve animation
+        final tempDir = await getTemporaryDirectory();
+        final tempFile = File(
+          '${tempDir.path}/avatar_${DateTime.now().millisecondsSinceEpoch}.gif',
+        );
+        await File(picked.path).copy(tempFile.path);
+
+        _isGif = true;
+        await _loadImageInfo(tempFile);
+      } else {
+        // Static image: bake EXIF orientation and re-encode as JPG
+        final bytes = await File(picked.path).readAsBytes();
+
+        final original = img.decodeImage(bytes);
+        if (original == null) {
+          throw Exception(t.avatarDecodeError);
+        }
+
+        final oriented = img.bakeOrientation(original);
+
+        final tempDir = await getTemporaryDirectory();
+        final tempFile = File(
+          '${tempDir.path}/oriented_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        );
+        await tempFile.writeAsBytes(img.encodeJpg(oriented, quality: 90));
+
+        _isGif = false;
+        await _loadImageInfo(tempFile);
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
       }
-
-      // Bake EXIF orientation to avoid rotation mismatches in the preview and crop
-      final oriented = img.bakeOrientation(original);
-
-      // Save oriented image to a new temp file
-      final tempDir = await getTemporaryDirectory();
-      final tempFile = File(
-        '${tempDir.path}/oriented_${DateTime.now().millisecondsSinceEpoch}.jpg',
-      );
-      await tempFile.writeAsBytes(img.encodeJpg(oriented, quality: 90));
-
-      // Load this oriented temp file
-      await _loadImageInfo(tempFile);
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -178,6 +202,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
     }
   }
 
+<<<<<<< HEAD
   Future<void> _pickFromCamera() async {
     if (_isProcessing) return;
     try {
@@ -197,11 +222,28 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
     }
   }
 
+=======
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   Future<void> _pickFromGallery() async {
     if (_isProcessing) return;
     try {
-      final picked = await _picker.pickImage(source: ImageSource.gallery);
+      // pickMedia allows selecting GIFs (pickImage filters them out)
+      final picked = await _picker.pickMedia();
       if (picked != null) {
+        // Only accept image types (reject video etc.)
+        final ext = p.extension(picked.path).toLowerCase();
+        const allowedExts = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif'};
+        if (!allowedExts.contains(ext)) {
+          if (mounted) {
+            ref
+                .read(toastProvider.notifier)
+                .show(
+                  context.t.features.profile.avatarUnsupportedFormat,
+                  type: ToastType.error,
+                );
+          }
+          return;
+        }
         await _handlePickedFile(picked);
       }
     } catch (e) {
@@ -226,13 +268,64 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
     final t = context.t;
 
     try {
-      // Read bytes of already oriented image
-      final bytes = await _imageFile!.readAsBytes();
-      final original = img.decodeImage(bytes);
-      if (original == null) {
-        throw Exception(t.features.profile.avatarDecodeError);
+      String uploadPath;
+
+      if (_isGif) {
+        // GIF: upload original file as-is (no crop/re-encode to preserve animation)
+        uploadPath = _imageFile!.path;
+      } else {
+        // Static image: crop and re-encode as JPG
+        final bytes = await _imageFile!.readAsBytes();
+        final original = img.decodeImage(bytes);
+        if (original == null) {
+          throw Exception(t.features.profile.avatarDecodeError);
+        }
+
+        final matrix = _transformationController.value;
+        final s = matrix.storage[0];
+        final tx = matrix.storage[12];
+        final ty = matrix.storage[13];
+
+        final double totalScale = s * _scaleToCover;
+        final double cropX =
+            (((_viewportWidth - _kCircleDiameter) / 2.0) - tx) / totalScale;
+        final double cropY = -ty / totalScale;
+        final double cropW = _kCircleDiameter / totalScale;
+        final double cropH = _kCircleDiameter / totalScale;
+
+        final double cropSize = math.min(cropW, cropH);
+
+        final int finalX = cropX
+            .clamp(0.0, (original.width - cropSize).toDouble())
+            .toInt();
+        final int finalY = cropY
+            .clamp(0.0, (original.height - cropSize).toDouble())
+            .toInt();
+        final int finalSize = cropSize
+            .clamp(1.0, math.min(original.width, original.height).toDouble())
+            .toInt();
+
+        final cropped = img.copyCrop(
+          original,
+          x: finalX,
+          y: finalY,
+          width: finalSize,
+          height: finalSize,
+        );
+
+        final croppedBytes = Uint8List.fromList(
+          img.encodeJpg(cropped, quality: 85),
+        );
+
+        final tempDir = await getTemporaryDirectory();
+        final tempFile = File(
+          '${tempDir.path}/cropped_avatar_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        );
+        await tempFile.writeAsBytes(croppedBytes);
+        uploadPath = tempFile.path;
       }
 
+<<<<<<< HEAD
       final matrix = _transformationController.value;
       final s = matrix.storage[0];
       final tx = matrix.storage[12];
@@ -279,13 +372,18 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
       );
       await tempFile.writeAsBytes(croppedBytes);
 
+=======
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
       final success = await ref
           .read(profileNotifierProvider.notifier)
-          .uploadAvatar(tempFile.path);
+          .uploadAvatar(uploadPath);
 
-      // Clean up temp file
-      if (await tempFile.exists()) {
-        await tempFile.delete();
+      // Clean up temp file (for non-GIF, the cropped temp file; for GIF, _cleanupTempFile handles it)
+      if (!_isGif) {
+        final tempFile = File(uploadPath);
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
       }
 
       if (!mounted) return;
@@ -365,17 +463,29 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     final user = ref.watch(authStateProvider.select((state) => state.user));
     final hasPhoto =
         user?.profilePicture != null && user!.profilePicture!.isNotEmpty;
+=======
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
     final profileT = context.t.features.profile;
+    final user = ref.watch(authStateProvider.select((state) => state.user));
+    final hasPhoto =
+        user?.profilePicture != null && user!.profilePicture!.isNotEmpty;
+    final avatarUrl = hasPhoto
+        ? '${ApiConstants.baseUrl}/uploads/avatars/${user.profilePicture}'
+        : null;
 
     return PremiumBottomSheetScaffold(
       scrollable: false,
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL),
+      title: context.t.features.profile.editTitle,
+      showCloseButton: true,
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+<<<<<<< HEAD
           LayoutBuilder(
             builder: (context, constraints) {
               final viewportW = constraints.maxWidth;
@@ -428,16 +538,100 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
                           color: Colors.white.withValues(alpha: 0.12),
                         ),
                       ),
+=======
+          const SizedBox(height: AppSizes.spacingM),
+          _buildCropArea(profileT, avatarUrl: avatarUrl, hasPhoto: hasPhoto),
+        ],
+      ),
+      actions: PremiumSheetActions(
+        primaryLabel: profileT.avatarSave,
+        onPrimary: _imageFile != null && !_isProcessing ? _saveImage : null,
+        primaryLoading: _isProcessing && _imageFile != null,
+      ),
+    );
+  }
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
-                    // Semi-transparent overlay with circular cutout
-                    IgnorePointer(
-                      child: CustomPaint(
-                        size: Size(viewportW, _kViewportH),
-                        painter: _CircleCropOverlayPainter(
-                          circleDiameter: _kCircleDiameter,
+
+  Widget _buildCropArea(
+    Translations$features$profile$en profileT, {
+    required String? avatarUrl,
+    required bool hasPhoto,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final viewportW = constraints.maxWidth;
+        _viewportWidth = viewportW;
+        final showCrop = _imageFile != null && _imageInfo != null;
+        final showServerPhoto = !showCrop && avatarUrl != null && _imageFile == null;
+
+        return GestureDetector(
+          onTap: _isProcessing || showCrop
+              ? null
+              : _pickFromGallery,
+          child: Container(
+            width: viewportW,
+            height: _kViewportH,
+            decoration: BoxDecoration(
+              color: AppColors.isDark
+                  ? const Color(0xFF0D1117)
+                  : const Color(0xFF161B22),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.06),
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
+              children: [
+                // InteractiveViewer (crop mode) — local file picked
+                if (showCrop)
+                  InteractiveViewer(
+                    transformationController: _transformationController,
+                    minScale: 1.0,
+                    maxScale: 4.0,
+                    boundaryMargin: EdgeInsets.symmetric(
+                      horizontal: math.max(
+                        0.0,
+                        (viewportW - _kCircleDiameter) / 2.0,
+                      ),
+                    ),
+                    clipBehavior: Clip.none,
+                    constrained: false,
+                    child: SizedBox(
+                      width: _imageInfo!.width.toDouble() * _scaleToCover,
+                      height: _imageInfo!.height.toDouble() * _scaleToCover,
+                      child: Image.file(_imageFile!, fit: BoxFit.fill),
+                    ),
+                  )
+                // Server photo (preview) — centered square matching circle size
+                else if (showServerPhoto)
+                  Center(
+                    child: SizedBox(
+                      width: _kCircleDiameter,
+                      height: _kCircleDiameter,
+                      child: ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: avatarUrl,
+                          width: _kCircleDiameter,
+                          height: _kCircleDiameter,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, url, error) =>
+                              _buildPlaceholder(profileT),
+                          placeholder: (context, url) => Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white.withValues(alpha: 0.4),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
+<<<<<<< HEAD
                   ],
                 ),
               );
@@ -480,18 +674,78 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
+=======
+                  )
+                // Processing
+                else if (_isProcessing)
+                  Center(
+                    child: SizedBox(
+                      width: 28,
+                      height: 28,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        color: Colors.white,
+                        color: Colors.white.withValues(alpha: 0.4),
                       ),
-                    )
-                  : Text(
-                      profileT.avatarSave,
-                      style: AppTypography.button.copyWith(color: Colors.white),
                     ),
+                  )
+                // Empty placeholder
+                else
+                  _buildPlaceholder(profileT),
+
+                // Crop overlay with circular cutout
+                IgnorePointer(
+                  child: CustomPaint(
+                    size: Size(viewportW, _kViewportH),
+                    painter: _CircleCropOverlayPainter(
+                      circleDiameter: _kCircleDiameter,
+                      isDark: AppColors.isDark,
+                    ),
+                  ),
+                ),
+
+                // 🗑️ Remove button — top right when a photo is visible (server or local crop)
+                if (showServerPhoto || showCrop)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Material(
+                      color: AppColors.error.withValues(alpha: 0.9),
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: _isProcessing ? null : _removeImage,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          alignment: Alignment.center,
+                          child: _isProcessing
+                              ? SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.delete_outline_rounded,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
+        );
+      },
+    );
+  }
 
+<<<<<<< HEAD
           // ── Remove photo (subtle text link) ──
           if (hasPhoto) ...[
             const SizedBox(height: 4),
@@ -514,8 +768,34 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
                       ),
                     )
                   : Text(profileT.avatarRemove),
+=======
+  Widget _buildPlaceholder(Translations$features$profile$en profileT) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.06),
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
             ),
-          ],
+            child: Icon(
+              Icons.add_a_photo_rounded,
+              size: 32,
+              color: Colors.white.withValues(alpha: 0.25),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            profileT.avatarCamera,
+            style: AppTypography.caption.copyWith(
+              color: Colors.white.withValues(alpha: 0.3),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -523,6 +803,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
 }
 
 // ─────────────────────────────────────────────
+<<<<<<< HEAD
 // Compact source-pick button (Camera / Gallery)
 // ─────────────────────────────────────────────
 class _SourceButton extends StatelessWidget {
@@ -569,10 +850,17 @@ class _SourceButton extends StatelessWidget {
 // a centered circular cutout. The area outside
 // the circle is semi-transparent so the user
 // sees the image bleeding through softly.
+=======
+// Premium circle crop overlay with gradient ring
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 // ─────────────────────────────────────────────
 class _CircleCropOverlayPainter extends CustomPainter {
   final double circleDiameter;
-  _CircleCropOverlayPainter({required this.circleDiameter});
+  final bool isDark;
+  _CircleCropOverlayPainter({
+    required this.circleDiameter,
+    this.isDark = false,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -588,25 +876,50 @@ class _CircleCropOverlayPainter extends CustomPainter {
     canvas.drawPath(
       overlayPath,
       Paint()
+<<<<<<< HEAD
         ..color =
             const Color(
               0x80161B22,
             ) // 50 % overlay — lets the image show through
+=======
+        ..color = isDark
+            ? const Color(0xAA0D1117)
+            : const Color(0xAA161B22)
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
         ..style = PaintingStyle.fill,
     );
 
-    // Subtle white ring around the circle
+    // Gradient ring around the circle
+    final ringPaint = Paint()
+      ..shader = SweepGradient(
+        colors: [
+          Colors.white.withValues(alpha: 0.35),
+          Colors.white.withValues(alpha: 0.08),
+          Colors.white.withValues(alpha: 0.35),
+          Colors.white.withValues(alpha: 0.08),
+          Colors.white.withValues(alpha: 0.35),
+        ],
+      ).createShader(
+        Rect.fromCircle(center: center, radius: radius),
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    canvas.drawCircle(center, radius, ringPaint);
+
+    // Inner subtle glow
     canvas.drawCircle(
       center,
-      radius,
+      radius - 1,
       Paint()
-        ..color = Colors.white.withValues(alpha: 0.25)
+        ..color = Colors.white.withValues(alpha: 0.05)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
+        ..strokeWidth = 1.0,
     );
   }
 
   @override
   bool shouldRepaint(covariant _CircleCropOverlayPainter oldDelegate) =>
-      oldDelegate.circleDiameter != circleDiameter;
+      oldDelegate.circleDiameter != circleDiameter ||
+      oldDelegate.isDark != isDark;
 }

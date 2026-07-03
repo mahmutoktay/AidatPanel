@@ -3,8 +3,13 @@ import { buildDueRowsForApartments } from "../utils/dueGeneration.js";
 import { isValidTrIban, normalizeIban } from "../utils/iban.js";
 import { HttpError } from "../utils/httpError.js";
 import { assertManagerOwnsBuilding } from "../utils/access.js";
+<<<<<<< HEAD
 import { assertCanAddManagementUnit } from "./managementQuotaService.js";
 import { resolveEffectiveBuildingConfig } from "../utils/effectiveBuildingConfig.js";
+=======
+import { assertCanAddBuilding } from "./buildingQuotaService.js";
+import { enrichBuildingWithEffective } from "./buildingConfigService.js";
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 import {
   resolveListTake,
   resolvePageLimit,
@@ -61,9 +66,13 @@ export const createBuildingService = async ({
   dueDay = 1,
   currency = "TRY",
   managerId,
+  siteId = null,
+  blockLabel = null,
+  addressExtra = null,
   collectionIban,
   collectionAccountTitle,
   paymentReferenceTemplate,
+<<<<<<< HEAD
   skipQuotaCheck = false,
   siteId = null,
   blockLabel = null,
@@ -74,14 +83,44 @@ export const createBuildingService = async ({
   }
 
   const collectionData = collectionFieldsFromBody({
+=======
+  inheritFromSite = false,
+  siteDefaults = null,
+  skipQuotaCheck = false,
+}) => {
+  if (!skipQuotaCheck) {
+    await assertCanAddBuilding(managerId);
+  }
+
+  let effectiveDueAmount = dueAmount;
+  let effectiveDueDay = dueDay;
+  let effectiveCurrency = currency;
+  let effectiveCollection = {
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
     collectionIban,
     collectionAccountTitle,
     paymentReferenceTemplate,
-  });
+  };
+
+  if (inheritFromSite && siteDefaults) {
+    if (effectiveDueAmount == null && siteDefaults.dueAmount != null) {
+      effectiveDueAmount = Number(siteDefaults.dueAmount);
+    }
+    effectiveDueDay = dueDay ?? siteDefaults.dueDay ?? 1;
+    effectiveCurrency = currency ?? siteDefaults.currency ?? "TRY";
+    if (collectionIban === undefined && siteDefaults.collectionIban) {
+      effectiveCollection.collectionIban = siteDefaults.collectionIban;
+      effectiveCollection.collectionAccountTitle =
+        collectionAccountTitle ?? siteDefaults.collectionAccountTitle;
+      effectiveCollection.paymentReferenceTemplate =
+        paymentReferenceTemplate ?? siteDefaults.paymentReferenceTemplate;
+    }
+  }
+
+  const collectionData = collectionFieldsFromBody(effectiveCollection);
 
   return await prisma.$transaction(
     async (tx) => {
-      // 1. Building oluştur
       const building = await tx.building.create({
         data: {
           name,
@@ -89,14 +128,17 @@ export const createBuildingService = async ({
           city,
           totalFloors,
           apartmentsPerFloor,
-          dueAmount,
-          dueDay,
-          currency,
+          dueAmount: effectiveDueAmount ?? null,
+          dueDay: effectiveDueDay,
+          currency: effectiveCurrency,
           managerId,
           siteId,
           blockLabel,
           addressExtra,
           ...collectionData,
+        },
+        include: {
+          site: true,
         },
       });
 
@@ -124,7 +166,7 @@ export const createBuildingService = async ({
       // 3. Aidatlar — bulunulan aydan yıl sonuna (toplu INSERT)
       const dueRows = buildDueRowsForApartments(
         apartments.map((a) => a.id),
-        { dueAmount, dueDay, currency }
+        { dueAmount: effectiveDueAmount, dueDay: effectiveDueDay, currency: effectiveCurrency }
       );
       if (dueRows.length > 0) {
         await tx.due.createMany({ data: dueRows });
@@ -136,6 +178,7 @@ export const createBuildingService = async ({
           apartments: {
             orderBy: { number: "asc" },
           },
+          site: true,
         },
       });
     },
@@ -157,6 +200,13 @@ export const getBuildingsService = async (managerId, filters = {}) => {
     where.siteId = null;
   }
 
+<<<<<<< HEAD
+=======
+  if (filters.siteId) {
+    where.siteId = filters.siteId;
+  }
+
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   if (filters.search) {
     where.OR = [
       { name: { contains: filters.search, mode: "insensitive" } },
@@ -191,6 +241,7 @@ export const getBuildingsService = async (managerId, filters = {}) => {
     },
   });
 
+<<<<<<< HEAD
   const mapped = buildings.map((b) => {
     const { apartments, site, ...rest } = b;
     return resolveEffectiveBuildingConfig({
@@ -199,6 +250,18 @@ export const getBuildingsService = async (managerId, filters = {}) => {
       occupiedApartments: apartments.length,
     });
   });
+=======
+  const mapped = await Promise.all(
+    buildings.map(async (b) => {
+      const { apartments, site, ...rest } = b;
+      const base = {
+        ...rest,
+        occupiedApartments: apartments.length,
+      };
+      return enrichBuildingWithEffective({ ...base, site });
+    })
+  );
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
   return buildListResponse(filters, mapped, (b) => b);
 };
@@ -221,7 +284,11 @@ export const getBuildingByIdService = async (id, managerId) => {
   if (!building) return null;
 
   const { apartments, site, ...rest } = building;
+<<<<<<< HEAD
   return resolveEffectiveBuildingConfig({
+=======
+  return enrichBuildingWithEffective({
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
     ...rest,
     site,
     occupiedApartments: apartments.length,
@@ -258,6 +325,16 @@ export const deleteBuildingService = async (id, managerId) => {
         OR: [
           {
             expense: {
+              buildingId: id,
+            },
+          },
+          {
+            siteExpense: {
+              site: {
+                buildings: { some: { id } },
+              },
+            },
+            apartment: {
               buildingId: id,
             },
           },
@@ -395,9 +472,27 @@ export const getCollectionPresetsService = async (managerId) => {
     }),
   ]);
 
+  const sites = await prisma.site.findMany({
+    where: {
+      managerId,
+      collectionIban: { not: null },
+    },
+    select: {
+      collectionIban: true,
+      collectionAccountTitle: true,
+      paymentReferenceTemplate: true,
+      updatedAt: true,
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+
   const byKey = new Map();
 
+<<<<<<< HEAD
   const mergePreset = (row, source) => {
+=======
+  for (const b of [...buildings, ...sites]) {
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
     const key = [
       row.collectionIban,
       row.collectionAccountTitle ?? "",

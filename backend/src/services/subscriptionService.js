@@ -1,5 +1,6 @@
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
+import { getBuildingUsage } from "./buildingQuotaService.js";
 import {
   mapEventToStatus,
   mapProductIdToPlan,
@@ -8,7 +9,7 @@ import {
 } from "../utils/revenueCatWebhook.js";
 import { getManagementQuotaUsage } from "./managementQuotaService.js";
 
-function toSubscriptionDto(subscription) {
+function toSubscriptionDto(subscription, usage) {
   return {
     id: subscription.id,
     status: subscription.status,
@@ -16,6 +17,8 @@ function toSubscriptionDto(subscription) {
     platform: subscription.platform,
     currentPeriodStart: subscription.currentPeriodStart.toISOString(),
     currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
+    usage: { buildings: usage.buildings },
+    limits: { buildings: usage.limit },
   };
 }
 
@@ -23,6 +26,7 @@ export async function getMySubscriptionService(userId) {
   const subscription = await prisma.subscription.findUnique({
     where: { userId },
   });
+<<<<<<< HEAD
   const usage = await getManagementQuotaUsage(userId);
   const quotaFields = {
     usage: { managementUnits: usage.managementUnits },
@@ -37,6 +41,19 @@ export async function getMySubscriptionService(userId) {
     ...toSubscriptionDto(subscription),
     ...quotaFields,
   };
+=======
+  const usage = await getBuildingUsage(userId);
+  if (!subscription) {
+    return {
+      status: null,
+      plan: null,
+      platform: null,
+      usage: { buildings: usage.buildings },
+      limits: { buildings: usage.limit },
+    };
+  }
+  return toSubscriptionDto(subscription, usage);
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 }
 
 /**

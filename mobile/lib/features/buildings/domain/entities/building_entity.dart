@@ -36,10 +36,31 @@ class BuildingEntity extends Equatable {
   /// Havale açıklama şablonu; `{{number}}` → daire no.
   final String? paymentReferenceTemplate;
 
+<<<<<<< HEAD
   /// Site altı bina ise dolu; tekil binalarda null.
   final String? siteId;
   final String? blockLabel;
   final String? addressExtra;
+=======
+  /// Site altı bina ise site kimliği; tekil binalarda null.
+  final String? siteId;
+
+  /// Site içi blok etiketi (ör. "A Blok").
+  final String? blockLabel;
+
+  /// Site adresine eklenen blok/daire detayı.
+  final String? addressExtra;
+
+  /// Site varsayılanlarıyla birleşik çözümlenmiş alanlar (API).
+  final double? effectiveDueAmount;
+  final int? effectiveDueDay;
+  final String? effectiveCurrency;
+  final String? effectiveCollectionIban;
+  final String? effectiveCollectionAccountTitle;
+  final String? effectivePaymentReferenceTemplate;
+  final String? effectiveAddress;
+  final String? effectiveCity;
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   final String? siteName;
 
   const BuildingEntity({
@@ -60,17 +81,43 @@ class BuildingEntity extends Equatable {
     this.siteId,
     this.blockLabel,
     this.addressExtra,
+<<<<<<< HEAD
     this.siteName,
   });
 
   bool get isStandalone => siteId == null || siteId!.isEmpty;
+=======
+    this.effectiveDueAmount,
+    this.effectiveDueDay,
+    this.effectiveCurrency,
+    this.effectiveCollectionIban,
+    this.effectiveCollectionAccountTitle,
+    this.effectivePaymentReferenceTemplate,
+    this.effectiveAddress,
+    this.effectiveCity,
+    this.siteName,
+  });
+
+  /// Liste/kart görünümünde gösterilecek bina adı.
+  String get displayName {
+    final explicit = name.trim();
+    if (explicit.isNotEmpty) return explicit;
+    final block = blockLabel?.trim();
+    if (block != null && block.isNotEmpty) return block;
+    return name;
+  }
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
   /// Geçerli TR IBAN tanımlı mı (`^TR\d{24}$`).
-  bool get isCollectionConfigured => IbanUtils.isValidTrIban(collectionIban);
+  bool get isCollectionConfigured =>
+      IbanUtils.isValidTrIban(effectiveCollectionIban ?? collectionIban);
 
   /// Liste/kart görünümünde gösterilecek tam adres ("Adres, Şehir").
-  String get displayAddress =>
-      city.trim().isEmpty ? address : '$address, $city';
+  String get displayAddress {
+    final addr = effectiveAddress ?? address;
+    final c = (effectiveCity ?? city).trim();
+    return c.isEmpty ? addr : '$addr, $c';
+  }
 
   double get collectionRate {
     if (totalMonthlyDues == 0) return 0;
@@ -95,6 +142,17 @@ class BuildingEntity extends Equatable {
     String? siteId,
     String? blockLabel,
     String? addressExtra,
+<<<<<<< HEAD
+=======
+    double? effectiveDueAmount,
+    int? effectiveDueDay,
+    String? effectiveCurrency,
+    String? effectiveCollectionIban,
+    String? effectiveCollectionAccountTitle,
+    String? effectivePaymentReferenceTemplate,
+    String? effectiveAddress,
+    String? effectiveCity,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
     String? siteName,
   }) {
     return BuildingEntity(
@@ -117,6 +175,20 @@ class BuildingEntity extends Equatable {
       siteId: siteId ?? this.siteId,
       blockLabel: blockLabel ?? this.blockLabel,
       addressExtra: addressExtra ?? this.addressExtra,
+<<<<<<< HEAD
+=======
+      effectiveDueAmount: effectiveDueAmount ?? this.effectiveDueAmount,
+      effectiveDueDay: effectiveDueDay ?? this.effectiveDueDay,
+      effectiveCurrency: effectiveCurrency ?? this.effectiveCurrency,
+      effectiveCollectionIban:
+          effectiveCollectionIban ?? this.effectiveCollectionIban,
+      effectiveCollectionAccountTitle: effectiveCollectionAccountTitle ??
+          this.effectiveCollectionAccountTitle,
+      effectivePaymentReferenceTemplate: effectivePaymentReferenceTemplate ??
+          this.effectivePaymentReferenceTemplate,
+      effectiveAddress: effectiveAddress ?? this.effectiveAddress,
+      effectiveCity: effectiveCity ?? this.effectiveCity,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
       siteName: siteName ?? this.siteName,
     );
   }
@@ -140,6 +212,17 @@ class BuildingEntity extends Equatable {
         siteId,
         blockLabel,
         addressExtra,
+<<<<<<< HEAD
+=======
+        effectiveDueAmount,
+        effectiveDueDay,
+        effectiveCurrency,
+        effectiveCollectionIban,
+        effectiveCollectionAccountTitle,
+        effectivePaymentReferenceTemplate,
+        effectiveAddress,
+        effectiveCity,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
         siteName,
       ];
 }

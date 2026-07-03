@@ -11,6 +11,10 @@ import '../models/join_response.dart';
 
 abstract class AuthRemoteDataSource {
   Future<LoginResponse> login(LoginRequest request);
+  Future<void> checkIdentifier({
+    required String identifier,
+    required String purpose,
+  });
   Future<RegisterResponse> register(RegisterRequest request);
   Future<JoinResponse> join(JoinRequest request);
   Future<TokenRefreshResult> refreshToken(String refreshToken);
@@ -39,6 +43,38 @@ abstract class AuthRemoteDataSource {
     required String token,
     required String password,
   });
+
+  Future<void> sendOtp({
+    String? phone,
+    String? email,
+    required String purpose,
+    Map<String, dynamic>? payload,
+  });
+
+  Future<LoginResponse> verifyOtp({
+    String? phone,
+    String? email,
+    required String code,
+    required String purpose,
+    Map<String, dynamic>? payload,
+    String? name,
+    String? password,
+    String? inviteCode,
+  });
+
+  Future<String> validateInviteCode(String inviteCode);
+
+  Future<bool> verifyResidentJoinOtp({
+    required String phone,
+    required String code,
+    required String inviteCode,
+  });
+
+  Future<LoginResponse> completeResidentJoin({
+    required String phone,
+    required String name,
+    required String inviteCode,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -59,6 +95,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       data: request.toJson(),
     );
     return LoginResponse.fromJson(response.data['data']);
+  }
+
+  @override
+  Future<void> checkIdentifier({
+    required String identifier,
+    required String purpose,
+  }) async {
+    await _dioClient.post(
+      ApiConstants.checkIdentifier,
+      data: {
+        'identifier': identifier,
+        'purpose': purpose,
+      },
+    );
   }
 
   @override
@@ -134,5 +184,102 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       ApiConstants.resetPassword,
       data: {'token': token, 'password': password},
     );
+  }
+
+  @override
+  Future<void> sendOtp({
+    String? phone,
+    String? email,
+    required String purpose,
+    Map<String, dynamic>? payload,
+  }) async {
+    await _dioClient.post(
+      ApiConstants.otpSend,
+      data: {
+        if (phone != null) 'phone': phone,
+        if (email != null) 'email': email,
+        'purpose': purpose,
+        if (payload != null) 'payload': payload,
+      },
+    );
+  }
+
+  @override
+  Future<LoginResponse> verifyOtp({
+    String? phone,
+    String? email,
+    required String code,
+    required String purpose,
+    Map<String, dynamic>? payload,
+    String? name,
+    String? password,
+    String? inviteCode,
+  }) async {
+    final device = await DeviceInfoService.currentDeviceMeta();
+    final response = await _dioClient.post(
+      ApiConstants.otpVerify,
+      data: {
+        if (phone != null) 'phone': phone,
+        if (email != null) 'email': email,
+        'code': code,
+        'purpose': purpose,
+        if (payload != null) 'payload': payload,
+        if (name != null) 'name': name,
+        if (password != null) 'password': password,
+        if (inviteCode != null) 'inviteCode': inviteCode,
+        ...device.toJson(),
+      },
+    );
+    return LoginResponse.fromJson(response.data['data']);
+  }
+
+  @override
+  Future<String> validateInviteCode(String inviteCode) async {
+    final response = await _dioClient.post(
+      ApiConstants.inviteValidate,
+      data: {'inviteCode': inviteCode},
+    );
+    final data = response.data['data'] as Map<String, dynamic>;
+    return data['label'] as String? ?? '';
+  }
+
+  @override
+  Future<bool> verifyResidentJoinOtp({
+    required String phone,
+    required String code,
+    required String inviteCode,
+  }) async {
+    final device = await DeviceInfoService.currentDeviceMeta();
+    final response = await _dioClient.post(
+      ApiConstants.otpVerify,
+      data: {
+        'phone': phone,
+        'code': code,
+        'purpose': 'resident_join',
+        'inviteCode': inviteCode,
+        ...device.toJson(),
+      },
+    );
+    final data = response.data['data'] as Map<String, dynamic>?;
+    return data?['requireName'] == true;
+  }
+
+  @override
+  Future<LoginResponse> completeResidentJoin({
+    required String phone,
+    required String name,
+    required String inviteCode,
+  }) async {
+    final device = await DeviceInfoService.currentDeviceMeta();
+    final response = await _dioClient.post(
+      ApiConstants.otpCompleteResidentJoin,
+      data: {
+        'phone': phone,
+        'name': name,
+        'inviteCode': inviteCode,
+        ...device.toJson(),
+      },
+    );
+    return LoginResponse.fromJson(response.data['data'] as Map<String, dynamic>);
   }
 }

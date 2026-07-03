@@ -1,0 +1,40 @@
+<%- include('flash') %>
+<%- include('page-header', { title: 'Denetim Kayıtları', description: 'Tüm hassas admin işlemlerinin iz kaydı.' }) %>
+
+<div class="filter-panel" x-data="{ open: false }" :class="{ 'is-open': open }">
+  <button type="button" class="filter-panel__toggle mobile-only" @click="open = !open"><span>Filtreler</span><span>▼</span></button>
+  <form class="filter-panel__body" method="get" action="/audit">
+    <div class="form-group" style="margin:0;min-width:200px">
+      <label for="action">İşlem türü</label>
+      <select class="form-control" id="action" name="action">
+        <option value="">Tümü</option>
+        <% const actions = ['ADMIN_LOGIN','ADMIN_LOGOUT','USER_VIEW','PASSWORD_RESET','ACCOUNT_DELETE','SUBSCRIPTION_GRANT','PROMO_CREATE','NOTIFICATION_BROADCAST','BACKUP_CREATE','BACKUP_DOWNLOAD_TOKEN']; %>
+        <% actions.forEach(a => { %>
+        <option value="<%= a %>" <%= filters.action === a ? 'selected' : '' %>><%= a %></option>
+        <% }) %>
+      </select>
+    </div>
+    <button type="submit" class="btn btn--primary">Filtrele</button>
+  </form>
+</div>
+
+<% if (!logs.length) { %>
+<div class="card"><div class="empty-state"><p class="empty-state__title">Kayıt bulunamadı</p></div></div>
+<% } else { %>
+<div class="data-row-list">
+  <% logs.forEach(log => { %>
+  <div class="data-row" style="cursor:default">
+    <div class="data-row__avatar"><%= (log.admin?.name || 'A').charAt(0) %></div>
+    <div class="data-row__body">
+      <p class="data-row__title"><%= log.action %></p>
+      <p class="data-row__meta"><%= log.admin?.name %> · <%= new Date(log.createdAt).toLocaleString('tr-TR') %><% if (log.targetType) { %> · <%= log.targetType %><% } %></p>
+    </div>
+    <div class="data-row__end">
+      <span class="text-muted" style="font-size:var(--font-size-xs)"><%= log.ipAddress || '' %></span>
+    </div>
+  </div>
+  <% }) %>
+</div>
+<% } %>
+
+<%- include('./pagination', { pagination, basePath: '/audit', query: filters }) %>

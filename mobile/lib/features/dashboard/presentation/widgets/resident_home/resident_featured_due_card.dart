@@ -42,12 +42,14 @@ class ResidentFeaturedDueCard extends StatelessWidget {
         ? '$periodLabel · $dueDateSuffix'
         : periodLabel;
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
+<<<<<<< HEAD
         color: AppColors.heroCardBackground,
+=======
+        color: AppColors.darkCard,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
         borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
         boxShadow: DashboardScreenStyle.cardShadow,
       ),
@@ -95,7 +97,11 @@ class ResidentFeaturedDueCard extends StatelessWidget {
           Text(
             amountText,
             style: AppTypography.h1.copyWith(
+<<<<<<< HEAD
               color: AppColors.heroCardTitle,
+=======
+              color: Colors.white,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
               fontWeight: FontWeight.w800,
               fontSize: 36,
               height: 1.1,
@@ -105,7 +111,11 @@ class ResidentFeaturedDueCard extends StatelessWidget {
           Text(
             subtitle,
             style: AppTypography.body2.copyWith(
+<<<<<<< HEAD
               color: AppColors.heroCardSubtitle,
+=======
+              color: Colors.white.withValues(alpha: 0.72),
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -115,10 +125,8 @@ class ResidentFeaturedDueCard extends StatelessWidget {
             child: FilledButton(
               onPressed: onPay,
               style: FilledButton.styleFrom(
-                backgroundColor: isDark ? AppColors.actionButton : Colors.white,
-                foregroundColor: isDark
-                    ? AppColors.actionButtonForeground
-                    : AppColors.textPrimary,
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.darkCard,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(
@@ -129,9 +137,7 @@ class ResidentFeaturedDueCard extends StatelessWidget {
               child: Text(
                 dashT.payNow,
                 style: AppTypography.button.copyWith(
-                  color: isDark
-                      ? AppColors.actionButtonForeground
-                      : AppColors.textPrimary,
+                  color: AppColors.darkCard,
                   fontWeight: FontWeight.w800,
                 ),
               ),

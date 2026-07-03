@@ -1,10 +1,41 @@
 class ApiConstants {
-  /// Yerel backend: `flutter run --dart-define=API_BASE_URL=http://127.0.0.1:4200`
-  /// Android emülatör: `http://10.0.2.2:4200` · fiziksel cihaz: `http://<PC_IP>:4200`
-  static const String baseUrl = String.fromEnvironment(
+  /// `main_local.dart` çağrısı ile runtime override (dart-define gerekmez).
+  static String? _runtimeBaseUrlOverride;
+
+  /// Android emülatör → PC localhost:4200
+  static void enableLocalBackend([
+    String url = 'http://10.0.2.2:4200',
+  ]) {
+    _runtimeBaseUrlOverride = url;
+  }
+
+  static const bool useLocalBackend = bool.fromEnvironment(
+    'USE_LOCAL_BACKEND',
+    defaultValue: false,
+  );
+
+  static const String localBaseUrl = String.fromEnvironment(
+    'LOCAL_API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:4200',
+  );
+
+  static const String _productionBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'https://api.aidatpanel.com',
   );
+
+  static String get baseUrl {
+    if (_runtimeBaseUrlOverride != null) {
+      return _runtimeBaseUrlOverride!;
+    }
+    if (useLocalBackend) {
+      return localBaseUrl;
+    }
+    return _productionBaseUrl;
+  }
+
+  static bool get isLocalBackend =>
+      _runtimeBaseUrlOverride != null || useLocalBackend;
 
   static const String apiVersion = '/api/v1';
 
@@ -24,11 +55,17 @@ class ApiConstants {
   // Auth endpoints
   static const String register = '$apiVersion/auth/register';
   static const String login = '$apiVersion/auth/login';
+  static const String checkIdentifier = '$apiVersion/auth/check-identifier';
   static const String refresh = '$apiVersion/auth/refresh';
   static const String logout = '$apiVersion/auth/logout';
   static const String logoutAllDevices =
       '$apiVersion/auth/logout-all-devices';
   static const String join = '$apiVersion/auth/join';
+  static const String otpSend = '$apiVersion/auth/otp/send';
+  static const String otpVerify = '$apiVersion/auth/otp/verify';
+  static const String otpCompleteResidentJoin =
+      '$apiVersion/auth/otp/complete-resident-join';
+  static const String inviteValidate = '$apiVersion/auth/invite/validate';
   static const String forgotPassword = '$apiVersion/auth/forgot-password';
   static const String resetPassword = '$apiVersion/auth/reset-password';
 
@@ -69,6 +106,10 @@ class ApiConstants {
       '$apiVersion/buildings/$buildingId/expenses';
   static String buildingExpensesSummary(String buildingId) =>
       '$apiVersion/buildings/$buildingId/expenses/summary';
+  static String buildingDashboardSummary(String buildingId) =>
+      '$apiVersion/buildings/$buildingId/dashboard-summary';
+  static const String buildingDashboardSummaryBatch =
+      '$apiVersion/buildings/dashboard-summary/batch';
   static String buildingTickets(String buildingId) =>
       '$apiVersion/buildings/$buildingId/tickets';
   static String buildingAnnouncements(String buildingId) =>
@@ -77,6 +118,23 @@ class ApiConstants {
       '$apiVersion/apartments/$apartmentId/tickets';
   static String buildingReports(String buildingId) =>
       '$apiVersion/buildings/$buildingId/reports';
+
+  // Sites endpoints
+  static const String sites = '$apiVersion/sites';
+  static String siteDetail(String siteId) => '$apiVersion/sites/$siteId';
+  static String siteCollection(String siteId) =>
+      '$apiVersion/sites/$siteId/collection';
+  static String siteBuildings(String siteId) =>
+      '$apiVersion/sites/$siteId/buildings';
+  static String siteAggregation(String siteId) =>
+      '$apiVersion/sites/$siteId/aggregation';
+  static String siteReports(String siteId) => '$apiVersion/sites/$siteId/reports';
+  static String siteExpenses(String siteId) =>
+      '$apiVersion/sites/$siteId/expenses';
+  static String siteExpensesSummary(String siteId) =>
+      '$apiVersion/sites/$siteId/expenses/summary';
+  static String siteExpense(String siteId, String expenseId) =>
+      '$apiVersion/sites/$siteId/expenses/$expenseId';
 
   // Apartments endpoints
   // Belge §6: daire CRUD'u nested path altında (/buildings/:bId/apartments[/:id])

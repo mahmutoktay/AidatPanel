@@ -6,7 +6,7 @@ import {
 } from "../utils/access.js";
 import { userPublicSelect } from "./meService.js";
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
-import { TICKET_CREATED_MANAGER } from "../constants/notificationTemplates.js";
+import { NOTIFICATION_CODES } from "../constants/notificationCatalog.js";
 import { createForUsers } from "./notificationService.js";
 import {
   resolveListTake,
@@ -25,19 +25,10 @@ const ALLOWED_STATUS_TRANSITIONS = {
 
 const UPDATABLE_STATUSES = new Set(["OPEN", "IN_PROGRESS"]);
 
-const STATUS_NOTIFY_COPY = {
-  IN_PROGRESS: {
-    title: "Talebiniz inceleniyor",
-    body: (ticket) => `"${ticket.title}" talebiniz üzerinde çalışılıyor.`,
-  },
-  RESOLVED: {
-    title: "Talebiniz çözüldü",
-    body: (ticket) => `"${ticket.title}" talebiniz çözüldü olarak işaretlendi.`,
-  },
-  CLOSED: {
-    title: "Talebiniz kapatıldı",
-    body: (ticket) => `"${ticket.title}" talebiniz kapatıldı.`,
-  },
+const STATUS_NOTIFY_CODES = {
+  IN_PROGRESS: NOTIFICATION_CODES.TICKET_STATUS_IN_PROGRESS,
+  RESOLVED: NOTIFICATION_CODES.TICKET_STATUS_RESOLVED,
+  CLOSED: NOTIFICATION_CODES.TICKET_STATUS_CLOSED,
 };
 
 /**
@@ -51,8 +42,8 @@ async function notifyBuildingManager(ticket) {
 
   await createForUsers([managerId], {
     type: NOTIFICATION_TYPES.TICKET_CREATED,
-    title: TICKET_CREATED_MANAGER.title,
-    body: TICKET_CREATED_MANAGER.body(apartmentNumber, ticket.title),
+    code: NOTIFICATION_CODES.TICKET_CREATED_MANAGER,
+    params: { apartmentNumber, ticketTitle: ticket.title },
     data: {
       ticketId: ticket.id,
       buildingId: ticket.apartment?.buildingId ?? "",
@@ -67,14 +58,14 @@ async function notifyBuildingManager(ticket) {
 /**
  * Talep sahibi sakine in-app bildirim + FCM (Aşama A3).
  */
-async function notifyTicketOwner(ticket, { title, body, status }) {
+async function notifyTicketOwner(ticket, { code, params, status }) {
   const buildingId = ticket.apartment?.buildingId;
   if (!ticket.userId) return;
 
   await createForUsers([ticket.userId], {
-    type: "TICKET_UPDATE",
-    title,
-    body,
+    type: NOTIFICATION_TYPES.TICKET_UPDATE,
+    code,
+    params,
     data: {
       ticketId: ticket.id,
       buildingId: buildingId ?? "",
@@ -276,8 +267,8 @@ export async function addTicketUpdateService(ticketId, managerId, message) {
   const preview =
     message.length > 120 ? `${message.slice(0, 117)}...` : message;
   await notifyTicketOwner(ticket, {
-    title: "Talebiniz güncellendi",
-    body: `Yöneticiniz talebinize not ekledi: ${preview}`,
+    code: NOTIFICATION_CODES.TICKET_UPDATE_NOTE,
+    params: { preview },
     status: ticket.status,
   });
 
@@ -325,8 +316,8 @@ export async function changeTicketStatusService(ticketId, managerId, nextStatus)
     include: ticketIncludeList,
   });
 
-  const copy = STATUS_NOTIFY_COPY[nextStatus];
-  if (copy) {
+  const code = STATUS_NOTIFY_CODES[nextStatus];
+  if (code) {
     await notifyTicketOwner(
       {
         id: ticket.id,
@@ -335,8 +326,8 @@ export async function changeTicketStatusService(ticketId, managerId, nextStatus)
         apartment: ticket.apartment,
       },
       {
-        title: copy.title,
-        body: copy.body(ticket),
+        code,
+        params: { ticketTitle: ticket.title },
         status: nextStatus,
       }
     );

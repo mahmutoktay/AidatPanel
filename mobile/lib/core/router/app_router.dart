@@ -1,15 +1,17 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../shared/widgets/dashboard_secondary_scaffold.dart';
 
 import '../../main.dart' show MyApp;
 import 'app_route_guard.dart';
 import '../../features/auth/domain/entities/user_entity.dart' show UserRole;
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/onboarding/auth_onboarding_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
-import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
-import '../../features/auth/presentation/screens/sign_up_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/dashboard/presentation/screens/manager_dashboard_screen.dart';
 import '../../features/dashboard/presentation/screens/manager_overdue_apartments_screen.dart';
@@ -42,8 +44,13 @@ import '../../features/profile/presentation/screens/profile_details_screen.dart'
 import '../../features/profile/presentation/screens/active_sessions_screen.dart';
 import '../../features/subscription/presentation/screens/subscription_screen.dart';
 import '../../features/subscription/presentation/providers/subscription_provider.dart';
+import '../../features/sites/presentation/screens/add_site_screen.dart';
+import '../../features/sites/presentation/screens/site_detail_screen.dart';
+import '../../features/sites/presentation/screens/add_site_building_screen.dart';
+import '../../features/sites/presentation/screens/site_expenses_screen.dart';
+import '../../features/reports/presentation/screens/site_report_screen.dart';
+import '../../features/reports/domain/entities/report_entity.dart';
 import '../../features/profile/presentation/screens/legal_document_screen.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/utils/user_error_message.dart';
 import '../../l10n/strings.g.dart';
@@ -107,6 +114,7 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
     builder: (context, state) => SiteDetailScreen(
       siteId: state.pathParameters['siteId']!,
     ),
+<<<<<<< HEAD
     routes: [
       GoRoute(
         path: 'add-building',
@@ -139,6 +147,40 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
         ],
       ),
     ],
+=======
+  ),
+  GoRoute(
+    path: 'sites/:siteId/add-building',
+    name: 'manager_add_site_building',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => AddSiteBuildingScreen(
+      siteId: state.pathParameters['siteId']!,
+    ),
+  ),
+  GoRoute(
+    path: 'sites/:siteId/expenses',
+    name: 'manager_site_expenses',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => SiteExpensesScreen(
+      siteId: state.pathParameters['siteId']!,
+    ),
+  ),
+  GoRoute(
+    path: 'sites/:siteId/report',
+    name: 'manager_site_report',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) {
+      final typeParam = state.uri.queryParameters['type'] ?? 'monthly';
+      final type = typeParam == 'annual'
+          ? ReportType.annual
+          : ReportType.monthly;
+      return SiteReportScreen(
+        siteId: state.pathParameters['siteId']!,
+        siteName: state.uri.queryParameters['name'] ?? '',
+        type: type,
+      );
+    },
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   ),
   GoRoute(
     path: 'invite-code',
@@ -268,6 +310,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     navigatorKey: rootNavigatorKey,
     refreshListenable: refreshListenable,
     initialLocation: '/',
+    observers: [FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance)],
     redirect: (context, state) => AppRouteGuard.handleRedirect(state, ref),
     routes: [
       GoRoute(
@@ -296,31 +339,41 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/login',
         name: 'login',
         builder: (context, state) {
-          return const LoginScreen();
+          final q = state.uri.queryParameters;
+          return AuthOnboardingScreen(
+            initialRole: parseAuthRole(q['role']),
+            initialFlow: parseAuthFlow(q['flow']),
+            skipRoleStep: q['role'] != null || q['flow'] != null,
+          );
         },
       ),
       GoRoute(
         path: '/sign-up',
         name: 'sign_up',
-        builder: (context, state) {
+        redirect: (_, state) {
           final role = state.uri.queryParameters['role'];
-          return SignUpScreen(initialIsManager: role == 'manager');
+          if (role == 'manager') {
+            return '/login?role=manager&flow=register';
+          }
+          return '/login?role=resident&flow=join';
         },
       ),
       GoRoute(
         path: '/register',
         name: 'register',
-        builder: (context, state) {
-          return const SignUpScreen(initialIsManager: true);
-        },
+        redirect: (_, __) => '/login?role=manager&flow=register',
       ),
       GoRoute(
         path: '/join',
         name: 'join',
+<<<<<<< HEAD
         builder: (context, state) {
           final code = state.uri.queryParameters['code'];
           return SignUpScreen(initialInviteCode: code);
         },
+=======
+        redirect: (_, __) => '/login?role=resident&flow=join',
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
       ),
       GoRoute(
         path: '/forgot-password',
@@ -510,16 +563,8 @@ class _BuildingResidentsFallbackScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.dashboardBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        surfaceTintColor: Colors.transparent,
-        centerTitle: true,
-        title: Text(context.t.common.buildingDetail),
-      ),
+    return DashboardSecondaryScaffold(
+      title: context.t.common.buildingDetail,
       body: SafeArea(
         child: Padding(
           padding: AppSizes.screenBodyScrollPadding,

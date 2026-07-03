@@ -37,7 +37,11 @@ class DekontDetailHero extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
+<<<<<<< HEAD
         color: AppColors.heroCardBackground,
+=======
+        color: AppColors.darkCard,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
         borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
         boxShadow: DashboardScreenStyle.cardShadow,
       ),
@@ -59,6 +63,7 @@ class DekontDetailHero extends StatelessWidget {
                         ),
                       )
                     : amount != null
+<<<<<<< HEAD
                         ? Text(
                             amount,
                             style: AppTypography.h1.copyWith(
@@ -90,6 +95,27 @@ class DekontDetailHero extends StatelessWidget {
                                 ),
                               ),
                             ],
+=======
+                    ? Text(
+                        amount,
+                        style: AppTypography.h1.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 32,
+                          height: 1.1,
+                          letterSpacing: -0.5,
+                        ),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t.parsedAmount,
+                            style: AppTypography.caption.copyWith(
+                              color: Colors.white.withValues(alpha: 0.6),
+                              fontWeight: FontWeight.w600,
+                            ),
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
                           ),
               ),
               const SizedBox(width: AppSizes.spacingS),

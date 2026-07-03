@@ -36,7 +36,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   final TextEditingController _amountController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  String? _selectedBuildingId;
   int? _selectedDueDay;
   DueStatus? _statusFilter;
   int? _monthFilter = DateTime.now().month;
@@ -78,7 +77,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           if (buildingId != null &&
               buildingId.isNotEmpty &&
               buildings.any((b) => b.id == buildingId)) {
-            setState(() => _selectedBuildingId = buildingId);
+            ref.read(selectedBuildingIdProvider.notifier).select(buildingId);
           }
           final statusFilter = _statusFromIntent(next.statusFilter);
           if (statusFilter != null) {
@@ -121,8 +120,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     });
 
     final isLoading = duesState.isLoading;
-    final selectedBuilding = _selectedBuildingId != null
-        ? _buildingFor(_selectedBuildingId!, buildings)
+    final selectedBuildingId = ref.watch(selectedBuildingIdProvider);
+    final selectedBuilding = selectedBuildingId != null
+        ? _buildingFor(selectedBuildingId, buildings)
         : null;
     final statsSource =
         _statusFilter == null ? dues : _statsDues;
@@ -191,9 +191,12 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                 if (isLoading && dues.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: const LinearProgressIndicator(minHeight: 3),
+                    child: LinearProgressIndicator(
+                      minHeight: 2,
+                      backgroundColor: AppColors.lineLight,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.statusBlue,
+                      ),
                     ),
                   ),
               ]),
@@ -289,12 +292,12 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     final result = await BuildingPickerSheet.show(
       context,
       buildings: buildings,
-      selectedBuildingId: _selectedBuildingId,
+      selectedBuildingId: ref.watch(selectedBuildingIdProvider),
     );
     if (result.cancelled || result.buildingId == null) return;
-    if (result.buildingId == _selectedBuildingId) return;
+    if (result.buildingId == ref.read(selectedBuildingIdProvider)) return;
+    ref.read(selectedBuildingIdProvider.notifier).select(result.buildingId);
     setState(() {
-      _selectedBuildingId = result.buildingId;
       _selectedDueDay = null;
     });
     _reloadDues();
@@ -507,15 +510,16 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   void _tryInitialize(List<BuildingEntity> buildings) {
     if (_initialized || buildings.isEmpty) return;
     _initialized = true;
-    _selectedBuildingId = buildings.first.id;
+    final firstId = buildings.first.id;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _selectedBuildingId == null) return;
+      if (!mounted) return;
+      ref.read(selectedBuildingIdProvider.notifier).select(firstId);
       _reloadDues();
     });
   }
 
   Future<void> _reloadDues() async {
-    final buildingId = _selectedBuildingId;
+    final buildingId = ref.read(selectedBuildingIdProvider);
     if (buildingId == null) return;
 
     await ref.read(duesNotifierProvider.notifier).loadBuildingDues(
@@ -588,7 +592,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   }
 
   Future<void> _updateDueAmount(List<BuildingEntity> buildings) async {
-    final buildingId = _selectedBuildingId;
+    final buildingId = ref.read(selectedBuildingIdProvider);
     if (buildingId == null) return;
 
     final toast = ref.read(toastProvider.notifier);
@@ -673,7 +677,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   }
 
   Future<void> _updateStatus(String dueId, DueStatus status) async {
-    final buildingId = _selectedBuildingId;
+    final buildingId = ref.read(selectedBuildingIdProvider);
     if (buildingId == null) return;
     await ref.read(duesNotifierProvider.notifier).updateStatus(
           buildingId: buildingId,
@@ -690,10 +694,10 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   }
 
   String _currencyCode() {
-    return LocaleSettings.currentLocale == AppLocale.tr ? 'TRY' : 'USD';
+    return 'TRY';
   }
 
   String _currencySymbol() {
-    return LocaleSettings.currentLocale == AppLocale.tr ? '₺' : r'$';
+    return '₺';
   }
 }

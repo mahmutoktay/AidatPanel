@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 
 /// Input validation utilities for AidatPanel forms
 /// Provides comprehensive validation with Turkish error messages
+/// Backend `passwordSchema` in `shared.js` ile uyumludur.
 class InputValidators {
   // Regex patterns
   static final emailRegex = RegExp(
@@ -15,14 +16,9 @@ class InputValidators {
 
   static final nameRegex = RegExp(r'^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,50}$');
 
-  static final passwordRegex = RegExp(
-    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{6,}$',
-  );
-
-  static final _pwUpperRegex = RegExp(r'[A-Z]');
-  static final _pwLowerRegex = RegExp(r'[a-z]');
-  static final _pwDigitRegex = RegExp(r'[0-9]');
-  static final _pwSpecialRegex = RegExp(r'[@$!%*?&.]');
+  /// Backend [`passwordSchema`](backend/src/validators/shared.js) ile eşleşir.
+  /// En az 6 karakter, yalnızca harf ve rakam. Maksimum 100 karakter.
+  static final passwordRegex = RegExp(r'^[A-Za-z0-9]{6,100}$');
 
   /// Email validation - returns error keys for localization
   static String? validateEmail(String? value) {
@@ -66,24 +62,12 @@ class InputValidators {
       return 'password_too_short';
     }
 
-    if (value.length > 50) {
+    if (value.length > 100) {
       return 'password_too_long';
     }
 
-    if (!value.contains(_pwUpperRegex)) {
-      return 'password_uppercase_required';
-    }
-
-    if (!value.contains(_pwLowerRegex)) {
-      return 'password_lowercase_required';
-    }
-
-    if (!value.contains(_pwDigitRegex)) {
-      return 'password_number_required';
-    }
-
-    if (!value.contains(_pwSpecialRegex)) {
-      return 'password_special_char_required';
+    if (!passwordRegex.hasMatch(value)) {
+      return 'password_alphanumeric_required';
     }
 
     return null;
@@ -92,19 +76,19 @@ class InputValidators {
   /// Name validation (first and last name)
   static String? validateName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Ad soyad boş bırakılamaz';
+      return 'name_required';
     }
 
     if (value.length < 2) {
-      return 'Ad soyad en az 2 karakter olmalıdır';
+      return 'name_too_short';
     }
 
     if (value.length > 50) {
-      return 'Ad soyad çok uzun';
+      return 'name_too_long';
     }
 
     if (!nameRegex.hasMatch(value.trim())) {
-      return 'Geçerli bir ad soyad giriniz';
+      return 'name_invalid';
     }
 
     return null;
@@ -113,15 +97,15 @@ class InputValidators {
   /// Building name validation
   static String? validateBuildingName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Bina adı boş bırakılamaz';
+      return 'building_name_required';
     }
 
     if (value.length < 3) {
-      return 'Bina adı en az 3 karakter olmalıdır';
+      return 'building_name_too_short';
     }
 
     if (value.length > 100) {
-      return 'Bina adı çok uzun';
+      return 'building_name_too_long';
     }
 
     return null;
@@ -130,15 +114,15 @@ class InputValidators {
   /// Address validation
   static String? validateAddress(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Adres boş bırakılamaz';
+      return 'address_required';
     }
 
     if (value.length < 10) {
-      return 'Adres en az 10 karakter olmalıdır';
+      return 'address_too_short';
     }
 
     if (value.length > 200) {
-      return 'Adres çok uzun';
+      return 'address_too_long';
     }
 
     return null;
@@ -147,11 +131,11 @@ class InputValidators {
   /// Apartment number validation
   static String? validateApartmentNumber(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Daire numarası boş bırakılamaz';
+      return 'apartment_number_required';
     }
 
     if (value.length > 10) {
-      return 'Daire numarası çok uzun';
+      return 'apartment_number_too_long';
     }
 
     return null;
@@ -160,20 +144,20 @@ class InputValidators {
   /// Amount validation (for dues, payments, etc.)
   static String? validateAmount(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Tutar boş bırakılamaz';
+      return 'amount_required';
     }
 
     final amount = double.tryParse(value);
     if (amount == null) {
-      return 'Geçerli bir tutar giriniz';
+      return 'amount_invalid';
     }
 
     if (amount < 0) {
-      return 'Tutar negatif olamaz';
+      return 'amount_negative';
     }
 
     if (amount > 1000000) {
-      return 'Tutar çok büyük';
+      return 'amount_too_large';
     }
 
     return null;
@@ -190,37 +174,32 @@ class InputValidators {
     String? customMessage,
   }) {
     if (required && (value == null || value.isEmpty)) {
-      return '$fieldName boş bırakılamaz';
+      return 'field_required';
     }
 
     if (value != null) {
       if (minLength != null && value.length < minLength) {
-        return '$fieldName en az $minLength karakter olmalıdır';
+        return 'field_too_short';
       }
 
       if (maxLength != null && value.length > maxLength) {
-        return '$fieldName çok uzun';
+        return 'field_too_long';
       }
 
       if (customRegex != null && !RegExp(customRegex).hasMatch(value)) {
-        return customMessage ?? 'Geçerli bir $fieldName giriniz';
+        return customMessage ?? 'field_invalid';
       }
     }
 
     return null;
   }
 
-  /// Password strength indicator (0-4 scale)
+  /// Password strength indicator (0-3 scale)
   static int getPasswordStrength(String password) {
-    int strength = 0;
-
-    if (password.length >= 6) strength++;
-    if (password.contains(_pwUpperRegex)) strength++;
-    if (password.contains(_pwLowerRegex)) strength++;
-    if (password.contains(_pwDigitRegex)) strength++;
-    if (password.contains(_pwSpecialRegex)) strength++;
-
-    return strength;
+    if (password.length < 6) return 0;
+    if (!passwordRegex.hasMatch(password)) return 1;
+    if (password.length < 8) return 2;
+    return 3;
   }
 
   /// Password strength text
@@ -228,15 +207,13 @@ class InputValidators {
     switch (strength) {
       case 0:
       case 1:
-        return 'Zayıf';
+        return 'password_strength_weak';
       case 2:
+        return 'password_strength_medium';
       case 3:
-        return 'Orta';
-      case 4:
-      case 5:
-        return 'Güçlü';
+        return 'password_strength_strong';
       default:
-        return 'Bilinmeyen';
+        return 'password_strength_unknown';
     }
   }
 
@@ -247,13 +224,30 @@ class InputValidators {
       case 1:
         return AppColors.textDisabled;
       case 2:
-      case 3:
         return AppColors.textSecondary;
-      case 4:
-      case 5:
+      case 3:
         return AppColors.textPrimary;
       default:
         return AppColors.textDisabled;
     }
+  }
+
+  /// E-posta veya 0 ile başlayan 11 haneli telefon — onboarding identifier alanı.
+  static String? validateLoginIdentifier(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'identifier_required';
+    }
+    final trimmed = value.trim();
+    if (trimmed.contains('@')) {
+      return validateEmail(trimmed);
+    }
+    final digits = trimmed.replaceAll(_phoneStripRegex, '');
+    if (digits.length != 11 || !digits.startsWith('0')) {
+      return 'phone_invalid_eleven_digits';
+    }
+    if (!phoneRegex.hasMatch(digits.substring(1))) {
+      return 'phone_invalid';
+    }
+    return null;
   }
 }

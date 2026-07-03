@@ -1,0 +1,158 @@
+<%- include('flash') %>
+
+<a href="/explorer?focus=<%= user.id %>" class="btn btn--ghost btn--sm mb-4">
+  <%- include('icon', { name: 'arrowLeft' }) %> Gezgine dön
+</a>
+
+<div class="detail-grid detail-grid--2 mb-4">
+  <div class="card">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title"><%= user.name %></h2>
+        <p class="card__subtitle">Kullanıcı profili</p>
+      </div>
+      <% if (user.deletedAt) { %>
+        <span class="badge badge--danger">Kapatılmış</span>
+      <% } else { %>
+        <span class="badge badge--success">Aktif</span>
+      <% } %>
+    </div>
+    <ul class="info-list">
+      <li><span class="info-list__label">E-posta</span><span class="info-list__value"><%= user.email || '—' %></span></li>
+      <li><span class="info-list__label">Telefon</span><span class="info-list__value"><%= user.phone || '—' %></span></li>
+      <li><span class="info-list__label">Rol</span><span class="info-list__value"><span class="badge badge--<%= user.role === 'MANAGER' ? 'primary' : 'muted' %>"><%= user.role === 'MANAGER' ? 'Yönetici' : 'Sakin' %></span></span></li>
+      <li><span class="info-list__label">Kayıt tarihi</span><span class="info-list__value"><%= new Date(user.createdAt).toLocaleDateString('tr-TR') %></span></li>
+    </ul>
+  </div>
+
+  <% if (user.subscription) { %>
+  <div class="card">
+    <div class="card__header">
+      <div>
+        <h3 class="card__title">Abonelik</h3>
+        <p class="card__subtitle">Mevcut plan bilgisi</p>
+      </div>
+      <span class="badge badge--<%= user.subscription.status === 'ACTIVE' ? 'success' : 'warning' %>"><%= typeof labels !== 'undefined' ? (labels.SUBSCRIPTION_STATUS_TR[user.subscription.status] || user.subscription.status) : user.subscription.status %></span>
+    </div>
+    <ul class="info-list">
+      <li><span class="info-list__label">Plan</span><span class="info-list__value"><%= user.subscription.plan %></span></li>
+      <li><span class="info-list__label">Bitiş</span><span class="info-list__value"><%= new Date(user.subscription.currentPeriodEnd).toLocaleDateString('tr-TR') %></span></li>
+    </ul>
+  </div>
+  <% } %>
+</div>
+
+<% if (user.managedBuildings && user.managedBuildings.length) { %>
+<div class="card mb-4">
+  <div class="card__header">
+    <div>
+      <h3 class="card__title">Yönetilen Binalar</h3>
+      <p class="card__subtitle"><%= user.managedBuildings.length %> bina</p>
+    </div>
+  </div>
+  <div class="data-table-wrap" style="display:block;border:none">
+    <table class="data-table">
+      <thead><tr><th>Bina</th><th>Konum</th></tr></thead>
+      <tbody>
+        <% user.managedBuildings.forEach(b => { %>
+        <tr>
+          <td><strong><%= b.name %></strong></td>
+          <td class="text-secondary"><%= b.city %><%= b.district ? ', ' + b.district : '' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% } %>
+
+<% if (!user.deletedAt) { %>
+<div class="card mb-4" x-data="{ showGrant: false, showPromo: false, promoType: 'FREE_PERIOD' }">
+  <div class="card__header">
+    <div>
+      <h3 class="card__title">Abonelik & Promosyon</h3>
+      <p class="card__subtitle">Bu kullanıcı için hızlı işlemler</p>
+    </div>
+  </div>
+  <div class="action-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
+    <% if (user.role === 'MANAGER') { %>
+    <button type="button" class="action-tile" @click="showGrant = !showGrant; showPromo = false">
+      <span class="action-tile__label">Abonelik Hediye Et</span>
+      <span class="action-tile__desc">Manuel tanımlama</span>
+    </button>
+    <% } %>
+    <button type="button" class="action-tile" @click="showPromo = !showPromo; showGrant = false">
+      <span class="action-tile__label">Promosyon Oluştur</span>
+      <span class="action-tile__desc">Ücretsiz süre / indirim</span>
+    </button>
+  </div>
+
+  <% if (user.role === 'MANAGER') { %>
+  <div class="mt-4" x-show="showGrant" x-cloak>
+    <form method="post" action="/users/<%= user.id %>/grant" class="form-grid form-grid--2">
+      <div class="form-group"><label>Süre (gün)</label><input class="form-control" type="number" name="durationDays" value="30" min="1"></div>
+      <div class="form-group"><label>Plan</label><select class="form-control" name="plan"><option value="monthly">Aylık</option><option value="annual">Yıllık</option></select></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Gerekçe</label><input class="form-control" name="reason" required minlength="3"></div>
+      <div><button type="submit" class="btn btn--primary btn--sm">Abonelik Tanımla</button></div>
+    </form>
+  </div>
+  <% } %>
+
+  <div class="mt-4" x-show="showPromo" x-cloak>
+    <form method="post" action="/users/<%= user.id %>/promo" class="form-grid form-grid--2">
+      <input type="hidden" name="userId" value="<%= user.id %>">
+      <div class="form-group">
+        <label>Promo türü</label>
+        <select class="form-control" name="type" x-model="promoType">
+          <option value="FREE_PERIOD">Ücretsiz süre</option>
+          <option value="DISCOUNT_PERCENT">İndirim yüzdesi</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Plan</label><select class="form-control" name="plan"><option value="monthly">Aylık</option><option value="annual">Yıllık</option></select></div>
+      <div class="form-group" x-show="promoType === 'FREE_PERIOD'"><label>Süre (gün)</label><input class="form-control" type="number" name="durationDays" value="30" min="1"></div>
+      <div class="form-group" x-show="promoType === 'DISCOUNT_PERCENT'"><label>İndirim (%)</label><input class="form-control" type="number" name="discountPercent" min="1" max="100"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Gerekçe</label><input class="form-control" name="reason" required minlength="3"></div>
+      <div><button type="submit" class="btn btn--primary btn--sm">Promosyon Oluştur</button></div>
+    </form>
+  </div>
+</div>
+<% } %>
+
+<% if (!user.deletedAt && user.email) { %>
+<div class="card mb-4">
+  <div class="card__header">
+    <div>
+      <h3 class="card__title">Hesap İşlemleri</h3>
+      <p class="card__subtitle">Destek ekibi işlemleri</p>
+    </div>
+  </div>
+  <form method="post" action="/users/<%= user.id %>/reset-password">
+    <button type="submit" class="btn btn--secondary">Şifre Sıfırlama E-postası Gönder</button>
+  </form>
+</div>
+<% } %>
+
+<% if (admin.role === 'SUPER_ADMIN' && !user.deletedAt) { %>
+<div class="card">
+  <div class="card__header">
+    <div>
+      <h3 class="card__title">KVKK Hesap Kapatma</h3>
+      <p class="card__subtitle">Bu işlem geri alınamaz. Audit log'a kaydedilir.</p>
+    </div>
+  </div>
+  <form method="post" action="/users/<%= user.id %>/close-account" class="form-grid form-grid--2">
+    <div class="form-group">
+      <label for="reason">Gerekçe</label>
+      <input class="form-control" id="reason" name="reason" required minlength="5" placeholder="Kapatma gerekçesini yazın">
+    </div>
+    <div class="form-group" style="display:flex;align-items:flex-end">
+      <label style="display:flex;align-items:center;gap:var(--space-2);cursor:pointer;margin:0">
+        <input type="checkbox" name="forceManager"> Yönetici + bina override
+      </label>
+    </div>
+    <div style="grid-column:1/-1">
+      <button type="submit" class="btn btn--danger" onclick="return confirm('Hesap kalıcı olarak kapatılacak. Emin misiniz?')">Hesabı Kapat</button>
+    </div>
+  </form>
+</div>
+<% } %>

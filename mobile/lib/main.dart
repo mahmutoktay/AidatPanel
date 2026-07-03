@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,27 +24,48 @@ import 'l10n/strings.g.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  _installGlobalErrorHandlers();
   try {
     await initFirebase();
   } catch (e, st) {
-    developer.log('initFirebase başarısız', name: 'main', error: e, stackTrace: st);
+    developer.log(
+      'initFirebase başarısız',
+      name: 'main',
+      error: e,
+      stackTrace: st,
+    );
   }
+  // Error handlers — Firebase init sonrası (Crashlytics Firebase'e bağımlı)
+  await _installErrorHandlers();
   try {
     await initAppInfo();
   } catch (e, st) {
-    developer.log('initAppInfo başarısız', name: 'main', error: e, stackTrace: st);
+    developer.log(
+      'initAppInfo başarısız',
+      name: 'main',
+      error: e,
+      stackTrace: st,
+    );
   }
   try {
     await initLocale();
   } catch (e, st) {
-    developer.log('initLocale başarısız', name: 'main', error: e, stackTrace: st);
+    developer.log(
+      'initLocale başarısız',
+      name: 'main',
+      error: e,
+      stackTrace: st,
+    );
     LocaleSettings.setLocale(AppLocale.tr);
   }
   try {
     await initTheme();
   } catch (e, st) {
-    developer.log('initTheme başarısız', name: 'main', error: e, stackTrace: st);
+    developer.log(
+      'initTheme başarısız',
+      name: 'main',
+      error: e,
+      stackTrace: st,
+    );
   }
   try {
     await initDateFormatting();
@@ -68,25 +90,37 @@ void main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-/// - `ErrorWidget.builder`: build sırasında bir widget exception fırlatırsa
-///   Flutter'ın varsayılan kıpkırmızı ekranı yerine kibarca kullanıcıya bildir.
-/// - `FlutterError.onError`: framework içinde yakalanan hataları (build, layout
-///   vb.) konsola düzgün bas; release'de Crashlytics'e bağlanabilir.
-/// - `PlatformDispatcher.instance.onError`: zone dışı async uncaught error'ları
-///   yakala (örn. bir Future error'ı kimse await etmediyse). `true` döndürmek
-///   "ben hallettim, framework'e crash bildirme" demektir.
-void _installGlobalErrorHandlers() {
-  final originalOnError = FlutterError.onError;
+/// Tek hata yönetimi fonksiyonu — platform'a göre Crashlytics entegrasyonunu
+/// da dahil eder. Firebase init sonrası çağrılmalıdır.
+Future<void> _installErrorHandlers() async {
+  final useCrashlytics =
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  if (useCrashlytics) {
+    try {
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+        !kDebugMode,
+      );
+    } catch (_) {
+      // Crashlytics kullanılamazsa sessizce generic handler'lara düş.
+    }
+  }
+
   FlutterError.onError = (FlutterErrorDetails details) {
     if (kDebugMode) {
       FlutterError.dumpErrorToConsole(details);
     }
-    originalOnError?.call(details);
+    if (useCrashlytics) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    }
   };
 
   PlatformDispatcher.instance.onError = (error, stack) {
     if (kDebugMode) {
       debugPrint('[PlatformDispatcher] Uncaught: $error\n$stack');
+    }
+    if (useCrashlytics) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     }
     return true;
   };
@@ -202,7 +236,7 @@ class _MyAppContentState extends ConsumerState<_MyAppContent>
     final router = ref.watch(appRouterProvider);
     return TranslationProvider(
       child: MaterialApp.router(
-        title: 'AidatPanel',
+        title: AppConstants.appName,
         theme: AppTheme.lightTheme(),
         darkTheme: AppTheme.darkTheme(),
         themeMode: resolveThemeMode(themePref),

@@ -21,6 +21,7 @@ class NotificationEntity extends Equatable {
   final String title;
   final String body;
   final NotificationType type;
+  final String? code;
   final bool isRead;
   final Map<String, dynamic>? data;
   final DateTime createdAt;
@@ -31,14 +32,19 @@ class NotificationEntity extends Equatable {
     required this.title,
     required this.body,
     required this.type,
+    this.code,
     required this.isRead,
     this.data,
     required this.createdAt,
   });
 
+  bool get isFromAidatPanelTeam =>
+      code == 'subscription_granted_admin' ||
+      data?['source']?.toString() == 'admin_broadcast';
+
   @override
   List<Object?> get props =>
-      [id, userId, title, body, type, isRead, data, createdAt];
+      [id, userId, title, body, type, code, isRead, data, createdAt];
 }
 
 class NotificationListResult {

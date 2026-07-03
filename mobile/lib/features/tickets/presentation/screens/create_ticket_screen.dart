@@ -3,14 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/utils/user_error_message.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
-import '../../../../shared/widgets/toast_overlay.dart';
-import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/premium_filter_picker.dart';
+import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/tickets_provider.dart';
@@ -26,6 +27,7 @@ class CreateTicketScreen extends ConsumerStatefulWidget {
 class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
+  final _detailController = TextEditingController();
   final _descriptionController = TextEditingController();
   TicketCategory _category = TicketCategory.malfunction;
   bool _submitting = false;
@@ -33,6 +35,7 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
   @override
   void dispose() {
     _titleController.dispose();
+    _detailController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
@@ -75,80 +78,97 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
   Widget build(BuildContext context) {
     final t = context.t.features.tickets;
 
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: t.reportFaultTitle,
       canPop: !_submitting,
-      child: DashboardSecondaryScaffold(
-        title: t.createTitle,
-        onBack: _submitting ? () {} : null,
-        onFallback: () {
-          ref.read(residentTabIndexProvider.notifier).update(2);
-          context.go('/resident-dashboard');
-        },
-        bottomNavigationBar: MinimalStickyActionBar(
-          label: t.submit,
-          onPressed: _submit,
-          loading: _submitting,
+      onBack: _submitting ? () {} : null,
+      onFallback: () {
+        ref.read(residentTabIndexProvider.notifier).update(2);
+        context.go('/resident-dashboard');
+      },
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+        child: SizedBox(
+          height: AppSizes.buttonHeightPrimary,
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: _submitting ? null : _submit,
+            child: _submitting
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(t.submit),
+          ),
         ),
-        body: SafeArea(
-          child: AbsorbPointer(
-            absorbing: _submitting,
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: AppSizes.screenBodyScrollPadding.copyWith(
-                  top: AppSizes.spacingS,
-                  bottom: AppSizes.spacingXL,
-                ),
-                children: [
-                  MinimalPickerField(
-                    label: t.fieldCategory,
-                    value: _category.label(context),
-                    hint: t.fieldCategory,
-                    icon: Icons.category_outlined,
-                    required: true,
-                    enabled: !_submitting,
-                    onTap: _pickCategory,
-                  ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  MinimalTextField(
-                    controller: _titleController,
-                    label: t.fieldTitle,
-                    hint: t.fieldTitleHint,
-                    icon: Icons.title_rounded,
-                    required: true,
-                    enabled: !_submitting,
-                    textCapitalization: TextCapitalization.sentences,
-                    validator: (v) {
-                      final raw = v?.trim() ?? '';
-                      if (raw.isEmpty) {
-                        return context.t.common.fieldRequired;
-                      }
-                      if (raw.length < 3) return t.titleTooShort;
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  MinimalTextField(
-                    controller: _descriptionController,
-                    label: t.fieldDescription,
-                    hint: t.fieldDescriptionHint,
-                    icon: Icons.description_rounded,
-                    maxLines: 5,
-                    required: true,
-                    enabled: !_submitting,
-                    textCapitalization: TextCapitalization.sentences,
-                    validator: (v) {
-                      final raw = v?.trim() ?? '';
-                      if (raw.isEmpty) {
-                        return context.t.common.fieldRequired;
-                      }
-                      if (raw.length < 10) return t.descriptionTooShort;
-                      return null;
-                    },
-                  ),
-                ],
+      ),
+      body: SafeArea(
+        child: AbsorbPointer(
+          absorbing: _submitting,
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: AppSizes.screenBodyScrollPadding.copyWith(
+                top: AppSizes.spacingS,
+                bottom: AppSizes.spacingXL,
               ),
+              children: [
+                _PickerField(
+                  label: t.fieldCategory,
+                  value: _category.label(context),
+                  onTap: _pickCategory,
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+                _LabeledField(
+                  controller: _titleController,
+                  label: t.fieldTitle,
+                  hint: t.fieldTitleHint,
+                  validator: (v) {
+                    final raw = v?.trim() ?? '';
+                    if (raw.isEmpty) return context.t.common.fieldRequired;
+                    if (raw.length < 3) return t.titleTooShort;
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+                _LabeledField(
+                  controller: _detailController,
+                  label: t.fieldDetail,
+                  hint: t.fieldDetailHint,
+                  validator: (v) {
+                    final raw = v?.trim() ?? '';
+                    if (raw.isEmpty) return context.t.common.fieldRequired;
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+                _LabeledField(
+                  controller: _descriptionController,
+                  label: t.fieldDescription,
+                  hint: t.fieldDescriptionHint,
+                  maxLines: 5,
+                  maxLength: 500,
+                  validator: (v) {
+                    final raw = v?.trim() ?? '';
+                    if (raw.isEmpty) return context.t.common.fieldRequired;
+                    if (raw.length < 10) return t.descriptionTooShort;
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+                _AttachmentPlaceholder(
+                  hint: t.attachmentHint,
+                  onTap: () => ref.read(toastProvider.notifier).show(
+                        t.attachmentComingSoon,
+                        type: ToastType.info,
+                      ),
+                ),
+              ],
             ),
           ),
         ),
@@ -166,12 +186,19 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
           );
       return;
     }
+
+    final detail = _detailController.text.trim();
+    final description = _descriptionController.text.trim();
+    final fullDescription = detail.isEmpty
+        ? description
+        : '$detail\n\n$description';
+
     setState(() => _submitting = true);
     try {
       final ok = await ref.read(ticketsNotifierProvider.notifier).createTicket(
             apartmentId: apartmentId,
             title: _titleController.text,
-            description: _descriptionController.text,
+            description: fullDescription,
             category: _category,
           );
       if (!mounted) return;
@@ -180,6 +207,7 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
               context.t.features.tickets.createSuccess,
               type: ToastType.success,
             );
+        ref.read(residentTabIndexProvider.notifier).update(2);
         if (context.canPop()) {
           context.pop(true);
         } else {
@@ -204,17 +232,152 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
     }
   }
 
-  /// Sunucu 404 "Route not found" gibi teknik metinleri sade Türkçe'ye çevirir.
-  String _createErrorMessage(String? raw) {
-    final msg = raw?.trim() ?? '';
-    if (msg.isEmpty) return context.t.features.tickets.createFailed;
-    final lower = msg.toLowerCase();
-    if (lower.contains('route') && lower.contains('not found')) {
-      return context.t.features.tickets.createServiceUnavailable;
-    }
-    if (lower.contains('route') || lower.contains('bulunamad')) {
-      return context.t.features.tickets.createServiceUnavailable;
-    }
-    return userFacingError(ApiException(message: msg));
+  String _createErrorMessage(String? errorKey) {
+    final t = context.t.features.tickets;
+    if (errorKey == null || errorKey.isEmpty) return t.createFailed;
+    if (errorKey == 'service_unavailable') return t.createServiceUnavailable;
+    return t.createFailed;
+  }
+}
+
+class _PickerField extends StatelessWidget {
+  const _PickerField({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(label, style: AppTypography.body2.copyWith(fontWeight: FontWeight.w600)),
+        const SizedBox(height: AppSizes.spacingXS),
+        Material(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.spacingM,
+                vertical: AppSizes.spacingM,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      value,
+                      style: AppTypography.body1,
+                    ),
+                  ),
+                  const Icon(Icons.keyboard_arrow_down_rounded),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LabeledField extends StatelessWidget {
+  const _LabeledField({
+    required this.controller,
+    required this.label,
+    required this.hint,
+    this.maxLines = 1,
+    this.maxLength,
+    this.validator,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final String hint;
+  final int maxLines;
+  final int? maxLength;
+  final String? Function(String?)? validator;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(label, style: AppTypography.body2.copyWith(fontWeight: FontWeight.w600)),
+        const SizedBox(height: AppSizes.spacingXS),
+        TextFormField(
+          controller: controller,
+          maxLines: maxLines,
+          maxLength: maxLength,
+          validator: validator,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(
+            hintText: hint,
+            counterText: maxLength != null ? null : '',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AttachmentPlaceholder extends StatelessWidget {
+  const _AttachmentPlaceholder({
+    required this.hint,
+    required this.onTap,
+  });
+
+  final String hint;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSizes.spacingL),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+            border: Border.all(
+              color: AppColors.border,
+              style: BorderStyle.solid,
+            ),
+            color: AppColors.fill,
+          ),
+          child: Column(
+            children: [
+              Icon(
+                Icons.add_photo_alternate_outlined,
+                size: 40,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(height: AppSizes.spacingS),
+              Text(
+                hint,
+                textAlign: TextAlign.center,
+                style: AppTypography.body2.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

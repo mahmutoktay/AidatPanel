@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { logger } from "../config/logger.js";
 import { randomUUID } from "node:crypto";
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
@@ -43,13 +44,13 @@ function serializeExpense(expense) {
   return {
     ...expense,
     amount: expense.amount != null
-      ? (expense.amount?.toString?.() ?? String(expense.amount))
+      ? Number(expense.amount)
       : null,
     perUnitAmount: expense.perUnitAmount != null
-      ? (expense.perUnitAmount?.toString?.() ?? String(expense.perUnitAmount))
+      ? Number(expense.perUnitAmount)
       : null,
     parsedAmount: expense.parsedAmount != null
-      ? (expense.parsedAmount?.toString?.() ?? String(expense.parsedAmount))
+      ? Number(expense.parsedAmount)
       : null,
     receiptUrl: expense.receiptUrl
       ? `/api/v1/expenses/${expense.id}/file/${expense.receiptUrl.split("/").pop()}`
@@ -211,7 +212,9 @@ export async function getExpenseFileService(expenseId, userId, userRole) {
   try {
     const stats = await fs.promises.stat(absolutePath);
     sizeBytes = stats.size;
-  } catch (_) {}
+  } catch (_) {
+    logger.warn({ type: "expense_file_stat_failed", expenseId });
+  }
 
   return {
     storedPath: expense.receiptUrl,
@@ -274,7 +277,7 @@ export async function getExpenseSummaryService(buildingId, managerId, { month, y
     total += amount;
     return {
       category: g.category,
-      amount: amount.toFixed(2),
+      amount: Number(amount.toFixed(2)),
       count: g._count._all,
     };
   });
@@ -282,7 +285,7 @@ export async function getExpenseSummaryService(buildingId, managerId, { month, y
   return {
     month: m,
     year: y,
-    totalAmount: total.toFixed(2),
+    totalAmount: Number(total.toFixed(2)),
     currency: building.currency ?? "TRY",
     byCategory,
   };
@@ -433,7 +436,9 @@ export async function deleteExpenseService(expenseId, managerId) {
 
   const paths = Array.isArray(expense.storedPaths) ? expense.storedPaths : [];
   for (const p of paths) {
-    await deleteDekontFile(p).catch(() => {});
+    await deleteDekontFile(p).catch((err) => {
+      logger.warn({ type: "expense_delete_old_file", path: p, err: err?.message });
+    });
   }
 
   const { targetMonth, targetYear, buildingId } = expense;
@@ -499,7 +504,9 @@ export async function uploadExpenseProofsService(expenseId, managerId, files) {
 
     const oldPaths = Array.isArray(expense.storedPaths) ? expense.storedPaths : [];
     for (const oldPath of oldPaths) {
-      await deleteDekontFile(oldPath).catch(() => {});
+      await deleteDekontFile(oldPath).catch((err) => {
+        logger.warn({ type: "expense_old_file_cleanup", oldPath, err: err?.message });
+      });
     }
 
     const ocrUpdateData = {
@@ -507,8 +514,6 @@ export async function uploadExpenseProofsService(expenseId, managerId, files) {
       parsedAmount: null,
       ocrReceiptsJson: null,
       receiptUrl: savedPaths.length > 0 ? savedPaths[0] : null,
-      amount: null,
-      perUnitAmount: null,
     };
 
     const updatedExpense = await prisma.expense.update({
@@ -533,12 +538,16 @@ export async function uploadExpenseProofsService(expenseId, managerId, files) {
     return result;
   } catch (err) {
     for (const sp of savedPaths) {
-      await deleteDekontFile(sp).catch(() => {});
+      await deleteDekontFile(sp).catch((cleanupErr) => {
+        logger.warn({ type: "expense_upload_rollback_failed", storedPath: sp, err: cleanupErr?.message });
+      });
     }
     throw err;
   } finally {
     for (const file of files) {
-      await cleanupMulterTempFile(file).catch(() => {});
+      await cleanupMulterTempFile(file).catch((cleanupErr) => {
+        logger.warn({ type: "expense_upload_temp_cleanup_failed", file: file?.originalname, err: cleanupErr?.message });
+      });
     }
   }
 }

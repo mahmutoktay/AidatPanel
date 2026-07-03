@@ -172,6 +172,15 @@ class Translations$common$en {
 	/// en: 'You can change the app appearance here.'
 	String get themeSheetDescription => 'You can change the app appearance here.';
 
+	/// en: 'Light'
+	String get themeLightSubtitle => 'Light';
+
+	/// en: 'Dark'
+	String get themeDarkSubtitle => 'Dark';
+
+	/// en: 'System'
+	String get themeSystemSubtitle => 'System';
+
 	/// en: 'Turkish'
 	String get turkish => 'Turkish';
 
@@ -407,8 +416,71 @@ class Translations$common$en {
 	/// en: 'Support'
 	String get support => 'Support';
 
-	/// en: 'Quick actions'
-	String get quickActions => 'Quick actions';
+	/// en: 'Quick Actions'
+	String get quickActions => 'Quick Actions';
+
+	/// en: 'My applications'
+	String get myApplications => 'My applications';
+
+	/// en: 'Announcements'
+	String get myAnnouncements => 'Announcements';
+
+	/// en: 'Debt & pay'
+	String get debtAndPay => 'Debt & pay';
+
+	/// en: 'Dues status'
+	String get duesStatus => 'Dues status';
+
+	/// en: 'Account summary'
+	String get accountSummary => 'Account summary';
+
+	/// en: 'Period summary and details'
+	String get accountSummarySubtitle => 'Period summary and details';
+
+	/// en: 'Your payment receipts'
+	String get myReceiptsSubtitle => 'Your payment receipts';
+
+	/// en: 'Create a payment request'
+	String get myPaymentRequestSubtitle => 'Create a payment request';
+
+	/// en: 'My settings'
+	String get mySettings => 'My settings';
+
+	/// en: 'My receipts'
+	String get myReceipts => 'My receipts';
+
+	/// en: 'Payment request'
+	String get myPaymentRequest => 'Payment request';
+
+	/// en: 'History'
+	String get duesHistory => 'History';
+
+	/// en: 'Add request'
+	String get addRequest => 'Add request';
+
+	/// en: 'Pay debt'
+	String get payDebt => 'Pay debt';
+
+	/// en: 'All'
+	String get tabAll => 'All';
+
+	/// en: 'Faults'
+	String get tabFaults => 'Faults';
+
+	/// en: 'Requests'
+	String get tabRequests => 'Requests';
+
+	/// en: 'Apartment no.'
+	String get apartmentNo => 'Apartment no.';
+
+	/// en: 'Full name'
+	String get fullName => 'Full name';
+
+	/// en: 'Debt'
+	String get debtAmount => 'Debt';
+
+	/// en: 'Due date'
+	String get lastDueDate => 'Due date';
 
 	/// en: 'Resident Name'
 	String get residentName => 'Resident Name';
@@ -517,6 +589,12 @@ class Translations$common$en {
 
 	/// en: 'Which building to generate code for?'
 	String get whichBuildingForCode => 'Which building to generate code for?';
+
+	/// en: 'Which site should the code be for?'
+	String get whichSiteForCode => 'Which site should the code be for?';
+
+	/// en: 'Standalone buildings'
+	String get inviteStandaloneBuildings => 'Standalone buildings';
 
 	/// en: 'Which apartment to generate code for?'
 	String get whichApartmentForCode => 'Which apartment to generate code for?';
@@ -788,6 +866,15 @@ class Translations$common$en {
 	/// en: 'English'
 	String get englishLanguage => 'English';
 
+	/// en: 'Turkish'
+	String get turkishLanguageSubtitle => 'Turkish';
+
+	/// en: 'İngilizce'
+	String get englishLanguageSubtitle => 'İngilizce';
+
+	/// en: 'Site'
+	String get stepSite => 'Site';
+
 	/// en: 'Building'
 	String get stepBuilding => 'Building';
 
@@ -980,6 +1067,8 @@ class Translations$common$en {
 	/// en: 'You can change the application language here.'
 	String get languageSheetDescription => 'You can change the application language here.';
 
+	late final Translations$common$friendlyError$en friendlyError = Translations$common$friendlyError$en._(_root);
+
 	/// en: 'Must include uppercase, lowercase, and a number'
 	String get newPasswordHint => 'Must include uppercase, lowercase, and a number';
 
@@ -1078,6 +1167,14 @@ class Translations$common$en {
 
 	/// en: 'Back to login'
 	String get backToLogin => 'Back to login';
+
+	/// en: 'Select'
+	String get select => 'Select';
+
+	/// en: 'New'
+	String get kNew => 'New';
+
+	late final Translations$common$errorKeys$en errorKeys = Translations$common$errorKeys$en._(_root);
 }
 
 // Path: validation
@@ -1112,6 +1209,9 @@ class Translations$validation$en {
 	/// en: 'Password is too long'
 	String get passwordTooLong => 'Password is too long';
 
+	/// en: 'Password must be at least 6 characters and contain only letters and numbers'
+	String get passwordAlphanumericRequired => 'Password must be at least 6 characters and contain only letters and numbers';
+
 	/// en: 'Password must contain at least 1 uppercase letter'
 	String get passwordUppercaseRequired => 'Password must contain at least 1 uppercase letter';
 
@@ -1123,6 +1223,18 @@ class Translations$validation$en {
 
 	/// en: 'Password must contain at least 1 special character'
 	String get passwordSpecialCharRequired => 'Password must contain at least 1 special character';
+
+	/// en: 'This field is required'
+	String get field_required => 'This field is required';
+
+	/// en: 'Value is too short'
+	String get field_too_short => 'Value is too short';
+
+	/// en: 'Value is too long'
+	String get field_too_long => 'Value is too long';
+
+	/// en: 'Please enter a valid value'
+	String get field_invalid => 'Please enter a valid value';
 }
 
 // Path: features
@@ -1320,6 +1432,15 @@ class Translations$common$api$en {
 	/// en: 'This phone number is already registered.'
 	String get duplicatePhone => 'This phone number is already registered.';
 
+	/// en: 'No account found with this email. Check your details or sign up.'
+	String get accountNotFoundEmail => 'No account found with this email. Check your details or sign up.';
+
+	/// en: 'No account found with this phone number. Check your details or sign up.'
+	String get accountNotFoundPhone => 'No account found with this phone number. Check your details or sign up.';
+
+	/// en: 'Could not verify email or phone. Please try again.'
+	String get identifierCheckFailed => 'Could not verify email or phone. Please try again.';
+
 	/// en: 'Invite code is invalid. Check the code and try again.'
 	String get invalidInviteCode => 'Invite code is invalid. Check the code and try again.';
 
@@ -1406,6 +1527,294 @@ class Translations$common$documentPreview$en {
 
 	/// en: 'Pinch to zoom and drag to pan'
 	String get pinchHint => 'Pinch to zoom and drag to pan';
+}
+
+// Path: common.friendlyError
+class Translations$common$friendlyError$en {
+	Translations$common$friendlyError$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'No internet connection'
+	String get networkTitle => 'No internet connection';
+
+	/// en: 'Please make sure your phone is connected to the internet and try again.'
+	String get networkMessage => 'Please make sure your phone is connected to the internet and try again.';
+
+	/// en: 'Session ended'
+	String get unauthorizedTitle => 'Session ended';
+
+	/// en: 'Please close the app and sign in again.'
+	String get unauthorizedMessage => 'Please close the app and sign in again.';
+
+	/// en: 'Cannot reach the server'
+	String get serverTitle => 'Cannot reach the server';
+
+	/// en: 'Please try again in a moment.'
+	String get serverMessage => 'Please try again in a moment.';
+
+	/// en: 'This page could not be opened'
+	String get genericTitle => 'This page could not be opened';
+
+	/// en: 'Please close and reopen the app.'
+	String get genericMessage => 'Please close and reopen the app.';
+
+	/// en: 'Visible to developers only (debug):'
+	String get debugOnlyLabel => 'Visible to developers only (debug):';
+}
+
+// Path: common.errorKeys
+class Translations$common$errorKeys$en {
+	Translations$common$errorKeys$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'There was a problem signing in. Please try again.'
+	String get authLoginFailed => 'There was a problem signing in. Please try again.';
+
+	/// en: 'There was a problem creating your account. Please try again.'
+	String get authRegisterFailed => 'There was a problem creating your account. Please try again.';
+
+	/// en: 'There was a problem joining the apartment. Please try again.'
+	String get authJoinFailed => 'There was a problem joining the apartment. Please try again.';
+
+	/// en: 'Could not sign out other devices. Please try again.'
+	String get authLogoutAllDevicesFailed => 'Could not sign out other devices. Please try again.';
+
+	/// en: 'Could not send the request. Please try again.'
+	String get authForgotPasswordRequestFailed => 'Could not send the request. Please try again.';
+
+	/// en: 'Could not reset your password. Please try again.'
+	String get authResetPasswordFailed => 'Could not reset your password. Please try again.';
+
+	/// en: 'Could not load the dashboard summary. Please try again.'
+	String get dashboardSummaryFetchFailed => 'Could not load the dashboard summary. Please try again.';
+
+	/// en: 'Could not load the collection summary. Please try again.'
+	String get dashboardCollectionFetchFailed => 'Could not load the collection summary. Please try again.';
+
+	/// en: 'Could not load buildings. Please try again.'
+	String get buildingFetchFailed => 'Could not load buildings. Please try again.';
+
+	/// en: 'Could not load collection suggestions. Please try again.'
+	String get collectionPresetsFetchFailed => 'Could not load collection suggestions. Please try again.';
+
+	/// en: 'Could not add the building. Please try again.'
+	String get buildingCreateFailed => 'Could not add the building. Please try again.';
+
+	/// en: 'Could not update the building. Please try again.'
+	String get buildingUpdateFailed => 'Could not update the building. Please try again.';
+
+	/// en: 'Could not update collection details. Please try again.'
+	String get buildingCollectionUpdateFailed => 'Could not update collection details. Please try again.';
+
+	/// en: 'No IBAN record was found to update or delete.'
+	String get collectionPresetNotFound => 'No IBAN record was found to update or delete.';
+
+	/// en: 'Could not save the IBAN. Please try again.'
+	String get collectionPresetSaveFailed => 'Could not save the IBAN. Please try again.';
+
+	/// en: 'Could not delete the IBAN. Please try again.'
+	String get collectionPresetDeleteFailed => 'Could not delete the IBAN. Please try again.';
+
+	/// en: 'Could not delete the building. Please try again.'
+	String get buildingDeleteFailed => 'Could not delete the building. Please try again.';
+
+	/// en: 'Could not create the invite code. Please try again.'
+	String get inviteCodeCreateFailed => 'Could not create the invite code. Please try again.';
+
+	/// en: 'Could not load apartments. Please try again.'
+	String get apartmentsFetchFailed => 'Could not load apartments. Please try again.';
+
+	/// en: 'Could not add the apartment. Please try again.'
+	String get apartmentCreateFailed => 'Could not add the apartment. Please try again.';
+
+	/// en: 'Could not update the apartment. Please try again.'
+	String get apartmentUpdateFailed => 'Could not update the apartment. Please try again.';
+
+	/// en: 'Could not delete the apartment. Please try again.'
+	String get apartmentDeleteFailed => 'Could not delete the apartment. Please try again.';
+
+	/// en: 'Could not remove the resident. Please try again.'
+	String get residentRemoveFailed => 'Could not remove the resident. Please try again.';
+
+	/// en: 'Could not load the dues list. Please try again.'
+	String get buildingDuesFetchFailed => 'Could not load the dues list. Please try again.';
+
+	/// en: 'Could not load your dues. Please try again.'
+	String get myDuesFetchFailed => 'Could not load your dues. Please try again.';
+
+	/// en: 'Could not update the due status. Please try again.'
+	String get dueStatusUpdateFailed => 'Could not update the due status. Please try again.';
+
+	/// en: 'Could not update the due amount. Please try again.'
+	String get dueAmountUpdateFailed => 'Could not update the due amount. Please try again.';
+
+	/// en: 'Could not send the reminder. Please try again.'
+	String get dueReminderFailed => 'Could not send the reminder. Please try again.';
+
+	/// en: 'Could not load requests. Please try again.'
+	String get myTicketsFetchFailed => 'Could not load requests. Please try again.';
+
+	/// en: 'Could not load building requests. Please try again.'
+	String get buildingTicketsFetchFailed => 'Could not load building requests. Please try again.';
+
+	/// en: 'Could not load request details. Please try again.'
+	String get ticketDetailFetchFailed => 'Could not load request details. Please try again.';
+
+	/// en: 'Could not create the request. Please try again.'
+	String get ticketCreateFailed => 'Could not create the request. Please try again.';
+
+	/// en: 'Could not add the note. Please try again.'
+	String get ticketNoteAddFailed => 'Could not add the note. Please try again.';
+
+	/// en: 'Could not update the request status. Please try again.'
+	String get ticketStatusUpdateFailed => 'Could not update the request status. Please try again.';
+
+	/// en: 'Could not load expenses. Please try again.'
+	String get expensesFetchFailed => 'Could not load expenses. Please try again.';
+
+	/// en: 'Could not load the expense summary. Please try again.'
+	String get expenseSummaryFetchFailed => 'Could not load the expense summary. Please try again.';
+
+	/// en: 'Could not save the expense. Please try again.'
+	String get expenseCreateFailed => 'Could not save the expense. Please try again.';
+
+	/// en: 'Could not update the expense. Please try again.'
+	String get expenseUpdateFailed => 'Could not update the expense. Please try again.';
+
+	/// en: 'Could not delete the expense. Please try again.'
+	String get expenseDeleteFailed => 'Could not delete the expense. Please try again.';
+
+	/// en: 'Could not upload receipts. Please try again.'
+	String get expenseReceiptsUploadFailed => 'Could not upload receipts. Please try again.';
+
+	/// en: 'Could not load profile information. Please try again.'
+	String get profileFetchFailed => 'Could not load profile information. Please try again.';
+
+	/// en: 'Could not update the profile. Please try again.'
+	String get profileUpdateFailed => 'Could not update the profile. Please try again.';
+
+	/// en: 'Could not save the language preference. Please try again.'
+	String get languageUpdateFailed => 'Could not save the language preference. Please try again.';
+
+	/// en: 'Could not change the password. Please try again.'
+	String get passwordChangeFailed => 'Could not change the password. Please try again.';
+
+	/// en: 'Could not close the account. Please try again.'
+	String get accountDeleteFailed => 'Could not close the account. Please try again.';
+
+	/// en: 'Could not upload the profile photo. Please try again.'
+	String get profilePictureUploadFailed => 'Could not upload the profile photo. Please try again.';
+
+	/// en: 'Could not remove the profile photo. Please try again.'
+	String get profilePictureDeleteFailed => 'Could not remove the profile photo. Please try again.';
+
+	/// en: 'Could not load the notification count. Please try again.'
+	String get notificationCountFetchFailed => 'Could not load the notification count. Please try again.';
+
+	/// en: 'Could not load notifications. Please try again.'
+	String get notificationsFetchFailed => 'Could not load notifications. Please try again.';
+
+	/// en: 'Could not load the announcement count. Please try again.'
+	String get announcementCountFetchFailed => 'Could not load the announcement count. Please try again.';
+
+	/// en: 'Could not mark the notification as read. Please try again.'
+	String get notificationMarkReadFailed => 'Could not mark the notification as read. Please try again.';
+
+	/// en: 'Could not mark notifications as read. Please try again.'
+	String get notificationsMarkAllReadFailed => 'Could not mark notifications as read. Please try again.';
+
+	/// en: 'Could not send the announcement. Please try again.'
+	String get announcementSendFailed => 'Could not send the announcement. Please try again.';
+
+	/// en: 'Could not load sites. Please try again.'
+	String get sitesFetchFailed => 'Could not load sites. Please try again.';
+
+	/// en: 'Could not load site details. Please try again.'
+	String get siteDetailFetchFailed => 'Could not load site details. Please try again.';
+
+	/// en: 'Could not load blocks. Please try again.'
+	String get siteBuildingsFetchFailed => 'Could not load blocks. Please try again.';
+
+	/// en: 'Could not add the site. Please try again.'
+	String get siteCreateFailed => 'Could not add the site. Please try again.';
+
+	/// en: 'Could not update the site. Please try again.'
+	String get siteUpdateFailed => 'Could not update the site. Please try again.';
+
+	/// en: 'Could not update site collection details. Please try again.'
+	String get siteCollectionUpdateFailed => 'Could not update site collection details. Please try again.';
+
+	/// en: 'Could not delete the site. Please try again.'
+	String get siteDeleteFailed => 'Could not delete the site. Please try again.';
+
+	/// en: 'Could not add the block. Please try again.'
+	String get siteBuildingCreateFailed => 'Could not add the block. Please try again.';
+
+	/// en: 'Could not load site expenses. Please try again.'
+	String get siteExpensesFetchFailed => 'Could not load site expenses. Please try again.';
+
+	/// en: 'Could not load the site expense summary. Please try again.'
+	String get siteExpenseSummaryFetchFailed => 'Could not load the site expense summary. Please try again.';
+
+	/// en: 'Could not add the site expense. Please try again.'
+	String get siteExpenseCreateFailed => 'Could not add the site expense. Please try again.';
+
+	/// en: 'Could not update the site expense. Please try again.'
+	String get siteExpenseUpdateFailed => 'Could not update the site expense. Please try again.';
+
+	/// en: 'Could not delete the site expense. Please try again.'
+	String get siteExpenseDeleteFailed => 'Could not delete the site expense. Please try again.';
+
+	/// en: 'Could not load subscription information. Please try again.'
+	String get subscriptionFetchFailed => 'Could not load subscription information. Please try again.';
+
+	/// en: 'Could not read expense information. Please try again.'
+	String get invalidExpenseResponse => 'Could not read expense information. Please try again.';
+
+	/// en: 'Could not read site expense information. Please try again.'
+	String get invalidSiteExpenseResponse => 'Could not read site expense information. Please try again.';
+
+	/// en: 'This file type is not supported.'
+	String get unsupportedFileType => 'This file type is not supported.';
+
+	/// en: 'Could not upload the receipt. Please try again.'
+	String get dekontUploadFailed => 'Could not upload the receipt. Please try again.';
+
+	/// en: 'Could not read the server response. Please try again.'
+	String get serverResponseUnreadable => 'Could not read the server response. Please try again.';
+
+	/// en: 'The receipt response is incomplete. Please try again.'
+	String get dekontResponseMissing => 'The receipt response is incomplete. Please try again.';
+
+	/// en: 'Could not process the receipt response. Please try again.'
+	String get dekontResponseParseFailed => 'Could not process the receipt response. Please try again.';
+
+	/// en: 'The report file was empty. Please try again.'
+	String get reportFileEmpty => 'The report file was empty. Please try again.';
+
+	/// en: 'Download started...'
+	String get downloadStarted => 'Download started...';
+
+	/// en: 'Saved to your phone's Gallery (AidatPanel album).'
+	String get downloadSavedToGallery => 'Saved to your phone\'s Gallery (AidatPanel album).';
+
+	/// en: 'Receipt saved to your Downloads folder.'
+	String get downloadSavedToDownloads => 'Receipt saved to your Downloads folder.';
+
+	/// en: 'Share screen opened. You can save it to Files from there.'
+	String get downloadFallbackShare => 'Share screen opened. You can save it to Files from there.';
+
+	/// en: 'An error occurred while downloading the file.'
+	String get downloadError => 'An error occurred while downloading the file.';
+
+	/// en: 'Gallery access permission was denied.'
+	String get galleryPermissionDenied => 'Gallery access permission was denied.';
 }
 
 // Path: features.buildings
@@ -1524,6 +1933,7 @@ class Translations$features$sites$en {
 
 	// Translations
 
+<<<<<<< HEAD
 	/// en: 'Sites'
 	String get tabSites => 'Sites';
 
@@ -1535,6 +1945,10 @@ class Translations$features$sites$en {
 
 	/// en: 'Add Site'
 	String get addSite => 'Add Site';
+=======
+	/// en: 'Add New Site'
+	String get addSiteTitle => 'Add New Site';
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
 	/// en: 'Create Site'
 	String get createSite => 'Create Site';
@@ -1542,6 +1956,7 @@ class Translations$features$sites$en {
 	/// en: 'Site name'
 	String get siteName => 'Site name';
 
+<<<<<<< HEAD
 	/// en: 'e.g. Lale Site'
 	String get siteNameHint => 'e.g. Lale Site';
 
@@ -1565,10 +1980,48 @@ class Translations$features$sites$en {
 
 	/// en: 'blocks'
 	String get blockCount => 'blocks';
+=======
+	/// en: 'e.g. Sunny Residence'
+	String get siteNameHint => 'e.g. Sunny Residence';
+
+	/// en: 'Site created successfully'
+	String get siteCreated => 'Site created successfully';
+
+	/// en: 'Could not add site'
+	String get siteCreateFailed => 'Could not add site';
+
+	/// en: 'My Sites'
+	String get mySites => 'My Sites';
+
+	/// en: 'Sites'
+	String get tabSites => 'Sites';
+
+	/// en: 'Buildings'
+	String get tabBuildings => 'Buildings';
+
+	/// en: '{count} site'
+	String get siteCount => '{count} site';
+
+	/// en: '{count} building'
+	String get buildingCount => '{count} building';
+
+	/// en: 'No sites added yet'
+	String get emptySites => 'No sites added yet';
+
+	/// en: 'New Site'
+	String get newSite => 'New Site';
+
+	/// en: 'New Building'
+	String get newBuilding => 'New Building';
+
+	/// en: 'Site Details'
+	String get siteDetailTitle => 'Site Details';
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
 	/// en: 'Add Block'
 	String get addBlock => 'Add Block';
 
+<<<<<<< HEAD
 	/// en: 'No sites yet. Use the button at the bottom right to add one.'
 	String get emptySites => 'No sites yet. Use the button at the bottom right to add one.';
 
@@ -1589,6 +2042,19 @@ class Translations$features$sites$en {
 
 	/// en: '{count} units'
 	String get apartmentCountLabel => '{count} units';
+=======
+	/// en: 'Add Block to Site'
+	String get addBlockTitle => 'Add Block to Site';
+
+	/// en: 'Create Block'
+	String get createBlock => 'Create Block';
+
+	/// en: 'Block added successfully'
+	String get blockCreated => 'Block added successfully';
+
+	/// en: 'Block details'
+	String get blockSection => 'Block details';
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
 	/// en: 'Block label'
 	String get blockLabel => 'Block label';
@@ -1596,6 +2062,7 @@ class Translations$features$sites$en {
 	/// en: 'e.g. Block A'
 	String get blockLabelHint => 'e.g. Block A';
 
+<<<<<<< HEAD
 	/// en: 'Dues settings'
 	String get overrideDues => 'Dues settings';
 
@@ -1616,6 +2083,115 @@ class Translations$features$sites$en {
 
 	/// en: 'When off, the site collection details apply.'
 	String get overrideCollectionHint => 'When off, the site collection details apply.';
+=======
+	/// en: 'Building name (optional)'
+	String get blockNameOptional => 'Building name (optional)';
+
+	/// en: 'Uses block label if left empty'
+	String get blockNameHint => 'Uses block label if left empty';
+
+	/// en: 'Extra address'
+	String get addressExtra => 'Extra address';
+
+	/// en: 'e.g. Rear entrance, Gate 2'
+	String get addressExtraHint => 'e.g. Rear entrance, Gate 2';
+
+	/// en: 'Override site default due amount'
+	String get overrideDue => 'Override site default due amount';
+
+	/// en: 'When off, site due applies'
+	String get overrideDueHint => 'When off, site due applies';
+
+	/// en: 'Override site default IBAN'
+	String get overrideCollection => 'Override site default IBAN';
+
+	/// en: 'When off, site IBAN applies'
+	String get overrideCollectionHint => 'When off, site IBAN applies';
+
+	/// en: 'Blocks'
+	String get blocksTitle => 'Blocks';
+
+	/// en: 'No blocks added yet'
+	String get noBlocks => 'No blocks added yet';
+
+	/// en: '{count} units'
+	String get blockApartments => '{count} units';
+
+	/// en: 'Blocks'
+	String get blockCount => 'Blocks';
+
+	/// en: 'Units'
+	String get apartmentCount => 'Units';
+
+	/// en: 'Collected'
+	String get collectedAmount => 'Collected';
+
+	/// en: 'Expected'
+	String get expectedAmount => 'Expected';
+
+	/// en: 'Collection'
+	String get collectionRate => 'Collection';
+
+	/// en: '{collected} / {expected}'
+	String get collectedExpected => '{collected} / {expected}';
+
+	/// en: 'Common Expenses'
+	String get commonExpenses => 'Common Expenses';
+
+	/// en: 'Report'
+	String get report => 'Report';
+
+	/// en: 'Site report'
+	String get reportSheetTitle => 'Site report';
+
+	/// en: 'Monthly report (PDF)'
+	String get monthlyReport => 'Monthly report (PDF)';
+
+	/// en: 'Annual report (PDF)'
+	String get annualReport => 'Annual report (PDF)';
+
+	/// en: 'Site Common Expenses'
+	String get siteExpensesTitle => 'Site Common Expenses';
+
+	/// en: 'Add Common Expense'
+	String get addExpenseTitle => 'Add Common Expense';
+
+	/// en: 'Edit Expense'
+	String get editExpenseTitle => 'Edit Expense';
+
+	/// en: 'Add Expense'
+	String get addExpense => 'Add Expense';
+
+	/// en: 'Site expense added'
+	String get expenseCreated => 'Site expense added';
+
+	/// en: 'Site expense updated'
+	String get expenseUpdated => 'Site expense updated';
+
+	/// en: 'Confirmation required'
+	String get confirmExpenseTitle => 'Confirmation required';
+
+	/// en: 'Delete expense?'
+	String get deleteExpenseTitle => 'Delete expense?';
+
+	/// en: 'This site expense will be permanently deleted.'
+	String get deleteExpenseConfirm => 'This site expense will be permanently deleted.';
+
+	/// en: 'Site expense deleted'
+	String get deleteExpenseSuccess => 'Site expense deleted';
+
+	/// en: 'No expenses'
+	String get noExpenses => 'No expenses';
+
+	/// en: 'No common expenses for this month.'
+	String get noExpensesHint => 'No common expenses for this month.';
+
+	/// en: 'Total: {amount}'
+	String get totalExpenses => 'Total: {amount}';
+
+	/// en: 'Per unit: {amount}'
+	String get perUnitShare => 'Per unit: {amount}';
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 }
 
 // Path: features.auth
@@ -1784,6 +2360,8 @@ class Translations$features$auth$en {
 
 	/// en: 'Are you a manager? Register'
 	String get areYouManager => 'Are you a manager? Register';
+
+	late final Translations$features$auth$onboarding$en onboarding = Translations$features$auth$onboarding$en._(_root);
 }
 
 // Path: features.apartments
@@ -1815,17 +2393,35 @@ class Translations$features$tickets$en {
 	/// en: 'Report issue / request'
 	String get createTitle => 'Report issue / request';
 
-	/// en: 'Title'
-	String get fieldTitle => 'Title';
+	/// en: 'Report fault'
+	String get reportFaultTitle => 'Report fault';
 
-	/// en: 'e.g. Elevator malfunction'
-	String get fieldTitleHint => 'e.g. Elevator malfunction';
+	/// en: 'My applications'
+	String get myApplicationsTitle => 'My applications';
+
+	/// en: 'Subject'
+	String get fieldTitle => 'Subject';
+
+	/// en: 'Enter a short summary.'
+	String get fieldTitleHint => 'Enter a short summary.';
+
+	/// en: 'Details'
+	String get fieldDetail => 'Details';
+
+	/// en: 'Briefly describe the issue.'
+	String get fieldDetailHint => 'Briefly describe the issue.';
 
 	/// en: 'Description'
 	String get fieldDescription => 'Description';
 
-	/// en: 'Briefly describe the issue'
-	String get fieldDescriptionHint => 'Briefly describe the issue';
+	/// en: 'Write a detailed explanation…'
+	String get fieldDescriptionHint => 'Write a detailed explanation…';
+
+	/// en: 'Add photo, video or document… PNG, JPG — max 5 MB.'
+	String get attachmentHint => 'Add photo, video or document… PNG, JPG — max 5 MB.';
+
+	/// en: 'File attachments coming soon.'
+	String get attachmentComingSoon => 'File attachments coming soon.';
 
 	/// en: 'Category'
 	String get fieldCategory => 'Category';
@@ -2006,6 +2602,27 @@ class Translations$features$dekont$en {
 
 	/// en: 'Make Payment'
 	String get makePaymentTitle => 'Make Payment';
+
+	/// en: 'Pay debt'
+	String get payDebtTitle => 'Pay debt';
+
+	/// en: 'Payment method'
+	String get paymentMethodTitle => 'Payment method';
+
+	/// en: 'Credit / debit card'
+	String get paymentMethodCard => 'Credit / debit card';
+
+	/// en: 'Bank transfer'
+	String get paymentMethodEft => 'Bank transfer';
+
+	/// en: 'Upload receipt'
+	String get paymentMethodDekont => 'Upload receipt';
+
+	/// en: 'Card payments coming soon.'
+	String get paymentCardComingSoon => 'Card payments coming soon.';
+
+	/// en: 'Upload receipt (jpg, png, webp, PDF — max 5 MB).'
+	String get uploadReceiptHint => 'Upload receipt (jpg, png, webp, PDF — max 5 MB).';
 
 	/// en: 'My Receipts'
 	String get myDekontsTitle => 'My Receipts';
@@ -2703,6 +3320,9 @@ class Translations$features$notifications$en {
 	/// en: 'System'
 	String get typeSystem => 'System';
 
+	/// en: 'AidatPanel Team'
+	String get typeAidatPanelTeam => 'AidatPanel Team';
+
 	/// en: 'Notification'
 	String get typeOther => 'Notification';
 
@@ -2799,6 +3419,15 @@ class Translations$features$profile$en {
 	/// en: 'Cannot be edited here'
 	String get readOnlySection => 'Cannot be edited here';
 
+	/// en: 'At least one contact channel (Email or Phone) must be registered.'
+	String get contactRequired => 'At least one contact channel (Email or Phone) must be registered.';
+
+	/// en: 'Security Verification'
+	String get securityVerificationTitle => 'Security Verification';
+
+	/// en: 'You must enter your current password to change your email or phone number.'
+	String get securityVerificationMessage => 'You must enter your current password to change your email or phone number.';
+
 	/// en: 'Only name and phone can be updated. Other details are shown on the profile screen above.'
 	String get editSheetHint => 'Only name and phone can be updated. Other details are shown on the profile screen above.';
 
@@ -2840,6 +3469,9 @@ class Translations$features$profile$en {
 
 	/// en: 'Could not save the photo.'
 	String get avatarSaveError => 'Could not save the photo.';
+
+	/// en: 'Unsupported file type. Please select a JPG, PNG, or GIF.'
+	String get avatarUnsupportedFormat => 'Unsupported file type. Please select a JPG, PNG, or GIF.';
 
 	/// en: 'Account created: {date}'
 	String get accountCreatedAt => 'Account created: {date}';
@@ -2931,6 +3563,12 @@ class Translations$features$subscription$en {
 	/// en: 'Unlimited units'
 	String get featureUnlimitedUnits => 'Unlimited units';
 
+	/// en: 'Managed buildings: {used}'
+	String get buildingUsageSummary => 'Managed buildings: {used}';
+
+	/// en: 'Managed buildings: {used} / {limit}'
+	String get buildingUsageWithLimit => 'Managed buildings: {used} / {limit}';
+
 	/// en: 'Dues tracking'
 	String get featureDuesTracking => 'Dues tracking';
 
@@ -3014,6 +3652,69 @@ class Translations$features$subscription$en {
 
 	/// en: 'Purchases are not enabled in this build yet.'
 	String get purchasesDisabledHint => 'Purchases are not enabled in this build yet.';
+
+	/// en: '1-5 Buildings Plan'
+	String get plan1To5 => '1-5 Buildings Plan';
+
+	/// en: '5-20 Buildings Plan'
+	String get plan5To20 => '5-20 Buildings Plan';
+
+	/// en: '20-50 Buildings Plan'
+	String get plan20To50 => '20-50 Buildings Plan';
+
+	/// en: '50+ Buildings (Custom)'
+	String get plan50Plus => '50+ Buildings (Custom)';
+
+	/// en: 'Coming Soon'
+	String get comingSoon => 'Coming Soon';
+
+	/// en: 'Contact Us'
+	String get contactUs => 'Contact Us';
+
+	/// en: 'Contact us for custom pricing.'
+	String get contactUsDesc => 'Contact us for custom pricing.';
+
+	/// en: 'Plans'
+	String get sectionPlans => 'Plans';
+
+	/// en: 'Manage 1-5 Buildings'
+	String get feature1To5 => 'Manage 1-5 Buildings';
+
+	/// en: 'Manage 5-20 Buildings'
+	String get feature5To20 => 'Manage 5-20 Buildings';
+
+	/// en: 'Manage 20-50 Buildings'
+	String get feature20To50 => 'Manage 20-50 Buildings';
+
+	/// en: 'Unlimited Building Management'
+	String get feature50Plus => 'Unlimited Building Management';
+
+	/// en: 'Dedicated Account Manager'
+	String get featureCustomSupport => 'Dedicated Account Manager';
+
+	/// en: 'Monthly'
+	String get toggleMonthly => 'Monthly';
+
+	/// en: 'Annual'
+	String get toggleAnnual => 'Annual';
+
+	/// en: 'Your Current Plan'
+	String get currentPlanBadge => 'Your Current Plan';
+
+	/// en: 'Building Usage'
+	String get buildingProgress => 'Building Usage';
+
+	/// en: 'Basic Plan'
+	String get planBasic => 'Basic Plan';
+
+	/// en: 'Manage 1 Building'
+	String get featureBasicBuildings => 'Manage 1 Building';
+
+	/// en: 'Basic Reports'
+	String get featureBasicReports => 'Basic Reports';
+
+	/// en: 'Lifetime'
+	String get statusUnlimited => 'Lifetime';
 }
 
 // Path: features.reports
@@ -3209,6 +3910,9 @@ class Translations$features$dashboard$en {
 
 	/// en: '{month} {year} dues'
 	String get featuredDuePeriod => '{month} {year} dues';
+
+	/// en: 'Pay your dues here.'
+	String get residentDebtAndPaySubtitle => 'Pay your dues here.';
 }
 
 // Path: features.faz2
@@ -3460,6 +4164,342 @@ class Translations$features$buildings$list$en {
 	String get monthlyDuesShort => 'Monthly Dues';
 }
 
+// Path: features.auth.onboarding
+class Translations$features$auth$onboarding$en {
+	Translations$features$auth$onboarding$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Step {current} / {total}'
+	String get stepProgress => 'Step {current} / {total}';
+
+	/// en: 'Continue'
+	String get continueButton => 'Continue';
+
+	/// en: 'Go to panel'
+	String get goToPanel => 'Go to panel';
+
+	/// en: 'Your information is securely protected.'
+	String get secureNote => 'Your information is securely protected.';
+
+	/// en: 'Who will you use the app as?'
+	String get step1Title => 'Who will you use the app as?';
+
+	/// en: 'Select your role to continue.'
+	String get step1Subtitle => 'Select your role to continue.';
+
+	/// en: 'I am an apartment manager'
+	String get step1ManagerOption => 'I am an apartment manager';
+
+	/// en: 'I am an apartment resident'
+	String get step1ResidentOption => 'I am an apartment resident';
+
+	/// en: 'Select this if you manage an apartment or site.'
+	String get step1ManagerHint => 'Select this if you manage an apartment or site.';
+
+	/// en: 'I am a resident signing in to my unit.'
+	String get step1ResidentHint => 'I am a resident signing in to my unit.';
+
+	/// en: 'I have signed in before'
+	String get step1ReturningLogin => 'I have signed in before';
+
+	/// en: 'I signed in before as manager'
+	String get step1ReturningLoginManager => 'I signed in before as manager';
+
+	/// en: 'I signed in before as resident'
+	String get step1ReturningLoginResident => 'I signed in before as resident';
+
+	/// en: '{name} · {contact}'
+	String get step1ReturningLoginHint => '{name} · {contact}';
+
+	/// en: 'Sign in with email and password'
+	String get step1LegacyEmailLogin => 'Sign in with email and password';
+
+	/// en: 'Back'
+	String get backButton => 'Back';
+
+	/// en: 'Welcome to AidatPanel'
+	String get managerExperienceTitle => 'Welcome to AidatPanel';
+
+	/// en: 'Have you registered before?'
+	String get managerExperienceSubtitle => 'Have you registered before?';
+
+	/// en: 'I have registered before'
+	String get managerReturningOption => 'I have registered before';
+
+	/// en: 'I am using the app for the first time'
+	String get managerFirstTimeOption => 'I am using the app for the first time';
+
+	/// en: 'What is your name?'
+	String get managerNameTitle => 'What is your name?';
+
+	/// en: 'How should we address you?'
+	String get managerNameSubtitle => 'How should we address you?';
+
+	/// en: 'Enter your email or phone'
+	String get managerIdentifierTitle => 'Enter your email or phone';
+
+	/// en: 'This will be used for sign-in.'
+	String get managerIdentifierSubtitle => 'This will be used for sign-in.';
+
+	/// en: 'Email or phone'
+	String get managerIdentifierLabel => 'Email or phone';
+
+	/// en: 'example@mail.com or 05321234567'
+	String get managerIdentifierHint => 'example@mail.com or 05321234567';
+
+	/// en: 'For phone, enter 11 digits starting with 0.'
+	String get managerIdentifierPhoneNote => 'For phone, enter 11 digits starting with 0.';
+
+	/// en: 'Enter your email or phone'
+	String get identifierRequired => 'Enter your email or phone';
+
+	/// en: 'Enter an 11-digit phone number starting with 0'
+	String get phoneInvalidElevenDigits => 'Enter an 11-digit phone number starting with 0';
+
+	/// en: 'Enter your password'
+	String get managerLoginPasswordTitle => 'Enter your password';
+
+	/// en: 'Set your password'
+	String get managerRegisterPasswordTitle => 'Set your password';
+
+	/// en: 'At least 6 characters; letters and numbers only.'
+	String get managerRegisterPasswordSubtitle => 'At least 6 characters; letters and numbers only.';
+
+	/// en: 'Create Account'
+	String get managerCreateAccountButton => 'Create Account';
+
+	/// en: 'Sign In'
+	String get managerLoginButton => 'Sign In';
+
+	/// en: 'Welcome to AidatPanel'
+	String get residentExperienceTitle => 'Welcome to AidatPanel';
+
+	/// en: 'How would you like to continue?'
+	String get residentExperienceSubtitle => 'How would you like to continue?';
+
+	/// en: 'I have signed in before'
+	String get residentReturningOption => 'I have signed in before';
+
+	/// en: 'I have an invite code'
+	String get residentInviteOption => 'I have an invite code';
+
+	/// en: 'Your phone number'
+	String get residentPhoneTitle => 'Your phone number';
+
+	/// en: 'We will send you a one-time sign-in code.'
+	String get residentPhoneSubtitle => 'We will send you a one-time sign-in code.';
+
+	/// en: 'Welcome!'
+	String get residentWelcomeTitle => 'Welcome!';
+
+	/// en: 'Your phone is verified. Please enter your name.'
+	String get residentWelcomeSubtitle => 'Your phone is verified. Please enter your name.';
+
+	/// en: 'Go to Dashboard'
+	String get residentCompleteJoinButton => 'Go to Dashboard';
+
+	/// en: 'Enter Your Contact Information'
+	String get step2Title => 'Enter Your Contact Information';
+
+	/// en: 'Enter your phone number or email address to continue.'
+	String get step2Subtitle => 'Enter your phone number or email address to continue.';
+
+	/// en: 'We will send you a verification code.'
+	String get step2SubtitlePhone => 'We will send you a verification code.';
+
+	/// en: 'We will send a verification code to your email.'
+	String get step2SubtitleEmail => 'We will send a verification code to your email.';
+
+	/// en: 'Verification Code'
+	String get step3OtpTitle => 'Verification Code';
+
+	/// en: 'Enter the 6-digit code sent to {phone}.'
+	String get step3OtpSubtitlePhone => 'Enter the 6-digit code sent to {phone}.';
+
+	/// en: 'Enter the 6-digit code sent to {email}.'
+	String get step3OtpSubtitleEmail => 'Enter the 6-digit code sent to {email}.';
+
+	/// en: 'Enter the 6-digit code below.'
+	String get step3OtpSubtitle => 'Enter the 6-digit code below.';
+
+	/// en: 'Code sent to {phone}.'
+	String get step3OtpSentTo => 'Code sent to {phone}.';
+
+	/// en: 'Resend code ({seconds} s)'
+	String get step3ResendOtp => 'Resend code ({seconds} s)';
+
+	/// en: 'Resend code'
+	String get step3ResendOtpReady => 'Resend code';
+
+	/// en: 'Enter your password'
+	String get step3PasswordTitle => 'Enter your password';
+
+	/// en: 'Create your password'
+	String get step3RegisterPasswordTitle => 'Create your password';
+
+	/// en: 'We protect your account with secure verification.'
+	String get step3SecureVerify => 'We protect your account with secure verification.';
+
+	/// en: 'If SMS does not arrive, check the backend terminal for the otp_dev line.'
+	String get step3DevOtpHint => 'If SMS does not arrive, check the backend terminal for the otp_dev line.';
+
+	/// en: 'Enter Your Invite Code'
+	String get step4InviteTitle => 'Enter Your Invite Code';
+
+	/// en: 'Enter the code from your manager.'
+	String get step4InviteSubtitle => 'Enter the code from your manager.';
+
+	/// en: 'You can get your invite code from management or your manager.'
+	String get step4InviteHint => 'You can get your invite code from management or your manager.';
+
+	/// en: 'Enter Your Invite Code'
+	String get step4ManagerInviteTitle => 'Enter Your Invite Code';
+
+	/// en: 'Enter your invite code to link your manager account to the site or building.'
+	String get step4ManagerInviteSubtitle => 'Enter your invite code to link your manager account to the site or building.';
+
+	/// en: 'You can get your invite code from management or your manager.'
+	String get step4ManagerInviteInfo => 'You can get your invite code from management or your manager.';
+
+	/// en: 'No, I am the manager'
+	String get step4ManagerPrimaryLink => 'No, I am the manager';
+
+	/// en: 'Choose this if you will manage the building yourself.'
+	String get step4ManagerPrimaryHint => 'Choose this if you will manage the building yourself.';
+
+	/// en: 'Valid invite: {label}'
+	String get step4InviteValidated => 'Valid invite: {label}';
+
+	/// en: 'What You Can Do as a Manager'
+	String get step5Title => 'What You Can Do as a Manager';
+
+	/// en: 'Manage your site easily with AidatPanel and serve your residents better.'
+	String get step5ManagerSubtitle => 'Manage your site easily with AidatPanel and serve your residents better.';
+
+	/// en: 'What You Can Do as a Resident'
+	String get step5ResidentTitle => 'What You Can Do as a Resident';
+
+	/// en: 'Track your dues and payments here.'
+	String get step5ResidentSubtitle => 'Track your dues and payments here.';
+
+	/// en: 'Manage announcements'
+	String get step5ManagerAnnounceTitle => 'Manage announcements';
+
+	/// en: 'Send announcements to all residents quickly.'
+	String get step5ManagerAnnounceBody => 'Send announcements to all residents quickly.';
+
+	/// en: 'Dues tracking'
+	String get step5ManagerDuesTitle => 'Dues tracking';
+
+	/// en: 'Track collections and view payments.'
+	String get step5ManagerDuesBody => 'Track collections and view payments.';
+
+	/// en: 'Resident management'
+	String get step5ManagerResidentsTitle => 'Resident management';
+
+	/// en: 'Manage resident information and simplify communication.'
+	String get step5ManagerResidentsBody => 'Manage resident information and simplify communication.';
+
+	/// en: 'Reporting'
+	String get step5ManagerReportsTitle => 'Reporting';
+
+	/// en: 'Monitor site finances with detailed reports.'
+	String get step5ManagerReportsBody => 'Monitor site finances with detailed reports.';
+
+	/// en: 'View your dues'
+	String get step5ResidentDuesTitle => 'View your dues';
+
+	/// en: 'Track your current balance and payment history.'
+	String get step5ResidentDuesBody => 'Track your current balance and payment history.';
+
+	/// en: 'Upload receipts'
+	String get step5ResidentDekontTitle => 'Upload receipts';
+
+	/// en: 'Send your payment receipt as a photo or PDF.'
+	String get step5ResidentDekontBody => 'Send your payment receipt as a photo or PDF.';
+
+	/// en: 'Report issues'
+	String get step5ResidentTicketsTitle => 'Report issues';
+
+	/// en: 'Easily notify management about site problems.'
+	String get step5ResidentTicketsBody => 'Easily notify management about site problems.';
+
+	/// en: 'Get notifications'
+	String get step5ResidentNotifyTitle => 'Get notifications';
+
+	/// en: 'Stay informed about announcements and due reminders.'
+	String get step5ResidentNotifyBody => 'Stay informed about announcements and due reminders.';
+
+	/// en: 'Setup complete'
+	String get step6ManagerTitle => 'Setup complete';
+
+	/// en: 'Welcome to the manager panel! You can now start managing your site and serving your residents better.'
+	String get step6ManagerSubtitle => 'Welcome to the manager panel! You can now start managing your site and serving your residents better.';
+
+	/// en: 'Sign-in complete'
+	String get step6ResidentTitle => 'Sign-in complete';
+
+	/// en: 'Track your dues and payments from here.'
+	String get step6ResidentSubtitle => 'Track your dues and payments from here.';
+
+	/// en: 'Wrong code. Try again.'
+	String get otpInvalid => 'Wrong code. Try again.';
+
+	/// en: 'Code expired. Request a new one.'
+	String get otpExpired => 'Code expired. Request a new one.';
+
+	/// en: 'Enter a valid phone number (5XX XXX XX XX).'
+	String get phoneInvalid => 'Enter a valid phone number (5XX XXX XX XX).';
+
+	/// en: 'Invite code is invalid or expired.'
+	String get inviteInvalid => 'Invite code is invalid or expired.';
+
+	/// en: 'Could not send code. Please try again.'
+	String get otpSendFailed => 'Could not send code. Please try again.';
+
+	/// en: 'Phone sign-in coming soon. You can use email for now.'
+	String get phoneOtpDisabledHint => 'Phone sign-in coming soon. You can use email for now.';
+
+	/// en: 'Resident Sign In'
+	String get residentLoginTitle => 'Resident Sign In';
+
+	/// en: 'Enter your details to continue.'
+	String get residentLoginSubtitle => 'Enter your details to continue.';
+
+	/// en: 'Send Code'
+	String get residentSendCodeButton => 'Send Code';
+
+	/// en: 'A verification code will be sent to your phone number.'
+	String get residentPhoneVerifyNote => 'A verification code will be sent to your phone number.';
+
+	/// en: 'Enter the 6-digit code sent to your phone.'
+	String get residentOtpSubtitle => 'Enter the 6-digit code sent to your phone.';
+
+	/// en: 'Didn't get the code?'
+	String get residentResendPrompt => 'Didn\'t get the code?';
+
+	/// en: 'Resend'
+	String get residentResendLink => 'Resend';
+
+	/// en: 'Please enter the invitation code you received from your manager to continue.'
+	String get residentInviteSubtitle => 'Please enter the invitation code you received from your manager to continue.';
+
+	/// en: 'Join Apartment'
+	String get residentJoinButton => 'Join Apartment';
+
+	/// en: 'Invitation Code'
+	String get residentInviteCodeLabel => 'Invitation Code';
+
+	/// en: 'e.g. APF-45532'
+	String get residentInviteCodeHint => 'e.g. APF-45532';
+
+	/// en: 'Please enter your full name.'
+	String get residentNameRequired => 'Please enter your full name.';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -3507,6 +4547,9 @@ extension on Translations {
 			'common.themeDark' => 'Dark',
 			'common.themeSystem' => 'System',
 			'common.themeSheetDescription' => 'You can change the app appearance here.',
+			'common.themeLightSubtitle' => 'Light',
+			'common.themeDarkSubtitle' => 'Dark',
+			'common.themeSystemSubtitle' => 'System',
 			'common.turkish' => 'Turkish',
 			'common.notifications' => 'Notifications',
 			'common.info' => 'Info',
@@ -3539,6 +4582,9 @@ extension on Translations {
 			'common.api.invalidCredentials' => 'Email, phone, or password is incorrect. Please check and try again.',
 			'common.api.duplicateEmail' => 'This email is already registered. Try signing in.',
 			'common.api.duplicatePhone' => 'This phone number is already registered.',
+			'common.api.accountNotFoundEmail' => 'No account found with this email. Check your details or sign up.',
+			'common.api.accountNotFoundPhone' => 'No account found with this phone number. Check your details or sign up.',
+			'common.api.identifierCheckFailed' => 'Could not verify email or phone. Please try again.',
 			'common.api.invalidInviteCode' => 'Invite code is invalid. Check the code and try again.',
 			'common.api.inviteCodeUsed' => 'This invite code has already been used.',
 			'common.api.inviteCodeExpired' => 'This invite code has expired. Ask your manager for a new one.',
@@ -3621,7 +4667,28 @@ extension on Translations {
 			'common.makePayment' => 'Make Payment',
 			'common.bills' => 'Bills',
 			'common.support' => 'Support',
-			'common.quickActions' => 'Quick actions',
+			'common.quickActions' => 'Quick Actions',
+			'common.myApplications' => 'My applications',
+			'common.myAnnouncements' => 'Announcements',
+			'common.debtAndPay' => 'Debt & pay',
+			'common.duesStatus' => 'Dues status',
+			'common.accountSummary' => 'Account summary',
+			'common.accountSummarySubtitle' => 'Period summary and details',
+			'common.myReceiptsSubtitle' => 'Your payment receipts',
+			'common.myPaymentRequestSubtitle' => 'Create a payment request',
+			'common.mySettings' => 'My settings',
+			'common.myReceipts' => 'My receipts',
+			'common.myPaymentRequest' => 'Payment request',
+			'common.duesHistory' => 'History',
+			'common.addRequest' => 'Add request',
+			'common.payDebt' => 'Pay debt',
+			'common.tabAll' => 'All',
+			'common.tabFaults' => 'Faults',
+			'common.tabRequests' => 'Requests',
+			'common.apartmentNo' => 'Apartment no.',
+			'common.fullName' => 'Full name',
+			'common.debtAmount' => 'Debt',
+			'common.lastDueDate' => 'Due date',
 			'common.residentName' => 'Resident Name',
 			'common.addBuildingNew' => 'Add New Building',
 			'common.basicInfo' => 'Basic Info',
@@ -3658,6 +4725,8 @@ extension on Translations {
 			'common.buildingAddedSuccess' => 'Building added successfully',
 			'common.createInviteCode' => 'Create Invite Code',
 			'common.whichBuildingForCode' => 'Which building to generate code for?',
+			'common.whichSiteForCode' => 'Which site should the code be for?',
+			'common.inviteStandaloneBuildings' => 'Standalone buildings',
 			'common.whichApartmentForCode' => 'Which apartment to generate code for?',
 			'common.noApartmentsInBuilding' => 'No apartments added to this building yet',
 			'common.activeCodeBadge' => 'Active Code',
@@ -3748,6 +4817,9 @@ extension on Translations {
 			'common.apartmentLabel' => 'APT',
 			'common.turkishLanguage' => 'Türkçe',
 			'common.englishLanguage' => 'English',
+			'common.turkishLanguageSubtitle' => 'Turkish',
+			'common.englishLanguageSubtitle' => 'İngilizce',
+			'common.stepSite' => 'Site',
 			'common.stepBuilding' => 'Building',
 			'common.stepApartment' => 'Apartment',
 			'common.stepCode' => 'Code',
@@ -3812,6 +4884,15 @@ extension on Translations {
 			'common.changePasswordFailed' => 'Could not change password. Please try again.',
 			'common.changePasswordWrongCurrent' => 'Current password is incorrect.',
 			'common.languageSheetDescription' => 'You can change the application language here.',
+			'common.friendlyError.networkTitle' => 'No internet connection',
+			'common.friendlyError.networkMessage' => 'Please make sure your phone is connected to the internet and try again.',
+			'common.friendlyError.unauthorizedTitle' => 'Session ended',
+			'common.friendlyError.unauthorizedMessage' => 'Please close the app and sign in again.',
+			'common.friendlyError.serverTitle' => 'Cannot reach the server',
+			'common.friendlyError.serverMessage' => 'Please try again in a moment.',
+			'common.friendlyError.genericTitle' => 'This page could not be opened',
+			'common.friendlyError.genericMessage' => 'Please close and reopen the app.',
+			'common.friendlyError.debugOnlyLabel' => 'Visible to developers only (debug):',
 			'common.newPasswordHint' => 'Must include uppercase, lowercase, and a number',
 			'common.passwordStrengthUnspecified' => 'Not specified',
 			'common.passwordStrengthWeak' => 'Weak',
@@ -3845,6 +4926,89 @@ extension on Translations {
 			'common.resetPasswordFailed' => 'Could not reset password. The code may be invalid or expired.',
 			'common.resetPasswordSubmit' => 'Reset Password',
 			'common.backToLogin' => 'Back to login',
+			'common.select' => 'Select',
+			'common.kNew' => 'New',
+			'common.errorKeys.authLoginFailed' => 'There was a problem signing in. Please try again.',
+			'common.errorKeys.authRegisterFailed' => 'There was a problem creating your account. Please try again.',
+			'common.errorKeys.authJoinFailed' => 'There was a problem joining the apartment. Please try again.',
+			'common.errorKeys.authLogoutAllDevicesFailed' => 'Could not sign out other devices. Please try again.',
+			'common.errorKeys.authForgotPasswordRequestFailed' => 'Could not send the request. Please try again.',
+			'common.errorKeys.authResetPasswordFailed' => 'Could not reset your password. Please try again.',
+			'common.errorKeys.dashboardSummaryFetchFailed' => 'Could not load the dashboard summary. Please try again.',
+			'common.errorKeys.dashboardCollectionFetchFailed' => 'Could not load the collection summary. Please try again.',
+			'common.errorKeys.buildingFetchFailed' => 'Could not load buildings. Please try again.',
+			'common.errorKeys.collectionPresetsFetchFailed' => 'Could not load collection suggestions. Please try again.',
+			'common.errorKeys.buildingCreateFailed' => 'Could not add the building. Please try again.',
+			'common.errorKeys.buildingUpdateFailed' => 'Could not update the building. Please try again.',
+			'common.errorKeys.buildingCollectionUpdateFailed' => 'Could not update collection details. Please try again.',
+			'common.errorKeys.collectionPresetNotFound' => 'No IBAN record was found to update or delete.',
+			'common.errorKeys.collectionPresetSaveFailed' => 'Could not save the IBAN. Please try again.',
+			'common.errorKeys.collectionPresetDeleteFailed' => 'Could not delete the IBAN. Please try again.',
+			'common.errorKeys.buildingDeleteFailed' => 'Could not delete the building. Please try again.',
+			'common.errorKeys.inviteCodeCreateFailed' => 'Could not create the invite code. Please try again.',
+			'common.errorKeys.apartmentsFetchFailed' => 'Could not load apartments. Please try again.',
+			'common.errorKeys.apartmentCreateFailed' => 'Could not add the apartment. Please try again.',
+			'common.errorKeys.apartmentUpdateFailed' => 'Could not update the apartment. Please try again.',
+			'common.errorKeys.apartmentDeleteFailed' => 'Could not delete the apartment. Please try again.',
+			'common.errorKeys.residentRemoveFailed' => 'Could not remove the resident. Please try again.',
+			'common.errorKeys.buildingDuesFetchFailed' => 'Could not load the dues list. Please try again.',
+			'common.errorKeys.myDuesFetchFailed' => 'Could not load your dues. Please try again.',
+			'common.errorKeys.dueStatusUpdateFailed' => 'Could not update the due status. Please try again.',
+			'common.errorKeys.dueAmountUpdateFailed' => 'Could not update the due amount. Please try again.',
+			'common.errorKeys.dueReminderFailed' => 'Could not send the reminder. Please try again.',
+			'common.errorKeys.myTicketsFetchFailed' => 'Could not load requests. Please try again.',
+			'common.errorKeys.buildingTicketsFetchFailed' => 'Could not load building requests. Please try again.',
+			'common.errorKeys.ticketDetailFetchFailed' => 'Could not load request details. Please try again.',
+			'common.errorKeys.ticketCreateFailed' => 'Could not create the request. Please try again.',
+			'common.errorKeys.ticketNoteAddFailed' => 'Could not add the note. Please try again.',
+			'common.errorKeys.ticketStatusUpdateFailed' => 'Could not update the request status. Please try again.',
+			'common.errorKeys.expensesFetchFailed' => 'Could not load expenses. Please try again.',
+			'common.errorKeys.expenseSummaryFetchFailed' => 'Could not load the expense summary. Please try again.',
+			'common.errorKeys.expenseCreateFailed' => 'Could not save the expense. Please try again.',
+			'common.errorKeys.expenseUpdateFailed' => 'Could not update the expense. Please try again.',
+			'common.errorKeys.expenseDeleteFailed' => 'Could not delete the expense. Please try again.',
+			'common.errorKeys.expenseReceiptsUploadFailed' => 'Could not upload receipts. Please try again.',
+			'common.errorKeys.profileFetchFailed' => 'Could not load profile information. Please try again.',
+			'common.errorKeys.profileUpdateFailed' => 'Could not update the profile. Please try again.',
+			'common.errorKeys.languageUpdateFailed' => 'Could not save the language preference. Please try again.',
+			'common.errorKeys.passwordChangeFailed' => 'Could not change the password. Please try again.',
+			'common.errorKeys.accountDeleteFailed' => 'Could not close the account. Please try again.',
+			'common.errorKeys.profilePictureUploadFailed' => 'Could not upload the profile photo. Please try again.',
+			'common.errorKeys.profilePictureDeleteFailed' => 'Could not remove the profile photo. Please try again.',
+			'common.errorKeys.notificationCountFetchFailed' => 'Could not load the notification count. Please try again.',
+			'common.errorKeys.notificationsFetchFailed' => 'Could not load notifications. Please try again.',
+			'common.errorKeys.announcementCountFetchFailed' => 'Could not load the announcement count. Please try again.',
+			'common.errorKeys.notificationMarkReadFailed' => 'Could not mark the notification as read. Please try again.',
+			'common.errorKeys.notificationsMarkAllReadFailed' => 'Could not mark notifications as read. Please try again.',
+			'common.errorKeys.announcementSendFailed' => 'Could not send the announcement. Please try again.',
+			'common.errorKeys.sitesFetchFailed' => 'Could not load sites. Please try again.',
+			'common.errorKeys.siteDetailFetchFailed' => 'Could not load site details. Please try again.',
+			'common.errorKeys.siteBuildingsFetchFailed' => 'Could not load blocks. Please try again.',
+			'common.errorKeys.siteCreateFailed' => 'Could not add the site. Please try again.',
+			'common.errorKeys.siteUpdateFailed' => 'Could not update the site. Please try again.',
+			'common.errorKeys.siteCollectionUpdateFailed' => 'Could not update site collection details. Please try again.',
+			'common.errorKeys.siteDeleteFailed' => 'Could not delete the site. Please try again.',
+			'common.errorKeys.siteBuildingCreateFailed' => 'Could not add the block. Please try again.',
+			'common.errorKeys.siteExpensesFetchFailed' => 'Could not load site expenses. Please try again.',
+			'common.errorKeys.siteExpenseSummaryFetchFailed' => 'Could not load the site expense summary. Please try again.',
+			'common.errorKeys.siteExpenseCreateFailed' => 'Could not add the site expense. Please try again.',
+			'common.errorKeys.siteExpenseUpdateFailed' => 'Could not update the site expense. Please try again.',
+			'common.errorKeys.siteExpenseDeleteFailed' => 'Could not delete the site expense. Please try again.',
+			'common.errorKeys.subscriptionFetchFailed' => 'Could not load subscription information. Please try again.',
+			'common.errorKeys.invalidExpenseResponse' => 'Could not read expense information. Please try again.',
+			'common.errorKeys.invalidSiteExpenseResponse' => 'Could not read site expense information. Please try again.',
+			'common.errorKeys.unsupportedFileType' => 'This file type is not supported.',
+			'common.errorKeys.dekontUploadFailed' => 'Could not upload the receipt. Please try again.',
+			'common.errorKeys.serverResponseUnreadable' => 'Could not read the server response. Please try again.',
+			'common.errorKeys.dekontResponseMissing' => 'The receipt response is incomplete. Please try again.',
+			'common.errorKeys.dekontResponseParseFailed' => 'Could not process the receipt response. Please try again.',
+			'common.errorKeys.reportFileEmpty' => 'The report file was empty. Please try again.',
+			'common.errorKeys.downloadStarted' => 'Download started...',
+			'common.errorKeys.downloadSavedToGallery' => 'Saved to your phone\'s Gallery (AidatPanel album).',
+			'common.errorKeys.downloadSavedToDownloads' => 'Receipt saved to your Downloads folder.',
+			'common.errorKeys.downloadFallbackShare' => 'Share screen opened. You can save it to Files from there.',
+			'common.errorKeys.downloadError' => 'An error occurred while downloading the file.',
+			'common.errorKeys.galleryPermissionDenied' => 'Gallery access permission was denied.',
 			'validation.emailRequired' => 'Email address cannot be empty',
 			'validation.emailInvalid' => 'Please enter a valid email address',
 			'validation.emailTooLong' => 'Email address is too long',
@@ -3853,10 +5017,15 @@ extension on Translations {
 			'validation.passwordRequired' => 'Password cannot be empty',
 			'validation.passwordTooShort' => 'Password must be at least 6 characters',
 			'validation.passwordTooLong' => 'Password is too long',
+			'validation.passwordAlphanumericRequired' => 'Password must be at least 6 characters and contain only letters and numbers',
 			'validation.passwordUppercaseRequired' => 'Password must contain at least 1 uppercase letter',
 			'validation.passwordLowercaseRequired' => 'Password must contain at least 1 lowercase letter',
 			'validation.passwordNumberRequired' => 'Password must contain at least 1 number',
 			'validation.passwordSpecialCharRequired' => 'Password must contain at least 1 special character',
+			'validation.field_required' => 'This field is required',
+			'validation.field_too_short' => 'Value is too short',
+			'validation.field_too_long' => 'Value is too long',
+			'validation.field_invalid' => 'Please enter a valid value',
 			'features.buildings.managerPanel' => 'Manager',
 			'features.buildings.buildingDetail' => 'Building Detail',
 			'features.buildings.addBuilding' => 'Add Building',
@@ -3880,6 +5049,8 @@ extension on Translations {
 			'features.buildings.newCodePrefix' => 'If you generate a new code, ',
 			'features.buildings.oldUserRemoved' => 'the old user will be removed',
 			'features.buildings.currentCodePrefix' => 'The current code ',
+			_ => null,
+		} ?? switch (path) {
 			'features.buildings.codeInvalid' => 'will become invalid',
 			'features.buildings.codeReady' => 'Invite Code Ready',
 			'features.buildings.code' => 'CODE',
@@ -3959,6 +5130,7 @@ extension on Translations {
 			'features.buildings.list.unitsWaiting' => '{count} units waiting',
 			'features.buildings.list.allPaymentsComplete' => 'All payments complete',
 			'features.buildings.list.monthlyDuesShort' => 'Monthly Dues',
+<<<<<<< HEAD
 			'features.sites.tabSites' => 'Sites',
 			'features.sites.tabBuildings' => 'Buildings',
 			'features.sites.mySites' => 'My Sites',
@@ -3992,6 +5164,66 @@ extension on Translations {
 			'features.sites.overrideCollection' => 'Collection details',
 			'features.sites.overrideCollectionSwitch' => 'Use custom IBAN for this block',
 			'features.sites.overrideCollectionHint' => 'When off, the site collection details apply.',
+=======
+			'features.sites.addSiteTitle' => 'Add New Site',
+			'features.sites.createSite' => 'Create Site',
+			'features.sites.siteName' => 'Site name',
+			'features.sites.siteNameHint' => 'e.g. Sunny Residence',
+			'features.sites.siteCreated' => 'Site created successfully',
+			'features.sites.siteCreateFailed' => 'Could not add site',
+			'features.sites.mySites' => 'My Sites',
+			'features.sites.tabSites' => 'Sites',
+			'features.sites.tabBuildings' => 'Buildings',
+			'features.sites.siteCount' => '{count} site',
+			'features.sites.buildingCount' => '{count} building',
+			'features.sites.emptySites' => 'No sites added yet',
+			'features.sites.newSite' => 'New Site',
+			'features.sites.newBuilding' => 'New Building',
+			'features.sites.siteDetailTitle' => 'Site Details',
+			'features.sites.addBlock' => 'Add Block',
+			'features.sites.addBlockTitle' => 'Add Block to Site',
+			'features.sites.createBlock' => 'Create Block',
+			'features.sites.blockCreated' => 'Block added successfully',
+			'features.sites.blockSection' => 'Block details',
+			'features.sites.blockLabel' => 'Block label',
+			'features.sites.blockLabelHint' => 'e.g. Block A',
+			'features.sites.blockNameOptional' => 'Building name (optional)',
+			'features.sites.blockNameHint' => 'Uses block label if left empty',
+			'features.sites.addressExtra' => 'Extra address',
+			'features.sites.addressExtraHint' => 'e.g. Rear entrance, Gate 2',
+			'features.sites.overrideDue' => 'Override site default due amount',
+			'features.sites.overrideDueHint' => 'When off, site due applies',
+			'features.sites.overrideCollection' => 'Override site default IBAN',
+			'features.sites.overrideCollectionHint' => 'When off, site IBAN applies',
+			'features.sites.blocksTitle' => 'Blocks',
+			'features.sites.noBlocks' => 'No blocks added yet',
+			'features.sites.blockApartments' => '{count} units',
+			'features.sites.blockCount' => 'Blocks',
+			'features.sites.apartmentCount' => 'Units',
+			'features.sites.collectedAmount' => 'Collected',
+			'features.sites.expectedAmount' => 'Expected',
+			'features.sites.collectionRate' => 'Collection',
+			'features.sites.collectedExpected' => '{collected} / {expected}',
+			'features.sites.commonExpenses' => 'Common Expenses',
+			'features.sites.report' => 'Report',
+			'features.sites.reportSheetTitle' => 'Site report',
+			'features.sites.monthlyReport' => 'Monthly report (PDF)',
+			'features.sites.annualReport' => 'Annual report (PDF)',
+			'features.sites.siteExpensesTitle' => 'Site Common Expenses',
+			'features.sites.addExpenseTitle' => 'Add Common Expense',
+			'features.sites.editExpenseTitle' => 'Edit Expense',
+			'features.sites.addExpense' => 'Add Expense',
+			'features.sites.expenseCreated' => 'Site expense added',
+			'features.sites.expenseUpdated' => 'Site expense updated',
+			'features.sites.confirmExpenseTitle' => 'Confirmation required',
+			'features.sites.deleteExpenseTitle' => 'Delete expense?',
+			'features.sites.deleteExpenseConfirm' => 'This site expense will be permanently deleted.',
+			'features.sites.deleteExpenseSuccess' => 'Site expense deleted',
+			'features.sites.noExpenses' => 'No expenses',
+			'features.sites.noExpensesHint' => 'No common expenses for this month.',
+			'features.sites.totalExpenses' => 'Total: {amount}',
+			'features.sites.perUnitShare' => 'Per unit: {amount}',
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 			'features.auth.register' => 'Register',
 			'features.auth.login' => 'Login',
 			'features.auth.join' => 'Join',
@@ -4045,14 +5277,129 @@ extension on Translations {
 			'features.auth.inviteCodeAndPasswordRequired' => 'Invite code, name and password cannot be empty',
 			'features.auth.invalidPhoneNumber' => 'Enter a valid phone number',
 			'features.auth.areYouManager' => 'Are you a manager? Register',
+			'features.auth.onboarding.stepProgress' => 'Step {current} / {total}',
+			'features.auth.onboarding.continueButton' => 'Continue',
+			'features.auth.onboarding.goToPanel' => 'Go to panel',
+			'features.auth.onboarding.secureNote' => 'Your information is securely protected.',
+			'features.auth.onboarding.step1Title' => 'Who will you use the app as?',
+			'features.auth.onboarding.step1Subtitle' => 'Select your role to continue.',
+			'features.auth.onboarding.step1ManagerOption' => 'I am an apartment manager',
+			'features.auth.onboarding.step1ResidentOption' => 'I am an apartment resident',
+			'features.auth.onboarding.step1ManagerHint' => 'Select this if you manage an apartment or site.',
+			'features.auth.onboarding.step1ResidentHint' => 'I am a resident signing in to my unit.',
+			'features.auth.onboarding.step1ReturningLogin' => 'I have signed in before',
+			'features.auth.onboarding.step1ReturningLoginManager' => 'I signed in before as manager',
+			'features.auth.onboarding.step1ReturningLoginResident' => 'I signed in before as resident',
+			'features.auth.onboarding.step1ReturningLoginHint' => '{name} · {contact}',
+			'features.auth.onboarding.step1LegacyEmailLogin' => 'Sign in with email and password',
+			'features.auth.onboarding.backButton' => 'Back',
+			'features.auth.onboarding.managerExperienceTitle' => 'Welcome to AidatPanel',
+			'features.auth.onboarding.managerExperienceSubtitle' => 'Have you registered before?',
+			'features.auth.onboarding.managerReturningOption' => 'I have registered before',
+			'features.auth.onboarding.managerFirstTimeOption' => 'I am using the app for the first time',
+			'features.auth.onboarding.managerNameTitle' => 'What is your name?',
+			'features.auth.onboarding.managerNameSubtitle' => 'How should we address you?',
+			'features.auth.onboarding.managerIdentifierTitle' => 'Enter your email or phone',
+			'features.auth.onboarding.managerIdentifierSubtitle' => 'This will be used for sign-in.',
+			'features.auth.onboarding.managerIdentifierLabel' => 'Email or phone',
+			'features.auth.onboarding.managerIdentifierHint' => 'example@mail.com or 05321234567',
+			'features.auth.onboarding.managerIdentifierPhoneNote' => 'For phone, enter 11 digits starting with 0.',
+			'features.auth.onboarding.identifierRequired' => 'Enter your email or phone',
+			'features.auth.onboarding.phoneInvalidElevenDigits' => 'Enter an 11-digit phone number starting with 0',
+			'features.auth.onboarding.managerLoginPasswordTitle' => 'Enter your password',
+			'features.auth.onboarding.managerRegisterPasswordTitle' => 'Set your password',
+			'features.auth.onboarding.managerRegisterPasswordSubtitle' => 'At least 6 characters; letters and numbers only.',
+			'features.auth.onboarding.managerCreateAccountButton' => 'Create Account',
+			'features.auth.onboarding.managerLoginButton' => 'Sign In',
+			'features.auth.onboarding.residentExperienceTitle' => 'Welcome to AidatPanel',
+			'features.auth.onboarding.residentExperienceSubtitle' => 'How would you like to continue?',
+			'features.auth.onboarding.residentReturningOption' => 'I have signed in before',
+			'features.auth.onboarding.residentInviteOption' => 'I have an invite code',
+			'features.auth.onboarding.residentPhoneTitle' => 'Your phone number',
+			'features.auth.onboarding.residentPhoneSubtitle' => 'We will send you a one-time sign-in code.',
+			'features.auth.onboarding.residentWelcomeTitle' => 'Welcome!',
+			'features.auth.onboarding.residentWelcomeSubtitle' => 'Your phone is verified. Please enter your name.',
+			'features.auth.onboarding.residentCompleteJoinButton' => 'Go to Dashboard',
+			'features.auth.onboarding.step2Title' => 'Enter Your Contact Information',
+			'features.auth.onboarding.step2Subtitle' => 'Enter your phone number or email address to continue.',
+			'features.auth.onboarding.step2SubtitlePhone' => 'We will send you a verification code.',
+			'features.auth.onboarding.step2SubtitleEmail' => 'We will send a verification code to your email.',
+			'features.auth.onboarding.step3OtpTitle' => 'Verification Code',
+			'features.auth.onboarding.step3OtpSubtitlePhone' => 'Enter the 6-digit code sent to {phone}.',
+			'features.auth.onboarding.step3OtpSubtitleEmail' => 'Enter the 6-digit code sent to {email}.',
+			'features.auth.onboarding.step3OtpSubtitle' => 'Enter the 6-digit code below.',
+			'features.auth.onboarding.step3OtpSentTo' => 'Code sent to {phone}.',
+			'features.auth.onboarding.step3ResendOtp' => 'Resend code ({seconds} s)',
+			'features.auth.onboarding.step3ResendOtpReady' => 'Resend code',
+			'features.auth.onboarding.step3PasswordTitle' => 'Enter your password',
+			'features.auth.onboarding.step3RegisterPasswordTitle' => 'Create your password',
+			'features.auth.onboarding.step3SecureVerify' => 'We protect your account with secure verification.',
+			'features.auth.onboarding.step3DevOtpHint' => 'If SMS does not arrive, check the backend terminal for the otp_dev line.',
+			'features.auth.onboarding.step4InviteTitle' => 'Enter Your Invite Code',
+			'features.auth.onboarding.step4InviteSubtitle' => 'Enter the code from your manager.',
+			'features.auth.onboarding.step4InviteHint' => 'You can get your invite code from management or your manager.',
+			'features.auth.onboarding.step4ManagerInviteTitle' => 'Enter Your Invite Code',
+			'features.auth.onboarding.step4ManagerInviteSubtitle' => 'Enter your invite code to link your manager account to the site or building.',
+			'features.auth.onboarding.step4ManagerInviteInfo' => 'You can get your invite code from management or your manager.',
+			'features.auth.onboarding.step4ManagerPrimaryLink' => 'No, I am the manager',
+			'features.auth.onboarding.step4ManagerPrimaryHint' => 'Choose this if you will manage the building yourself.',
+			'features.auth.onboarding.step4InviteValidated' => 'Valid invite: {label}',
+			'features.auth.onboarding.step5Title' => 'What You Can Do as a Manager',
+			'features.auth.onboarding.step5ManagerSubtitle' => 'Manage your site easily with AidatPanel and serve your residents better.',
+			'features.auth.onboarding.step5ResidentTitle' => 'What You Can Do as a Resident',
+			'features.auth.onboarding.step5ResidentSubtitle' => 'Track your dues and payments here.',
+			'features.auth.onboarding.step5ManagerAnnounceTitle' => 'Manage announcements',
+			'features.auth.onboarding.step5ManagerAnnounceBody' => 'Send announcements to all residents quickly.',
+			'features.auth.onboarding.step5ManagerDuesTitle' => 'Dues tracking',
+			'features.auth.onboarding.step5ManagerDuesBody' => 'Track collections and view payments.',
+			'features.auth.onboarding.step5ManagerResidentsTitle' => 'Resident management',
+			'features.auth.onboarding.step5ManagerResidentsBody' => 'Manage resident information and simplify communication.',
+			'features.auth.onboarding.step5ManagerReportsTitle' => 'Reporting',
+			'features.auth.onboarding.step5ManagerReportsBody' => 'Monitor site finances with detailed reports.',
+			'features.auth.onboarding.step5ResidentDuesTitle' => 'View your dues',
+			'features.auth.onboarding.step5ResidentDuesBody' => 'Track your current balance and payment history.',
+			'features.auth.onboarding.step5ResidentDekontTitle' => 'Upload receipts',
+			'features.auth.onboarding.step5ResidentDekontBody' => 'Send your payment receipt as a photo or PDF.',
+			'features.auth.onboarding.step5ResidentTicketsTitle' => 'Report issues',
+			'features.auth.onboarding.step5ResidentTicketsBody' => 'Easily notify management about site problems.',
+			'features.auth.onboarding.step5ResidentNotifyTitle' => 'Get notifications',
+			'features.auth.onboarding.step5ResidentNotifyBody' => 'Stay informed about announcements and due reminders.',
+			'features.auth.onboarding.step6ManagerTitle' => 'Setup complete',
+			'features.auth.onboarding.step6ManagerSubtitle' => 'Welcome to the manager panel! You can now start managing your site and serving your residents better.',
+			'features.auth.onboarding.step6ResidentTitle' => 'Sign-in complete',
+			'features.auth.onboarding.step6ResidentSubtitle' => 'Track your dues and payments from here.',
+			'features.auth.onboarding.otpInvalid' => 'Wrong code. Try again.',
+			'features.auth.onboarding.otpExpired' => 'Code expired. Request a new one.',
+			'features.auth.onboarding.phoneInvalid' => 'Enter a valid phone number (5XX XXX XX XX).',
+			'features.auth.onboarding.inviteInvalid' => 'Invite code is invalid or expired.',
+			'features.auth.onboarding.otpSendFailed' => 'Could not send code. Please try again.',
+			'features.auth.onboarding.phoneOtpDisabledHint' => 'Phone sign-in coming soon. You can use email for now.',
+			'features.auth.onboarding.residentLoginTitle' => 'Resident Sign In',
+			'features.auth.onboarding.residentLoginSubtitle' => 'Enter your details to continue.',
+			'features.auth.onboarding.residentSendCodeButton' => 'Send Code',
+			'features.auth.onboarding.residentPhoneVerifyNote' => 'A verification code will be sent to your phone number.',
+			'features.auth.onboarding.residentOtpSubtitle' => 'Enter the 6-digit code sent to your phone.',
+			'features.auth.onboarding.residentResendPrompt' => 'Didn\'t get the code?',
+			'features.auth.onboarding.residentResendLink' => 'Resend',
+			'features.auth.onboarding.residentInviteSubtitle' => 'Please enter the invitation code you received from your manager to continue.',
+			'features.auth.onboarding.residentJoinButton' => 'Join Apartment',
+			'features.auth.onboarding.residentInviteCodeLabel' => 'Invitation Code',
+			'features.auth.onboarding.residentInviteCodeHint' => 'e.g. APF-45532',
+			'features.auth.onboarding.residentNameRequired' => 'Please enter your full name.',
 			'features.apartments.residentPanel' => 'Resident',
 			'features.tickets.myTickets' => 'My requests',
 			'features.tickets.newTicket' => 'New request',
 			'features.tickets.createTitle' => 'Report issue / request',
-			'features.tickets.fieldTitle' => 'Title',
-			'features.tickets.fieldTitleHint' => 'e.g. Elevator malfunction',
+			'features.tickets.reportFaultTitle' => 'Report fault',
+			'features.tickets.myApplicationsTitle' => 'My applications',
+			'features.tickets.fieldTitle' => 'Subject',
+			'features.tickets.fieldTitleHint' => 'Enter a short summary.',
+			'features.tickets.fieldDetail' => 'Details',
+			'features.tickets.fieldDetailHint' => 'Briefly describe the issue.',
 			'features.tickets.fieldDescription' => 'Description',
-			'features.tickets.fieldDescriptionHint' => 'Briefly describe the issue',
+			'features.tickets.fieldDescriptionHint' => 'Write a detailed explanation…',
+			'features.tickets.attachmentHint' => 'Add photo, video or document… PNG, JPG — max 5 MB.',
+			'features.tickets.attachmentComingSoon' => 'File attachments coming soon.',
 			'features.tickets.fieldCategory' => 'Category',
 			'features.tickets.categoryComplaint' => 'Complaint',
 			'features.tickets.categoryRequest' => 'Request',
@@ -4110,6 +5457,13 @@ extension on Translations {
 			'features.tickets.templateResolvedCheck' => 'Resolved / verified',
 			'features.tickets.templateResolvedCheckText' => 'Issue fixed; verification completed.',
 			'features.dekont.makePaymentTitle' => 'Make Payment',
+			'features.dekont.payDebtTitle' => 'Pay debt',
+			'features.dekont.paymentMethodTitle' => 'Payment method',
+			'features.dekont.paymentMethodCard' => 'Credit / debit card',
+			'features.dekont.paymentMethodEft' => 'Bank transfer',
+			'features.dekont.paymentMethodDekont' => 'Upload receipt',
+			'features.dekont.paymentCardComingSoon' => 'Card payments coming soon.',
+			'features.dekont.uploadReceiptHint' => 'Upload receipt (jpg, png, webp, PDF — max 5 MB).',
 			'features.dekont.myDekontsTitle' => 'My Receipts',
 			'features.dekont.managerTitle' => 'Receipt Review',
 			'features.dekont.reviewAction' => 'Review receipt',
@@ -4246,6 +5600,8 @@ extension on Translations {
 			'features.expenses.categoryElevator' => 'Elevator',
 			'features.expenses.categoryElectricity' => 'Electricity',
 			'features.expenses.categoryWater' => 'Water',
+			_ => null,
+		} ?? switch (path) {
 			'features.expenses.categoryInsurance' => 'Insurance',
 			'features.expenses.categoryRepair' => 'Repair',
 			'features.expenses.categoryGarden' => 'Garden',
@@ -4336,6 +5692,7 @@ extension on Translations {
 			'features.notifications.typeDekontPaymentApplied' => 'Receipt approved',
 			'features.notifications.typeExpenseAdded' => 'New expense',
 			'features.notifications.typeSystem' => 'System',
+			'features.notifications.typeAidatPanelTeam' => 'AidatPanel Team',
 			'features.notifications.typeOther' => 'Notification',
 			'features.notifications.allApartmentsTag' => 'All apartments',
 			'features.notifications.sendTitle' => 'Announcement to residents',
@@ -4365,6 +5722,9 @@ extension on Translations {
 			'features.profile.profileUpdateFailed' => 'Could not update profile. Please try again.',
 			'features.profile.profileLoadFailed' => 'Could not load profile.',
 			'features.profile.readOnlySection' => 'Cannot be edited here',
+			'features.profile.contactRequired' => 'At least one contact channel (Email or Phone) must be registered.',
+			'features.profile.securityVerificationTitle' => 'Security Verification',
+			'features.profile.securityVerificationMessage' => 'You must enter your current password to change your email or phone number.',
 			'features.profile.editSheetHint' => 'Only name and phone can be updated. Other details are shown on the profile screen above.',
 			'features.profile.photoSaved' => 'Profile photo saved for this account.',
 			'features.profile.photoRemoved' => 'Profile photo removed.',
@@ -4379,6 +5739,7 @@ extension on Translations {
 			'features.profile.avatarGalleryError' => 'Could not open the gallery.',
 			'features.profile.avatarDecodeError' => 'Could not decode the image.',
 			'features.profile.avatarSaveError' => 'Could not save the photo.',
+			'features.profile.avatarUnsupportedFormat' => 'Unsupported file type. Please select a JPG, PNG, or GIF.',
 			'features.profile.accountCreatedAt' => 'Account created: {date}',
 			'features.subscription.title' => 'Subscription',
 			'features.subscription.statusActive' => 'Active',
@@ -4406,6 +5767,8 @@ extension on Translations {
 			'features.subscription.cycleMonthly' => 'Renews every month',
 			'features.subscription.cycleAnnual' => 'Renews every year',
 			'features.subscription.featureUnlimitedUnits' => 'Unlimited units',
+			'features.subscription.buildingUsageSummary' => 'Managed buildings: {used}',
+			'features.subscription.buildingUsageWithLimit' => 'Managed buildings: {used} / {limit}',
 			'features.subscription.featureDuesTracking' => 'Dues tracking',
 			'features.subscription.featureAdvancedReports' => 'Advanced reports',
 			'features.subscription.featurePrioritySupport' => 'Priority support',
@@ -4434,6 +5797,27 @@ extension on Translations {
 			'features.subscription.priceUnavailable' => '—',
 			'features.subscription.loadingPlans' => 'Loading plans…',
 			'features.subscription.purchasesDisabledHint' => 'Purchases are not enabled in this build yet.',
+			'features.subscription.plan1To5' => '1-5 Buildings Plan',
+			'features.subscription.plan5To20' => '5-20 Buildings Plan',
+			'features.subscription.plan20To50' => '20-50 Buildings Plan',
+			'features.subscription.plan50Plus' => '50+ Buildings (Custom)',
+			'features.subscription.comingSoon' => 'Coming Soon',
+			'features.subscription.contactUs' => 'Contact Us',
+			'features.subscription.contactUsDesc' => 'Contact us for custom pricing.',
+			'features.subscription.sectionPlans' => 'Plans',
+			'features.subscription.feature1To5' => 'Manage 1-5 Buildings',
+			'features.subscription.feature5To20' => 'Manage 5-20 Buildings',
+			'features.subscription.feature20To50' => 'Manage 20-50 Buildings',
+			'features.subscription.feature50Plus' => 'Unlimited Building Management',
+			'features.subscription.featureCustomSupport' => 'Dedicated Account Manager',
+			'features.subscription.toggleMonthly' => 'Monthly',
+			'features.subscription.toggleAnnual' => 'Annual',
+			'features.subscription.currentPlanBadge' => 'Your Current Plan',
+			'features.subscription.buildingProgress' => 'Building Usage',
+			'features.subscription.planBasic' => 'Basic Plan',
+			'features.subscription.featureBasicBuildings' => 'Manage 1 Building',
+			'features.subscription.featureBasicReports' => 'Basic Reports',
+			'features.subscription.statusUnlimited' => 'Lifetime',
 			'features.reports.menuDownload' => 'Download report',
 			'features.reports.sheetTitle' => 'PDF report',
 			'features.reports.reportTypeLabel' => 'Report type',
@@ -4493,6 +5877,7 @@ extension on Translations {
 			'features.dashboard.payNow' => 'Pay Now',
 			'features.dashboard.overduePaymentsBadge' => '{count} overdue payment(s)',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} dues',
+			'features.dashboard.residentDebtAndPaySubtitle' => 'Pay your dues here.',
 			'features.faz2.sectionTitle' => 'Phase 2',
 			_ => null,
 		} ?? switch (path) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/action_chevron.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -66,11 +67,7 @@ class BuildingActionsSheet extends StatelessWidget {
           PremiumActionSheetTile(
             icon: Icons.edit_outlined,
             label: t.common.editBuilding,
-            trailing: Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.mutedText,
-              size: AppSizes.iconSize,
-            ),
+            trailing: const ActionChevron(),
             onTap: () => Navigator.pop(context, BuildingMenuAction.edit),
           ),
           const SizedBox(height: AppSizes.spacingXS),
@@ -82,11 +79,7 @@ class BuildingActionsSheet extends StatelessWidget {
             iconColor:
                 collectionReady ? AppColors.textPrimary : AppColors.warning,
             trailing: collectionReady
-                ? Icon(
-                    Icons.chevron_right_rounded,
-                    color: AppColors.mutedText,
-                    size: AppSizes.iconSize,
-                  )
+                ? const ActionChevron()
                 : const Icon(
                     Icons.warning_amber_rounded,
                     size: AppSizes.iconSizeSmall,

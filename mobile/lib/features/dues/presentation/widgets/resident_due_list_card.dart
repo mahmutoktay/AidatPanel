@@ -158,7 +158,7 @@ class _PrimaryActionButton extends StatelessWidget {
       onPressed: onTap,
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.actionButton,
-        foregroundColor: AppColors.surface,
+        foregroundColor: AppColors.actionButtonForeground,
         elevation: 0,
         minimumSize: const Size(0, AppSizes.buttonHeightSmall),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -170,7 +170,7 @@ class _PrimaryActionButton extends StatelessWidget {
       child: Text(
         label,
         style: AppTypography.button.copyWith(
-          color: AppColors.surface,
+          color: AppColors.actionButtonForeground,
           fontWeight: FontWeight.w800,
           fontSize: 15,
         ),

@@ -90,6 +90,9 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get themeDark => 'Koyu';
 	@override String get themeSystem => 'Sistem';
 	@override String get themeSheetDescription => 'Uygulamanın görünümünü buradan değiştirebilirsiniz.';
+	@override String get themeLightSubtitle => 'Light';
+	@override String get themeDarkSubtitle => 'Dark';
+	@override String get themeSystemSubtitle => 'System';
 	@override String get turkish => 'Türkçe';
 	@override String get notifications => 'Bildirimler';
 	@override String get info => 'Bilgi';
@@ -168,7 +171,28 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get makePayment => 'Ödeme Yap';
 	@override String get bills => 'Faturalar';
 	@override String get support => 'Destek';
-	@override String get quickActions => 'Hızlı işlemler';
+	@override String get quickActions => 'Hızlı İşlemler';
+	@override String get myApplications => 'Başvurularım';
+	@override String get myAnnouncements => 'Duyurularım';
+	@override String get debtAndPay => 'Borç ve Öde';
+	@override String get duesStatus => 'Aidat Durumu';
+	@override String get accountSummary => 'Hesap Özeti';
+	@override String get accountSummarySubtitle => 'Dönem özetini ve detay';
+	@override String get myReceiptsSubtitle => 'Ödeme dekontlarınız';
+	@override String get myPaymentRequestSubtitle => 'Ödeme talebi oluşturun';
+	@override String get mySettings => 'Ayarlarım';
+	@override String get myReceipts => 'Dekontlarım';
+	@override String get myPaymentRequest => 'Ödeme Talebi';
+	@override String get duesHistory => 'Geçmişler';
+	@override String get addRequest => 'Talep Ekle';
+	@override String get payDebt => 'Borcu Öde';
+	@override String get tabAll => 'Tümü';
+	@override String get tabFaults => 'Arızalar';
+	@override String get tabRequests => 'Talepler';
+	@override String get apartmentNo => 'Daire No';
+	@override String get fullName => 'Ad Soyad';
+	@override String get debtAmount => 'Borç';
+	@override String get lastDueDate => 'Son Ödeme Tarihi';
 	@override String get residentName => 'Sakin Adı';
 	@override String get addBuildingNew => 'Yeni Bina Ekle';
 	@override String get basicInfo => 'Temel Bilgiler';
@@ -206,6 +230,8 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get buildingAddedSuccess => 'Bina başarıyla eklendi';
 	@override String get createInviteCode => 'Davet Kodu Oluştur';
 	@override String get whichBuildingForCode => 'Hangi binadan kod üretilecek?';
+	@override String get whichSiteForCode => 'Hangi siteden kod üretilecek?';
+	@override String get inviteStandaloneBuildings => 'Tekil binalar';
 	@override String get whichApartmentForCode => 'Hangi daire için kod üretilecek?';
 	@override String get noApartmentsInBuilding => 'Bu binaya henüz daire eklenmemiş';
 	@override String get activeCodeBadge => 'Aktif Kod';
@@ -296,6 +322,9 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get apartmentLabel => 'DAİRE';
 	@override String get turkishLanguage => 'Türkçe';
 	@override String get englishLanguage => 'English';
+	@override String get turkishLanguageSubtitle => 'Turkish';
+	@override String get englishLanguageSubtitle => 'İngilizce';
+	@override String get stepSite => 'Site';
 	@override String get stepBuilding => 'Bina';
 	@override String get stepApartment => 'Daire';
 	@override String get stepCode => 'Kod';
@@ -360,6 +389,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get changePasswordFailed => 'Şifre değiştirilemedi. Lütfen tekrar deneyin.';
 	@override String get changePasswordWrongCurrent => 'Mevcut şifre hatalı.';
 	@override String get languageSheetDescription => 'Uygulama dilini buradan değiştirebilirsiniz.';
+	@override late final _Translations$common$friendlyError$tr friendlyError = _Translations$common$friendlyError$tr._(_root);
 	@override String get newPasswordHint => 'Büyük harf, küçük harf ve rakam içermeli';
 	@override String get passwordStrengthUnspecified => 'Belirtilmemiş';
 	@override String get passwordStrengthWeak => 'Zayıf';
@@ -393,6 +423,9 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get resetPasswordFailed => 'Şifre sıfırlanamadı. Kod hatalı veya süresi dolmuş olabilir.';
 	@override String get resetPasswordSubmit => 'Şifreyi Sıfırla';
 	@override String get backToLogin => 'Giriş ekranına dön';
+	@override String get select => 'Seç';
+	@override String get kNew => 'Yeni';
+	@override late final _Translations$common$errorKeys$tr errorKeys = _Translations$common$errorKeys$tr._(_root);
 }
 
 // Path: validation
@@ -410,10 +443,15 @@ class _Translations$validation$tr implements Translations$validation$en {
 	@override String get passwordRequired => 'Şifre boş bırakılamaz';
 	@override String get passwordTooShort => 'Şifre en az 6 karakter olmalıdır';
 	@override String get passwordTooLong => 'Şifre çok uzun';
+	@override String get passwordAlphanumericRequired => 'Şifre en az 6 karakter olmalı ve yalnızca harf ile rakam içermelidir';
 	@override String get passwordUppercaseRequired => 'Şifrede en az 1 büyük harf olmalıdır';
 	@override String get passwordLowercaseRequired => 'Şifrede en az 1 küçük harf olmalıdır';
 	@override String get passwordNumberRequired => 'Şifrede en az 1 rakam olmalıdır';
 	@override String get passwordSpecialCharRequired => 'Şifrede en az 1 özel karakter olmalıdır';
+	@override String get field_required => 'Bu alan boş bırakılamaz';
+	@override String get field_too_short => 'Girilen değer çok kısa';
+	@override String get field_too_long => 'Girilen değer çok uzun';
+	@override String get field_invalid => 'Geçerli bir değer giriniz';
 }
 
 // Path: features
@@ -512,6 +550,9 @@ class _Translations$common$api$tr implements Translations$common$api$en {
 	@override String get invalidCredentials => 'E-posta, telefon veya şifre hatalı. Bilgilerinizi kontrol edip tekrar deneyin.';
 	@override String get duplicateEmail => 'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.';
 	@override String get duplicatePhone => 'Bu telefon numarası zaten kayıtlı.';
+	@override String get accountNotFoundEmail => 'Bu e-posta adresiyle kayıtlı hesap bulunamadı. Bilgilerinizi kontrol edin veya kayıt olun.';
+	@override String get accountNotFoundPhone => 'Bu telefon numarasıyla kayıtlı hesap bulunamadı. Bilgilerinizi kontrol edin veya kayıt olun.';
+	@override String get identifierCheckFailed => 'E-posta veya telefon doğrulanamadı. Lütfen tekrar deneyin.';
 	@override String get invalidInviteCode => 'Davet kodu geçersiz. Kodu kontrol edip tekrar deneyin.';
 	@override String get inviteCodeUsed => 'Bu davet kodu daha önce kullanılmış.';
 	@override String get inviteCodeExpired => 'Davet kodunun süresi dolmuş. Yöneticinizden yeni kod isteyin.';
@@ -547,6 +588,114 @@ class _Translations$common$documentPreview$tr implements Translations$common$doc
 	@override String get share => 'Paylaş';
 	@override String get pdfUnavailable => 'PDF bu cihazda açılamadı. Paylaş ile başka bir uygulamada açabilirsiniz.';
 	@override String get pinchHint => 'İki parmakla yakınlaştırıp kaydırın';
+}
+
+// Path: common.friendlyError
+class _Translations$common$friendlyError$tr implements Translations$common$friendlyError$en {
+	_Translations$common$friendlyError$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get networkTitle => 'İnternet bağlantısı yok';
+	@override String get networkMessage => 'Telefonunuzun internete bağlı olduğundan emin olup tekrar deneyin.';
+	@override String get unauthorizedTitle => 'Oturum sona erdi';
+	@override String get unauthorizedMessage => 'Lütfen uygulamayı kapatıp tekrar giriş yapın.';
+	@override String get serverTitle => 'Sunucuya ulaşılamıyor';
+	@override String get serverMessage => 'Biraz sonra tekrar deneyebilir misiniz?';
+	@override String get genericTitle => 'Bu sayfa açılamadı';
+	@override String get genericMessage => 'Lütfen uygulamayı kapatıp tekrar açın.';
+	@override String get debugOnlyLabel => 'Sadece geliştirici görür (debug):';
+}
+
+// Path: common.errorKeys
+class _Translations$common$errorKeys$tr implements Translations$common$errorKeys$en {
+	_Translations$common$errorKeys$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get authLoginFailed => 'Giriş sırasında bir sorun oluştu. Lütfen tekrar deneyin.';
+	@override String get authRegisterFailed => 'Kayıt sırasında bir sorun oluştu. Lütfen tekrar deneyin.';
+	@override String get authJoinFailed => 'Katılım sırasında bir sorun oluştu. Lütfen tekrar deneyin.';
+	@override String get authLogoutAllDevicesFailed => 'Diğer cihazlardan çıkış yapılamadı. Lütfen tekrar deneyin.';
+	@override String get authForgotPasswordRequestFailed => 'İstek gönderilemedi. Lütfen tekrar deneyin.';
+	@override String get authResetPasswordFailed => 'Şifre sıfırlanamadı. Lütfen tekrar deneyin.';
+	@override String get dashboardSummaryFetchFailed => 'Dashboard özeti alınamadı. Lütfen tekrar deneyin.';
+	@override String get dashboardCollectionFetchFailed => 'Tahsilat özeti alınamadı. Lütfen tekrar deneyin.';
+	@override String get buildingFetchFailed => 'Binalar yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get collectionPresetsFetchFailed => 'Tahsilat önerileri yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get buildingCreateFailed => 'Bina eklenemedi. Lütfen tekrar deneyin.';
+	@override String get buildingUpdateFailed => 'Bina güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get buildingCollectionUpdateFailed => 'Tahsilat bilgileri güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get collectionPresetNotFound => 'Güncellenecek veya silinecek IBAN kaydı bulunamadı.';
+	@override String get collectionPresetSaveFailed => 'IBAN kaydedilemedi. Lütfen tekrar deneyin.';
+	@override String get collectionPresetDeleteFailed => 'IBAN silinemedi. Lütfen tekrar deneyin.';
+	@override String get buildingDeleteFailed => 'Bina silinemedi. Lütfen tekrar deneyin.';
+	@override String get inviteCodeCreateFailed => 'Davet kodu oluşturulamadı. Lütfen tekrar deneyin.';
+	@override String get apartmentsFetchFailed => 'Daireler yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get apartmentCreateFailed => 'Daire eklenemedi. Lütfen tekrar deneyin.';
+	@override String get apartmentUpdateFailed => 'Daire güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get apartmentDeleteFailed => 'Daire silinemedi. Lütfen tekrar deneyin.';
+	@override String get residentRemoveFailed => 'Sakin çıkarılamadı. Lütfen tekrar deneyin.';
+	@override String get buildingDuesFetchFailed => 'Aidat listesi alınamadı. Lütfen tekrar deneyin.';
+	@override String get myDuesFetchFailed => 'Aidatlarınız alınamadı. Lütfen tekrar deneyin.';
+	@override String get dueStatusUpdateFailed => 'Aidat durumu güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get dueAmountUpdateFailed => 'Aidat tutarı güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get dueReminderFailed => 'Hatırlatma gönderilemedi. Lütfen tekrar deneyin.';
+	@override String get myTicketsFetchFailed => 'Talepler alınamadı. Lütfen tekrar deneyin.';
+	@override String get buildingTicketsFetchFailed => 'Bina talepleri alınamadı. Lütfen tekrar deneyin.';
+	@override String get ticketDetailFetchFailed => 'Talep detayı alınamadı. Lütfen tekrar deneyin.';
+	@override String get ticketCreateFailed => 'Talep oluşturulamadı. Lütfen tekrar deneyin.';
+	@override String get ticketNoteAddFailed => 'Not eklenemedi. Lütfen tekrar deneyin.';
+	@override String get ticketStatusUpdateFailed => 'Talep durumu güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get expensesFetchFailed => 'Gider listesi alınamadı. Lütfen tekrar deneyin.';
+	@override String get expenseSummaryFetchFailed => 'Gider özeti alınamadı. Lütfen tekrar deneyin.';
+	@override String get expenseCreateFailed => 'Gider kaydedilemedi. Lütfen tekrar deneyin.';
+	@override String get expenseUpdateFailed => 'Gider güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get expenseDeleteFailed => 'Gider silinemedi. Lütfen tekrar deneyin.';
+	@override String get expenseReceiptsUploadFailed => 'Makbuzlar yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get profileFetchFailed => 'Profil bilgileri alınamadı. Lütfen tekrar deneyin.';
+	@override String get profileUpdateFailed => 'Profil güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get languageUpdateFailed => 'Dil tercihi kaydedilemedi. Lütfen tekrar deneyin.';
+	@override String get passwordChangeFailed => 'Şifre değiştirilemedi. Lütfen tekrar deneyin.';
+	@override String get accountDeleteFailed => 'Hesap kapatılamadı. Lütfen tekrar deneyin.';
+	@override String get profilePictureUploadFailed => 'Profil fotoğrafı yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get profilePictureDeleteFailed => 'Profil fotoğrafı silinemedi. Lütfen tekrar deneyin.';
+	@override String get notificationCountFetchFailed => 'Bildirim sayısı alınamadı. Lütfen tekrar deneyin.';
+	@override String get notificationsFetchFailed => 'Bildirimler alınamadı. Lütfen tekrar deneyin.';
+	@override String get announcementCountFetchFailed => 'Duyuru sayısı alınamadı. Lütfen tekrar deneyin.';
+	@override String get notificationMarkReadFailed => 'Bildirim okunamadı. Lütfen tekrar deneyin.';
+	@override String get notificationsMarkAllReadFailed => 'Bildirimler okunamadı. Lütfen tekrar deneyin.';
+	@override String get announcementSendFailed => 'Duyuru gönderilemedi. Lütfen tekrar deneyin.';
+	@override String get sitesFetchFailed => 'Siteler yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteDetailFetchFailed => 'Site detayı yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteBuildingsFetchFailed => 'Bloklar yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteCreateFailed => 'Site eklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteUpdateFailed => 'Site güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get siteCollectionUpdateFailed => 'Site tahsilat bilgileri güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get siteDeleteFailed => 'Site silinemedi. Lütfen tekrar deneyin.';
+	@override String get siteBuildingCreateFailed => 'Blok eklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteExpensesFetchFailed => 'Site giderleri yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteExpenseSummaryFetchFailed => 'Site gider özeti yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteExpenseCreateFailed => 'Site gideri eklenemedi. Lütfen tekrar deneyin.';
+	@override String get siteExpenseUpdateFailed => 'Site gideri güncellenemedi. Lütfen tekrar deneyin.';
+	@override String get siteExpenseDeleteFailed => 'Site gideri silinemedi. Lütfen tekrar deneyin.';
+	@override String get subscriptionFetchFailed => 'Abonelik bilgisi alınamadı. Lütfen tekrar deneyin.';
+	@override String get invalidExpenseResponse => 'Gider bilgisi okunamadı. Lütfen tekrar deneyin.';
+	@override String get invalidSiteExpenseResponse => 'Site gider bilgisi okunamadı. Lütfen tekrar deneyin.';
+	@override String get unsupportedFileType => 'Bu dosya türü desteklenmiyor.';
+	@override String get dekontUploadFailed => 'Dekont yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get serverResponseUnreadable => 'Sunucu yanıtı okunamadı. Lütfen tekrar deneyin.';
+	@override String get dekontResponseMissing => 'Dekont yanıtı eksik. Lütfen tekrar deneyin.';
+	@override String get dekontResponseParseFailed => 'Dekont yanıtı işlenemedi. Lütfen tekrar deneyin.';
+	@override String get reportFileEmpty => 'Rapor dosyası boş geldi. Lütfen tekrar deneyin.';
+	@override String get downloadStarted => 'İndirme başlatıldı...';
+	@override String get downloadSavedToGallery => 'Görsel telefonunuzun Galerisine (AidatPanel albümüne) kaydedildi.';
+	@override String get downloadSavedToDownloads => 'Dekont, telefonunuzun İndirilenler (Downloads) klasörüne kaydedildi.';
+	@override String get downloadFallbackShare => 'Paylaşım ekranı açıldı, buradan Dosyalara Kaydet diyebilirsiniz.';
+	@override String get downloadError => 'Dosya indirilirken bir hata oluştu.';
+	@override String get galleryPermissionDenied => 'Galeriye erişim izni reddedildi.';
 }
 
 // Path: features.buildings
@@ -599,6 +748,7 @@ class _Translations$features$sites$tr implements Translations$features$sites$en 
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
+<<<<<<< HEAD
 	@override String get tabSites => 'Siteler';
 	@override String get tabBuildings => 'Binalar';
 	@override String get mySites => 'Sitelerim';
@@ -630,6 +780,66 @@ class _Translations$features$sites$tr implements Translations$features$sites$en 
 	@override String get overrideCollection => 'Tahsilat bilgileri';
 	@override String get overrideCollectionSwitch => 'Blok için özel IBAN kullan';
 	@override String get overrideCollectionHint => 'Kapalıyken site tahsilat bilgisi uygulanır.';
+=======
+	@override String get addSiteTitle => 'Yeni Site Ekle';
+	@override String get createSite => 'Site Oluştur';
+	@override String get siteName => 'Site adı';
+	@override String get siteNameHint => 'Örn: Güneş Sitesi';
+	@override String get siteCreated => 'Site başarıyla oluşturuldu';
+	@override String get siteCreateFailed => 'Site eklenemedi';
+	@override String get mySites => 'Sitelerim';
+	@override String get tabSites => 'Siteler';
+	@override String get tabBuildings => 'Binalar';
+	@override String get siteCount => '{count} site';
+	@override String get buildingCount => '{count} bina';
+	@override String get emptySites => 'Henüz site eklenmedi';
+	@override String get newSite => 'Yeni Site';
+	@override String get newBuilding => 'Yeni Bina';
+	@override String get siteDetailTitle => 'Site Detayı';
+	@override String get addBlock => 'Blok Ekle';
+	@override String get addBlockTitle => 'Siteye Blok Ekle';
+	@override String get createBlock => 'Blok Oluştur';
+	@override String get blockCreated => 'Blok başarıyla eklendi';
+	@override String get blockSection => 'Blok bilgileri';
+	@override String get blockLabel => 'Blok adı';
+	@override String get blockLabelHint => 'Örn: A Blok';
+	@override String get blockNameOptional => 'Bina adı (isteğe bağlı)';
+	@override String get blockNameHint => 'Boş bırakılırsa blok adı kullanılır';
+	@override String get addressExtra => 'Ek adres bilgisi';
+	@override String get addressExtraHint => 'Örn: Arka giriş, Kapı no 2';
+	@override String get overrideDue => 'Aidatı site varsayılanından farklı ayarla';
+	@override String get overrideDueHint => 'Kapalıyken site aidatı geçerli olur';
+	@override String get overrideCollection => 'IBAN\'ı site varsayılanından farklı ayarla';
+	@override String get overrideCollectionHint => 'Kapalıyken site IBAN\'ı geçerli olur';
+	@override String get blocksTitle => 'Bloklar';
+	@override String get noBlocks => 'Henüz blok eklenmedi';
+	@override String get blockApartments => '{count} daire';
+	@override String get blockCount => 'Blok';
+	@override String get apartmentCount => 'Daire';
+	@override String get collectedAmount => 'Toplanan';
+	@override String get expectedAmount => 'Beklenen';
+	@override String get collectionRate => 'Tahsilat';
+	@override String get collectedExpected => '{collected} / {expected}';
+	@override String get commonExpenses => 'Ortak Giderler';
+	@override String get report => 'Rapor';
+	@override String get reportSheetTitle => 'Site raporu';
+	@override String get monthlyReport => 'Aylık rapor (PDF)';
+	@override String get annualReport => 'Yıllık rapor (PDF)';
+	@override String get siteExpensesTitle => 'Site Ortak Giderleri';
+	@override String get addExpenseTitle => 'Ortak Gider Ekle';
+	@override String get editExpenseTitle => 'Gideri Düzenle';
+	@override String get addExpense => 'Gider Ekle';
+	@override String get expenseCreated => 'Site gideri eklendi';
+	@override String get expenseUpdated => 'Site gideri güncellendi';
+	@override String get confirmExpenseTitle => 'Onay gerekli';
+	@override String get deleteExpenseTitle => 'Gider silinsin mi?';
+	@override String get deleteExpenseConfirm => 'Bu site gideri kalıcı olarak silinecek.';
+	@override String get deleteExpenseSuccess => 'Site gideri silindi';
+	@override String get noExpenses => 'Gider yok';
+	@override String get noExpensesHint => 'Bu ay için ortak gider kaydı bulunmuyor.';
+	@override String get totalExpenses => 'Toplam: {amount}';
+	@override String get perUnitShare => 'Daire payı: {amount}';
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 }
 
 // Path: features.auth
@@ -692,6 +902,7 @@ class _Translations$features$auth$tr implements Translations$features$auth$en {
 	@override String get inviteCodeAndPasswordRequired => 'Davet kodu, ad ve şifre boş bırakılamaz';
 	@override String get invalidPhoneNumber => 'Geçerli bir telefon numarası giriniz';
 	@override String get areYouManager => 'Yönetici misiniz? Kaydolun';
+	@override late final _Translations$features$auth$onboarding$tr onboarding = _Translations$features$auth$onboarding$tr._(_root);
 }
 
 // Path: features.apartments
@@ -714,10 +925,16 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	@override String get myTickets => 'Taleplerim';
 	@override String get newTicket => 'Yeni Talep';
 	@override String get createTitle => 'Arıza / Talep Bildir';
-	@override String get fieldTitle => 'Başlık';
-	@override String get fieldTitleHint => 'Örn: Asansör arızası';
+	@override String get reportFaultTitle => 'Arıza Bildir';
+	@override String get myApplicationsTitle => 'Başvurularım';
+	@override String get fieldTitle => 'Konu';
+	@override String get fieldTitleHint => 'Kısa bir tanım girin.';
+	@override String get fieldDetail => 'Detaylandırın';
+	@override String get fieldDetailHint => 'Sorunu kısaca özetleyin.';
 	@override String get fieldDescription => 'Açıklama';
-	@override String get fieldDescriptionHint => 'Sorunu kısaca anlatın';
+	@override String get fieldDescriptionHint => 'Ayrıntılı açıklama yazın…';
+	@override String get attachmentHint => 'Fotoğraf, video veya belge ekleyin… PNG, JPG — en fazla 5 MB.';
+	@override String get attachmentComingSoon => 'Dosya ekleme yakında aktif olacak.';
 	@override String get fieldCategory => 'Kategori';
 	@override String get categoryComplaint => 'Şikayet';
 	@override String get categoryRequest => 'Talep';
@@ -784,6 +1001,13 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 
 	// Translations
 	@override String get makePaymentTitle => 'Ödeme Yap';
+	@override String get payDebtTitle => 'Borcu Öde';
+	@override String get paymentMethodTitle => 'Ödeme Yöntemi';
+	@override String get paymentMethodCard => 'Kredi / Banka Kartı';
+	@override String get paymentMethodEft => 'Havale / EFT';
+	@override String get paymentMethodDekont => 'Dekont Yükle';
+	@override String get paymentCardComingSoon => 'Kart ile ödeme yakında eklenecek.';
+	@override String get uploadReceiptHint => 'Dekont yükleyin (jpg, png, webp, PDF — en fazla 5 MB).';
 	@override String get myDekontsTitle => 'Dekontlarım';
 	@override String get managerTitle => 'Dekont İnceleme';
 	@override String get reviewAction => 'Dekont İncele';
@@ -1028,6 +1252,7 @@ class _Translations$features$notifications$tr implements Translations$features$n
 	@override String get typeDekontPaymentApplied => 'Dekont onaylandı';
 	@override String get typeExpenseAdded => 'Yeni gider';
 	@override String get typeSystem => 'Sistem';
+	@override String get typeAidatPanelTeam => 'AidatPanel Ekibi';
 	@override String get typeOther => 'Bildirim';
 	@override String get allApartmentsTag => 'Tüm daireler';
 	@override String get sendTitle => 'Sakinlere Duyuru';
@@ -1066,6 +1291,9 @@ class _Translations$features$profile$tr implements Translations$features$profile
 	@override String get profileUpdateFailed => 'Profil güncellenemedi. Lütfen tekrar deneyin.';
 	@override String get profileLoadFailed => 'Profil bilgileri yüklenemedi.';
 	@override String get readOnlySection => 'Buradan düzenlenemez';
+	@override String get contactRequired => 'En az bir iletişim kanalı (E-posta veya Telefon) kayıtlı olmalıdır.';
+	@override String get securityVerificationTitle => 'Güvenlik Doğrulaması';
+	@override String get securityVerificationMessage => 'E-posta veya telefon numaranızı değiştirmek için mevcut şifrenizi girmelisiniz.';
 	@override String get editSheetHint => 'Yalnızca ad ve telefon güncellenir. Diğer bilgiler yukarıdaki profil ekranında görünür.';
 	@override String get photoSaved => 'Profil fotoğrafı bu hesap için kaydedildi.';
 	@override String get photoRemoved => 'Profil fotoğrafı kaldırıldı.';
@@ -1080,6 +1308,7 @@ class _Translations$features$profile$tr implements Translations$features$profile
 	@override String get avatarGalleryError => 'Galeri açılamadı.';
 	@override String get avatarDecodeError => 'Görsel çözümlenemedi.';
 	@override String get avatarSaveError => 'Fotoğraf kaydedilirken hata oluştu.';
+	@override String get avatarUnsupportedFormat => 'Desteklenmeyen dosya türü. Lütfen JPG, PNG veya GIF seçin.';
 	@override String get accountCreatedAt => 'Hesap oluşturulma: {date}';
 }
 
@@ -1116,6 +1345,8 @@ class _Translations$features$subscription$tr implements Translations$features$su
 	@override String get cycleMonthly => 'Her ay yenilenir';
 	@override String get cycleAnnual => 'Her yıl yenilenir';
 	@override String get featureUnlimitedUnits => 'Sınırsız daire';
+	@override String get buildingUsageSummary => 'Yönetilen bina: {used}';
+	@override String get buildingUsageWithLimit => 'Yönetilen bina: {used} / {limit}';
 	@override String get featureDuesTracking => 'Aidat takibi';
 	@override String get featureAdvancedReports => 'Gelişmiş raporlar';
 	@override String get featurePrioritySupport => 'Öncelikli destek';
@@ -1144,6 +1375,27 @@ class _Translations$features$subscription$tr implements Translations$features$su
 	@override String get priceUnavailable => '—';
 	@override String get loadingPlans => 'Planlar yükleniyor…';
 	@override String get purchasesDisabledHint => 'Satın alma bu sürümde henüz etkin değil.';
+	@override String get plan1To5 => '1-5 Bina Paketi';
+	@override String get plan5To20 => '5-20 Bina Paketi';
+	@override String get plan20To50 => '20-50 Bina Paketi';
+	@override String get plan50Plus => '50+ Bina (Özel)';
+	@override String get comingSoon => 'Yakında';
+	@override String get contactUs => 'İletişime Geçin';
+	@override String get contactUsDesc => 'Özel fiyatlandırma için bizimle iletişime geçin.';
+	@override String get sectionPlans => 'Paketler';
+	@override String get feature1To5 => '1-5 Bina Yönetimi';
+	@override String get feature5To20 => '5-20 Bina Yönetimi';
+	@override String get feature20To50 => '20-50 Bina Yönetimi';
+	@override String get feature50Plus => 'Sınırsız Bina Yönetimi';
+	@override String get featureCustomSupport => 'Özel Müşteri Temsilcisi';
+	@override String get toggleMonthly => 'Aylık';
+	@override String get toggleAnnual => 'Yıllık';
+	@override String get currentPlanBadge => 'Mevcut Planınız';
+	@override String get buildingProgress => 'Bina Kullanımı';
+	@override String get planBasic => 'Temel Paket';
+	@override String get featureBasicBuildings => '1 Bina Yönetimi';
+	@override String get featureBasicReports => 'Temel Raporlar';
+	@override String get statusUnlimited => 'Süresiz';
 }
 
 // Path: features.reports
@@ -1221,6 +1473,7 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get payNow => 'Şimdi Öde';
 	@override String get overduePaymentsBadge => '{count} gecikmiş ödeme';
 	@override String get featuredDuePeriod => '{month} {year} aidatı';
+	@override String get residentDebtAndPaySubtitle => 'Ödeme yaparak ödeyin.';
 }
 
 // Path: features.faz2
@@ -1324,6 +1577,124 @@ class _Translations$features$buildings$list$tr implements Translations$features$
 	@override String get monthlyDuesShort => 'Aylık Aidat';
 }
 
+// Path: features.auth.onboarding
+class _Translations$features$auth$onboarding$tr implements Translations$features$auth$onboarding$en {
+	_Translations$features$auth$onboarding$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get stepProgress => 'Adım {current} / {total}';
+	@override String get continueButton => 'Devam Et';
+	@override String get goToPanel => 'Panele Git';
+	@override String get secureNote => 'Bilgileriniz güvenle korunur.';
+	@override String get step1Title => 'Uygulamayı kim olarak kullanacaksınız?';
+	@override String get step1Subtitle => 'Devam etmek için rolünüzü seçin.';
+	@override String get step1ManagerOption => 'Apartman Yöneticisiyim';
+	@override String get step1ResidentOption => 'Apartman Sakiniyim';
+	@override String get step1ManagerHint => 'Apartman veya site yönetiyorsanız burayı seçin.';
+	@override String get step1ResidentHint => 'Apartman sakiniyim, daireme giriş yapacağım.';
+	@override String get step1ReturningLogin => 'Daha önce giriş yaptım';
+	@override String get step1ReturningLoginManager => 'Yönetici olarak daha önce giriş yaptım';
+	@override String get step1ReturningLoginResident => 'Sakin olarak daha önce giriş yaptım';
+	@override String get step1ReturningLoginHint => '{name} · {contact}';
+	@override String get step1LegacyEmailLogin => 'E-posta ve şifremle girmek istiyorum';
+	@override String get backButton => 'Geri';
+	@override String get managerExperienceTitle => 'AidatPanel\'e hoş geldiniz';
+	@override String get managerExperienceSubtitle => 'Daha önce kayıt oldunuz mu?';
+	@override String get managerReturningOption => 'Daha önce kayıt olmuştum';
+	@override String get managerFirstTimeOption => 'Uygulamayı ilk defa kullanacağım';
+	@override String get managerNameTitle => 'İsminiz nedir?';
+	@override String get managerNameSubtitle => 'Size nasıl hitap edelim?';
+	@override String get managerIdentifierTitle => 'E-posta veya telefonunuzu girin';
+	@override String get managerIdentifierSubtitle => 'Giriş bilgileriniz olarak kullanılacak.';
+	@override String get managerIdentifierLabel => 'E-posta veya telefon';
+	@override String get managerIdentifierHint => 'ornek@mail.com veya 05321234567';
+	@override String get managerIdentifierPhoneNote => 'Telefon numarasını 0 ile başlayarak 11 hane girin.';
+	@override String get identifierRequired => 'E-posta veya telefon giriniz';
+	@override String get phoneInvalidElevenDigits => 'Telefon numarasını 0 ile başlayarak 11 hane giriniz';
+	@override String get managerLoginPasswordTitle => 'Şifrenizi girin';
+	@override String get managerRegisterPasswordTitle => 'Şifrenizi belirleyin';
+	@override String get managerRegisterPasswordSubtitle => 'En az 6 karakter; yalnızca harf ve rakam kullanın.';
+	@override String get managerCreateAccountButton => 'Hesabı Oluştur';
+	@override String get managerLoginButton => 'Giriş Yap';
+	@override String get residentExperienceTitle => 'AidatPanel\'e hoş geldiniz';
+	@override String get residentExperienceSubtitle => 'Nasıl devam etmek istersiniz?';
+	@override String get residentReturningOption => 'Daha önce giriş yapmıştım';
+	@override String get residentInviteOption => 'Davet kodum var';
+	@override String get residentPhoneTitle => 'Telefon numaranız';
+	@override String get residentPhoneSubtitle => 'Size tek kullanımlık giriş kodu göndereceğiz.';
+	@override String get residentWelcomeTitle => 'Hoş geldiniz!';
+	@override String get residentWelcomeSubtitle => 'Telefon numaranız doğrulandı. Son olarak adınızı girin.';
+	@override String get residentCompleteJoinButton => 'Panele Git';
+	@override String get step2Title => 'İletişim Bilgilerinizi Giriniz';
+	@override String get step2Subtitle => 'Devam etmek için telefon numaranızı veya e-posta adresinizi girin.';
+	@override String get step2SubtitlePhone => 'Size doğrulama kodu göndereceğiz.';
+	@override String get step2SubtitleEmail => 'E-postanıza doğrulama kodu göndereceğiz.';
+	@override String get step3OtpTitle => 'Doğrulama Kodu';
+	@override String get step3OtpSubtitlePhone => '{phone} numarasına gönderilen 6 haneli kodu giriniz.';
+	@override String get step3OtpSubtitleEmail => '{email} adresine gönderilen 6 haneli kodu giriniz.';
+	@override String get step3OtpSubtitle => '6 haneli kodu aşağıya girin.';
+	@override String get step3OtpSentTo => 'Kod {phone} numarasına gönderildi.';
+	@override String get step3ResendOtp => 'Kodu yeniden gönder ({seconds} sn)';
+	@override String get step3ResendOtpReady => 'Kodu yeniden gönder';
+	@override String get step3PasswordTitle => 'Şifrenizi yazın';
+	@override String get step3RegisterPasswordTitle => 'Şifrenizi belirleyin';
+	@override String get step3SecureVerify => 'Güvenli doğrulama ile hesabınızı koruyoruz.';
+	@override String get step3DevOtpHint => 'SMS gelmezse bilgisayarda backend terminalinde otp_dev satırına bakın.';
+	@override String get step4InviteTitle => 'Davet Kodunuzu Giriniz';
+	@override String get step4InviteSubtitle => 'Yöneticinizin size verdiği kodu buraya girin.';
+	@override String get step4InviteHint => 'Davet kodunuzu yönetimden veya yöneticinizden alabilirsiniz.';
+	@override String get step4ManagerInviteTitle => 'Davet Kodunuzu Giriniz';
+	@override String get step4ManagerInviteSubtitle => 'Yönetici hesabınızı site veya apartman yönetimine bağlamak için davet kodunuzu giriniz.';
+	@override String get step4ManagerInviteInfo => 'Davet kodunuzu yönetimden veya yöneticinizden alabilirsiniz.';
+	@override String get step4ManagerPrimaryLink => 'Hayır, ben yöneticiyim';
+	@override String get step4ManagerPrimaryHint => 'Apartman veya siteyi siz yönetecekseniz bunu seçin.';
+	@override String get step4InviteValidated => 'Davet geçerli: {label}';
+	@override String get step5Title => 'Yönetici Olarak Yapabilecekleriniz';
+	@override String get step5ManagerSubtitle => 'AidatPanel ile sitenizi kolayca yönetin, sakinlerinize daha iyi hizmet verin.';
+	@override String get step5ResidentTitle => 'Sakin Olarak Yapabilecekleriniz';
+	@override String get step5ResidentSubtitle => 'Aidat ve ödemelerinizi buradan takip edin.';
+	@override String get step5ManagerAnnounceTitle => 'Duyuruları yönetin';
+	@override String get step5ManagerAnnounceBody => 'Tüm sakinlere hızlıca duyuru gönderebilirsiniz.';
+	@override String get step5ManagerDuesTitle => 'Aidat takibi';
+	@override String get step5ManagerDuesBody => 'Tahsilatları takip edin, ödemeleri görüntüleyin.';
+	@override String get step5ManagerResidentsTitle => 'Sakin yönetimi';
+	@override String get step5ManagerResidentsBody => 'Sakin bilgilerini yönetin, iletişimi kolaylaştırın.';
+	@override String get step5ManagerReportsTitle => 'Raporlama';
+	@override String get step5ManagerReportsBody => 'Detaylı raporlar ile site finansal durumunu izleyin.';
+	@override String get step5ResidentDuesTitle => 'Aidatınızı görün';
+	@override String get step5ResidentDuesBody => 'Güncel borcunuzu ve geçmiş ödemelerinizi takip edin.';
+	@override String get step5ResidentDekontTitle => 'Dekont yükleyin';
+	@override String get step5ResidentDekontBody => 'Ödeme dekontunuzu fotoğraf veya PDF olarak gönderin.';
+	@override String get step5ResidentTicketsTitle => 'Arıza bildirin';
+	@override String get step5ResidentTicketsBody => 'Site içi sorunları kolayca yönetime iletin.';
+	@override String get step5ResidentNotifyTitle => 'Bildirim alın';
+	@override String get step5ResidentNotifyBody => 'Duyuru ve aidat hatırlatmalarından haberdar olun.';
+	@override String get step6ManagerTitle => 'Kurulum tamamlandı';
+	@override String get step6ManagerSubtitle => 'Yönetici paneline hoş geldiniz! Artık sitenizi yönetmeye başlayabilir, sakinlerinize daha iyi hizmet sunabilirsiniz.';
+	@override String get step6ResidentTitle => 'Giriş tamamlandı';
+	@override String get step6ResidentSubtitle => 'Aidat ve ödemelerinizi buradan takip edebilirsiniz.';
+	@override String get otpInvalid => 'Kod yanlış. Tekrar deneyin.';
+	@override String get otpExpired => 'Kod süresi doldu. Yeni kod isteyin.';
+	@override String get phoneInvalid => 'Geçerli bir telefon numarası girin (5XX XXX XX XX).';
+	@override String get inviteInvalid => 'Davet kodu geçersiz veya süresi dolmuş.';
+	@override String get otpSendFailed => 'Kod gönderilemedi. Lütfen tekrar deneyin.';
+	@override String get phoneOtpDisabledHint => 'Telefon ile giriş yakında. Şimdilik e-posta ile devam edebilirsiniz.';
+	@override String get residentLoginTitle => 'Sakin Girişi';
+	@override String get residentLoginSubtitle => 'Bilgilerinizi girerek devam edin.';
+	@override String get residentSendCodeButton => 'Kod Gönder';
+	@override String get residentPhoneVerifyNote => 'Telefon numaranız doğrulanarak kod gönderilecektir.';
+	@override String get residentOtpSubtitle => 'Telefonunuza gelen 6 haneli kodu girin.';
+	@override String get residentResendPrompt => 'Kod gelmedi mi?';
+	@override String get residentResendLink => 'Tekrar gönder';
+	@override String get residentInviteSubtitle => 'Yöneticinizden aldığınız davet kodunu girerek devam etmenizi rica ederiz.';
+	@override String get residentJoinButton => 'Apartmana Katıl';
+	@override String get residentInviteCodeLabel => 'Davet Kodu';
+	@override String get residentInviteCodeHint => 'Örn: APF-45532';
+	@override String get residentNameRequired => 'Lütfen ad soyadınızı girin.';
+}
+
 /// The flat map containing all translations for locale <tr>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -1371,6 +1742,9 @@ extension on TranslationsTr {
 			'common.themeDark' => 'Koyu',
 			'common.themeSystem' => 'Sistem',
 			'common.themeSheetDescription' => 'Uygulamanın görünümünü buradan değiştirebilirsiniz.',
+			'common.themeLightSubtitle' => 'Light',
+			'common.themeDarkSubtitle' => 'Dark',
+			'common.themeSystemSubtitle' => 'System',
 			'common.turkish' => 'Türkçe',
 			'common.notifications' => 'Bildirimler',
 			'common.info' => 'Bilgi',
@@ -1403,6 +1777,9 @@ extension on TranslationsTr {
 			'common.api.invalidCredentials' => 'E-posta, telefon veya şifre hatalı. Bilgilerinizi kontrol edip tekrar deneyin.',
 			'common.api.duplicateEmail' => 'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.',
 			'common.api.duplicatePhone' => 'Bu telefon numarası zaten kayıtlı.',
+			'common.api.accountNotFoundEmail' => 'Bu e-posta adresiyle kayıtlı hesap bulunamadı. Bilgilerinizi kontrol edin veya kayıt olun.',
+			'common.api.accountNotFoundPhone' => 'Bu telefon numarasıyla kayıtlı hesap bulunamadı. Bilgilerinizi kontrol edin veya kayıt olun.',
+			'common.api.identifierCheckFailed' => 'E-posta veya telefon doğrulanamadı. Lütfen tekrar deneyin.',
 			'common.api.invalidInviteCode' => 'Davet kodu geçersiz. Kodu kontrol edip tekrar deneyin.',
 			'common.api.inviteCodeUsed' => 'Bu davet kodu daha önce kullanılmış.',
 			'common.api.inviteCodeExpired' => 'Davet kodunun süresi dolmuş. Yöneticinizden yeni kod isteyin.',
@@ -1484,7 +1861,28 @@ extension on TranslationsTr {
 			'common.makePayment' => 'Ödeme Yap',
 			'common.bills' => 'Faturalar',
 			'common.support' => 'Destek',
-			'common.quickActions' => 'Hızlı işlemler',
+			'common.quickActions' => 'Hızlı İşlemler',
+			'common.myApplications' => 'Başvurularım',
+			'common.myAnnouncements' => 'Duyurularım',
+			'common.debtAndPay' => 'Borç ve Öde',
+			'common.duesStatus' => 'Aidat Durumu',
+			'common.accountSummary' => 'Hesap Özeti',
+			'common.accountSummarySubtitle' => 'Dönem özetini ve detay',
+			'common.myReceiptsSubtitle' => 'Ödeme dekontlarınız',
+			'common.myPaymentRequestSubtitle' => 'Ödeme talebi oluşturun',
+			'common.mySettings' => 'Ayarlarım',
+			'common.myReceipts' => 'Dekontlarım',
+			'common.myPaymentRequest' => 'Ödeme Talebi',
+			'common.duesHistory' => 'Geçmişler',
+			'common.addRequest' => 'Talep Ekle',
+			'common.payDebt' => 'Borcu Öde',
+			'common.tabAll' => 'Tümü',
+			'common.tabFaults' => 'Arızalar',
+			'common.tabRequests' => 'Talepler',
+			'common.apartmentNo' => 'Daire No',
+			'common.fullName' => 'Ad Soyad',
+			'common.debtAmount' => 'Borç',
+			'common.lastDueDate' => 'Son Ödeme Tarihi',
 			'common.residentName' => 'Sakin Adı',
 			'common.addBuildingNew' => 'Yeni Bina Ekle',
 			'common.basicInfo' => 'Temel Bilgiler',
@@ -1522,6 +1920,8 @@ extension on TranslationsTr {
 			'common.buildingAddedSuccess' => 'Bina başarıyla eklendi',
 			'common.createInviteCode' => 'Davet Kodu Oluştur',
 			'common.whichBuildingForCode' => 'Hangi binadan kod üretilecek?',
+			'common.whichSiteForCode' => 'Hangi siteden kod üretilecek?',
+			'common.inviteStandaloneBuildings' => 'Tekil binalar',
 			'common.whichApartmentForCode' => 'Hangi daire için kod üretilecek?',
 			'common.noApartmentsInBuilding' => 'Bu binaya henüz daire eklenmemiş',
 			'common.activeCodeBadge' => 'Aktif Kod',
@@ -1612,6 +2012,9 @@ extension on TranslationsTr {
 			'common.apartmentLabel' => 'DAİRE',
 			'common.turkishLanguage' => 'Türkçe',
 			'common.englishLanguage' => 'English',
+			'common.turkishLanguageSubtitle' => 'Turkish',
+			'common.englishLanguageSubtitle' => 'İngilizce',
+			'common.stepSite' => 'Site',
 			'common.stepBuilding' => 'Bina',
 			'common.stepApartment' => 'Daire',
 			'common.stepCode' => 'Kod',
@@ -1676,6 +2079,15 @@ extension on TranslationsTr {
 			'common.changePasswordFailed' => 'Şifre değiştirilemedi. Lütfen tekrar deneyin.',
 			'common.changePasswordWrongCurrent' => 'Mevcut şifre hatalı.',
 			'common.languageSheetDescription' => 'Uygulama dilini buradan değiştirebilirsiniz.',
+			'common.friendlyError.networkTitle' => 'İnternet bağlantısı yok',
+			'common.friendlyError.networkMessage' => 'Telefonunuzun internete bağlı olduğundan emin olup tekrar deneyin.',
+			'common.friendlyError.unauthorizedTitle' => 'Oturum sona erdi',
+			'common.friendlyError.unauthorizedMessage' => 'Lütfen uygulamayı kapatıp tekrar giriş yapın.',
+			'common.friendlyError.serverTitle' => 'Sunucuya ulaşılamıyor',
+			'common.friendlyError.serverMessage' => 'Biraz sonra tekrar deneyebilir misiniz?',
+			'common.friendlyError.genericTitle' => 'Bu sayfa açılamadı',
+			'common.friendlyError.genericMessage' => 'Lütfen uygulamayı kapatıp tekrar açın.',
+			'common.friendlyError.debugOnlyLabel' => 'Sadece geliştirici görür (debug):',
 			'common.newPasswordHint' => 'Büyük harf, küçük harf ve rakam içermeli',
 			'common.passwordStrengthUnspecified' => 'Belirtilmemiş',
 			'common.passwordStrengthWeak' => 'Zayıf',
@@ -1709,6 +2121,89 @@ extension on TranslationsTr {
 			'common.resetPasswordFailed' => 'Şifre sıfırlanamadı. Kod hatalı veya süresi dolmuş olabilir.',
 			'common.resetPasswordSubmit' => 'Şifreyi Sıfırla',
 			'common.backToLogin' => 'Giriş ekranına dön',
+			'common.select' => 'Seç',
+			'common.kNew' => 'Yeni',
+			'common.errorKeys.authLoginFailed' => 'Giriş sırasında bir sorun oluştu. Lütfen tekrar deneyin.',
+			'common.errorKeys.authRegisterFailed' => 'Kayıt sırasında bir sorun oluştu. Lütfen tekrar deneyin.',
+			'common.errorKeys.authJoinFailed' => 'Katılım sırasında bir sorun oluştu. Lütfen tekrar deneyin.',
+			'common.errorKeys.authLogoutAllDevicesFailed' => 'Diğer cihazlardan çıkış yapılamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.authForgotPasswordRequestFailed' => 'İstek gönderilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.authResetPasswordFailed' => 'Şifre sıfırlanamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.dashboardSummaryFetchFailed' => 'Dashboard özeti alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.dashboardCollectionFetchFailed' => 'Tahsilat özeti alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingFetchFailed' => 'Binalar yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.collectionPresetsFetchFailed' => 'Tahsilat önerileri yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingCreateFailed' => 'Bina eklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingUpdateFailed' => 'Bina güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingCollectionUpdateFailed' => 'Tahsilat bilgileri güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.collectionPresetNotFound' => 'Güncellenecek veya silinecek IBAN kaydı bulunamadı.',
+			'common.errorKeys.collectionPresetSaveFailed' => 'IBAN kaydedilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.collectionPresetDeleteFailed' => 'IBAN silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingDeleteFailed' => 'Bina silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.inviteCodeCreateFailed' => 'Davet kodu oluşturulamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.apartmentsFetchFailed' => 'Daireler yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.apartmentCreateFailed' => 'Daire eklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.apartmentUpdateFailed' => 'Daire güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.apartmentDeleteFailed' => 'Daire silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.residentRemoveFailed' => 'Sakin çıkarılamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingDuesFetchFailed' => 'Aidat listesi alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.myDuesFetchFailed' => 'Aidatlarınız alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.dueStatusUpdateFailed' => 'Aidat durumu güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.dueAmountUpdateFailed' => 'Aidat tutarı güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.dueReminderFailed' => 'Hatırlatma gönderilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.myTicketsFetchFailed' => 'Talepler alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.buildingTicketsFetchFailed' => 'Bina talepleri alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.ticketDetailFetchFailed' => 'Talep detayı alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.ticketCreateFailed' => 'Talep oluşturulamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.ticketNoteAddFailed' => 'Not eklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.ticketStatusUpdateFailed' => 'Talep durumu güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.expensesFetchFailed' => 'Gider listesi alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.expenseSummaryFetchFailed' => 'Gider özeti alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.expenseCreateFailed' => 'Gider kaydedilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.expenseUpdateFailed' => 'Gider güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.expenseDeleteFailed' => 'Gider silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.expenseReceiptsUploadFailed' => 'Makbuzlar yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.profileFetchFailed' => 'Profil bilgileri alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.profileUpdateFailed' => 'Profil güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.languageUpdateFailed' => 'Dil tercihi kaydedilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.passwordChangeFailed' => 'Şifre değiştirilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.accountDeleteFailed' => 'Hesap kapatılamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.profilePictureUploadFailed' => 'Profil fotoğrafı yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.profilePictureDeleteFailed' => 'Profil fotoğrafı silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.notificationCountFetchFailed' => 'Bildirim sayısı alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.notificationsFetchFailed' => 'Bildirimler alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.announcementCountFetchFailed' => 'Duyuru sayısı alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.notificationMarkReadFailed' => 'Bildirim okunamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.notificationsMarkAllReadFailed' => 'Bildirimler okunamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.announcementSendFailed' => 'Duyuru gönderilemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.sitesFetchFailed' => 'Siteler yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteDetailFetchFailed' => 'Site detayı yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteBuildingsFetchFailed' => 'Bloklar yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteCreateFailed' => 'Site eklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteUpdateFailed' => 'Site güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteCollectionUpdateFailed' => 'Site tahsilat bilgileri güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteDeleteFailed' => 'Site silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteBuildingCreateFailed' => 'Blok eklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteExpensesFetchFailed' => 'Site giderleri yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteExpenseSummaryFetchFailed' => 'Site gider özeti yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteExpenseCreateFailed' => 'Site gideri eklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteExpenseUpdateFailed' => 'Site gideri güncellenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.siteExpenseDeleteFailed' => 'Site gideri silinemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.subscriptionFetchFailed' => 'Abonelik bilgisi alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.invalidExpenseResponse' => 'Gider bilgisi okunamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.invalidSiteExpenseResponse' => 'Site gider bilgisi okunamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.unsupportedFileType' => 'Bu dosya türü desteklenmiyor.',
+			'common.errorKeys.dekontUploadFailed' => 'Dekont yüklenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.serverResponseUnreadable' => 'Sunucu yanıtı okunamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.dekontResponseMissing' => 'Dekont yanıtı eksik. Lütfen tekrar deneyin.',
+			'common.errorKeys.dekontResponseParseFailed' => 'Dekont yanıtı işlenemedi. Lütfen tekrar deneyin.',
+			'common.errorKeys.reportFileEmpty' => 'Rapor dosyası boş geldi. Lütfen tekrar deneyin.',
+			'common.errorKeys.downloadStarted' => 'İndirme başlatıldı...',
+			'common.errorKeys.downloadSavedToGallery' => 'Görsel telefonunuzun Galerisine (AidatPanel albümüne) kaydedildi.',
+			'common.errorKeys.downloadSavedToDownloads' => 'Dekont, telefonunuzun İndirilenler (Downloads) klasörüne kaydedildi.',
+			'common.errorKeys.downloadFallbackShare' => 'Paylaşım ekranı açıldı, buradan Dosyalara Kaydet diyebilirsiniz.',
+			'common.errorKeys.downloadError' => 'Dosya indirilirken bir hata oluştu.',
+			'common.errorKeys.galleryPermissionDenied' => 'Galeriye erişim izni reddedildi.',
 			'validation.emailRequired' => 'Email adresi boş bırakılamaz',
 			'validation.emailInvalid' => 'Geçerli bir email adresi giriniz',
 			'validation.emailTooLong' => 'Email adresi çok uzun',
@@ -1717,10 +2212,15 @@ extension on TranslationsTr {
 			'validation.passwordRequired' => 'Şifre boş bırakılamaz',
 			'validation.passwordTooShort' => 'Şifre en az 6 karakter olmalıdır',
 			'validation.passwordTooLong' => 'Şifre çok uzun',
+			'validation.passwordAlphanumericRequired' => 'Şifre en az 6 karakter olmalı ve yalnızca harf ile rakam içermelidir',
 			'validation.passwordUppercaseRequired' => 'Şifrede en az 1 büyük harf olmalıdır',
 			'validation.passwordLowercaseRequired' => 'Şifrede en az 1 küçük harf olmalıdır',
 			'validation.passwordNumberRequired' => 'Şifrede en az 1 rakam olmalıdır',
 			'validation.passwordSpecialCharRequired' => 'Şifrede en az 1 özel karakter olmalıdır',
+			'validation.field_required' => 'Bu alan boş bırakılamaz',
+			'validation.field_too_short' => 'Girilen değer çok kısa',
+			'validation.field_too_long' => 'Girilen değer çok uzun',
+			'validation.field_invalid' => 'Geçerli bir değer giriniz',
 			'features.buildings.managerPanel' => 'Yönetici',
 			'features.buildings.buildingDetail' => 'Bina Detayı',
 			'features.buildings.addBuilding' => 'Bina Ekle',
@@ -1744,6 +2244,8 @@ extension on TranslationsTr {
 			'features.buildings.newCodePrefix' => 'Yeni kod üretirsen ',
 			'features.buildings.oldUserRemoved' => 'eski kullanıcı çıkarılır',
 			'features.buildings.currentCodePrefix' => 'Mevcut kod ',
+			_ => null,
+		} ?? switch (path) {
 			'features.buildings.codeInvalid' => 'geçersiz hale gelir',
 			'features.buildings.codeReady' => 'Davet Kodu Hazır',
 			'features.buildings.code' => 'KOD',
@@ -1823,6 +2325,7 @@ extension on TranslationsTr {
 			'features.buildings.list.unitsWaiting' => '{count} daire bekliyor',
 			'features.buildings.list.allPaymentsComplete' => 'Tüm ödemeler tamam',
 			'features.buildings.list.monthlyDuesShort' => 'Aylık Aidat',
+<<<<<<< HEAD
 			'features.sites.tabSites' => 'Siteler',
 			'features.sites.tabBuildings' => 'Binalar',
 			'features.sites.mySites' => 'Sitelerim',
@@ -1856,6 +2359,66 @@ extension on TranslationsTr {
 			'features.sites.overrideCollection' => 'Tahsilat bilgileri',
 			'features.sites.overrideCollectionSwitch' => 'Blok için özel IBAN kullan',
 			'features.sites.overrideCollectionHint' => 'Kapalıyken site tahsilat bilgisi uygulanır.',
+=======
+			'features.sites.addSiteTitle' => 'Yeni Site Ekle',
+			'features.sites.createSite' => 'Site Oluştur',
+			'features.sites.siteName' => 'Site adı',
+			'features.sites.siteNameHint' => 'Örn: Güneş Sitesi',
+			'features.sites.siteCreated' => 'Site başarıyla oluşturuldu',
+			'features.sites.siteCreateFailed' => 'Site eklenemedi',
+			'features.sites.mySites' => 'Sitelerim',
+			'features.sites.tabSites' => 'Siteler',
+			'features.sites.tabBuildings' => 'Binalar',
+			'features.sites.siteCount' => '{count} site',
+			'features.sites.buildingCount' => '{count} bina',
+			'features.sites.emptySites' => 'Henüz site eklenmedi',
+			'features.sites.newSite' => 'Yeni Site',
+			'features.sites.newBuilding' => 'Yeni Bina',
+			'features.sites.siteDetailTitle' => 'Site Detayı',
+			'features.sites.addBlock' => 'Blok Ekle',
+			'features.sites.addBlockTitle' => 'Siteye Blok Ekle',
+			'features.sites.createBlock' => 'Blok Oluştur',
+			'features.sites.blockCreated' => 'Blok başarıyla eklendi',
+			'features.sites.blockSection' => 'Blok bilgileri',
+			'features.sites.blockLabel' => 'Blok adı',
+			'features.sites.blockLabelHint' => 'Örn: A Blok',
+			'features.sites.blockNameOptional' => 'Bina adı (isteğe bağlı)',
+			'features.sites.blockNameHint' => 'Boş bırakılırsa blok adı kullanılır',
+			'features.sites.addressExtra' => 'Ek adres bilgisi',
+			'features.sites.addressExtraHint' => 'Örn: Arka giriş, Kapı no 2',
+			'features.sites.overrideDue' => 'Aidatı site varsayılanından farklı ayarla',
+			'features.sites.overrideDueHint' => 'Kapalıyken site aidatı geçerli olur',
+			'features.sites.overrideCollection' => 'IBAN\'ı site varsayılanından farklı ayarla',
+			'features.sites.overrideCollectionHint' => 'Kapalıyken site IBAN\'ı geçerli olur',
+			'features.sites.blocksTitle' => 'Bloklar',
+			'features.sites.noBlocks' => 'Henüz blok eklenmedi',
+			'features.sites.blockApartments' => '{count} daire',
+			'features.sites.blockCount' => 'Blok',
+			'features.sites.apartmentCount' => 'Daire',
+			'features.sites.collectedAmount' => 'Toplanan',
+			'features.sites.expectedAmount' => 'Beklenen',
+			'features.sites.collectionRate' => 'Tahsilat',
+			'features.sites.collectedExpected' => '{collected} / {expected}',
+			'features.sites.commonExpenses' => 'Ortak Giderler',
+			'features.sites.report' => 'Rapor',
+			'features.sites.reportSheetTitle' => 'Site raporu',
+			'features.sites.monthlyReport' => 'Aylık rapor (PDF)',
+			'features.sites.annualReport' => 'Yıllık rapor (PDF)',
+			'features.sites.siteExpensesTitle' => 'Site Ortak Giderleri',
+			'features.sites.addExpenseTitle' => 'Ortak Gider Ekle',
+			'features.sites.editExpenseTitle' => 'Gideri Düzenle',
+			'features.sites.addExpense' => 'Gider Ekle',
+			'features.sites.expenseCreated' => 'Site gideri eklendi',
+			'features.sites.expenseUpdated' => 'Site gideri güncellendi',
+			'features.sites.confirmExpenseTitle' => 'Onay gerekli',
+			'features.sites.deleteExpenseTitle' => 'Gider silinsin mi?',
+			'features.sites.deleteExpenseConfirm' => 'Bu site gideri kalıcı olarak silinecek.',
+			'features.sites.deleteExpenseSuccess' => 'Site gideri silindi',
+			'features.sites.noExpenses' => 'Gider yok',
+			'features.sites.noExpensesHint' => 'Bu ay için ortak gider kaydı bulunmuyor.',
+			'features.sites.totalExpenses' => 'Toplam: {amount}',
+			'features.sites.perUnitShare' => 'Daire payı: {amount}',
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 			'features.auth.register' => 'Kaydol',
 			'features.auth.login' => 'Giriş Yap',
 			'features.auth.join' => 'Katıl',
@@ -1909,14 +2472,129 @@ extension on TranslationsTr {
 			'features.auth.inviteCodeAndPasswordRequired' => 'Davet kodu, ad ve şifre boş bırakılamaz',
 			'features.auth.invalidPhoneNumber' => 'Geçerli bir telefon numarası giriniz',
 			'features.auth.areYouManager' => 'Yönetici misiniz? Kaydolun',
+			'features.auth.onboarding.stepProgress' => 'Adım {current} / {total}',
+			'features.auth.onboarding.continueButton' => 'Devam Et',
+			'features.auth.onboarding.goToPanel' => 'Panele Git',
+			'features.auth.onboarding.secureNote' => 'Bilgileriniz güvenle korunur.',
+			'features.auth.onboarding.step1Title' => 'Uygulamayı kim olarak kullanacaksınız?',
+			'features.auth.onboarding.step1Subtitle' => 'Devam etmek için rolünüzü seçin.',
+			'features.auth.onboarding.step1ManagerOption' => 'Apartman Yöneticisiyim',
+			'features.auth.onboarding.step1ResidentOption' => 'Apartman Sakiniyim',
+			'features.auth.onboarding.step1ManagerHint' => 'Apartman veya site yönetiyorsanız burayı seçin.',
+			'features.auth.onboarding.step1ResidentHint' => 'Apartman sakiniyim, daireme giriş yapacağım.',
+			'features.auth.onboarding.step1ReturningLogin' => 'Daha önce giriş yaptım',
+			'features.auth.onboarding.step1ReturningLoginManager' => 'Yönetici olarak daha önce giriş yaptım',
+			'features.auth.onboarding.step1ReturningLoginResident' => 'Sakin olarak daha önce giriş yaptım',
+			'features.auth.onboarding.step1ReturningLoginHint' => '{name} · {contact}',
+			'features.auth.onboarding.step1LegacyEmailLogin' => 'E-posta ve şifremle girmek istiyorum',
+			'features.auth.onboarding.backButton' => 'Geri',
+			'features.auth.onboarding.managerExperienceTitle' => 'AidatPanel\'e hoş geldiniz',
+			'features.auth.onboarding.managerExperienceSubtitle' => 'Daha önce kayıt oldunuz mu?',
+			'features.auth.onboarding.managerReturningOption' => 'Daha önce kayıt olmuştum',
+			'features.auth.onboarding.managerFirstTimeOption' => 'Uygulamayı ilk defa kullanacağım',
+			'features.auth.onboarding.managerNameTitle' => 'İsminiz nedir?',
+			'features.auth.onboarding.managerNameSubtitle' => 'Size nasıl hitap edelim?',
+			'features.auth.onboarding.managerIdentifierTitle' => 'E-posta veya telefonunuzu girin',
+			'features.auth.onboarding.managerIdentifierSubtitle' => 'Giriş bilgileriniz olarak kullanılacak.',
+			'features.auth.onboarding.managerIdentifierLabel' => 'E-posta veya telefon',
+			'features.auth.onboarding.managerIdentifierHint' => 'ornek@mail.com veya 05321234567',
+			'features.auth.onboarding.managerIdentifierPhoneNote' => 'Telefon numarasını 0 ile başlayarak 11 hane girin.',
+			'features.auth.onboarding.identifierRequired' => 'E-posta veya telefon giriniz',
+			'features.auth.onboarding.phoneInvalidElevenDigits' => 'Telefon numarasını 0 ile başlayarak 11 hane giriniz',
+			'features.auth.onboarding.managerLoginPasswordTitle' => 'Şifrenizi girin',
+			'features.auth.onboarding.managerRegisterPasswordTitle' => 'Şifrenizi belirleyin',
+			'features.auth.onboarding.managerRegisterPasswordSubtitle' => 'En az 6 karakter; yalnızca harf ve rakam kullanın.',
+			'features.auth.onboarding.managerCreateAccountButton' => 'Hesabı Oluştur',
+			'features.auth.onboarding.managerLoginButton' => 'Giriş Yap',
+			'features.auth.onboarding.residentExperienceTitle' => 'AidatPanel\'e hoş geldiniz',
+			'features.auth.onboarding.residentExperienceSubtitle' => 'Nasıl devam etmek istersiniz?',
+			'features.auth.onboarding.residentReturningOption' => 'Daha önce giriş yapmıştım',
+			'features.auth.onboarding.residentInviteOption' => 'Davet kodum var',
+			'features.auth.onboarding.residentPhoneTitle' => 'Telefon numaranız',
+			'features.auth.onboarding.residentPhoneSubtitle' => 'Size tek kullanımlık giriş kodu göndereceğiz.',
+			'features.auth.onboarding.residentWelcomeTitle' => 'Hoş geldiniz!',
+			'features.auth.onboarding.residentWelcomeSubtitle' => 'Telefon numaranız doğrulandı. Son olarak adınızı girin.',
+			'features.auth.onboarding.residentCompleteJoinButton' => 'Panele Git',
+			'features.auth.onboarding.step2Title' => 'İletişim Bilgilerinizi Giriniz',
+			'features.auth.onboarding.step2Subtitle' => 'Devam etmek için telefon numaranızı veya e-posta adresinizi girin.',
+			'features.auth.onboarding.step2SubtitlePhone' => 'Size doğrulama kodu göndereceğiz.',
+			'features.auth.onboarding.step2SubtitleEmail' => 'E-postanıza doğrulama kodu göndereceğiz.',
+			'features.auth.onboarding.step3OtpTitle' => 'Doğrulama Kodu',
+			'features.auth.onboarding.step3OtpSubtitlePhone' => '{phone} numarasına gönderilen 6 haneli kodu giriniz.',
+			'features.auth.onboarding.step3OtpSubtitleEmail' => '{email} adresine gönderilen 6 haneli kodu giriniz.',
+			'features.auth.onboarding.step3OtpSubtitle' => '6 haneli kodu aşağıya girin.',
+			'features.auth.onboarding.step3OtpSentTo' => 'Kod {phone} numarasına gönderildi.',
+			'features.auth.onboarding.step3ResendOtp' => 'Kodu yeniden gönder ({seconds} sn)',
+			'features.auth.onboarding.step3ResendOtpReady' => 'Kodu yeniden gönder',
+			'features.auth.onboarding.step3PasswordTitle' => 'Şifrenizi yazın',
+			'features.auth.onboarding.step3RegisterPasswordTitle' => 'Şifrenizi belirleyin',
+			'features.auth.onboarding.step3SecureVerify' => 'Güvenli doğrulama ile hesabınızı koruyoruz.',
+			'features.auth.onboarding.step3DevOtpHint' => 'SMS gelmezse bilgisayarda backend terminalinde otp_dev satırına bakın.',
+			'features.auth.onboarding.step4InviteTitle' => 'Davet Kodunuzu Giriniz',
+			'features.auth.onboarding.step4InviteSubtitle' => 'Yöneticinizin size verdiği kodu buraya girin.',
+			'features.auth.onboarding.step4InviteHint' => 'Davet kodunuzu yönetimden veya yöneticinizden alabilirsiniz.',
+			'features.auth.onboarding.step4ManagerInviteTitle' => 'Davet Kodunuzu Giriniz',
+			'features.auth.onboarding.step4ManagerInviteSubtitle' => 'Yönetici hesabınızı site veya apartman yönetimine bağlamak için davet kodunuzu giriniz.',
+			'features.auth.onboarding.step4ManagerInviteInfo' => 'Davet kodunuzu yönetimden veya yöneticinizden alabilirsiniz.',
+			'features.auth.onboarding.step4ManagerPrimaryLink' => 'Hayır, ben yöneticiyim',
+			'features.auth.onboarding.step4ManagerPrimaryHint' => 'Apartman veya siteyi siz yönetecekseniz bunu seçin.',
+			'features.auth.onboarding.step4InviteValidated' => 'Davet geçerli: {label}',
+			'features.auth.onboarding.step5Title' => 'Yönetici Olarak Yapabilecekleriniz',
+			'features.auth.onboarding.step5ManagerSubtitle' => 'AidatPanel ile sitenizi kolayca yönetin, sakinlerinize daha iyi hizmet verin.',
+			'features.auth.onboarding.step5ResidentTitle' => 'Sakin Olarak Yapabilecekleriniz',
+			'features.auth.onboarding.step5ResidentSubtitle' => 'Aidat ve ödemelerinizi buradan takip edin.',
+			'features.auth.onboarding.step5ManagerAnnounceTitle' => 'Duyuruları yönetin',
+			'features.auth.onboarding.step5ManagerAnnounceBody' => 'Tüm sakinlere hızlıca duyuru gönderebilirsiniz.',
+			'features.auth.onboarding.step5ManagerDuesTitle' => 'Aidat takibi',
+			'features.auth.onboarding.step5ManagerDuesBody' => 'Tahsilatları takip edin, ödemeleri görüntüleyin.',
+			'features.auth.onboarding.step5ManagerResidentsTitle' => 'Sakin yönetimi',
+			'features.auth.onboarding.step5ManagerResidentsBody' => 'Sakin bilgilerini yönetin, iletişimi kolaylaştırın.',
+			'features.auth.onboarding.step5ManagerReportsTitle' => 'Raporlama',
+			'features.auth.onboarding.step5ManagerReportsBody' => 'Detaylı raporlar ile site finansal durumunu izleyin.',
+			'features.auth.onboarding.step5ResidentDuesTitle' => 'Aidatınızı görün',
+			'features.auth.onboarding.step5ResidentDuesBody' => 'Güncel borcunuzu ve geçmiş ödemelerinizi takip edin.',
+			'features.auth.onboarding.step5ResidentDekontTitle' => 'Dekont yükleyin',
+			'features.auth.onboarding.step5ResidentDekontBody' => 'Ödeme dekontunuzu fotoğraf veya PDF olarak gönderin.',
+			'features.auth.onboarding.step5ResidentTicketsTitle' => 'Arıza bildirin',
+			'features.auth.onboarding.step5ResidentTicketsBody' => 'Site içi sorunları kolayca yönetime iletin.',
+			'features.auth.onboarding.step5ResidentNotifyTitle' => 'Bildirim alın',
+			'features.auth.onboarding.step5ResidentNotifyBody' => 'Duyuru ve aidat hatırlatmalarından haberdar olun.',
+			'features.auth.onboarding.step6ManagerTitle' => 'Kurulum tamamlandı',
+			'features.auth.onboarding.step6ManagerSubtitle' => 'Yönetici paneline hoş geldiniz! Artık sitenizi yönetmeye başlayabilir, sakinlerinize daha iyi hizmet sunabilirsiniz.',
+			'features.auth.onboarding.step6ResidentTitle' => 'Giriş tamamlandı',
+			'features.auth.onboarding.step6ResidentSubtitle' => 'Aidat ve ödemelerinizi buradan takip edebilirsiniz.',
+			'features.auth.onboarding.otpInvalid' => 'Kod yanlış. Tekrar deneyin.',
+			'features.auth.onboarding.otpExpired' => 'Kod süresi doldu. Yeni kod isteyin.',
+			'features.auth.onboarding.phoneInvalid' => 'Geçerli bir telefon numarası girin (5XX XXX XX XX).',
+			'features.auth.onboarding.inviteInvalid' => 'Davet kodu geçersiz veya süresi dolmuş.',
+			'features.auth.onboarding.otpSendFailed' => 'Kod gönderilemedi. Lütfen tekrar deneyin.',
+			'features.auth.onboarding.phoneOtpDisabledHint' => 'Telefon ile giriş yakında. Şimdilik e-posta ile devam edebilirsiniz.',
+			'features.auth.onboarding.residentLoginTitle' => 'Sakin Girişi',
+			'features.auth.onboarding.residentLoginSubtitle' => 'Bilgilerinizi girerek devam edin.',
+			'features.auth.onboarding.residentSendCodeButton' => 'Kod Gönder',
+			'features.auth.onboarding.residentPhoneVerifyNote' => 'Telefon numaranız doğrulanarak kod gönderilecektir.',
+			'features.auth.onboarding.residentOtpSubtitle' => 'Telefonunuza gelen 6 haneli kodu girin.',
+			'features.auth.onboarding.residentResendPrompt' => 'Kod gelmedi mi?',
+			'features.auth.onboarding.residentResendLink' => 'Tekrar gönder',
+			'features.auth.onboarding.residentInviteSubtitle' => 'Yöneticinizden aldığınız davet kodunu girerek devam etmenizi rica ederiz.',
+			'features.auth.onboarding.residentJoinButton' => 'Apartmana Katıl',
+			'features.auth.onboarding.residentInviteCodeLabel' => 'Davet Kodu',
+			'features.auth.onboarding.residentInviteCodeHint' => 'Örn: APF-45532',
+			'features.auth.onboarding.residentNameRequired' => 'Lütfen ad soyadınızı girin.',
 			'features.apartments.residentPanel' => 'Sakin',
 			'features.tickets.myTickets' => 'Taleplerim',
 			'features.tickets.newTicket' => 'Yeni Talep',
 			'features.tickets.createTitle' => 'Arıza / Talep Bildir',
-			'features.tickets.fieldTitle' => 'Başlık',
-			'features.tickets.fieldTitleHint' => 'Örn: Asansör arızası',
+			'features.tickets.reportFaultTitle' => 'Arıza Bildir',
+			'features.tickets.myApplicationsTitle' => 'Başvurularım',
+			'features.tickets.fieldTitle' => 'Konu',
+			'features.tickets.fieldTitleHint' => 'Kısa bir tanım girin.',
+			'features.tickets.fieldDetail' => 'Detaylandırın',
+			'features.tickets.fieldDetailHint' => 'Sorunu kısaca özetleyin.',
 			'features.tickets.fieldDescription' => 'Açıklama',
-			'features.tickets.fieldDescriptionHint' => 'Sorunu kısaca anlatın',
+			'features.tickets.fieldDescriptionHint' => 'Ayrıntılı açıklama yazın…',
+			'features.tickets.attachmentHint' => 'Fotoğraf, video veya belge ekleyin… PNG, JPG — en fazla 5 MB.',
+			'features.tickets.attachmentComingSoon' => 'Dosya ekleme yakında aktif olacak.',
 			'features.tickets.fieldCategory' => 'Kategori',
 			'features.tickets.categoryComplaint' => 'Şikayet',
 			'features.tickets.categoryRequest' => 'Talep',
@@ -1974,6 +2652,13 @@ extension on TranslationsTr {
 			'features.tickets.templateResolvedCheck' => 'Çözüldü / kontrol',
 			'features.tickets.templateResolvedCheckText' => 'Sorun giderildi, kontrol sağlandı.',
 			'features.dekont.makePaymentTitle' => 'Ödeme Yap',
+			'features.dekont.payDebtTitle' => 'Borcu Öde',
+			'features.dekont.paymentMethodTitle' => 'Ödeme Yöntemi',
+			'features.dekont.paymentMethodCard' => 'Kredi / Banka Kartı',
+			'features.dekont.paymentMethodEft' => 'Havale / EFT',
+			'features.dekont.paymentMethodDekont' => 'Dekont Yükle',
+			'features.dekont.paymentCardComingSoon' => 'Kart ile ödeme yakında eklenecek.',
+			'features.dekont.uploadReceiptHint' => 'Dekont yükleyin (jpg, png, webp, PDF — en fazla 5 MB).',
 			'features.dekont.myDekontsTitle' => 'Dekontlarım',
 			'features.dekont.managerTitle' => 'Dekont İnceleme',
 			'features.dekont.reviewAction' => 'Dekont İncele',
@@ -2110,6 +2795,8 @@ extension on TranslationsTr {
 			'features.expenses.categoryElevator' => 'Asansör',
 			'features.expenses.categoryElectricity' => 'Elektrik',
 			'features.expenses.categoryWater' => 'Su',
+			_ => null,
+		} ?? switch (path) {
 			'features.expenses.categoryInsurance' => 'Sigorta',
 			'features.expenses.categoryRepair' => 'Onarım',
 			'features.expenses.categoryGarden' => 'Bahçe',
@@ -2200,6 +2887,7 @@ extension on TranslationsTr {
 			'features.notifications.typeDekontPaymentApplied' => 'Dekont onaylandı',
 			'features.notifications.typeExpenseAdded' => 'Yeni gider',
 			'features.notifications.typeSystem' => 'Sistem',
+			'features.notifications.typeAidatPanelTeam' => 'AidatPanel Ekibi',
 			'features.notifications.typeOther' => 'Bildirim',
 			'features.notifications.allApartmentsTag' => 'Tüm daireler',
 			'features.notifications.sendTitle' => 'Sakinlere Duyuru',
@@ -2229,6 +2917,9 @@ extension on TranslationsTr {
 			'features.profile.profileUpdateFailed' => 'Profil güncellenemedi. Lütfen tekrar deneyin.',
 			'features.profile.profileLoadFailed' => 'Profil bilgileri yüklenemedi.',
 			'features.profile.readOnlySection' => 'Buradan düzenlenemez',
+			'features.profile.contactRequired' => 'En az bir iletişim kanalı (E-posta veya Telefon) kayıtlı olmalıdır.',
+			'features.profile.securityVerificationTitle' => 'Güvenlik Doğrulaması',
+			'features.profile.securityVerificationMessage' => 'E-posta veya telefon numaranızı değiştirmek için mevcut şifrenizi girmelisiniz.',
 			'features.profile.editSheetHint' => 'Yalnızca ad ve telefon güncellenir. Diğer bilgiler yukarıdaki profil ekranında görünür.',
 			'features.profile.photoSaved' => 'Profil fotoğrafı bu hesap için kaydedildi.',
 			'features.profile.photoRemoved' => 'Profil fotoğrafı kaldırıldı.',
@@ -2243,6 +2934,7 @@ extension on TranslationsTr {
 			'features.profile.avatarGalleryError' => 'Galeri açılamadı.',
 			'features.profile.avatarDecodeError' => 'Görsel çözümlenemedi.',
 			'features.profile.avatarSaveError' => 'Fotoğraf kaydedilirken hata oluştu.',
+			'features.profile.avatarUnsupportedFormat' => 'Desteklenmeyen dosya türü. Lütfen JPG, PNG veya GIF seçin.',
 			'features.profile.accountCreatedAt' => 'Hesap oluşturulma: {date}',
 			'features.subscription.title' => 'Abonelik',
 			'features.subscription.statusActive' => 'Aktif',
@@ -2270,6 +2962,8 @@ extension on TranslationsTr {
 			'features.subscription.cycleMonthly' => 'Her ay yenilenir',
 			'features.subscription.cycleAnnual' => 'Her yıl yenilenir',
 			'features.subscription.featureUnlimitedUnits' => 'Sınırsız daire',
+			'features.subscription.buildingUsageSummary' => 'Yönetilen bina: {used}',
+			'features.subscription.buildingUsageWithLimit' => 'Yönetilen bina: {used} / {limit}',
 			'features.subscription.featureDuesTracking' => 'Aidat takibi',
 			'features.subscription.featureAdvancedReports' => 'Gelişmiş raporlar',
 			'features.subscription.featurePrioritySupport' => 'Öncelikli destek',
@@ -2298,6 +2992,27 @@ extension on TranslationsTr {
 			'features.subscription.priceUnavailable' => '—',
 			'features.subscription.loadingPlans' => 'Planlar yükleniyor…',
 			'features.subscription.purchasesDisabledHint' => 'Satın alma bu sürümde henüz etkin değil.',
+			'features.subscription.plan1To5' => '1-5 Bina Paketi',
+			'features.subscription.plan5To20' => '5-20 Bina Paketi',
+			'features.subscription.plan20To50' => '20-50 Bina Paketi',
+			'features.subscription.plan50Plus' => '50+ Bina (Özel)',
+			'features.subscription.comingSoon' => 'Yakında',
+			'features.subscription.contactUs' => 'İletişime Geçin',
+			'features.subscription.contactUsDesc' => 'Özel fiyatlandırma için bizimle iletişime geçin.',
+			'features.subscription.sectionPlans' => 'Paketler',
+			'features.subscription.feature1To5' => '1-5 Bina Yönetimi',
+			'features.subscription.feature5To20' => '5-20 Bina Yönetimi',
+			'features.subscription.feature20To50' => '20-50 Bina Yönetimi',
+			'features.subscription.feature50Plus' => 'Sınırsız Bina Yönetimi',
+			'features.subscription.featureCustomSupport' => 'Özel Müşteri Temsilcisi',
+			'features.subscription.toggleMonthly' => 'Aylık',
+			'features.subscription.toggleAnnual' => 'Yıllık',
+			'features.subscription.currentPlanBadge' => 'Mevcut Planınız',
+			'features.subscription.buildingProgress' => 'Bina Kullanımı',
+			'features.subscription.planBasic' => 'Temel Paket',
+			'features.subscription.featureBasicBuildings' => '1 Bina Yönetimi',
+			'features.subscription.featureBasicReports' => 'Temel Raporlar',
+			'features.subscription.statusUnlimited' => 'Süresiz',
 			'features.reports.menuDownload' => 'Rapor indir',
 			'features.reports.sheetTitle' => 'PDF rapor',
 			'features.reports.reportTypeLabel' => 'Rapor türü',
@@ -2357,6 +3072,7 @@ extension on TranslationsTr {
 			'features.dashboard.payNow' => 'Şimdi Öde',
 			'features.dashboard.overduePaymentsBadge' => '{count} gecikmiş ödeme',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} aidatı',
+			'features.dashboard.residentDebtAndPaySubtitle' => 'Ödeme yaparak ödeyin.',
 			'features.faz2.sectionTitle' => 'Faz 2',
 			_ => null,
 		} ?? switch (path) {

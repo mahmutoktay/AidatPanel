@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/navigation/dashboard_back_handler.dart';
 import '../../../../core/navigation/app_back_navigation.dart';
+import '../../../../core/providers/theme_mode_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
@@ -66,6 +67,9 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Tema değişiminde tüm dashboard iskeletinin rebuild olması için watch
+    ref.watch(themeModeProvider);
+
     ref.listen<int>(managerTabIndexProvider, (previous, next) {
       if (_tabController.index != next) {
         _tabController.animateTo(
@@ -77,9 +81,19 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     });
 
     final buildingsAsync = ref.watch(buildingsStoreProvider);
+    final standaloneBuildingsAsync =
+        ref.watch(standaloneBuildingsStoreProvider);
     final userName =
-        ref.watch(authStateProvider).user?.name ?? context.t.common.user;
+        ref.watch(authStateProvider.select((state) => state.user?.name)) ??
+        context.t.common.user;
     final selectedTab = ref.watch(managerTabIndexProvider);
+<<<<<<< HEAD
+=======
+    final isSettings = selectedTab == 3;
+    final title = isSettings
+        ? context.t.common.settings
+        : context.t.common.manager;
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
     return DashboardBackHandler(
       dashboardRootPath: '/manager-dashboard',
@@ -130,10 +144,17 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                 children: [
                   ManagerHomeTab(
                     buildingsAsync: buildingsAsync,
-                    onRetryBuildings: () =>
-                        ref.read(buildingsStoreProvider.notifier).loadBuildings(),
+                    onRetryBuildings: () => ref
+                        .read(buildingsStoreProvider.notifier)
+                        .loadBuildings(),
                   ),
+                  ManagerPropertiesTab(
+                    standaloneBuildingsAsync: standaloneBuildingsAsync,
+                  ),
+<<<<<<< HEAD
                   ManagerPropertiesTab(),
+=======
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
                   const ManagerDuesTab(),
                   const MenuTab(role: UserRole.manager),
                 ],
@@ -142,7 +163,9 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
           ],
         ),
         bottomNavigationBar: DashboardBottomNavBar(
-          selectedIndex: ref.watch(managerTabIndexProvider),
+          selectedIndex: ref.watch(
+            managerTabIndexProvider.select((index) => index),
+          ),
           onDestinationSelected: (index) {
             ref.read(managerTabIndexProvider.notifier).update(index);
             _tabController.animateTo(

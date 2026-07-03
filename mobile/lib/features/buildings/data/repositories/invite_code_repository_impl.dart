@@ -6,9 +6,9 @@ import 'invite_code_repository.dart';
 class InviteCodeRepositoryImpl implements InviteCodeRepository {
   final InviteCodeRemoteDataSource _remoteDataSource;
 
-  InviteCodeRepositoryImpl(
-      {required InviteCodeRemoteDataSource remoteDataSource})
-      : _remoteDataSource = remoteDataSource;
+  InviteCodeRepositoryImpl({
+    required InviteCodeRemoteDataSource remoteDataSource,
+  }) : _remoteDataSource = remoteDataSource;
 
   @override
   Future<InviteCodeModel> generateInviteCode(String apartmentId) async {
@@ -17,7 +17,7 @@ class InviteCodeRepositoryImpl implements InviteCodeRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Davet kodu oluşturulurken hata oluştu: $e');
+      throw ApiException(message: 'invite_code_create_failed');
     }
   }
 }

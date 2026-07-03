@@ -1,8 +1,8 @@
 import { prisma } from "../config/db.js";
 import { logger } from "../config/logger.js";
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
+import { NOTIFICATION_CODES } from "../constants/notificationCatalog.js";
 import { EXPENSE_CATEGORY_LABELS } from "../constants/reportLabels.js";
-import { EXPENSE_ADDED_RESIDENT } from "../constants/notificationTemplates.js";
 import { createForUsers } from "./notificationService.js";
 
 /**
@@ -57,15 +57,15 @@ export async function notifyResidentsOfNewExpense(buildingId, payload) {
       residents.map((r) => r.id),
       {
         type: NOTIFICATION_TYPES.EXPENSE_ADDED,
-        title: EXPENSE_ADDED_RESIDENT.title,
-        body: EXPENSE_ADDED_RESIDENT.body({
+        code: NOTIFICATION_CODES.EXPENSE_ADDED_RESIDENT,
+        params: {
           title,
           month: targetMonth,
           year: targetYear,
-          amountStr,
+          amountStr: amountStr ?? "",
           categoryLabel,
           splitMonths,
-        }),
+        },
         data: {
           expenseId,
           buildingId,

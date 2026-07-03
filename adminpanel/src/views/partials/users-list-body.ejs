@@ -1,0 +1,87 @@
+<%- include('flash') %>
+<%- include('page-header', { title: 'Üyeler', description: 'Tüm yönetici ve sakin hesaplarını arayın, filtreleyin ve yönetin.' }) %>
+
+<div class="filter-panel" x-data="{ open: false }" :class="{ 'is-open': open }">
+  <button type="button" class="filter-panel__toggle mobile-only" @click="open = !open">
+    <span>Filtreler</span>
+    <span>▼</span>
+  </button>
+  <form class="filter-panel__body" method="get" action="/users">
+    <div class="form-group" style="margin:0;flex:1;min-width:180px">
+      <label for="q">Ara</label>
+      <input class="form-control" id="q" name="q" value="<%= filters.q || '' %>" placeholder="Ad, e-posta veya telefon">
+    </div>
+    <div class="form-group" style="margin:0;min-width:130px">
+      <label for="role">Rol</label>
+      <select class="form-control" id="role" name="role">
+        <option value="">Tümü</option>
+        <option value="MANAGER" <%= filters.role === 'MANAGER' ? 'selected' : '' %>>Yönetici</option>
+        <option value="RESIDENT" <%= filters.role === 'RESIDENT' ? 'selected' : '' %>>Sakin</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:130px">
+      <label for="deleted">Durum</label>
+      <select class="form-control" id="deleted" name="deleted">
+        <option value="false" <%= filters.deleted !== 'true' ? 'selected' : '' %>>Aktif</option>
+        <option value="true" <%= filters.deleted === 'true' ? 'selected' : '' %>>Silinmiş</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:150px">
+      <label for="hasSubscription">Abonelik</label>
+      <select class="form-control" id="hasSubscription" name="hasSubscription">
+        <option value="">Tümü</option>
+        <option value="true" <%= filters.hasSubscription === 'true' ? 'selected' : '' %>>Aboneliği var</option>
+        <option value="false" <%= filters.hasSubscription === 'false' ? 'selected' : '' %>>Aboneliği yok</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn--primary">Filtrele</button>
+  </form>
+</div>
+
+<% if (!users.length) { %>
+<div class="card">
+  <div class="empty-state">
+    <div class="empty-state__icon"><%- include('icon', { name: 'users' }) %></div>
+    <p class="empty-state__title">Üye bulunamadı</p>
+    <p>Filtreleri değiştirerek tekrar deneyin.</p>
+  </div>
+</div>
+<% } else { %>
+<div class="data-table-wrap">
+  <table class="data-table">
+    <thead><tr><th>Ad</th><th>E-posta</th><th>Rol</th><th>Abonelik</th><th></th></tr></thead>
+    <tbody>
+      <% users.forEach(u => { %>
+      <tr>
+        <td><strong><%= u.name %></strong></td>
+        <td class="text-secondary"><%= u.email %></td>
+        <td><span class="badge badge--<%= u.role === 'MANAGER' ? 'primary' : 'muted' %>"><%= u.role === 'MANAGER' ? 'Yönetici' : 'Sakin' %></span></td>
+        <td>
+          <% if (u.subscription) { %>
+            <span class="badge badge--<%= u.subscription.status === 'ACTIVE' ? 'success' : 'warning' %>"><%= u.subscription.status %></span>
+          <% } else { %>
+            <span class="text-muted">—</span>
+          <% } %>
+        </td>
+        <td><a href="/users/<%= u.id %>" class="btn btn--secondary btn--sm">Detay</a></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<div class="data-cards">
+  <% users.forEach(u => { %>
+  <div class="data-card">
+    <div class="data-card__header">
+      <h3 class="data-card__title"><%= u.name %></h3>
+      <span class="badge badge--muted"><%= u.role === 'MANAGER' ? 'Yönetici' : 'Sakin' %></span>
+    </div>
+    <p class="data-card__meta"><%= u.email %></p>
+    <a href="/users/<%= u.id %>" class="btn btn--secondary btn--sm mt-4">Detay</a>
+  </div>
+  <% }) %>
+</div>
+<% } %>
+
+<%- include('./pagination', { pagination, basePath: '/users', query: filters }) %>

@@ -1,6 +1,7 @@
 import 'package:aidatpanel/features/profile/presentation/screens/legal_document_screen.dart';
 import 'package:aidatpanel/l10n/strings.g.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -13,9 +14,11 @@ void main() {
     LegalDocumentKind kind,
   ) async {
     await tester.pumpWidget(
-      TranslationProvider(
-        child: MaterialApp(
-          home: LegalDocumentScreen(kind: kind),
+      ProviderScope(
+        child: TranslationProvider(
+          child: MaterialApp(
+            home: LegalDocumentScreen(kind: kind),
+          ),
         ),
       ),
     );

@@ -1,13 +1,13 @@
 import '../../../../core/network/api_exception.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../datasources/profile_remote_datasource.dart';
-import 'profile_repository.dart';
+import '../../domain/repositories/profile_repository.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource _remoteDataSource;
 
   ProfileRepositoryImpl({required ProfileRemoteDataSource remoteDataSource})
-      : _remoteDataSource = remoteDataSource;
+    : _remoteDataSource = remoteDataSource;
 
   @override
   Future<UserEntity> getProfile() async {
@@ -17,7 +17,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Profil bilgileri alınamadı');
+      throw ApiException(message: 'profile_fetch_failed');
     }
   }
 
@@ -39,7 +39,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Profil güncellenemedi');
+      throw ApiException(message: 'profile_update_failed');
     }
   }
 
@@ -51,7 +51,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Dil tercihi kaydedilemedi');
+      throw ApiException(message: 'language_update_failed');
     }
   }
 
@@ -68,7 +68,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Şifre değiştirilemedi: $e');
+      throw ApiException(message: 'password_change_failed');
     }
   }
 
@@ -79,7 +79,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException(message: 'Hesap kapatılamadı: $e');
+      throw ApiException(message: 'account_delete_failed');
     }
   }
 
@@ -91,7 +91,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Profil fotoğrafı yüklenemedi');
+      throw ApiException(message: 'profile_picture_upload_failed');
     }
   }
 
@@ -103,7 +103,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Profil fotoğrafı silinemedi');
+      throw ApiException(message: 'profile_picture_delete_failed');
     }
   }
 }

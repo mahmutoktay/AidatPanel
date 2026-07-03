@@ -140,21 +140,20 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     final t = context.t.features.expenses;
     final expense = widget.expense;
 
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: _isEdit ? t.editTitle : t.createTitle,
       canPop: !_submitting,
-      child: DashboardSecondaryScaffold(
-        title: _isEdit ? t.editTitle : t.createTitle,
-        body: Form(
-          key: _formKey,
-          child: ListView.builder(
-            padding: AppSizes.screenBodyScrollPadding,
-            itemCount: _sectionCount,
-            itemBuilder: (context, index) {
-              var sectionIndex = index;
-              if (sectionIndex == 0) {
-                return Padding(
-                  padding: DashboardScreenStyle.listItemPadding,
-                  child: DashboardSurfaceCard(
+      body: Form(
+        key: _formKey,
+        child: ListView.builder(
+          padding: AppSizes.screenBodyScrollPadding,
+          itemCount: _sectionCount,
+          itemBuilder: (context, index) {
+            var sectionIndex = index;
+            if (sectionIndex == 0) {
+              return Padding(
+                padding: DashboardScreenStyle.listItemPadding,
+                child: DashboardSurfaceCard(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -417,7 +416,6 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
             },
           ),
         ),
-      ),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../widgets/action_chevron.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
 import '../../l10n/strings.g.dart';
@@ -100,10 +101,9 @@ class PremiumFilterButton extends StatelessWidget {
                         ),
                       ),
                     ],
-                    Icon(
-                      Icons.keyboard_arrow_down_rounded,
+                    const ActionChevron(
+                      direction: ChevronDirection.down,
                       size: 22,
-                      color: AppColors.mutedText.withValues(alpha: 0.45),
                     ),
                   ],
                 ),

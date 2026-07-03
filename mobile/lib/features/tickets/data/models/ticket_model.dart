@@ -58,9 +58,10 @@ class TicketModel {
       }
     }
 
+    // Backend'de ticket user ilişkisi üzerinden sakin bilgisi döner
+    // Hem 'resident' hem 'createdBy' aynı kullanıcıyı işaret eder
+    // createdBy fallback'i kaldırıldı — resident ana kaynaktır
     final resident = json['resident'];
-    final createdBy = json['createdBy'];
-    
     String? resName;
     String? resPhone;
     String? resEmail;
@@ -73,12 +74,9 @@ class TicketModel {
     }
 
     String? crName;
+    final createdBy = json['createdBy'];
     if (createdBy is Map) {
       crName = createdBy['name'] as String?;
-      resName ??= crName;
-      resPhone ??= createdBy['phone'] as String?;
-      resEmail ??= createdBy['email'] as String?;
-      resPic ??= createdBy['profilePicture'] as String?;
     }
 
     return TicketModel(

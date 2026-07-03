@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/action_chevron.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -142,10 +143,7 @@ class TicketListCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: AppColors.textDisabled,
-                ),
+                const ActionChevron(),
               ],
             ),
           ),

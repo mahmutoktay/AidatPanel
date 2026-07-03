@@ -42,7 +42,7 @@ export async function updateProfileService(
     await assertEmailAvailableForUser(userId, email);
   }
   if (isPhoneChanged) {
-    await assertPhoneAvailableForUser(userId, phone);
+    await assertPhoneAvailableForUser(userId, phone, user.role);
   }
 
   const data = {};

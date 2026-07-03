@@ -88,3 +88,17 @@ final managerDueHighlightIdProvider =
     NotifierProvider<ManagerDueHighlightNotifier, String?>(
   ManagerDueHighlightNotifier.new,
 );
+
+/// Manager ekranlarında seçili building ID'yi merkezi yönetmek için.
+/// setState ile yönetilen _selectedBuildingId / _buildingId değişkenlerinin yerine kullanılır.
+class SelectedBuildingIdNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void select(String? id) => state = id;
+}
+
+final selectedBuildingIdProvider =
+    NotifierProvider<SelectedBuildingIdNotifier, String?>(
+  SelectedBuildingIdNotifier.new,
+);

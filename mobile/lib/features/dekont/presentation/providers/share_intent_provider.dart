@@ -63,7 +63,12 @@ class ShareIntentNotifier extends Notifier<ShareIntentState> {
     ref.onDispose(() {
       _intentDataStreamSubscription?.cancel();
     });
-    Future.microtask(_init);
+    // Fire-and-forget: bilinçli unawaited + catchError.
+    unawaited(
+      Future.microtask(_init).catchError((err, st) {
+        debugPrint('[share_intent] init hatası: $err');
+      }),
+    );
     return const ShareIntentState();
   }
 
@@ -77,7 +82,12 @@ class ShareIntentNotifier extends Notifier<ShareIntentState> {
           (List<SharedMediaFile> value) {
             debugPrint('[share_intent] Stream event: ${value.length} dosya');
             if (value.isNotEmpty) {
-              _handleWarmResumeFiles(value);
+              // Fire-and-forget: stream callback'i async handler'ı await etmez.
+              unawaited(
+                _handleWarmResumeFiles(value).catchError((err, st) {
+                  debugPrint('[share_intent] warm resume hatası: $err');
+                }),
+              );
             }
           },
           onError: (err) {
@@ -86,18 +96,20 @@ class ShareIntentNotifier extends Notifier<ShareIntentState> {
         );
 
     // ── 2. COLD START: Uygulama kapalıyken tetiklenen intent ──
-    ReceiveSharingIntent.instance
-        .getInitialMedia()
-        .then((List<SharedMediaFile> value) {
-          debugPrint('[share_intent] Initial media: ${value.length} dosya');
-          if (value.isNotEmpty) {
-            _handleColdStartFiles(value);
-            ReceiveSharingIntent.instance.reset();
-          }
-        })
-        .catchError((err) {
-          debugPrint('[share_intent] initial error: $err');
-        });
+    unawaited(
+      ReceiveSharingIntent.instance
+          .getInitialMedia()
+          .then((List<SharedMediaFile> value) {
+            debugPrint('[share_intent] Initial media: ${value.length} dosya');
+            if (value.isNotEmpty) {
+              _handleColdStartFiles(value);
+              ReceiveSharingIntent.instance.reset();
+            }
+          })
+          .catchError((err) {
+            debugPrint('[share_intent] initial error: $err');
+          }),
+    );
   }
 
   // ── COLD START: Sadece dosyayı state'e yaz, NAVIGATE ETME ──
@@ -182,7 +194,8 @@ class ShareIntentNotifier extends Notifier<ShareIntentState> {
     }
 
     try {
-      debugPrint('[share_intent] Gelen dosya path: $path');
+      final safePath = '[path length=${path.length} ext=${path.contains('.') ? path.split('.').last : 'unknown'}]';
+      debugPrint('[share_intent] Gelen dosya (sanitized): $safePath');
 
       // Path temizliği
       String cleanPath = path;
@@ -196,7 +209,7 @@ class ShareIntentNotifier extends Notifier<ShareIntentState> {
       // Cache kopyası gecikebilir
       final f = File(cleanPath);
       if (!f.existsSync()) {
-        debugPrint('[share_intent] Dosya henüz yok, 500ms bekleniyor...');
+        debugPrint('[share_intent] Dosya henüz yok, 500ms bekleniyor... (path sanitized)');
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
@@ -205,7 +218,7 @@ class ShareIntentNotifier extends Notifier<ShareIntentState> {
       try {
         bytes = await f.readAsBytes();
       } catch (e) {
-        debugPrint('[share_intent] HATA: Dosya okunamadı ($cleanPath): $e');
+        debugPrint('[share_intent] HATA: Dosya okunamadı (sanitized): ${e.runtimeType}');
         return null;
       }
 
@@ -223,8 +236,8 @@ class ShareIntentNotifier extends Notifier<ShareIntentState> {
       );
 
       return {'fileName': fileName, 'fileBytes': bytes, 'filePath': path};
-    } catch (e, st) {
-      debugPrint('[share_intent] HATA: _readFileToMap exception: $e\n$st');
+    } catch (e) {
+      debugPrint('[share_intent] HATA: _readFileToMap exception (sanitized): ${e.runtimeType}');
       return null;
     }
   }

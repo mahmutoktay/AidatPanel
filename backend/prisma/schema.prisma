@@ -16,7 +16,7 @@ model User {
   email        String?  @unique
   passwordHash String
   name         String
-  phone        String?  @unique
+  phone        String?
   role         UserRole @default(RESIDENT)
   fcmToken     String?
   language     String   @default("tr")
@@ -44,8 +44,11 @@ model User {
   uploadedDekonts     Dekont[]
   reviewedDekonts     Dekont[]     @relation("DekontReviewer")
   sessions            UserSession[]
+  promoGrants         PromoGrant[]
 
+  @@unique([phone, role])
   @@index([apartmentId])
+  @@index([role, deletedAt, createdAt])
 }
 
 /// Cihaz bazlı oturum takibi — login/join'de oluşur; revoke ile sonlandırılır.
@@ -63,6 +66,7 @@ model UserSession {
 
   @@index([userId])
   @@index([userId, revokedAt])
+  @@index([lastSeenAt])
 }
 
 /// Şifre sıfırlama: düz metin token yalnızca e-postada; DB'de SHA-256 özeti.
@@ -76,6 +80,23 @@ model PasswordResetToken {
   createdAt DateTime  @default(now())
 
   @@index([userId])
+}
+
+/// SMS OTP — telefon doğrulama (sakin/yönetici giriş ve kayıt).
+model PhoneOtpToken {
+  id        String    @id @default(uuid())
+  phone     String?
+  email     String?
+  purpose   String
+  tokenHash String    @unique
+  payload   Json?
+  expiresAt DateTime
+  usedAt    DateTime?
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  @@index([phone, purpose])
+  @@index([email, purpose])
 }
 
 enum UserRole {
@@ -97,6 +118,7 @@ model Subscription {
   updatedAt          DateTime           @updatedAt
 
   @@index([userId])
+  @@index([status, currentPeriodEnd])
 }
 
 enum SubscriptionStatus {
@@ -111,17 +133,27 @@ model Site {
   name                     String
   address                  String
   city                     String
+<<<<<<< HEAD
+=======
+  district                 String?
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   managerId                String
   manager                  User          @relation("SiteManager", fields: [managerId], references: [id])
   buildings                Building[]
   siteExpenses             SiteExpense[]
 
+<<<<<<< HEAD
   // Varsayılan aidat ayarları (site altı binalar inherit eder)
+=======
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   dueAmount                Decimal?      @db.Decimal(10, 2)
   dueDay                   Int           @default(1)
   currency                 String        @default("TRY")
 
+<<<<<<< HEAD
   // Varsayılan tahsilat hesabı
+=======
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   collectionIban           String?
   collectionAccountTitle   String?
   paymentReferenceTemplate String?
@@ -138,15 +170,20 @@ model Building {
   name              String
   address           String
   city              String
+  district          String?
   totalFloors       Int?
   apartmentsPerFloor Int?
   managerId         String
   manager           User        @relation("BuildingManager", fields: [managerId], references: [id])
   siteId            String?
   site              Site?       @relation(fields: [siteId], references: [id], onDelete: Cascade)
+<<<<<<< HEAD
   /// Opsiyonel blok etiketi (ör. "C Blok"); `name` yeterli olabilir.
   blockLabel        String?
   /// Site adresine ek satır (kapı no, blok girişi vb.)
+=======
+  blockLabel        String?
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   addressExtra      String?
   apartments        Apartment[]
   expenses          Expense[]
@@ -186,13 +223,23 @@ model SiteExpense {
   note            String?
   receiptUrl      String?
   storedPaths     Json?           @default("[]")
+<<<<<<< HEAD
+=======
+
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   rawText         String?         @db.Text
   parsedJson      Json?
   parsedAmount    Decimal?        @db.Decimal(12, 2)
   transactionDate DateTime?
   aiConfidence    Float?
   ocrReceiptsJson Json?
+<<<<<<< HEAD
   carryforwards   DueExpenseCarryforward[]
+=======
+
+  carryforwards   DueExpenseCarryforward[]
+
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -385,6 +432,8 @@ model Notification {
   id        String           @id @default(uuid())
   userId    String
   user      User             @relation(fields: [userId], references: [id])
+  code      String
+  params    Json?
   title     String
   body      String
   type      NotificationType
@@ -475,8 +524,111 @@ model Dekont {
   @@index([buildingId, createdAt])
   @@index([uploadedById])
   @@index([status])
+  @@index([status, createdAt])
   @@index([apartmentId])
   @@index([fileHash])
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  SUPPORT
+}
+
+model AdminUser {
+  id            String              @id @default(uuid())
+  email         String              @unique
+  passwordHash  String
+  name          String
+  role          AdminRole           @default(SUPPORT)
+  isActive      Boolean             @default(true)
+  fcmToken      String?
+  lastLoginAt   DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  auditLogs     AdminAuditLog[]
+  promoGrants   PromoGrant[]
+  notifications AdminNotification[]
+  dbBackups     DbBackup[]
+}
+
+model AdminAuditLog {
+  id         String    @id @default(uuid())
+  adminId    String
+  admin      AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  action     String
+  targetType String?
+  targetId   String?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime  @default(now())
+
+  @@index([adminId, createdAt])
+  @@index([action, createdAt])
+}
+
+enum PromoType {
+  FREE_PERIOD
+  DISCOUNT_PERCENT
+}
+
+model PromoGrant {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  grantedById     String
+  grantedBy       AdminUser @relation(fields: [grantedById], references: [id])
+  type            PromoType
+  plan            String?
+  durationDays    Int?
+  discountPercent Int?
+  reason          String
+  expiresAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([userId])
+  @@index([grantedById])
+}
+
+model UserActivityDaily {
+  id          String   @id @default(uuid())
+  date        DateTime @db.Date
+  role        UserRole
+  activeUsers Int
+  createdAt   DateTime @default(now())
+
+  @@unique([date, role])
+  @@index([date])
+}
+
+model AdminNotification {
+  id        String     @id @default(uuid())
+  adminId   String?
+  admin     AdminUser? @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  type      String     @default("SYSTEM")
+  isRead    Boolean    @default(false)
+  metadata  Json?
+  createdAt DateTime   @default(now())
+
+  @@index([adminId, isRead, createdAt])
+}
+
+model DbBackup {
+  id                     String    @id @default(uuid())
+  filename               String
+  sizeBytes              BigInt?
+  status                 String    @default("PENDING")
+  createdById            String
+  createdBy              AdminUser @relation(fields: [createdById], references: [id])
+  errorMessage           String?
+  downloadTokenHash      String?
+  downloadTokenExpiresAt DateTime?
+  createdAt              DateTime  @default(now())
+  completedAt            DateTime?
+
+  @@index([createdById, createdAt])
+  @@index([status])
 }
 
 model DuePayment {

@@ -49,6 +49,20 @@ export async function validateDekontUploadFile(buffer, file) {
 }
 
 /**
+ * MIME tipinden dosya uzantısını döndürür (createMulterUpload.js tarafından kullanılır).
+ * @param {string} mimeType
+ * @returns {string|null}
+ */
+export function extensionForMime(mimeType) {
+  const map = {
+    "application/pdf": ".pdf",
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+  };
+  return map[mimeType] ?? null;
+}
+
+/**
  * Disk üzerindeki geçici dosyayı doğrular (multer diskStorage).
  * @param {string} filePath
  * @param {{ mimetype?: string, size?: number }} file

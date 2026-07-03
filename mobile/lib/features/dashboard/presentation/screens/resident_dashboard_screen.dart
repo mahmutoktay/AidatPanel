@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/navigation/app_back_navigation.dart';
 import '../../../../core/navigation/dashboard_back_handler.dart';
+import '../../../../core/providers/theme_mode_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
@@ -19,6 +20,7 @@ import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../../dues/presentation/screens/resident_dues_tab.dart';
 import '../../../tickets/presentation/providers/tickets_provider.dart';
 import '../../../tickets/presentation/screens/resident_tickets_tab.dart';
+import '../widgets/resident_home/resident_home_colors.dart';
 import '../widgets/resident_home/resident_home_tab.dart';
 
 class ResidentDashboardScreen extends ConsumerStatefulWidget {
@@ -29,7 +31,8 @@ class ResidentDashboardScreen extends ConsumerStatefulWidget {
       _ResidentDashboardScreenState();
 }
 
-class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScreen>
+class _ResidentDashboardScreenState
+    extends ConsumerState<ResidentDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -82,6 +85,9 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
 
   @override
   Widget build(BuildContext context) {
+    // Tema değişiminde tüm dashboard iskeletinin rebuild olması için watch
+    ref.watch(themeModeProvider);
+
     ref.listen<int>(residentTabIndexProvider, (previous, next) {
       if (_tabController.index != next) {
         _tabController.animateTo(
@@ -112,6 +118,16 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
     final userName =
         ref.watch(authStateProvider.select((state) => state.user?.name)) ??
         context.t.common.user;
+<<<<<<< HEAD
+=======
+    final isSettings = selectedTab == 3;
+    final title = switch (selectedTab) {
+      3 => t.mySettings,
+      2 => t.issues,
+      1 => t.dues,
+      _ => t.resident,
+    };
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
     return DashboardBackHandler(
       dashboardRootPath: '/resident-dashboard',
@@ -125,16 +141,22 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
           curve: DashboardNavAnimation.curve,
         );
       },
-      onExitHint: (message) => ref.read(toastProvider.notifier).show(
+      onExitHint: (message) => ref
+          .read(toastProvider.notifier)
+          .show(
             message,
             type: ToastType.info,
             duration: AppBackNavigation.exitGracePeriod,
           ),
       child: Scaffold(
+<<<<<<< HEAD
         key: _scaffoldKey,
         drawer: const ProfileDrawer(role: UserRole.resident),
         drawerEnableOpenDragGesture: false,
         backgroundColor: AppColors.dashboardBackground,
+=======
+        backgroundColor: AppColors.surface,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -172,6 +194,8 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
         ),
         bottomNavigationBar: DashboardBottomNavBar(
           selectedIndex: selectedTab,
+          selectedAccentColor: ResidentHomeColors.blue,
+          showSelectionPill: false,
           onDestinationSelected: (index) {
             ref.read(residentTabIndexProvider.notifier).update(index);
             _tabController.animateTo(
@@ -187,8 +211,8 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
               label: t.home,
             ),
             DashboardNavDestination(
-              icon: Icons.receipt_outlined,
-              selectedIcon: Icons.receipt,
+              icon: Icons.account_balance_wallet_outlined,
+              selectedIcon: Icons.account_balance_wallet,
               label: t.dues,
             ),
             DashboardNavDestination(
@@ -197,9 +221,15 @@ class _ResidentDashboardScreenState extends ConsumerState<ResidentDashboardScree
               label: t.issues,
             ),
             DashboardNavDestination(
+<<<<<<< HEAD
               icon: Icons.apps_outlined,
               selectedIcon: Icons.apps_rounded,
               label: t.menu,
+=======
+              icon: Icons.settings_outlined,
+              selectedIcon: Icons.settings,
+              label: t.mySettings,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
             ),
           ],
         ),

@@ -57,7 +57,7 @@ void main() {
 
 class _EmptyBuildingsRepository implements BuildingRepository {
   @override
-  Future<List<BuildingEntity>> fetchBuildings() async => [];
+  Future<List<BuildingEntity>> fetchBuildings({bool standalone = false}) async => [];
 
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
@@ -65,7 +65,7 @@ class _EmptyBuildingsRepository implements BuildingRepository {
 
 class _FailingBuildingsRepository implements BuildingRepository {
   @override
-  Future<List<BuildingEntity>> fetchBuildings() async {
+  Future<List<BuildingEntity>> fetchBuildings({bool standalone = false}) async {
     throw ApiException(message: 'Sunucuya bağlanılamadı');
   }
 

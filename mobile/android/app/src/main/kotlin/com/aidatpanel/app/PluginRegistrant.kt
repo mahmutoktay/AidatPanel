@@ -14,8 +14,6 @@ import com.github.dart_lang.jni_flutter.JniFlutterPlugin
 
 import com.it_nomads.fluttersecurestorage.FlutterSecureStoragePlugin
 
-import com.kasem.receive_sharing_intent.ReceiveSharingIntentPlugin
-
 import com.mr.flutter.plugin.filepicker.FilePickerPlugin
 
 import io.scer.pdfx.PdfxPlugin
@@ -82,7 +80,11 @@ object PluginRegistrant {
 
         flutterEngine.plugins.add(PdfxPlugin())
 
-        flutterEngine.plugins.add(ReceiveSharingIntentPlugin())
+        addPluginReflective(
+            flutterEngine,
+            "com.kasem.receive_sharing_intent.ReceiveSharingIntentPlugin",
+            "receive_sharing_intent",
+        )
 
         addPluginReflective(
 
@@ -122,6 +124,36 @@ object PluginRegistrant {
 
             "purchases_flutter",
 
+        )
+
+        addPluginReflective(
+            flutterEngine,
+            "io.flutter.plugins.firebase.crashlytics.FlutterFirebaseCrashlyticsPlugin",
+            "firebase_crashlytics"
+        )
+
+        addPluginReflective(
+            flutterEngine,
+            "io.flutter.plugins.firebase.analytics.FlutterFirebaseAnalyticsPlugin",
+            "firebase_analytics"
+        )
+
+        addPluginReflective(
+            flutterEngine,
+            "dev.fluttercommunity.plus.device_info.DeviceInfoPlusPlugin",
+            "device_info_plus"
+        )
+
+        addPluginReflective(
+            flutterEngine,
+            "com.tekartik.sqflite.SqflitePlugin",
+            "sqflite_android"
+        )
+
+        addPluginReflective(
+            flutterEngine,
+            "io.flutter.plugins.urllauncher.UrlLauncherPlugin",
+            "url_launcher_android"
         )
 
     }

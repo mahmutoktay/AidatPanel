@@ -1,33 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/cache_invalidator.dart';
+import '../../../../core/providers/app_providers.dart';
 import '../../../../core/subscription/revenue_cat_service.dart';
 import '../../../../core/utils/user_error_message.dart';
-import '../../../../core/network/dio_client.dart';
-import '../../../../core/storage/secure_storage.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart'
     show AuthRepository, AuthRepositoryImpl;
 import '../../domain/entities/user_entity.dart';
 import '../../../profile/presentation/providers/profile_notifier.dart';
-import '../../../../l10n/strings.g.dart';
 import '../../../../core/utils/input_validators.dart';
+import '../../../../core/utils/phone_utils.dart';
+import '../../../../l10n/strings.g.dart';
 
-/// Oturum sonlandığında callback almak için global değişken.
-/// DioClient > TokenRefreshService token yenileyemezse bu callback tetiklenir.
-/// AuthNotifier kurulumda bu callback'i kendine bağlar.
-typedef SessionExpiredCallback = void Function();
-SessionExpiredCallback? onSessionExpired;
-
-final secureStorageProvider = Provider((ref) => SecureStorage());
-
-final dioClientProvider = Provider((ref) {
-  return DioClient(
-    secureStorage: ref.watch(secureStorageProvider),
-    // Getter olarak iletilir: çağrı anında güncel değer alınır.
-    onSessionExpiredGetter: () => onSessionExpired,
-  );
-});
+export '../../../../core/providers/app_providers.dart'
+    show dioClientProvider, secureStorageProvider, onSessionExpiredProvider;
 
 final authRemoteDataSourceProvider = Provider((ref) {
   return AuthRemoteDataSourceImpl(dioClient: ref.watch(dioClientProvider));
@@ -97,74 +84,136 @@ class AuthNotifier extends Notifier<AuthState> {
 
   @override
   AuthState build() {
-    // Oturum sonlanınca (başka cihazdan çıkış, refresh başarısız vb.)
-    // state'i sıfırla ve hata mesajı koy (UI bildirim gösterecek).
-    // Not: Dil bağımsız mesaj l10n dosyasında; burada yedek olarak İngilizce
-    // kullanılır, app_router.dart l10n sürümünü gösterir.
-    onSessionExpired = () {
-      state = const AuthState(
-        logoutReason: LogoutReason.otherDevices,
-        isAuthenticated: false,
-        isManualLogout: false,
-      );
-    };
     return const AuthState();
+  }
+
+  void dismissError() {
+    if (state.error == null) return;
+    state = state.copyWith(clearError: true);
   }
 
   Future<void> submitLogin(
     String rawIdentifier,
     String password,
-    bool isPhone,
     WidgetRef ref,
   ) async {
     if (state.isLoading) return;
-
-    final t = LocaleSettings.instance.currentTranslations;
-    String? identifierError;
-    String? passwordError;
-
-    if (isPhone) {
-      final phoneError = InputValidators.validatePhone(rawIdentifier);
-      identifierError = phoneError == null
-          ? null
-          : phoneError == 'phone_required'
-              ? t.validation.phoneRequired
-              : t.validation.phoneInvalid;
-    } else {
-      final emailError = InputValidators.validateEmail(rawIdentifier);
-      identifierError = emailError == null
-          ? null
-          : emailError == 'email_required'
-              ? t.validation.emailRequired
-              : emailError == 'email_invalid'
-                  ? t.validation.emailInvalid
-                  : t.validation.emailTooLong;
-    }
-
-    passwordError = password.isEmpty ? t.features.auth.passwordRequired : null;
-
-    if (identifierError != null || passwordError != null) {
-      String errorMessage = '';
-      if (identifierError != null) errorMessage += identifierError;
-      if (passwordError != null) {
-        if (errorMessage.isNotEmpty) errorMessage += '\n';
-        errorMessage += passwordError;
-      }
-      state = state.copyWith(isLoading: false, error: errorMessage);
+    if (password.isEmpty) {
+      state = state.copyWith(error: t.features.auth.passwordRequired);
       return;
     }
-
-    final identifier = isPhone ? '+90${rawIdentifier.trim()}' : rawIdentifier.trim();
+    final identifierError =
+        InputValidators.validateLoginIdentifier(rawIdentifier);
+    if (identifierError != null) {
+      state = state.copyWith(error: _identifierErrorMessage(identifierError));
+      return;
+    }
+    final identifier = PhoneUtils.normalizeLoginIdentifier(rawIdentifier);
     await login(identifier, password, ref);
   }
 
-  /// `identifier` email **veya** telefon (Belge §3).
+  Future<void> registerAndLogin({
+    required String name,
+    required String rawIdentifier,
+    required String password,
+    required WidgetRef ref,
+  }) async {
+    if (state.isLoading) return;
+    final passwordError = InputValidators.validatePassword(password);
+    if (passwordError != null) {
+      state = state.copyWith(error: _passwordErrorMessage(passwordError));
+      return;
+    }
+    final identifierError =
+        InputValidators.validateLoginIdentifier(rawIdentifier);
+    if (identifierError != null) {
+      state = state.copyWith(error: _identifierErrorMessage(identifierError));
+      return;
+    }
+    final trimmed = rawIdentifier.trim();
+    final isEmail = trimmed.contains('@');
+    final email = isEmail ? trimmed.toLowerCase() : null;
+    final phone = isEmail ? null : PhoneUtils.normalizeTrPhone(trimmed);
+    final nameError = InputValidators.validateName(name);
+    if (nameError != null) {
+      state = state.copyWith(error: _nameErrorMessage(nameError));
+      return;
+    }
+    await register(email, password, name.trim(), phone);
+    if (state.error != null) return;
+    final identifier = PhoneUtils.normalizeLoginIdentifier(trimmed);
+    await login(identifier, password, ref);
+  }
+
+  Future<void> checkManagerIdentifier({
+    required String rawIdentifier,
+    required bool isRegister,
+  }) async {
+    if (state.isLoading) return;
+    final identifierError =
+        InputValidators.validateLoginIdentifier(rawIdentifier);
+    if (identifierError != null) {
+      state = state.copyWith(error: _identifierErrorMessage(identifierError));
+      return;
+    }
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      await _authRepository.checkIdentifier(
+        identifier: rawIdentifier.trim(),
+        purpose: isRegister ? 'manager_register' : 'manager_login',
+      );
+      state = state.copyWith(isLoading: false, clearError: true);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  String _passwordErrorMessage(String key) {
+    switch (key) {
+      case 'password_required':
+        return t.validation.passwordRequired;
+      case 'password_too_short':
+        return t.validation.passwordTooShort;
+      case 'password_too_long':
+        return t.validation.passwordTooLong;
+      case 'password_alphanumeric_required':
+        return t.validation.passwordAlphanumericRequired;
+      default:
+        return t.validation.passwordRequired;
+    }
+  }
+
+  String _identifierErrorMessage(String key) {
+    switch (key) {
+      case 'identifier_required':
+        return t.features.auth.onboarding.identifierRequired;
+      case 'phone_invalid_eleven_digits':
+        return t.features.auth.onboarding.phoneInvalidElevenDigits;
+      case 'email_invalid':
+        return t.validation.emailInvalid;
+      case 'phone_invalid':
+        return t.features.auth.onboarding.phoneInvalid;
+      default:
+        return t.features.auth.onboarding.identifierRequired;
+    }
+  }
+
+  String _nameErrorMessage(String key) {
+    switch (key) {
+      case 'name_required':
+      case 'name_too_short':
+        return t.features.auth.onboarding.residentNameRequired;
+      default:
+        return t.features.auth.onboarding.residentNameRequired;
+    }
+  }
+
   Future<void> login(String identifier, String password, WidgetRef ref) async {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final user = await _authRepository.login(identifier, password);
-      // Reset tab index on successful login
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);
       await _onAuthenticated(ref, user);
@@ -180,18 +229,26 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> register(
-    String email,
+    String? email,
     String password,
     String name,
     String? phone,
   ) async {
     if (state.isLoading) return;
+    final passwordError = InputValidators.validatePassword(password);
+    if (passwordError != null) {
+      state = state.copyWith(error: _passwordErrorMessage(passwordError));
+      return;
+    }
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final formattedPhone = (phone != null && phone.trim().isNotEmpty)
-          ? (phone.trim().startsWith('+90') ? phone.trim() : '+90${phone.trim()}')
-          : null;
-      await _authRepository.register(email, password, name, formattedPhone);
+      final normalizedPhone = PhoneUtils.normalizeTrPhone(phone);
+      await _authRepository.register(
+        email?.trim().isEmpty == true ? null : email?.trim(),
+        password,
+        name,
+        normalizedPhone,
+      );
       state = state.copyWith(
         isLoading: false,
         registrationSuccess: true,
@@ -213,9 +270,7 @@ class AuthNotifier extends Notifier<AuthState> {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final formattedPhone = (phone != null && phone.trim().isNotEmpty)
-          ? (phone.trim().startsWith('+90') ? phone.trim() : '+90${phone.trim()}')
-          : null;
+      final formattedPhone = PhoneUtils.normalizeTrPhone(phone);
       final user = await _authRepository.join(
         inviteCode,
         email,
@@ -223,7 +278,6 @@ class AuthNotifier extends Notifier<AuthState> {
         name,
         formattedPhone,
       );
-      // Reset tab index on successful join
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);
       await _onAuthenticated(ref, user);
@@ -238,6 +292,123 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  Future<void> sendOtp({
+    String? phone,
+    String? email,
+    required String purpose,
+    Map<String, dynamic>? payload,
+  }) async {
+    if (state.isLoading) return;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      await _authRepository.sendOtp(
+        phone: phone,
+        email: email,
+        purpose: purpose,
+        payload: payload,
+      );
+      state = state.copyWith(isLoading: false, clearError: true);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  Future<bool> verifyResidentJoinOtp({
+    required String phone,
+    required String code,
+    required String inviteCode,
+  }) async {
+    if (state.isLoading) return false;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final requireName = await _authRepository.verifyResidentJoinOtp(
+        phone: phone,
+        code: code,
+        inviteCode: inviteCode,
+      );
+      state = state.copyWith(isLoading: false, clearError: true);
+      return requireName;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  Future<UserEntity> completeResidentJoinAndAuthenticate({
+    required String phone,
+    required String name,
+    required String inviteCode,
+    required WidgetRef ref,
+  }) async {
+    if (state.isLoading) return Future.error('loading');
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final user = await _authRepository.completeResidentJoin(
+        phone: phone,
+        name: name,
+        inviteCode: inviteCode,
+      );
+      resetManagerTabIndex(ref);
+      resetResidentTabIndex(ref);
+      await _onAuthenticated(ref, user);
+      state = state.copyWith(
+        isLoading: false,
+        user: user,
+        isAuthenticated: true,
+        clearError: true,
+      );
+      return user;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  Future<UserEntity> verifyOtpAndAuthenticate({
+    String? phone,
+    String? email,
+    required String code,
+    required String purpose,
+    Map<String, dynamic>? payload,
+    String? name,
+    String? password,
+    String? inviteCode,
+    required WidgetRef ref,
+  }) async {
+    if (state.isLoading) return Future.error('loading');
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final user = await _authRepository.verifyOtp(
+        phone: phone,
+        email: email,
+        code: code,
+        purpose: purpose,
+        payload: payload,
+        name: name,
+        password: password,
+        inviteCode: inviteCode,
+      );
+      resetManagerTabIndex(ref);
+      resetResidentTabIndex(ref);
+      await _onAuthenticated(ref, user);
+      state = state.copyWith(
+        isLoading: false,
+        user: user,
+        isAuthenticated: true,
+        clearError: true,
+      );
+      return user;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  Future<String> validateInviteCode(String code) async {
+    return _authRepository.validateInvite(code);
+  }
+
   Future<void> _onAuthenticated(WidgetRef ref, UserEntity user) async {
     final previousId = state.user?.id;
     ref.read(dioClientProvider).clearResponseCache();
@@ -248,13 +419,9 @@ class AuthNotifier extends Notifier<AuthState> {
     if (user.role == UserRole.manager) {
       await RevenueCatService.logIn(user.id);
     }
-    // Pre-emptively load the profile to fetch the latest avatar and user details.
     ref.read(profileNotifierProvider.notifier).loadProfile();
   }
 
-  /// Uygulama açılışında SecureStorage'daki oturumu geri yükler.
-  /// Splash bu future'ı bekleyip ardından yönlendirme yapar.
-  /// Profil / dil güncellemesi sonrası oturum kullanıcısını ve önbelleği senkronlar.
   Future<void> syncCachedUser(UserEntity user) async {
     await _authRepository.persistUser(user);
     if (state.isAuthenticated) {
@@ -277,7 +444,6 @@ class AuthNotifier extends Notifier<AuthState> {
           isLoading: false,
           clearError: true,
         );
-        // Pre-emptively load the profile to fetch the latest avatar and user details.
         ref.read(profileNotifierProvider.notifier).loadProfile();
       } else {
         state = AuthState();
@@ -291,7 +457,6 @@ class AuthNotifier extends Notifier<AuthState> {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      // Reset tab index on logout
       resetManagerTabIndex(ref);
       resetResidentTabIndex(ref);
       ref.read(dioClientProvider).clearResponseCache();
@@ -324,7 +489,6 @@ class AuthNotifier extends Notifier<AuthState> {
     );
   }
 
-  /// Başka cihazdan oturum kapatıldığında — sessionExpired toast gösterilir.
   Future<void> logoutRemoteSession(WidgetRef ref) async {
     resetManagerTabIndex(ref);
     resetResidentTabIndex(ref);
@@ -344,7 +508,6 @@ class AuthNotifier extends Notifier<AuthState> {
     );
   }
 
-  /// Diğer cihazlardan çıkış — bu cihazda oturum devam eder.
   Future<void> logoutAllDevices(WidgetRef ref) async {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);

@@ -1,0 +1,91 @@
+<%- include('flash') %>
+<%- include('page-header', { title: 'Dekont Raporları', description: 'OCR sonuçları, eşleştirme durumları ve güven skorlarını inceleyin.' }) %>
+
+<div class="filter-panel mb-6" x-data="{ open: false }" :class="{ 'is-open': open }">
+  <button type="button" class="filter-panel__toggle mobile-only" @click="open = !open"><span>Filtreler</span><span>▼</span></button>
+  <form class="filter-panel__body" method="get" action="/reports/dekonts">
+    <div class="form-group" style="margin:0;min-width:180px">
+      <label for="status">Durum</label>
+      <select class="form-control" id="status" name="status">
+        <option value="">Tümü</option>
+        <% const dekontStatuses = ['NEEDS_MANAGER_REVIEW','MATCHED','PAYMENT_APPLIED','REJECTED','UNMATCHED','PARSE_LOW_CONFIDENCE','EXTRACT_FAILED','RECEIVED','MATCHING']; %>
+        <% dekontStatuses.forEach(s => { %>
+        <option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:160px">
+      <label for="lowConfidence">Düşük güven</label>
+      <select class="form-control" id="lowConfidence" name="lowConfidence">
+        <option value="">Tümü</option>
+        <option value="true" <%= filters.lowConfidence === 'true' ? 'selected' : '' %>>Evet (&lt;70%)</option>
+        <option value="false" <%= filters.lowConfidence === 'false' ? 'selected' : '' %>>Hayır</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn--primary">Filtrele</button>
+  </form>
+</div>
+
+<div class="kpi-grid mb-6">
+  <div class="card card--kpi card--kpi--red">
+    <div class="card__top"><span class="card__label">Hatalı Dekont</span><div class="card__icon"><%- include('icon', { name: 'dekont' }) %></div></div>
+    <p class="card__value"><%= summary.failedCount ?? 0 %></p>
+  </div>
+  <div class="card card--kpi card--kpi--blue">
+    <div class="card__top"><span class="card__label">Ortalama Güven</span><div class="card__icon"><%- include('icon', { name: 'chart' }) %></div></div>
+    <p class="card__value"><%= summary.avgConfidence ? (summary.avgConfidence * 100).toFixed(0) + '%' : '—' %></p>
+  </div>
+</div>
+
+<div class="card mb-6">
+  <div class="card__header">
+    <div><h3 class="card__title">Durum Dağılımı</h3><p class="card__subtitle">Tüm dekontların durum özeti</p></div>
+  </div>
+  <div class="chart-container"><canvas id="dekontStatusChart"></canvas></div>
+</div>
+
+<% if (!dekonts.length) { %>
+<div class="card"><div class="empty-state"><p class="empty-state__title">Dekont kaydı yok</p></div></div>
+<% } else { %>
+<div class="data-table-wrap">
+  <table class="data-table">
+    <thead><tr><th>Bina</th><th>Durum</th><th>Tutar</th><th>Güven</th><th>Tarih</th></tr></thead>
+    <tbody>
+      <% dekonts.forEach(d => { %>
+      <tr>
+        <td><strong><%= d.building?.name || '—' %></strong></td>
+        <td><span class="badge badge--muted"><%= d.status %></span></td>
+        <td><%= d.parsedAmount != null ? Number(d.parsedAmount).toLocaleString('tr-TR') + ' ₺' : '—' %></td>
+        <td><%= d.aiConfidence ? (d.aiConfidence * 100).toFixed(0) + '%' : '—' %></td>
+        <td class="text-secondary"><%= new Date(d.createdAt).toLocaleDateString('tr-TR') %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<div class="data-cards">
+  <% dekonts.forEach(d => { %>
+  <div class="data-card">
+    <div class="data-card__header"><h3 class="data-card__title"><%= d.building?.name %></h3><span class="badge badge--muted"><%= d.status %></span></div>
+    <p class="data-card__meta"><%= d.parsedAmount != null ? Number(d.parsedAmount).toLocaleString('tr-TR') + ' ₺' : '—' %> · <%= new Date(d.createdAt).toLocaleDateString('tr-TR') %></p>
+  </div>
+  <% }) %>
+</div>
+<% } %>
+
+<%- include('./pagination', { pagination, basePath: '/reports/dekonts', query: filters }) %>
+
+<script>
+  (function(){
+    const data = <%- JSON.stringify(summary.byStatus || []) %>;
+    if (typeof Chart !== 'undefined' && data.length) {
+      Chart.defaults.color = '#a1a1aa';
+      new Chart(document.getElementById('dekontStatusChart'), {
+        type: 'bar',
+        data: { labels: data.map(d=>d.status), datasets: [{ data: data.map(d=>d.count), backgroundColor: '#6366f1', borderRadius: 6 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#27272a' } }, x: { grid: { display: false } } } }
+      });
+    }
+  })();
+</script>

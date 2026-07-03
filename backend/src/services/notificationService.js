@@ -6,39 +6,55 @@ import {
   formatNotificationRow,
 } from "../utils/notificationPayload.js";
 import { deliverCreatedNotifications } from "./notificationDeliveryService.js";
+import { renderNotification } from "./notificationRenderer.js";
 
 /**
  * Birden fazla kullanıcıya in-app bildirim + FCM push.
  * @param {string[]} userIds
- * @param {{ type: import("@prisma/client").NotificationType, title: string, body: string, data?: object }} payload
+ * @param {{ type: import("@prisma/client").NotificationType, code: string, params?: object, data?: object }} payload
  */
-export async function createForUsers(userIds, { type, title, body, data }) {
+export async function createForUsers(userIds, { type, code, params, data }) {
   const uniqueIds = [...new Set(userIds.filter(Boolean))];
   if (uniqueIds.length === 0) {
     return { dbCount: 0, pushSent: 0, pushFailed: 0, pushSkipped: 0, notifications: [] };
   }
 
-  const notifications = await prisma.notification.createManyAndReturn({
-    data: uniqueIds.map((userId) => ({
-      userId,
-      type,
-      title,
-      body,
-      data: data ?? undefined,
-    })),
-  });
-
   const users = await prisma.user.findMany({
     where: { id: { in: uniqueIds }, deletedAt: null },
-    select: { id: true, fcmToken: true },
+    select: { id: true, language: true, fcmToken: true },
   });
-  const tokenByUserId = new Map(users.map((u) => [u.id, u.fcmToken]));
 
-  const delivery = await deliverCreatedNotifications(
-    notifications,
-    { title, body, type },
-    tokenByUserId
+  if (users.length === 0) {
+    return { dbCount: 0, pushSent: 0, pushFailed: 0, pushSkipped: 0, notifications: [] };
+  }
+
+  const inputByUserId = new Map(
+    users.map((user) => {
+      const rendered = renderNotification(code, params ?? {}, user.language);
+      return [
+        user.id,
+        {
+          userId: user.id,
+          type,
+          code,
+          params: params ?? {},
+          title: rendered.title,
+          body: rendered.body,
+          data: data ?? undefined,
+        },
+      ];
+    })
   );
+
+  const notifications = await prisma.$transaction(
+    uniqueIds
+      .map((userId) => inputByUserId.get(userId))
+      .filter(Boolean)
+      .map((row) => prisma.notification.create({ data: row }))
+  );
+
+  const tokenByUserId = new Map(users.map((u) => [u.id, u.fcmToken]));
+  const delivery = await deliverCreatedNotifications(notifications, tokenByUserId);
 
   return {
     dbCount: notifications.length,

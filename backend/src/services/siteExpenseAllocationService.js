@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+<<<<<<< HEAD
 import {
   computePerUnitAmount,
   ensureDuesForMonth,
@@ -18,6 +19,8 @@ export async function getSiteApartmentIds(siteId, db = prisma) {
   });
   return rows;
 }
+=======
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
 export async function getSiteApartmentCount(siteId, db = prisma) {
   return db.apartment.count({
@@ -33,6 +36,7 @@ export async function getSiteBuildingIds(siteId, db = prisma) {
   return buildings.map((b) => b.id);
 }
 
+<<<<<<< HEAD
 /**
  * Site genelinde belirli ayda PAID olan daireler.
  */
@@ -178,4 +182,15 @@ export async function previewSitePaidImpact(siteId, targetMonth, targetYear, per
 
 export function computeSitePerUnitAmount(totalAmount, apartmentCount) {
   return computePerUnitAmount(totalAmount, apartmentCount);
+=======
+export async function recalculateAllSiteBuildingsForMonth(siteId, month, year, db = prisma) {
+  const { recalculateBuildingDuesForMonth } = await import("./dueExpenseRecalcService.js");
+  const buildingIds = await getSiteBuildingIds(siteId, db);
+  let total = 0;
+  for (const buildingId of buildingIds) {
+    const result = await recalculateBuildingDuesForMonth(buildingId, month, year, db);
+    total += result.updated;
+  }
+  return { updated: total, buildingCount: buildingIds.length };
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 }

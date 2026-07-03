@@ -33,9 +33,36 @@ class DeviceInfoService {
       if (Platform.isIOS) {
         final info = await _plugin.iosInfo;
         final name = info.name.trim();
+        final modelRaw = info.model.trim();
+        final model = modelRaw.isNotEmpty ? ' ($modelRaw)' : '';
+        final label = name.isEmpty ? 'iPhone$model' : '$name$model';
         return DeviceMeta(
-          deviceLabel: name.isEmpty ? 'iPhone' : name,
+          deviceLabel: label,
           platform: 'ios',
+        );
+      }
+      if (Platform.isWindows) {
+        final info = await _plugin.windowsInfo;
+        final label = info.computerName.trim();
+        return DeviceMeta(
+          deviceLabel: label.isEmpty ? 'Windows PC' : label,
+          platform: 'windows',
+        );
+      }
+      if (Platform.isMacOS) {
+        final info = await _plugin.macOsInfo;
+        final label = info.computerName.trim();
+        return DeviceMeta(
+          deviceLabel: label.isEmpty ? 'Mac' : label,
+          platform: 'macos',
+        );
+      }
+      if (Platform.isLinux) {
+        final info = await _plugin.linuxInfo;
+        final label = info.name.trim();
+        return DeviceMeta(
+          deviceLabel: label.isEmpty ? 'Linux' : label,
+          platform: 'linux',
         );
       }
     } catch (_) {

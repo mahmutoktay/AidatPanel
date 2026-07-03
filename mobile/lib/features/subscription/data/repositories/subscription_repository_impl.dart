@@ -7,7 +7,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   final SubscriptionRemoteDataSource _remote;
 
   SubscriptionRepositoryImpl({required SubscriptionRemoteDataSource remote})
-      : _remote = remote;
+    : _remote = remote;
 
   @override
   Future<SubscriptionEntity?> getMySubscription() async {
@@ -17,7 +17,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Abonelik bilgisi alınamadı');
+      throw ApiException(message: 'subscription_fetch_failed');
     }
   }
 }

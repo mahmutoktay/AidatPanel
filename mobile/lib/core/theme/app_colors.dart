@@ -18,7 +18,12 @@ class AppColors {
   static Color get primary => _palette.primary;
   static Color get primaryLight => _palette.primaryLight;
 
+<<<<<<< HEAD
   static const Color accent = Color(0xFFFF6600);
+=======
+  static const Color accent = Color(0xFFF59E0B);
+  static const Color darkCard = Color(0xFF161B22);
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
 
   static Color get paymentCta => _palette.paymentCta;
   static Color get paymentCtaForeground => _palette.paymentCtaForeground;
@@ -116,10 +121,8 @@ class AppColors {
   static Color get datePickerSelectedDayForeground =>
       _palette.datePickerSelectedDayForeground;
 
-  static BorderSide get cardBorderSide => BorderSide(
-        color: border,
-        width: AppSizes.cardBorderWidth,
-      );
+  static BorderSide get cardBorderSide =>
+      BorderSide(color: border, width: AppSizes.cardBorderWidth);
 
   static Border get cardBorder => Border.fromBorderSide(cardBorderSide);
 }

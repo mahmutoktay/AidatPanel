@@ -97,7 +97,10 @@ class InviteCodeResultView extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            '${building.name} • $apartmentLabel',
+            InviteCodeHelpers.resultSubtitle(
+              building: building,
+              apartmentLabel: apartmentLabel,
+            ),
             style: AppTypography.body2.copyWith(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w600,

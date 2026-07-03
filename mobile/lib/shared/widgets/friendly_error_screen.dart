@@ -5,6 +5,7 @@ import '../../core/network/api_exception.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
+import '../../l10n/strings.g.dart';
 
 /// Yakalanmamış bir build-time hatasında Flutter'ın varsayılan kıpkırmızı
 /// `ErrorWidget`'ı yerine basılır. Hem debug hem release modda çalışır.
@@ -17,40 +18,40 @@ class FriendlyErrorScreen extends StatelessWidget {
 
   const FriendlyErrorScreen({super.key, required this.details});
 
-  _ErrorCopy _copy() {
+  _ErrorCopy _copy(BuildContext context) {
     final ex = details.exception;
+    final t = context.t.common.friendlyError;
     if (ex is NetworkException) {
-      return const _ErrorCopy(
+      return _ErrorCopy(
         icon: Icons.wifi_off_rounded,
-        title: 'İnternet bağlantısı yok',
-        message:
-            'Telefonunuzun internete bağlı olduğundan emin olup tekrar deneyin.',
+        title: t.networkTitle,
+        message: t.networkMessage,
       );
     }
     if (ex is UnauthorizedException) {
-      return const _ErrorCopy(
+      return _ErrorCopy(
         icon: Icons.lock_outline_rounded,
-        title: 'Oturum sona erdi',
-        message: 'Lütfen uygulamayı kapatıp tekrar giriş yapın.',
+        title: t.unauthorizedTitle,
+        message: t.unauthorizedMessage,
       );
     }
     if (ex is ServerException) {
-      return const _ErrorCopy(
+      return _ErrorCopy(
         icon: Icons.cloud_off_rounded,
-        title: 'Sunucuya ulaşılamıyor',
-        message: 'Biraz sonra tekrar deneyebilir misiniz?',
+        title: t.serverTitle,
+        message: t.serverMessage,
       );
     }
-    return const _ErrorCopy(
+    return _ErrorCopy(
       icon: Icons.error_outline,
-      title: 'Bu sayfa açılamadı',
-      message: 'Lütfen uygulamayı kapatıp tekrar açın.',
+      title: t.genericTitle,
+      message: t.genericMessage,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final copy = _copy();
+    final copy = _copy(context);
     return Material(
       color: AppColors.surface,
       child: SafeArea(
@@ -67,11 +68,7 @@ class FriendlyErrorScreen extends StatelessWidget {
                   color: AppColors.fill,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  copy.icon,
-                  color: AppColors.textPrimary,
-                  size: 44,
-                ),
+                child: Icon(copy.icon, color: AppColors.textPrimary, size: 44),
               ),
               const SizedBox(height: AppSizes.spacingL),
               Text(
@@ -104,7 +101,7 @@ class FriendlyErrorScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Sadece geliştirici görür (debug):',
+                        context.t.common.friendlyError.debugOnlyLabel,
                         style: AppTypography.caption.copyWith(
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,

@@ -24,7 +24,10 @@ import '../../../dues/presentation/utils/dues_ui_helpers.dart';
 import '../../../profile/presentation/theme/profile_settings_ui.dart';
 import '../providers/dekont_provider.dart';
 import '../providers/share_intent_provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/copy_payment_field.dart';
+
+enum _PaymentMethod { card, eft, dekont }
 
 class MakePaymentScreen extends ConsumerStatefulWidget {
   final String? preselectedDueId;
@@ -37,6 +40,7 @@ class MakePaymentScreen extends ConsumerStatefulWidget {
 
 class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
   bool _requested = false;
+  _PaymentMethod _method = _PaymentMethod.dekont;
 
   @override
   void initState() {
@@ -51,16 +55,40 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
             .selectDue(widget.preselectedDueId);
       }
 
-      final pendingFile = ref.read(pendingDekontFileProvider);
-      if (pendingFile != null) {
-        ref.read(makePaymentNotifierProvider.notifier).setPickedReceipt(
-              fileName: pendingFile['fileName'],
-              fileBytes: pendingFile['fileBytes'],
-              filePath: pendingFile['filePath'],
-            );
-        ref.read(pendingDekontFileProvider.notifier).update(null);
-      }
+      _setFromPendingFile();
     });
+  }
+
+  void _setFromPendingFile() {
+    final pendingFile = ref.read(pendingDekontFileProvider);
+    if (pendingFile == null) return;
+    final name = pendingFile['fileName'] as String? ?? '';
+    final bytes = pendingFile['fileBytes'] as List<int>?;
+    final path = pendingFile['filePath'] as String?;
+
+    if (name.isEmpty || bytes == null || bytes.isEmpty) {
+      ref.read(pendingDekontFileProvider.notifier).update(null);
+      return;
+    }
+
+    // Validate the file from share intent (show error if unsupported)
+    final t = context.t.features.dekont;
+    final validationError = UploadFileUtils.validateReceiptBytes(bytes, name);
+    if (validationError != null) {
+      ref.read(toastProvider.notifier).show(
+            _uploadValidationMessage(t, validationError),
+            type: ToastType.error,
+          );
+      ref.read(pendingDekontFileProvider.notifier).update(null);
+      return;
+    }
+
+    ref.read(makePaymentNotifierProvider.notifier).setPickedReceipt(
+          fileName: name,
+          fileBytes: bytes,
+          filePath: path,
+        );
+    ref.read(pendingDekontFileProvider.notifier).update(null);
   }
 
   Future<void> _pickFile() async {
@@ -163,176 +191,221 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
       _requested = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        ref.read(duesNotifierProvider.notifier).loadMyDues();
+        ref.read(duesNotifierProvider.notifier).loadMyDues().then((_) {
+          final dues = ref.read(duesNotifierProvider).dues;
+          final pending = dues
+              .where(
+                (d) =>
+                    d.status == DueStatus.pending ||
+                    d.status == DueStatus.overdue,
+              )
+              .toList();
+          if (pending.isNotEmpty &&
+              ref.read(makePaymentNotifierProvider).selectedDueId == null) {
+            ref
+                .read(makePaymentNotifierProvider.notifier)
+                .selectDue(pending.first.id);
+          }
+        });
       });
     }
 
     final paymentState = ref.watch(makePaymentNotifierProvider);
     final duesState = ref.watch(duesNotifierProvider);
     final t = context.t.features.dekont;
+    final common = context.t.common;
+    final userName =
+        ref.watch(authStateProvider.select((s) => s.user?.name)) ?? common.user;
     final pendingDues = duesState.dues
         .where(
           (d) => d.status == DueStatus.pending || d.status == DueStatus.overdue,
         )
         .toList();
+    final selectedDue = _resolveSelectedDue(pendingDues, paymentState.selectedDueId);
     final busy = paymentState.isUploading;
-    final canSubmit = !busy &&
+    final canSubmitDekont = !busy &&
         paymentState.pickedFileBytes != null &&
         paymentState.selectedDueId != null;
+    final canContinue = !busy &&
+        (_method == _PaymentMethod.card ||
+            _method == _PaymentMethod.eft ||
+            canSubmitDekont);
 
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: t.payDebtTitle,
       canPop: !busy,
-      child: Scaffold(
-        backgroundColor: AppColors.dashboardBackground,
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _MakePaymentTopBar(
-              onBack: busy ? null : () => Navigator.of(context).maybePop(),
-              onDekonts: busy ? null : () => context.push('/dekonts'),
-            ),
-            Expanded(
-              child: paymentState.isLoadingInfo
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: AppSizes.screenBodyScrollPadding.copyWith(
-                        top: AppSizes.spacingS,
-                        bottom: AppSizes.spacingXL,
+      onBack: busy ? null : () => Navigator.of(context).maybePop(),
+      showNotificationAction: false,
+      body: paymentState.isLoadingInfo
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: AppSizes.screenBodyScrollPadding.copyWith(
+                top: AppSizes.spacingS,
+                bottom: AppSizes.spacingXL,
+              ),
+              children: [
+                if (selectedDue != null)
+                  _DebtSummaryCard(
+                    apartmentNo: paymentState.collection?.apartmentNumber ?? '—',
+                    name: userName,
+                    due: selectedDue,
+                  ),
+                const SizedBox(height: AppSizes.spacingM),
+                Text(
+                  t.paymentMethodTitle,
+                  style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: AppSizes.spacingS),
+                _PaymentMethodTile(
+                  label: t.paymentMethodCard,
+                  selected: _method == _PaymentMethod.card,
+                  onTap: busy
+                      ? null
+                      : () => setState(() => _method = _PaymentMethod.card),
+                ),
+                _PaymentMethodTile(
+                  label: t.paymentMethodEft,
+                  selected: _method == _PaymentMethod.eft,
+                  onTap: busy
+                      ? null
+                      : () => setState(() => _method = _PaymentMethod.eft),
+                ),
+                _PaymentMethodTile(
+                  label: t.paymentMethodDekont,
+                  selected: _method == _PaymentMethod.dekont,
+                  onTap: busy
+                      ? null
+                      : () => setState(() => _method = _PaymentMethod.dekont),
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+                if (_method == _PaymentMethod.card)
+                  DashboardSurfaceCard(
+                    child: Text(
+                      t.paymentCardComingSoon,
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.textSecondary,
                       ),
-                      children: [
-                        if (paymentState.collection != null &&
-                            !paymentState.collection!.isCollectionConfigured)
-                          Padding(
-                            padding: DashboardScreenStyle.listItemPadding,
-                            child: DashboardSurfaceCard(
-                              padding:
-                                  const EdgeInsets.all(AppSizes.spacingM),
-                              child: Text(
-                                t.collectionNotConfigured,
-                                style: AppTypography.body2.copyWith(
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        DashboardSectionTitle(title: t.paymentInfoTitle),
-                        const SizedBox(height: AppSizes.spacingS),
-                        if (paymentState.collection != null) ...[
-                          CopyPaymentField(
-                            label: t.ibanLabel,
-                            value: paymentState.collection!.collectionIban,
-                            monospace: true,
-                          ),
-                          const SizedBox(height: AppSizes.spacingS),
-                          CopyPaymentField(
-                            label: t.accountTitleLabel,
-                            value:
-                                paymentState.collection!.collectionAccountTitle,
-                          ),
-                          const SizedBox(height: AppSizes.spacingS),
-                          CopyPaymentField(
-                            label: t.referenceLabel,
-                            value: paymentState.collection!.paymentReference,
-                          ),
-                        ] else if (paymentState.error != null)
-                          DashboardSurfaceCard(
-                            child: Text(
-                              userFacingError(paymentState.error!),
-                              style: AppTypography.body2.copyWith(
-                                color: AppColors.error,
-                              ),
-                            ),
-                          ),
-                        const SizedBox(height: AppSizes.spacingM),
-                        DashboardSectionTitle(title: t.selectDue),
-                        const SizedBox(height: AppSizes.spacingXS),
-                        Text(
-                          t.selectDueHint,
-                          style: AppTypography.caption.copyWith(
-                            color: AppColors.textSecondary,
+                    ),
+                  )
+                else if (_method == _PaymentMethod.eft) ...[
+                  if (paymentState.collection != null &&
+                      paymentState.collection!.isCollectionConfigured) ...[
+                    CopyPaymentField(
+                      label: t.ibanLabel,
+                      value: paymentState.collection!.collectionIban,
+                      monospace: true,
+                    ),
+                    const SizedBox(height: AppSizes.spacingS),
+                    CopyPaymentField(
+                      label: t.accountTitleLabel,
+                      value: paymentState.collection!.collectionAccountTitle,
+                    ),
+                    const SizedBox(height: AppSizes.spacingS),
+                    CopyPaymentField(
+                      label: t.referenceLabel,
+                      value: paymentState.collection!.paymentReference,
+                    ),
+                  ] else
+                    DashboardSurfaceCard(
+                      child: Text(
+                        t.collectionNotConfigured,
+                        style: AppTypography.body2,
+                      ),
+                    ),
+                ] else ...[
+                  if (pendingDues.isEmpty)
+                    DashboardSurfaceCard(
+                      child: Text(
+                        t.noPendingDues,
+                        style: AppTypography.body2.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    )
+                  else ...[
+                    if (pendingDues.length > 1) ...[
+                      DashboardSectionTitle(title: t.selectDue),
+                      const SizedBox(height: AppSizes.spacingS),
+                      for (final due in pendingDues)
+                        Padding(
+                          padding: DashboardScreenStyle.listItemPadding,
+                          child: _DueSelectableCard(
+                            due: due,
+                            selected: paymentState.selectedDueId == due.id,
+                            enabled: !busy,
+                            onTap: () => ref
+                                .read(makePaymentNotifierProvider.notifier)
+                                .selectDue(due.id),
                           ),
                         ),
-                        if (duesState.isLoading)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: AppSizes.spacingL,
-                            ),
-                            child: Center(child: CircularProgressIndicator()),
-                          )
-                        else if (pendingDues.isEmpty)
-                          DashboardSurfaceCard(
-                            child: Text(
-                              t.noPendingDues,
-                              style: AppTypography.body2.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          )
-                        else
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: pendingDues.length,
-                            itemBuilder: (_, i) {
-                              final due = pendingDues[i];
-                              return Padding(
-                                padding: DashboardScreenStyle.listItemPadding,
-                                child: _DueSelectableCard(
-                                  due: due,
-                                  selected:
-                                      paymentState.selectedDueId == due.id,
-                                  enabled: !busy,
-                                  onTap: () => ref
-                                      .read(makePaymentNotifierProvider.notifier)
-                                      .selectDue(due.id),
-                                ),
-                              );
-                            },
-                          ),
-                        const SizedBox(height: AppSizes.spacingM),
-                        DashboardSectionTitle(title: t.uploadSectionTitle),
-                        const SizedBox(height: AppSizes.spacingS),
-                        if (paymentState.pickedFileName == null)
-                          _FilePickCard(
-                            busy: busy,
-                            onTap: _pickFile,
-                          )
-                        else
-                          _FilePickCard(
-                            busy: busy,
-                            fileName: paymentState.pickedFileName!,
-                            onTap: busy ? null : _pickFile,
-                            onClear: busy
-                                ? null
-                                : () => ref
-                                    .read(makePaymentNotifierProvider.notifier)
-                                    .clearPickedReceipt(),
-                            onPreview: busy ||
-                                    paymentState.pickedFileBytes == null
-                                ? null
-                                : () => _openPickedPreview(paymentState),
-                          ),
-                      ],
-                    ),
+                      const SizedBox(height: AppSizes.spacingM),
+                    ],
+                    if (paymentState.pickedFileName == null)
+                      _FilePickCard(
+                        busy: busy,
+                        hint: t.uploadReceiptHint,
+                        onTap: _pickFile,
+                      )
+                    else
+                      _FilePickCard(
+                        busy: busy,
+                        fileName: paymentState.pickedFileName!,
+                        hint: t.uploadReceiptHint,
+                        onTap: busy ? null : _pickFile,
+                        onClear: busy
+                            ? null
+                            : () => ref
+                                .read(makePaymentNotifierProvider.notifier)
+                                .clearPickedReceipt(),
+                        onPreview: busy || paymentState.pickedFileBytes == null
+                            ? null
+                            : () => _openPickedPreview(paymentState),
+                      ),
+                  ],
+                ],
+              ],
             ),
-          ],
-        ),
-        bottomNavigationBar: _buildSubmitBar(
-          context,
-          busy: busy,
-          canSubmit: canSubmit,
-        ),
+      bottomNavigationBar: _buildSubmitBar(
+        context,
+        busy: busy,
+        canSubmit: canContinue,
+        onContinue: () {
+          if (_method == _PaymentMethod.dekont) {
+            _upload();
+          } else if (_method == _PaymentMethod.eft) {
+            ref.read(toastProvider.notifier).show(
+                  t.uploadSuccess,
+                  type: ToastType.info,
+                );
+          } else {
+            ref.read(toastProvider.notifier).show(
+                  t.paymentCardComingSoon,
+                  type: ToastType.info,
+                );
+          }
+        },
       ),
     );
+  }
+
+  DueEntity? _resolveSelectedDue(List<DueEntity> pending, String? selectedId) {
+    if (pending.isEmpty) return null;
+    if (selectedId != null) {
+      for (final due in pending) {
+        if (due.id == selectedId) return due;
+      }
+    }
+    return pending.first;
   }
 
   Widget _buildSubmitBar(
     BuildContext context, {
     required bool busy,
     required bool canSubmit,
+    required VoidCallback onContinue,
   }) {
-    final t = context.t.features.dekont;
+    final continueLabel = context.t.features.auth.onboarding.continueButton;
     return ColoredBox(
       color: AppColors.dashboardBackground,
       child: SafeArea(
@@ -340,36 +413,36 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
         child: SizedBox(
           height: ProfileSettingsUi.buttonHeight,
           child: Material(
-          color: AppColors.primary,
-          borderRadius:
-              BorderRadius.circular(ProfileSettingsUi.radiusPill),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: !busy && canSubmit ? _upload : null,
-            child: SizedBox(
-              height: ProfileSettingsUi.buttonHeight,
-              width: double.infinity,
-              child: Center(
-                child: busy
-                    ? const SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.4,
-                          color: Colors.white,
+            color: AppColors.primary,
+            borderRadius:
+                BorderRadius.circular(ProfileSettingsUi.radiusPill),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: !busy && canSubmit ? onContinue : null,
+              child: SizedBox(
+                height: ProfileSettingsUi.buttonHeight,
+                width: double.infinity,
+                child: Center(
+                  child: busy
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.4,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          continueLabel,
+                          style: AppTypography.button.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      )
-                    : Text(
-                        t.upload,
-                        style: AppTypography.button.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                ),
               ),
             ),
           ),
-        ),
         ),
       ),
     );
@@ -396,89 +469,57 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
   }
 }
 
-class _MakePaymentTopBar extends StatelessWidget {
-  final VoidCallback? onBack;
-  final VoidCallback? onDekonts;
-
-  const _MakePaymentTopBar({
-    this.onBack,
-    this.onDekonts,
+class _DebtSummaryCard extends StatelessWidget {
+  const _DebtSummaryCard({
+    required this.apartmentNo,
+    required this.name,
+    required this.due,
   });
+
+  final String apartmentNo;
+  final String name;
+  final DueEntity due;
 
   @override
   Widget build(BuildContext context) {
-    final t = context.t.features.dekont;
+    final common = context.t.common;
+    final amount = AppCurrencyFormat.format(due.amount);
+    final dueDateText = due.dueDate != null
+        ? '${due.dueDate!.day} ${localizedMonthName(context, due.dueDate!.month)} ${due.dueDate!.year}'
+        : '—';
 
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSizes.dashboardScreenPaddingHorizontal,
-          AppSizes.spacingS,
-          AppSizes.dashboardScreenPaddingHorizontal,
-          AppSizes.spacingS,
-        ),
-        child: Row(
-          children: [
-            _CircularIconButton(
-              icon: Icons.chevron_left_rounded,
-              onPressed: onBack,
-            ),
-            Expanded(
-              child: Text(
-                t.makePaymentTitle,
-                textAlign: TextAlign.center,
-                style: ProfileSettingsUi.title,
-              ),
-            ),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onDekonts,
-                borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.spacingXS,
-                    vertical: AppSizes.spacingXS,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        t.viewDekonts,
-                        style: AppTypography.body2.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.textPrimary,
-                        size: 20,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+    return DashboardSurfaceCard(
+      padding: const EdgeInsets.all(AppSizes.spacingM),
+      child: Column(
+        children: [
+          _SummaryRow(label: common.apartmentNo, value: apartmentNo),
+          _SummaryRow(label: common.fullName, value: name),
+          _SummaryRow(label: common.debtAmount, value: amount),
+          _SummaryRow(
+            label: common.lastDueDate,
+            value: dueDateText,
+            valueColor: AppColors.error,
+          ),
+        ],
       ),
     );
   }
 }
 
-class _CircularIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onPressed;
-
-  const _CircularIconButton({
-    required this.icon,
-    this.onPressed,
+class _SummaryRow extends StatelessWidget {
+  const _SummaryRow({
+    required this.label,
+    required this.value,
+    this.valueColor,
   });
+
+  final String label;
+  final String value;
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return Center(
       child: GestureDetector(
         onTap: onPressed,
@@ -498,6 +539,90 @@ class _CircularIconButton extends StatelessWidget {
             icon,
             color: AppColors.iconButtonForeground,
             size: 18,
+=======
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 4,
+            child: Text(
+              label,
+              style: AppTypography.body2.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 5,
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: AppTypography.body1.copyWith(
+                fontWeight: FontWeight.w700,
+                color: valueColor ?? AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaymentMethodTile extends StatelessWidget {
+  const _PaymentMethodTile({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSizes.spacingXS),
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.spacingM,
+              vertical: AppSizes.spacingM,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+              border: Border.all(
+                color: selected ? AppColors.primary : AppColors.border,
+                width: selected ? 2 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  selected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
+                  color: selected ? AppColors.primary : AppColors.textSecondary,
+                ),
+                const SizedBox(width: AppSizes.spacingM),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: AppTypography.body1.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
           ),
         ),
       ),
@@ -617,6 +742,7 @@ class _DueSelectableCard extends StatelessWidget {
 class _FilePickCard extends StatelessWidget {
   final bool busy;
   final String? fileName;
+  final String? hint;
   final VoidCallback? onTap;
   final VoidCallback? onClear;
   final VoidCallback? onPreview;
@@ -624,6 +750,7 @@ class _FilePickCard extends StatelessWidget {
   const _FilePickCard({
     required this.busy,
     this.fileName,
+    this.hint,
     this.onTap,
     this.onClear,
     this.onPreview,
@@ -676,7 +803,7 @@ class _FilePickCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        _hasFile ? fileName! : t.pickFile,
+                        _hasFile ? fileName! : (hint ?? t.pickFile),
                         style: AppTypography.body1.copyWith(
                           color: AppColors.textPrimary,
                           fontWeight: FontWeight.w700,

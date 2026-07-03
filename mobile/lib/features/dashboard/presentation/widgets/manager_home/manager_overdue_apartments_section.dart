@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../shared/widgets/action_chevron.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
@@ -72,7 +73,7 @@ class ManagerOverdueApartmentsSection extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 2),
-                      const Icon(Icons.chevron_right_rounded, size: 20),
+                      const ActionChevron(size: 20),
                     ],
                   ),
                 ),

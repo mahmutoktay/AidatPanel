@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../widgets/action_chevron.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
 import 'premium_bottom_sheet.dart';
@@ -115,8 +116,8 @@ class AppSelectField<T> extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.keyboard_arrow_down_rounded,
+                ActionChevron(
+                  direction: ChevronDirection.down,
                   color: enabled ? AppColors.textSecondary : AppColors.textDisabled,
                   size: AppSizes.iconSize,
                 ),

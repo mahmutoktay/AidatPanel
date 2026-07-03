@@ -1,30 +1,25 @@
 import 'package:flutter/material.dart';
+import 'action_chevron.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../features/profile/presentation/theme/profile_settings_ui.dart';
+import 'app_back_button.dart';
 
 /// Bölüm başlığı — uppercase gri, geniş letter-spacing.
 class MinimalSectionLabel extends StatelessWidget {
   final String title;
   final String? subtitle;
 
-  const MinimalSectionLabel({
-    super.key,
-    required this.title,
-    this.subtitle,
-  });
+  const MinimalSectionLabel({super.key, required this.title, this.subtitle});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          title.toUpperCase(),
-          style: ProfileSettingsUi.fieldLabelUppercase,
-        ),
+        Text(title.toUpperCase(), style: ProfileSettingsUi.fieldLabelUppercase),
         if (subtitle != null) ...[
           const SizedBox(height: AppSizes.spacingXS),
           Text(
@@ -112,8 +107,9 @@ class _MinimalTextFieldState extends State<MinimalTextField> {
     setState(() => _hasFocus = _focusNode.hasFocus);
   }
 
-  String get _displayLabel =>
-      widget.required ? '${widget.label.toUpperCase()} *' : widget.label.toUpperCase();
+  String get _displayLabel => widget.required
+      ? '${widget.label.toUpperCase()} *'
+      : widget.label.toUpperCase();
 
   double get _fieldLabelSlotHeight {
     final style = ProfileSettingsUi.fieldLabelUppercase;
@@ -134,10 +130,7 @@ class _MinimalTextFieldState extends State<MinimalTextField> {
 
     return SizedBox(
       height: _fieldLabelSlotHeight,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: label,
-      ),
+      child: Align(alignment: Alignment.centerLeft, child: label),
     );
   }
 
@@ -258,8 +251,9 @@ class MinimalPickerField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasValue = value != null && value!.isNotEmpty;
-    final displayLabel =
-        required ? '${label.toUpperCase()} *' : label.toUpperCase();
+    final displayLabel = required
+        ? '${label.toUpperCase()} *'
+        : label.toUpperCase();
 
     final content = Material(
       color: Colors.transparent,
@@ -312,9 +306,9 @@ class MinimalPickerField extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: enabled ? ProfileSettingsUi.muted : ProfileSettingsUi.muted,
+              ActionChevron(
+                direction: ChevronDirection.down,
+                color: ProfileSettingsUi.muted,
                 size: AppSizes.iconSize,
               ),
             ],
@@ -364,10 +358,7 @@ class MinimalStickyActionBar extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    barColor.withValues(alpha: 0),
-                    barColor,
-                  ],
+                  colors: [barColor.withValues(alpha: 0), barColor],
                 ),
               ),
             ),
@@ -403,29 +394,7 @@ class MinimalBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: GestureDetector(
-        onTap: onPressed ?? () => Navigator.of(context).maybePop(),
-        child: Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: const Color(0x14000000), // siyah %8
-              width: 0.5,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: const Icon(
-            Icons.chevron_left_rounded,
-            color: Color(0xFF333333),
-            size: 18,
-          ),
-        ),
-      ),
-    );
+    return AppBackButton(onPressed: onPressed);
   }
 }
 
@@ -569,11 +538,15 @@ class MinimalSearchField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final bool autofocus;
 
+  /// Sheet içinde beyaz zemin, normal formda varsayılan.
+  final bool whiteBackground;
+
   const MinimalSearchField({
     super.key,
     required this.hint,
     required this.onChanged,
     this.autofocus = false,
+    this.whiteBackground = false,
   });
 
   @override
@@ -581,7 +554,9 @@ class MinimalSearchField extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
       decoration: BoxDecoration(
-        color: ProfileSettingsUi.fieldFill,
+        color: whiteBackground
+            ? AppColors.surface
+            : ProfileSettingsUi.fieldFill,
         borderRadius: BorderRadius.circular(ProfileSettingsUi.fieldRadius),
       ),
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),

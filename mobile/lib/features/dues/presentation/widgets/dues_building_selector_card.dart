@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/action_chevron.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
@@ -90,10 +91,9 @@ class DuesBuildingSelectorCard extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
-                  child: Icon(
-                    Icons.keyboard_arrow_down_rounded,
+                  child: const ActionChevron(
+                    direction: ChevronDirection.down,
                     size: 22,
-                    color: AppColors.mutedText.withValues(alpha: 0.85),
                   ),
                 ),
               ],

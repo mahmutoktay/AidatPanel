@@ -74,6 +74,27 @@ export const logger = pino({
     env: process.env.NODE_ENV || "development",
     service: "aidatpanel-api",
   },
+
+  // Hassas alanları maskeler — KVKK uyumu
+  redact: {
+    paths: [
+      'req.headers.authorization',
+      'req.headers.cookie',
+      'fcmToken',
+      'tokenPrefix',
+      'token',
+      'accessToken',
+      'refreshToken',
+      'password',
+      'email',
+      'phone',
+      'body',
+      'iban',
+      'collectionIban',
+      'paymentReference',
+    ],
+    censor: '[REDACTED]',
+  },
 });
 
 /**
@@ -83,11 +104,21 @@ export const logger = pino({
  * @param {import("express").Request} req - Express request nesnesi
  * @returns {import("pino").Logger} Request-scoped logger
  */
+/**
+ * URL'deki query parametrelerinde geçen token/accessToken/refreshToken değerlerini
+ * maskeler. Pino redact'ı JSON body için çalışır; query string için manuel sanitization gerekir.
+ */
+function sanitizeUrl(raw) {
+  if (!raw) return raw;
+  // Query token'larını maskele — realtime WS'de token query'den geçer
+  return raw.replace(/([?&])(token|access_token|refresh_token)=[^&]+/gi, '$1$2=[REDACTED]');
+}
+
 export function reqLogger(req) {
   return logger.child({
     reqId: req.id || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
     method: req.method,
-    url: req.originalUrl || req.url,
+    url: sanitizeUrl(req.originalUrl || req.url),
     userId: req.user?.id,
     ip: req.ip,
   });

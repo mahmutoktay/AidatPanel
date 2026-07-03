@@ -81,7 +81,9 @@ void main() async {
         ticketRepositoryProvider.overrideWithValue(mockTickets),
         dekontRepositoryProvider.overrideWithValue(mockDekont),
         expenseDataSourceProvider.overrideWithValue(mockExpenses),
-        notificationRemoteDataSourceProvider.overrideWithValue(mockNotifications),
+        notificationRemoteDataSourceProvider.overrideWithValue(
+          mockNotifications,
+        ),
       ],
       child: const _DevBanner(child: _DevApp()),
     ),
@@ -134,7 +136,7 @@ class _DevApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
     return TranslationProvider(
       child: MaterialApp.router(
-        title: 'AidatPanel (DEV)',
+        title: AppConstants.devAppName,
         theme: AppTheme.lightTheme(),
         debugShowCheckedModeBanner: false,
         routerConfig: router,
@@ -169,9 +171,7 @@ class _DevBanner extends StatelessWidget {
           const Positioned(
             top: 0,
             right: 0,
-            child: IgnorePointer(
-              child: _DevTag(),
-            ),
+            child: IgnorePointer(child: _DevTag()),
           ),
         ],
       ),

@@ -119,3 +119,100 @@ export const getDashboardSummary = asyncHandler(async (req, res) => {
     },
   });
 });
+<<<<<<< HEAD
+=======
+
+/**
+ * Çoklu bina dashboard özeti — 1 API çağrısında tüm binaların özetini döner.
+ * N+1 problemini çözmek için: Flutter tek istekle tüm binaların verisini alır.
+ *
+ * POST /api/v1/buildings/dashboard-summary/batch
+ * Body: { buildingIds: ["id1", "id2", ...] }
+ */
+export const getBatchDashboardSummary = asyncHandler(async (req, res) => {
+  const { buildingIds } = req.body;
+  const managerId = req.user.id;
+
+  if (!Array.isArray(buildingIds) || buildingIds.length === 0) {
+    return res.status(400).json({ success: false, message: "buildingIds array gerekli." });
+  }
+  if (buildingIds.length > 50) {
+    return res.status(400).json({ success: false, message: "En fazla 50 bina sorgulanabilir." });
+  }
+
+  // Tüm binaları paralel sorgula
+  const results = await Promise.allSettled(
+    buildingIds.map(async (buildingId) => {
+      // Sahiplik kontrolü
+      await assertManagerOwnsBuilding(buildingId, managerId);
+
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentYear = now.getFullYear();
+
+      const [
+        totalApartments,
+        occupiedApartments,
+        duesByStatus,
+        expensesThisMonth,
+        openTickets,
+        pendingDekonts,
+      ] = await Promise.all([
+        prisma.apartment.count({ where: { buildingId } }),
+        prisma.apartment.count({ where: { buildingId, resident: { isNot: null } } }),
+        prisma.due.groupBy({
+          by: ["status"],
+          where: { apartment: { buildingId }, month: currentMonth, year: currentYear },
+          _count: true,
+          _sum: { amount: true },
+        }),
+        prisma.expense.aggregate({
+          where: { buildingId, targetMonth: currentMonth, targetYear: currentYear },
+          _sum: { amount: true },
+          _count: true,
+        }),
+        prisma.ticket.count({
+          where: { apartment: { buildingId }, status: { in: ["OPEN", "IN_PROGRESS"] } },
+        }),
+        prisma.dekont.count({
+          where: { buildingId, status: { in: ["RECEIVED", "PARSED", "MATCHING", "NEEDS_MANAGER_REVIEW"] } },
+        }),
+      ]);
+
+      const duesBreakdown = {};
+      for (const group of duesByStatus) {
+        duesBreakdown[group.status] = {
+          count: group._count,
+          totalAmount: Number(group._sum.amount ?? 0),
+        };
+      }
+
+      return {
+        buildingId,
+        apartments: { total: totalApartments, occupied: occupiedApartments },
+        dues: duesBreakdown,
+        expenses: { total: Number(expensesThisMonth._sum.amount ?? 0), count: expensesThisMonth._count },
+        openTickets,
+        pendingDekonts,
+        period: { month: currentMonth, year: currentYear },
+      };
+    })
+  );
+
+  const data = {};
+  const warnings = [];
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      data[result.value.buildingId] = result.value;
+    } else {
+      warnings.push(result.reason?.message || "Bilinmeyen hata");
+    }
+  }
+
+  res.json({
+    success: true,
+    data,
+    ...(warnings.length > 0 && { partial: true, warnings }),
+  });
+});
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6

@@ -1,12 +1,7 @@
 import { prisma } from "../config/db.js";
 import { logger } from "../config/logger.js";
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
-import {
-  DEKONT_RECEIVED_MANAGER,
-  DEKONT_NEEDS_REVIEW_MANAGER,
-  DEKONT_MATCHED_MANAGER,
-  DEKONT_REJECTED_RESIDENT,
-} from "../constants/notificationTemplates.js";
+import { NOTIFICATION_CODES } from "../constants/notificationCatalog.js";
 import { createForUsers } from "./notificationService.js";
 
 const MANAGER_PIPELINE_STATUSES = new Set([
@@ -48,8 +43,8 @@ export async function notifyDekontStatus(dekontId) {
     if (dekont.status === "RECEIVED") {
       await createForUsers([managerId], {
         type: NOTIFICATION_TYPES.DEKONT_RECEIVED,
-        title: DEKONT_RECEIVED_MANAGER.title,
-        body: DEKONT_RECEIVED_MANAGER.body(apt, dekont.originalFilename),
+        code: NOTIFICATION_CODES.DEKONT_RECEIVED_MANAGER,
+        params: { apartmentNumber: apt, filename: dekont.originalFilename },
         data: baseData,
       });
       return;
@@ -58,8 +53,8 @@ export async function notifyDekontStatus(dekontId) {
     if (dekont.status === "MATCHED") {
       await createForUsers([managerId], {
         type: NOTIFICATION_TYPES.DEKONT_MATCHED,
-        title: DEKONT_MATCHED_MANAGER.title,
-        body: DEKONT_MATCHED_MANAGER.body(apt),
+        code: NOTIFICATION_CODES.DEKONT_MATCHED_MANAGER,
+        params: { apartmentNumber: apt },
         data: baseData,
       });
       return;
@@ -68,8 +63,8 @@ export async function notifyDekontStatus(dekontId) {
     if (MANAGER_PIPELINE_STATUSES.has(dekont.status)) {
       await createForUsers([managerId], {
         type: NOTIFICATION_TYPES.DEKONT_NEEDS_REVIEW,
-        title: DEKONT_NEEDS_REVIEW_MANAGER.title,
-        body: DEKONT_NEEDS_REVIEW_MANAGER.body(apt),
+        code: NOTIFICATION_CODES.DEKONT_NEEDS_REVIEW_MANAGER,
+        params: { apartmentNumber: apt },
         data: { ...baseData, route: "/manager-dashboard" },
       });
     }
@@ -97,8 +92,8 @@ export async function notifyDekontRejected(dekontId) {
     const reason = dekont.rejectionReason || dekont.reviewNote;
     await createForUsers([dekont.uploadedById], {
       type: NOTIFICATION_TYPES.SYSTEM,
-      title: DEKONT_REJECTED_RESIDENT.title,
-      body: DEKONT_REJECTED_RESIDENT.body(reason),
+      code: NOTIFICATION_CODES.DEKONT_REJECTED_RESIDENT,
+      params: { reason: reason ?? "" },
       data: {
         dekontId: dekont.id,
         buildingId: dekont.buildingId,

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { optionalPhone } from "./shared.js";
+import { optionalPhone, passwordSchema, normalizedPhoneSchema } from "./shared.js";
 
 const deviceMetaFields = {
   deviceLabel: z
@@ -14,20 +14,32 @@ const deviceMetaFields = {
     .optional(),
 };
 
+const otpPurpose = z.enum([
+  "manager_register",
+  "manager_login",
+  "resident_join",
+  "resident_login",
+]);
+
 export const authSchemas = {
   register: {
-    body: z.object({
-      name: z
-        .string()
-        .min(2, "İsim en az 2 karakter olmalıdır")
-        .max(50, "İsim en fazla 50 karakter olabilir"),
-      email: z.string().email("Geçerli bir email adresi giriniz"),
-      phone: optionalPhone,
-      password: z
-        .string()
-        .min(6, "Şifre en az 6 karakter olmalıdır")
-        .max(100, "Şifre en fazla 100 karakter olabilir"),
-    }),
+    body: z
+      .object({
+        name: z
+          .string()
+          .min(2, "İsim en az 2 karakter olmalıdır")
+          .max(50, "İsim en fazla 50 karakter olabilir"),
+        email: z
+          .preprocess(
+            (v) => (v === "" || v === null || v === undefined ? undefined : v),
+            z.string().email("Geçerli bir email adresi giriniz").optional()
+          ),
+        phone: optionalPhone,
+        password: passwordSchema,
+      })
+      .refine((d) => d.email || d.phone, {
+        message: "E-posta veya telefon numarası gereklidir.",
+      }),
   },
 
   login: {
@@ -35,6 +47,13 @@ export const authSchemas = {
       identifier: z.string().min(1, "Email veya telefon numarası gereklidir"),
       password: z.string().min(1, "Şifre gereklidir"),
       ...deviceMetaFields,
+    }),
+  },
+
+  checkIdentifier: {
+    body: z.object({
+      identifier: z.string().min(1, "E-posta veya telefon numarası gereklidir"),
+      purpose: z.enum(["manager_register", "manager_login"]),
     }),
   },
 
@@ -53,10 +72,7 @@ export const authSchemas = {
         .max(50, "İsim en fazla 50 karakter olabilir"),
       email: z.string().email("Geçerli bir email adresi giriniz"),
       phone: optionalPhone,
-      password: z
-        .string()
-        .min(6, "Şifre en az 6 karakter olmalıdır")
-        .max(100, "Şifre en fazla 100 karakter olabilir"),
+      password: passwordSchema,
       inviteCode: z.preprocess(
         (v) => (typeof v === "string" ? v.trim().toUpperCase().replace(/\s+/g, "") : v),
         z
@@ -86,10 +102,79 @@ export const authSchemas = {
             "Geçersiz kod (6 karakter: rakam 2–9 ve büyük harf; 0, O, 1, I, L kullanılmaz)"
           )
       ),
-      password: z
+      password: passwordSchema,
+    }),
+  },
+
+  otpSend: {
+    body: z
+      .object({
+        phone: optionalPhone,
+        email: z
+          .preprocess(
+            (v) => (v === "" || v === null || v === undefined ? undefined : v),
+            z.string().email("Geçerli bir e-posta adresi giriniz").optional()
+          ),
+        purpose: otpPurpose,
+        payload: z.record(z.unknown()).optional(),
+      })
+      .refine((d) => d.phone || d.email, {
+        message: "Telefon veya e-posta gereklidir.",
+      })
+      .refine((d) => !(d.phone && d.email), {
+        message: "Telefon veya e-posta gönderin, ikisini birden değil.",
+      }),
+  },
+
+  otpVerify: {
+    body: z
+      .object({
+        phone: optionalPhone,
+        email: z
+          .preprocess(
+            (v) => (v === "" || v === null || v === undefined ? undefined : v),
+            z.string().email("Geçerli bir e-posta adresi giriniz").optional()
+          ),
+        code: z
+          .string()
+          .length(6, "Doğrulama kodu 6 haneli olmalıdır")
+          .regex(/^\d{6}$/, "Doğrulama kodu yalnızca rakam içermelidir"),
+        purpose: otpPurpose,
+        payload: z.record(z.unknown()).optional(),
+        name: z.string().min(2).max(50).optional(),
+        password: passwordSchema.optional(),
+        inviteCode: z.string().min(1).max(20).optional(),
+        ...deviceMetaFields,
+      })
+      .refine((d) => d.phone || d.email, {
+        message: "Telefon veya e-posta gereklidir.",
+      })
+      .refine((d) => !(d.phone && d.email), {
+        message: "Telefon veya e-posta gönderin, ikisini birden değil.",
+      }),
+  },
+
+  completeResidentJoin: {
+    body: z.object({
+      phone: normalizedPhoneSchema,
+      name: z
         .string()
-        .min(6, "Şifre en az 6 karakter olmalıdır")
-        .max(100, "Şifre en fazla 100 karakter olabilir"),
+        .min(2, "İsim en az 2 karakter olmalıdır")
+        .max(50, "İsim en fazla 50 karakter olabilir"),
+      inviteCode: z.preprocess(
+        (v) => (typeof v === "string" ? v.trim().toUpperCase().replace(/\s+/g, "") : v),
+        z.string().min(1, "Davet kodu gereklidir").max(20)
+      ),
+      ...deviceMetaFields,
+    }),
+  },
+
+  inviteValidate: {
+    body: z.object({
+      inviteCode: z.preprocess(
+        (v) => (typeof v === "string" ? v.trim().toUpperCase().replace(/\s+/g, "") : v),
+        z.string().min(1, "Davet kodu gereklidir").max(20)
+      ),
     }),
   },
 };

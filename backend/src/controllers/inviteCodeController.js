@@ -1,5 +1,6 @@
 import { prisma } from "../config/db.js";
 import crypto from "crypto";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 /**
  * Benzersiz davet kodu üret (collision durumunda retry)
@@ -24,55 +25,51 @@ const generateUniqueCode = async (maxRetries = 3) => {
 };
 
 // Davet kodu üret
-const generateInviteCode = async (req, res, next) => {
-  try {
-    // POST /api/v1/apartments/:apartmentId/invite-code
-    const { apartmentId } = req.params;
-    const managerId = req.user.id;
+const generateInviteCode = asyncHandler(async (req, res) => {
+  // POST /api/v1/apartments/:apartmentId/invite-code
+  const { apartmentId } = req.params;
+  const managerId = req.user.id;
 
-    // Apartmanın bu yöneticiye ait olduğunu kontrol et
-    const apartment = await prisma.apartment.findFirst({
-      where: {
-        id: apartmentId,
-        building: { managerId }
-      }
-    });
-
-    if (!apartment) {
-      return res.status(403).json({
-        success: false,
-        message: "Bu daire için davet kodu üretme yetkiniz yok."
-      });
+  // Apartmanın bu yöneticiye ait olduğunu kontrol et
+  const apartment = await prisma.apartment.findFirst({
+    where: {
+      id: apartmentId,
+      building: { managerId }
     }
+  });
 
-    // Benzersiz kod üret
-    const formattedCode = await generateUniqueCode();
-
-    // 7 gün geçerlilik süresi
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-
-    const inviteCode = await prisma.inviteCode.create({
-      data: {
-        code: formattedCode,
-        apartmentId,
-        expiresAt
-      }
+  if (!apartment) {
+    return res.status(403).json({
+      success: false,
+      message: "Bu daire için davet kodu üretme yetkiniz yok."
     });
-
-    res.status(201).json({
-      success: true,
-      data: {
-        id: inviteCode.id,
-        apartmentId: inviteCode.apartmentId,
-        code: inviteCode.code,
-        expiresAt: inviteCode.expiresAt,
-        usedAt: inviteCode.usedAt,
-      },
-    });
-  } catch (error) {
-    next(error);
   }
-};
+
+  // Benzersiz kod üret
+  const formattedCode = await generateUniqueCode();
+
+  // 7 gün geçerlilik süresi
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7);
+
+  const inviteCode = await prisma.inviteCode.create({
+    data: {
+      code: formattedCode,
+      apartmentId,
+      expiresAt
+    }
+  });
+
+  res.status(201).json({
+    success: true,
+    data: {
+      id: inviteCode.id,
+      apartmentId: inviteCode.apartmentId,
+      code: inviteCode.code,
+      expiresAt: inviteCode.expiresAt,
+      usedAt: inviteCode.usedAt,
+    },
+  });
+});
 
 export { generateInviteCode };

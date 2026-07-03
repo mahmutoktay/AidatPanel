@@ -107,41 +107,40 @@ class _SavedIbansScreenState extends ConsumerState<SavedIbansScreen> {
     final items = async.asData?.value;
     final hasItems = items != null && items.isNotEmpty;
 
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: _selectionMode
+          ? '$selectedCount ${context.t.common.selectedCountLabel}'
+          : t.savedIbansTitle,
       canPop: !_selectionMode,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         _exitSelectionMode();
       },
-      child: DashboardSecondaryScaffold(
-        title: _selectionMode
-            ? '$selectedCount ${context.t.common.selectedCountLabel}'
-            : t.savedIbansTitle,
-        onBack: () {
-          if (_selectionMode) {
-            _exitSelectionMode();
-          } else {
-            Navigator.of(context).pop();
-          }
-        },
-        actions: [
-          if (!_selectionMode && hasItems)
-            IconButton(
-              tooltip: t.savedIbansSelectMode,
-              icon: const Icon(Icons.checklist_rounded),
-              onPressed: () => setState(() {
-                _selectionMode = true;
-                _selectedIbanKeys.clear();
-              }),
-            ),
-        ],
-        floatingActionButton: _buildFloatingActionButton(
-          context,
-          selectedCount: selectedCount,
-          allItems: items ?? const [],
-        ),
-        floatingActionButtonLocation: selectionActionFabLocation,
-        body: async.when(
+      onBack: () {
+        if (_selectionMode) {
+          _exitSelectionMode();
+        } else {
+          Navigator.of(context).pop();
+        }
+      },
+      actions: [
+        if (!_selectionMode && hasItems)
+          IconButton(
+            tooltip: t.savedIbansSelectMode,
+            icon: const Icon(Icons.checklist_rounded),
+            onPressed: () => setState(() {
+              _selectionMode = true;
+              _selectedIbanKeys.clear();
+            }),
+          ),
+      ],
+      floatingActionButton: _buildFloatingActionButton(
+        context,
+        selectedCount: selectedCount,
+        allItems: items ?? const [],
+      ),
+      floatingActionButtonLocation: selectionActionFabLocation,
+      body: async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => AsyncErrorWidget(
             message: userFacingError(error),
@@ -216,7 +215,6 @@ class _SavedIbansScreenState extends ConsumerState<SavedIbansScreen> {
             );
           },
         ),
-      ),
     );
   }
   Widget? _buildFloatingActionButton(

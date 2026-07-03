@@ -255,7 +255,7 @@ class _ToastItemState extends State<_ToastItem>
       case ToastType.notification:
         statusBg = AppColors.infoBg;
     }
-    return Color.lerp(statusBg, AppColors.surface, 0.42)!;
+    return Color.lerp(statusBg, AppColors.surface, 0.42)!.withValues(alpha: 1.0);
   }
 
   @override
@@ -279,8 +279,8 @@ class _ToastItemState extends State<_ToastItem>
           padding: const EdgeInsets.only(bottom: AppSizes.spacingS),
           child: Material(
             color: Colors.transparent,
-            elevation: 8,
-            shadowColor: AppColors.textPrimary.withValues(alpha: 0.16),
+            elevation: 0,
+            shadowColor: Colors.transparent,
             borderRadius: BorderRadius.circular(AppSizes.cardRadius),
             child: InkWell(
               onTap: widget.onTap,

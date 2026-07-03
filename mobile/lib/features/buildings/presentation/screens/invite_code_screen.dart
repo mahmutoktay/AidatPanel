@@ -9,6 +9,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
+import '../../../../features/sites/data/sites_store.dart';
+import '../../../../features/sites/domain/entities/site_entity.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/async_error_widget.dart';
@@ -26,7 +28,7 @@ import '../widgets/invite_confirm_dialogs.dart';
 import '../widgets/invite_selectable_tile.dart';
 import '../widgets/invite_step_indicator.dart';
 
-/// Davet kodu üretme akışı (3 adım): Bina → Daire → Kod.
+/// Davet kodu üretme akışı: Site (varsa) → Bina → Daire → Kod.
 class InviteCodeScreen extends ConsumerStatefulWidget {
   const InviteCodeScreen({super.key});
 
@@ -36,107 +38,192 @@ class InviteCodeScreen extends ConsumerStatefulWidget {
 
 class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   int _step = 0;
+  SiteEntity? _selectedSite;
+  bool _standaloneMode = false;
   BuildingEntity? _selectedBuilding;
   ApartmentEntity? _selectedApartment;
   String? _generatedCode;
   DateTime? _activeExpiresAt;
 
+  bool get _hasSiteStep {
+    final sites = ref.watch(sitesStoreProvider);
+    return sites.maybeWhen(data: (list) => list.isNotEmpty, orElse: () => false);
+  }
+
+  int get _buildingStep => _hasSiteStep ? 1 : 0;
+  int get _apartmentStep => _hasSiteStep ? 2 : 1;
+  int get _codeStep => _hasSiteStep ? 3 : 2;
+
   @override
   Widget build(BuildContext context) {
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: context.t.common.createInviteCode,
       canPop: _step == 0,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         _onBackPressed();
       },
-      child: DashboardSecondaryScaffold(
-        title: context.t.common.createInviteCode,
-        onBack: _onBackPressed,
-        body: Column(
-          children: [
-            InviteStepIndicator(currentStep: _step),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                switchInCurve: Curves.easeInOut,
-                switchOutCurve: Curves.easeInOut,
-                child: _buildStepContent(),
-              ),
+      onBack: _onBackPressed,
+      body: Column(
+        children: [
+          InviteStepIndicator(
+            currentStep: _step,
+            includeSiteStep: _hasSiteStep,
+          ),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              switchInCurve: Curves.easeInOut,
+              switchOutCurve: Curves.easeInOut,
+              child: _buildStepContent(),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildStepContent() {
-    switch (_step) {
-      case 0:
-        final buildingsAsync = ref.watch(buildingsStoreProvider);
+    if (_hasSiteStep && _step == 0) {
+      final sitesAsync = ref.watch(sitesStoreProvider);
+      return sitesAsync.when(
+        loading: () => const Center(
+          key: ValueKey('step-site-loading'),
+          child: CircularProgressIndicator(),
+        ),
+        error: (e, _) => AsyncErrorWidget(
+          key: const ValueKey('step-site-error'),
+          message: userFacingError(e),
+          onRetry: () => ref.read(sitesStoreProvider.notifier).loadSites(),
+        ),
+        data: (sites) => _SitePickerStep(
+          key: const ValueKey('step-site'),
+          sites: sites,
+          onSitePick: _onSitePicked,
+          onStandalonePick: _onStandalonePicked,
+        ),
+      );
+    }
+
+    if (_step == _buildingStep) {
+      if (_selectedSite != null) {
+        final buildingsAsync =
+            ref.watch(siteBuildingsProvider(_selectedSite!.id));
         return buildingsAsync.when(
           loading: () => const Center(
-            key: ValueKey('step-0-loading'),
+            key: ValueKey('step-building-loading'),
             child: CircularProgressIndicator(),
           ),
           error: (e, _) => AsyncErrorWidget(
-            key: const ValueKey('step-0-error'),
+            key: const ValueKey('step-building-error'),
             message: userFacingError(e),
-            onRetry: () => ref.read(buildingsStoreProvider.notifier).loadBuildings(),
+            onRetry: () => ref.invalidate(siteBuildingsProvider(_selectedSite!.id)),
           ),
           data: (buildings) => _BuildingPickerStep(
-            key: const ValueKey('step-0'),
+            key: const ValueKey('step-building-site'),
             buildings: buildings,
+            site: _selectedSite,
             onPick: _onBuildingPicked,
           ),
         );
-      case 1:
-        final asyncApts =
-            ref.watch(apartmentsStoreProvider(_selectedBuilding!.id));
-        return asyncApts.when(
-          loading: () => const Center(
-            key: ValueKey('step-1-loading'),
-            child: CircularProgressIndicator(),
-          ),
-          error: (e, _) => AsyncErrorWidget(
-            key: const ValueKey('step-1-error'),
-            message: userFacingError(e),
-            onRetry: () => ref
-                .read(apartmentsStoreProvider(_selectedBuilding!.id).notifier)
-                .loadApartments(),
-          ),
-          data: (apartments) => _ApartmentPickerStep(
-            key: const ValueKey('step-1'),
-            building: _selectedBuilding!,
-            apartments: apartments,
-            onPick: _onApartmentSelected,
-            activeCodes: ref.watch(inviteCodeStoreProvider),
-          ),
-        );
-      case 2:
-        return InviteCodeResultView(
-          key: const ValueKey('step-2'),
-          code: _generatedCode!,
-          building: _selectedBuilding!,
-          apartment: _selectedApartment!,
-          expiresAt: _activeExpiresAt!,
-          onCopy: () => _copyCode(_generatedCode!),
-          onShare: () => _shareCode(),
-          onRevoke: _confirmRevoke,
-          onPickAnother: _resetFlow,
-          onGoHome: () => context.pop(),
-        );
-      default:
-        return const SizedBox.shrink();
+      }
+
+      final provider = _standaloneMode
+          ? standaloneBuildingsStoreProvider
+          : buildingsStoreProvider;
+      final buildingsAsync = ref.watch(provider);
+      return buildingsAsync.when(
+        loading: () => const Center(
+          key: ValueKey('step-building-loading'),
+          child: CircularProgressIndicator(),
+        ),
+        error: (e, _) => AsyncErrorWidget(
+          key: const ValueKey('step-building-error'),
+          message: userFacingError(e),
+          onRetry: () {
+            if (_standaloneMode) {
+              ref.read(standaloneBuildingsStoreProvider.notifier).loadBuildings();
+            } else {
+              ref.read(buildingsStoreProvider.notifier).loadBuildings();
+            }
+          },
+        ),
+        data: (buildings) => _BuildingPickerStep(
+          key: ValueKey('step-building-${_standaloneMode ? 'standalone' : 'all'}'),
+          buildings: buildings,
+          site: _selectedSite,
+          onPick: _onBuildingPicked,
+        ),
+      );
     }
+
+    if (_step == _apartmentStep) {
+      final asyncApts =
+          ref.watch(apartmentsStoreProvider(_selectedBuilding!.id));
+      return asyncApts.when(
+        loading: () => const Center(
+          key: ValueKey('step-apartment-loading'),
+          child: CircularProgressIndicator(),
+        ),
+        error: (e, _) => AsyncErrorWidget(
+          key: const ValueKey('step-apartment-error'),
+          message: userFacingError(e),
+          onRetry: () => ref
+              .read(apartmentsStoreProvider(_selectedBuilding!.id).notifier)
+              .loadApartments(),
+        ),
+        data: (apartments) => _ApartmentPickerStep(
+          key: const ValueKey('step-apartment'),
+          building: _selectedBuilding!,
+          apartments: apartments,
+          onPick: _onApartmentSelected,
+          activeCodes: ref.watch(inviteCodeStoreProvider),
+        ),
+      );
+    }
+
+    if (_step == _codeStep) {
+      return InviteCodeResultView(
+        key: const ValueKey('step-code'),
+        code: _generatedCode!,
+        building: _selectedBuilding!,
+        apartment: _selectedApartment!,
+        expiresAt: _activeExpiresAt!,
+        onCopy: () => _copyCode(_generatedCode!),
+        onShare: () => _shareCode(),
+        onRevoke: _confirmRevoke,
+        onPickAnother: _resetToApartmentStep,
+        onGoHome: () => context.pop(),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
-  // ---------- AKIŞ ----------
+  void _onSitePicked(SiteEntity site) {
+    setState(() {
+      _selectedSite = site;
+      _standaloneMode = false;
+      _selectedBuilding = null;
+      _step = _buildingStep;
+    });
+  }
+
+  void _onStandalonePicked() {
+    setState(() {
+      _selectedSite = null;
+      _standaloneMode = true;
+      _selectedBuilding = null;
+      _step = _buildingStep;
+    });
+  }
+
   void _onBuildingPicked(BuildingEntity b) {
     ref.invalidate(apartmentsStoreProvider(b.id));
     setState(() {
       _selectedBuilding = b;
       _selectedApartment = null;
-      _step = 1;
+      _step = _apartmentStep;
     });
   }
 
@@ -162,7 +249,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       _selectedApartment = apt;
       _generatedCode = active.code;
       _activeExpiresAt = active.expiresAt;
-      _step = 2;
+      _step = _codeStep;
     });
   }
 
@@ -182,7 +269,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       _selectedApartment = apt;
       _generatedCode = active.code;
       _activeExpiresAt = active.expiresAt;
-      _step = 2;
+      _step = _codeStep;
     });
   }
 
@@ -195,15 +282,14 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
         ref
             .read(toastProvider.notifier)
             .show(context.t.common.codeRevoked, type: ToastType.success);
-        _resetFlow();
+        _resetToApartmentStep();
       },
     );
   }
 
-  void _resetFlow() {
+  void _resetToApartmentStep() {
     setState(() {
-      _step = 0;
-      _selectedBuilding = null;
+      _step = _apartmentStep;
       _selectedApartment = null;
       _generatedCode = null;
       _activeExpiresAt = null;
@@ -213,22 +299,39 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   void _onBackPressed() {
     if (_step == 0) {
       context.pop();
-    } else if (_step == 1) {
+      return;
+    }
+    if (_step == _codeStep) {
       setState(() {
-        _step = 0;
-        _selectedBuilding = null;
-      });
-    } else {
-      setState(() {
-        _step = 1;
+        _step = _apartmentStep;
         _selectedApartment = null;
         _generatedCode = null;
         _activeExpiresAt = null;
       });
+      return;
+    }
+    if (_step == _apartmentStep) {
+      setState(() {
+        _step = _buildingStep;
+        _selectedApartment = null;
+        _selectedBuilding = null;
+      });
+      return;
+    }
+    if (_step == _buildingStep) {
+      if (_hasSiteStep) {
+        setState(() {
+          _step = 0;
+          _selectedSite = null;
+          _standaloneMode = false;
+          _selectedBuilding = null;
+        });
+      } else {
+        context.pop();
+      }
     }
   }
 
-  // ---------- AKSİYONLAR ----------
   void _copyCode(String code) {
     Clipboard.setData(ClipboardData(text: code));
     ref
@@ -266,16 +369,68 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   }
 }
 
-// ============================================================================
-//  ADIM 1: BİNA SEÇİMİ
-// ============================================================================
+class _SitePickerStep extends StatelessWidget {
+  final List<SiteEntity> sites;
+  final ValueChanged<SiteEntity> onSitePick;
+  final VoidCallback onStandalonePick;
+
+  const _SitePickerStep({
+    super.key,
+    required this.sites,
+    required this.onSitePick,
+    required this.onStandalonePick,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: AppSizes.screenBodyScrollPadding.copyWith(
+        top: AppSizes.spacingM,
+      ),
+      itemCount: sites.length + 2,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
+            child: DashboardSectionTitle(
+              title: context.t.common.whichSiteForCode,
+            ),
+          );
+        }
+        if (index == 1) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSizes.spacingS),
+            child: InviteSelectableTile(
+              icon: Icons.home_work_outlined,
+              iconColor: AppColors.accent,
+              title: context.t.common.inviteStandaloneBuildings,
+              subtitle: context.t.common.whichBuildingForCode,
+              onTap: onStandalonePick,
+            ),
+          );
+        }
+        final site = sites[index - 2];
+        return InviteSelectableTile(
+          icon: Icons.domain_rounded,
+          iconColor: AppColors.primary,
+          title: site.name,
+          subtitle: site.displayAddress,
+          onTap: () => onSitePick(site),
+        );
+      },
+    );
+  }
+}
+
 class _BuildingPickerStep extends StatelessWidget {
   final List<BuildingEntity> buildings;
+  final SiteEntity? site;
   final ValueChanged<BuildingEntity> onPick;
 
   const _BuildingPickerStep({
     super.key,
     required this.buildings,
+    required this.site,
     required this.onPick,
   });
 
@@ -285,9 +440,19 @@ class _BuildingPickerStep extends StatelessWidget {
       padding: AppSizes.screenBodyScrollPadding.copyWith(
         top: AppSizes.spacingM,
       ),
-      itemCount: buildings.length + 1,
+      itemCount: buildings.length + (site != null ? 2 : 1),
       itemBuilder: (context, index) {
         if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
+            child: site != null
+                ? _InviteSiteBanner(site: site!)
+                : DashboardSectionTitle(
+                    title: context.t.common.whichBuildingForCode,
+                  ),
+          );
+        }
+        if (site != null && index == 1) {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
             child: DashboardSectionTitle(
@@ -295,12 +460,18 @@ class _BuildingPickerStep extends StatelessWidget {
             ),
           );
         }
-        final b = buildings[index - 1];
+        final offset = site != null ? 2 : 1;
+        final b = buildings[index - offset];
         return InviteSelectableTile(
           icon: Icons.apartment_rounded,
           iconColor: AppColors.primary,
+<<<<<<< HEAD
           title: b.name,
           subtitle: InviteCodeHelpers.buildingListSubtitle(b),
+=======
+          title: b.displayName,
+          subtitle: b.displayAddress,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
           onTap: () => onPick(b),
         );
       },
@@ -308,9 +479,67 @@ class _BuildingPickerStep extends StatelessWidget {
   }
 }
 
-// ============================================================================
-//  ADIM 2: DAİRE SEÇİMİ
-// ============================================================================
+class _InviteSiteBanner extends StatelessWidget {
+  final SiteEntity site;
+
+  const _InviteSiteBanner({required this.site});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.spacingM),
+      decoration: DashboardScreenStyle.whiteCard(),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.domain_rounded,
+              color: AppColors.primary,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  site.name,
+                  style: ProfileSettingsUi.fieldValue.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (site.displayAddress.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    site.displayAddress,
+                    style: ProfileSettingsUi.fieldLabel.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ApartmentPickerStep extends StatelessWidget {
   final BuildingEntity building;
   final List<ApartmentEntity> apartments;
@@ -450,7 +679,11 @@ class _InviteBuildingBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (building.siteName != null &&
+<<<<<<< HEAD
                     building.siteName!.isNotEmpty) ...[
+=======
+                    building.siteName!.trim().isNotEmpty) ...[
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
                   Text(
                     building.siteName!,
                     style: ProfileSettingsUi.fieldLabel.copyWith(
@@ -458,11 +691,18 @@ class _InviteBuildingBanner extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                       color: AppColors.primary,
                     ),
+<<<<<<< HEAD
                   ),
                   const SizedBox(height: 4),
+=======
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
                 ],
                 Text(
-                  building.name,
+                  building.displayName,
                   style: ProfileSettingsUi.fieldValue.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,

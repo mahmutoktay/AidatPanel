@@ -33,7 +33,7 @@ class TicketRepositoryImpl implements TicketRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Talepler alınırken bir hata oluştu');
+      throw ApiException(message: 'my_tickets_fetch_failed');
     }
   }
 
@@ -60,7 +60,7 @@ class TicketRepositoryImpl implements TicketRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Bina talepleri alınırken bir hata oluştu');
+      throw ApiException(message: 'building_tickets_fetch_failed');
     }
   }
 
@@ -72,7 +72,7 @@ class TicketRepositoryImpl implements TicketRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Talep detayı alınırken bir hata oluştu');
+      throw ApiException(message: 'ticket_detail_fetch_failed');
     }
   }
 
@@ -96,7 +96,7 @@ class TicketRepositoryImpl implements TicketRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Talep oluşturulurken bir hata oluştu');
+      throw ApiException(message: 'ticket_create_failed');
     }
   }
 
@@ -111,7 +111,7 @@ class TicketRepositoryImpl implements TicketRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Not eklenirken bir hata oluştu');
+      throw ApiException(message: 'ticket_note_add_failed');
     }
   }
 
@@ -129,9 +129,7 @@ class TicketRepositoryImpl implements TicketRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(
-        message: 'Talep durumu güncellenirken bir hata oluştu',
-      );
+      throw ApiException(message: 'ticket_status_update_failed');
     }
   }
 }

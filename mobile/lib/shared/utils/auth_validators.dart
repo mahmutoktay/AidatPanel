@@ -45,7 +45,6 @@ class AuthValidators {
 
   /// Şifre karmaşıklık kontrolü (opsiyonel - ileride eklenebilir)
   static bool isStrongPassword(String password) {
-    // En az 6 karakter, en az 1 harf, en az 1 sayı
-    return RegExp(r'^(?=.*[A-Za-z])(?=.*\d).{6,}$').hasMatch(password);
+    return RegExp(r'^[A-Za-z0-9]{6,}$').hasMatch(password);
   }
 }

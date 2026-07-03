@@ -28,8 +28,19 @@ class SavedIbanMatcher {
   ) {
     return presets.map((preset) {
       final key = IbanUtils.normalize(preset.collectionIban);
+<<<<<<< HEAD
       final matchedBuildings = buildings
           .where((b) => IbanUtils.normalize(b.collectionIban ?? '') == key)
+=======
+      final matched = buildings
+          .where(
+            (b) =>
+                IbanUtils.normalize(
+                  b.effectiveCollectionIban ?? b.collectionIban ?? '',
+                ) ==
+                key,
+          )
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
           .toList();
       final matchedSites = sites
           .where((s) => IbanUtils.normalize(s.collectionIban ?? '') == key)

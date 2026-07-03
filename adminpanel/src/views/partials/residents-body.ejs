@@ -1,0 +1,45 @@
+<%- include('flash') %>
+<%- include('page-header', { title: 'Sakinler', description: 'Tüm sakinleri listeleyin ve ödeme alışkanlıklarını inceleyin.' }) %>
+
+<form method="get" class="filter-panel__body mb-6" style="display:flex;gap:var(--space-3);flex-wrap:wrap;padding:var(--space-4);background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg)">
+  <div class="form-group" style="margin:0;flex:1;min-width:220px">
+    <label for="q">Sakin ara</label>
+    <input class="form-control" id="q" name="q" value="<%= filters.q || '' %>" placeholder="Ad veya e-posta">
+  </div>
+  <div class="form-group" style="margin:0;display:flex;align-items:flex-end">
+    <button type="submit" class="btn btn--primary">Ara</button>
+  </div>
+</form>
+
+<% if (!residents.length) { %>
+<div class="card"><div class="empty-state"><p class="empty-state__title">Sakin bulunamadı</p></div></div>
+<% } else { %>
+<div class="data-table-wrap">
+  <table class="data-table">
+    <thead><tr><th>Sakin</th><th>Daire</th><th>Bina</th><th>Yönetici</th><th></th></tr></thead>
+    <tbody>
+      <% residents.forEach(r => { %>
+      <tr>
+        <td><strong><%= r.name %></strong></td>
+        <td><%= r.apartment?.number ?? '—' %></td>
+        <td class="text-secondary"><%= r.apartment?.building?.name ?? '—' %></td>
+        <td class="text-secondary"><%= r.apartment?.building?.manager?.name ?? '—' %></td>
+        <td><a href="/reports/residents/<%= r.id %>/habits" class="btn btn--secondary btn--sm">Ödeme Alışkanlığı</a></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<div class="data-cards">
+  <% residents.forEach(r => { %>
+  <div class="data-card">
+    <h3 class="data-card__title"><%= r.name %></h3>
+    <p class="data-card__meta"><%= r.apartment?.building?.name ?? '—' %> / Daire <%= r.apartment?.number ?? '—' %></p>
+    <a href="/reports/residents/<%= r.id %>/habits" class="btn btn--secondary btn--sm mt-4">Ödeme Alışkanlığı</a>
+  </div>
+  <% }) %>
+</div>
+<% } %>
+
+<%- include('./pagination', { pagination, basePath: '/reports/residents', query: filters }) %>

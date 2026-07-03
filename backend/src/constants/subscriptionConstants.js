@@ -7,3 +7,6 @@ export const SUBSCRIPTION_PRODUCT_IDS = {
 export const SUBSCRIPTION_PLANS = ["monthly", "annual"];
 
 export const SUBSCRIPTION_PLATFORMS = ["ios", "android"];
+
+/** Aktif abonelikte bina kotası; null = sınırsız (FAZ 8). */
+export const BUILDING_LIMIT_ACTIVE = null;

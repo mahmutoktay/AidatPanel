@@ -9,12 +9,18 @@ import '../../../../shared/theme/dashboard_screen_style.dart';
 /// Davet kodu akışı için 3 adımlı görsel adım göstergesi.
 class InviteStepIndicator extends StatelessWidget {
   final int currentStep;
+  final bool includeSiteStep;
 
-  const InviteStepIndicator({super.key, required this.currentStep});
+  const InviteStepIndicator({
+    super.key,
+    required this.currentStep,
+    this.includeSiteStep = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final steps = [
+    final steps = <(String, IconData)>[
+      if (includeSiteStep) (context.t.common.stepSite, Icons.domain_rounded),
       (context.t.common.stepBuilding, Icons.apartment_rounded),
       (context.t.common.stepApartment, Icons.door_front_door_outlined),
       (context.t.common.stepCode, Icons.qr_code_2_rounded),

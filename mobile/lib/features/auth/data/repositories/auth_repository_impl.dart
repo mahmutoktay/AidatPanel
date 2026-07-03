@@ -5,7 +5,9 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/token_refresh_service.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/utils/jwt_utils.dart';
+import '../../../../core/utils/phone_utils.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/entities/saved_login_hint.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/login_request.dart';
 import '../models/register_request.dart';
@@ -15,8 +17,12 @@ import '../models/user_data.dart';
 abstract class AuthRepository {
   /// `identifier` email **veya** telefon olabilir (Belge §3).
   Future<UserEntity> login(String identifier, String password);
+  Future<void> checkIdentifier({
+    required String identifier,
+    required String purpose,
+  });
   Future<void> register(
-    String email,
+    String? email,
     String password,
     String name,
     String? phone,
@@ -52,6 +58,40 @@ abstract class AuthRepository {
 
   /// Profil güncellemesi sonrası SecureStorage kullanıcı önbelleğini yazar.
   Future<void> persistUser(UserEntity user);
+
+  Future<void> sendOtp({
+    String? phone,
+    String? email,
+    required String purpose,
+    Map<String, dynamic>? payload,
+  });
+
+  Future<UserEntity> verifyOtp({
+    String? phone,
+    String? email,
+    required String code,
+    required String purpose,
+    Map<String, dynamic>? payload,
+    String? name,
+    String? password,
+    String? inviteCode,
+  });
+
+  Future<String> validateInvite(String inviteCode);
+
+  Future<bool> verifyResidentJoinOtp({
+    required String phone,
+    required String code,
+    required String inviteCode,
+  });
+
+  Future<UserEntity> completeResidentJoin({
+    required String phone,
+    required String name,
+    required String inviteCode,
+  });
+
+  Future<SavedLoginHint?> getSavedLoginHint(UserRole role);
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -67,13 +107,51 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> _persistTokens(String accessToken, String refreshToken) async {
     await _secureStorage.saveToken(accessToken);
     await _secureStorage.saveRefreshToken(refreshToken);
-    await _secureStorage.saveTokenExpiry(
-      JwtUtils.parseExpiry(accessToken),
-    );
-    final sid = JwtUtils.parseSessionId(refreshToken) ??
+    await _secureStorage.saveTokenExpiry(JwtUtils.parseExpiry(accessToken));
+    final sid =
+        JwtUtils.parseSessionId(refreshToken) ??
         JwtUtils.parseSessionId(accessToken);
     if (sid != null) {
       await _secureStorage.saveSessionId(sid);
+    }
+  }
+
+  String _roleStorageKey(UserRole role) =>
+      role == UserRole.manager ? 'MANAGER' : 'RESIDENT';
+
+  Future<void> _saveLoginHintForUser(UserEntity user) async {
+    final hint = SavedLoginHint(
+      role: user.role,
+      name: user.name,
+      phone: user.phone,
+      email: user.email,
+    );
+    final raw = await _secureStorage.getLoginHintsRaw();
+    final map = <String, dynamic>{};
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is Map) {
+          map.addAll(Map<String, dynamic>.from(decoded));
+        }
+      } catch (_) {}
+    }
+    map[_roleStorageKey(user.role)] = hint.toJson();
+    await _secureStorage.saveLoginHintsRaw(jsonEncode(map));
+  }
+
+  @override
+  Future<SavedLoginHint?> getSavedLoginHint(UserRole role) async {
+    final raw = await _secureStorage.getLoginHintsRaw();
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map) return null;
+      final entry = decoded[_roleStorageKey(role)];
+      if (entry is! Map) return null;
+      return SavedLoginHint.fromJson(Map<String, dynamic>.from(entry));
+    } catch (_) {
+      return null;
     }
   }
 
@@ -91,18 +169,37 @@ class AuthRepositoryImpl implements AuthRepository {
 
       await _persistTokens(response.accessToken, response.refreshToken);
       await _secureStorage.saveUser(jsonEncode(response.user.toJson()));
+      final user = response.user.toEntity();
+      await _saveLoginHintForUser(user);
 
-      return response.user.toEntity();
+      return user;
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Giriş sırasında bir hata oluştu');
+      throw ApiException(message: 'auth_login_failed');
+    }
+  }
+
+  @override
+  Future<void> checkIdentifier({
+    required String identifier,
+    required String purpose,
+  }) async {
+    try {
+      await _remoteDataSource.checkIdentifier(
+        identifier: PhoneUtils.normalizeLoginIdentifier(identifier),
+        purpose: purpose,
+      );
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'identifier_check_failed');
     }
   }
 
   @override
   Future<void> register(
-    String email,
+    String? email,
     String password,
     String name,
     String? phone,
@@ -118,7 +215,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Kayıt sırasında bir hata oluştu');
+      throw ApiException(message: 'auth_register_failed');
     }
   }
 
@@ -145,24 +242,25 @@ class AuthRepositoryImpl implements AuthRepository {
 
       await _persistTokens(response.accessToken, response.refreshToken);
       await _secureStorage.saveUser(jsonEncode(response.user.toJson()));
+      final user = response.user.toEntity();
+      await _saveLoginHintForUser(user);
 
-      return response.user.toEntity();
+      return user;
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Katılım sırasında bir hata oluştu');
+      throw ApiException(message: 'auth_join_failed');
     }
   }
 
   @override
   Future<void> logout() async {
-    // Belge §3: çıkışta sunucuya POST /auth/logout zorunlu, ardından
-    // yerel token silinir. Sunucu hata verse bile (örn. network) kullanıcı
-    // yine "çıkmış" olmalı; yoksa donar. Bu yüzden hata yutulur.
     try {
       await _remoteDataSource.logout();
-    } catch (_) {
-      // Sunucuya ulaşılamasa bile yerel temizlik garantili.
+    } catch (_) {}
+    final user = await getStoredUser();
+    if (user != null) {
+      await _saveLoginHintForUser(user);
     }
     await _secureStorage.clearAuth();
   }
@@ -176,9 +274,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(
-        message: 'Diğer cihazlardan çıkış yapılamadı, lütfen tekrar deneyin',
-      );
+      throw ApiException(message: 'auth_logout_all_devices_failed');
     } finally {
       _remoteDataSource.endSessionMutation();
     }
@@ -187,9 +283,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> _persistTokenPair(TokenRefreshResult tokens) async {
     final refresh = tokens.refreshToken;
     if (refresh == null || refresh.isEmpty) {
-      throw ApiException(
-        message: 'Diğer cihazlardan çıkış yapılamadı, lütfen tekrar deneyin',
-      );
+      throw ApiException(message: 'auth_logout_all_devices_failed');
     }
     await _persistTokens(tokens.accessToken, refresh);
   }
@@ -201,21 +295,18 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'İstek gönderilemedi, lütfen tekrar deneyin');
+      throw ApiException(message: 'auth_forgot_password_request_failed');
     }
   }
 
   @override
   Future<void> resetPassword(String token, String password) async {
     try {
-      await _remoteDataSource.resetPassword(
-        token: token,
-        password: password,
-      );
+      await _remoteDataSource.resetPassword(token: token, password: password);
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw ApiException(message: 'Şifre sıfırlanamadı, lütfen tekrar deneyin');
+      throw ApiException(message: 'auth_reset_password_failed');
     }
   }
 
@@ -276,7 +367,8 @@ class AuthRepositoryImpl implements AuthRepository {
       if (result.refreshToken != null && result.refreshToken!.isNotEmpty) {
         await _secureStorage.saveRefreshToken(result.refreshToken!);
       }
-      final sid = JwtUtils.parseSessionId(result.refreshToken ?? refreshToken) ??
+      final sid =
+          JwtUtils.parseSessionId(result.refreshToken ?? refreshToken) ??
           JwtUtils.parseSessionId(result.accessToken);
       if (sid != null) {
         await _secureStorage.saveSessionId(sid);
@@ -293,6 +385,115 @@ class AuthRepositoryImpl implements AuthRepository {
       return user;
     } catch (_) {
       return user;
+    }
+  }
+
+  @override
+  Future<void> sendOtp({
+    String? phone,
+    String? email,
+    required String purpose,
+    Map<String, dynamic>? payload,
+  }) async {
+    try {
+      await _remoteDataSource.sendOtp(
+        phone: phone,
+        email: email,
+        purpose: purpose,
+        payload: payload,
+      );
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'otp_send_failed');
+    }
+  }
+
+  @override
+  Future<UserEntity> verifyOtp({
+    String? phone,
+    String? email,
+    required String code,
+    required String purpose,
+    Map<String, dynamic>? payload,
+    String? name,
+    String? password,
+    String? inviteCode,
+  }) async {
+    try {
+      final response = await _remoteDataSource.verifyOtp(
+        phone: phone,
+        email: email,
+        code: code,
+        purpose: purpose,
+        payload: payload,
+        name: name,
+        password: password,
+        inviteCode: inviteCode,
+      );
+      await _persistTokens(response.accessToken, response.refreshToken);
+      await _secureStorage.saveUser(jsonEncode(response.user.toJson()));
+      final user = response.user.toEntity();
+      await _saveLoginHintForUser(user);
+      return user;
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'otp_verify_failed');
+    }
+  }
+
+  @override
+  Future<String> validateInvite(String inviteCode) async {
+    try {
+      return await _remoteDataSource.validateInviteCode(inviteCode);
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'invite_invalid');
+    }
+  }
+
+  @override
+  Future<bool> verifyResidentJoinOtp({
+    required String phone,
+    required String code,
+    required String inviteCode,
+  }) async {
+    try {
+      return await _remoteDataSource.verifyResidentJoinOtp(
+        phone: phone,
+        code: code,
+        inviteCode: inviteCode,
+      );
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'otp_verify_failed');
+    }
+  }
+
+  @override
+  Future<UserEntity> completeResidentJoin({
+    required String phone,
+    required String name,
+    required String inviteCode,
+  }) async {
+    try {
+      final response = await _remoteDataSource.completeResidentJoin(
+        phone: phone,
+        name: name,
+        inviteCode: inviteCode,
+      );
+      await _persistTokens(response.accessToken, response.refreshToken);
+      await _secureStorage.saveUser(jsonEncode(response.user.toJson()));
+      final user = response.user.toEntity();
+      await _saveLoginHintForUser(user);
+      return user;
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'otp_verify_failed');
     }
   }
 }

@@ -1,0 +1,138 @@
+<%- include('flash') %>
+<%- include('page-header', { title: 'Büyüme & Abonelik', description: 'Abonelik yönetimi, promo tanımlama ve büyüme metrikleri.' }) %>
+
+<div x-data="{ showGrant: false, showPromo: false, promoType: 'FREE_PERIOD' }">
+  <div class="action-grid mb-6">
+    <button type="button" class="action-tile" @click="showGrant = true; showPromo = false">
+      <div class="action-tile__icon"><%- include('icon', { name: 'subscription' }) %></div>
+      <span class="action-tile__label">Abonelik Hediye Et</span>
+      <span class="action-tile__desc">E-posta veya telefon ile</span>
+    </button>
+    <button type="button" class="action-tile" @click="showPromo = true; showGrant = false">
+      <div class="action-tile__icon"><%- include('icon', { name: 'analytics' }) %></div>
+      <span class="action-tile__label">Promosyon Oluştur</span>
+      <span class="action-tile__desc">Ücretsiz süre veya indirim</span>
+    </button>
+  </div>
+
+  <div class="card mb-6" id="grant" x-show="showGrant" x-cloak>
+    <div class="card__header">
+      <div>
+        <h3 class="card__title">Abonelik Hediye Et</h3>
+        <p class="card__subtitle">Yöneticinin e-posta veya telefon numarasını girin</p>
+      </div>
+      <button type="button" class="btn btn--ghost btn--sm" @click="showGrant = false" aria-label="Kapat">✕</button>
+    </div>
+    <form method="post" action="/growth/grant" class="form-grid form-grid--2">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>E-posta veya telefon</label>
+        <input class="form-control" name="contact" required placeholder="ornek@mail.com veya 05xx…" autocomplete="off">
+      </div>
+      <div class="form-group"><label>Süre (gün)</label><input class="form-control" type="number" name="durationDays" value="30" min="1"></div>
+      <div class="form-group"><label>Plan</label><select class="form-control" name="plan"><option value="monthly">Aylık</option><option value="annual">Yıllık</option></select></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Gerekçe</label><input class="form-control" name="reason" required minlength="3" placeholder="Destek talebi, kampanya vb."></div>
+      <div class="cluster cluster--2">
+        <button type="submit" class="btn btn--primary">Abonelik Tanımla</button>
+        <button type="button" class="btn btn--secondary" @click="showGrant = false">İptal</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card mb-6" x-show="showPromo" x-cloak>
+    <div class="card__header">
+      <div>
+        <h3 class="card__title">Promosyon Oluştur</h3>
+        <p class="card__subtitle">Kullanıcının e-posta veya telefon numarasını girin</p>
+      </div>
+      <button type="button" class="btn btn--ghost btn--sm" @click="showPromo = false" aria-label="Kapat">✕</button>
+    </div>
+    <form method="post" action="/growth/promos" class="form-grid form-grid--2">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>E-posta veya telefon</label>
+        <input class="form-control" name="contact" required placeholder="ornek@mail.com veya 05xx…" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Promo türü</label>
+        <select class="form-control" name="type" x-model="promoType">
+          <option value="FREE_PERIOD">Ücretsiz süre</option>
+          <option value="DISCOUNT_PERCENT">İndirim yüzdesi</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Plan</label><select class="form-control" name="plan"><option value="monthly">Aylık</option><option value="annual">Yıllık</option></select></div>
+      <div class="form-group" x-show="promoType === 'FREE_PERIOD'">
+        <label>Süre (gün)</label>
+        <input class="form-control" type="number" name="durationDays" value="30" min="1">
+      </div>
+      <div class="form-group" x-show="promoType === 'DISCOUNT_PERCENT'">
+        <label>İndirim (%)</label>
+        <input class="form-control" type="number" name="discountPercent" min="1" max="100" placeholder="20">
+      </div>
+      <div class="form-group" style="grid-column:1/-1"><label>Gerekçe</label><input class="form-control" name="reason" required minlength="3"></div>
+      <div class="cluster cluster--2">
+        <button type="submit" class="btn btn--primary">Promosyon Oluştur</button>
+        <button type="button" class="btn btn--secondary" @click="showPromo = false">İptal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="filter-panel" x-data="{ open: false }" :class="{ 'is-open': open }">
+  <button type="button" class="filter-panel__toggle mobile-only" @click="open = !open"><span>Filtreler</span><span>▼</span></button>
+  <form class="filter-panel__body" method="get" action="/growth">
+    <div class="form-group" style="margin:0;min-width:120px">
+      <label>Plan</label>
+      <select class="form-control" name="plan">
+        <option value="">Tümü</option>
+        <option value="monthly" <%= filters.plan === 'monthly' ? 'selected' : '' %>>Aylık</option>
+        <option value="annual" <%= filters.plan === 'annual' ? 'selected' : '' %>>Yıllık</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:120px">
+      <label>Durum</label>
+      <select class="form-control" name="status">
+        <option value="">Tümü</option>
+        <option value="ACTIVE" <%= filters.status === 'ACTIVE' ? 'selected' : '' %>>Aktif</option>
+        <option value="EXPIRED" <%= filters.status === 'EXPIRED' ? 'selected' : '' %>>Süresi dolmuş</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:120px">
+      <label>Bitiş (gün)</label>
+      <input class="form-control" name="expiringWithinDays" type="number" placeholder="7" value="<%= filters.expiringWithinDays || '' %>">
+    </div>
+    <button type="submit" class="btn btn--primary">Filtrele</button>
+  </form>
+</div>
+
+<% if (!subscriptions.length) { %>
+<div class="card"><div class="empty-state"><p class="empty-state__title">Abonelik bulunamadı</p></div></div>
+<% } else { %>
+<div class="data-row-list">
+  <% subscriptions.forEach(s => { %>
+  <a href="/users/<%= s.user?.id || '' %>" class="data-row">
+    <div class="data-row__avatar"><%= (s.user?.name || '?').charAt(0) %></div>
+    <div class="data-row__body">
+      <p class="data-row__title"><%= s.user?.name || '—' %></p>
+      <p class="data-row__meta"><%= labels.SUBSCRIPTION_PLAN_TR[s.plan] || s.plan %> · <%= new Date(s.currentPeriodEnd).toLocaleDateString('tr-TR') %> · <%= s.user?.email || '—' %></p>
+    </div>
+    <div class="data-row__end">
+      <span class="badge badge--<%= s.status === 'ACTIVE' ? 'success' : 'warning' %>"><%= labels.SUBSCRIPTION_STATUS_TR[s.status] || s.status %></span>
+      <span class="data-row__chevron">›</span>
+    </div>
+  </a>
+  <% }) %>
+</div>
+<% } %>
+
+<%- include('./pagination', { pagination, basePath: '/growth', query: filters }) %>
+
+<% if (promos.length) { %>
+<h3 class="section-title">Son Promosyonlar</h3>
+<ul class="promo-list">
+  <% promos.forEach(p => { %>
+  <li>
+    <span class="promo-list__reason"><%= p.reason %></span>
+    <span class="promo-list__meta"><%= labels.PROMO_TYPE_TR[p.type] || p.type %> · <%= new Date(p.createdAt).toLocaleDateString('tr-TR') %></span>
+  </li>
+  <% }) %>
+</ul>
+<% } %>

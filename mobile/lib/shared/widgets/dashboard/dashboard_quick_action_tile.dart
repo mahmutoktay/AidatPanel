@@ -30,8 +30,8 @@ class DashboardQuickActionTile extends StatelessWidget {
     return Material(
       color: AppColors.background,
       borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-      elevation: 1,
-      shadowColor: AppColors.primary.withValues(alpha: 0.08),
+      elevation: 0,
+      shadowColor: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),

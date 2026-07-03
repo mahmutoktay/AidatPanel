@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/action_chevron.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/app_date_format.dart';
@@ -7,6 +8,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/profile_avatar.dart';
 import '../../../../shared/widgets/profile_avatar_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -99,7 +101,11 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
       ref
           .read(toastProvider.notifier)
           .show(
+<<<<<<< HEAD
             'En az bir iletişim kanalı (E-posta veya Telefon) kayıtlı olmalıdır.',
+=======
+            t.features.profile.contactRequired,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
             type: ToastType.error,
           );
       return;
@@ -152,12 +158,12 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
           backgroundColor: ProfileSettingsUi.background,
-          title: Text('Güvenlik Doğrulaması', style: ProfileSettingsUi.title),
+          title: Text(t.features.profile.securityVerificationTitle, style: ProfileSettingsUi.title),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'E-posta veya telefon numaranızı değiştirmek için mevcut şifrenizi girmelisiniz.',
+                t.features.profile.securityVerificationMessage,
                 style: ProfileSettingsUi.fieldValue,
               ),
               const SizedBox(height: 16),
@@ -212,8 +218,10 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     final user = profileState.user ?? authUser;
     final subscriptionState = ref.watch(subscriptionNotifierProvider);
 
-    return PopScope(
+    return DashboardSecondaryScaffold(
+      title: _editing ? context.t.features.profile.editTitle : context.t.features.profile.title,
       canPop: !profileState.isSaving,
+<<<<<<< HEAD
       child: Scaffold(
         backgroundColor: AppColors.dashboardBackground,
         appBar: _buildAppBar(context, user, profileState),
@@ -268,26 +276,26 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
         _editing ? t.features.profile.editTitle : t.features.profile.title,
         style: ProfileSettingsUi.title,
       ),
+=======
+      leading: _editing
+          ? IconButton(
+              icon: const Icon(Icons.close_rounded),
+              onPressed: _cancelEdit,
+            )
+          : null,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
       actions: [
-        if (showEdit)
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: TextButton.icon(
-              onPressed: _enterEdit,
-              icon: const Icon(Icons.edit_outlined, size: 20),
-              label: Text(
-                t.common.edit,
-                style: ProfileSettingsUi.fieldValue.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              style: TextButton.styleFrom(
-                minimumSize: const Size(48, 48),
-                foregroundColor: ProfileSettingsUi.ink,
-              ),
-            ),
+        if (user != null && !_editing && !profileState.isSaving)
+          TextButton.icon(
+            onPressed: _enterEdit,
+            icon: const Icon(Icons.edit_outlined, size: 20),
+            label: Text(context.t.common.edit),
           ),
       ],
+      body: _buildBody(context, profileState, user, subscriptionState),
+      bottomNavigationBar: _editing && user != null
+          ? _buildSaveBar(context, profileState)
+          : null,
     );
   }
 
@@ -384,7 +392,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                         final key = InputValidators.validateEmail(raw);
                         if (key == 'email_required') return null;
                         if (key == null) return null;
-                        return 'Geçerli bir e-posta adresi giriniz';
+                        return t.validation.emailInvalid;
                       },
                       showClearSuffix: true,
                       onChanged: (_) => setState(() {}),
@@ -549,13 +557,7 @@ class _ProfileSurfaceCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: const [],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -631,12 +633,12 @@ class _ProfileHero extends StatelessWidget {
                     child: InkWell(
                       onTap: onAvatarTap,
                       customBorder: const CircleBorder(),
-                      child: const Padding(
-                        padding: EdgeInsets.all(6),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
                         child: Icon(
                           Icons.photo_camera_outlined,
                           size: 14,
-                          color: Colors.white,
+                          color: AppColors.actionButtonForeground,
                         ),
                       ),
                     ),
@@ -798,24 +800,27 @@ class _InfoTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSizes.spacingM,
-        vertical: 12,
+        vertical: 6,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            size: ProfileSettingsUi.iconSize,
-            color: ProfileSettingsUi.ink,
+          Padding(
+            padding: const EdgeInsets.only(left: 40),
+            child: Text(label, style: ProfileSettingsUi.fieldLabel),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: ProfileSettingsUi.fieldLabel),
-                const SizedBox(height: 2),
-                Text(
+          const SizedBox(height: 2),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: ProfileSettingsUi.iconSize,
+                color: ProfileSettingsUi.ink,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
                   value,
                   style: ProfileSettingsUi.fieldValue.copyWith(
                     color: isEmpty
@@ -827,18 +832,18 @@ class _InfoTile extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
-          ),
-          if (locked)
-            Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Icon(
-                Icons.lock_outline,
-                size: 18,
-                color: ProfileSettingsUi.muted.withValues(alpha: 0.7),
               ),
-            ),
+              if (locked)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Icon(
+                    Icons.lock_outline,
+                    size: 18,
+                    color: ProfileSettingsUi.muted.withValues(alpha: 0.7),
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );
@@ -889,10 +894,8 @@ class _DangerTile extends StatelessWidget {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
+                const ActionChevron(
                   size: 22,
-                  color: AppColors.error.withValues(alpha: 0.55),
                 ),
               ],
             ),
@@ -948,24 +951,27 @@ class _InlineField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSizes.spacingM,
-        vertical: 12,
+        vertical: 6,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            size: ProfileSettingsUi.iconSize,
-            color: ProfileSettingsUi.ink,
+          Padding(
+            padding: const EdgeInsets.only(left: 40),
+            child: Text(label, style: ProfileSettingsUi.fieldLabel),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: ProfileSettingsUi.fieldLabel),
-                const SizedBox(height: 2),
-                TextFormField(
+          const SizedBox(height: 2),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: ProfileSettingsUi.iconSize,
+                color: ProfileSettingsUi.ink,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
                   controller: controller,
                   enabled: enabled,
                   textCapitalization: textCapitalization,
@@ -989,16 +995,20 @@ class _InlineField extends StatelessWidget {
                     helperStyle: ProfileSettingsUi.fieldLabel.copyWith(
                       fontSize: 12,
                     ),
+<<<<<<< HEAD
                     counterText: '',
+=======
+                    counterText: maxLength != null ? '' : null,
+>>>>>>> e6f0cc38ed07757b214400fd14a6d14faad243f6
                     suffixIcon:
                         showClearSuffix && enabled && controller.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.close, size: 20),
+                            icon: const Icon(Icons.close, size: 18),
                             color: ProfileSettingsUi.muted,
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(
-                              minWidth: 40,
-                              minHeight: 40,
+                              minWidth: 24,
+                              minHeight: 24,
                             ),
                             visualDensity: VisualDensity.compact,
                             style: IconButton.styleFrom(
@@ -1011,8 +1021,8 @@ class _InlineField extends StatelessWidget {
                           )
                         : null,
                     suffixIconConstraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 40,
+                      minWidth: 24,
+                      minHeight: 24,
                     ),
                     contentPadding: EdgeInsets.zero,
                     border: borderless,
@@ -1023,8 +1033,8 @@ class _InlineField extends StatelessWidget {
                     focusedErrorBorder: borderless,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
