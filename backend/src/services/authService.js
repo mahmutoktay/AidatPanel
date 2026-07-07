@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateTokens.js";
 import { validateInviteCode } from "./inviteCodeService.js";
+import { ensureApartmentDuesService } from "./dueBulkService.js";
 import { HttpError } from "../utils/httpError.js";
 import {
   createSession,
@@ -331,6 +332,8 @@ export async function joinWithInviteCodeService(body) {
 
     return created;
   });
+
+  await ensureApartmentDuesService(user.apartmentId);
 
   const session = await createSession(user.id, deviceMeta(body));
 

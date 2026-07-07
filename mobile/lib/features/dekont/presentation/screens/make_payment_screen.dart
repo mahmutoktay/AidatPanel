@@ -630,10 +630,7 @@ class _DueSelectableCard extends StatelessWidget {
       decimalDigits: 2,
     );
 
-    final apartmentLabel = dueApartmentLabel(context, due);
-    final subtitle = isOverdue
-        ? '$apartmentLabel · ${context.t.common.overdue}'
-        : apartmentLabel;
+    final subtitle = residentDueStatusDetail(context, due);
 
     final pillBg =
         isOverdue ? AppColors.statusRedBg : AppColors.statusGreenBg;

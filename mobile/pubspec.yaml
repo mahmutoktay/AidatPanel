@@ -60,6 +60,7 @@ dependencies:
   purchases_flutter: ^10.2.3
   cached_network_image: ^3.4.1
   url_launcher: ^6.3.2
+  flutter_slidable: ^3.1.2
 
 dev_dependencies:
   flutter_test:
@@ -123,6 +124,7 @@ flutter:
   assets:
     - assets/brand/app_logo.png
     - assets/profile/default_avatar.png
+    - assets/locations/tr_provinces_districts.json
 
 flutter_launcher_icons:
   android: true

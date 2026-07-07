@@ -5,12 +5,14 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dekont/domain/entities/dekont_entity.dart';
 import '../../../dekont/presentation/providers/dekont_provider.dart';
 import '../../../dekont/presentation/utils/dekont_labels.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
+import '../../../dues/presentation/utils/dues_ui_helpers.dart';
 import '../../../tickets/domain/entities/ticket_entity.dart';
 import '../../../tickets/presentation/providers/tickets_provider.dart';
 import '../../../tickets/presentation/utils/ticket_labels.dart';
@@ -122,7 +124,7 @@ class _NotificationDetailSheetBody extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      n.senderLabel(context),
+                      n.senderLabel(context, role: role),
                       style: AppTypography.caption.copyWith(
                         color: visual.color,
                         fontWeight: FontWeight.w800,
@@ -274,6 +276,8 @@ class _TicketDetailSection extends ConsumerWidget {
       loading: () => const _DetailLoading(),
       error: (_, _) => _GenericBody(body: fallbackBody),
       data: (ticket) {
+        final role = ref.watch(authStateProvider.select((s) => s.user?.role));
+        final isResident = role == UserRole.resident;
         final statusColor = _statusColor(ticket.status);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,7 +285,9 @@ class _TicketDetailSection extends ConsumerWidget {
             Row(
               children: [
                 _StatusPill(
-                  label: ticket.status.label(context),
+                  label: isResident
+                      ? ticket.status.residentLabel(context)
+                      : ticket.status.label(context),
                   color: statusColor,
                   background: statusColor.withValues(alpha: 0.15),
                 ),
@@ -395,7 +401,13 @@ class _DekontDetailSection extends ConsumerWidget {
       loading: () => const _DetailLoading(),
       error: (_, _) => _GenericBody(body: fallbackBody),
       data: (DekontEntity dekont) {
-        final visual = dekontStatusVisual(context, dekont.status);
+        final role = ref.watch(authStateProvider.select((s) => s.user?.role));
+        final isResident = role == UserRole.resident;
+        final visual = dekontStatusVisualForRole(
+          context,
+          dekont.status,
+          forResident: isResident,
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -474,8 +486,17 @@ class _DueDetailSection extends ConsumerWidget {
 
   ({String label, Color color, Color background}) _statusVisual(
     BuildContext context,
-    DueStatus status,
-  ) {
+    DueStatus status, {
+    required bool forResident,
+  }) {
+    if (forResident) {
+      final visual = residentDuesStatusVisual(context, status);
+      return (
+        label: visual.label,
+        color: visual.fg,
+        background: visual.bg,
+      );
+    }
     final c = context.t.common;
     switch (status) {
       case DueStatus.paid:
@@ -522,7 +543,9 @@ class _DueDetailSection extends ConsumerWidget {
 
     if (due == null) return _GenericBody(body: fallbackBody);
 
-    final visual = _statusVisual(context, due.status);
+    final role = ref.watch(authStateProvider.select((s) => s.user?.role));
+    final isResident = role == UserRole.resident;
+    final visual = _statusVisual(context, due.status, forResident: isResident);
     final amount = due.amount == due.amount.roundToDouble()
         ? due.amount.toStringAsFixed(0)
         : due.amount.toStringAsFixed(2);

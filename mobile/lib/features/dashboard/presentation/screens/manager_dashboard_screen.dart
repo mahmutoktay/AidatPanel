@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/navigation/dashboard_back_handler.dart';
 import '../../../../core/navigation/app_back_navigation.dart';
+import '../../../../core/notifications/notification_permission_prompt.dart';
 import '../../../../core/providers/theme_mode_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -50,6 +51,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       prefetchNotifications(ref);
+      maybeShowNotificationPermissionPrompt(context, ref);
       ref.invalidate(managerMonthExpensesCountProvider);
       ref.invalidate(managerMonthAnnouncementsCountProvider);
       ref.invalidate(managerPendingDekontsCountProvider);
@@ -123,7 +125,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                 child: DashboardPageHeader(
                   title: title,
                   userName: userName,
-                  showWelcome: !isSettings,
+                  showWelcome: selectedTab == 0,
                 ),
               ),
             ),

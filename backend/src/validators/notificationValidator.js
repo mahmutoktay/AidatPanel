@@ -36,7 +36,6 @@ export const buildingAnnouncementSchema = {
     id: z.string().uuid("Geçerli bir bina ID'si giriniz"),
   }),
   body: z.object({
-    title: z.string().min(1).max(120),
     body: z.string().min(1).max(2000),
   }),
 };

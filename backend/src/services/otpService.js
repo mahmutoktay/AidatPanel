@@ -11,6 +11,7 @@ import {
 } from "./sms/twilioVerifyProvider.js";
 import { sendOtpEmail } from "./email/resendEmail.js";
 import { validateInviteCode, normalizeInviteCode } from "./inviteCodeService.js";
+import { ensureApartmentDuesService } from "./dueBulkService.js";
 import { createSession } from "./sessionService.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateTokens.js";
 import { logger } from "../config/logger.js";
@@ -605,6 +606,8 @@ async function joinResidentWithOtp(contact, body, storedPayload) {
 
     return created;
   });
+
+  await ensureApartmentDuesService(user.apartmentId);
 
   const session = await createSession(user.id, deviceMeta(body));
   const tokens = await prisma.$transaction(async (tx) => {

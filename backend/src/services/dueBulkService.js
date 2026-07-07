@@ -8,15 +8,45 @@ import {
   filterNewDueRows,
 } from "../utils/dueGeneration.js";
 import { assertManagerOwnsBuilding } from "../utils/access.js";
+import { userPublicSelect } from "./meService.js";
+
+async function loadOccupiedApartments(buildingId, apartmentIds = null) {
+  const where = {
+    buildingId,
+    resident: { isNot: null },
+    ...(apartmentIds ? { id: { in: apartmentIds } } : {}),
+  };
+
+  return prisma.apartment.findMany({
+    where,
+    select: {
+      id: true,
+      resident: { select: userPublicSelect },
+    },
+  });
+}
+
+function toApartmentEntries(apartments) {
+  return apartments.map((apartment) => ({
+    id: apartment.id,
+    residentName: apartment.resident?.name ?? null,
+  }));
+}
 
 /**
- * Binadaki daireler için eksik aidatları oluşturur (mevcut ay/yıl kombinasyonlarını atlar).
+ * Binadaki sakinli daireler için eksik aidatları oluşturur.
  *
  * @param {string} buildingId
  * @param {{ managerId?: string }} ctx — managerId verilirse sahiplik kontrolü
  * @param {{ month?: number, year?: number }} [period] — ikisi de verilirse yalnızca o ay; aksi halde bulunulan ay → yıl sonu
+ * @param {{ apartmentIds?: string[] }} [options] — yalnızca belirtilen daireler
  */
-export async function bulkGenerateBuildingDuesService(buildingId, ctx = {}, period = {}) {
+export async function bulkGenerateBuildingDuesService(
+  buildingId,
+  ctx = {},
+  period = {},
+  options = {}
+) {
   const building = ctx.managerId
     ? await assertManagerOwnsBuilding(buildingId, ctx.managerId)
     : await prisma.building.findUnique({ where: { id: buildingId } });
@@ -43,10 +73,7 @@ export async function bulkGenerateBuildingDuesService(buildingId, ctx = {}, peri
     period.month != null && period.year != null ? period.month : null;
   const fromMonth = singleMonth ?? istanbul.month;
 
-  const apartments = await prisma.apartment.findMany({
-    where: { buildingId },
-    select: { id: true },
-  });
+  const apartments = await loadOccupiedApartments(buildingId, options.apartmentIds);
 
   if (apartments.length === 0) {
     return {
@@ -59,7 +86,8 @@ export async function bulkGenerateBuildingDuesService(buildingId, ctx = {}, peri
     };
   }
 
-  const apartmentIds = apartments.map((a) => a.id);
+  const apartmentEntries = toApartmentEntries(apartments);
+  const apartmentIds = apartmentEntries.map((entry) => entry.id);
 
   const existing = await prisma.due.findMany({
     where: {
@@ -74,15 +102,16 @@ export async function bulkGenerateBuildingDuesService(buildingId, ctx = {}, peri
 
   let candidateRows;
   if (singleMonth != null) {
-    candidateRows = apartmentIds.map((apartmentId) =>
-      buildSingleDueRow(apartmentId, singleMonth, targetYear, {
+    candidateRows = apartmentEntries.map((entry) =>
+      buildSingleDueRow(entry.id, singleMonth, targetYear, {
         dueAmount: building.dueAmount,
         dueDay: building.dueDay,
         currency: building.currency,
+        residentNameSnapshot: entry.residentName,
       })
     );
   } else {
-    candidateRows = buildDueRowsFromMonth(apartmentIds, fromMonth, targetYear, {
+    candidateRows = buildDueRowsFromMonth(apartmentEntries, fromMonth, targetYear, {
       dueAmount: building.dueAmount,
       dueDay: building.dueDay,
       currency: building.currency,
@@ -103,6 +132,29 @@ export async function bulkGenerateBuildingDuesService(buildingId, ctx = {}, peri
     fromMonth: singleMonth ?? fromMonth,
     toMonth: singleMonth ?? 12,
   };
+}
+
+/**
+ * Sakin atandığında tek daire için eksik aidatları tamamlar.
+ */
+export async function ensureApartmentDuesService(apartmentId) {
+  const apartment = await prisma.apartment.findUnique({
+    where: { id: apartmentId },
+    select: { buildingId: true, resident: { select: { id: true } } },
+  });
+
+  if (!apartment?.resident) {
+    return { created: 0 };
+  }
+
+  const outcome = await bulkGenerateBuildingDuesService(
+    apartment.buildingId,
+    {},
+    {},
+    { apartmentIds: [apartmentId] }
+  );
+
+  return outcome ?? { created: 0 };
 }
 
 /**

@@ -14,17 +14,24 @@ class DekontListCard extends StatelessWidget {
   final String? apartmentLabel;
   final String? uploaderLabel;
 
+  final bool forResident;
+
   const DekontListCard({
     super.key,
     required this.dekont,
     required this.onTap,
     this.apartmentLabel,
     this.uploaderLabel,
+    this.forResident = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final visual = dekontStatusVisual(context, dekont.status);
+    final visual = dekontStatusVisualForRole(
+      context,
+      dekont.status,
+      forResident: forResident,
+    );
     final date = AppDateFormat.dateShort(dekont.createdAt);
 
     return Material(
@@ -65,6 +72,9 @@ class DekontListCard extends StatelessWidget {
                         color: visual.color,
                         fontWeight: FontWeight.w700,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
                     ),
                   ),
                 ],

@@ -32,14 +32,12 @@ class AnnouncementFormSheet extends ConsumerStatefulWidget {
 
 class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
   final _bodyController = TextEditingController();
   String? _buildingId;
   bool _submitting = false;
 
   @override
   void dispose() {
-    _titleController.dispose();
     _bodyController.dispose();
     super.dispose();
   }
@@ -160,20 +158,6 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
         ),
         const SizedBox(height: AppSizes.spacingM),
         MinimalTextField(
-          controller: _titleController,
-          label: t.fieldTitle,
-          icon: Icons.title_outlined,
-          required: true,
-          enabled: !_submitting,
-          validator: (v) {
-            final s = v?.trim() ?? '';
-            if (s.isEmpty) return t.fieldRequired;
-            if (s.length > 120) return t.titleTooLong;
-            return null;
-          },
-        ),
-        const SizedBox(height: AppSizes.spacingM),
-        MinimalTextField(
           controller: _bodyController,
           label: t.fieldBody,
           icon: Icons.notes_outlined,
@@ -229,7 +213,6 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
         .read(notificationsNotifierProvider.notifier)
         .sendAnnouncement(
           id,
-          title: _titleController.text.trim(),
           body: _bodyController.text.trim(),
         );
     if (!mounted) return;

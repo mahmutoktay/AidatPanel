@@ -91,13 +91,11 @@ class NotificationRepositoryImpl implements NotificationRepository {
   @override
   Future<AnnouncementResultEntity> sendAnnouncement(
     String buildingId, {
-    required String title,
     required String body,
   }) async {
     try {
       return await _remote.sendAnnouncement(
         buildingId,
-        title: title,
         body: body,
       );
     } on ApiException {

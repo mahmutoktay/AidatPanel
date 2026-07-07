@@ -1,11 +1,29 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+/// Mevcut bildirim izni durumu — sistem diyaloğu açmaz.
+Future<bool> isNotificationPermissionGranted({
+  FirebaseMessaging? messaging,
+}) async {
+  if (Platform.isAndroid) {
+    return Permission.notification.isGranted;
+  }
+
+  if (Platform.isIOS) {
+    final instance = messaging ?? FirebaseMessaging.instance;
+    final settings = await instance.getNotificationSettings();
+    return settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional;
+  }
+
+  return true;
+}
+
 /// Android 13+ (POST_NOTIFICATIONS) ve iOS bildirim izinleri.
-/// `false` → tray push gösterilmez (in-app liste yine çalışır).
+/// Yalnızca kullanıcı açıklayıcı diyalogdan sonra çağrılmalıdır.
 Future<bool> requestNotificationPermissions({
   required FirebaseMessaging messaging,
 }) async {

@@ -125,8 +125,8 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get user => 'Kullanıcı';
 	@override String get welcome => 'Hoş Geldiniz';
 	@override String get managedBuildings => 'Yönetilen Binalar';
-	@override String get issues => 'Arızalar';
-	@override String get issuesTab => 'Arızalar Sekmesi';
+	@override String get issues => 'Talepler';
+	@override String get issuesTab => 'Talepler Sekmesi';
 	@override String get apartment => 'Daire';
 	@override String get addBuilding => 'Bina Ekle';
 	@override String get inviteCode => 'Davet Kodu';
@@ -139,6 +139,11 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get duesCollection => 'Aidat Tahsilatı';
 	@override String get totalDues => 'Toplam Aidat';
 	@override String get recentTransactions => 'Son İşlemler';
+	@override String get recentMovements => 'Son Hareketler';
+	@override String get seeAll => 'Tümünü Gör';
+	@override String get payDue => 'Aidat Öde';
+	@override String get noCurrentDebt => 'Güncel borcunuz bulunmuyor ✓';
+	@override String get announcements => 'Duyurular';
 	@override String get paid => 'Ödendi';
 	@override String get pending => 'Beklemede';
 	@override String get overdue => 'Gecikmiş';
@@ -161,7 +166,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get myReceipts => 'Dekontlarım';
 	@override String get myPaymentRequest => 'Ödeme Talebi';
 	@override String get duesHistory => 'Geçmişler';
-	@override String get addRequest => 'Talep Ekle';
+	@override String get addRequest => 'Talep Oluştur';
 	@override String get payDebt => 'Borcu Öde';
 	@override String get tabAll => 'Tümü';
 	@override String get tabFaults => 'Arızalar';
@@ -198,6 +203,30 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get selectCityFirst => 'Önce şehir seçin';
 	@override String get selectCityTitle => 'Şehir Seçin';
 	@override String get selectDistrictTitle => 'İlçe Seçin';
+	@override String get neighborhoodRequired => 'Mahalle *';
+	@override String get selectNeighborhood => 'Mahalle seçin';
+	@override String get selectNeighborhoodTitle => 'Mahalle Seçin';
+	@override String get selectDistrictFirst => 'Önce ilçe seçin';
+	@override String get wizardNext => 'İleri';
+	@override String get wizardBack => 'Geri';
+	@override String get wizardMore => 'Daha Fazla';
+	@override String get wizardEnterNumber => 'Sayı girin';
+	@override String get wizardBackToGrid => 'Listeye dön';
+	@override String get wizardNumberRangeError => 'Sayı {min} ile {max} arasında olmalı';
+	@override String get wizardLocationLoadFailed => 'İl ve ilçe listesi yüklenemedi. Lütfen tekrar deneyin.';
+	@override String get wizardNeighborhoodLoadFailed => 'Mahalle listesi yüklenemedi. İnternet bağlantınızı kontrol edip tekrar deneyin.';
+	@override String get wizardStepBuildingName => 'Bina Adı';
+	@override String get wizardStepSiteName => 'Site Adı';
+	@override String get wizardStepBlockInfo => 'Blok';
+	@override String get wizardStepLocation => 'İl / İlçe';
+	@override String get wizardStepNeighborhoodAddress => 'Mahalle';
+	@override String get wizardStepFloors => 'Kat';
+	@override String get wizardStepApartments => 'Daire';
+	@override String get wizardStepDues => 'Aidat';
+	@override String get wizardStepRecipient => 'Alıcı';
+	@override String get wizardStepSiteOverrides => 'Ayarlar';
+	@override String get wizardPickFloorCount => 'Kat sayısını seçin';
+	@override String get wizardPickApartmentCount => 'Kattaki daire sayısını seçin';
 	@override String get search => 'Ara...';
 	@override String get noResults => 'Sonuç bulunamadı';
 	@override String get fieldRequired => 'boş bırakılamaz';
@@ -269,6 +298,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get myPastDues => 'Geçmiş aidatlarım';
 	@override String get buildingDues => 'Bina Aidatları';
 	@override String get noDuesYet => 'Henüz aidat kaydı yok';
+	@override String get residentNoDuesYet => 'Size atanmış bir aidat kaydı yok';
 	@override String get duesUpdated => 'Aidat durumu güncellendi';
 	@override String get amount => 'Tutar';
 	@override String get updateDueAmount => 'Aidat Tutarını Güncelle';
@@ -286,11 +316,9 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get filter => 'Filtrele';
 	@override String get apply => 'Uygula';
 	@override String get overdueDays => 'gün gecikmiş';
-	@override String get dueMetaOverdueDelay => '{days} gün gecikme';
-	@override String get dueStatusOverdueWithDays => 'Bekliyor / {days} Gün Gecikti';
-	@override String get dueMetaPaidInMonth => '{month} {year}\'de ödendi';
-	@override String get dueMetaPaidOnDay => '{day} {month}\'ta ödendi';
-	@override String get paidLateDays => '{days} gün geç ödedi';
+	@override String get dueMetaOverdueDelay => '{days} gün gecikti';
+	@override String get dueStatusOverdueWithDays => '{days} gün gecikti';
+	@override String get duePaidSummaryLate => '{date} - {days} gün gecikti';
 	@override String get dueMetaPendingDueDate => 'son ödeme {day} {month}';
 	@override String get payShort => 'Öde';
 	@override String get dekontShort => 'Dekont';
@@ -757,8 +785,8 @@ class _Translations$features$sites$tr implements Translations$features$sites$en 
 	@override String get addressExtraHint => 'Örn: Arka giriş, Kapı no 2';
 	@override String get overrideDue => 'Aidatı site varsayılanından farklı ayarla';
 	@override String get overrideDueHint => 'Kapalıyken site aidatı geçerli olur';
-	@override String get overrideCollection => 'IBAN\'ı site varsayılanından farklı ayarla';
-	@override String get overrideCollectionHint => 'Kapalıyken site IBAN\'ı geçerli olur';
+	@override String get overrideCollection => 'Alıcı bilgilerini site varsayılanından farklı ayarla';
+	@override String get overrideCollectionHint => 'Kapalıyken site alıcı bilgileri geçerli olur';
 	@override String get blocksTitle => 'Bloklar';
 	@override String get noBlocks => 'Henüz blok eklenmedi';
 	@override String get blockApartments => '{count} daire';
@@ -871,9 +899,9 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	// Translations
 	@override String get myTickets => 'Taleplerim';
 	@override String get newTicket => 'Yeni Talep';
-	@override String get createTitle => 'Arıza / Talep Bildir';
-	@override String get reportFaultTitle => 'Arıza Bildir';
-	@override String get myApplicationsTitle => 'Başvurularım';
+	@override String get createTitle => 'Talep Oluştur';
+	@override String get reportFaultTitle => 'Yeni Talep';
+	@override String get myApplicationsTitle => 'Taleplerim';
 	@override String get fieldTitle => 'Konu';
 	@override String get fieldTitleHint => 'Kısa bir tanım girin.';
 	@override String get fieldDetail => 'Detaylandırın';
@@ -882,6 +910,7 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	@override String get fieldDescriptionHint => 'Ayrıntılı açıklama yazın…';
 	@override String get attachmentHint => 'Fotoğraf, video veya belge ekleyin… PNG, JPG — en fazla 5 MB.';
 	@override String get attachmentComingSoon => 'Dosya ekleme yakında aktif olacak.';
+	@override String get attachmentPickFailed => 'Görsel seçilemedi. Lütfen tekrar deneyin.';
 	@override String get fieldCategory => 'Kategori';
 	@override String get categoryComplaint => 'Şikayet';
 	@override String get categoryRequest => 'Talep';
@@ -892,7 +921,9 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	@override String get createFailed => 'Talep kaydedilemedi. Lütfen tekrar deneyin.';
 	@override String get createServiceUnavailable => 'Talep servisi şu an hazır değil. Lütfen daha sonra tekrar deneyin.';
 	@override String get emptyTitle => 'Henüz talep yok';
-	@override String get emptySubtitle => 'Arıza veya talebinizi buradan bildirebilirsiniz';
+	@override String get emptySubtitle => 'Talebinizi buradan oluşturabilirsiniz';
+	@override String get residentEmptyTitle => 'Henüz bir talebiniz yok';
+	@override String get residentEmptySubtitle => 'Yönetime iletmek istediğiniz konuları buradan oluşturabilirsiniz.';
 	@override String get titleTooShort => 'Başlık en az 3 karakter olmalı';
 	@override String get descriptionTooShort => 'Açıklama en az 10 karakter olmalı';
 	@override String get statusOpen => 'Açık';
@@ -900,10 +931,10 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	@override String get statusResolved => 'Çözüldü';
 	@override String get statusClosed => 'Kapalı';
 	@override String get statusTrackerTitle => 'TALEP DURUMU';
-	@override String get statusStepWaiting => 'Bekliyor';
-	@override String get statusStepInProgress => 'İşlemde';
-	@override String get statusStepResolved => 'Çözüldü';
-	@override String get statusStepClosed => 'Kapalı';
+	@override String get statusStepWaiting => 'İnceleme bekleniyor';
+	@override String get statusStepInProgress => 'Yönetim ilgileniyor';
+	@override String get statusStepResolved => 'Çözüm sağlandı';
+	@override String get statusStepClosed => 'Talep kapandı';
 	@override String get statusHeadlineOpen => 'Talebiniz beklemede';
 	@override String get statusHeadlineInProgress => 'Talebiniz işlemde';
 	@override String get statusHeadlineResolved => 'Talebiniz çözüldü';
@@ -922,7 +953,8 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	@override String get statusClosedHint => 'Bu talep kapatıldı; durum değiştirilemez.';
 	@override String get apartmentRequired => 'Daire bilgisi bulunamadı. Lütfen tekrar giriş yapın.';
 	@override String get managerUpdateLabel => 'Yönetici güncellemesi';
-	@override String get residentUpdateLabel => 'Sakin güncellemesi';
+	@override String get residentUpdateLabel => 'Sizin güncellemeniz';
+	@override String get managerUpdateForResident => 'Yönetimden güncelleme';
 	@override String get quickReplyTemplatesTitle => 'Hızlı yanıt şablonları';
 	@override String get confirmChanges => 'Onayla';
 	@override String get residentInfoTitle => 'Talep sahibi bilgileri';
@@ -962,7 +994,7 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 	@override String get paymentInfoTitle => 'Havale bilgileri';
 	@override String get collectionNotConfigured => 'Yöneticiniz henüz tahsilat IBAN bilgisini tanımlamadı. Yine de dekont yükleyebilirsiniz.';
 	@override String get ibanLabel => 'IBAN';
-	@override String get accountTitleLabel => 'Alıcı unvanı';
+	@override String get accountTitleLabel => 'Alıcı Adı';
 	@override String get referenceLabel => 'Havale açıklaması';
 	@override String get copy => 'Kopyala';
 	@override String get copied => 'Panoya kopyalandı';
@@ -1005,6 +1037,7 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 	@override String get filterPending => 'İncelemede';
 	@override String get filterApproved => 'Onaylandı';
 	@override String get filterRejected => 'Reddedildi';
+	@override late final _Translations$features$dekont$resident$tr resident = _Translations$features$dekont$resident$tr._(_root);
 	@override String get statusReceived => 'Alındı';
 	@override String get statusExtracting => 'Okunuyor';
 	@override String get statusExtractFailed => 'Okunamadı';
@@ -1047,7 +1080,7 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 	@override String get transactionDateLabel => 'İşlem tarihi';
 	@override String get bankLabel => 'Banka';
 	@override String get receiverIbanLabel => 'Alıcı IBAN';
-	@override String get receiverNameLabel => 'Alıcı unvanı';
+	@override String get receiverNameLabel => 'Alıcı Adı';
 	@override String get referenceNumberLabel => 'Referans no';
 	@override String get ibanUnreadableNotice => 'Yüklediğiniz aidat ödeme dekontunda alıcı IBAN bilgisi okunamamıştır. Bu haliyle yönetici onayına sunulacaktır.';
 	@override String get ibanMismatchNotice => 'Dekonttaki alıcı IBAN, binanızın tahsilat hesabıyla eşleşmiyor. Yönetici hesabını kontrol ederek karar verecektir.';
@@ -1201,6 +1234,7 @@ class _Translations$features$notifications$tr implements Translations$features$n
 	@override String get typeSystem => 'Sistem';
 	@override String get typeAidatPanelTeam => 'AidatPanel Ekibi';
 	@override String get typeOther => 'Bildirim';
+	@override late final _Translations$features$notifications$resident$tr resident = _Translations$features$notifications$resident$tr._(_root);
 	@override String get allApartmentsTag => 'Tüm daireler';
 	@override String get sendTitle => 'Sakinlere Duyuru';
 	@override String get fieldTitle => 'Başlık';
@@ -1209,6 +1243,7 @@ class _Translations$features$notifications$tr implements Translations$features$n
 	@override String get sendSuccess => 'Duyuru gönderildi';
 	@override String get sendFailed => 'Duyuru gönderilemedi';
 	@override String get fieldRequired => 'Zorunlu alan';
+	@override late final _Translations$features$notifications$permissionPrompt$tr permissionPrompt = _Translations$features$notifications$permissionPrompt$tr._(_root);
 	@override String get titleTooLong => 'Başlık en fazla 120 karakter olabilir';
 	@override String get bodyTooLong => 'Mesaj en fazla 2000 karakter olabilir';
 	@override String get noBuilding => 'Önce bir bina ekleyin';
@@ -1385,7 +1420,7 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get buildingUnitsSummary => '{apartments} daire';
 	@override String get collectionRate => 'Tahsilat Oranı';
 	@override String get overduePayments => 'Geciken Ödeme';
-	@override String get openTicketRequests => 'Açık Arıza Talebi';
+	@override String get openTicketRequests => 'Açık Talep';
 	@override String get monthTotalExpense => 'Bu Ay Toplam Gider';
 	@override String get pendingDekonts => 'Bekleyen Dekont';
 	@override String get duesCollectionStatus => 'Aidat Tahsilat Durumu';
@@ -1393,7 +1428,7 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get last6Months => 'Son 6 Ay';
 	@override String get collectedDues => 'Toplanan Aidat';
 	@override String get totalExpense => 'Toplam Gider';
-	@override String get ticketStatusTitle => 'Arıza Talepleri Durumu';
+	@override String get ticketStatusTitle => 'Talep Durumu';
 	@override String get ticketOpen => 'Açık';
 	@override String get ticketInProgress => 'İşlemde';
 	@override String get ticketResolved => 'Çözüldü';
@@ -1416,7 +1451,9 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get seeMoreOverdue => 'Daha fazlası (+{count})';
 	@override String get payNow => 'Şimdi Öde';
 	@override String get overduePaymentsBadge => '{count} gecikmiş ödeme';
+	@override String get residentOverduePaymentsBadge => '{count} aidatınız gecikmiş';
 	@override String get featuredDuePeriod => '{month} {year} aidatı';
+	@override String get residentFeaturedDuePeriod => '{month} {year} aidatınız';
 	@override String get residentDebtAndPaySubtitle => 'Ödeme yaparak ödeyin.';
 	@override String get duesStatusAction => 'Aidat Durumu';
 	@override String get overdueDuesBadge => '{count} gecikmiş aidat';
@@ -1424,6 +1461,7 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get independentBuildingsSection => 'Bağımsız Binalar';
 	@override String get sitePickerSummary => '{name} · {count} bina';
 	@override String get siteScopeSummary => '{count} bina';
+	@override late final _Translations$features$dashboard$activityHistory$tr activityHistory = _Translations$features$dashboard$activityHistory$tr._(_root);
 }
 
 // Path: features.dues
@@ -1433,6 +1471,15 @@ class _Translations$features$dues$tr implements Translations$features$dues$en {
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
+	@override String get detailTitle => 'Aidat Detayı';
+	@override String get collectPayment => 'Ödeme Al';
+	@override String get collectPaymentConfirmTitle => 'Elden ödeme alınsın mı?';
+	@override String get collectPaymentConfirmBody => '{apartment} — {period} aidatı ödendi olarak işaretlenecek.';
+	@override String get reviewDekont => 'Dekont İncele';
+	@override String get paymentDetail => 'Ödeme Detayı';
+	@override String get amountLabel => 'Tutar';
+	@override String get periodLabel => 'Dönem';
+	@override late final _Translations$features$dues$resident$tr resident = _Translations$features$dues$resident$tr._(_root);
 	@override late final _Translations$features$dues$transactions$tr transactions = _Translations$features$dues$transactions$tr._(_root);
 }
 
@@ -1456,7 +1503,7 @@ class _Translations$features$buildings$collection$tr implements Translations$fea
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String get sectionTitle => 'Tahsilat bilgileri';
+	@override String get sectionTitle => 'Alıcı bilgileri';
 	@override String get sectionHint => 'Sakinlerin havale yapacağı IBAN. Boş bırakılabilir; sonradan da ekleyebilirsiniz.';
 	@override String get modeSaved => 'Kayıtlı IBAN';
 	@override String get modeNew => 'Yeni IBAN';
@@ -1464,8 +1511,8 @@ class _Translations$features$buildings$collection$tr implements Translations$fea
 	@override String get savedListSectionLabel => 'Kayıtlı IBAN\'lar';
 	@override String get pickSavedIban => 'Kayıtlı IBAN seçin';
 	@override String get changeSavedIban => 'Başka IBAN seçmek için dokunun';
-	@override String get searchSavedIban => 'IBAN veya unvan ara';
-	@override String get detailAccountHolder => 'Hesap sahibi';
+	@override String get searchSavedIban => 'IBAN veya alıcı adı ara';
+	@override String get detailAccountHolder => 'Alıcı Adı';
 	@override String get detailReference => 'Havale açıklaması';
 	@override String get detailReferenceAuto => 'Havale açıklamasına daire numarası otomatik eklenir';
 	@override String get detailReferenceDaireOnly => 'Havale açıklaması: Daire numarası';
@@ -1477,9 +1524,9 @@ class _Translations$features$buildings$collection$tr implements Translations$fea
 	@override String get ibanHint => 'TR33 0006 1005 1978 6457 8413 26';
 	@override String get ibanInvalid => 'Geçerli bir Türkiye IBAN girin (TR + 24 rakam)';
 	@override String get ibanRequiredIfOtherFilled => 'Alıcı veya açıklama girdiniz; geçerli IBAN girin';
-	@override String get accountTitleLabel => 'Hesap sahibi / alıcı unvanı';
-	@override String get accountTitleHint => 'Örn: Site Yönetimi';
-	@override String get referenceTemplateLabel => 'Havale açıklama şablonu';
+	@override String get accountTitleLabel => 'Alıcı Adı';
+	@override String get accountTitleHint => 'Örn: Ahmet Yılmaz veya Site Yönetimi';
+	@override String get referenceTemplateLabel => 'Havale açıklaması';
 	@override String get referenceTemplateHint => 'Örn: Daire {{number}}';
 	@override String get presetsEmpty => 'Henüz kayıtlı tahsilat bilgisi yok';
 	@override String get presetsLoadFailed => 'Öneriler yüklenemedi';
@@ -1626,8 +1673,8 @@ class _Translations$features$auth$onboarding$tr implements Translations$features
 	@override String get step5ResidentDuesBody => 'Güncel borcunuzu ve geçmiş ödemelerinizi takip edin.';
 	@override String get step5ResidentDekontTitle => 'Dekont yükleyin';
 	@override String get step5ResidentDekontBody => 'Ödeme dekontunuzu fotoğraf veya PDF olarak gönderin.';
-	@override String get step5ResidentTicketsTitle => 'Arıza bildirin';
-	@override String get step5ResidentTicketsBody => 'Site içi sorunları kolayca yönetime iletin.';
+	@override String get step5ResidentTicketsTitle => 'Talep oluşturun';
+	@override String get step5ResidentTicketsBody => 'Yönetime iletmek istediğiniz konuları kolayca bildirin.';
 	@override String get step5ResidentNotifyTitle => 'Bildirim alın';
 	@override String get step5ResidentNotifyBody => 'Duyuru ve aidat hatırlatmalarından haberdar olun.';
 	@override String get step6ManagerTitle => 'Kurulum tamamlandı';
@@ -1654,6 +1701,98 @@ class _Translations$features$auth$onboarding$tr implements Translations$features
 	@override String get residentNameRequired => 'Lütfen ad soyadınızı girin.';
 }
 
+// Path: features.dekont.resident
+class _Translations$features$dekont$resident$tr implements Translations$features$dekont$resident$en {
+	_Translations$features$dekont$resident$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get statusProcessing => 'Dekontunuz işleniyor';
+	@override String get statusAwaitingApproval => 'Dekontunuz onay bekliyor';
+	@override String get statusApproved => 'Ödemeniz onaylandı';
+	@override String get statusPartiallyApproved => 'Ödemeniz kısmen onaylandı';
+	@override String get statusRejected => 'Dekontunuz reddedildi';
+	@override String get statusCouldNotMatch => 'Dekontunuz eşleştirilemedi';
+	@override String get filterAll => 'Tüm dekontlarınız';
+	@override String get filterPending => 'Onay bekleyenler';
+	@override String get filterApproved => 'Onaylananlar';
+	@override String get filterRejected => 'Reddedilenler';
+	@override String get dueOverdueHint => 'Bu aidatınız gecikmiş';
+}
+
+// Path: features.notifications.resident
+class _Translations$features$notifications$resident$tr implements Translations$features$notifications$resident$en {
+	_Translations$features$notifications$resident$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get typeDueReminder => 'Aidat hatırlatmanız var';
+	@override String get typeDuePaid => 'Aidatınız ödendi';
+	@override String get typeTicketCreated => 'Talebiniz oluşturuldu';
+	@override String get typeTicketUpdate => 'Talebiniz güncellendi';
+	@override String get typeAnnouncement => 'Size duyuru geldi';
+	@override String get typeDekontReceived => 'Dekontunuz alındı';
+	@override String get typeDekontNeedsReview => 'Dekontunuz inceleniyor';
+	@override String get typeDekontMatched => 'Dekontunuz eşleşti';
+	@override String get typeDekontPaymentApplied => 'Dekontunuz onaylandı';
+	@override String get typeExpenseAdded => 'Yeni gider eklendi';
+	@override String get typeSystem => 'Sistem bildirimi';
+	@override String get typeOther => 'Bildiriminiz';
+	@override String get allApartmentsTag => 'Size duyuru';
+	@override String get announcementFeedLabel => 'Yönetimden duyuru';
+}
+
+// Path: features.notifications.permissionPrompt
+class _Translations$features$notifications$permissionPrompt$tr implements Translations$features$notifications$permissionPrompt$en {
+	_Translations$features$notifications$permissionPrompt$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get residentTitle => 'Bildirimlere izin verin';
+	@override String get residentBody => 'Aidat hatırlatmaları, yönetim duyuruları ve dekont durumları hakkında anında bilgi almak için bildirimlere izin vermenizi öneririz.';
+	@override String get managerTitle => 'Bildirimlere izin verin';
+	@override String get managerBody => 'Dekont onayları, sakin talepleri ve aidat hareketleri hakkında anında bilgi almak için bildirimlere izin vermenizi öneririz.';
+	@override String get allow => 'İzin Ver';
+	@override String get notNow => 'Şimdi Değil';
+}
+
+// Path: features.dashboard.activityHistory
+class _Translations$features$dashboard$activityHistory$tr implements Translations$features$dashboard$activityHistory$en {
+	_Translations$features$dashboard$activityHistory$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Son Hareketler';
+	@override String get rangeToday => 'Bugün';
+	@override String get rangeThisWeek => 'Bu Hafta';
+	@override String get rangeThisMonth => 'Bu Ay';
+	@override String get rangeThreeMonths => '3 Ay';
+	@override String get rangeSixMonths => '6 Ay';
+	@override String get emptyTitle => 'Bu dönemde hareketiniz yok';
+	@override String get emptySubtitle => 'Seçtiğiniz aralıkta ödeme veya duyuru görünmüyor.';
+}
+
+// Path: features.dues.resident
+class _Translations$features$dues$resident$tr implements Translations$features$dues$resident$en {
+	_Translations$features$dues$resident$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get paidStatus => 'Ödediniz';
+	@override String get overdueStatus => 'Aidatınız gecikmiş';
+	@override String get pendingStatus => 'Ödemeniz bekliyor';
+	@override String get waivedStatus => 'Bu dönem muaftınız';
+	@override String get overdueDetail => 'Aidatınız {days} gündür gecikmiş';
+	@override String get pendingDetail => 'Son ödeme tarihi {day} {month}';
+	@override String get paidLateSummary => '{date} tarihinde ödediniz · {days} gün gecikme';
+	@override String get paidOnTimeSummary => '{date} tarihinde ödediniz';
+}
+
 // Path: features.dues.transactions
 class _Translations$features$dues$transactions$tr implements Translations$features$dues$transactions$en {
 	_Translations$features$dues$transactions$tr._(this._root);
@@ -1662,14 +1801,21 @@ class _Translations$features$dues$transactions$tr implements Translations$featur
 
 	// Translations
 	@override String get title => 'Aidat İşlem Geçmişi';
+	@override String get residentTitle => 'İşlem Geçmişiniz';
 	@override String get emptyTitle => 'Henüz işlem yok';
 	@override String get emptySubtitle => 'Dekont onayları ve manuel ödemeler burada listelenir.';
+	@override String get residentEmptyTitle => 'Henüz bir işleminiz yok';
+	@override String get residentEmptySubtitle => 'Yaptığınız ödemeler ve dekontlarınız burada görünür.';
 	@override String get sourceReceipt => 'Dekont';
 	@override String get sourceManual => 'Elden';
 	@override String get statusApproved => 'Onaylı';
 	@override String get statusPending => 'Beklemede';
 	@override String get statusRejected => 'Reddedildi';
 	@override String get unknownApartment => 'Daire bilgisi yok';
+	@override String get residentPaidByManual => 'Aidatı elden ödediniz';
+	@override String get residentPaidByReceipt => 'Aidatı dekontla ödediniz';
+	@override String get residentDekontPending => 'Dekontunuz onay bekliyor';
+	@override String get residentDekontRejected => 'Dekontunuz reddedildi';
 }
 
 /// The flat map containing all translations for locale <tr>.
@@ -1792,8 +1938,8 @@ extension on TranslationsTr {
 			'common.user' => 'Kullanıcı',
 			'common.welcome' => 'Hoş Geldiniz',
 			'common.managedBuildings' => 'Yönetilen Binalar',
-			'common.issues' => 'Arızalar',
-			'common.issuesTab' => 'Arızalar Sekmesi',
+			'common.issues' => 'Talepler',
+			'common.issuesTab' => 'Talepler Sekmesi',
 			'common.apartment' => 'Daire',
 			'common.addBuilding' => 'Bina Ekle',
 			'common.inviteCode' => 'Davet Kodu',
@@ -1806,6 +1952,11 @@ extension on TranslationsTr {
 			'common.duesCollection' => 'Aidat Tahsilatı',
 			'common.totalDues' => 'Toplam Aidat',
 			'common.recentTransactions' => 'Son İşlemler',
+			'common.recentMovements' => 'Son Hareketler',
+			'common.seeAll' => 'Tümünü Gör',
+			'common.payDue' => 'Aidat Öde',
+			'common.noCurrentDebt' => 'Güncel borcunuz bulunmuyor ✓',
+			'common.announcements' => 'Duyurular',
 			'common.paid' => 'Ödendi',
 			'common.pending' => 'Beklemede',
 			'common.overdue' => 'Gecikmiş',
@@ -1828,7 +1979,7 @@ extension on TranslationsTr {
 			'common.myReceipts' => 'Dekontlarım',
 			'common.myPaymentRequest' => 'Ödeme Talebi',
 			'common.duesHistory' => 'Geçmişler',
-			'common.addRequest' => 'Talep Ekle',
+			'common.addRequest' => 'Talep Oluştur',
 			'common.payDebt' => 'Borcu Öde',
 			'common.tabAll' => 'Tümü',
 			'common.tabFaults' => 'Arızalar',
@@ -1865,6 +2016,30 @@ extension on TranslationsTr {
 			'common.selectCityFirst' => 'Önce şehir seçin',
 			'common.selectCityTitle' => 'Şehir Seçin',
 			'common.selectDistrictTitle' => 'İlçe Seçin',
+			'common.neighborhoodRequired' => 'Mahalle *',
+			'common.selectNeighborhood' => 'Mahalle seçin',
+			'common.selectNeighborhoodTitle' => 'Mahalle Seçin',
+			'common.selectDistrictFirst' => 'Önce ilçe seçin',
+			'common.wizardNext' => 'İleri',
+			'common.wizardBack' => 'Geri',
+			'common.wizardMore' => 'Daha Fazla',
+			'common.wizardEnterNumber' => 'Sayı girin',
+			'common.wizardBackToGrid' => 'Listeye dön',
+			'common.wizardNumberRangeError' => 'Sayı {min} ile {max} arasında olmalı',
+			'common.wizardLocationLoadFailed' => 'İl ve ilçe listesi yüklenemedi. Lütfen tekrar deneyin.',
+			'common.wizardNeighborhoodLoadFailed' => 'Mahalle listesi yüklenemedi. İnternet bağlantınızı kontrol edip tekrar deneyin.',
+			'common.wizardStepBuildingName' => 'Bina Adı',
+			'common.wizardStepSiteName' => 'Site Adı',
+			'common.wizardStepBlockInfo' => 'Blok',
+			'common.wizardStepLocation' => 'İl / İlçe',
+			'common.wizardStepNeighborhoodAddress' => 'Mahalle',
+			'common.wizardStepFloors' => 'Kat',
+			'common.wizardStepApartments' => 'Daire',
+			'common.wizardStepDues' => 'Aidat',
+			'common.wizardStepRecipient' => 'Alıcı',
+			'common.wizardStepSiteOverrides' => 'Ayarlar',
+			'common.wizardPickFloorCount' => 'Kat sayısını seçin',
+			'common.wizardPickApartmentCount' => 'Kattaki daire sayısını seçin',
 			'common.search' => 'Ara...',
 			'common.noResults' => 'Sonuç bulunamadı',
 			'common.fieldRequired' => 'boş bırakılamaz',
@@ -1936,6 +2111,7 @@ extension on TranslationsTr {
 			'common.myPastDues' => 'Geçmiş aidatlarım',
 			'common.buildingDues' => 'Bina Aidatları',
 			'common.noDuesYet' => 'Henüz aidat kaydı yok',
+			'common.residentNoDuesYet' => 'Size atanmış bir aidat kaydı yok',
 			'common.duesUpdated' => 'Aidat durumu güncellendi',
 			'common.amount' => 'Tutar',
 			'common.updateDueAmount' => 'Aidat Tutarını Güncelle',
@@ -1953,11 +2129,9 @@ extension on TranslationsTr {
 			'common.filter' => 'Filtrele',
 			'common.apply' => 'Uygula',
 			'common.overdueDays' => 'gün gecikmiş',
-			'common.dueMetaOverdueDelay' => '{days} gün gecikme',
-			'common.dueStatusOverdueWithDays' => 'Bekliyor / {days} Gün Gecikti',
-			'common.dueMetaPaidInMonth' => '{month} {year}\'de ödendi',
-			'common.dueMetaPaidOnDay' => '{day} {month}\'ta ödendi',
-			'common.paidLateDays' => '{days} gün geç ödedi',
+			'common.dueMetaOverdueDelay' => '{days} gün gecikti',
+			'common.dueStatusOverdueWithDays' => '{days} gün gecikti',
+			'common.duePaidSummaryLate' => '{date} - {days} gün gecikti',
 			'common.dueMetaPendingDueDate' => 'son ödeme {day} {month}',
 			'common.payShort' => 'Öde',
 			'common.dekontShort' => 'Dekont',
@@ -2164,6 +2338,8 @@ extension on TranslationsTr {
 			'common.errorKeys.downloadFallbackShare' => 'Paylaşım ekranı açıldı, buradan Dosyalara Kaydet diyebilirsiniz.',
 			'common.errorKeys.downloadError' => 'Dosya indirilirken bir hata oluştu.',
 			'common.errorKeys.galleryPermissionDenied' => 'Galeriye erişim izni reddedildi.',
+			_ => null,
+		} ?? switch (path) {
 			'validation.emailRequired' => 'Email adresi boş bırakılamaz',
 			'validation.emailInvalid' => 'Geçerli bir email adresi giriniz',
 			'validation.emailTooLong' => 'Email adresi çok uzun',
@@ -2192,8 +2368,6 @@ extension on TranslationsTr {
 			'features.buildings.copy' => 'Kopyala',
 			'features.buildings.copyDone' => 'Kopyalandı',
 			'features.buildings.share' => 'Paylaş',
-			_ => null,
-		} ?? switch (path) {
 			'features.buildings.anotherApartment' => 'Başka Daire',
 			'features.buildings.codeRevoked' => 'Kod iptal edildi',
 			'features.buildings.occupiedDialog' => 'Yeni kod üretirsen eski kullanıcı çıkarılır. Emin misiniz?',
@@ -2211,7 +2385,7 @@ extension on TranslationsTr {
 			'features.buildings.activeCodeNote' => 'Bu kod aktifken aynı daireye yeni kod üretilemez. Yeni kod için önce mevcut kodu iptal etmelisin.',
 			'features.buildings.backToMainMenu' => 'Ana Menüye Dön',
 			'features.buildings.tekrarDene' => 'Tekrar Dene',
-			'features.buildings.collection.sectionTitle' => 'Tahsilat bilgileri',
+			'features.buildings.collection.sectionTitle' => 'Alıcı bilgileri',
 			'features.buildings.collection.sectionHint' => 'Sakinlerin havale yapacağı IBAN. Boş bırakılabilir; sonradan da ekleyebilirsiniz.',
 			'features.buildings.collection.modeSaved' => 'Kayıtlı IBAN',
 			'features.buildings.collection.modeNew' => 'Yeni IBAN',
@@ -2219,8 +2393,8 @@ extension on TranslationsTr {
 			'features.buildings.collection.savedListSectionLabel' => 'Kayıtlı IBAN\'lar',
 			'features.buildings.collection.pickSavedIban' => 'Kayıtlı IBAN seçin',
 			'features.buildings.collection.changeSavedIban' => 'Başka IBAN seçmek için dokunun',
-			'features.buildings.collection.searchSavedIban' => 'IBAN veya unvan ara',
-			'features.buildings.collection.detailAccountHolder' => 'Hesap sahibi',
+			'features.buildings.collection.searchSavedIban' => 'IBAN veya alıcı adı ara',
+			'features.buildings.collection.detailAccountHolder' => 'Alıcı Adı',
 			'features.buildings.collection.detailReference' => 'Havale açıklaması',
 			'features.buildings.collection.detailReferenceAuto' => 'Havale açıklamasına daire numarası otomatik eklenir',
 			'features.buildings.collection.detailReferenceDaireOnly' => 'Havale açıklaması: Daire numarası',
@@ -2232,9 +2406,9 @@ extension on TranslationsTr {
 			'features.buildings.collection.ibanHint' => 'TR33 0006 1005 1978 6457 8413 26',
 			'features.buildings.collection.ibanInvalid' => 'Geçerli bir Türkiye IBAN girin (TR + 24 rakam)',
 			'features.buildings.collection.ibanRequiredIfOtherFilled' => 'Alıcı veya açıklama girdiniz; geçerli IBAN girin',
-			'features.buildings.collection.accountTitleLabel' => 'Hesap sahibi / alıcı unvanı',
-			'features.buildings.collection.accountTitleHint' => 'Örn: Site Yönetimi',
-			'features.buildings.collection.referenceTemplateLabel' => 'Havale açıklama şablonu',
+			'features.buildings.collection.accountTitleLabel' => 'Alıcı Adı',
+			'features.buildings.collection.accountTitleHint' => 'Örn: Ahmet Yılmaz veya Site Yönetimi',
+			'features.buildings.collection.referenceTemplateLabel' => 'Havale açıklaması',
 			'features.buildings.collection.referenceTemplateHint' => 'Örn: Daire {{number}}',
 			'features.buildings.collection.presetsEmpty' => 'Henüz kayıtlı tahsilat bilgisi yok',
 			'features.buildings.collection.presetsLoadFailed' => 'Öneriler yüklenemedi',
@@ -2309,8 +2483,8 @@ extension on TranslationsTr {
 			'features.sites.addressExtraHint' => 'Örn: Arka giriş, Kapı no 2',
 			'features.sites.overrideDue' => 'Aidatı site varsayılanından farklı ayarla',
 			'features.sites.overrideDueHint' => 'Kapalıyken site aidatı geçerli olur',
-			'features.sites.overrideCollection' => 'IBAN\'ı site varsayılanından farklı ayarla',
-			'features.sites.overrideCollectionHint' => 'Kapalıyken site IBAN\'ı geçerli olur',
+			'features.sites.overrideCollection' => 'Alıcı bilgilerini site varsayılanından farklı ayarla',
+			'features.sites.overrideCollectionHint' => 'Kapalıyken site alıcı bilgileri geçerli olur',
 			'features.sites.blocksTitle' => 'Bloklar',
 			'features.sites.noBlocks' => 'Henüz blok eklenmedi',
 			'features.sites.blockApartments' => '{count} daire',
@@ -2475,8 +2649,8 @@ extension on TranslationsTr {
 			'features.auth.onboarding.step5ResidentDuesBody' => 'Güncel borcunuzu ve geçmiş ödemelerinizi takip edin.',
 			'features.auth.onboarding.step5ResidentDekontTitle' => 'Dekont yükleyin',
 			'features.auth.onboarding.step5ResidentDekontBody' => 'Ödeme dekontunuzu fotoğraf veya PDF olarak gönderin.',
-			'features.auth.onboarding.step5ResidentTicketsTitle' => 'Arıza bildirin',
-			'features.auth.onboarding.step5ResidentTicketsBody' => 'Site içi sorunları kolayca yönetime iletin.',
+			'features.auth.onboarding.step5ResidentTicketsTitle' => 'Talep oluşturun',
+			'features.auth.onboarding.step5ResidentTicketsBody' => 'Yönetime iletmek istediğiniz konuları kolayca bildirin.',
 			'features.auth.onboarding.step5ResidentNotifyTitle' => 'Bildirim alın',
 			'features.auth.onboarding.step5ResidentNotifyBody' => 'Duyuru ve aidat hatırlatmalarından haberdar olun.',
 			'features.auth.onboarding.step6ManagerTitle' => 'Kurulum tamamlandı',
@@ -2504,9 +2678,9 @@ extension on TranslationsTr {
 			'features.apartments.residentPanel' => 'Sakin',
 			'features.tickets.myTickets' => 'Taleplerim',
 			'features.tickets.newTicket' => 'Yeni Talep',
-			'features.tickets.createTitle' => 'Arıza / Talep Bildir',
-			'features.tickets.reportFaultTitle' => 'Arıza Bildir',
-			'features.tickets.myApplicationsTitle' => 'Başvurularım',
+			'features.tickets.createTitle' => 'Talep Oluştur',
+			'features.tickets.reportFaultTitle' => 'Yeni Talep',
+			'features.tickets.myApplicationsTitle' => 'Taleplerim',
 			'features.tickets.fieldTitle' => 'Konu',
 			'features.tickets.fieldTitleHint' => 'Kısa bir tanım girin.',
 			'features.tickets.fieldDetail' => 'Detaylandırın',
@@ -2515,6 +2689,7 @@ extension on TranslationsTr {
 			'features.tickets.fieldDescriptionHint' => 'Ayrıntılı açıklama yazın…',
 			'features.tickets.attachmentHint' => 'Fotoğraf, video veya belge ekleyin… PNG, JPG — en fazla 5 MB.',
 			'features.tickets.attachmentComingSoon' => 'Dosya ekleme yakında aktif olacak.',
+			'features.tickets.attachmentPickFailed' => 'Görsel seçilemedi. Lütfen tekrar deneyin.',
 			'features.tickets.fieldCategory' => 'Kategori',
 			'features.tickets.categoryComplaint' => 'Şikayet',
 			'features.tickets.categoryRequest' => 'Talep',
@@ -2525,7 +2700,9 @@ extension on TranslationsTr {
 			'features.tickets.createFailed' => 'Talep kaydedilemedi. Lütfen tekrar deneyin.',
 			'features.tickets.createServiceUnavailable' => 'Talep servisi şu an hazır değil. Lütfen daha sonra tekrar deneyin.',
 			'features.tickets.emptyTitle' => 'Henüz talep yok',
-			'features.tickets.emptySubtitle' => 'Arıza veya talebinizi buradan bildirebilirsiniz',
+			'features.tickets.emptySubtitle' => 'Talebinizi buradan oluşturabilirsiniz',
+			'features.tickets.residentEmptyTitle' => 'Henüz bir talebiniz yok',
+			'features.tickets.residentEmptySubtitle' => 'Yönetime iletmek istediğiniz konuları buradan oluşturabilirsiniz.',
 			'features.tickets.titleTooShort' => 'Başlık en az 3 karakter olmalı',
 			'features.tickets.descriptionTooShort' => 'Açıklama en az 10 karakter olmalı',
 			'features.tickets.statusOpen' => 'Açık',
@@ -2533,10 +2710,10 @@ extension on TranslationsTr {
 			'features.tickets.statusResolved' => 'Çözüldü',
 			'features.tickets.statusClosed' => 'Kapalı',
 			'features.tickets.statusTrackerTitle' => 'TALEP DURUMU',
-			'features.tickets.statusStepWaiting' => 'Bekliyor',
-			'features.tickets.statusStepInProgress' => 'İşlemde',
-			'features.tickets.statusStepResolved' => 'Çözüldü',
-			'features.tickets.statusStepClosed' => 'Kapalı',
+			'features.tickets.statusStepWaiting' => 'İnceleme bekleniyor',
+			'features.tickets.statusStepInProgress' => 'Yönetim ilgileniyor',
+			'features.tickets.statusStepResolved' => 'Çözüm sağlandı',
+			'features.tickets.statusStepClosed' => 'Talep kapandı',
 			'features.tickets.statusHeadlineOpen' => 'Talebiniz beklemede',
 			'features.tickets.statusHeadlineInProgress' => 'Talebiniz işlemde',
 			'features.tickets.statusHeadlineResolved' => 'Talebiniz çözüldü',
@@ -2555,7 +2732,8 @@ extension on TranslationsTr {
 			'features.tickets.statusClosedHint' => 'Bu talep kapatıldı; durum değiştirilemez.',
 			'features.tickets.apartmentRequired' => 'Daire bilgisi bulunamadı. Lütfen tekrar giriş yapın.',
 			'features.tickets.managerUpdateLabel' => 'Yönetici güncellemesi',
-			'features.tickets.residentUpdateLabel' => 'Sakin güncellemesi',
+			'features.tickets.residentUpdateLabel' => 'Sizin güncellemeniz',
+			'features.tickets.managerUpdateForResident' => 'Yönetimden güncelleme',
 			'features.tickets.quickReplyTemplatesTitle' => 'Hızlı yanıt şablonları',
 			'features.tickets.confirmChanges' => 'Onayla',
 			'features.tickets.residentInfoTitle' => 'Talep sahibi bilgileri',
@@ -2586,7 +2764,7 @@ extension on TranslationsTr {
 			'features.dekont.paymentInfoTitle' => 'Havale bilgileri',
 			'features.dekont.collectionNotConfigured' => 'Yöneticiniz henüz tahsilat IBAN bilgisini tanımlamadı. Yine de dekont yükleyebilirsiniz.',
 			'features.dekont.ibanLabel' => 'IBAN',
-			'features.dekont.accountTitleLabel' => 'Alıcı unvanı',
+			'features.dekont.accountTitleLabel' => 'Alıcı Adı',
 			'features.dekont.referenceLabel' => 'Havale açıklaması',
 			'features.dekont.copy' => 'Kopyala',
 			'features.dekont.copied' => 'Panoya kopyalandı',
@@ -2629,6 +2807,17 @@ extension on TranslationsTr {
 			'features.dekont.filterPending' => 'İncelemede',
 			'features.dekont.filterApproved' => 'Onaylandı',
 			'features.dekont.filterRejected' => 'Reddedildi',
+			'features.dekont.resident.statusProcessing' => 'Dekontunuz işleniyor',
+			'features.dekont.resident.statusAwaitingApproval' => 'Dekontunuz onay bekliyor',
+			'features.dekont.resident.statusApproved' => 'Ödemeniz onaylandı',
+			'features.dekont.resident.statusPartiallyApproved' => 'Ödemeniz kısmen onaylandı',
+			'features.dekont.resident.statusRejected' => 'Dekontunuz reddedildi',
+			'features.dekont.resident.statusCouldNotMatch' => 'Dekontunuz eşleştirilemedi',
+			'features.dekont.resident.filterAll' => 'Tüm dekontlarınız',
+			'features.dekont.resident.filterPending' => 'Onay bekleyenler',
+			'features.dekont.resident.filterApproved' => 'Onaylananlar',
+			'features.dekont.resident.filterRejected' => 'Reddedilenler',
+			'features.dekont.resident.dueOverdueHint' => 'Bu aidatınız gecikmiş',
 			'features.dekont.statusReceived' => 'Alındı',
 			'features.dekont.statusExtracting' => 'Okunuyor',
 			'features.dekont.statusExtractFailed' => 'Okunamadı',
@@ -2663,6 +2852,8 @@ extension on TranslationsTr {
 			'features.dekont.amount' => 'Tutar',
 			'features.dekont.loadError' => 'Dekontlar yüklenemedi',
 			'features.dekont.systemInfoTitle' => 'Sistem bilgileri',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.systemInfoSubtitle' => 'Dekontunuzdan okuduğumuz bilgiler aşağıdadır. Ödeme otomatik onaylanmaz; yönetici hesabını kontrol ederek onaylar.',
 			'features.dekont.systemReadLabel' => 'Dekonttan okunanlar',
 			'features.dekont.systemInfoProcessing' => 'Dekontunuz işleniyor. Okunan tutar, tarih ve banka bilgileri birkaç dakika içinde burada görünecek.',
@@ -2671,7 +2862,7 @@ extension on TranslationsTr {
 			'features.dekont.transactionDateLabel' => 'İşlem tarihi',
 			'features.dekont.bankLabel' => 'Banka',
 			'features.dekont.receiverIbanLabel' => 'Alıcı IBAN',
-			'features.dekont.receiverNameLabel' => 'Alıcı unvanı',
+			'features.dekont.receiverNameLabel' => 'Alıcı Adı',
 			'features.dekont.referenceNumberLabel' => 'Referans no',
 			'features.dekont.ibanUnreadableNotice' => 'Yüklediğiniz aidat ödeme dekontunda alıcı IBAN bilgisi okunamamıştır. Bu haliyle yönetici onayına sunulacaktır.',
 			'features.dekont.ibanMismatchNotice' => 'Dekonttaki alıcı IBAN, binanızın tahsilat hesabıyla eşleşmiyor. Yönetici hesabını kontrol ederek karar verecektir.',
@@ -2706,8 +2897,6 @@ extension on TranslationsTr {
 			'features.expenses.submit' => 'Kaydet',
 			'features.expenses.required' => 'Zorunlu alan',
 			'features.expenses.amountInvalid' => 'Geçerli tutar girin',
-			_ => null,
-		} ?? switch (path) {
 			'features.expenses.amountFromReceiptsHint' => 'Tutar makbuzlardan otomatik okunur.',
 			'features.expenses.receiptRequired' => 'En az bir makbuz fotoğrafı ekleyin',
 			'features.expenses.amountOcrPending' => 'Makbuz tutarları okunuyor. Birkaç saniye sonra listede görünür.',
@@ -2809,6 +2998,20 @@ extension on TranslationsTr {
 			'features.notifications.typeSystem' => 'Sistem',
 			'features.notifications.typeAidatPanelTeam' => 'AidatPanel Ekibi',
 			'features.notifications.typeOther' => 'Bildirim',
+			'features.notifications.resident.typeDueReminder' => 'Aidat hatırlatmanız var',
+			'features.notifications.resident.typeDuePaid' => 'Aidatınız ödendi',
+			'features.notifications.resident.typeTicketCreated' => 'Talebiniz oluşturuldu',
+			'features.notifications.resident.typeTicketUpdate' => 'Talebiniz güncellendi',
+			'features.notifications.resident.typeAnnouncement' => 'Size duyuru geldi',
+			'features.notifications.resident.typeDekontReceived' => 'Dekontunuz alındı',
+			'features.notifications.resident.typeDekontNeedsReview' => 'Dekontunuz inceleniyor',
+			'features.notifications.resident.typeDekontMatched' => 'Dekontunuz eşleşti',
+			'features.notifications.resident.typeDekontPaymentApplied' => 'Dekontunuz onaylandı',
+			'features.notifications.resident.typeExpenseAdded' => 'Yeni gider eklendi',
+			'features.notifications.resident.typeSystem' => 'Sistem bildirimi',
+			'features.notifications.resident.typeOther' => 'Bildiriminiz',
+			'features.notifications.resident.allApartmentsTag' => 'Size duyuru',
+			'features.notifications.resident.announcementFeedLabel' => 'Yönetimden duyuru',
 			'features.notifications.allApartmentsTag' => 'Tüm daireler',
 			'features.notifications.sendTitle' => 'Sakinlere Duyuru',
 			'features.notifications.fieldTitle' => 'Başlık',
@@ -2817,6 +3020,12 @@ extension on TranslationsTr {
 			'features.notifications.sendSuccess' => 'Duyuru gönderildi',
 			'features.notifications.sendFailed' => 'Duyuru gönderilemedi',
 			'features.notifications.fieldRequired' => 'Zorunlu alan',
+			'features.notifications.permissionPrompt.residentTitle' => 'Bildirimlere izin verin',
+			'features.notifications.permissionPrompt.residentBody' => 'Aidat hatırlatmaları, yönetim duyuruları ve dekont durumları hakkında anında bilgi almak için bildirimlere izin vermenizi öneririz.',
+			'features.notifications.permissionPrompt.managerTitle' => 'Bildirimlere izin verin',
+			'features.notifications.permissionPrompt.managerBody' => 'Dekont onayları, sakin talepleri ve aidat hareketleri hakkında anında bilgi almak için bildirimlere izin vermenizi öneririz.',
+			'features.notifications.permissionPrompt.allow' => 'İzin Ver',
+			'features.notifications.permissionPrompt.notNow' => 'Şimdi Değil',
 			'features.notifications.titleTooLong' => 'Başlık en fazla 120 karakter olabilir',
 			'features.notifications.bodyTooLong' => 'Mesaj en fazla 2000 karakter olabilir',
 			'features.notifications.noBuilding' => 'Önce bir bina ekleyin',
@@ -2957,7 +3166,7 @@ extension on TranslationsTr {
 			'features.dashboard.buildingUnitsSummary' => '{apartments} daire',
 			'features.dashboard.collectionRate' => 'Tahsilat Oranı',
 			'features.dashboard.overduePayments' => 'Geciken Ödeme',
-			'features.dashboard.openTicketRequests' => 'Açık Arıza Talebi',
+			'features.dashboard.openTicketRequests' => 'Açık Talep',
 			'features.dashboard.monthTotalExpense' => 'Bu Ay Toplam Gider',
 			'features.dashboard.pendingDekonts' => 'Bekleyen Dekont',
 			'features.dashboard.duesCollectionStatus' => 'Aidat Tahsilat Durumu',
@@ -2965,7 +3174,7 @@ extension on TranslationsTr {
 			'features.dashboard.last6Months' => 'Son 6 Ay',
 			'features.dashboard.collectedDues' => 'Toplanan Aidat',
 			'features.dashboard.totalExpense' => 'Toplam Gider',
-			'features.dashboard.ticketStatusTitle' => 'Arıza Talepleri Durumu',
+			'features.dashboard.ticketStatusTitle' => 'Talep Durumu',
 			'features.dashboard.ticketOpen' => 'Açık',
 			'features.dashboard.ticketInProgress' => 'İşlemde',
 			'features.dashboard.ticketResolved' => 'Çözüldü',
@@ -2988,7 +3197,9 @@ extension on TranslationsTr {
 			'features.dashboard.seeMoreOverdue' => 'Daha fazlası (+{count})',
 			'features.dashboard.payNow' => 'Şimdi Öde',
 			'features.dashboard.overduePaymentsBadge' => '{count} gecikmiş ödeme',
+			'features.dashboard.residentOverduePaymentsBadge' => '{count} aidatınız gecikmiş',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} aidatı',
+			'features.dashboard.residentFeaturedDuePeriod' => '{month} {year} aidatınız',
 			'features.dashboard.residentDebtAndPaySubtitle' => 'Ödeme yaparak ödeyin.',
 			'features.dashboard.duesStatusAction' => 'Aidat Durumu',
 			'features.dashboard.overdueDuesBadge' => '{count} gecikmiş aidat',
@@ -2996,15 +3207,46 @@ extension on TranslationsTr {
 			'features.dashboard.independentBuildingsSection' => 'Bağımsız Binalar',
 			'features.dashboard.sitePickerSummary' => '{name} · {count} bina',
 			'features.dashboard.siteScopeSummary' => '{count} bina',
+			'features.dashboard.activityHistory.title' => 'Son Hareketler',
+			'features.dashboard.activityHistory.rangeToday' => 'Bugün',
+			'features.dashboard.activityHistory.rangeThisWeek' => 'Bu Hafta',
+			'features.dashboard.activityHistory.rangeThisMonth' => 'Bu Ay',
+			'features.dashboard.activityHistory.rangeThreeMonths' => '3 Ay',
+			'features.dashboard.activityHistory.rangeSixMonths' => '6 Ay',
+			'features.dashboard.activityHistory.emptyTitle' => 'Bu dönemde hareketiniz yok',
+			'features.dashboard.activityHistory.emptySubtitle' => 'Seçtiğiniz aralıkta ödeme veya duyuru görünmüyor.',
+			'features.dues.detailTitle' => 'Aidat Detayı',
+			'features.dues.collectPayment' => 'Ödeme Al',
+			'features.dues.collectPaymentConfirmTitle' => 'Elden ödeme alınsın mı?',
+			'features.dues.collectPaymentConfirmBody' => '{apartment} — {period} aidatı ödendi olarak işaretlenecek.',
+			'features.dues.reviewDekont' => 'Dekont İncele',
+			'features.dues.paymentDetail' => 'Ödeme Detayı',
+			'features.dues.amountLabel' => 'Tutar',
+			'features.dues.periodLabel' => 'Dönem',
+			'features.dues.resident.paidStatus' => 'Ödediniz',
+			'features.dues.resident.overdueStatus' => 'Aidatınız gecikmiş',
+			'features.dues.resident.pendingStatus' => 'Ödemeniz bekliyor',
+			'features.dues.resident.waivedStatus' => 'Bu dönem muaftınız',
+			'features.dues.resident.overdueDetail' => 'Aidatınız {days} gündür gecikmiş',
+			'features.dues.resident.pendingDetail' => 'Son ödeme tarihi {day} {month}',
+			'features.dues.resident.paidLateSummary' => '{date} tarihinde ödediniz · {days} gün gecikme',
+			'features.dues.resident.paidOnTimeSummary' => '{date} tarihinde ödediniz',
 			'features.dues.transactions.title' => 'Aidat İşlem Geçmişi',
+			'features.dues.transactions.residentTitle' => 'İşlem Geçmişiniz',
 			'features.dues.transactions.emptyTitle' => 'Henüz işlem yok',
 			'features.dues.transactions.emptySubtitle' => 'Dekont onayları ve manuel ödemeler burada listelenir.',
+			'features.dues.transactions.residentEmptyTitle' => 'Henüz bir işleminiz yok',
+			'features.dues.transactions.residentEmptySubtitle' => 'Yaptığınız ödemeler ve dekontlarınız burada görünür.',
 			'features.dues.transactions.sourceReceipt' => 'Dekont',
 			'features.dues.transactions.sourceManual' => 'Elden',
 			'features.dues.transactions.statusApproved' => 'Onaylı',
 			'features.dues.transactions.statusPending' => 'Beklemede',
 			'features.dues.transactions.statusRejected' => 'Reddedildi',
 			'features.dues.transactions.unknownApartment' => 'Daire bilgisi yok',
+			'features.dues.transactions.residentPaidByManual' => 'Aidatı elden ödediniz',
+			'features.dues.transactions.residentPaidByReceipt' => 'Aidatı dekontla ödediniz',
+			'features.dues.transactions.residentDekontPending' => 'Dekontunuz onay bekliyor',
+			'features.dues.transactions.residentDekontRejected' => 'Dekontunuz reddedildi',
 			'features.faz2.sectionTitle' => 'Faz 2',
 			'features.faz2.tickets' => 'Talepler',
 			'features.faz2.expenses' => 'Giderler',

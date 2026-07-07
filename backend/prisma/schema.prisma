@@ -266,6 +266,8 @@ model Due {
   status      DueStatus @default(PENDING)
   paidAt      DateTime?
   overdueDays Int?      @default(0)         // Kaç gün gecikti
+  /// Sakin çıktıktan sonra açık borç listesinde gösterim için
+  residentNameSnapshot String?
   note        String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

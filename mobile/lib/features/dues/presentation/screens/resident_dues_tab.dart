@@ -7,10 +7,14 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/dashboard_section_label.dart';
+import '../../../dashboard/domain/resident_home_activity_item.dart';
+import '../../../dashboard/presentation/widgets/resident_home/resident_home_activity_row.dart';
+import '../../../dekont/presentation/providers/dekont_provider.dart';
 import '../../domain/entities/due_entity.dart';
 import '../../domain/resident_dues_list.dart';
 import '../providers/dues_provider.dart';
-import '../widgets/dues_action_card.dart';
+import '../providers/resident_due_transactions_provider.dart';
 import '../widgets/dues_segment_toggle.dart';
 import '../widgets/resident_due_list_card.dart';
 
@@ -33,7 +37,7 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _ensureDuesLoaded());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _ensureDataLoaded());
     attachPaginationScroll(
       _scrollController,
       _onScrollNearEnd,
@@ -44,12 +48,23 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
     );
   }
 
-  void _ensureDuesLoaded() {
+  Future<void> _ensureDataLoaded() async {
     if (!mounted) return;
     final duesState = ref.read(duesNotifierProvider);
     if (duesState.dues.isEmpty && !duesState.isLoading) {
-      ref.read(duesNotifierProvider.notifier).loadMyDues();
+      await ref.read(duesNotifierProvider.notifier).loadMyDues();
     }
+    final dekontsState = ref.read(myDekontsNotifierProvider);
+    if (dekontsState.dekonts.isEmpty && !dekontsState.isLoading) {
+      await ref.read(myDekontsNotifierProvider.notifier).load(refresh: true);
+    }
+  }
+
+  Future<void> _refresh() async {
+    await Future.wait([
+      ref.read(duesNotifierProvider.notifier).loadMyDues(),
+      ref.read(myDekontsNotifierProvider.notifier).load(refresh: true),
+    ]);
   }
 
   void _onScrollNearEnd() {
@@ -74,111 +89,100 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
     super.build(context);
 
     final duesState = ref.watch(duesNotifierProvider);
+    final transactionsState = ref.watch(residentDueTransactionsProvider);
     final split = splitResidentDuesForDisplay(duesState.dues);
     final displayDues =
         _selectedSegment == 0 ? split.current : split.past;
-    final contentItems = _buildDueItems(context, displayDues, duesState);
+    final transactionsT = context.t.features.dues.transactions;
 
     return ColoredBox(
       color: AppColors.dashboardBackground,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: AppSizes.screenBodyScrollPadding.copyWith(
-              top: 0,
-              bottom: 0,
+      child: RefreshIndicator(
+        onRefresh: _refresh,
+        color: AppColors.primary,
+        child: ListView(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: AppSizes.screenBodyScrollPadding.copyWith(
+            top: 0,
+            bottom: AppSizes.spacingXL,
+          ),
+          children: [
+            DashboardSectionLabel(
+              label: context.t.common.duesStatus,
+              padding: EdgeInsets.zero,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildActionCards(context),
-                const SizedBox(height: AppSizes.spacingS),
-                DuesSegmentToggle(
-                  segments: [
-                    context.t.common.dues,
-                    context.t.common.duesHistory,
-                  ],
-                  selectedIndex: _selectedSegment,
-                  onChanged: (index) => setState(() => _selectedSegment = index),
-                ),
-                if (_selectedSegment == 0) ...[
-                  const SizedBox(height: AppSizes.spacingM),
-                  Text(
-                    context.t.common.currentPeriodDue,
-                    style: AppTypography.h4.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 18,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: AppSizes.spacingM),
+            const SizedBox(height: AppSizes.spacingS),
+            DuesSegmentToggle(
+              segments: [
+                context.t.common.dues,
+                context.t.common.duesHistory,
               ],
+              selectedIndex: _selectedSegment,
+              onChanged: (index) => setState(() => _selectedSegment = index),
             ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () =>
-                  ref.read(duesNotifierProvider.notifier).loadMyDues(),
-              color: AppColors.primary,
-              child: contentItems.isEmpty
-                  ? ListView(
-                      controller: _scrollController,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: AppSizes.screenBodyScrollPadding.copyWith(
-                        top: 0,
-                      ),
-                      children: [
-                        _buildEmptyState(context, duesState),
-                      ],
-                    )
-                  : ListView.builder(
-                      controller: _scrollController,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: AppSizes.screenBodyScrollPadding.copyWith(
-                        top: 0,
-                        bottom: AppSizes.spacingXL,
-                      ),
-                      itemCount: contentItems.length,
-                      itemBuilder: (context, index) => contentItems[index],
-                    ),
+            if (_selectedSegment == 0) ...[
+              const SizedBox(height: AppSizes.spacingM),
+              Text(
+                context.t.common.currentPeriodDue,
+                style: AppTypography.h4.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSizes.spacingM),
+            ..._buildDueSection(context, displayDues, duesState),
+            const SizedBox(height: AppSizes.spacingL),
+            DashboardSectionLabel(
+              label: transactionsT.residentTitle,
+              padding: EdgeInsets.zero,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context, DuesState duesState) {
-    if (duesState.isLoading) {
-      return const Padding(
-        padding: EdgeInsets.only(top: AppSizes.spacingXL),
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.spacingXL),
-      child: Center(
-        child: Text(
-          context.t.common.noDuesYet,
-          style: AppTypography.body1.copyWith(
-            color: AppColors.textSecondary,
-          ),
+            const SizedBox(height: AppSizes.spacingS),
+            ..._buildTransactionsSection(context, transactionsState),
+          ],
         ),
       ),
     );
   }
 
-  List<Widget> _buildDueItems(
+  List<Widget> _buildDueSection(
     BuildContext context,
     List<DueEntity> dues,
     DuesState duesState,
   ) {
-    if (duesState.isLoading || dues.isEmpty) return const [];
+    if (duesState.isLoading && dues.isEmpty) {
+      return const [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: AppSizes.spacingXL),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ];
+    }
+
+    if (dues.isEmpty) {
+      return [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingL),
+          child: Center(
+            child: Text(
+              context.t.common.residentNoDuesYet,
+              style: AppTypography.body1.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ),
+      ];
+    }
 
     final items = <Widget>[
-      for (final due in dues) ResidentDueListCard(due: due),
+      for (final due in dues)
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSizes.spacingS),
+          child: ResidentDueListCard(due: due),
+        ),
     ];
 
     if (duesState.isLoadingMore && _selectedSegment == 1) {
@@ -191,31 +195,64 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
     return items;
   }
 
-  Widget _buildActionCards(BuildContext context) {
-    final dekontT = context.t.features.dekont;
+  List<Widget> _buildTransactionsSection(
+    BuildContext context,
+    ResidentDueTransactionsViewState state,
+  ) {
+    final t = context.t.features.dues.transactions;
 
-    return Row(
-      children: [
-        Expanded(
-          child: DuesActionCard(
-            icon: Icons.credit_card_outlined,
-            label: context.t.common.makePayment,
-            iconBg: AppColors.primary.withValues(alpha: 0.1),
-            iconColor: AppColors.primary,
-            onTap: () => context.push('/resident-dashboard/payment'),
+    if (state.isLoading && state.transactions.isEmpty) {
+      return const [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: AppSizes.spacingL),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ];
+    }
+
+    if (state.transactions.isEmpty) {
+      return [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingL),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                t.residentEmptyTitle,
+                textAlign: TextAlign.center,
+                style: AppTypography.body1.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: AppSizes.spacingXS),
+              Text(
+                t.residentEmptySubtitle,
+                textAlign: TextAlign.center,
+                style: AppTypography.body2.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(width: AppSizes.spacingS),
-        Expanded(
-          child: DuesActionCard(
-            icon: Icons.receipt_long_outlined,
-            label: dekontT.viewDekonts,
-            iconBg: AppColors.primary.withValues(alpha: 0.1),
-            iconColor: AppColors.primary,
-            onTap: () => context.push('/resident-dashboard/dekonts'),
+      ];
+    }
+
+    final duesById = duesByIdMap(ref.read(duesNotifierProvider).dues);
+
+    return [
+      for (final transaction in state.transactions)
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSizes.spacingS),
+          child: ResidentHomeActivityRow(
+            item: ResidentHomeActivityItem.transaction(transaction),
+            duesById: duesById,
+            onTap: transaction.dekontId != null
+                ? () => context.push('/dekonts/${transaction.dekontId}')
+                : null,
           ),
         ),
-      ],
-    );
+    ];
   }
 }

@@ -1,5 +1,4 @@
 import { prisma } from "../config/db.js";
-import { buildDueRowsForApartments } from "../utils/dueGeneration.js";
 import { isValidTrIban, normalizeIban } from "../utils/iban.js";
 import { HttpError } from "../utils/httpError.js";
 import { assertManagerOwnsBuilding } from "../utils/access.js";
@@ -144,15 +143,6 @@ export const createBuildingService = async ({
         apartmentRows.length > 0
           ? await tx.apartment.createManyAndReturn({ data: apartmentRows })
           : [];
-
-      // 3. Aidatlar — bulunulan aydan yıl sonuna (toplu INSERT)
-      const dueRows = buildDueRowsForApartments(
-        apartments.map((a) => a.id),
-        { dueAmount: effectiveDueAmount, dueDay: effectiveDueDay, currency: effectiveCurrency }
-      );
-      if (dueRows.length > 0) {
-        await tx.due.createMany({ data: dueRows });
-      }
 
       return await tx.building.findUnique({
         where: { id: building.id },

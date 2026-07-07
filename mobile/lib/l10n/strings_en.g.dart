@@ -275,11 +275,11 @@ class Translations$common$en {
 	/// en: 'Managed Buildings'
 	String get managedBuildings => 'Managed Buildings';
 
-	/// en: 'Issues'
-	String get issues => 'Issues';
+	/// en: 'Requests'
+	String get issues => 'Requests';
 
-	/// en: 'Issues Tab'
-	String get issuesTab => 'Issues Tab';
+	/// en: 'Requests tab'
+	String get issuesTab => 'Requests tab';
 
 	/// en: 'Apartment'
 	String get apartment => 'Apartment';
@@ -319,6 +319,21 @@ class Translations$common$en {
 
 	/// en: 'Recent Transactions'
 	String get recentTransactions => 'Recent Transactions';
+
+	/// en: 'Recent Activity'
+	String get recentMovements => 'Recent Activity';
+
+	/// en: 'See all'
+	String get seeAll => 'See all';
+
+	/// en: 'Pay due'
+	String get payDue => 'Pay due';
+
+	/// en: 'You have no current balance due ✓'
+	String get noCurrentDebt => 'You have no current balance due ✓';
+
+	/// en: 'Announcements'
+	String get announcements => 'Announcements';
 
 	/// en: 'Paid'
 	String get paid => 'Paid';
@@ -386,8 +401,8 @@ class Translations$common$en {
 	/// en: 'History'
 	String get duesHistory => 'History';
 
-	/// en: 'Add request'
-	String get addRequest => 'Add request';
+	/// en: 'Create request'
+	String get addRequest => 'Create request';
 
 	/// en: 'Pay debt'
 	String get payDebt => 'Pay debt';
@@ -493,6 +508,78 @@ class Translations$common$en {
 
 	/// en: 'Select District'
 	String get selectDistrictTitle => 'Select District';
+
+	/// en: 'Neighborhood *'
+	String get neighborhoodRequired => 'Neighborhood *';
+
+	/// en: 'Select neighborhood'
+	String get selectNeighborhood => 'Select neighborhood';
+
+	/// en: 'Select Neighborhood'
+	String get selectNeighborhoodTitle => 'Select Neighborhood';
+
+	/// en: 'Select district first'
+	String get selectDistrictFirst => 'Select district first';
+
+	/// en: 'Next'
+	String get wizardNext => 'Next';
+
+	/// en: 'Back'
+	String get wizardBack => 'Back';
+
+	/// en: 'More'
+	String get wizardMore => 'More';
+
+	/// en: 'Enter number'
+	String get wizardEnterNumber => 'Enter number';
+
+	/// en: 'Back to list'
+	String get wizardBackToGrid => 'Back to list';
+
+	/// en: 'Number must be between {min} and {max}'
+	String get wizardNumberRangeError => 'Number must be between {min} and {max}';
+
+	/// en: 'Could not load city and district list. Please try again.'
+	String get wizardLocationLoadFailed => 'Could not load city and district list. Please try again.';
+
+	/// en: 'Could not load neighborhoods. Check your connection and try again.'
+	String get wizardNeighborhoodLoadFailed => 'Could not load neighborhoods. Check your connection and try again.';
+
+	/// en: 'Name'
+	String get wizardStepBuildingName => 'Name';
+
+	/// en: 'Site'
+	String get wizardStepSiteName => 'Site';
+
+	/// en: 'Block'
+	String get wizardStepBlockInfo => 'Block';
+
+	/// en: 'City'
+	String get wizardStepLocation => 'City';
+
+	/// en: 'Area'
+	String get wizardStepNeighborhoodAddress => 'Area';
+
+	/// en: 'Floors'
+	String get wizardStepFloors => 'Floors';
+
+	/// en: 'Units'
+	String get wizardStepApartments => 'Units';
+
+	/// en: 'Dues'
+	String get wizardStepDues => 'Dues';
+
+	/// en: 'Recipient'
+	String get wizardStepRecipient => 'Recipient';
+
+	/// en: 'Settings'
+	String get wizardStepSiteOverrides => 'Settings';
+
+	/// en: 'Select number of floors'
+	String get wizardPickFloorCount => 'Select number of floors';
+
+	/// en: 'Select units per floor'
+	String get wizardPickApartmentCount => 'Select units per floor';
 
 	/// en: 'Search...'
 	String get search => 'Search...';
@@ -707,6 +794,9 @@ class Translations$common$en {
 	/// en: 'No dues records yet'
 	String get noDuesYet => 'No dues records yet';
 
+	/// en: 'No dues have been assigned to you yet'
+	String get residentNoDuesYet => 'No dues have been assigned to you yet';
+
 	/// en: 'Dues status updated'
 	String get duesUpdated => 'Dues status updated';
 
@@ -758,20 +848,14 @@ class Translations$common$en {
 	/// en: 'days overdue'
 	String get overdueDays => 'days overdue';
 
-	/// en: '{days} days overdue'
-	String get dueMetaOverdueDelay => '{days} days overdue';
+	/// en: '{days} days late'
+	String get dueMetaOverdueDelay => '{days} days late';
 
-	/// en: 'Pending / {days} Days Overdue'
-	String get dueStatusOverdueWithDays => 'Pending / {days} Days Overdue';
+	/// en: '{days} days late'
+	String get dueStatusOverdueWithDays => '{days} days late';
 
-	/// en: 'paid in {month} {year}'
-	String get dueMetaPaidInMonth => 'paid in {month} {year}';
-
-	/// en: 'paid on {day} {month}'
-	String get dueMetaPaidOnDay => 'paid on {day} {month}';
-
-	/// en: 'Paid {days} days late'
-	String get paidLateDays => 'Paid {days} days late';
+	/// en: '{date} - {days} days late'
+	String get duePaidSummaryLate => '{date} - {days} days late';
 
 	/// en: 'due by {day} {month}'
 	String get dueMetaPendingDueDate => 'due by {day} {month}';
@@ -1958,11 +2042,11 @@ class Translations$features$sites$en {
 	/// en: 'When off, site due applies'
 	String get overrideDueHint => 'When off, site due applies';
 
-	/// en: 'Override site default IBAN'
-	String get overrideCollection => 'Override site default IBAN';
+	/// en: 'Override site default recipient details'
+	String get overrideCollection => 'Override site default recipient details';
 
-	/// en: 'When off, site IBAN applies'
-	String get overrideCollectionHint => 'When off, site IBAN applies';
+	/// en: 'When off, site recipient details apply'
+	String get overrideCollectionHint => 'When off, site recipient details apply';
 
 	/// en: 'Blocks'
 	String get blocksTitle => 'Blocks';
@@ -2245,14 +2329,14 @@ class Translations$features$tickets$en {
 	/// en: 'New request'
 	String get newTicket => 'New request';
 
-	/// en: 'Report issue / request'
-	String get createTitle => 'Report issue / request';
+	/// en: 'Create request'
+	String get createTitle => 'Create request';
 
-	/// en: 'Report fault'
-	String get reportFaultTitle => 'Report fault';
+	/// en: 'New request'
+	String get reportFaultTitle => 'New request';
 
-	/// en: 'My applications'
-	String get myApplicationsTitle => 'My applications';
+	/// en: 'My requests'
+	String get myApplicationsTitle => 'My requests';
 
 	/// en: 'Subject'
 	String get fieldTitle => 'Subject';
@@ -2277,6 +2361,9 @@ class Translations$features$tickets$en {
 
 	/// en: 'File attachments coming soon.'
 	String get attachmentComingSoon => 'File attachments coming soon.';
+
+	/// en: 'Could not select the image. Please try again.'
+	String get attachmentPickFailed => 'Could not select the image. Please try again.';
 
 	/// en: 'Category'
 	String get fieldCategory => 'Category';
@@ -2308,8 +2395,14 @@ class Translations$features$tickets$en {
 	/// en: 'No requests yet'
 	String get emptyTitle => 'No requests yet';
 
-	/// en: 'Report an issue or request from here'
-	String get emptySubtitle => 'Report an issue or request from here';
+	/// en: 'You can create your request here'
+	String get emptySubtitle => 'You can create your request here';
+
+	/// en: 'You have no requests yet'
+	String get residentEmptyTitle => 'You have no requests yet';
+
+	/// en: 'Create a request here to reach your building manager.'
+	String get residentEmptySubtitle => 'Create a request here to reach your building manager.';
 
 	/// en: 'Title must be at least 3 characters'
 	String get titleTooShort => 'Title must be at least 3 characters';
@@ -2332,11 +2425,11 @@ class Translations$features$tickets$en {
 	/// en: 'REQUEST STATUS'
 	String get statusTrackerTitle => 'REQUEST STATUS';
 
-	/// en: 'Waiting'
-	String get statusStepWaiting => 'Waiting';
+	/// en: 'Awaiting review'
+	String get statusStepWaiting => 'Awaiting review';
 
-	/// en: 'In progress'
-	String get statusStepInProgress => 'In progress';
+	/// en: 'Management is handling it'
+	String get statusStepInProgress => 'Management is handling it';
 
 	/// en: 'Resolved'
 	String get statusStepResolved => 'Resolved';
@@ -2398,8 +2491,11 @@ class Translations$features$tickets$en {
 	/// en: 'Manager update'
 	String get managerUpdateLabel => 'Manager update';
 
-	/// en: 'Resident update'
-	String get residentUpdateLabel => 'Resident update';
+	/// en: 'Your update'
+	String get residentUpdateLabel => 'Your update';
+
+	/// en: 'Update from management'
+	String get managerUpdateForResident => 'Update from management';
 
 	/// en: 'Quick reply templates'
 	String get quickReplyTemplatesTitle => 'Quick reply templates';
@@ -2500,8 +2596,8 @@ class Translations$features$dekont$en {
 	/// en: 'IBAN'
 	String get ibanLabel => 'IBAN';
 
-	/// en: 'Account title'
-	String get accountTitleLabel => 'Account title';
+	/// en: 'Recipient name'
+	String get accountTitleLabel => 'Recipient name';
 
 	/// en: 'Transfer reference'
 	String get referenceLabel => 'Transfer reference';
@@ -2628,6 +2724,8 @@ class Translations$features$dekont$en {
 
 	/// en: 'Rejected'
 	String get filterRejected => 'Rejected';
+
+	late final Translations$features$dekont$resident$en resident = Translations$features$dekont$resident$en._(_root);
 
 	/// en: 'Received'
 	String get statusReceived => 'Received';
@@ -3181,6 +3279,8 @@ class Translations$features$notifications$en {
 	/// en: 'Notification'
 	String get typeOther => 'Notification';
 
+	late final Translations$features$notifications$resident$en resident = Translations$features$notifications$resident$en._(_root);
+
 	/// en: 'All apartments'
 	String get allApartmentsTag => 'All apartments';
 
@@ -3204,6 +3304,8 @@ class Translations$features$notifications$en {
 
 	/// en: 'Required field'
 	String get fieldRequired => 'Required field';
+
+	late final Translations$features$notifications$permissionPrompt$en permissionPrompt = Translations$features$notifications$permissionPrompt$en._(_root);
 
 	/// en: 'Title must be at most 120 characters'
 	String get titleTooLong => 'Title must be at most 120 characters';
@@ -3661,8 +3763,8 @@ class Translations$features$dashboard$en {
 	/// en: 'Overdue Payments'
 	String get overduePayments => 'Overdue Payments';
 
-	/// en: 'Open Maintenance Requests'
-	String get openTicketRequests => 'Open Maintenance Requests';
+	/// en: 'Open Requests'
+	String get openTicketRequests => 'Open Requests';
 
 	/// en: 'This Month's Expenses'
 	String get monthTotalExpense => 'This Month\'s Expenses';
@@ -3685,8 +3787,8 @@ class Translations$features$dashboard$en {
 	/// en: 'Total Expenses'
 	String get totalExpense => 'Total Expenses';
 
-	/// en: 'Maintenance Request Status'
-	String get ticketStatusTitle => 'Maintenance Request Status';
+	/// en: 'Request Status'
+	String get ticketStatusTitle => 'Request Status';
 
 	/// en: 'Open'
 	String get ticketOpen => 'Open';
@@ -3754,8 +3856,14 @@ class Translations$features$dashboard$en {
 	/// en: '{count} overdue payment(s)'
 	String get overduePaymentsBadge => '{count} overdue payment(s)';
 
+	/// en: '{count} of your dues are overdue'
+	String get residentOverduePaymentsBadge => '{count} of your dues are overdue';
+
 	/// en: '{month} {year} dues'
 	String get featuredDuePeriod => '{month} {year} dues';
+
+	/// en: 'Your {month} {year} dues'
+	String get residentFeaturedDuePeriod => 'Your {month} {year} dues';
 
 	/// en: 'Pay your dues here.'
 	String get residentDebtAndPaySubtitle => 'Pay your dues here.';
@@ -3777,6 +3885,8 @@ class Translations$features$dashboard$en {
 
 	/// en: '{count} buildings'
 	String get siteScopeSummary => '{count} buildings';
+
+	late final Translations$features$dashboard$activityHistory$en activityHistory = Translations$features$dashboard$activityHistory$en._(_root);
 }
 
 // Path: features.dues
@@ -3786,6 +3896,32 @@ class Translations$features$dues$en {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// en: 'Due Details'
+	String get detailTitle => 'Due Details';
+
+	/// en: 'Collect Payment'
+	String get collectPayment => 'Collect Payment';
+
+	/// en: 'Record cash payment?'
+	String get collectPaymentConfirmTitle => 'Record cash payment?';
+
+	/// en: '{apartment} — {period} due will be marked as paid.'
+	String get collectPaymentConfirmBody => '{apartment} — {period} due will be marked as paid.';
+
+	/// en: 'Review Receipt'
+	String get reviewDekont => 'Review Receipt';
+
+	/// en: 'Payment Details'
+	String get paymentDetail => 'Payment Details';
+
+	/// en: 'Amount'
+	String get amountLabel => 'Amount';
+
+	/// en: 'Period'
+	String get periodLabel => 'Period';
+
+	late final Translations$features$dues$resident$en resident = Translations$features$dues$resident$en._(_root);
 	late final Translations$features$dues$transactions$en transactions = Translations$features$dues$transactions$en._(_root);
 }
 
@@ -3818,8 +3954,8 @@ class Translations$features$buildings$collection$en {
 
 	// Translations
 
-	/// en: 'Collection details'
-	String get sectionTitle => 'Collection details';
+	/// en: 'Recipient details'
+	String get sectionTitle => 'Recipient details';
 
 	/// en: 'IBAN for resident bank transfers. Optional; you can add it later.'
 	String get sectionHint => 'IBAN for resident bank transfers. Optional; you can add it later.';
@@ -3842,11 +3978,11 @@ class Translations$features$buildings$collection$en {
 	/// en: 'Tap to choose another IBAN'
 	String get changeSavedIban => 'Tap to choose another IBAN';
 
-	/// en: 'Search IBAN or account name'
-	String get searchSavedIban => 'Search IBAN or account name';
+	/// en: 'Search IBAN or recipient name'
+	String get searchSavedIban => 'Search IBAN or recipient name';
 
-	/// en: 'Account holder'
-	String get detailAccountHolder => 'Account holder';
+	/// en: 'Recipient name'
+	String get detailAccountHolder => 'Recipient name';
 
 	/// en: 'Payment reference'
 	String get detailReference => 'Payment reference';
@@ -3881,14 +4017,14 @@ class Translations$features$buildings$collection$en {
 	/// en: 'You entered account title or reference; enter a valid IBAN'
 	String get ibanRequiredIfOtherFilled => 'You entered account title or reference; enter a valid IBAN';
 
-	/// en: 'Account holder name'
-	String get accountTitleLabel => 'Account holder name';
+	/// en: 'Recipient name'
+	String get accountTitleLabel => 'Recipient name';
 
-	/// en: 'e.g. Building Management'
-	String get accountTitleHint => 'e.g. Building Management';
+	/// en: 'e.g. Ahmet Yilmaz or Building Management'
+	String get accountTitleHint => 'e.g. Ahmet Yilmaz or Building Management';
 
-	/// en: 'Payment reference template'
-	String get referenceTemplateLabel => 'Payment reference template';
+	/// en: 'Payment reference'
+	String get referenceTemplateLabel => 'Payment reference';
 
 	/// en: 'e.g. Apt {{number}}'
 	String get referenceTemplateHint => 'e.g. Apt {{number}}';
@@ -4292,11 +4428,11 @@ class Translations$features$auth$onboarding$en {
 	/// en: 'Send your payment receipt as a photo or PDF.'
 	String get step5ResidentDekontBody => 'Send your payment receipt as a photo or PDF.';
 
-	/// en: 'Report issues'
-	String get step5ResidentTicketsTitle => 'Report issues';
+	/// en: 'Create requests'
+	String get step5ResidentTicketsTitle => 'Create requests';
 
-	/// en: 'Easily notify management about site problems.'
-	String get step5ResidentTicketsBody => 'Easily notify management about site problems.';
+	/// en: 'Easily notify management about matters you want to report.'
+	String get step5ResidentTicketsBody => 'Easily notify management about matters you want to report.';
 
 	/// en: 'Get notifications'
 	String get step5ResidentNotifyTitle => 'Get notifications';
@@ -4371,6 +4507,192 @@ class Translations$features$auth$onboarding$en {
 	String get residentNameRequired => 'Please enter your full name.';
 }
 
+// Path: features.dekont.resident
+class Translations$features$dekont$resident$en {
+	Translations$features$dekont$resident$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Your receipt is being processed'
+	String get statusProcessing => 'Your receipt is being processed';
+
+	/// en: 'Your receipt is awaiting approval'
+	String get statusAwaitingApproval => 'Your receipt is awaiting approval';
+
+	/// en: 'Your payment was approved'
+	String get statusApproved => 'Your payment was approved';
+
+	/// en: 'Your payment was partially approved'
+	String get statusPartiallyApproved => 'Your payment was partially approved';
+
+	/// en: 'Your receipt was rejected'
+	String get statusRejected => 'Your receipt was rejected';
+
+	/// en: 'Your receipt could not be matched'
+	String get statusCouldNotMatch => 'Your receipt could not be matched';
+
+	/// en: 'All your receipts'
+	String get filterAll => 'All your receipts';
+
+	/// en: 'Awaiting approval'
+	String get filterPending => 'Awaiting approval';
+
+	/// en: 'Approved'
+	String get filterApproved => 'Approved';
+
+	/// en: 'Rejected'
+	String get filterRejected => 'Rejected';
+
+	/// en: 'This due is overdue'
+	String get dueOverdueHint => 'This due is overdue';
+}
+
+// Path: features.notifications.resident
+class Translations$features$notifications$resident$en {
+	Translations$features$notifications$resident$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'You have a due reminder'
+	String get typeDueReminder => 'You have a due reminder';
+
+	/// en: 'Your due was paid'
+	String get typeDuePaid => 'Your due was paid';
+
+	/// en: 'Your request was created'
+	String get typeTicketCreated => 'Your request was created';
+
+	/// en: 'Your request was updated'
+	String get typeTicketUpdate => 'Your request was updated';
+
+	/// en: 'You received an announcement'
+	String get typeAnnouncement => 'You received an announcement';
+
+	/// en: 'Your receipt was received'
+	String get typeDekontReceived => 'Your receipt was received';
+
+	/// en: 'Your receipt is under review'
+	String get typeDekontNeedsReview => 'Your receipt is under review';
+
+	/// en: 'Your receipt was matched'
+	String get typeDekontMatched => 'Your receipt was matched';
+
+	/// en: 'Your receipt was approved'
+	String get typeDekontPaymentApplied => 'Your receipt was approved';
+
+	/// en: 'A new expense was added'
+	String get typeExpenseAdded => 'A new expense was added';
+
+	/// en: 'System notification'
+	String get typeSystem => 'System notification';
+
+	/// en: 'Your notification'
+	String get typeOther => 'Your notification';
+
+	/// en: 'Announcement for you'
+	String get allApartmentsTag => 'Announcement for you';
+
+	/// en: 'Announcement from management'
+	String get announcementFeedLabel => 'Announcement from management';
+}
+
+// Path: features.notifications.permissionPrompt
+class Translations$features$notifications$permissionPrompt$en {
+	Translations$features$notifications$permissionPrompt$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Enable notifications'
+	String get residentTitle => 'Enable notifications';
+
+	/// en: 'We recommend allowing notifications so you can get due reminders, announcements, and receipt updates right away.'
+	String get residentBody => 'We recommend allowing notifications so you can get due reminders, announcements, and receipt updates right away.';
+
+	/// en: 'Enable notifications'
+	String get managerTitle => 'Enable notifications';
+
+	/// en: 'We recommend allowing notifications so you can get receipt reviews, resident requests, and due activity right away.'
+	String get managerBody => 'We recommend allowing notifications so you can get receipt reviews, resident requests, and due activity right away.';
+
+	/// en: 'Allow'
+	String get allow => 'Allow';
+
+	/// en: 'Not now'
+	String get notNow => 'Not now';
+}
+
+// Path: features.dashboard.activityHistory
+class Translations$features$dashboard$activityHistory$en {
+	Translations$features$dashboard$activityHistory$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Recent Activity'
+	String get title => 'Recent Activity';
+
+	/// en: 'Today'
+	String get rangeToday => 'Today';
+
+	/// en: 'This Week'
+	String get rangeThisWeek => 'This Week';
+
+	/// en: 'This Month'
+	String get rangeThisMonth => 'This Month';
+
+	/// en: '3 Months'
+	String get rangeThreeMonths => '3 Months';
+
+	/// en: '6 Months'
+	String get rangeSixMonths => '6 Months';
+
+	/// en: 'No activity in this period'
+	String get emptyTitle => 'No activity in this period';
+
+	/// en: 'No payments or announcements in the range you selected.'
+	String get emptySubtitle => 'No payments or announcements in the range you selected.';
+}
+
+// Path: features.dues.resident
+class Translations$features$dues$resident$en {
+	Translations$features$dues$resident$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Paid'
+	String get paidStatus => 'Paid';
+
+	/// en: 'Your due is overdue'
+	String get overdueStatus => 'Your due is overdue';
+
+	/// en: 'Payment pending'
+	String get pendingStatus => 'Payment pending';
+
+	/// en: 'You are waived this period'
+	String get waivedStatus => 'You are waived this period';
+
+	/// en: 'Your due is {days} days overdue'
+	String get overdueDetail => 'Your due is {days} days overdue';
+
+	/// en: 'Due by {day} {month}'
+	String get pendingDetail => 'Due by {day} {month}';
+
+	/// en: 'You paid on {date} · {days} days late'
+	String get paidLateSummary => 'You paid on {date} · {days} days late';
+
+	/// en: 'You paid on {date}'
+	String get paidOnTimeSummary => 'You paid on {date}';
+}
+
 // Path: features.dues.transactions
 class Translations$features$dues$transactions$en {
 	Translations$features$dues$transactions$en._(this._root);
@@ -4382,11 +4704,20 @@ class Translations$features$dues$transactions$en {
 	/// en: 'Dues Transaction History'
 	String get title => 'Dues Transaction History';
 
+	/// en: 'Your Transaction History'
+	String get residentTitle => 'Your Transaction History';
+
 	/// en: 'No transactions yet'
 	String get emptyTitle => 'No transactions yet';
 
 	/// en: 'Receipt approvals and manual payments appear here.'
 	String get emptySubtitle => 'Receipt approvals and manual payments appear here.';
+
+	/// en: 'No transactions yet'
+	String get residentEmptyTitle => 'No transactions yet';
+
+	/// en: 'Your payments and receipts will appear here.'
+	String get residentEmptySubtitle => 'Your payments and receipts will appear here.';
 
 	/// en: 'Receipt'
 	String get sourceReceipt => 'Receipt';
@@ -4405,6 +4736,18 @@ class Translations$features$dues$transactions$en {
 
 	/// en: 'No apartment info'
 	String get unknownApartment => 'No apartment info';
+
+	/// en: 'You paid your due in person'
+	String get residentPaidByManual => 'You paid your due in person';
+
+	/// en: 'You paid your due with a receipt'
+	String get residentPaidByReceipt => 'You paid your due with a receipt';
+
+	/// en: 'Your receipt is awaiting approval'
+	String get residentDekontPending => 'Your receipt is awaiting approval';
+
+	/// en: 'Your receipt was rejected'
+	String get residentDekontRejected => 'Your receipt was rejected';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -4527,8 +4870,8 @@ extension on Translations {
 			'common.user' => 'User',
 			'common.welcome' => 'Welcome',
 			'common.managedBuildings' => 'Managed Buildings',
-			'common.issues' => 'Issues',
-			'common.issuesTab' => 'Issues Tab',
+			'common.issues' => 'Requests',
+			'common.issuesTab' => 'Requests tab',
 			'common.apartment' => 'Apartment',
 			'common.addBuilding' => 'Add Building',
 			'common.inviteCode' => 'Invite Code',
@@ -4542,6 +4885,11 @@ extension on Translations {
 			'common.duesCollection' => 'Dues Collection',
 			'common.totalDues' => 'Total Dues',
 			'common.recentTransactions' => 'Recent Transactions',
+			'common.recentMovements' => 'Recent Activity',
+			'common.seeAll' => 'See all',
+			'common.payDue' => 'Pay due',
+			'common.noCurrentDebt' => 'You have no current balance due ✓',
+			'common.announcements' => 'Announcements',
 			'common.paid' => 'Paid',
 			'common.pending' => 'Pending',
 			'common.overdue' => 'Overdue',
@@ -4564,7 +4912,7 @@ extension on Translations {
 			'common.myReceipts' => 'My receipts',
 			'common.myPaymentRequest' => 'Payment request',
 			'common.duesHistory' => 'History',
-			'common.addRequest' => 'Add request',
+			'common.addRequest' => 'Create request',
 			'common.payDebt' => 'Pay debt',
 			'common.tabAll' => 'All',
 			'common.tabFaults' => 'Faults',
@@ -4600,6 +4948,30 @@ extension on Translations {
 			'common.selectCityFirst' => 'Select city first',
 			'common.selectCityTitle' => 'Select City',
 			'common.selectDistrictTitle' => 'Select District',
+			'common.neighborhoodRequired' => 'Neighborhood *',
+			'common.selectNeighborhood' => 'Select neighborhood',
+			'common.selectNeighborhoodTitle' => 'Select Neighborhood',
+			'common.selectDistrictFirst' => 'Select district first',
+			'common.wizardNext' => 'Next',
+			'common.wizardBack' => 'Back',
+			'common.wizardMore' => 'More',
+			'common.wizardEnterNumber' => 'Enter number',
+			'common.wizardBackToGrid' => 'Back to list',
+			'common.wizardNumberRangeError' => 'Number must be between {min} and {max}',
+			'common.wizardLocationLoadFailed' => 'Could not load city and district list. Please try again.',
+			'common.wizardNeighborhoodLoadFailed' => 'Could not load neighborhoods. Check your connection and try again.',
+			'common.wizardStepBuildingName' => 'Name',
+			'common.wizardStepSiteName' => 'Site',
+			'common.wizardStepBlockInfo' => 'Block',
+			'common.wizardStepLocation' => 'City',
+			'common.wizardStepNeighborhoodAddress' => 'Area',
+			'common.wizardStepFloors' => 'Floors',
+			'common.wizardStepApartments' => 'Units',
+			'common.wizardStepDues' => 'Dues',
+			'common.wizardStepRecipient' => 'Recipient',
+			'common.wizardStepSiteOverrides' => 'Settings',
+			'common.wizardPickFloorCount' => 'Select number of floors',
+			'common.wizardPickApartmentCount' => 'Select units per floor',
 			'common.search' => 'Search...',
 			'common.noResults' => 'No results found',
 			'common.fieldRequired' => 'cannot be empty',
@@ -4671,6 +5043,7 @@ extension on Translations {
 			'common.myPastDues' => 'My past dues',
 			'common.buildingDues' => 'Building Dues',
 			'common.noDuesYet' => 'No dues records yet',
+			'common.residentNoDuesYet' => 'No dues have been assigned to you yet',
 			'common.duesUpdated' => 'Dues status updated',
 			'common.amount' => 'Amount',
 			'common.updateDueAmount' => 'Update Due Amount',
@@ -4688,11 +5061,9 @@ extension on Translations {
 			'common.filter' => 'Filter',
 			'common.apply' => 'Apply',
 			'common.overdueDays' => 'days overdue',
-			'common.dueMetaOverdueDelay' => '{days} days overdue',
-			'common.dueStatusOverdueWithDays' => 'Pending / {days} Days Overdue',
-			'common.dueMetaPaidInMonth' => 'paid in {month} {year}',
-			'common.dueMetaPaidOnDay' => 'paid on {day} {month}',
-			'common.paidLateDays' => 'Paid {days} days late',
+			'common.dueMetaOverdueDelay' => '{days} days late',
+			'common.dueStatusOverdueWithDays' => '{days} days late',
+			'common.duePaidSummaryLate' => '{date} - {days} days late',
 			'common.dueMetaPendingDueDate' => 'due by {day} {month}',
 			'common.payShort' => 'Pay',
 			'common.dekontShort' => 'Receipt',
@@ -4899,6 +5270,8 @@ extension on Translations {
 			'common.errorKeys.downloadFallbackShare' => 'Share screen opened. You can save it to Files from there.',
 			'common.errorKeys.downloadError' => 'An error occurred while downloading the file.',
 			'common.errorKeys.galleryPermissionDenied' => 'Gallery access permission was denied.',
+			_ => null,
+		} ?? switch (path) {
 			'validation.emailRequired' => 'Email address cannot be empty',
 			'validation.emailInvalid' => 'Please enter a valid email address',
 			'validation.emailTooLong' => 'Email address is too long',
@@ -4927,8 +5300,6 @@ extension on Translations {
 			'features.buildings.copy' => 'Copy',
 			'features.buildings.copyDone' => 'Copied',
 			'features.buildings.share' => 'Share',
-			_ => null,
-		} ?? switch (path) {
 			'features.buildings.anotherApartment' => 'Another Apartment',
 			'features.buildings.codeRevoked' => 'Code revoked',
 			'features.buildings.occupiedDialog' => 'If you generate a new code, the old user will be removed. Are you sure?',
@@ -4946,7 +5317,7 @@ extension on Translations {
 			'features.buildings.activeCodeNote' => 'While this code is active, you cannot generate a new code for the same apartment. You must revoke the current code first.',
 			'features.buildings.backToMainMenu' => 'Back to Main Menu',
 			'features.buildings.tekrarDene' => 'Try Again',
-			'features.buildings.collection.sectionTitle' => 'Collection details',
+			'features.buildings.collection.sectionTitle' => 'Recipient details',
 			'features.buildings.collection.sectionHint' => 'IBAN for resident bank transfers. Optional; you can add it later.',
 			'features.buildings.collection.modeSaved' => 'Saved IBAN',
 			'features.buildings.collection.modeNew' => 'New IBAN',
@@ -4954,8 +5325,8 @@ extension on Translations {
 			'features.buildings.collection.savedListSectionLabel' => 'Saved IBANs',
 			'features.buildings.collection.pickSavedIban' => 'Choose saved IBAN',
 			'features.buildings.collection.changeSavedIban' => 'Tap to choose another IBAN',
-			'features.buildings.collection.searchSavedIban' => 'Search IBAN or account name',
-			'features.buildings.collection.detailAccountHolder' => 'Account holder',
+			'features.buildings.collection.searchSavedIban' => 'Search IBAN or recipient name',
+			'features.buildings.collection.detailAccountHolder' => 'Recipient name',
 			'features.buildings.collection.detailReference' => 'Payment reference',
 			'features.buildings.collection.detailReferenceAuto' => 'Apartment number is added to the transfer reference automatically',
 			'features.buildings.collection.detailReferenceDaireOnly' => 'Transfer reference: Apartment number',
@@ -4967,9 +5338,9 @@ extension on Translations {
 			'features.buildings.collection.ibanHint' => 'TR33 0006 1005 1978 6457 8413 26',
 			'features.buildings.collection.ibanInvalid' => 'Enter a valid Turkish IBAN (TR + 24 digits)',
 			'features.buildings.collection.ibanRequiredIfOtherFilled' => 'You entered account title or reference; enter a valid IBAN',
-			'features.buildings.collection.accountTitleLabel' => 'Account holder name',
-			'features.buildings.collection.accountTitleHint' => 'e.g. Building Management',
-			'features.buildings.collection.referenceTemplateLabel' => 'Payment reference template',
+			'features.buildings.collection.accountTitleLabel' => 'Recipient name',
+			'features.buildings.collection.accountTitleHint' => 'e.g. Ahmet Yilmaz or Building Management',
+			'features.buildings.collection.referenceTemplateLabel' => 'Payment reference',
 			'features.buildings.collection.referenceTemplateHint' => 'e.g. Apt {{number}}',
 			'features.buildings.collection.presetsEmpty' => 'No saved collection details yet',
 			'features.buildings.collection.presetsLoadFailed' => 'Could not load suggestions',
@@ -5044,8 +5415,8 @@ extension on Translations {
 			'features.sites.addressExtraHint' => 'e.g. Rear entrance, Gate 2',
 			'features.sites.overrideDue' => 'Override site default due amount',
 			'features.sites.overrideDueHint' => 'When off, site due applies',
-			'features.sites.overrideCollection' => 'Override site default IBAN',
-			'features.sites.overrideCollectionHint' => 'When off, site IBAN applies',
+			'features.sites.overrideCollection' => 'Override site default recipient details',
+			'features.sites.overrideCollectionHint' => 'When off, site recipient details apply',
 			'features.sites.blocksTitle' => 'Blocks',
 			'features.sites.noBlocks' => 'No blocks added yet',
 			'features.sites.blockApartments' => '{count} units',
@@ -5210,8 +5581,8 @@ extension on Translations {
 			'features.auth.onboarding.step5ResidentDuesBody' => 'Track your current balance and payment history.',
 			'features.auth.onboarding.step5ResidentDekontTitle' => 'Upload receipts',
 			'features.auth.onboarding.step5ResidentDekontBody' => 'Send your payment receipt as a photo or PDF.',
-			'features.auth.onboarding.step5ResidentTicketsTitle' => 'Report issues',
-			'features.auth.onboarding.step5ResidentTicketsBody' => 'Easily notify management about site problems.',
+			'features.auth.onboarding.step5ResidentTicketsTitle' => 'Create requests',
+			'features.auth.onboarding.step5ResidentTicketsBody' => 'Easily notify management about matters you want to report.',
 			'features.auth.onboarding.step5ResidentNotifyTitle' => 'Get notifications',
 			'features.auth.onboarding.step5ResidentNotifyBody' => 'Stay informed about announcements and due reminders.',
 			'features.auth.onboarding.step6ManagerTitle' => 'Setup complete',
@@ -5239,9 +5610,9 @@ extension on Translations {
 			'features.apartments.residentPanel' => 'Resident',
 			'features.tickets.myTickets' => 'My requests',
 			'features.tickets.newTicket' => 'New request',
-			'features.tickets.createTitle' => 'Report issue / request',
-			'features.tickets.reportFaultTitle' => 'Report fault',
-			'features.tickets.myApplicationsTitle' => 'My applications',
+			'features.tickets.createTitle' => 'Create request',
+			'features.tickets.reportFaultTitle' => 'New request',
+			'features.tickets.myApplicationsTitle' => 'My requests',
 			'features.tickets.fieldTitle' => 'Subject',
 			'features.tickets.fieldTitleHint' => 'Enter a short summary.',
 			'features.tickets.fieldDetail' => 'Details',
@@ -5250,6 +5621,7 @@ extension on Translations {
 			'features.tickets.fieldDescriptionHint' => 'Write a detailed explanation…',
 			'features.tickets.attachmentHint' => 'Add photo, video or document… PNG, JPG — max 5 MB.',
 			'features.tickets.attachmentComingSoon' => 'File attachments coming soon.',
+			'features.tickets.attachmentPickFailed' => 'Could not select the image. Please try again.',
 			'features.tickets.fieldCategory' => 'Category',
 			'features.tickets.categoryComplaint' => 'Complaint',
 			'features.tickets.categoryRequest' => 'Request',
@@ -5260,7 +5632,9 @@ extension on Translations {
 			'features.tickets.createFailed' => 'Could not save your request. Please try again.',
 			'features.tickets.createServiceUnavailable' => 'The request service is not available right now. Please try again later.',
 			'features.tickets.emptyTitle' => 'No requests yet',
-			'features.tickets.emptySubtitle' => 'Report an issue or request from here',
+			'features.tickets.emptySubtitle' => 'You can create your request here',
+			'features.tickets.residentEmptyTitle' => 'You have no requests yet',
+			'features.tickets.residentEmptySubtitle' => 'Create a request here to reach your building manager.',
 			'features.tickets.titleTooShort' => 'Title must be at least 3 characters',
 			'features.tickets.descriptionTooShort' => 'Description must be at least 10 characters',
 			'features.tickets.statusOpen' => 'Open',
@@ -5268,8 +5642,8 @@ extension on Translations {
 			'features.tickets.statusResolved' => 'Resolved',
 			'features.tickets.statusClosed' => 'Closed',
 			'features.tickets.statusTrackerTitle' => 'REQUEST STATUS',
-			'features.tickets.statusStepWaiting' => 'Waiting',
-			'features.tickets.statusStepInProgress' => 'In progress',
+			'features.tickets.statusStepWaiting' => 'Awaiting review',
+			'features.tickets.statusStepInProgress' => 'Management is handling it',
 			'features.tickets.statusStepResolved' => 'Resolved',
 			'features.tickets.statusStepClosed' => 'Closed',
 			'features.tickets.statusHeadlineOpen' => 'Your request is waiting',
@@ -5290,7 +5664,8 @@ extension on Translations {
 			'features.tickets.statusClosedHint' => 'This request is closed; status cannot be changed.',
 			'features.tickets.apartmentRequired' => 'Apartment not linked. Please sign in again.',
 			'features.tickets.managerUpdateLabel' => 'Manager update',
-			'features.tickets.residentUpdateLabel' => 'Resident update',
+			'features.tickets.residentUpdateLabel' => 'Your update',
+			'features.tickets.managerUpdateForResident' => 'Update from management',
 			'features.tickets.quickReplyTemplatesTitle' => 'Quick reply templates',
 			'features.tickets.confirmChanges' => 'Confirm',
 			'features.tickets.residentInfoTitle' => 'Requester details',
@@ -5321,7 +5696,7 @@ extension on Translations {
 			'features.dekont.paymentInfoTitle' => 'Transfer details',
 			'features.dekont.collectionNotConfigured' => 'Your manager has not set up collection IBAN yet. You can still upload a receipt.',
 			'features.dekont.ibanLabel' => 'IBAN',
-			'features.dekont.accountTitleLabel' => 'Account title',
+			'features.dekont.accountTitleLabel' => 'Recipient name',
 			'features.dekont.referenceLabel' => 'Transfer reference',
 			'features.dekont.copy' => 'Copy',
 			'features.dekont.copied' => 'Copied to clipboard',
@@ -5364,6 +5739,17 @@ extension on Translations {
 			'features.dekont.filterPending' => 'Under review',
 			'features.dekont.filterApproved' => 'Approved',
 			'features.dekont.filterRejected' => 'Rejected',
+			'features.dekont.resident.statusProcessing' => 'Your receipt is being processed',
+			'features.dekont.resident.statusAwaitingApproval' => 'Your receipt is awaiting approval',
+			'features.dekont.resident.statusApproved' => 'Your payment was approved',
+			'features.dekont.resident.statusPartiallyApproved' => 'Your payment was partially approved',
+			'features.dekont.resident.statusRejected' => 'Your receipt was rejected',
+			'features.dekont.resident.statusCouldNotMatch' => 'Your receipt could not be matched',
+			'features.dekont.resident.filterAll' => 'All your receipts',
+			'features.dekont.resident.filterPending' => 'Awaiting approval',
+			'features.dekont.resident.filterApproved' => 'Approved',
+			'features.dekont.resident.filterRejected' => 'Rejected',
+			'features.dekont.resident.dueOverdueHint' => 'This due is overdue',
 			'features.dekont.statusReceived' => 'Received',
 			'features.dekont.statusExtracting' => 'Reading',
 			'features.dekont.statusExtractFailed' => 'Read failed',
@@ -5398,6 +5784,8 @@ extension on Translations {
 			'features.dekont.amount' => 'Amount',
 			'features.dekont.loadError' => 'Could not load receipts',
 			'features.dekont.systemInfoTitle' => 'System information',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.systemInfoSubtitle' => 'Below is what we read from your receipt. Payment is not approved automatically; your manager will verify the bank account and approve.',
 			'features.dekont.systemReadLabel' => 'Read from receipt',
 			'features.dekont.systemInfoProcessing' => 'Your receipt is being processed. Amount, date and bank details will appear here shortly.',
@@ -5441,8 +5829,6 @@ extension on Translations {
 			'features.expenses.submit' => 'Save',
 			'features.expenses.required' => 'Required field',
 			'features.expenses.amountInvalid' => 'Enter a valid amount',
-			_ => null,
-		} ?? switch (path) {
 			'features.expenses.amountFromReceiptsHint' => 'Amount is read automatically from receipts.',
 			'features.expenses.receiptRequired' => 'Add at least one receipt photo',
 			'features.expenses.amountOcrPending' => 'Reading receipt amounts. They will appear in the list shortly.',
@@ -5544,6 +5930,20 @@ extension on Translations {
 			'features.notifications.typeSystem' => 'System',
 			'features.notifications.typeAidatPanelTeam' => 'AidatPanel Team',
 			'features.notifications.typeOther' => 'Notification',
+			'features.notifications.resident.typeDueReminder' => 'You have a due reminder',
+			'features.notifications.resident.typeDuePaid' => 'Your due was paid',
+			'features.notifications.resident.typeTicketCreated' => 'Your request was created',
+			'features.notifications.resident.typeTicketUpdate' => 'Your request was updated',
+			'features.notifications.resident.typeAnnouncement' => 'You received an announcement',
+			'features.notifications.resident.typeDekontReceived' => 'Your receipt was received',
+			'features.notifications.resident.typeDekontNeedsReview' => 'Your receipt is under review',
+			'features.notifications.resident.typeDekontMatched' => 'Your receipt was matched',
+			'features.notifications.resident.typeDekontPaymentApplied' => 'Your receipt was approved',
+			'features.notifications.resident.typeExpenseAdded' => 'A new expense was added',
+			'features.notifications.resident.typeSystem' => 'System notification',
+			'features.notifications.resident.typeOther' => 'Your notification',
+			'features.notifications.resident.allApartmentsTag' => 'Announcement for you',
+			'features.notifications.resident.announcementFeedLabel' => 'Announcement from management',
 			'features.notifications.allApartmentsTag' => 'All apartments',
 			'features.notifications.sendTitle' => 'Announcement to residents',
 			'features.notifications.fieldTitle' => 'Title',
@@ -5552,6 +5952,12 @@ extension on Translations {
 			'features.notifications.sendSuccess' => 'Announcement sent',
 			'features.notifications.sendFailed' => 'Could not send announcement',
 			'features.notifications.fieldRequired' => 'Required field',
+			'features.notifications.permissionPrompt.residentTitle' => 'Enable notifications',
+			'features.notifications.permissionPrompt.residentBody' => 'We recommend allowing notifications so you can get due reminders, announcements, and receipt updates right away.',
+			'features.notifications.permissionPrompt.managerTitle' => 'Enable notifications',
+			'features.notifications.permissionPrompt.managerBody' => 'We recommend allowing notifications so you can get receipt reviews, resident requests, and due activity right away.',
+			'features.notifications.permissionPrompt.allow' => 'Allow',
+			'features.notifications.permissionPrompt.notNow' => 'Not now',
 			'features.notifications.titleTooLong' => 'Title must be at most 120 characters',
 			'features.notifications.bodyTooLong' => 'Message must be at most 2000 characters',
 			'features.notifications.noBuilding' => 'Add a building first',
@@ -5692,7 +6098,7 @@ extension on Translations {
 			'features.dashboard.buildingUnitsSummary' => '{apartments} units',
 			'features.dashboard.collectionRate' => 'Collection Rate',
 			'features.dashboard.overduePayments' => 'Overdue Payments',
-			'features.dashboard.openTicketRequests' => 'Open Maintenance Requests',
+			'features.dashboard.openTicketRequests' => 'Open Requests',
 			'features.dashboard.monthTotalExpense' => 'This Month\'s Expenses',
 			'features.dashboard.pendingDekonts' => 'Pending Receipts',
 			'features.dashboard.duesCollectionStatus' => 'Dues Collection Status',
@@ -5700,7 +6106,7 @@ extension on Translations {
 			'features.dashboard.last6Months' => 'Last 6 Months',
 			'features.dashboard.collectedDues' => 'Collected Dues',
 			'features.dashboard.totalExpense' => 'Total Expenses',
-			'features.dashboard.ticketStatusTitle' => 'Maintenance Request Status',
+			'features.dashboard.ticketStatusTitle' => 'Request Status',
 			'features.dashboard.ticketOpen' => 'Open',
 			'features.dashboard.ticketInProgress' => 'In Progress',
 			'features.dashboard.ticketResolved' => 'Resolved',
@@ -5723,7 +6129,9 @@ extension on Translations {
 			'features.dashboard.seeMoreOverdue' => 'See more (+{count})',
 			'features.dashboard.payNow' => 'Pay Now',
 			'features.dashboard.overduePaymentsBadge' => '{count} overdue payment(s)',
+			'features.dashboard.residentOverduePaymentsBadge' => '{count} of your dues are overdue',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} dues',
+			'features.dashboard.residentFeaturedDuePeriod' => 'Your {month} {year} dues',
 			'features.dashboard.residentDebtAndPaySubtitle' => 'Pay your dues here.',
 			'features.dashboard.duesStatusAction' => 'Dues Status',
 			'features.dashboard.overdueDuesBadge' => '{count} overdue dues',
@@ -5731,15 +6139,46 @@ extension on Translations {
 			'features.dashboard.independentBuildingsSection' => 'Independent Buildings',
 			'features.dashboard.sitePickerSummary' => '{name} · {count} buildings',
 			'features.dashboard.siteScopeSummary' => '{count} buildings',
+			'features.dashboard.activityHistory.title' => 'Recent Activity',
+			'features.dashboard.activityHistory.rangeToday' => 'Today',
+			'features.dashboard.activityHistory.rangeThisWeek' => 'This Week',
+			'features.dashboard.activityHistory.rangeThisMonth' => 'This Month',
+			'features.dashboard.activityHistory.rangeThreeMonths' => '3 Months',
+			'features.dashboard.activityHistory.rangeSixMonths' => '6 Months',
+			'features.dashboard.activityHistory.emptyTitle' => 'No activity in this period',
+			'features.dashboard.activityHistory.emptySubtitle' => 'No payments or announcements in the range you selected.',
+			'features.dues.detailTitle' => 'Due Details',
+			'features.dues.collectPayment' => 'Collect Payment',
+			'features.dues.collectPaymentConfirmTitle' => 'Record cash payment?',
+			'features.dues.collectPaymentConfirmBody' => '{apartment} — {period} due will be marked as paid.',
+			'features.dues.reviewDekont' => 'Review Receipt',
+			'features.dues.paymentDetail' => 'Payment Details',
+			'features.dues.amountLabel' => 'Amount',
+			'features.dues.periodLabel' => 'Period',
+			'features.dues.resident.paidStatus' => 'Paid',
+			'features.dues.resident.overdueStatus' => 'Your due is overdue',
+			'features.dues.resident.pendingStatus' => 'Payment pending',
+			'features.dues.resident.waivedStatus' => 'You are waived this period',
+			'features.dues.resident.overdueDetail' => 'Your due is {days} days overdue',
+			'features.dues.resident.pendingDetail' => 'Due by {day} {month}',
+			'features.dues.resident.paidLateSummary' => 'You paid on {date} · {days} days late',
+			'features.dues.resident.paidOnTimeSummary' => 'You paid on {date}',
 			'features.dues.transactions.title' => 'Dues Transaction History',
+			'features.dues.transactions.residentTitle' => 'Your Transaction History',
 			'features.dues.transactions.emptyTitle' => 'No transactions yet',
 			'features.dues.transactions.emptySubtitle' => 'Receipt approvals and manual payments appear here.',
+			'features.dues.transactions.residentEmptyTitle' => 'No transactions yet',
+			'features.dues.transactions.residentEmptySubtitle' => 'Your payments and receipts will appear here.',
 			'features.dues.transactions.sourceReceipt' => 'Receipt',
 			'features.dues.transactions.sourceManual' => 'Manual',
 			'features.dues.transactions.statusApproved' => 'Approved',
 			'features.dues.transactions.statusPending' => 'Pending',
 			'features.dues.transactions.statusRejected' => 'Rejected',
 			'features.dues.transactions.unknownApartment' => 'No apartment info',
+			'features.dues.transactions.residentPaidByManual' => 'You paid your due in person',
+			'features.dues.transactions.residentPaidByReceipt' => 'You paid your due with a receipt',
+			'features.dues.transactions.residentDekontPending' => 'Your receipt is awaiting approval',
+			'features.dues.transactions.residentDekontRejected' => 'Your receipt was rejected',
 			'features.faz2.sectionTitle' => 'Phase 2',
 			'features.faz2.tickets' => 'Requests',
 			'features.faz2.expenses' => 'Expenses',

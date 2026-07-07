@@ -387,7 +387,6 @@ class MockNotificationDataSource implements NotificationDataSource {
   @override
   Future<AnnouncementResultEntity> sendAnnouncement(
     String buildingId, {
-    required String title,
     required String body,
   }) async {
     await Future.delayed(_delay);
@@ -396,7 +395,7 @@ class MockNotificationDataSource implements NotificationDataSource {
       NotificationEntity(
         id: 'n_${DateTime.now().millisecondsSinceEpoch}',
         userId: 'dev_manager_1',
-        title: title,
+        title: 'Duyuru',
         body: body,
         type: NotificationType.announcement,
         isRead: false,

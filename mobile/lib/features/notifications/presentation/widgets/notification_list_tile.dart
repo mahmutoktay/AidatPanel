@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/app_date_format.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../utils/notification_labels.dart';
 import '../utils/notification_style.dart';
@@ -11,7 +14,7 @@ import '../utils/notification_tile_extractors.dart';
 import '../utils/notification_time.dart';
 
 /// Tek bildirim kartı — lüks ve premium kart tasarımı.
-class NotificationListTile extends StatelessWidget {
+class NotificationListTile extends ConsumerWidget {
   final NotificationEntity notification;
   final VoidCallback onTap;
 
@@ -22,12 +25,13 @@ class NotificationListTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final n = notification;
+    final role = ref.watch(authStateProvider.select((s) => s.user?.role));
     final visual = notificationVisual(n.type);
     final unread = !n.isRead;
     final timeStr = notificationRelativeTime(context, n.createdAt);
-    final typeLabel = n.senderLabel(context).trim();
+    final typeLabel = n.senderLabel(context, role: role).trim();
     final title = n.title.trim();
     final apt = notificationTileApartmentLabel(n);
     final amount = notificationTileAmount(n);
@@ -66,7 +70,11 @@ class NotificationListTile extends StatelessWidget {
         ));
       }
     } else if (n.type == NotificationType.announcement) {
-      badges.add(_BadgeChip(label: t.allApartmentsTag));
+      badges.add(_BadgeChip(
+        label: role == UserRole.resident
+            ? t.resident.allApartmentsTag
+            : t.allApartmentsTag,
+      ));
     }
 
     return Container(

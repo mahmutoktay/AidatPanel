@@ -15,6 +15,7 @@ import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/dashboard/presentation/screens/manager_dashboard_screen.dart';
 import '../../features/dashboard/presentation/screens/manager_overdue_apartments_screen.dart';
+import '../../features/dashboard/presentation/screens/resident_activity_history_screen.dart';
 import '../../features/dashboard/presentation/screens/resident_dashboard_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/tickets/presentation/screens/create_ticket_screen.dart';
@@ -221,6 +222,12 @@ List<RouteBase> _residentDashboardChildRoutes() => [
     name: 'resident_dashboard_dekonts',
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) => const MyDekontsScreen(),
+  ),
+  GoRoute(
+    path: 'activity-history',
+    name: 'resident_dashboard_activity_history',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const ResidentActivityHistoryScreen(),
   ),
   GoRoute(
     path: 'notifications',

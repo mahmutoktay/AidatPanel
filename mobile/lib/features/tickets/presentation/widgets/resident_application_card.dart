@@ -43,7 +43,7 @@ class ResidentApplicationCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    _categoryIcon(ticket.category),
+                    Icons.assignment_outlined,
                     color: statusColor,
                     size: 22,
                   ),
@@ -54,7 +54,9 @@ class ResidentApplicationCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        ticket.title,
+                        ticket.description.trim().isNotEmpty
+                            ? ticket.description.trim().split('\n').first
+                            : ticket.title,
                         style: AppTypography.body1.copyWith(
                           fontWeight: FontWeight.w800,
                           color: AppColors.textPrimary,
@@ -80,11 +82,14 @@ class ResidentApplicationCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    ticket.status.label(context),
+                    ticket.status.residentLabel(context),
                     style: AppTypography.caption.copyWith(
                       color: statusColor,
                       fontWeight: FontWeight.w700,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
@@ -93,19 +98,6 @@ class ResidentApplicationCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  IconData _categoryIcon(TicketCategory category) {
-    switch (category) {
-      case TicketCategory.complaint:
-        return Icons.report_problem_outlined;
-      case TicketCategory.request:
-        return Icons.help_outline_rounded;
-      case TicketCategory.malfunction:
-        return Icons.build_outlined;
-      case TicketCategory.other:
-        return Icons.more_horiz_rounded;
-    }
   }
 
   Color _statusColor(TicketStatus status) {

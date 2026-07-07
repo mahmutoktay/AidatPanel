@@ -13,7 +13,7 @@ import { createForUsers } from "./notificationService.js";
 export async function sendBuildingAnnouncementService(
   buildingId,
   managerId,
-  { title, body }
+  { body }
 ) {
   await assertManagerOwnsBuilding(buildingId, managerId);
 
@@ -36,7 +36,7 @@ export async function sendBuildingAnnouncementService(
   const result = await createForUsers(userIds, {
     type: NOTIFICATION_TYPES.ANNOUNCEMENT,
     code: NOTIFICATION_CODES.ANNOUNCEMENT_CUSTOM,
-    params: { title, body },
+    params: { body },
     data: {
       buildingId,
       route: "/resident-dashboard",

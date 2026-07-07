@@ -7,6 +7,7 @@ import '../../data/repositories/dues_repository_impl.dart';
 import '../../domain/entities/due_entity.dart';
 import '../../domain/repositories/dues_repository.dart';
 import '../../domain/resident_dues_list.dart';
+import 'dues_cache_refresh.dart';
 
 final duesRemoteDataSourceProvider = Provider<DuesRemoteDataSource>((ref) {
   return DuesRemoteDataSourceImpl(dioClient: ref.watch(dioClientProvider));
@@ -307,6 +308,34 @@ class DuesNotifier extends Notifier<DuesState> {
     status: _lastStatus,
   );
 
+  /// Ödeme sonrası mevcut kapsamda yüklü aidat listesini yeniler.
+  Future<void> refreshLoadedDues() async {
+    if (_isResidentList) {
+      if (state.dues.isEmpty && !state.isLoading) return;
+      await loadMyDues(
+        refresh: true,
+        month: _lastMonth,
+        year: _lastYear,
+        status: _lastStatus,
+      );
+      return;
+    }
+    if (_loadedBuildingId == null) return;
+
+    final buildingIds = _loadedBuildingId!.contains(',')
+        ? _loadedBuildingId!.split(',')
+        : [_loadedBuildingId!];
+
+    await loadScopedBuildingDues(
+      buildingIds,
+      refresh: true,
+      month: _lastMonth,
+      year: _lastYear,
+      status: _lastStatus,
+      paginated: _paginated,
+    );
+  }
+
   Future<void> updateStatus({
     required String buildingId,
     required String dueId,
@@ -321,14 +350,8 @@ class DuesNotifier extends Notifier<DuesState> {
         dueId: dueId,
         status: status,
       );
-      await loadBuildingDues(
-        buildingId,
-        refresh: true,
-        month: _lastMonth,
-        year: _lastYear,
-        status: _lastStatus,
-        paginated: _paginated,
-      );
+      await refreshLoadedDues();
+      await invalidateDuesRelatedCaches(ref);
     } catch (e) {
       state = state.copyWith(error: userFacingError(e));
     } finally {

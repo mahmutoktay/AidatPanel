@@ -20,7 +20,6 @@ abstract class NotificationRepository {
 
   Future<AnnouncementResultEntity> sendAnnouncement(
     String buildingId, {
-    required String title,
     required String body,
   });
 }

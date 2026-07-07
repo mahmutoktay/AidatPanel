@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
 import '../../core/theme/app_sizes.dart';
 
 /// Uygulama genelinde kullanılan tek geri butonu.
@@ -63,10 +64,13 @@ class AppBackButton extends StatelessWidget {
                     border: Border.all(color: borderColor, width: 0.5),
                   ),
                   alignment: Alignment.center,
-                  child: Icon(
-                    Icons.chevron_left_rounded,
-                    color: iconColor,
-                    size: iconSize,
+                  child: Transform.translate(
+                    offset: const Offset(-1, 0),
+                    child: Icon(
+                      AppIcons.back,
+                      color: iconColor,
+                      size: iconSize,
+                    ),
                   ),
                 ),
               ),

@@ -33,4 +33,19 @@ extension TicketStatusLabels on TicketStatus {
         return t.statusClosed;
     }
   }
+
+  /// Sakin ekranları — açıklayıcı durum cümleleri.
+  String residentLabel(BuildContext context) {
+    final t = context.t.features.tickets;
+    switch (this) {
+      case TicketStatus.open:
+        return t.statusHeadlineOpen;
+      case TicketStatus.inProgress:
+        return t.statusHeadlineInProgress;
+      case TicketStatus.resolved:
+        return t.statusHeadlineResolved;
+      case TicketStatus.closed:
+        return t.statusHeadlineClosed;
+    }
+  }
 }

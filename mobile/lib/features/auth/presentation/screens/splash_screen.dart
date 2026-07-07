@@ -11,6 +11,7 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/auth_screen_shell.dart';
 import '../../../dekont/presentation/providers/share_intent_provider.dart';
+import '../../presentation/widgets/auth_brand_mark.dart';
 import '../../presentation/providers/auth_provider.dart';
 import '../../domain/entities/user_entity.dart' show UserRole;
 
@@ -227,27 +228,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
-                'assets/brand/app_logo.png',
-                width: 140,
-                height: 140,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(height: AppSizes.spacingL),
-              Text(
-                context.t.features.auth.appTitle,
-                style: AppTypography.h1.copyWith(
-                  color: AppColors.inkDark,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: AppSizes.spacingS),
-              Text(
-                context.t.features.auth.appSubtitle,
-                style: AppTypography.body1.copyWith(
-                  color: AppColors.mutedText,
-                ),
-                textAlign: TextAlign.center,
+              AuthBrandMark(
+                size: AuthBrandMarkSize.hero,
+                showSubtitle: true,
+                subtitle: context.t.features.auth.appSubtitle,
               ),
               const SizedBox(height: AppSizes.spacingXL),
               if (_hasBootError)

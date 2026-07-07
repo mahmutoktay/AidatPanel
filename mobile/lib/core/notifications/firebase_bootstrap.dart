@@ -9,7 +9,6 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../firebase_options.dart';
 import 'fcm_platform.dart';
 import 'local_notification_service.dart';
-import 'notification_permissions.dart';
 
 /// Arka planda gelen FCM mesajları (top-level, isolate girişi).
 @pragma('vm:entry-point')
@@ -42,21 +41,13 @@ Future<void> initFirebase() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await LocalNotificationService.instance.initialize();
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  if (isFcmSupported && (Platform.isAndroid || Platform.isIOS)) {
-    final granted = await requestNotificationPermissions(
-      messaging: FirebaseMessaging.instance,
-    );
-    if (kDebugMode) {
-      final settings =
-          await FirebaseMessaging.instance.getNotificationSettings();
+  if (kDebugMode && isFcmSupported && (Platform.isAndroid || Platform.isIOS)) {
+    final settings = await FirebaseMessaging.instance.getNotificationSettings();
+    debugPrint('[FCM] başlangıç auth=${settings.authorizationStatus}');
+    if (Platform.isAndroid) {
       debugPrint(
-        '[FCM] izin=$granted fcmAuth=${settings.authorizationStatus}',
+        '[FCM] POST_NOTIFICATIONS=${await Permission.notification.status}',
       );
-      if (Platform.isAndroid) {
-        debugPrint(
-          '[FCM] POST_NOTIFICATIONS=${await Permission.notification.status}',
-        );
-      }
     }
   }
 }

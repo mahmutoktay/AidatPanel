@@ -121,31 +121,7 @@ class ApartmentAccountSummaryTile extends StatelessWidget {
   }
 
   String _statusLabel(BuildContext context, DueEntity due) {
-    final t = context.t.common;
-    switch (due.status) {
-      case DueStatus.paid:
-        final lateDays = latePaymentDays(due);
-        if (lateDays != null) {
-          return t.paidLateDays.replaceAll('{days}', '$lateDays');
-        }
-        return t.paidStatus;
-      case DueStatus.waived:
-        return t.waivedStatus;
-      case DueStatus.pending:
-        return t.pendingStatus;
-      case DueStatus.overdue:
-        final days = due.overdueDays > 0
-            ? due.overdueDays
-            : _fallbackOverdueDays(due);
-        return t.dueStatusOverdueWithDays.replaceAll('{days}', '$days');
-    }
-  }
-
-  int _fallbackOverdueDays(DueEntity due) {
-    final dueDate = due.dueDate;
-    if (dueDate == null) return 0;
-    final diff = DateTime.now().difference(dueDate).inDays;
-    return diff > 0 ? diff : 0;
+    return dueStatusDetail(context, due);
   }
 
   String? _paymentMethodLabel(

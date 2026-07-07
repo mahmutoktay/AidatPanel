@@ -20,10 +20,12 @@ import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
 import '../../domain/entities/due_entity.dart';
+import '../providers/dues_cache_refresh.dart';
 import '../providers/dues_provider.dart';
 import '../utils/dues_ui_helpers.dart';
-import '../widgets/due_status_sheet.dart';
-import '../widgets/dues_list_item_card.dart';
+import '../utils/due_collect_payment_flow.dart';
+import '../widgets/due_detail_sheet.dart';
+import '../widgets/dues_list_item_slidable.dart';
 import '../widgets/dues_quick_amount_card.dart';
 import '../widgets/dues_stat_cards_row.dart';
 
@@ -37,6 +39,7 @@ class ManagerDuesTab extends ConsumerStatefulWidget {
 class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   final TextEditingController _amountController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _isCollectingPayment = false;
 
   int? _selectedDueDay;
   DueStatus? _statusFilter;
@@ -247,11 +250,14 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) => KeyedSubtree(
                     key: ValueKey<String>(dues[index].id),
-                    child: DuesListItemCard(
+                    child: DuesListItemSlidable(
                       due: dues[index],
                       currencySymbol: currencySymbol,
                       highlighted: highlightDueId == dues[index].id,
-                      onMenuTap: () => _openDueStatusSheet(context, dues[index]),
+                      onTap: () => _openDueDetailSheet(context, dues[index]),
+                      onCollectPayment: _canCollectPayment(dues[index])
+                          ? () => _handleCollectPayment(context, dues[index])
+                          : null,
                     ),
                   ),
                   childCount: dues.length,
@@ -523,17 +529,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     List<BuildingEntity> buildings,
     List<DueEntity> statsSource,
   ) {
-    final scoped = ManagerDashboardMapper.filterBuildingsByScope(
-      buildings,
-      siteId: scope.siteId,
-      buildingId: scope.buildingId,
-    );
-    final fromBuildings = scoped.fold<int>(
-      0,
-      (sum, building) => sum + building.totalApartments,
-    );
-    final fromDues = statsSource.length;
-    return math.max(math.max(fromBuildings, fromDues), 1);
+    return math.max(statsSource.length, 1);
   }
 
   void _tryInitialize(List<BuildingEntity> buildings) {
@@ -589,10 +585,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     }
   }
 
-  void _invalidateDashboardDuesHero() {
-    ref.invalidate(allBuildingsDuesProvider);
-  }
-
   DueStatus? _statusFromIntent(String? value) {
     switch (value) {
       case 'pending':
@@ -608,15 +600,56 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     }
   }
 
-  Future<void> _openDueStatusSheet(BuildContext context, DueEntity due) async {
+  bool _canCollectPayment(DueEntity due) =>
+      due.status == DueStatus.pending || due.status == DueStatus.overdue;
+
+  String? _dueBuildingId(DueEntity due) {
+    return ref.read(duesNotifierProvider.notifier).dueBuildingIds[due.id] ??
+        ref.read(dashboardFilterScopeProvider).buildingId;
+  }
+
+  Future<void> _handleCollectPayment(BuildContext context, DueEntity due) async {
+    final buildingId = _dueBuildingId(due);
+    if (buildingId == null || _isCollectingPayment) return;
+
+    setState(() => _isCollectingPayment = true);
+    final success = await collectDuePayment(
+      context: context,
+      ref: ref,
+      due: due,
+      buildingId: buildingId,
+    );
+    if (!mounted) return;
+    setState(() => _isCollectingPayment = false);
+
+    if (!success) return;
+    if (_statusFilter != null) {
+      await _reloadDues();
+    }
+    if (!mounted || !context.mounted) return;
+    ref
+        .read(toastProvider.notifier)
+        .show(context.t.common.duesUpdated, type: ToastType.success);
+  }
+
+  Future<void> _openDueDetailSheet(BuildContext context, DueEntity due) async {
     final monthLabel = '${monthName(context, due.month)} ${due.year}';
-    final status = await DueStatusSheet.show(
+    final buildingId = _dueBuildingId(due);
+    final canCollect = _canCollectPayment(due) && buildingId != null;
+
+    await DueDetailSheet.show(
       context,
       due: due,
       monthLabel: monthLabel,
+      currencySymbol: _currencySymbol(),
+      isCollecting: _isCollectingPayment,
+      onCollectPayment: canCollect
+          ? () {
+              Navigator.of(context).pop();
+              _handleCollectPayment(context, due);
+            }
+          : null,
     );
-    if (!mounted || status == null || status == due.status) return;
-    await _updateStatus(due.id, status);
   }
 
   Widget _buildEmptyState(BuildContext context) {
@@ -703,7 +736,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
       }
       await ref.read(buildingsStoreProvider.notifier).refreshBuildings();
       if (!mounted) return;
-      _invalidateDashboardDuesHero();
+      await invalidateDuesRelatedCaches(ref);
       if (!mounted) return;
       await _reloadDues();
     }
@@ -714,25 +747,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
       if (b.id == buildingId) return b;
     }
     return null;
-  }
-
-  Future<void> _updateStatus(String dueId, DueStatus status) async {
-    final buildingId =
-        ref.read(duesNotifierProvider.notifier).dueBuildingIds[dueId] ??
-            ref.read(dashboardFilterScopeProvider).buildingId;
-    if (buildingId == null) return;
-    await ref.read(duesNotifierProvider.notifier).updateStatus(
-          buildingId: buildingId,
-          dueId: dueId,
-          status: status,
-        );
-    if (!mounted) return;
-    await _reloadDues();
-    if (!mounted) return;
-    _invalidateDashboardDuesHero();
-    ref
-        .read(toastProvider.notifier)
-        .show(context.t.common.duesUpdated, type: ToastType.success);
   }
 
   String _currencyCode() {

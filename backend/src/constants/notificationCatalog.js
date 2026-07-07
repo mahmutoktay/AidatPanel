@@ -230,11 +230,11 @@ export const NOTIFICATION_CATALOG = Object.freeze({
 
   [NOTIFICATION_CODES.ANNOUNCEMENT_CUSTOM]: Object.freeze({
     tr: Object.freeze({
-      title: (params) => text(params, "title", "Duyuru"),
+      title: () => "Duyuru",
       body: (params) => text(params, "body", ""),
     }),
     en: Object.freeze({
-      title: (params) => text(params, "title", "Announcement"),
+      title: () => "Announcement",
       body: (params) => text(params, "body", ""),
     }),
   }),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/navigation/app_back_navigation.dart';
 import '../../../../core/navigation/dashboard_back_handler.dart';
+import '../../../../core/notifications/notification_permission_prompt.dart';
 import '../../../../core/providers/theme_mode_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -53,6 +54,7 @@ class _ResidentDashboardScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       prefetchNotifications(ref);
+      maybeShowNotificationPermissionPrompt(context, ref);
     });
   }
 
@@ -115,7 +117,6 @@ class _ResidentDashboardScreenState
     final userName =
         ref.watch(authStateProvider.select((state) => state.user?.name)) ??
         context.t.common.user;
-    final isSettings = selectedTab == 3;
     final title = switch (selectedTab) {
       3 => t.mySettings,
       2 => t.issues,
@@ -157,7 +158,7 @@ class _ResidentDashboardScreenState
                 child: DashboardPageHeader(
                   title: title,
                   userName: userName,
-                  showWelcome: !isSettings,
+                  showWelcome: selectedTab == 0,
                 ),
               ),
             ),

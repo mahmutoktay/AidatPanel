@@ -49,7 +49,7 @@ class _MyDekontsScreenState extends ConsumerState<MyDekontsScreen> {
   }
 
   String _dekontFilterLabel(BuildContext context, String? key) {
-    final t = context.t.features.dekont;
+    final t = context.t.features.dekont.resident;
     switch (key) {
       case 'pending':
         return t.filterPending;
@@ -65,7 +65,7 @@ class _MyDekontsScreenState extends ConsumerState<MyDekontsScreen> {
   Future<void> _openFilterSheet() async {
     var draftKey = _filterKey;
     final common = context.t.common;
-    final t = context.t.features.dekont;
+    final t = context.t.features.dekont.resident;
     final allToken = Object();
 
     await PremiumFilterSheet.show(
@@ -204,6 +204,7 @@ class _MyDekontsScreenState extends ConsumerState<MyDekontsScreen> {
           padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
           child: DekontListCard(
             dekont: d,
+            forResident: true,
             onTap: () => context.push('/dekonts/${d.id}'),
           ),
         );

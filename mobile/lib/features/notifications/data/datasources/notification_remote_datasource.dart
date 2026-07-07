@@ -17,7 +17,6 @@ abstract class NotificationDataSource {
   Future<int> markAllRead();
   Future<AnnouncementResultEntity> sendAnnouncement(
     String buildingId, {
-    required String title,
     required String body,
   });
 }
@@ -85,12 +84,11 @@ class NotificationRemoteDataSource implements NotificationDataSource {
   @override
   Future<AnnouncementResultEntity> sendAnnouncement(
     String buildingId, {
-    required String title,
     required String body,
   }) async {
     final response = await _dioClient.post(
       ApiConstants.buildingAnnouncements(buildingId),
-      data: {'title': title, 'body': body},
+      data: {'body': body},
     );
     final data = response.data['data'] as Map<String, dynamic>;
     return AnnouncementResultEntity(

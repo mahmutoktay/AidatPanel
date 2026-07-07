@@ -302,13 +302,11 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
 
   Future<AnnouncementResultEntity?> sendAnnouncement(
     String buildingId, {
-    required String title,
     required String body,
   }) async {
     try {
       return await _repository.sendAnnouncement(
         buildingId,
-        title: title,
         body: body,
       );
     } catch (e) {

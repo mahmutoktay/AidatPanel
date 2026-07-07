@@ -1,7 +1,57 @@
 # AidatPanel — Project Skills & Context (Machine-Readable Profile)
 
 *Target LLM: Autonomous AI Agent (Implementation-capable)*
-*Source Material: CLAUDE.md, FAZ_DURUMU.md, AIDATPANEL.md, Codebase Analysis*
+*Source Material: `FAZ_DURUMU.md` (tek kaynak), `AIDATPANEL.md`, `backend/README.md`, Codebase Analysis*
+*Son güncelleme: 2026-07-07*
+
+---
+
+## 0. Dokümantasyon Hiyerarşisi ve Senkronizasyon (ZORUNLU)
+
+AI ajanı her oturumda dokümantasyonu **güncel tutmakla** yükümlüdür. Kod değişikliği yapıldığında ilgili dokümanlar **aynı oturumda** güncellenir; ayrı talep beklenmez.
+
+### 0.1 Tek Kaynaklar (Source of Truth)
+
+| Dosya | Rol | Ne zaman güncellenir |
+|-------|-----|----------------------|
+| `resources/yol-haritası/FAZ_DURUMU.md` | Faz durumu, checklist, onaylar, teknik borç | Görev tamamlanınca, faz değişince, onay alınınca |
+| `resources/AIDATPANEL.md` | API sözleşmesi, şema, roller, deployment | Yeni/değişen endpoint, model, env, deploy adımı |
+| `AGENTS.md` | AI ajan profili (özet + kurallar) | Mimari, stack, faz, feature veya kural değişince |
+| `backend/README.md` | Backend geliştirme notları | Backend kurulum, script, env değişince |
+| `backend/.env.example` | Ortam değişkeni şablonu | Yeni `process.env` anahtarı eklenince |
+
+### 0.2 Oturum Başlangıcı Kontrol Listesi
+
+```
+1. resources/yol-haritası/FAZ_DURUMU.md dosyasını OKU (aktif fazları belirle).
+2. AGENTS.md §5 ile FAZ_DURUMU.md faz tablosunu karşılaştır; uyumsuzluk varsa AGENTS.md'yi düzelt.
+3. Yapılacak işin kapsamı API/model içeriyorsa resources/AIDATPANEL.md'yi kontrol et.
+```
+
+### 0.3 Oturum Sonu Senkronizasyon Kuralları
+
+Aşağıdaki değişikliklerden **herhangi biri** yapıldıysa ilgili dokümanlar güncellenir:
+
+| Değişiklik türü | Güncellenecek dosyalar |
+|-----------------|------------------------|
+| Faz görevi tamamlandı / yeni görev | `FAZ_DURUMU.md` |
+| Yeni API endpoint / Prisma model / enum | `AIDATPANEL.md`, gerekirse `api_constants.dart` |
+| Yeni `mobile/lib/features/` modülü | `AGENTS.md` §3.2, `FAZ_DURUMU.md` |
+| Paket versiyonu (`pubspec.yaml` / `package.json`) | `AGENTS.md` §2 |
+| Yeni env değişkeni | `backend/.env.example`, `AIDATPANEL.md` |
+| Deploy / PM2 / sunucu yolu değişikliği | `AGENTS.md` §6.2, `AIDATPANEL.md`, `deploy.config.example.json` |
+| Mimari pattern değişikliği | `AGENTS.md` §3, referans implementasyon §6.9 |
+| Test sayısı anlamlı değişti (`npm test`) | `AGENTS.md` §2.1, `FAZ_DURUMU.md` teknik borç tablosu |
+
+### 0.4 AGENTS.md Güncelleme Tetikleyicileri
+
+`AGENTS.md` şu durumlarda **mutlaka** güncellenir:
+- Aktif faz sayısı veya faz kapsamı değiştiğinde
+- `mobile/lib/features/` altına yeni klasör eklendiğinde veya yeniden adlandırıldığında
+- Riverpod, deploy, i18n veya faz kapısı kuralları değiştiğinde
+- Backend kritik servis listesi genişlediğinde
+
+> **Kural:** Dokümantasyon güncellemesi "sonra yapılır" diye ertelenmez; kod PR/commit ile birlikte aynı oturumda tamamlanır.
 
 ---
 
@@ -10,10 +60,10 @@
 - **Proje Amacı:** Türk apartman/site yöneticileri için mobil aidat yönetim platformu. Aidat, gider, tahsilat (dekont/OCR) ve arıza bildirim (ticket) süreçlerini dijitalleştirir. Multi-tenant desteklidir.
 - **Hedef Kitle:** 50+ yaş apartman yöneticileri ve sakinleri. Tüm UI/UX kararları bu kullanıcı kitlesine uyarlanmıştır.
 - **Kullanıcı Rolleri (RBAC):** `MANAGER` (Yönetici - abonelik kısıtlamalarına tabi) ve `RESIDENT` (Sakin - sadece kendi dairesi).
-- **Abonelik Sistemi:** RevenueCat ile yönetilen aylık/yıllık abonelik. `aidatpanel_monthly` (₺99/ay) ve `aidatpanel_annual` (₺799/yıl).
+- **Abonelik Sistemi:** RevenueCat ile yönetilen aylık/yıllık abonelik. `aidatpanel_monthly` (₺99/ay) ve `aidatpanel_annual` (₺799/yıl). Kota: **toplam bina sayısı** (site altı bloklar dahil).
 - **Topoloji:**
   - **Backend:** Node.js + Express RESTful API + WebSocket Realtime servisi.
-  - **Mobile:** Flutter uygulaması (iOS & Android).
+  - **Mobile:** Flutter uygulaması (iOS & Android). Güncel sürüm: `0.6.8+2000000009` (`pubspec.yaml`).
   - **Web:** Statik landing page (yardımcı araç, uygulamanın ana parçası değil).
   - **İletişim:** REST (JSON `{success, message, data}`) + WebSocket (`wss://api.aidatpanel.com/api/v1/realtime?token=JWT`) + FCM Push Notifications.
   - **Domain:** `aidatpanel.com` (Cloudflare). API: `api.aidatpanel.com` (Contabo VPS / CloudPanel reverse proxy, PM2 ile yönetiliyor).
@@ -37,23 +87,24 @@
 | Dosya İşleme | multer, sharp, pdfjs-dist, pdfkit | multer ^2.1.1, sharp ^0.33.5, pdfjs-dist ^4.0.379, pdfkit ^0.16.0 | Multipart upload, image resize, PDF OCR + PDF üretimi |
 | Validasyon | zod | ^3.23.8 | Request schema validation (route middleware) |
 | Loglama | pino, pino-pretty | pino ^9.3.2, pino-pretty ^11.2.2 | Structured JSON logging (console.* yerine) |
-| Test | jest, supertest | jest ^29.7.0, supertest ^7.0.0 | Backend unit test altyapısı (53 test, 13 suite) |
+| Test | jest, supertest | jest ^29.7.0, supertest ^7.0.0 | Backend unit test (~77 test, 18 suite — `npm test` ile doğrula) |
 | Deploy | PM2, nodemon | — | Process manager + dev watcher |
 
 ### 2.2 Mobile Stack (Flutter)
 
 | Kategori | Teknoloji | Versiyon | Açıklama |
 |----------|-----------|----------|----------|
-| SDK | Flutter + Dart | SDK ^3.11.5, Dart ^3.11.5 | Cross-platform mobil uygulama |
-| State Management | flutter_riverpod | ^3.3.1 | Manuel `Notifier` / `StateNotifierProvider` pattern (CodeGen kullanılmaz) |
+| SDK | Flutter + Dart | SDK ^3.11.5 | Cross-platform mobil uygulama |
+| State Management | flutter_riverpod | ^3.3.1 | Manuel `Notifier` / `NotifierProvider` pattern (CodeGen kullanılmaz) |
 | Navigation | go_router | ^17.3.0 | Deep link desteği, role-based routing |
 | Network | dio, web_socket_channel | dio ^5.4.0, ws_channel ^3.0.2 | HTTP/HTTPS + WebSocket istemcisi |
 | Güvenlik | flutter_secure_storage | ^10.3.1 | JWT token saklama (SecureStorage, SharedPreferences yasak) |
 | i18n | slang + slang_flutter | ^4.15.0 | Type-safe TR/EN çeviri sistemi (Slang JSON) |
 | Firebase | firebase_core, firebase_messaging, firebase_analytics, firebase_crashlytics | firebase_core ^4.10.0, messaging ^16.3.0, analytics ^12.0.0, crashlytics ^5.0.0 | FCM push, analytics, crash reporting |
+| Bildirim (yerel) | flutter_local_notifications, permission_handler | ^22.0.1, ^12.0.3 | Ön plan bildirim + izin yönetimi |
 | Abonelik | purchases_flutter | ^10.2.3 | RevenueCat SDK entegrasyonu |
-| UI/Utils | equatable, freezed_annotation, json_annotation, google_fonts, fl_chart, pdfx, cached_network_image, shimmer, share_plus, image_picker, file_picker, intl, path_provider, crypto | — | Entity modeling, grafik, PDF görüntüleme, dosya işleme |
-| Build | build_runner, slang_build_runner, flutter_launcher_icons | build_runner ^2.12.2 | Code generation + asset processing |
+| UI/Utils | equatable, freezed, json_serializable, google_fonts, fl_chart, pdfx, cached_network_image, share_plus, image_picker, file_picker, intl, path_provider, crypto, receive_sharing_intent, gal, image, url_launcher, package_info_plus, device_info_plus | — | Entity modeling, grafik, PDF, dosya işleme, dekont paylaşımı |
+| Build | build_runner, slang_build_runner, flutter_launcher_icons | build_runner ^2.12.2 | Freezed/JSON codegen + Slang + asset processing |
 | Test | flutter_test, mocktail, integration_test | — | Unit, widget, integration test iskeleti |
 
 ---
@@ -69,6 +120,7 @@ src/
 ├── services/         # İş kuralları (SRP prensibi ile modüller ayrılmış)
 │   ├── me/           # /me endpoint'lerine özel modüller (meProfileHelpers vb.)
 │   ├── dekont*/      # Dekont pipeline: storage → OCR → verification → payment
+│   ├── site*/        # Site CRUD, site gideri, kota, aggregation (FAZ 8)
 │   ├── notification* # Bildirim dağıtımı: realtimeHub + FCM
 │   └── ...
 ├── middlewares/      # Rate limit, auth (JWT), error handling
@@ -87,8 +139,12 @@ src/
 - `dueExpenseRecalcService.js` — Gider → aidat dağılımı yeniden hesaplama
 - `dekontPipelineQueue.js` — Dekont işleme kuyruğu (upload → OCR → verification → business rules)
 - `notificationDeliveryService.js` — WebSocket + FCM dual-channel delivery
-- `reportDataService.js` + `reportPdfService.js` — PDF rapor üretimi (aylık + yıllık)
+- `reportDataService.js` + `reportPdfService.js` — PDF rapor üretimi (aylık + yıllık; bina + site)
 - `meService.js` (ve `me/` alt modülleri) — Profil, dil, şifre işlemleri
+- `siteService.js` — Site CRUD, site altı bina, effective config
+- `siteExpenseService.js` + `siteExpenseAllocationService.js` — Site ortak gideri dairelere paylaştırma
+- `siteAggregationService.js` — Site/bina toplanan/beklenen tutar özeti
+- `buildingQuotaService.js` — Abonelik bina kotası (toplam bina sayımı)
 
 ### 3.2 Mobile Mimari Deseni (Feature-First Clean Architecture)
 
@@ -104,16 +160,18 @@ mobile/lib/
 │   └── notifications/         # FCM + WebSocket + Polling coordinator
 ├── l10n/                      # Slang TR/EN i18n JSON dosyaları
 ├── features/                  # Feature-first yapı (referans: auth/)
-│   ├── auth/                  # TAM KATMANLAR: domain/, data/, presentation/
-│   ├── dashboard/             # Manager + Resident dashboard screens
-│   ├── buildings/             # Bina CRUD
-│   ├── apartments/            # Daire CRUD + davet kodu
-│   ├── dues/                  # Aidat listesi, filtreleme, durum güncelleme
+│   ├── auth/                  # Giriş, kayıt, OTP, onboarding
+│   ├── dashboard/             # Manager + Resident dashboard; ManagerPropertiesTab (Siteler|Binalar)
+│   ├── sites/                 # Site CRUD, site gideri, site raporu (FAZ 8)
+│   ├── buildings/             # Bina CRUD, davet kodu, IBAN
+│   ├── apartments/            # Daire CRUD + sakin atama
+│   ├── dues/                  # Aidat listesi, filtreleme, durum güncelleme, breakdown
 │   ├── expenses/              # Gider listesi + form + OCR makbuz
 │   ├── tickets/               # Arıza/talep CRUD + update
 │   ├── notifications/         # Bildirim listesi + detay sheet
-│   ├── reports/               # PDF indirme + paylaşma
-│   ├── dekonts/               # Tahsilat dekontları (sakin + yönetici)
+│   ├── profile/               # Profil, şifre, dil, aktif oturumlar
+│   ├── reports/               # PDF indirme + paylaşma (bina + site)
+│   ├── dekont/                # Tahsilat dekontları (sakin + yönetici)
 │   └── subscription/          # Abonelik ekranı + paywall
 ├── shared/
 │   └── widgets/               # password_field.dart, empty_state_widget.dart, friendly_error_screen.dart vb.
@@ -128,23 +186,26 @@ mobile/lib/
 - `data/repositories/` → Domain interface implementasyonları.
 - `presentation/` → Screens, widgets, Riverpod provider'ları. **DATASOURCE'A DOĞRUDAN ERİŞEMEZ** (provider üzerinden erişir).
 
-### 3.3 Riverpod Pattern (Manuel StateNotifierProvider — CodeGen KULLANILMAZ)
+### 3.3 Riverpod Pattern (Manuel NotifierProvider — CodeGen KULLANILMAZ)
+
+> `StateNotifier` / `StateNotifierProvider` **kullanılmaz** — Riverpod 3.x `Notifier` / `NotifierProvider` standardıdır (FAZ 5 migrasyonu tamamlandı).
 
 ```dart
-// 1. State (Freezed)
-@freezed
-class DuesState with _$DuesState {
-  const factory DuesState({
-    @Default(false) bool isLoading,
-    @Default([]) List<DueEntity> dues,
-    String? error,
-  }) = _DuesState;
+// 1. State (immutable sınıf veya Freezed)
+class DuesState {
+  final bool isLoading;
+  final List<DueEntity> dues;
+  final String? error;
+  const DuesState({this.isLoading = false, this.dues = const [], this.error});
+  DuesState copyWith({bool? isLoading, List<DueEntity>? dues, String? error}) => ...;
 }
 
 // 2. Notifier
-class DuesNotifier extends StateNotifier<DuesState> {
-  final DuesRepository _repository;
-  DuesNotifier(this._repository) : super(const DuesState());
+class DuesNotifier extends Notifier<DuesState> {
+  DuesRepository get _repository => ref.read(duesRepositoryProvider);
+
+  @override
+  DuesState build() => const DuesState();
 
   Future<void> loadDues(String buildingId) async {
     state = state.copyWith(isLoading: true, error: null);
@@ -158,9 +219,9 @@ class DuesNotifier extends StateNotifier<DuesState> {
 }
 
 // 3. Provider
-final duesNotifierProvider = StateNotifierProvider<DuesNotifier, DuesState>((ref) {
-  return DuesNotifier(ref.watch(duesRepositoryProvider));
-});
+final duesNotifierProvider = NotifierProvider<DuesNotifier, DuesState>(
+  DuesNotifier.new,
+);
 
 // 4. Screen
 class DuesScreen extends ConsumerWidget {
@@ -171,6 +232,8 @@ class DuesScreen extends ConsumerWidget {
   }
 }
 ```
+
+**Referans:** `mobile/lib/features/dues/presentation/providers/dues_provider.dart`, `mobile/lib/features/auth/presentation/providers/auth_provider.dart`
 
 ### 3.4 Dekont (Banka Dekontu) Pipeline Mimarisi
 
@@ -185,6 +248,21 @@ Resident Upload → DekontStorageService (multer, hash duplicate check)
 
 **Dekont Durumları (DekontStatus enum):** RECEIVED → EXTRACTING → (EXTRACT_FAILED | PARSED | PARSE_LOW_CONFIDENCE) → MATCHING → (MATCHED | MATCH_AMBIGUOUS | UNMATCHED | NEEDS_MANAGER_REVIEW) → (PAYMENT_APPLIED | PAYMENT_PARTIAL | REJECTED | RECIPIENT_MISMATCH)
 
+### 3.5 Site Yönetimi Mimarisi (FAZ 8)
+
+```
+Site (varsayılan aidat, IBAN, adres)
+  └── Building[] (blockLabel zorunlu, site varsayılanlarını inherit/override eder)
+        └── Apartment[] → Due[]
+
+SiteExpense → siteExpenseAllocationService → tüm site dairelerine eşit pay (perUnitAmount)
+            → dueExpenseRecalcService → DueExpenseCarryforward (siteExpenseId?)
+
+Abonelik kotası: buildingQuotaService → toplam bina sayısı (tekil + site altı bloklar)
+```
+
+**Mobil giriş noktaları:** `features/sites/`, `dashboard/ManagerPropertiesTab` (Siteler | Binalar sekmeleri), genişleyen FAB (Yeni Site / Yeni Bina).
+
 ---
 
 ## 4. Bağımlılık Ağacı ve 3. Parti Servisler
@@ -196,31 +274,34 @@ Resident Upload → DekontStorageService (multer, hash duplicate check)
 | `@prisma/client`, `@prisma/adapter-neon`, `@prisma/adapter-pg` | Type-safe veritabanı erişimi, migration yönetimi, Neon serverless destek |
 | `jsonwebtoken` + `bcryptjs` | JWT tabanlı auth (access/refresh) + şifre hash |
 | `express-rate-limit` | API rate limiting (4 katmanlı: global, auth, sensitive, upload) |
-| `firebase-admin` | FCM push bildirimleri (açık/ kapalı app için) |
+| `firebase-admin` | FCM push bildirimleri (açık/kapalı app için) |
 | `ws` | WebSocket realtime hub (notification broadcast) |
-| `multer` + `sharp` | Multipart file upload + thumbnail/image processing |
+| `multer` + `sharp` + `file-type` | Multipart file upload + thumbnail/image processing + MIME doğrulama |
 | `pdfjs-dist` | PDF'ten metin çıkarma (OCR pipeline) |
 | `pdfkit` | Aylık/yıllık aidat raporu PDF üretimi |
 | `zod` | Request validation schema (Zod → route middleware) |
 | `pino` | Structured JSON logging (production-grade) |
-| `helmet` + `cors` | Security headers + CORS whitelist |
+| `helmet` + `cors` + `cookie-parser` | Security headers + CORS whitelist + cookie parsing |
+| `pg` | PostgreSQL driver (Prisma adapter ile) |
 
 ### Mobil Bağımlılıkları
 
 | Paket | Çözdüğü Problem |
 |-------|----------------|
-| `flutter_riverpod` | State management (manuel StateNotifierProvider pattern) |
+| `flutter_riverpod` | State management (`NotifierProvider` pattern) |
 | `go_router` | Deep-link destekli navigation |
 | `dio` | HTTP/HTTPS istemcisi (certificate pinning, interceptor) |
 | `flutter_secure_storage` | JWT token güvenli saklama (Keychain/Keystore) |
-| `slang` + `slang_flutter` | Type-safe TR/EN i18n (build_runner ile codegen) |
+| `slang` + `slang_flutter` | Type-safe TR/EN i18n (`dart run slang` ile codegen) |
 | `web_socket_channel` | WebSocket realtime notification (app açıkken) |
-| `firebase_messaging` | FCM push (app kapalıyken) |
+| `firebase_messaging` + `flutter_local_notifications` | FCM push + ön plan bildirim |
+| `permission_handler` | Bildirim ve medya izinleri |
 | `purchases_flutter` | RevenueCat iOS/Android abonelik entegrasyonu |
 | `freezed` + `json_serializable` | Immutable entity + DTO modeling + JSON serialization |
-| `fl_chart` | Dashboard grafikleri |
+| `fl_chart` | Dashboard özet grafikleri |
 | `pdfx` | PDF raporu görüntüleme |
 | `share_plus` | PDF raporu paylaşma |
+| `receive_sharing_intent` + `gal` | Dekont paylaşım intent'i + galeri kaydetme |
 | `file_picker` + `image_picker` | Dekont yükleme + makbuz fotoğrafı seçimi |
 | `google_fonts` | Nunito fontu (yaşlı kullanıcılar için okunabilirlik) |
 
@@ -234,13 +315,17 @@ Resident Upload → DekontStorageService (multer, hash duplicate check)
 | Twilio / NetGsm | SMS ve WhatsApp bildirimleri |
 | Cloudflare | DNS + CDN (aidatpanel.com) |
 | CloudPanel | Reverse proxy + SSL (api.aidatpanel.com → VPS port 4200) |
-| Contabo VPS | Sunucu alanı (aidatpanel-api PM2 süreci) |
+| Contabo VPS | Sunucu alanı (`aidapanel-api` PM2 süreci) |
 
 ---
 
 ## 5. Gelecek Vizyonu ve Roadmap
 
-### Aktif Durum: FAZ 7 — v1.0.0 Lansman (AKTİF, ~2026-07-14)
+> **Tek kaynak:** `resources/yol-haritası/FAZ_DURUMU.md` — bu bölüm özet niteliğindedir; çelişki durumunda FAZ_DURUMU.md geçerlidir.
+
+### Aktif Fazlar
+
+#### FAZ 7 — v1.0.0 Lansman (▶ AKTİF, hedef ~2026-07-14)
 
 | Görev | Durum |
 |-------|-------|
@@ -249,7 +334,19 @@ Resident Upload → DekontStorageService (multer, hash duplicate check)
 | Firebase Analytics & Crashlytics | ✅ Tamamlandı |
 | v1.0.0 release tag | Bekliyor |
 
-**Tüm önceki fazlar (0-6) kilitli ve ONAY: Furkan ile tamamlandı.**
+#### FAZ 8 — Site Yönetimi (▶ AKTİF, hedef ~2026-08)
+
+Site → bina hiyerarşisi; tekil binalar korunur. Backend ve mobil implementasyon büyük ölçüde tamamlandı.
+
+| Görev | Durum |
+|-------|-------|
+| Backend: Site/SiteExpense modelleri + API + servisler | ✅ Tamamlandı |
+| Mobil: `features/sites/` + ManagerPropertiesTab + FAB | ✅ Tamamlandı |
+| Mevcut modül güncellemeleri (BuildingEntity, davet, IBAN, abonelik özeti) | ✅ Tamamlandı |
+| Canlı E2E: site → blok → ortak gider → breakdown → site PDF | Bekliyor |
+| `ONAY: Furkan ✅` | Bekliyor |
+
+**FAZ 0–6:** Kilitli ve onaylı. Yalnızca aktif faz checklist'lerinde `[ ]` kalan görevlere odaklan.
 
 ### Teknik Borçlar (Bilinen Eksikler)
 
@@ -257,14 +354,15 @@ Resident Upload → DekontStorageService (multer, hash duplicate check)
 |---|------|----------|---------|----------|
 | 1 | Test kapsamı %30+ | Mobil | 🟡 | Auth/Dio/widget testleri var; genişletilecek |
 | 2 | OCR performansı | Backend | 🟡 | Worker thread kısmi; kuyruk sistemi ölçeklenmeli |
-| 3 | Online ödeme | Fullstack | 🔴 | İyzico/PayTR sanal POS (Faz 8+) |
-| 4 | Multi-manager | Backend | 🔴 | Personel atama sistemi (Faz 8+) |
-| 5 | Aidat istatistik grafikleri | Mobil | 🔴 | Grafik dashboard (Faz 8+) |
+| 3 | FAZ 8 canlı E2E | Fullstack | 🟡 | Site akışı uçtan uca doğrulanacak |
+| 4 | Online ödeme | Fullstack | 🔴 | İyzico/PayTR sanal POS (Faz 9+) |
+| 5 | Multi-manager | Backend | 🔴 | Personel atama sistemi (Faz 9+) |
+| 6 | Aidat geçmişi trend grafikleri | Mobil | 🟡 | Dashboard'da özet grafik var; geçmiş trend/istatistik genişletilecek |
 
-### Gelecek Planlar (Faz 8+)
+### Gelecek Planlar (Faz 9+)
 - İyzico / PayTR ile online tahsilat
 - Çoklu yönetici (personel atama)
-- Aidat geçmişi grafik / istatistik dashboard
+- Aidat geçmişi trend / istatistik dashboard (mevcut özet grafiklerin ötesinde)
 - Belge paylaşımı (yönetim kararları, toplantı tutanakları)
 - WhatsApp bildirimleri (NetGsm/Twilio)
 
@@ -278,12 +376,13 @@ Resident Upload → DekontStorageService (multer, hash duplicate check)
 
 ```
 1. Her oturum başında resources/yol-haritası/FAZ_DURUMU.md dosyasını OKU.
-2. SADECE "AKTİF" olarak işaretlenmiş fazın görevlerini yap.
-3. Kilitli fazların features/ klasörlerine DOKUNMA (okuma dahil her türlü erişim yasak).
-4. Faz tamamlanması için İKİ koşul BİRDEN ZORUNLU:
+2. SADECE "AKTİF" (▶) olarak işaretlenmiş fazların checklist görevlerini yap.
+3. Onaylı (✅) ve kilitli fazların kapsamına geri dönme; yalnızca aktif fazlardaki [ ] görevlere odaklan.
+4. features/ klasörü faz bazlı ayrılmaz; aktif fazın görevleri hangi feature'ı gerektiriyorsa ona dokun.
+5. Faz tamamlanması için İKİ koşul BİRDEN ZORUNLU:
    a) Tüm checklist öğeleri [x] işaretli
    b) "ONAY: Furkan ✅" satırı mevcut
-5. Bu koşullar sağlanmadan sonraki faza geçilemez. İstisna YOK.
+6. Bu koşullar sağlanmadan sonraki faza geçilemez. İstisna YOK.
 ```
 
 ### 6.2 Backend Deploy Kuralı (ZORUNLU)
@@ -315,7 +414,9 @@ Backend'den dönen her yanıt şu formatta olmalıdır:
 - `ListView.children` KULLANILAMAZ → `ListView.builder` ZORUNLU.
 - `WillPopScope` KULLANILAMAZ → `PopScope` (`canPop` + `onPopInvokedWithResult`) ZORUNLU.
 - String literalleri UI'da YASAK → `context.t.xxx` (Slang i18n) ZORUNLU.
-- i18n ekleme: TR + EN JSON dosyalarını güncelle → `flutter pub run build_runner build --delete-conflicting-outputs`
+- i18n ekleme: TR + EN JSON güncelle → `dart run slang` (Slang codegen)
+- Freezed/model codegen: `dart run build_runner build --delete-conflicting-outputs`
+- `StateNotifier` / `StateNotifierProvider` KULLANILAMAZ → `Notifier` / `NotifierProvider` ZORUNLU.
 - Token'lar loglanamaz, `SharedPreferences`'a yazılamaz → `flutter_secure_storage` ZORUNLU.
 - `LogInterceptor` sadece `kDebugMode`'da aktif.
 - 401 hataları DioClient interceptor tarafından otomatik yönetilir; elle yakalama YASAK.
@@ -338,7 +439,7 @@ Backend'den dönen her yanıt şu formatta olmalıdır:
 | Minimum dokunma alanı | 48×48dp |
 | Navigasyon | BottomNavigationBar (ikon + yazı birlikte, hamburger YASAK) |
 | Loading göstergesi | Her async işlemde görünür (CircularProgressIndicator) |
-| Hata mesajları | Sadece Türkçe, teknik terim YOK |
+| Hata mesajları | `context.t` ile kullanıcı dilinde (TR/EN); teknik terim YOK |
 | Animasyon | Maksimum 200ms, `Curves.easeInOut` |
 | Lottie / Hero animasyon | YASAK |
 | textScaleFactor | Hiçbir yerde kısıtlanamaz |
@@ -350,7 +451,7 @@ Backend'den dönen her yanıt şu formatta olmalıdır:
 1. pubspec.yaml version: satırında "+" sonrası build code'u 1 artır.
 2. flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=REVENUECAT_ANDROID_KEY=goog_...
 3. Çıktı: mobile/build/app/outputs/bundle/prodRelease/app-prod-release.aab
-- NOT: Sürüm adı (0.1.x) sadece kullanıcı açıkça isterse değişir.
+- NOT: Sürüm adı (ör. 0.6.x) sadece kullanıcı açıkça isterse değişir; build code her AAB'de artar.
 - RevenueCat anahtarı olmadan satın alma devre dışı kalır.
 ```
 
@@ -382,6 +483,8 @@ Mobil → NotificationDeliveryCoordinator
 ### 6.9 Referans Implementasyon
 
 - Tam feature örneği (tüm katmanlar eksiksiz): `mobile/lib/features/auth/`
+- Site yönetimi örneği (FAZ 8): `mobile/lib/features/sites/`
+- Riverpod Notifier örneği: `mobile/lib/features/dues/presentation/providers/dues_provider.dart`
 - Backend route + controller + service örneği: `src/routes/authRoutes.js` + `src/controllers/authController.js` + `src/services/authService.js`
 - API şeması + kullanıcı rolleri: `resources/AIDATPANEL.md`
 - Faz durumu + roadmap: `resources/yol-haritası/FAZ_DURUMU.md`
@@ -389,9 +492,9 @@ Mobil → NotificationDeliveryCoordinator
 ### 6.10 Yapılacak İş (Task Kanban Formatı)
 
 Tüm görevler `FAZ_DURUMU.md` içinde `[ ]` / `[x]` olarak işaretlenir. AI ajanı:
-- Aktif fazın `[ ]` olan görevlerini `[x]` yapar.
+- Aktif fazların `[ ]` olan görevlerini `[x]` yapar.
 - Tamamlanan görevden sonra Furkan'dan onay alır (yanıt formatı: `ONAY: Furkan ✅ (YYYY-MM-DD)`).
-- İleriki fazların dosyalarına DOKUNMAZ.
+- Kilitli fazların kapsamına geri dönmez; yalnızca aktif faz checklist'lerine odaklanır.
 
 ### 6.11 Commit Mesajı Dili (ZORUNLU)
 
@@ -408,3 +511,16 @@ Tüm görevler `FAZ_DURUMU.md` içinde `[ ]` / `[x]` olarak işaretlenir. AI aja
 4. JSON dosyalarına ekleme yapıldıktan sonra ZORUNLU OLARAK `dart run slang` komutu çalıştırılmalı ve `strings.g.dart` dosyası güncellenmelidir.
 5. Parametreli çeviriler için JSON içerisinde `{degisken}` formatı kullanılmalı ve UI tarafında `.replaceAll('{degisken}', deger)` şeklinde kullanılmalıdır.
 ```
+
+### 6.13 Dokümantasyon Güncelleme Zorunluluğu
+
+Her kod değişikliği oturumunda §0 kuralları uygulanır. AI ajanı oturumu şu kontrolle kapatır:
+
+```
+[ ] FAZ_DURUMU.md — aktif faz checklist'i güncel mi?
+[ ] AIDATPANEL.md — API/model değiştiyse güncellendi mi?
+[ ] AGENTS.md — mimari/stack/faz/feature değiştiyse güncellendi mi?
+[ ] .env.example — yeni env anahtarı eklendiyse güncellendi mi?
+```
+
+Dokümantasyon güncellenmeden "iş tamamlandı" denmez.

@@ -4,7 +4,11 @@ import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
 import { userPublicSelect } from "./meService.js";
 import { createForUsers } from "./notificationService.js";
-import { computeOverdueDays } from "../utils/trDueDate.js";
+import {
+  buildDueStatusFilterClause,
+  buildManagerDueVisibilityWhere,
+  serializeDueForApi,
+} from "../utils/dueStatus.js";
 import {
   resolveListTake,
   resolvePageLimit,
@@ -21,16 +25,7 @@ import {
 
 function mapDueRow(due) {
   const { apartment, ...rest } = due;
-  return {
-    ...rest,
-    apartmentNumber: apartment.number,
-    apartment: {
-      id: apartment.id,
-      number: apartment.number,
-      floor: apartment.floor,
-    },
-    resident: apartment.resident ?? null,
-  };
+  return serializeDueForApi(rest, apartment);
 }
 
 async function attachBreakdownToDue(due, buildingId) {
@@ -99,13 +94,14 @@ export const getDuesByBuildingService = async (buildingId, managerId, filters = 
   const pageLimit = paginated ? resolvePageLimit(filters.limit) : resolveListTake(filters.limit);
   const take = paginated ? pageLimit + 1 : pageLimit;
 
-  let whereClause = {
-    apartment: { buildingId },
-  };
+  const andClauses = [buildManagerDueVisibilityWhere(buildingId)];
 
-  if (month) whereClause.month = parseInt(String(month), 10);
-  if (year) whereClause.year = parseInt(String(year), 10);
-  if (status) whereClause.status = status;
+  if (month) andClauses.push({ month: parseInt(String(month), 10) });
+  if (year) andClauses.push({ year: parseInt(String(year), 10) });
+  const statusClause = buildDueStatusFilterClause(status);
+  if (statusClause) andClauses.push(statusClause);
+
+  let whereClause = { AND: andClauses };
 
   if (paginated && filters.cursor) {
     whereClause = await mergeCreatedAtCursorWhere(
@@ -151,6 +147,10 @@ export const getDuesByBuildingService = async (buildingId, managerId, filters = 
  * Aidat durumunu güncelle (yönetici için)
  */
 export const updateDueStatusService = async (dueId, managerId, { status, paidAt, note, buildingId }) => {
+  if (status !== "PAID") {
+    throw new HttpError(400, "Yalnızca 'Ödendi' durumu işaretlenebilir.");
+  }
+
   // Due'nun yöneticinin binasına ait olduğunu kontrol et
   const due = await prisma.due.findUnique({
     where: { id: dueId },
@@ -175,31 +175,23 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
 
   const previousStatus = due.status;
 
-  // Güncelleme verisi
-  const updateData = { status };
+  const updateData = { status: "PAID" };
 
   let resident = null;
 
-  if (status === "PAID") {
-    resident = await prisma.user.findFirst({
-      where: {
-        apartmentId: due.apartmentId,
-        deletedAt: null,
-        role: "RESIDENT",
-      },
-      select: { id: true },
-    });
-    if (!resident) {
-      throw new HttpError(400, "Sakin atanmamış dairelerin aidatları 'Ödendi' yapılamaz.");
-    }
-    updateData.paidAt = (paidAt && !isNaN(Date.parse(paidAt))) ? new Date(paidAt) : new Date();
-    updateData.overdueDays = 0;
-  } else if (status === "WAIVED") {
-    updateData.paidAt = null;
-    updateData.overdueDays = 0;
-  } else if (status === "OVERDUE") {
-    updateData.overdueDays = computeOverdueDays(due.dueDate);
+  resident = await prisma.user.findFirst({
+    where: {
+      apartmentId: due.apartmentId,
+      deletedAt: null,
+      role: "RESIDENT",
+    },
+    select: { id: true },
+  });
+  if (!resident && !due.residentNameSnapshot) {
+    throw new HttpError(400, "Sakin atanmamış dairelerin aidatları 'Ödendi' yapılamaz.");
   }
+  updateData.paidAt = (paidAt && !isNaN(Date.parse(paidAt))) ? new Date(paidAt) : new Date();
+  updateData.overdueDays = 0;
 
   if (note !== undefined) {
     updateData.note = note;
@@ -402,9 +394,20 @@ export const getMyDuesService = async (userId, filters = {}) => {
 
   let whereClause = { apartmentId: user.apartment.id };
 
-  if (status) whereClause.status = status;
-  if (year) whereClause.year = parseInt(String(year), 10);
-  if (month) whereClause.month = parseInt(String(month), 10);
+  const statusClause = buildDueStatusFilterClause(status);
+  if (statusClause) {
+    whereClause = { AND: [{ apartmentId: user.apartment.id }, statusClause] };
+  }
+  if (year) {
+    whereClause = whereClause.AND
+      ? { AND: [...whereClause.AND, { year: parseInt(String(year), 10) }] }
+      : { ...whereClause, year: parseInt(String(year), 10) };
+  }
+  if (month) {
+    whereClause = whereClause.AND
+      ? { AND: [...whereClause.AND, { month: parseInt(String(month), 10) }] }
+      : { ...whereClause, month: parseInt(String(month), 10) };
+  }
 
   if (paginated && filters.cursor) {
     whereClause = await mergeCreatedAtCursorWhere(whereClause, filters.cursor, (id) =>
@@ -429,13 +432,12 @@ export const getMyDuesService = async (userId, filters = {}) => {
   const buildingId = user.apartment.buildingId;
 
   const mapped = buildListResponse(filters, dues, (due) => ({
-    ...due,
-    apartmentId: user.apartment.id,
-    apartmentNumber: user.apartment.number,
-    apartment: {
+    ...serializeDueForApi(due, {
       id: user.apartment.id,
       number: user.apartment.number,
-    },
+      floor: null,
+      resident: null,
+    }),
     building,
   }));
 

@@ -46,7 +46,11 @@ export const dueSchemas = {
       dueId: z.string().uuid("Geçerli bir aidat ID'si giriniz"),
     }),
     body: z.object({
-      status: dueStatusEnum,
+      status: z.literal("PAID", {
+        errorMap: () => ({
+          message: "Yalnızca 'Ödendi' durumu işaretlenebilir.",
+        }),
+      }),
       paidAt: z.string().datetime().optional(),
       note: z.string().max(500, "Not en fazla 500 karakter olabilir").optional(),
     }),

@@ -1,6 +1,5 @@
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
-import { buildDueRowsForApartments } from "../utils/dueGeneration.js";
 import { userPublicSelect } from "./meService.js";
 import {
   resolveListTake,
@@ -80,9 +79,20 @@ export const removeResidentFromApartmentService = async (apartmentId, buildingId
     throw new HttpError(404, "Bu dairede kayıtlı sakin yok.");
   }
 
-  await prisma.user.update({
-    where: { id: resident.id },
-    data: { apartmentId: null },
+  await prisma.$transaction(async (tx) => {
+    await tx.due.updateMany({
+      where: {
+        apartmentId: apartment.id,
+        status: { in: ["PENDING", "OVERDUE"] },
+        residentNameSnapshot: null,
+      },
+      data: { residentNameSnapshot: resident.name },
+    });
+
+    await tx.user.update({
+      where: { id: resident.id },
+      data: { apartmentId: null },
+    });
   });
 
   return await prisma.apartment.findUnique({
@@ -109,16 +119,6 @@ export const createApartmentService = async ({ buildingId, number, floor, manage
         floor,
       },
     });
-
-    const dueRows = buildDueRowsForApartments([apartment.id], {
-      dueAmount: building.dueAmount,
-      dueDay: building.dueDay,
-      currency: building.currency,
-    });
-
-    if (dueRows.length > 0) {
-      await tx.due.createMany({ data: dueRows });
-    }
 
     return apartment;
   });

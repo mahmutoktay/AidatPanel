@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../../core/notifications/notification_payload.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../../domain/entities/notification_entity.dart';
 
 extension NotificationTypeLabels on NotificationType {
@@ -33,6 +34,41 @@ extension NotificationTypeLabels on NotificationType {
       case NotificationType.other:
         return t.typeOther;
     }
+  }
+
+  String residentLabel(BuildContext context) {
+    final t = context.t.features.notifications.resident;
+    switch (this) {
+      case NotificationType.dueReminder:
+        return t.typeDueReminder;
+      case NotificationType.duePaid:
+        return t.typeDuePaid;
+      case NotificationType.ticketCreated:
+        return t.typeTicketCreated;
+      case NotificationType.ticketUpdate:
+        return t.typeTicketUpdate;
+      case NotificationType.announcement:
+        return t.typeAnnouncement;
+      case NotificationType.dekontReceived:
+        return t.typeDekontReceived;
+      case NotificationType.dekontNeedsReview:
+        return t.typeDekontNeedsReview;
+      case NotificationType.dekontMatched:
+        return t.typeDekontMatched;
+      case NotificationType.dekontPaymentApplied:
+        return t.typeDekontPaymentApplied;
+      case NotificationType.expenseAdded:
+        return t.typeExpenseAdded;
+      case NotificationType.system:
+        return t.typeSystem;
+      case NotificationType.other:
+        return t.typeOther;
+    }
+  }
+
+  String labelForRole(BuildContext context, UserRole? role) {
+    if (role == UserRole.resident) return residentLabel(context);
+    return label(context);
   }
 
   /// Backend `Notification.type` string değeri.
@@ -67,11 +103,11 @@ extension NotificationTypeLabels on NotificationType {
 }
 
 extension NotificationEntityLabels on NotificationEntity {
-  String senderLabel(BuildContext context) {
+  String senderLabel(BuildContext context, {UserRole? role}) {
     if (isFromAidatPanelTeam) {
       return context.t.features.notifications.typeAidatPanelTeam;
     }
-    return type.label(context);
+    return type.labelForRole(context, role);
   }
 }
 

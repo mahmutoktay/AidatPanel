@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../../../core/notifications/notification_navigation.dart';
 import '../../../../../core/notifications/notification_toast.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
-import '../../../../../core/theme/app_typography.dart';
-import '../../../../../l10n/strings.g.dart';
+import '../../../../dekont/presentation/providers/dekont_provider.dart';
 import '../../../../dues/presentation/providers/dues_provider.dart';
-import 'resident_home_actions_grid.dart';
-import 'resident_home_colors.dart';
-import 'resident_home_quick_icons.dart';
+import '../../../../dues/presentation/providers/resident_due_transactions_provider.dart';
+import '../../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../notifications/domain/entities/notification_entity.dart';
+import '../../../../notifications/presentation/providers/notifications_provider.dart';
+import '../../../../notifications/presentation/utils/notification_labels.dart';
+import '../../../../notifications/presentation/widgets/notification_detail_sheet.dart';
+import 'resident_debt_summary_card.dart';
+import 'resident_home_quick_actions_row.dart';
+import 'resident_recent_activity_section.dart';
 
-/// Sakin ana sayfa — mockup 5 birebir.
-class ResidentHomeTab extends ConsumerWidget {
+/// Sakin ana sayfa — borç özeti, hızlı işlemler, birleşik son hareketler.
+class ResidentHomeTab extends ConsumerStatefulWidget {
   const ResidentHomeTab({
     super.key,
     required this.onGoToDuesTab,
@@ -23,23 +28,87 @@ class ResidentHomeTab extends ConsumerWidget {
   final VoidCallback onGoToDuesTab;
   final VoidCallback onGoToIssuesTab;
 
-  Future<void> _refresh(WidgetRef ref) async {
+  @override
+  ConsumerState<ResidentHomeTab> createState() => _ResidentHomeTabState();
+}
+
+class _ResidentHomeTabState extends ConsumerState<ResidentHomeTab> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _ensureDataLoaded());
+  }
+
+  Future<void> _ensureDataLoaded() async {
+    if (!mounted) return;
+    final duesState = ref.read(duesNotifierProvider);
+    if (duesState.dues.isEmpty && !duesState.isLoading) {
+      await ref.read(duesNotifierProvider.notifier).loadMyDues();
+    }
+    final dekontsState = ref.read(myDekontsNotifierProvider);
+    if (dekontsState.dekonts.isEmpty && !dekontsState.isLoading) {
+      await ref.read(myDekontsNotifierProvider.notifier).load(refresh: true);
+    }
+    final notificationsState = ref.read(notificationsNotifierProvider);
+    if (notificationsState.items.isEmpty && !notificationsState.isLoading) {
+      await ref.read(notificationsNotifierProvider.notifier).load(refresh: true);
+    }
+  }
+
+  Future<void> _refresh() async {
     await Future.wait([
       ref.read(duesNotifierProvider.notifier).loadMyDues(),
+      ref.read(myDekontsNotifierProvider.notifier).load(refresh: true),
+      ref.read(notificationsNotifierProvider.notifier).load(refresh: true),
       pollAndShowNotificationToasts(ref),
     ]);
   }
 
+  Future<void> _openAnnouncement(NotificationEntity notification) async {
+    if (!notification.isRead) {
+      await ref
+          .read(notificationsNotifierProvider.notifier)
+          .markRead(notification.id);
+    }
+    if (!mounted) return;
+
+    var shown = notification;
+    for (final item in ref.read(notificationsNotifierProvider).items) {
+      if (item.id == notification.id) {
+        shown = item;
+        break;
+      }
+    }
+
+    final role = ref.read(authStateProvider).user?.role;
+    final path = shown.toPayload().resolveNavigationPath(role: role);
+
+    await NotificationDetailSheet.show(
+      context,
+      notification: shown,
+      onMarkRead: () {},
+      onNavigate: path != null
+          ? () => navigateFromNotificationPath(context, ref, path)
+          : null,
+    );
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.t.common;
-    final dashT = context.t.features.dashboard;
+  Widget build(BuildContext context) {
+    final duesState = ref.watch(duesNotifierProvider);
+    final transactionsState = ref.watch(residentDueTransactionsProvider);
+    final notificationsState = ref.watch(notificationsNotifierProvider);
+    final announcements = notificationsState.items
+        .where((item) => item.type == NotificationType.announcement)
+        .toList(growable: false);
+    final isFeedLoading = transactionsState.isLoading ||
+        (notificationsState.isLoading && announcements.isEmpty);
 
     return ColoredBox(
       color: AppColors.surface,
       child: RefreshIndicator(
-        onRefresh: () => _refresh(ref),
-        color: ResidentHomeColors.blue,
+        onRefresh: _refresh,
+        color: AppColors.primary,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: AppSizes.screenBodyScrollPadding.copyWith(
@@ -49,102 +118,22 @@ class ResidentHomeTab extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ResidentHomeTopShortcutCard(
-                    label: t.debtAndPay,
-                    icon: Icons.account_balance_wallet_rounded,
-                    iconBackground: ResidentHomeColors.topOrange,
-                    onTap: () => context.push('/resident-dashboard/payment'),
-                  ),
-                  const SizedBox(width: 10),
-                  ResidentHomeTopShortcutCard(
-                    label: t.duesStatus,
-                    icon: Icons.warning_amber_rounded,
-                    iconBackground: ResidentHomeColors.topRed,
-                    onTap: onGoToDuesTab,
-                  ),
-                  const SizedBox(width: 10),
-                  ResidentHomeTopShortcutCard(
-                    label: t.myAnnouncements,
-                    icon: Icons.check_rounded,
-                    iconBackground: ResidentHomeColors.topGreen,
-                    iconShape: BoxShape.circle,
-                    onTap: () =>
-                        context.push('/resident-dashboard/notifications'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSizes.spacingL),
-              Text(
-                t.quickActions,
-                style: AppTypography.h4.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 19,
-                ),
+              ResidentDebtSummaryCard(
+                dues: duesState.dues,
+                isLoading: duesState.isLoading,
               ),
               const SizedBox(height: AppSizes.spacingM),
-              SizedBox(
-                height: 228,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      flex: 11,
-                      child: ResidentHomeFeaturedAction(
-                        title: t.debtAndPay,
-                        subtitle: dashT.residentDebtAndPaySubtitle,
-                        onTap: () =>
-                            context.push('/resident-dashboard/payment'),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      flex: 12,
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: ResidentHomeSecondaryAction(
-                              icon: Icons.description_outlined,
-                              iconBackground:
-                                  ResidentHomeColors.secondaryOrangeBg,
-                              iconColor: ResidentHomeColors.topOrange,
-                              label: t.accountSummary,
-                              subtitle: t.accountSummarySubtitle,
-                              onTap: onGoToDuesTab,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Expanded(
-                            child: ResidentHomeSecondaryAction(
-                              icon: Icons.receipt_long_outlined,
-                              iconBackground: ResidentHomeColors.secondaryBlueBg,
-                              iconColor: ResidentHomeColors.blue,
-                              label: t.myReceipts,
-                              subtitle: t.myReceiptsSubtitle,
-                              onTap: () => context.push(
-                                '/resident-dashboard/dekonts',
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Expanded(
-                            child: ResidentHomeSecondaryAction(
-                              icon: Icons.request_page_outlined,
-                              iconBackground: ResidentHomeColors.secondaryBlueBg,
-                              iconColor: ResidentHomeColors.blue,
-                              label: t.myPaymentRequest,
-                              subtitle: t.myPaymentRequestSubtitle,
-                              onTap: onGoToIssuesTab,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              ResidentHomeQuickActionsRow(
+                onGoToDuesTab: widget.onGoToDuesTab,
+                onGoToIssuesTab: widget.onGoToIssuesTab,
+              ),
+              const SizedBox(height: AppSizes.spacingL),
+              ResidentRecentActivitySection(
+                transactions: transactionsState.transactions,
+                announcements: announcements,
+                dues: duesState.dues,
+                isLoading: isFeedLoading,
+                onOpenAnnouncement: _openAnnouncement,
               ),
             ],
           ),

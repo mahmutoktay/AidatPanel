@@ -3,16 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/locations/location_models.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
+import '../../../../shared/widgets/form_step_indicator.dart';
+import '../../../../shared/widgets/form_wizard_scaffold.dart';
+import '../../../../shared/widgets/location_picker_fields.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
-import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/show_due_day_picker.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
-import '../../../buildings/data/cities_data.dart';
 import '../../../buildings/presentation/widgets/building_collection_fields.dart';
 import '../../data/sites_store.dart';
 
@@ -24,7 +25,6 @@ class AddSiteScreen extends ConsumerStatefulWidget {
 }
 
 class _AddSiteScreenState extends ConsumerState<AddSiteScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   final _monthlyDuesController = TextEditingController();
@@ -32,11 +32,15 @@ class _AddSiteScreenState extends ConsumerState<AddSiteScreen> {
   final _collectionAccountTitleController = TextEditingController();
   final _collectionReferenceTemplateController = TextEditingController();
 
-  String? _selectedCity;
-  String? _selectedDistrict;
+  int _step = 0;
+  Province? _selectedProvince;
+  District? _selectedDistrict;
+  Neighborhood? _selectedNeighborhood;
   int _selectedDueDay = 1;
   bool _pickingDueDay = false;
   bool _submitting = false;
+
+  static const int _stepCount = 5;
 
   @override
   void dispose() {
@@ -49,156 +53,101 @@ class _AddSiteScreenState extends ConsumerState<AddSiteScreen> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final t = context.t.features.sites;
-
-    return DashboardSecondaryScaffold(
-      title: t.addSiteTitle,
-      canPop: !_submitting,
-      useMinimalBackButton: true,
-      onBack: _submitting ? null : () => context.pop(),
-      bottomNavigationBar: MinimalStickyActionBar(
-        label: t.createSite,
-        loading: _submitting,
-        onPressed: _onSubmit,
+  List<FormStepDescriptor> _steps(BuildContext context) {
+    final t = context.t.common;
+    return [
+      FormStepDescriptor(
+        label: t.wizardStepSiteName,
+        icon: Icons.location_city_outlined,
       ),
-      body: SafeArea(
-          child: AbsorbPointer(
-            absorbing: _submitting,
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: AppSizes.screenBodyScrollPadding.copyWith(
-                  top: AppSizes.spacingS,
-                  bottom: AppSizes.spacingXL,
-                ),
-                children: [
-                  MinimalSectionLabel(title: context.t.common.basicInfo),
-                  const SizedBox(height: AppSizes.spacingS),
-                  MinimalTextField(
-                    controller: _nameController,
-                    label: t.siteName,
-                    hint: t.siteNameHint,
-                    icon: Icons.location_city_outlined,
-                    required: true,
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? context.t.common.fieldRequired
-                        : null,
-                  ),
-                  const SizedBox(height: AppSizes.spacingFieldSpacing),
-                  MinimalSectionLabel(title: context.t.common.location),
-                  const SizedBox(height: AppSizes.spacingS),
-                  MinimalPickerField(
-                    label: context.t.common.cityRequired.replaceAll(' *', ''),
-                    value: _selectedCity,
-                    hint: context.t.common.selectCity,
-                    icon: Icons.location_on_outlined,
-                    iconColor: AppColors.info,
-                    required: true,
-                    onTap: _showCityPicker,
-                  ),
-                  const SizedBox(height: AppSizes.spacingFieldSpacing),
-                  MinimalPickerField(
-                    label:
-                        context.t.common.districtRequired.replaceAll(' *', ''),
-                    value: _selectedDistrict,
-                    hint: _selectedCity != null
-                        ? context.t.common.selectDistrict
-                        : context.t.common.selectCityFirst,
-                    icon: Icons.map_outlined,
-                    required: true,
-                    enabled: _selectedCity != null,
-                    onTap: _selectedCity != null ? _showDistrictPicker : null,
-                  ),
-                  const SizedBox(height: AppSizes.spacingFieldSpacing),
-                  MinimalTextField(
-                    controller: _addressController,
-                    label: context.t.common.streetAddress,
-                    hint: context.t.common.streetAddressHint,
-                    icon: Icons.home_outlined,
-                    required: true,
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? context.t.common.fieldRequired
-                        : null,
-                  ),
-                  const SizedBox(height: AppSizes.spacingFieldSpacing),
-                  MinimalSectionLabel(title: context.t.common.details),
-                  const SizedBox(height: AppSizes.spacingS),
-                  MinimalTextField(
-                    controller: _monthlyDuesController,
-                    label: context.t.common.monthlyDuesLabel,
-                    hint: context.t.common.monthlyDuesHint,
-                    icon: Icons.payments_outlined,
-                    iconColor: AppColors.warning,
-                    required: true,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    suffix: Text(
-                      '₺',
-                      style: ProfileSettingsUi.fieldValue.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? context.t.common.fieldRequired
-                        : null,
-                  ),
-                  const SizedBox(height: AppSizes.spacingFieldSpacing),
-                  MinimalPickerField(
-                    label: context.t.common.dueDay,
-                    value: '$_selectedDueDay',
-                    hint: context.t.common.selectDueDay,
-                    icon: Icons.event_outlined,
-                    enabled: !_submitting && !_pickingDueDay,
-                    onTap: _showDueDayPicker,
-                  ),
-                  const SizedBox(height: AppSizes.spacingFieldSpacing),
-                  BuildingCollectionFields(
-                    ibanController: _collectionIbanController,
-                    accountTitleController: _collectionAccountTitleController,
-                    referenceTemplateController:
-                        _collectionReferenceTemplateController,
-                  ),
-                ],
-              ),
-            ),
-          ),
+      FormStepDescriptor(
+        label: t.wizardStepLocation,
+        icon: Icons.location_on_outlined,
       ),
-    );
+      FormStepDescriptor(
+        label: t.wizardStepNeighborhoodAddress,
+        icon: Icons.home_outlined,
+      ),
+      FormStepDescriptor(
+        label: t.wizardStepDues,
+        icon: Icons.payments_outlined,
+      ),
+      FormStepDescriptor(
+        label: t.wizardStepRecipient,
+        icon: Icons.account_balance_outlined,
+      ),
+    ];
   }
 
-  void _showCityPicker() {
-    PremiumBottomSheetScaffold.show<void>(
-      context: context,
-      builder: (ctx) => _SearchablePicker(
-        title: context.t.common.selectCityTitle,
-        items: sortedCityNames,
-        selected: _selectedCity,
-        onSelected: (city) {
-          setState(() {
-            _selectedCity = city;
-            _selectedDistrict = null;
-          });
-        },
-      ),
-    );
+  bool get _isLastStep => _step == _stepCount - 1;
+
+  void _onBack() {
+    if (_step == 0) {
+      context.pop();
+      return;
+    }
+    setState(() => _step -= 1);
   }
 
-  void _showDistrictPicker() {
-    final districts = turkishCities[_selectedCity] ?? const [];
-    PremiumBottomSheetScaffold.show<void>(
-      context: context,
-      builder: (ctx) => _SearchablePicker(
-        title: context.t.common.selectDistrictTitle,
-        items: districts,
-        selected: _selectedDistrict,
-        onSelected: (district) {
-          setState(() => _selectedDistrict = district);
-        },
-      ),
-    );
+  void _goNext() {
+    if (_step < _stepCount - 1) {
+      setState(() => _step += 1);
+    }
+  }
+
+  bool _validateCurrentStep() {
+    switch (_step) {
+      case 0:
+        if (_nameController.text.trim().isEmpty) {
+          ref.read(toastProvider.notifier).show(
+                context.t.common.fillRequiredFields,
+                type: ToastType.error,
+              );
+          return false;
+        }
+        return true;
+      case 1:
+        if (_selectedProvince == null || _selectedDistrict == null) {
+          ref.read(toastProvider.notifier).show(
+                context.t.common.selectCityAndDistrict,
+                type: ToastType.error,
+              );
+          return false;
+        }
+        return true;
+      case 2:
+        if (_selectedNeighborhood == null ||
+            _addressController.text.trim().isEmpty) {
+          ref.read(toastProvider.notifier).show(
+                context.t.common.fillRequiredFields,
+                type: ToastType.error,
+              );
+          return false;
+        }
+        return true;
+      case 3:
+        final dueAmount =
+            double.tryParse(_monthlyDuesController.text.trim()) ?? 0;
+        if (dueAmount <= 0) {
+          ref.read(toastProvider.notifier).show(
+                context.t.common.fillRequiredFields,
+                type: ToastType.error,
+              );
+          return false;
+        }
+        return true;
+      default:
+        return true;
+    }
+  }
+
+  void _onPrimaryAction() {
+    if (_isLastStep) {
+      _onSubmit();
+      return;
+    }
+    if (!_validateCurrentStep()) return;
+    _goNext();
   }
 
   Future<void> _showDueDayPicker() async {
@@ -221,22 +170,6 @@ class _AddSiteScreenState extends ConsumerState<AddSiteScreen> {
   Future<void> _onSubmit() async {
     if (_submitting) return;
 
-    final formValid = _formKey.currentState?.validate() ?? false;
-    if (!formValid) {
-      ref.read(toastProvider.notifier).show(
-            context.t.common.fillRequiredFields,
-            type: ToastType.error,
-          );
-      return;
-    }
-    if (_selectedCity == null || _selectedDistrict == null) {
-      ref.read(toastProvider.notifier).show(
-            context.t.common.selectCityAndDistrict,
-            type: ToastType.error,
-          );
-      return;
-    }
-
     final dueAmount =
         double.tryParse(_monthlyDuesController.text.trim()) ?? 0;
     if (dueAmount <= 0) {
@@ -250,7 +183,7 @@ class _AddSiteScreenState extends ConsumerState<AddSiteScreen> {
     setState(() => _submitting = true);
     try {
       final address =
-          '${_addressController.text.trim()}, $_selectedDistrict';
+          '${_addressController.text.trim()}, ${_selectedNeighborhood!.name}, ${_selectedDistrict!.name}';
       final collection = BuildingCollectionInput.fromControllers(
         iban: _collectionIbanController,
         accountTitle: _collectionAccountTitleController,
@@ -260,7 +193,7 @@ class _AddSiteScreenState extends ConsumerState<AddSiteScreen> {
       final id = await ref.read(sitesStoreProvider.notifier).addSite(
             name: _nameController.text.trim(),
             address: address,
-            city: _selectedCity!,
+            city: _selectedProvince!.name,
             dueAmount: dueAmount,
             dueDay: _selectedDueDay,
             currency: 'TRY',
@@ -287,156 +220,128 @@ class _AddSiteScreenState extends ConsumerState<AddSiteScreen> {
       if (mounted) setState(() => _submitting = false);
     }
   }
-}
 
-class _SearchablePicker extends StatefulWidget {
-  final String title;
-  final List<String> items;
-  final String? selected;
-  final ValueChanged<String> onSelected;
+  Widget _buildStepBody() {
+    final t = context.t.features.sites;
 
-  const _SearchablePicker({
-    required this.title,
-    required this.items,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  @override
-  State<_SearchablePicker> createState() => _SearchablePickerState();
-}
-
-class _SearchablePickerState extends State<_SearchablePicker> {
-  String _query = '';
+    switch (_step) {
+      case 0:
+        return MinimalTextField(
+          controller: _nameController,
+          label: t.siteName,
+          hint: t.siteNameHint,
+          icon: Icons.location_city_outlined,
+          required: true,
+          autofocus: true,
+        );
+      case 1:
+        return LocationPickerFields(
+          selectedProvince: _selectedProvince,
+          selectedDistrict: _selectedDistrict,
+          onProvinceChanged: (p) => setState(() {
+            _selectedProvince = p;
+            _selectedDistrict = null;
+            _selectedNeighborhood = null;
+          }),
+          onDistrictChanged: (d) => setState(() {
+            _selectedDistrict = d;
+            _selectedNeighborhood = null;
+          }),
+        );
+      case 2:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_selectedProvince != null && _selectedDistrict != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
+                child: Text(
+                  '${_selectedProvince!.name}, ${_selectedDistrict!.name}',
+                  style: ProfileSettingsUi.handle.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            LocationPickerFields(
+              selectedProvince: _selectedProvince,
+              selectedDistrict: _selectedDistrict,
+              selectedNeighborhood: _selectedNeighborhood,
+              showCity: false,
+              showDistrict: false,
+              showNeighborhood: true,
+              onProvinceChanged: (_) {},
+              onDistrictChanged: (_) {},
+              onNeighborhoodChanged: (n) =>
+                  setState(() => _selectedNeighborhood = n),
+            ),
+            const SizedBox(height: AppSizes.spacingFieldSpacing),
+            MinimalTextField(
+              controller: _addressController,
+              label: context.t.common.streetAddress,
+              hint: context.t.common.streetAddressHint,
+              icon: Icons.signpost_outlined,
+              required: true,
+            ),
+          ],
+        );
+      case 3:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            MinimalTextField(
+              controller: _monthlyDuesController,
+              label: context.t.common.monthlyDuesLabel,
+              hint: context.t.common.monthlyDuesHint,
+              icon: Icons.payments_outlined,
+              iconColor: AppColors.warning,
+              required: true,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              suffix: Text(
+                '₺',
+                style: ProfileSettingsUi.fieldValue.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSizes.spacingFieldSpacing),
+            MinimalPickerField(
+              label: context.t.common.dueDay,
+              value: '$_selectedDueDay',
+              hint: context.t.common.selectDueDay,
+              icon: Icons.event_outlined,
+              enabled: !_submitting && !_pickingDueDay,
+              onTap: _showDueDayPicker,
+            ),
+          ],
+        );
+      case 4:
+        return BuildingCollectionFields(
+          ibanController: _collectionIbanController,
+          accountTitleController: _collectionAccountTitleController,
+          referenceTemplateController: _collectionReferenceTemplateController,
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final filtered = widget.items
-        .where((s) => s.toLowerCase().contains(_query.toLowerCase()))
-        .toList();
+    final t = context.t.features.sites;
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.75,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      expand: false,
-      builder: (_, scrollController) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: AppSizes.spacingS),
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.lineLight,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSizes.dashboardScreenPaddingHorizontal,
-              AppSizes.spacingM,
-              AppSizes.dashboardScreenPaddingHorizontal,
-              AppSizes.spacingS,
-            ),
-            child: Text(widget.title, style: ProfileSettingsUi.title),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.dashboardScreenPaddingHorizontal,
-            ),
-            child: MinimalSearchField(
-              hint: context.t.common.search,
-              onChanged: (v) => setState(() => _query = v),
-            ),
-          ),
-          const SizedBox(height: AppSizes.spacingS),
-          Expanded(
-            child: filtered.isEmpty
-                ? Center(
-                    child: Text(
-                      context.t.common.noResults,
-                      style: ProfileSettingsUi.handle,
-                    ),
-                  )
-                : ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.dashboardScreenPaddingHorizontal,
-                    ),
-                    itemCount: filtered.length,
-                    itemBuilder: (_, index) {
-                      final item = filtered[index];
-                      final isSelected = item == widget.selected;
-                      return Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: AppSizes.spacingXS,
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {
-                              widget.onSelected(item);
-                              context.pop();
-                            },
-                            borderRadius: BorderRadius.circular(
-                              ProfileSettingsUi.fieldRadius,
-                            ),
-                            child: Container(
-                              constraints: const BoxConstraints(
-                                minHeight: AppSizes.minTouchTarget,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSizes.spacingM,
-                                vertical: AppSizes.spacingS,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? ProfileSettingsUi.background
-                                    : ProfileSettingsUi.fieldFill,
-                                borderRadius: BorderRadius.circular(
-                                  ProfileSettingsUi.fieldRadius,
-                                ),
-                                border: isSelected
-                                    ? Border.all(
-                                        color: ProfileSettingsUi.ink,
-                                        width: ProfileSettingsUi
-                                            .fieldFocusBorderWidth,
-                                      )
-                                    : null,
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      item,
-                                      style: ProfileSettingsUi.fieldValue
-                                          .copyWith(
-                                        fontWeight: isSelected
-                                            ? FontWeight.w700
-                                            : FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                  if (isSelected)
-                                    const Icon(
-                                      Icons.check_rounded,
-                                      color: AppColors.statusGreen,
-                                      size: 22,
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
+    return FormWizardScaffold(
+      title: t.addSiteTitle,
+      steps: _steps(context),
+      currentStep: _step,
+      stepBody: _buildStepBody(),
+      primaryActionLabel:
+          _isLastStep ? t.createSite : context.t.common.wizardNext,
+      onPrimaryAction: _onPrimaryAction,
+      primaryLoading: _submitting,
+      absorbing: _submitting,
+      onBack: _onBack,
+      canPop: _step == 0,
     );
   }
 }

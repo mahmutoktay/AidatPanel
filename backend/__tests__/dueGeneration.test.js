@@ -7,11 +7,16 @@ import {
 
 describe("dueGeneration", () => {
   test("buildDueRowsFromMonth üretir (Haziran–Aralık = 7 ay)", () => {
-    const rows = buildDueRowsFromMonth(["apt-1"], 6, 2026, {
-      dueAmount: 500,
-      dueDay: 5,
-      currency: "TRY",
-    });
+    const rows = buildDueRowsFromMonth(
+      [{ id: "apt-1", residentName: "Ali Veli" }],
+      6,
+      2026,
+      {
+        dueAmount: 500,
+        dueDay: 5,
+        currency: "TRY",
+      },
+    );
     expect(rows).toHaveLength(7);
     expect(rows[0]).toMatchObject({
       apartmentId: "apt-1",
@@ -19,16 +24,24 @@ describe("dueGeneration", () => {
       year: 2026,
       status: "PENDING",
       currency: "TRY",
+      residentNameSnapshot: "Ali Veli",
     });
     expect(rows[6].month).toBe(12);
   });
 
   test("dueAmount yoksa boş dizi döner", () => {
-    expect(buildDueRowsFromMonth(["apt-1"], 1, 2026, { dueAmount: null })).toEqual([]);
+    expect(
+      buildDueRowsFromMonth([{ id: "apt-1" }], 1, 2026, { dueAmount: null }),
+    ).toEqual([]);
   });
 
   test("filterNewDueRows mevcut kayıtları atlar", () => {
-    const rows = buildDueRowsFromMonth(["a1", "a2"], 1, 2026, { dueAmount: 100 });
+    const rows = buildDueRowsFromMonth(
+      [{ id: "a1" }, { id: "a2" }],
+      1,
+      2026,
+      { dueAmount: 100 },
+    );
     const keys = dueLookupKeys([{ apartmentId: "a1", month: 1 }]);
     const fresh = filterNewDueRows(rows, keys);
     expect(fresh).toHaveLength(rows.length - 1);
@@ -36,7 +49,7 @@ describe("dueGeneration", () => {
   });
 
   test("buildDueRowsForApartments İstanbul ayından yıl sonuna üretir", () => {
-    const rows = buildDueRowsForApartments(["apt-x"], {
+    const rows = buildDueRowsForApartments([{ id: "apt-x" }], {
       dueAmount: 200,
       dueDay: 1,
     });

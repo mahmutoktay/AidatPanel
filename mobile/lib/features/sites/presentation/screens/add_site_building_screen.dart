@@ -4,20 +4,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
+import '../../../../shared/widgets/app_back_button.dart';
+import '../../../../shared/widgets/form_step_indicator.dart';
+import '../../../../shared/widgets/form_wizard_scaffold.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
+import '../../../../shared/widgets/number_grid_selector.dart';
 import '../../../../shared/widgets/show_due_day_picker.dart';
-import '../../../../core/utils/user_error_message.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/presentation/widgets/building_collection_fields.dart';
 import '../../data/sites_store.dart';
 
 const int _kFloorsMin = 1;
 const int _kFloorsMax = 200;
+const int _kFloorsQuickMax = 15;
 const int _kApartmentsPerFloorMin = 1;
 const int _kApartmentsPerFloorMax = 50;
+const int _kApartmentsQuickMax = 5;
 
 class AddSiteBuildingScreen extends ConsumerStatefulWidget {
   final String siteId;
@@ -30,30 +35,30 @@ class AddSiteBuildingScreen extends ConsumerStatefulWidget {
 }
 
 class _AddSiteBuildingScreenState extends ConsumerState<AddSiteBuildingScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _blockLabelController = TextEditingController();
   final _nameController = TextEditingController();
   final _addressExtraController = TextEditingController();
-  final _floorsController = TextEditingController();
-  final _apartmentsPerFloorController = TextEditingController();
   final _monthlyDuesController = TextEditingController();
   final _collectionIbanController = TextEditingController();
   final _collectionAccountTitleController = TextEditingController();
   final _collectionReferenceTemplateController = TextEditingController();
 
+  int _step = 0;
+  int? _totalFloors;
+  int? _apartmentsPerFloor;
   bool _overrideDue = false;
   bool _overrideCollection = false;
   int _selectedDueDay = 1;
   bool _pickingDueDay = false;
   bool _submitting = false;
 
+  static const int _stepCount = 4;
+
   @override
   void dispose() {
     _blockLabelController.dispose();
     _nameController.dispose();
     _addressExtraController.dispose();
-    _floorsController.dispose();
-    _apartmentsPerFloorController.dispose();
     _monthlyDuesController.dispose();
     _collectionIbanController.dispose();
     _collectionAccountTitleController.dispose();
@@ -61,198 +66,82 @@ class _AddSiteBuildingScreenState extends ConsumerState<AddSiteBuildingScreen> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final t = context.t.features.sites;
-    final siteAsync = ref.watch(siteDetailProvider(widget.siteId));
-
-    return DashboardSecondaryScaffold(
-      title: t.addBlockTitle,
-      canPop: !_submitting,
-      useMinimalBackButton: true,
-      onBack: _submitting ? null : () => context.pop(),
-      bottomNavigationBar: MinimalStickyActionBar(
-        label: t.createBlock,
-        loading: _submitting,
-        onPressed: _onSubmit,
+  List<FormStepDescriptor> _steps(BuildContext context) {
+    final t = context.t.common;
+    return [
+      FormStepDescriptor(
+        label: t.wizardStepBlockInfo,
+        icon: Icons.view_module_outlined,
       ),
-      body: siteAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(userFacingError(e))),
-        data: (detail) {
-          return SafeArea(
-            child: AbsorbPointer(
-              absorbing: _submitting,
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: AppSizes.screenBodyScrollPadding.copyWith(
-                    top: AppSizes.spacingS,
-                    bottom: AppSizes.spacingXL,
-                  ),
-                  children: [
-                    MinimalSectionLabel(
-                      title: t.blockSection,
-                      subtitle: detail.site.name,
-                    ),
-                    const SizedBox(height: AppSizes.spacingS),
-                    MinimalTextField(
-                      controller: _blockLabelController,
-                      label: t.blockLabel,
-                      hint: t.blockLabelHint,
-                      icon: Icons.view_module_outlined,
-                      required: true,
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? context.t.common.fieldRequired
-                          : null,
-                    ),
-                    const SizedBox(height: AppSizes.spacingFieldSpacing),
-                    MinimalTextField(
-                      controller: _nameController,
-                      label: t.blockNameOptional,
-                      hint: t.blockNameHint,
-                      icon: Icons.apartment_outlined,
-                    ),
-                    const SizedBox(height: AppSizes.spacingFieldSpacing),
-                    MinimalTextField(
-                      controller: _addressExtraController,
-                      label: t.addressExtra,
-                      hint: t.addressExtraHint,
-                      icon: Icons.place_outlined,
-                    ),
-                    const SizedBox(height: AppSizes.spacingFieldSpacing),
-                    MinimalSectionLabel(title: context.t.common.details),
-                    const SizedBox(height: AppSizes.spacingS),
-                    IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: MinimalTextField(
-                              controller: _floorsController,
-                              label: context.t.common.floorCount,
-                              hint: context.t.common.floorCountHint,
-                              icon: Icons.apartment_outlined,
-                              required: true,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              validator: (v) => _validateRange(
-                                v,
-                                min: _kFloorsMin,
-                                max: _kFloorsMax,
-                                rangeError:
-                                    context.t.common.floorRangeError,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: AppSizes.spacingS),
-                          Expanded(
-                            child: MinimalTextField(
-                              controller: _apartmentsPerFloorController,
-                              label: context.t.common.apartmentsPerFloor,
-                              hint: context.t.common.apartmentsPerFloorHint,
-                              icon: Icons.door_front_door_outlined,
-                              required: true,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              validator: (v) => _validateRange(
-                                v,
-                                min: _kApartmentsPerFloorMin,
-                                max: _kApartmentsPerFloorMax,
-                                rangeError: context
-                                    .t.common.apartmentsPerFloorRangeError,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: AppSizes.spacingFieldSpacing),
-                    SwitchListTile.adaptive(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        t.overrideDue,
-                        style: ProfileSettingsUi.fieldValue,
-                      ),
-                      subtitle: Text(
-                        t.overrideDueHint,
-                        style: ProfileSettingsUi.handle,
-                      ),
-                      value: _overrideDue,
-                      onChanged: (v) => setState(() => _overrideDue = v),
-                    ),
-                    if (_overrideDue) ...[
-                      MinimalTextField(
-                        controller: _monthlyDuesController,
-                        label: context.t.common.monthlyDuesLabel,
-                        hint: context.t.common.monthlyDuesHint,
-                        icon: Icons.payments_outlined,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                      ),
-                      const SizedBox(height: AppSizes.spacingFieldSpacing),
-                      MinimalPickerField(
-                        label: context.t.common.dueDay,
-                        value: '$_selectedDueDay',
-                        hint: context.t.common.selectDueDay,
-                        icon: Icons.event_outlined,
-                        enabled: !_submitting && !_pickingDueDay,
-                        onTap: _showDueDayPicker,
-                      ),
-                    ],
-                    const SizedBox(height: AppSizes.spacingFieldSpacing),
-                    SwitchListTile.adaptive(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        t.overrideCollection,
-                        style: ProfileSettingsUi.fieldValue,
-                      ),
-                      subtitle: Text(
-                        t.overrideCollectionHint,
-                        style: ProfileSettingsUi.handle,
-                      ),
-                      value: _overrideCollection,
-                      onChanged: (v) =>
-                          setState(() => _overrideCollection = v),
-                    ),
-                    if (_overrideCollection) ...[
-                      const SizedBox(height: AppSizes.spacingS),
-                      BuildingCollectionFields(
-                        ibanController: _collectionIbanController,
-                        accountTitleController:
-                            _collectionAccountTitleController,
-                        referenceTemplateController:
-                            _collectionReferenceTemplateController,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
+      FormStepDescriptor(
+        label: t.wizardStepFloors,
+        icon: Icons.layers_outlined,
       ),
-    );
+      FormStepDescriptor(
+        label: t.wizardStepApartments,
+        icon: Icons.door_front_door_outlined,
+      ),
+      FormStepDescriptor(
+        label: t.wizardStepSiteOverrides,
+        icon: Icons.tune_outlined,
+      ),
+    ];
   }
 
-  String? _validateRange(
-    String? value, {
-    required int min,
-    required int max,
-    required String rangeError,
-  }) {
-    final raw = value?.trim() ?? '';
-    if (raw.isEmpty) return context.t.common.fieldRequired;
-    final n = int.tryParse(raw);
-    if (n == null || n < min || n > max) return rangeError;
-    return null;
+  bool get _isGridStep => _step == 1 || _step == 2;
+
+  bool get _isLastStep => _step == _stepCount - 1;
+
+  void _onBack() {
+    if (_step == 0) {
+      context.pop();
+      return;
+    }
+    setState(() => _step -= 1);
+  }
+
+  void _goNext() {
+    if (_step < _stepCount - 1) {
+      setState(() => _step += 1);
+    }
+  }
+
+  bool _validateCurrentStep() {
+    switch (_step) {
+      case 0:
+        if (_blockLabelController.text.trim().isEmpty) {
+          ref.read(toastProvider.notifier).show(
+                context.t.common.fillRequiredFields,
+                type: ToastType.error,
+              );
+          return false;
+        }
+        return true;
+      case 3:
+        if (_overrideDue) {
+          final dueAmount =
+              double.tryParse(_monthlyDuesController.text.trim()) ?? 0;
+          if (dueAmount <= 0) {
+            ref.read(toastProvider.notifier).show(
+                  context.t.common.fillRequiredFields,
+                  type: ToastType.error,
+                );
+            return false;
+          }
+        }
+        return true;
+      default:
+        return true;
+    }
+  }
+
+  void _onPrimaryAction() {
+    if (_isLastStep) {
+      _onSubmit();
+      return;
+    }
+    if (!_validateCurrentStep()) return;
+    _goNext();
   }
 
   Future<void> _showDueDayPicker() async {
@@ -274,12 +163,8 @@ class _AddSiteBuildingScreenState extends ConsumerState<AddSiteBuildingScreen> {
 
   Future<void> _onSubmit() async {
     if (_submitting) return;
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-
-    final floors = int.tryParse(_floorsController.text.trim());
-    final apartmentsPerFloor =
-        int.tryParse(_apartmentsPerFloorController.text.trim());
-    if (floors == null || apartmentsPerFloor == null) return;
+    if (_totalFloors == null || _apartmentsPerFloor == null) return;
+    if (!_validateCurrentStep()) return;
 
     double? dueAmount;
     if (_overrideDue) {
@@ -313,8 +198,8 @@ class _AddSiteBuildingScreenState extends ConsumerState<AddSiteBuildingScreen> {
             addressExtra: _addressExtraController.text.trim().isEmpty
                 ? null
                 : _addressExtraController.text.trim(),
-            totalFloors: floors,
-            apartmentsPerFloor: apartmentsPerFloor,
+            totalFloors: _totalFloors!,
+            apartmentsPerFloor: _apartmentsPerFloor!,
             dueAmount: _overrideDue ? dueAmount : null,
             dueDay: _overrideDue ? _selectedDueDay : null,
             collectionIban: collection?.collectionIban,
@@ -339,5 +224,208 @@ class _AddSiteBuildingScreenState extends ConsumerState<AddSiteBuildingScreen> {
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
+  }
+
+  Widget _buildStepBody(String siteName) {
+    final t = context.t.features.sites;
+
+    switch (_step) {
+      case 0:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            MinimalSectionLabel(
+              title: t.blockSection,
+              subtitle: siteName,
+            ),
+            const SizedBox(height: AppSizes.spacingS),
+            MinimalTextField(
+              controller: _blockLabelController,
+              label: t.blockLabel,
+              hint: t.blockLabelHint,
+              icon: Icons.view_module_outlined,
+              required: true,
+              autofocus: true,
+            ),
+            const SizedBox(height: AppSizes.spacingFieldSpacing),
+            MinimalTextField(
+              controller: _nameController,
+              label: t.blockNameOptional,
+              hint: t.blockNameHint,
+              icon: Icons.apartment_outlined,
+            ),
+            const SizedBox(height: AppSizes.spacingFieldSpacing),
+            MinimalTextField(
+              controller: _addressExtraController,
+              label: t.addressExtra,
+              hint: t.addressExtraHint,
+              icon: Icons.place_outlined,
+            ),
+          ],
+        );
+      case 1:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              context.t.common.wizardPickFloorCount,
+              style: ProfileSettingsUi.fieldValue.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: AppSizes.spacingM),
+            NumberGridSelector(
+              min: _kFloorsMin,
+              maxQuickPick: _kFloorsQuickMax,
+              gridColumns: 5,
+              manualMax: _kFloorsMax,
+              selected: _totalFloors,
+              onQuickPick: (value) {
+                setState(() => _totalFloors = value);
+                _goNext();
+              },
+              onManualConfirm: (value) {
+                setState(() => _totalFloors = value);
+                _goNext();
+              },
+            ),
+          ],
+        );
+      case 2:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              context.t.common.wizardPickApartmentCount,
+              style: ProfileSettingsUi.fieldValue.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: AppSizes.spacingM),
+            NumberGridSelector(
+              min: _kApartmentsPerFloorMin,
+              maxQuickPick: _kApartmentsQuickMax,
+              gridColumns: 5,
+              manualMax: _kApartmentsPerFloorMax,
+              selected: _apartmentsPerFloor,
+              onQuickPick: (value) {
+                setState(() => _apartmentsPerFloor = value);
+                _goNext();
+              },
+              onManualConfirm: (value) {
+                setState(() => _apartmentsPerFloor = value);
+                _goNext();
+              },
+            ),
+          ],
+        );
+      case 3:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                t.overrideDue,
+                style: ProfileSettingsUi.fieldValue,
+              ),
+              subtitle: Text(
+                t.overrideDueHint,
+                style: ProfileSettingsUi.handle,
+              ),
+              value: _overrideDue,
+              onChanged: (v) => setState(() => _overrideDue = v),
+            ),
+            if (_overrideDue) ...[
+              const SizedBox(height: AppSizes.spacingS),
+              MinimalTextField(
+                controller: _monthlyDuesController,
+                label: context.t.common.monthlyDuesLabel,
+                hint: context.t.common.monthlyDuesHint,
+                icon: Icons.payments_outlined,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+              const SizedBox(height: AppSizes.spacingFieldSpacing),
+              MinimalPickerField(
+                label: context.t.common.dueDay,
+                value: '$_selectedDueDay',
+                hint: context.t.common.selectDueDay,
+                icon: Icons.event_outlined,
+                enabled: !_submitting && !_pickingDueDay,
+                onTap: _showDueDayPicker,
+              ),
+            ],
+            const SizedBox(height: AppSizes.spacingFieldSpacing),
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                t.overrideCollection,
+                style: ProfileSettingsUi.fieldValue,
+              ),
+              subtitle: Text(
+                t.overrideCollectionHint,
+                style: ProfileSettingsUi.handle,
+              ),
+              value: _overrideCollection,
+              onChanged: (v) => setState(() => _overrideCollection = v),
+            ),
+            if (_overrideCollection) ...[
+              const SizedBox(height: AppSizes.spacingS),
+              BuildingCollectionFields(
+                ibanController: _collectionIbanController,
+                accountTitleController: _collectionAccountTitleController,
+                referenceTemplateController:
+                    _collectionReferenceTemplateController,
+              ),
+            ],
+          ],
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t.features.sites;
+    final siteAsync = ref.watch(siteDetailProvider(widget.siteId));
+
+    return siteAsync.when(
+      loading: () => Scaffold(
+        appBar: AppBar(
+          title: Text(t.addBlockTitle),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: AppBackButton(onPressed: () => context.pop()),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => Scaffold(
+        appBar: AppBar(
+          title: Text(t.addBlockTitle),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: AppBackButton(onPressed: () => context.pop()),
+          ),
+        ),
+        body: Center(child: Text(userFacingError(e))),
+      ),
+      data: (detail) => FormWizardScaffold(
+        title: t.addBlockTitle,
+        steps: _steps(context),
+        currentStep: _step,
+        stepBody: _buildStepBody(detail.site.name),
+        primaryActionLabel:
+            _isLastStep ? t.createBlock : context.t.common.wizardNext,
+        onPrimaryAction: _onPrimaryAction,
+        primaryLoading: _submitting,
+        showStepActions: !_isGridStep,
+        absorbing: _submitting,
+        onBack: _onBack,
+        canPop: _step == 0,
+      ),
+    );
   }
 }

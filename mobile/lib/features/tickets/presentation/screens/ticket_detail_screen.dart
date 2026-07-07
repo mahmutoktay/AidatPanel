@@ -120,7 +120,10 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSizes.spacingM),
-                TicketDetailUpdatesTimeline(updates: ticket.updates),
+                TicketDetailUpdatesTimeline(
+                  updates: ticket.updates,
+                  viewerIsResident: !isManager,
+                ),
               ],
               if (!isManager) ...[
                 const SizedBox(height: AppSizes.spacingL),

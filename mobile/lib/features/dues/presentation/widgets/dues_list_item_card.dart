@@ -13,13 +13,13 @@ class DuesListItemCard extends StatelessWidget {
   final DueEntity due;
   final String currencySymbol;
   final bool highlighted;
-  final VoidCallback? onMenuTap;
+  final VoidCallback? onTap;
 
   const DuesListItemCard({
     super.key,
     required this.due,
     required this.currencySymbol,
-    this.onMenuTap,
+    this.onTap,
     this.highlighted = false,
   });
 
@@ -34,61 +34,63 @@ class DuesListItemCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
-      child: Container(
-        decoration: DuesScreenStyle.whiteCard().copyWith(
-          border: highlighted
-              ? Border.all(color: AppColors.statusBlue, width: 2)
-              : null,
-        ),
-        padding: const EdgeInsets.all(AppSizes.spacingM),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: visual.bg,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.door_front_door_rounded,
-                color: visual.fg,
-                size: 24,
-              ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(DuesScreenStyle.cardRadius),
+          child: Ink(
+            decoration: DuesScreenStyle.whiteCard().copyWith(
+              border: highlighted
+                  ? Border.all(color: AppColors.statusBlue, width: 2)
+                  : null,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${ApartmentUiUtils.formatApartmentLabel(context, due.apartmentNumber)} • ${due.resident?.name ?? context.t.common.vacantBadge}',
-                    style: AppTypography.body1.copyWith(
-                      color: AppColors.inkDark,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    meta,
-                    style: AppTypography.body2.copyWith(
-                      color: AppColors.mutedText,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            padding: const EdgeInsets.all(AppSizes.spacingM),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: visual.bg,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.door_front_door_rounded,
+                    color: visual.fg,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${ApartmentUiUtils.formatApartmentLabel(context, due.apartmentNumber)} • ${due.resident?.name ?? context.t.common.vacantBadge}',
+                        style: AppTypography.body1.copyWith(
+                          color: AppColors.inkDark,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        meta,
+                        style: AppTypography.body2.copyWith(
+                          color: AppColors.mutedText,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -107,25 +109,9 @@ class DuesListItemCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 4),
-                if (onMenuTap != null)
-                  SizedBox(
-                    width: AppSizes.minTouchTargetComfort,
-                    height: AppSizes.minTouchTargetComfort,
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      tooltip: context.t.common.status,
-                      icon: Icon(
-                        Icons.more_vert,
-                        size: AppSizes.iconSize,
-                        color: AppColors.mutedText,
-                      ),
-                      onPressed: onMenuTap,
-                    ),
-                  ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

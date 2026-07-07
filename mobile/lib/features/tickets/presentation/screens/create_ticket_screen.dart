@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -10,12 +13,11 @@ import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
-import '../../../../shared/widgets/premium_filter_picker.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/tickets_provider.dart';
-import '../utils/ticket_labels.dart';
+import '../utils/ticket_form_helpers.dart';
 
 class CreateTicketScreen extends ConsumerStatefulWidget {
   const CreateTicketScreen({super.key});
@@ -26,52 +28,48 @@ class CreateTicketScreen extends ConsumerStatefulWidget {
 
 class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _detailController = TextEditingController();
   final _descriptionController = TextEditingController();
-  TicketCategory _category = TicketCategory.malfunction;
+  final ImagePicker _imagePicker = ImagePicker();
+  Uint8List? _pickedImageBytes;
+  String? _pickedImageName;
   bool _submitting = false;
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _detailController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
 
-  IconData _categoryIcon(TicketCategory category) {
-    switch (category) {
-      case TicketCategory.complaint:
-        return Icons.report_problem_outlined;
-      case TicketCategory.request:
-        return Icons.help_outline_rounded;
-      case TicketCategory.malfunction:
-        return Icons.build_outlined;
-      case TicketCategory.other:
-        return Icons.more_horiz_rounded;
+  Future<void> _pickImage() async {
+    if (_submitting) return;
+    try {
+      final file = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 2048,
+        maxHeight: 2048,
+        imageQuality: 85,
+      );
+      if (file == null || !mounted) return;
+      final bytes = await file.readAsBytes();
+      if (!mounted) return;
+      setState(() {
+        _pickedImageBytes = bytes;
+        _pickedImageName = file.name;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      ref.read(toastProvider.notifier).show(
+            context.t.features.tickets.attachmentPickFailed,
+            type: ToastType.error,
+          );
     }
   }
 
-  Future<void> _pickCategory() async {
-    if (_submitting) return;
-    final t = context.t.features.tickets;
-    final picked = await showPremiumSingleSelectPicker<TicketCategory>(
-      context: context,
-      title: t.fieldCategory,
-      selected: _category,
-      options: [
-        for (final category in TicketCategory.values)
-          PremiumFilterPickerOption(
-            value: category,
-            label: category.label(context),
-            icon: _categoryIcon(category),
-          ),
-      ],
-    );
-    if (picked != null && mounted) {
-      setState(() => _category = picked);
-    }
+  void _removeImage() {
+    setState(() {
+      _pickedImageBytes = null;
+      _pickedImageName = null;
+    });
   }
 
   @override
@@ -79,7 +77,7 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
     final t = context.t.features.tickets;
 
     return DashboardSecondaryScaffold(
-      title: t.reportFaultTitle,
+      title: t.newTicket,
       canPop: !_submitting,
       onBack: _submitting ? () {} : null,
       onFallback: () {
@@ -102,7 +100,7 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
                       color: Colors.white,
                     ),
                   )
-                : Text(t.submit),
+                : Text(t.createTitle),
           ),
         ),
       ),
@@ -118,41 +116,12 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
                 bottom: AppSizes.spacingXL,
               ),
               children: [
-                _PickerField(
-                  label: t.fieldCategory,
-                  value: _category.label(context),
-                  onTap: _pickCategory,
-                ),
-                const SizedBox(height: AppSizes.spacingM),
-                _LabeledField(
-                  controller: _titleController,
-                  label: t.fieldTitle,
-                  hint: t.fieldTitleHint,
-                  validator: (v) {
-                    final raw = v?.trim() ?? '';
-                    if (raw.isEmpty) return context.t.common.fieldRequired;
-                    if (raw.length < 3) return t.titleTooShort;
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSizes.spacingM),
-                _LabeledField(
-                  controller: _detailController,
-                  label: t.fieldDetail,
-                  hint: t.fieldDetailHint,
-                  validator: (v) {
-                    final raw = v?.trim() ?? '';
-                    if (raw.isEmpty) return context.t.common.fieldRequired;
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSizes.spacingM),
                 _LabeledField(
                   controller: _descriptionController,
                   label: t.fieldDescription,
                   hint: t.fieldDescriptionHint,
-                  maxLines: 5,
-                  maxLength: 500,
+                  maxLines: 6,
+                  maxLength: 2000,
                   validator: (v) {
                     final raw = v?.trim() ?? '';
                     if (raw.isEmpty) return context.t.common.fieldRequired;
@@ -161,12 +130,12 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
                   },
                 ),
                 const SizedBox(height: AppSizes.spacingM),
-                _AttachmentPlaceholder(
+                _AttachmentSection(
                   hint: t.attachmentHint,
-                  onTap: () => ref.read(toastProvider.notifier).show(
-                        t.attachmentComingSoon,
-                        type: ToastType.info,
-                      ),
+                  imageBytes: _pickedImageBytes,
+                  imageName: _pickedImageName,
+                  onPick: _pickImage,
+                  onRemove: _removeImage,
                 ),
               ],
             ),
@@ -187,22 +156,25 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
       return;
     }
 
-    final detail = _detailController.text.trim();
     final description = _descriptionController.text.trim();
-    final fullDescription = detail.isEmpty
-        ? description
-        : '$detail\n\n$description';
+    final title = deriveTicketTitle(description);
 
     setState(() => _submitting = true);
     try {
       final ok = await ref.read(ticketsNotifierProvider.notifier).createTicket(
             apartmentId: apartmentId,
-            title: _titleController.text,
-            description: fullDescription,
-            category: _category,
+            title: title,
+            description: description,
+            category: TicketCategory.request,
           );
       if (!mounted) return;
       if (ok) {
+        if (_pickedImageBytes != null) {
+          ref.read(toastProvider.notifier).show(
+                context.t.features.tickets.attachmentComingSoon,
+                type: ToastType.info,
+              );
+        }
         ref.read(toastProvider.notifier).show(
               context.t.features.tickets.createSuccess,
               type: ToastType.success,
@@ -240,58 +212,6 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
   }
 }
 
-class _PickerField extends StatelessWidget {
-  const _PickerField({
-    required this.label,
-    required this.value,
-    required this.onTap,
-  });
-
-  final String label;
-  final String value;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(label, style: AppTypography.body2.copyWith(fontWeight: FontWeight.w600)),
-        const SizedBox(height: AppSizes.spacingXS),
-        Material(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSizes.spacingM,
-                vertical: AppSizes.spacingM,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      value,
-                      style: AppTypography.body1,
-                    ),
-                  ),
-                  const Icon(Icons.keyboard_arrow_down_rounded),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _LabeledField extends StatelessWidget {
   const _LabeledField({
     required this.controller,
@@ -314,7 +234,10 @@ class _LabeledField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(label, style: AppTypography.body2.copyWith(fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: AppTypography.body2.copyWith(fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: AppSizes.spacingXS),
         TextFormField(
           controller: controller,
@@ -332,31 +255,70 @@ class _LabeledField extends StatelessWidget {
   }
 }
 
-class _AttachmentPlaceholder extends StatelessWidget {
-  const _AttachmentPlaceholder({
+class _AttachmentSection extends StatelessWidget {
+  const _AttachmentSection({
     required this.hint,
-    required this.onTap,
+    required this.imageBytes,
+    required this.imageName,
+    required this.onPick,
+    required this.onRemove,
   });
 
   final String hint;
-  final VoidCallback onTap;
+  final Uint8List? imageBytes;
+  final String? imageName;
+  final VoidCallback onPick;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
+    if (imageBytes != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+            child: Image.memory(
+              imageBytes!,
+              height: 180,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingS),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  imageName ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: onRemove,
+                child: Text(context.t.common.remove),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: onPick,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(AppSizes.spacingL),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-            border: Border.all(
-              color: AppColors.border,
-              style: BorderStyle.solid,
-            ),
+            border: Border.all(color: AppColors.border),
             color: AppColors.fill,
           ),
           child: Column(

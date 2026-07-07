@@ -10,8 +10,13 @@ import '../../domain/entities/ticket_update_entity.dart';
 
 class TicketDetailUpdatesTimeline extends StatelessWidget {
   final List<TicketUpdateEntity> updates;
+  final bool viewerIsResident;
 
-  const TicketDetailUpdatesTimeline({super.key, required this.updates});
+  const TicketDetailUpdatesTimeline({
+    super.key,
+    required this.updates,
+    this.viewerIsResident = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +26,7 @@ class TicketDetailUpdatesTimeline extends StatelessWidget {
           TicketDetailTimelineEntry(
             update: updates[i],
             isLast: i == updates.length - 1,
+            viewerIsResident: viewerIsResident,
           ),
       ],
     );
@@ -30,21 +36,26 @@ class TicketDetailUpdatesTimeline extends StatelessWidget {
 class TicketDetailTimelineEntry extends StatelessWidget {
   final TicketUpdateEntity update;
   final bool isLast;
+  final bool viewerIsResident;
 
   const TicketDetailTimelineEntry({
     super.key,
     required this.update,
     required this.isLast,
+    this.viewerIsResident = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.tickets;
     final dateStr = AppDateFormat.dateShort(update.createdAt);
-    final isManager = update.fromRole == 'MANAGER';
-    final themeColor = isManager ? AppColors.primary : AppColors.success;
-    final roleText =
-        isManager ? t.managerUpdateLabel : t.residentUpdateLabel;
+    final isManagerUpdate = update.fromRole == 'MANAGER';
+    final themeColor = isManagerUpdate ? AppColors.primary : AppColors.success;
+    final roleText = viewerIsResident
+        ? (isManagerUpdate
+            ? t.managerUpdateForResident
+            : t.residentUpdateLabel)
+        : (isManagerUpdate ? t.managerUpdateLabel : t.residentUpdateLabel);
     final roleBg = themeColor.withValues(alpha: 0.08);
 
     return IntrinsicHeight(

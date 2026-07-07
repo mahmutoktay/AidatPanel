@@ -336,7 +336,7 @@ DELETE /api/v1/buildings/:id
 PATCH  /api/v1/buildings/:id/collection    # Tahsilat IBAN
 GET    /api/v1/buildings/collection-presets  # Bina + site IBAN önerileri
 GET    /api/v1/buildings/:id/dekonts
-POST   /api/v1/buildings/:id/announcements
+POST   /api/v1/buildings/:id/announcements   # body: { body } — başlık sistemde "Duyuru" olarak üretilir
 ```
 
 ### Sites (Yönetici — FAZ 8)

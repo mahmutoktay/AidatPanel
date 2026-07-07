@@ -14,14 +14,23 @@ import '../utils/dekont_parsed_fields.dart';
 /// Dekont detay — koyu hero kart (tutar, durum, tarih).
 class DekontDetailHero extends StatelessWidget {
   final DekontEntity dekont;
+  final bool forResident;
 
-  const DekontDetailHero({super.key, required this.dekont});
+  const DekontDetailHero({
+    super.key,
+    required this.dekont,
+    this.forResident = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.dekont;
     final languageCode = AppIntlLocale.fromContext(context);
-    final visual = dekontStatusVisual(context, dekont.status);
+    final visual = dekontStatusVisualForRole(
+      context,
+      dekont.status,
+      forResident: forResident,
+    );
     final awaiting = DekontParsedFields.isAwaitingPipeline(dekont);
     final amount = DekontParsedFields.formattedAmount(dekont);
     final txDate = DekontParsedFields.formattedTransactionDate(

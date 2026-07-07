@@ -21,7 +21,7 @@ class DekontSystemInfoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        DekontDetailHero(dekont: dekont),
+        DekontDetailHero(dekont: dekont, forResident: !isManager),
         const SizedBox(height: AppSizes.spacingM),
         DekontDetailMetricsCard(dekont: dekont, isManager: isManager),
       ],

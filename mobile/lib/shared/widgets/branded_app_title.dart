@@ -16,14 +16,13 @@ class BrandedAppTitle extends StatelessWidget {
 
   static const Color brandOrange = Color(0xFFF5A623);
   static const Color brandNavy = Color(0xFF1B3568);
-  static const Color brandNavyDark = Color(0xFF8EB4E8);
 
   static const _aidat = 'Aidat';
   static const _panel = 'Panel';
 
   @override
   Widget build(BuildContext context) {
-    final panelColor = AppColors.isDark ? brandNavyDark : brandNavy;
+    final panelColor = AppColors.isDark ? Colors.white : brandNavy;
     final style = GoogleFonts.nunito(
       fontSize: fontSize,
       fontWeight: FontWeight.w600,

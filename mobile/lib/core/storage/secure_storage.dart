@@ -157,6 +157,22 @@ class SecureStorage {
     await saveProfilePhotosMap(map);
   }
 
+  Future<bool> hasSeenNotificationPermissionPrompt(String userId) async {
+    if (userId.isEmpty) return true;
+    final raw = await _storage.read(
+      key: AppConstants.notificationPermissionPromptKey(userId),
+    );
+    return raw == '1';
+  }
+
+  Future<void> markNotificationPermissionPromptSeen(String userId) async {
+    if (userId.isEmpty) return;
+    await _storage.write(
+      key: AppConstants.notificationPermissionPromptKey(userId),
+      value: '1',
+    );
+  }
+
   Future<void> removeProfilePhotoRef(String userId) async {
     if (userId.isEmpty) return;
     final map = await getProfilePhotosMap();

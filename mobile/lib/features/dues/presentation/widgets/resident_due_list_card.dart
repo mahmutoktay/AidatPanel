@@ -19,7 +19,7 @@ class ResidentDueListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visual = duesStatusVisual(context, due.status);
+    final visual = residentDuesStatusVisual(context, due.status);
     final periodLabel =
         '${monthName(context, due.month)} ${due.year}';
     final subtitle = residentDueCardSubtitle(context, due);
@@ -96,6 +96,9 @@ class ResidentDueListCard extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
