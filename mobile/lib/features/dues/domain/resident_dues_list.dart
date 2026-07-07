@@ -32,6 +32,19 @@ List<DueEntity> prepareResidentDuesList(
 bool isCurrentPeriodDue(DueEntity due, DateTime now) =>
     due.year == now.year && due.month == now.month;
 
+/// Hesap özeti: ödenmiş/muaf geçmiş + yalnızca güncel ayın açık aidatı.
+/// Eski dönemlerdeki PENDING/OVERDUE kayıtları listelenmez.
+bool shouldShowInAccountSummary(DueEntity due, {DateTime? now}) {
+  final clock = now ?? DateTime.now();
+  if (!isDuePeriodAtOrBeforeNow(due.month, due.year, clock)) {
+    return false;
+  }
+  if (due.status == DueStatus.paid || due.status == DueStatus.waived) {
+    return true;
+  }
+  return isCurrentPeriodDue(due, clock);
+}
+
 /// Görüntüleme: güncel dönem(ler) ve geçmiş; sıra korunur.
 ({List<DueEntity> current, List<DueEntity> past}) splitResidentDuesForDisplay(
   List<DueEntity> dues, {

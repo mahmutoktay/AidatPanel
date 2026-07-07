@@ -220,7 +220,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     final t = context.t.features.dekont;
     final downloadActions = _downloadActions(detail);
     final fallbackRoute = isManager
-        ? '/manager-dashboard/dekonts'
+        ? '/manager-dashboard/due-transactions'
         : '/resident-dashboard/dekonts';
 
     final body = detail.when(

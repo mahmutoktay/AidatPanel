@@ -75,6 +75,9 @@ class DuesNotifier extends Notifier<DuesState> {
   String? _loadedBuildingId;
   bool _isResidentList = false;
   bool _paginated = true;
+  Map<String, String> _dueBuildingIds = const {};
+
+  Map<String, String> get dueBuildingIds => _dueBuildingIds;
 
   @override
   DuesState build() => const DuesState();
@@ -127,12 +130,100 @@ class DuesNotifier extends Notifier<DuesState> {
       final merged = effectiveRefresh
           ? result.items
           : [...state.dues, ...result.items];
+      _dueBuildingIds = {
+        for (final due in merged) due.id: buildingId,
+      };
       state = state.copyWith(
         isLoading: false,
         isLoadingMore: false,
         dues: merged,
         nextCursor: result.nextCursor,
         clearNextCursor: result.nextCursor == null,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        isLoadingMore: false,
+        error: userFacingError(e),
+      );
+    }
+  }
+
+  /// Tek veya çoklu bina kapsamı — aidatlar sekmesi ile ana sayfa seçici uyumu.
+  Future<void> loadScopedBuildingDues(
+    List<String> buildingIds, {
+    bool refresh = true,
+    int? month,
+    int? year,
+    DueStatus? status,
+    bool paginated = false,
+  }) async {
+    if (buildingIds.isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        isLoadingMore: false,
+        dues: const [],
+        clearNextCursor: true,
+      );
+      return;
+    }
+    if (buildingIds.length == 1) {
+      return loadBuildingDues(
+        buildingIds.first,
+        refresh: refresh,
+        month: month,
+        year: year,
+        status: status,
+        paginated: paginated,
+      );
+    }
+
+    final filtersChanged =
+        _lastMonth != month ||
+        _lastYear != year ||
+        _lastStatus != status ||
+        _isResidentList ||
+        _paginated != paginated ||
+        _loadedBuildingId != buildingIds.join(',');
+    final effectiveRefresh = refresh || filtersChanged;
+
+    _loadedBuildingId = buildingIds.join(',');
+    _isResidentList = false;
+    _lastMonth = month;
+    _lastYear = year;
+    _lastStatus = status;
+    _paginated = paginated;
+
+    state = state.copyWith(
+      isLoading: true,
+      isLoadingMore: false,
+      clearError: true,
+      dues: effectiveRefresh ? const [] : state.dues,
+      clearNextCursor: true,
+    );
+
+    try {
+      final merged = <DueEntity>[];
+      final mapping = <String, String>{};
+      for (final buildingId in buildingIds) {
+        final result = await _repository.getBuildingDues(
+          buildingId,
+          month: month,
+          year: year,
+          status: status,
+          paginated: false,
+        );
+        for (final due in result.items) {
+          mapping[due.id] = buildingId;
+        }
+        merged.addAll(result.items);
+      }
+      _dueBuildingIds = mapping;
+      state = state.copyWith(
+        isLoading: false,
+        isLoadingMore: false,
+        dues: merged,
+        clearNextCursor: true,
       );
     } catch (e) {
       state = state.copyWith(

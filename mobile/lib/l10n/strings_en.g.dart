@@ -578,6 +578,12 @@ class Translations$common$en {
 	/// en: 'Empty Apartment'
 	String get emptyApartmentText => 'Empty Apartment';
 
+	/// en: 'No resident has been assigned to this apartment yet'
+	String get emptyApartmentAwaitingResident => 'No resident has been assigned to this apartment yet';
+
+	/// en: 'Invite'
+	String get inviteResident => 'Invite';
+
 	/// en: 'Vacant'
 	String get vacantBadge => 'Vacant';
 
@@ -755,11 +761,17 @@ class Translations$common$en {
 	/// en: '{days} days overdue'
 	String get dueMetaOverdueDelay => '{days} days overdue';
 
+	/// en: 'Pending / {days} Days Overdue'
+	String get dueStatusOverdueWithDays => 'Pending / {days} Days Overdue';
+
 	/// en: 'paid in {month} {year}'
 	String get dueMetaPaidInMonth => 'paid in {month} {year}';
 
 	/// en: 'paid on {day} {month}'
 	String get dueMetaPaidOnDay => 'paid on {day} {month}';
+
+	/// en: 'Paid {days} days late'
+	String get paidLateDays => 'Paid {days} days late';
 
 	/// en: 'due by {day} {month}'
 	String get dueMetaPendingDueDate => 'due by {day} {month}';
@@ -851,8 +863,14 @@ class Translations$common$en {
 	/// en: 'Delete Apartment'
 	String get deleteApartment => 'Delete Apartment';
 
+	/// en: 'Add Apartment'
+	String get addApartment => 'Add Apartment';
+
 	/// en: 'Apartment updated'
 	String get apartmentUpdated => 'Apartment updated';
+
+	/// en: 'Apartment added'
+	String get apartmentCreated => 'Apartment added';
 
 	/// en: 'Apartment deleted'
 	String get apartmentDeleted => 'Apartment deleted';
@@ -1184,6 +1202,7 @@ class Translations$features$en {
 	late final Translations$features$subscription$en subscription = Translations$features$subscription$en._(_root);
 	late final Translations$features$reports$en reports = Translations$features$reports$en._(_root);
 	late final Translations$features$dashboard$en dashboard = Translations$features$dashboard$en._(_root);
+	late final Translations$features$dues$en dues = Translations$features$dues$en._(_root);
 	late final Translations$features$faz2$en faz2 = Translations$features$faz2$en._(_root);
 }
 
@@ -1573,6 +1592,9 @@ class Translations$common$errorKeys$en {
 	/// en: 'Could not load the dues list. Please try again.'
 	String get buildingDuesFetchFailed => 'Could not load the dues list. Please try again.';
 
+	/// en: 'Could not load dues transaction history. Please try again.'
+	String get dueTransactionsFetchFailed => 'Could not load dues transaction history. Please try again.';
+
 	/// en: 'Could not load your dues. Please try again.'
 	String get myDuesFetchFailed => 'Could not load your dues. Please try again.';
 
@@ -1780,6 +1802,9 @@ class Translations$features$buildings$en {
 	/// en: 'Copy'
 	String get copy => 'Copy';
 
+	/// en: 'Copied'
+	String get copyDone => 'Copied';
+
 	/// en: 'Share'
 	String get share => 'Share';
 
@@ -1866,6 +1891,9 @@ class Translations$features$sites$en {
 
 	/// en: 'My Sites'
 	String get mySites => 'My Sites';
+
+	/// en: 'Search by site name or address'
+	String get searchSites => 'Search by site name or address';
 
 	/// en: 'Sites'
 	String get tabSites => 'Sites';
@@ -3731,6 +3759,34 @@ class Translations$features$dashboard$en {
 
 	/// en: 'Pay your dues here.'
 	String get residentDebtAndPaySubtitle => 'Pay your dues here.';
+
+	/// en: 'Dues Status'
+	String get duesStatusAction => 'Dues Status';
+
+	/// en: '{count} overdue dues'
+	String get overdueDuesBadge => '{count} overdue dues';
+
+	/// en: 'Sites'
+	String get sitesSection => 'Sites';
+
+	/// en: 'Independent Buildings'
+	String get independentBuildingsSection => 'Independent Buildings';
+
+	/// en: '{name} · {count} buildings'
+	String get sitePickerSummary => '{name} · {count} buildings';
+
+	/// en: '{count} buildings'
+	String get siteScopeSummary => '{count} buildings';
+}
+
+// Path: features.dues
+class Translations$features$dues$en {
+	Translations$features$dues$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$features$dues$transactions$en transactions = Translations$features$dues$transactions$en._(_root);
 }
 
 // Path: features.faz2
@@ -4315,6 +4371,42 @@ class Translations$features$auth$onboarding$en {
 	String get residentNameRequired => 'Please enter your full name.';
 }
 
+// Path: features.dues.transactions
+class Translations$features$dues$transactions$en {
+	Translations$features$dues$transactions$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Dues Transaction History'
+	String get title => 'Dues Transaction History';
+
+	/// en: 'No transactions yet'
+	String get emptyTitle => 'No transactions yet';
+
+	/// en: 'Receipt approvals and manual payments appear here.'
+	String get emptySubtitle => 'Receipt approvals and manual payments appear here.';
+
+	/// en: 'Receipt'
+	String get sourceReceipt => 'Receipt';
+
+	/// en: 'Manual'
+	String get sourceManual => 'Manual';
+
+	/// en: 'Approved'
+	String get statusApproved => 'Approved';
+
+	/// en: 'Pending'
+	String get statusPending => 'Pending';
+
+	/// en: 'Rejected'
+	String get statusRejected => 'Rejected';
+
+	/// en: 'No apartment info'
+	String get unknownApartment => 'No apartment info';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -4536,6 +4628,8 @@ extension on Translations {
 			'common.residents' => 'Residents',
 			'common.apartmentsBadge' => 'Apartments',
 			'common.emptyApartmentText' => 'Empty Apartment',
+			'common.emptyApartmentAwaitingResident' => 'No resident has been assigned to this apartment yet',
+			'common.inviteResident' => 'Invite',
 			'common.vacantBadge' => 'Vacant',
 			'common.phoneNotShared' => 'Phone not shared',
 			'common.residentDetailsLink' => 'View Details',
@@ -4595,8 +4689,10 @@ extension on Translations {
 			'common.apply' => 'Apply',
 			'common.overdueDays' => 'days overdue',
 			'common.dueMetaOverdueDelay' => '{days} days overdue',
+			'common.dueStatusOverdueWithDays' => 'Pending / {days} Days Overdue',
 			'common.dueMetaPaidInMonth' => 'paid in {month} {year}',
 			'common.dueMetaPaidOnDay' => 'paid on {day} {month}',
+			'common.paidLateDays' => 'Paid {days} days late',
 			'common.dueMetaPendingDueDate' => 'due by {day} {month}',
 			'common.payShort' => 'Pay',
 			'common.dekontShort' => 'Receipt',
@@ -4627,7 +4723,9 @@ extension on Translations {
 			'common.buildingNameMismatch' => 'What you typed does not match the building name.',
 			'common.editApartment' => 'Edit Apartment',
 			'common.deleteApartment' => 'Delete Apartment',
+			'common.addApartment' => 'Add Apartment',
 			'common.apartmentUpdated' => 'Apartment updated',
+			'common.apartmentCreated' => 'Apartment added',
 			'common.apartmentDeleted' => 'Apartment deleted',
 			'common.apartmentUpdateFailed' => 'Could not update apartment',
 			'common.apartmentDeleteFailed' => 'Could not delete apartment',
@@ -4743,6 +4841,7 @@ extension on Translations {
 			'common.errorKeys.apartmentDeleteFailed' => 'Could not delete the apartment. Please try again.',
 			'common.errorKeys.residentRemoveFailed' => 'Could not remove the resident. Please try again.',
 			'common.errorKeys.buildingDuesFetchFailed' => 'Could not load the dues list. Please try again.',
+			'common.errorKeys.dueTransactionsFetchFailed' => 'Could not load dues transaction history. Please try again.',
 			'common.errorKeys.myDuesFetchFailed' => 'Could not load your dues. Please try again.',
 			'common.errorKeys.dueStatusUpdateFailed' => 'Could not update the due status. Please try again.',
 			'common.errorKeys.dueAmountUpdateFailed' => 'Could not update the due amount. Please try again.',
@@ -4826,7 +4925,10 @@ extension on Translations {
 			'features.buildings.cancelCode' => 'Cancel Code',
 			'features.buildings.apartmentOccupied' => 'Apartment Occupied',
 			'features.buildings.copy' => 'Copy',
+			'features.buildings.copyDone' => 'Copied',
 			'features.buildings.share' => 'Share',
+			_ => null,
+		} ?? switch (path) {
 			'features.buildings.anotherApartment' => 'Another Apartment',
 			'features.buildings.codeRevoked' => 'Code revoked',
 			'features.buildings.occupiedDialog' => 'If you generate a new code, the old user will be removed. Are you sure?',
@@ -4835,8 +4937,6 @@ extension on Translations {
 			'features.buildings.newCodePrefix' => 'If you generate a new code, ',
 			'features.buildings.oldUserRemoved' => 'the old user will be removed',
 			'features.buildings.currentCodePrefix' => 'The current code ',
-			_ => null,
-		} ?? switch (path) {
 			'features.buildings.codeInvalid' => 'will become invalid',
 			'features.buildings.codeReady' => 'Invite Code Ready',
 			'features.buildings.code' => 'CODE',
@@ -4922,6 +5022,7 @@ extension on Translations {
 			'features.sites.siteCreated' => 'Site created successfully',
 			'features.sites.siteCreateFailed' => 'Could not add site',
 			'features.sites.mySites' => 'My Sites',
+			'features.sites.searchSites' => 'Search by site name or address',
 			'features.sites.tabSites' => 'Sites',
 			'features.sites.tabBuildings' => 'Buildings',
 			'features.sites.siteCount' => '{count} site',
@@ -5340,6 +5441,8 @@ extension on Translations {
 			'features.expenses.submit' => 'Save',
 			'features.expenses.required' => 'Required field',
 			'features.expenses.amountInvalid' => 'Enter a valid amount',
+			_ => null,
+		} ?? switch (path) {
 			'features.expenses.amountFromReceiptsHint' => 'Amount is read automatically from receipts.',
 			'features.expenses.receiptRequired' => 'Add at least one receipt photo',
 			'features.expenses.amountOcrPending' => 'Reading receipt amounts. They will appear in the list shortly.',
@@ -5349,8 +5452,6 @@ extension on Translations {
 			'features.expenses.categoryElevator' => 'Elevator',
 			'features.expenses.categoryElectricity' => 'Electricity',
 			'features.expenses.categoryWater' => 'Water',
-			_ => null,
-		} ?? switch (path) {
 			'features.expenses.categoryInsurance' => 'Insurance',
 			'features.expenses.categoryRepair' => 'Repair',
 			'features.expenses.categoryGarden' => 'Garden',
@@ -5624,6 +5725,21 @@ extension on Translations {
 			'features.dashboard.overduePaymentsBadge' => '{count} overdue payment(s)',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} dues',
 			'features.dashboard.residentDebtAndPaySubtitle' => 'Pay your dues here.',
+			'features.dashboard.duesStatusAction' => 'Dues Status',
+			'features.dashboard.overdueDuesBadge' => '{count} overdue dues',
+			'features.dashboard.sitesSection' => 'Sites',
+			'features.dashboard.independentBuildingsSection' => 'Independent Buildings',
+			'features.dashboard.sitePickerSummary' => '{name} · {count} buildings',
+			'features.dashboard.siteScopeSummary' => '{count} buildings',
+			'features.dues.transactions.title' => 'Dues Transaction History',
+			'features.dues.transactions.emptyTitle' => 'No transactions yet',
+			'features.dues.transactions.emptySubtitle' => 'Receipt approvals and manual payments appear here.',
+			'features.dues.transactions.sourceReceipt' => 'Receipt',
+			'features.dues.transactions.sourceManual' => 'Manual',
+			'features.dues.transactions.statusApproved' => 'Approved',
+			'features.dues.transactions.statusPending' => 'Pending',
+			'features.dues.transactions.statusRejected' => 'Rejected',
+			'features.dues.transactions.unknownApartment' => 'No apartment info',
 			'features.faz2.sectionTitle' => 'Phase 2',
 			'features.faz2.tickets' => 'Requests',
 			'features.faz2.expenses' => 'Expenses',

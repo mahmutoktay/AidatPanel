@@ -83,6 +83,19 @@ String monthName(BuildContext context, int month) {
   }
 }
 
+/// Ödeme vadesinden sonra yapıldıysa gecikme gün sayısı; yoksa null.
+int? latePaymentDays(DueEntity due) {
+  if (due.status != DueStatus.paid) return null;
+  final paidAt = due.paidAt;
+  final dueDate = due.dueDate;
+  if (paidAt == null || dueDate == null) return null;
+
+  final paidDay = DateTime(paidAt.year, paidAt.month, paidAt.day);
+  final deadline = DateTime(dueDate.year, dueDate.month, dueDate.day);
+  final diff = paidDay.difference(deadline).inDays;
+  return diff > 0 ? diff : null;
+}
+
 String dueMetaSubtitle(
   BuildContext context,
   DueEntity due, {

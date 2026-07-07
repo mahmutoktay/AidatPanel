@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
-import '../../../../shared/widgets/tint_dashboard_tile.dart';
 import '../../../../shared/widgets/user_profile_avatar.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
 import '../../../apartments/presentation/widgets/delete_apartment_dialog.dart';
 import '../../../apartments/presentation/widgets/edit_apartment_bottom_sheet.dart';
 import '../../../apartments/presentation/widgets/remove_resident_dialog.dart';
+import '../providers/apartment_dues_history_provider.dart';
 import '../utils/apartment_ui_utils.dart';
+import 'apartment_account_summary_list.dart';
+import 'apartment_details_bottom_toolbar.dart';
 
 class ApartmentDetailsSheet {
   static void _afterApartmentSheetClosed(
@@ -49,18 +53,123 @@ class _ApartmentDetailsSheetBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isOccupied = apt.isOccupied;
-    final resident = apt.resident;
+
+    if (!isOccupied) {
+      return _VacantApartmentSheet(
+        pageContext: pageContext,
+        apt: apt,
+      );
+    }
+
+    return _OccupiedApartmentSheet(
+      pageContext: pageContext,
+      apt: apt,
+    );
+  }
+}
+
+class _VacantApartmentSheet extends StatelessWidget {
+  const _VacantApartmentSheet({
+    required this.pageContext,
+    required this.apt,
+  });
+
+  final BuildContext pageContext;
+  final ApartmentEntity apt;
+
+  @override
+  Widget build(BuildContext context) {
+    final apartmentLabel =
+        ApartmentUiUtils.formatApartmentLabel(context, apt.apartmentNumber);
+
+    return PremiumBottomSheetScaffold(
+      maxHeightFactor: 0.55,
+      showCloseButton: true,
+      title: apartmentLabel,
+      body: Text(
+        context.t.common.emptyApartmentAwaitingResident,
+        style: AppTypography.body2.copyWith(
+          color: AppColors.mutedText,
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+          height: 1.35,
+        ),
+      ),
+      actions: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSizes.spacingL,
+          AppSizes.spacingS,
+          AppSizes.spacingL,
+          AppSizes.spacingL,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: AppSizes.buttonHeightPrimary,
+              child: ElevatedButton.icon(
+                onPressed: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
+                  pageContext,
+                  context,
+                  () => pageContext.push(
+                    '/manager-dashboard/invite-code'
+                    '?buildingId=${apt.buildingId}&apartmentId=${apt.id}',
+                  ),
+                ),
+                icon: const Icon(Icons.person_add_outlined),
+                label: Text(context.t.common.inviteResident),
+              ),
+            ),
+            const SizedBox(height: AppSizes.spacingS),
+            SizedBox(
+              height: AppSizes.buttonHeightSecondary,
+              child: OutlinedButton.icon(
+                onPressed: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
+                  pageContext,
+                  context,
+                  () => DeleteApartmentDialog.show(
+                    pageContext,
+                    apartment: apt,
+                  ),
+                ),
+                icon: const Icon(Icons.delete_outline),
+                label: Text(context.t.common.deleteApartment),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OccupiedApartmentSheet extends ConsumerWidget {
+  const _OccupiedApartmentSheet({
+    required this.pageContext,
+    required this.apt,
+  });
+
+  final BuildContext pageContext;
+  final ApartmentEntity apt;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final statusInfo = ApartmentUiUtils.getStatusInfo(context, apt.paymentStatus);
     final phoneText = apt.phone != null
         ? ApartmentUiUtils.formatPhone(apt.phone!)
         : context.t.common.phoneNotShared;
+    final historyAsync = ref.watch(
+      apartmentDuesHistoryProvider((
+        buildingId: apt.buildingId,
+        apartmentId: apt.id,
+      )),
+    );
 
     return PremiumBottomSheetScaffold(
-      maxHeightFactor: 0.85,
+      maxHeightFactor: 0.9,
       showCloseButton: true,
-      title: isOccupied
-          ? context.t.common.residentDetailsSheetTitle
-          : context.t.common.apartmentDetailsSheetTitle,
+      title: context.t.common.residentDetailsSheetTitle,
       body: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -70,32 +179,36 @@ class _ApartmentDetailsSheetBody extends ConsumerWidget {
             statusInfo: statusInfo,
           ),
           const SizedBox(height: AppSizes.spacingL),
-          _StatGrid(apt: apt),
-          if (isOccupied && resident != null) ...[
-            const SizedBox(height: AppSizes.spacingL),
-            PremiumInfoCard(
-              children: [
-                PremiumInfoRow(
-                  icon: Icons.mail_outline_rounded,
-                  iconColor: AppColors.primary,
-                  label: context.t.features.auth.email,
-                  value: resident.email,
-                ),
-                PremiumInfoRow(
-                  icon: Icons.phone_outlined,
-                  iconColor: AppColors.primary,
-                  label: context.t.features.auth.phone,
-                  value: phoneText,
-                ),
-              ],
+          _PhoneInfoRow(phoneText: phoneText),
+          const SizedBox(height: AppSizes.spacingL),
+          Text(
+            context.t.common.accountSummary,
+            style: AppTypography.h4.copyWith(
+              color: AppColors.inkDark,
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
             ),
-          ],
+          ),
+          const SizedBox(height: AppSizes.spacingS),
+          historyAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSizes.spacingXL),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (error, _) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingL),
+              child: Text(
+                userFacingError(error),
+                style: AppTypography.body2.copyWith(color: AppColors.statusRed),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            data: (items) => ApartmentAccountSummaryList(items: items),
+          ),
         ],
       ),
-      actions: PremiumSheetActions(
-        primaryLabel: context.t.common.editApartment,
-        icon: Icons.edit_outlined,
-        onPrimary: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
+      actions: ApartmentDetailsBottomToolbar(
+        onEdit: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
           pageContext,
           context,
           () => EditApartmentBottomSheet.show(
@@ -103,30 +216,70 @@ class _ApartmentDetailsSheetBody extends ConsumerWidget {
             apartment: apt,
           ),
         ),
-        secondaryLabel: isOccupied
-            ? context.t.common.removeResident
-            : context.t.common.deleteApartment,
-        onSecondary: () {
-          if (isOccupied) {
-            ApartmentDetailsSheet._afterApartmentSheetClosed(
-              pageContext,
-              context,
-              () => RemoveResidentDialog.show(
-                pageContext,
-                apartment: apt,
-              ),
-            );
-          } else {
-            ApartmentDetailsSheet._afterApartmentSheetClosed(
-              pageContext,
-              context,
-              () => DeleteApartmentDialog.show(
-                pageContext,
-                apartment: apt,
-              ),
-            );
-          }
-        },
+        onRemoveResident: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
+          pageContext,
+          context,
+          () => RemoveResidentDialog.show(
+            pageContext,
+            apartment: apt,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PhoneInfoRow extends StatelessWidget {
+  const _PhoneInfoRow({required this.phoneText});
+
+  final String phoneText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSizes.spacingM),
+      decoration: BoxDecoration(
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        border: Border.all(
+          color: AppColors.borderColor.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.phone_outlined,
+            color: AppColors.primary,
+            size: 22,
+          ),
+          const SizedBox(width: AppSizes.spacingM),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.t.features.auth.phone.toUpperCase(),
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.mutedText,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  phoneText,
+                  style: AppTypography.body1.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 17,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -143,8 +296,7 @@ class _SheetHero extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isOccupied = apt.isOccupied;
-    final resident = apt.resident;
+    final resident = apt.resident!;
     final apartmentLabel =
         ApartmentUiUtils.formatApartmentLabel(context, apt.apartmentNumber);
 
@@ -152,11 +304,10 @@ class _SheetHero extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         UserProfileAvatar(
-          userId: resident?.id,
-          userName: resident?.name ?? '',
-          profilePicture: resident?.profilePicture,
+          userId: resident.id,
+          userName: resident.name,
+          profilePicture: resident.profilePicture,
           size: 64,
-          isVacant: !isOccupied,
         ),
         const SizedBox(width: AppSizes.spacingM),
         Expanded(
@@ -164,9 +315,7 @@ class _SheetHero extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isOccupied && resident != null
-                    ? resident.name
-                    : context.t.common.emptyApartmentText,
+                resident.name,
                 style: AppTypography.h3.copyWith(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w800,
@@ -187,19 +336,12 @@ class _SheetHero extends ConsumerWidget {
                     color: AppColors.textSecondary,
                     background: AppColors.fill,
                   ),
-                  if (isOccupied)
-                    _InfoChip(
-                      label: statusInfo.label,
-                      color: statusInfo.color,
-                      background: statusInfo.bgColor,
-                      bordered: true,
-                    )
-                  else
-                    _InfoChip(
-                      label: context.t.common.vacantBadge,
-                      color: AppColors.textSecondary,
-                      background: AppColors.fill,
-                    ),
+                  _InfoChip(
+                    label: statusInfo.label,
+                    color: statusInfo.color,
+                    background: statusInfo.bgColor,
+                    bordered: true,
+                  ),
                 ],
               ),
             ],
@@ -252,67 +394,6 @@ class _InfoChip extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StatGrid extends StatelessWidget {
-  const _StatGrid({required this.apt});
-
-  final ApartmentEntity apt;
-
-  @override
-  Widget build(BuildContext context) {
-    final lastPaymentValue = apt.lastPaymentDate != null
-        ? ApartmentUiUtils.formatShortDate(apt.lastPaymentDate!)
-        : '—';
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.spacingXS,
-        vertical: AppSizes.spacingXS,
-      ),
-      child: SizedBox(
-        height: DashboardMetricTile.kTileHeight,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: DashboardMetricTile(
-                icon: Icons.receipt_long_outlined,
-                label: context.t.common.monthlyDues,
-                value: '₺${apt.monthlyDues.toStringAsFixed(0)}',
-                animateValue: false,
-                backgroundColor: Colors.transparent,
-              ),
-            ),
-            Expanded(
-              child: DashboardMetricTile(
-                icon: Icons.account_balance_wallet_outlined,
-                label: context.t.common.balance,
-                value: '₺${apt.balance.toStringAsFixed(0)}',
-                animateValue: false,
-                backgroundColor: Colors.transparent,
-              ),
-            ),
-            Expanded(
-              child: DashboardMetricTile(
-                icon: apt.lastPaymentDate != null
-                    ? Icons.event_available_outlined
-                    : Icons.event_busy_outlined,
-                label: context.t.common.lastPayment,
-                value: lastPaymentValue,
-                animateValue: false,
-                backgroundColor: Colors.transparent,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -226,6 +226,8 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get residents => 'Sakinler';
 	@override String get apartmentsBadge => 'Daire';
 	@override String get emptyApartmentText => 'Boş Daire';
+	@override String get emptyApartmentAwaitingResident => 'Bu daireye henüz sakin atanmadı';
+	@override String get inviteResident => 'Davet Et';
 	@override String get vacantBadge => 'Boş';
 	@override String get phoneNotShared => 'Telefon paylaşılmadı';
 	@override String get residentDetailsLink => 'Detayları Gör';
@@ -285,8 +287,10 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get apply => 'Uygula';
 	@override String get overdueDays => 'gün gecikmiş';
 	@override String get dueMetaOverdueDelay => '{days} gün gecikme';
+	@override String get dueStatusOverdueWithDays => 'Bekliyor / {days} Gün Gecikti';
 	@override String get dueMetaPaidInMonth => '{month} {year}\'de ödendi';
 	@override String get dueMetaPaidOnDay => '{day} {month}\'ta ödendi';
+	@override String get paidLateDays => '{days} gün geç ödedi';
 	@override String get dueMetaPendingDueDate => 'son ödeme {day} {month}';
 	@override String get payShort => 'Öde';
 	@override String get dekontShort => 'Dekont';
@@ -317,7 +321,9 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get buildingNameMismatch => 'Yazdığınız metin bina adıyla aynı değil.';
 	@override String get editApartment => 'Daireyi Düzenle';
 	@override String get deleteApartment => 'Daireyi Sil';
+	@override String get addApartment => 'Daire Ekle';
 	@override String get apartmentUpdated => 'Daire güncellendi';
+	@override String get apartmentCreated => 'Daire eklendi';
 	@override String get apartmentDeleted => 'Daire silindi';
 	@override String get apartmentUpdateFailed => 'Daire güncellenemedi';
 	@override String get apartmentDeleteFailed => 'Daire silinemedi';
@@ -449,6 +455,7 @@ class _Translations$features$tr implements Translations$features$en {
 	@override late final _Translations$features$subscription$tr subscription = _Translations$features$subscription$tr._(_root);
 	@override late final _Translations$features$reports$tr reports = _Translations$features$reports$tr._(_root);
 	@override late final _Translations$features$dashboard$tr dashboard = _Translations$features$dashboard$tr._(_root);
+	@override late final _Translations$features$dues$tr dues = _Translations$features$dues$tr._(_root);
 	@override late final _Translations$features$faz2$tr faz2 = _Translations$features$faz2$tr._(_root);
 }
 
@@ -615,6 +622,7 @@ class _Translations$common$errorKeys$tr implements Translations$common$errorKeys
 	@override String get apartmentDeleteFailed => 'Daire silinemedi. Lütfen tekrar deneyin.';
 	@override String get residentRemoveFailed => 'Sakin çıkarılamadı. Lütfen tekrar deneyin.';
 	@override String get buildingDuesFetchFailed => 'Aidat listesi alınamadı. Lütfen tekrar deneyin.';
+	@override String get dueTransactionsFetchFailed => 'Aidat işlem geçmişi alınamadı. Lütfen tekrar deneyin.';
 	@override String get myDuesFetchFailed => 'Aidatlarınız alınamadı. Lütfen tekrar deneyin.';
 	@override String get dueStatusUpdateFailed => 'Aidat durumu güncellenemedi. Lütfen tekrar deneyin.';
 	@override String get dueAmountUpdateFailed => 'Aidat tutarı güncellenemedi. Lütfen tekrar deneyin.';
@@ -690,6 +698,7 @@ class _Translations$features$buildings$tr implements Translations$features$build
 	@override String get cancelCode => 'Kodu İptal Et';
 	@override String get apartmentOccupied => 'Daire Dolu';
 	@override String get copy => 'Kopyala';
+	@override String get copyDone => 'Kopyalandı';
 	@override String get share => 'Paylaş';
 	@override String get anotherApartment => 'Başka Daire';
 	@override String get codeRevoked => 'Kod iptal edildi';
@@ -726,6 +735,7 @@ class _Translations$features$sites$tr implements Translations$features$sites$en 
 	@override String get siteCreated => 'Site başarıyla oluşturuldu';
 	@override String get siteCreateFailed => 'Site eklenemedi';
 	@override String get mySites => 'Sitelerim';
+	@override String get searchSites => 'Site adı veya adres ara';
 	@override String get tabSites => 'Siteler';
 	@override String get tabBuildings => 'Binalar';
 	@override String get siteCount => '{count} site';
@@ -1408,6 +1418,22 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get overduePaymentsBadge => '{count} gecikmiş ödeme';
 	@override String get featuredDuePeriod => '{month} {year} aidatı';
 	@override String get residentDebtAndPaySubtitle => 'Ödeme yaparak ödeyin.';
+	@override String get duesStatusAction => 'Aidat Durumu';
+	@override String get overdueDuesBadge => '{count} gecikmiş aidat';
+	@override String get sitesSection => 'Siteler';
+	@override String get independentBuildingsSection => 'Bağımsız Binalar';
+	@override String get sitePickerSummary => '{name} · {count} bina';
+	@override String get siteScopeSummary => '{count} bina';
+}
+
+// Path: features.dues
+class _Translations$features$dues$tr implements Translations$features$dues$en {
+	_Translations$features$dues$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$features$dues$transactions$tr transactions = _Translations$features$dues$transactions$tr._(_root);
 }
 
 // Path: features.faz2
@@ -1626,6 +1652,24 @@ class _Translations$features$auth$onboarding$tr implements Translations$features
 	@override String get residentInviteCodeLabel => 'Davet Kodu';
 	@override String get residentInviteCodeHint => 'Örn: APF-45532';
 	@override String get residentNameRequired => 'Lütfen ad soyadınızı girin.';
+}
+
+// Path: features.dues.transactions
+class _Translations$features$dues$transactions$tr implements Translations$features$dues$transactions$en {
+	_Translations$features$dues$transactions$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Aidat İşlem Geçmişi';
+	@override String get emptyTitle => 'Henüz işlem yok';
+	@override String get emptySubtitle => 'Dekont onayları ve manuel ödemeler burada listelenir.';
+	@override String get sourceReceipt => 'Dekont';
+	@override String get sourceManual => 'Elden';
+	@override String get statusApproved => 'Onaylı';
+	@override String get statusPending => 'Beklemede';
+	@override String get statusRejected => 'Reddedildi';
+	@override String get unknownApartment => 'Daire bilgisi yok';
 }
 
 /// The flat map containing all translations for locale <tr>.
@@ -1849,6 +1893,8 @@ extension on TranslationsTr {
 			'common.residents' => 'Sakinler',
 			'common.apartmentsBadge' => 'Daire',
 			'common.emptyApartmentText' => 'Boş Daire',
+			'common.emptyApartmentAwaitingResident' => 'Bu daireye henüz sakin atanmadı',
+			'common.inviteResident' => 'Davet Et',
 			'common.vacantBadge' => 'Boş',
 			'common.phoneNotShared' => 'Telefon paylaşılmadı',
 			'common.residentDetailsLink' => 'Detayları Gör',
@@ -1908,8 +1954,10 @@ extension on TranslationsTr {
 			'common.apply' => 'Uygula',
 			'common.overdueDays' => 'gün gecikmiş',
 			'common.dueMetaOverdueDelay' => '{days} gün gecikme',
+			'common.dueStatusOverdueWithDays' => 'Bekliyor / {days} Gün Gecikti',
 			'common.dueMetaPaidInMonth' => '{month} {year}\'de ödendi',
 			'common.dueMetaPaidOnDay' => '{day} {month}\'ta ödendi',
+			'common.paidLateDays' => '{days} gün geç ödedi',
 			'common.dueMetaPendingDueDate' => 'son ödeme {day} {month}',
 			'common.payShort' => 'Öde',
 			'common.dekontShort' => 'Dekont',
@@ -1940,7 +1988,9 @@ extension on TranslationsTr {
 			'common.buildingNameMismatch' => 'Yazdığınız metin bina adıyla aynı değil.',
 			'common.editApartment' => 'Daireyi Düzenle',
 			'common.deleteApartment' => 'Daireyi Sil',
+			'common.addApartment' => 'Daire Ekle',
 			'common.apartmentUpdated' => 'Daire güncellendi',
+			'common.apartmentCreated' => 'Daire eklendi',
 			'common.apartmentDeleted' => 'Daire silindi',
 			'common.apartmentUpdateFailed' => 'Daire güncellenemedi',
 			'common.apartmentDeleteFailed' => 'Daire silinemedi',
@@ -2056,6 +2106,7 @@ extension on TranslationsTr {
 			'common.errorKeys.apartmentDeleteFailed' => 'Daire silinemedi. Lütfen tekrar deneyin.',
 			'common.errorKeys.residentRemoveFailed' => 'Sakin çıkarılamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.buildingDuesFetchFailed' => 'Aidat listesi alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.dueTransactionsFetchFailed' => 'Aidat işlem geçmişi alınamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.myDuesFetchFailed' => 'Aidatlarınız alınamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.dueStatusUpdateFailed' => 'Aidat durumu güncellenemedi. Lütfen tekrar deneyin.',
 			'common.errorKeys.dueAmountUpdateFailed' => 'Aidat tutarı güncellenemedi. Lütfen tekrar deneyin.',
@@ -2139,7 +2190,10 @@ extension on TranslationsTr {
 			'features.buildings.cancelCode' => 'Kodu İptal Et',
 			'features.buildings.apartmentOccupied' => 'Daire Dolu',
 			'features.buildings.copy' => 'Kopyala',
+			'features.buildings.copyDone' => 'Kopyalandı',
 			'features.buildings.share' => 'Paylaş',
+			_ => null,
+		} ?? switch (path) {
 			'features.buildings.anotherApartment' => 'Başka Daire',
 			'features.buildings.codeRevoked' => 'Kod iptal edildi',
 			'features.buildings.occupiedDialog' => 'Yeni kod üretirsen eski kullanıcı çıkarılır. Emin misiniz?',
@@ -2148,8 +2202,6 @@ extension on TranslationsTr {
 			'features.buildings.newCodePrefix' => 'Yeni kod üretirsen ',
 			'features.buildings.oldUserRemoved' => 'eski kullanıcı çıkarılır',
 			'features.buildings.currentCodePrefix' => 'Mevcut kod ',
-			_ => null,
-		} ?? switch (path) {
 			'features.buildings.codeInvalid' => 'geçersiz hale gelir',
 			'features.buildings.codeReady' => 'Davet Kodu Hazır',
 			'features.buildings.code' => 'KOD',
@@ -2235,6 +2287,7 @@ extension on TranslationsTr {
 			'features.sites.siteCreated' => 'Site başarıyla oluşturuldu',
 			'features.sites.siteCreateFailed' => 'Site eklenemedi',
 			'features.sites.mySites' => 'Sitelerim',
+			'features.sites.searchSites' => 'Site adı veya adres ara',
 			'features.sites.tabSites' => 'Siteler',
 			'features.sites.tabBuildings' => 'Binalar',
 			'features.sites.siteCount' => '{count} site',
@@ -2653,6 +2706,8 @@ extension on TranslationsTr {
 			'features.expenses.submit' => 'Kaydet',
 			'features.expenses.required' => 'Zorunlu alan',
 			'features.expenses.amountInvalid' => 'Geçerli tutar girin',
+			_ => null,
+		} ?? switch (path) {
 			'features.expenses.amountFromReceiptsHint' => 'Tutar makbuzlardan otomatik okunur.',
 			'features.expenses.receiptRequired' => 'En az bir makbuz fotoğrafı ekleyin',
 			'features.expenses.amountOcrPending' => 'Makbuz tutarları okunuyor. Birkaç saniye sonra listede görünür.',
@@ -2662,8 +2717,6 @@ extension on TranslationsTr {
 			'features.expenses.categoryElevator' => 'Asansör',
 			'features.expenses.categoryElectricity' => 'Elektrik',
 			'features.expenses.categoryWater' => 'Su',
-			_ => null,
-		} ?? switch (path) {
 			'features.expenses.categoryInsurance' => 'Sigorta',
 			'features.expenses.categoryRepair' => 'Onarım',
 			'features.expenses.categoryGarden' => 'Bahçe',
@@ -2937,6 +2990,21 @@ extension on TranslationsTr {
 			'features.dashboard.overduePaymentsBadge' => '{count} gecikmiş ödeme',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} aidatı',
 			'features.dashboard.residentDebtAndPaySubtitle' => 'Ödeme yaparak ödeyin.',
+			'features.dashboard.duesStatusAction' => 'Aidat Durumu',
+			'features.dashboard.overdueDuesBadge' => '{count} gecikmiş aidat',
+			'features.dashboard.sitesSection' => 'Siteler',
+			'features.dashboard.independentBuildingsSection' => 'Bağımsız Binalar',
+			'features.dashboard.sitePickerSummary' => '{name} · {count} bina',
+			'features.dashboard.siteScopeSummary' => '{count} bina',
+			'features.dues.transactions.title' => 'Aidat İşlem Geçmişi',
+			'features.dues.transactions.emptyTitle' => 'Henüz işlem yok',
+			'features.dues.transactions.emptySubtitle' => 'Dekont onayları ve manuel ödemeler burada listelenir.',
+			'features.dues.transactions.sourceReceipt' => 'Dekont',
+			'features.dues.transactions.sourceManual' => 'Elden',
+			'features.dues.transactions.statusApproved' => 'Onaylı',
+			'features.dues.transactions.statusPending' => 'Beklemede',
+			'features.dues.transactions.statusRejected' => 'Reddedildi',
+			'features.dues.transactions.unknownApartment' => 'Daire bilgisi yok',
 			'features.faz2.sectionTitle' => 'Faz 2',
 			'features.faz2.tickets' => 'Talepler',
 			'features.faz2.expenses' => 'Giderler',

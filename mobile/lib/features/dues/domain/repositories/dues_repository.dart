@@ -1,6 +1,7 @@
 import '../../../../core/network/paginated_list_result.dart';
 import '../entities/due_entity.dart';
 import '../entities/due_remind_result.dart';
+import '../entities/due_transaction_entity.dart';
 
 abstract class DuesRepository {
   /// Tur 5 / §10/3 — server-side filtreleme.
@@ -37,5 +38,11 @@ abstract class DuesRepository {
   Future<DueRemindResult> remindBuildingDues(
     String buildingId, {
     List<String>? dueIds,
+  });
+
+  Future<PaginatedListResult<DueTransactionEntity>> getDueTransactions(
+    String buildingId, {
+    String? cursor,
+    bool paginated = true,
   });
 }

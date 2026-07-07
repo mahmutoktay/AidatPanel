@@ -4,7 +4,9 @@ import '../../../buildings/data/buildings_store.dart';
 import '../../../dekont/presentation/providers/dekont_provider.dart';
 import '../../../expenses/presentation/providers/expenses_provider.dart';
 import '../../../notifications/presentation/providers/notifications_provider.dart';
+import '../../domain/entities/dashboard_filter_scope.dart';
 import '../../data/providers/dashboard_provider.dart';
+import '../utils/manager_dashboard_mapper.dart';
 
 /// Yönetici ana sayfa — bu ay tüm binalardaki gider kayıt sayısı.
 /// Özet endpoint + paralel istek (tam liste çekilmez).
@@ -93,6 +95,41 @@ final managerPendingDekontsForBuildingProvider =
   var count = 0;
 
   for (final building in buildings) {
+    try {
+      final dekonts = await repo.getBuildingDekonts(
+        building.id,
+        paginated: false,
+      );
+      count += dekonts.items
+          .where((d) => d.status.needsManagerApproval)
+          .length;
+    } catch (_) {
+      // Tek bina hatası tüm sayacı düşürmez.
+    }
+  }
+
+  return count;
+});
+
+/// Site / bina / tümü kapsamına göre bekleyen dekont sayısı.
+final managerPendingDekontsForScopeProvider =
+    FutureProvider.autoDispose.family<int, DashboardFilterScope>((ref, scope) async {
+  if (scope.isBuilding) {
+    return ref.watch(managerPendingDekontsForBuildingProvider(scope.buildingId).future);
+  }
+
+  final buildings = ref.watch(buildingsStoreProvider).value ?? const [];
+  final targetBuildings = ManagerDashboardMapper.filterBuildingsByScope(
+    buildings,
+    siteId: scope.siteId,
+    buildingId: scope.buildingId,
+  );
+  if (targetBuildings.isEmpty) return 0;
+
+  final repo = ref.watch(dekontRepositoryProvider);
+  var count = 0;
+
+  for (final building in targetBuildings) {
     try {
       final dekonts = await repo.getBuildingDekonts(
         building.id,

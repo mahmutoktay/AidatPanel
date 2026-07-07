@@ -2,6 +2,7 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/paginated_list_result.dart';
 import '../../domain/entities/due_entity.dart';
 import '../../domain/entities/due_remind_result.dart';
+import '../../domain/entities/due_transaction_entity.dart';
 import '../../domain/repositories/dues_repository.dart';
 import '../datasources/dues_remote_datasource.dart';
 
@@ -124,6 +125,29 @@ class DuesRepositoryImpl implements DuesRepository {
       rethrow;
     } catch (_) {
       throw ApiException(message: 'due_reminder_failed');
+    }
+  }
+
+  @override
+  Future<PaginatedListResult<DueTransactionEntity>> getDueTransactions(
+    String buildingId, {
+    String? cursor,
+    bool paginated = true,
+  }) async {
+    try {
+      final result = await _remoteDataSource.getDueTransactions(
+        buildingId,
+        cursor: cursor,
+        paginated: paginated,
+      );
+      return PaginatedListResult(
+        items: result.items.map((model) => model.toEntity()).toList(),
+        nextCursor: result.nextCursor,
+      );
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'due_transactions_fetch_failed');
     }
   }
 

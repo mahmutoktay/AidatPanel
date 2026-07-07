@@ -1,27 +1,24 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
 import '../../../buildings/presentation/models/building_list_item_model.dart';
 import '../../../buildings/presentation/utils/building_collection_status.dart';
 import '../../../buildings/presentation/widgets/building_list_card.dart';
 import '../../../buildings/presentation/widgets/building_sort_bottom_sheet.dart';
-import '../../../buildings/presentation/widgets/buildings_summary_strip.dart';
-import '../../../buildings/presentation/widgets/delete_building_dialog.dart';
-import '../../../buildings/presentation/widgets/edit_building_bottom_sheet.dart';
-import '../../../buildings/presentation/widgets/edit_building_collection_bottom_sheet.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
+import '../../domain/entities/manager_dashboard_entities.dart';
+import '../../presentation/utils/manager_dashboard_mapper.dart';
+import 'manager_home/manager_dues_summary_card.dart';
 
 class ManagerBuildingsTab extends ConsumerStatefulWidget {
   final AsyncValue<List<BuildingEntity>> buildingsAsync;
@@ -38,18 +35,7 @@ class ManagerBuildingsTab extends ConsumerStatefulWidget {
 
 class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
   BuildingListSort _sort = BuildingListSort.byOverdue;
-
-  static const _actionButtonRadius = 18.0;
-
-  ButtonStyle _actionButtonStyle(ButtonStyle base) {
-    return base.copyWith(
-      shape: WidgetStatePropertyAll(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(_actionButtonRadius),
-        ),
-      ),
-    );
-  }
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -83,13 +69,49 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
     );
   }
 
+  List<BuildingEntity> _standaloneBuildings(List<BuildingEntity> buildings) {
+    return buildings
+        .where((building) => building.siteId == null)
+        .toList(growable: false);
+  }
+
+  List<BuildingEntity> _filterBySearch(
+    List<BuildingEntity> buildings,
+    String query,
+  ) {
+    final normalized = query.trim().toLowerCase();
+    if (normalized.isEmpty) return buildings;
+
+    return buildings.where((building) {
+      final haystack =
+          '${building.name} ${building.displayAddress}'.toLowerCase();
+      return haystack.contains(normalized);
+    }).toList(growable: false);
+  }
+
+  ManagerDuesAmountSummary _portfolioSummary(
+    Map<String, List<DueEntity>> allDues,
+  ) {
+    final allDuesList =
+        allDues.values.expand((list) => list).toList(growable: false);
+    final now = DateTime.now();
+    final currentMonthDues = ManagerDashboardMapper.filterDuesForMonth(
+      allDuesList,
+      month: now.month,
+      year: now.year,
+    );
+    return ManagerDashboardMapper.duesAmountSummary(currentMonthDues);
+  }
+
   Widget _buildScrollContent(
     BuildContext context, {
     required List<BuildingEntity> buildings,
     required Map<String, List<DueEntity>> allDues,
     required bool isRefreshing,
   }) {
-    final items = buildings
+    final standaloneBuildings = _standaloneBuildings(buildings);
+    final visibleBuildings = _filterBySearch(standaloneBuildings, _searchQuery);
+    final items = visibleBuildings
         .map(
           (building) => BuildingListItemModel.fromEntity(
             building: building,
@@ -98,7 +120,11 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
         )
         .toList(growable: false);
     final sortedItems = sortBuildingListItems(items, _sort);
-    final totals = BuildingsSummaryTotals.fromItems(items);
+    final portfolioSummary = _portfolioSummary(allDues);
+    final allBuildings = ref.watch(buildingsStoreProvider).value ?? const [];
+    final currency =
+        allBuildings.isNotEmpty ? allBuildings.first.currency : 'TRY';
+    final hasSearch = _searchQuery.trim().isNotEmpty;
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
@@ -107,15 +133,24 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverPadding(
-            padding: AppSizes.screenBodyScrollPadding.copyWith(top: AppSizes.spacingS, bottom: 0),
+            padding: AppSizes.screenBodyScrollPadding.copyWith(
+              top: AppSizes.spacingS,
+              bottom: 0,
+            ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                _buildActionButtons(context),
+                ManagerDuesSummaryCard(
+                  summary: portfolioSummary,
+                  currency: currency,
+                ),
                 const SizedBox(height: AppSizes.spacingM),
-                BuildingsSummaryStrip(totals: totals),
+                MinimalSearchField(
+                  hint: context.t.features.dashboard.searchBuildings,
+                  onChanged: (value) => setState(() => _searchQuery = value),
+                ),
                 const SizedBox(height: AppSizes.spacingL),
                 _buildListHeader(context),
-                if (isRefreshing && buildings.isNotEmpty) ...[
+                if (isRefreshing && standaloneBuildings.isNotEmpty) ...[
                   const SizedBox(height: AppSizes.spacingS),
                   LinearProgressIndicator(
                     minHeight: 2,
@@ -129,12 +164,26 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
               ]),
             ),
           ),
-          if (sortedItems.isEmpty)
+          if (standaloneBuildings.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
               child: Center(
                 child: Text(
                   context.t.common.myBuildings,
+                  style: AppTypography.body1.copyWith(
+                    color: AppColors.mutedText,
+                  ),
+                ),
+              ),
+            )
+          else if (sortedItems.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Text(
+                  hasSearch
+                      ? context.t.common.noResults
+                      : context.t.common.myBuildings,
                   style: AppTypography.body1.copyWith(
                     color: AppColors.mutedText,
                   ),
@@ -148,44 +197,18 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
                 itemCount: sortedItems.length,
                 itemBuilder: (context, index) {
                   final item = sortedItems[index];
-                  final building = buildings.firstWhere(
+                  final building = visibleBuildings.firstWhere(
                     (b) => b.id == item.id,
                   );
                   return BuildingListCard(
                     item: item,
                     onTap: () => _onBuildingTapped(building),
-                    onEdit: () =>
-                        EditBuildingBottomSheet.show(context, building: building),
-                    onCollection: () => EditBuildingCollectionBottomSheet.show(
-                      context,
-                      building: building,
-                    ),
-                    onDelete: () =>
-                        unawaited(DeleteBuildingDialog.show(context, building: building)),
                   );
                 },
               ),
             ),
         ],
       ),
-    );
-  }
-
-  Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: AppSizes.buttonHeightPrimary,
-            child: ElevatedButton.icon(
-              onPressed: _onCreateInviteCodePressed,
-              style: _actionButtonStyle(AppButtonStyles.elevatedAccent()),
-              icon: const Icon(Icons.qr_code_2),
-              label: Text(context.t.common.inviteCode),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -230,11 +253,6 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
     ref.read(standaloneBuildingsStoreProvider.notifier).loadBuildings();
   }
 
-
-  void _onCreateInviteCodePressed() {
-    context.push('/manager-dashboard/invite-code');
-  }
-
   void _onBuildingTapped(BuildingEntity building) {
     context.push('/manager-dashboard/buildings/${building.id}');
   }
@@ -275,7 +293,6 @@ class _BuildingsErrorView extends StatelessWidget {
               height: AppSizes.buttonHeightSecondary,
               child: ElevatedButton.icon(
                 onPressed: onRetry,
-                style: AppButtonStyles.elevatedPrimary(),
                 icon: const Icon(Icons.refresh, size: 20),
                 label: Text(context.t.common.tryAgain),
               ),

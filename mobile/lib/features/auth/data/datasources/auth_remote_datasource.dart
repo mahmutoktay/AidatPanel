@@ -196,10 +196,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     await _dioClient.post(
       ApiConstants.otpSend,
       data: {
-        if (phone != null) 'phone': phone,
-        if (email != null) 'email': email,
+        'phone': ?phone,
+        'email': ?email,
         'purpose': purpose,
-        if (payload != null) 'payload': payload,
+        'payload': ?payload,
       },
     );
   }
@@ -219,14 +219,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final response = await _dioClient.post(
       ApiConstants.otpVerify,
       data: {
-        if (phone != null) 'phone': phone,
-        if (email != null) 'email': email,
+        'phone': ?phone,
+        'email': ?email,
         'code': code,
         'purpose': purpose,
-        if (payload != null) 'payload': payload,
-        if (name != null) 'name': name,
-        if (password != null) 'password': password,
-        if (inviteCode != null) 'inviteCode': inviteCode,
+        'payload': ?payload,
+        'name': ?name,
+        'password': ?password,
+        'inviteCode': ?inviteCode,
         ...device.toJson(),
       },
     );

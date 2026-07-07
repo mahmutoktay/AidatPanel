@@ -1,71 +1,135 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/action_chevron.dart';
 import '../../core/theme/app_sizes.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/buildings/domain/entities/building_entity.dart';
+import '../../features/dashboard/domain/entities/dashboard_filter_scope.dart';
+import '../../features/sites/data/sites_store.dart';
+import '../../features/sites/domain/entities/site_entity.dart';
 import '../../l10n/strings.g.dart';
 import '../../shared/theme/dashboard_screen_style.dart';
 import 'building_picker_sheet.dart';
 
-/// Bina seçici — dokunulunca aranabilir liste açılır (çok bina için ölçeklenebilir).
-/// [includeAllOption] true ise "Tüm Binalar" seçeneği sunulur.
-class DashboardBuildingSelector extends StatelessWidget {
+/// Bina/site seçici — dokunulunca aranabilir hiyerarşik liste açılır.
+class DashboardBuildingSelector extends ConsumerWidget {
   final List<BuildingEntity> buildings;
-  final String? selectedBuildingId;
-  final ValueChanged<String?> onSelected;
+  final DashboardFilterScope scope;
+  final ValueChanged<DashboardFilterScope> onScopeChanged;
   final bool includeAllOption;
 
   const DashboardBuildingSelector({
     super.key,
     required this.buildings,
-    required this.selectedBuildingId,
-    required this.onSelected,
+    required this.scope,
+    required this.onScopeChanged,
     this.includeAllOption = false,
   });
 
-  BuildingEntity? get _selectedBuilding {
-    if (selectedBuildingId == null) return null;
+  /// Geriye dönük uyumluluk — yalnızca bina ID'si ile çalışır.
+  factory DashboardBuildingSelector.legacy({
+    required List<BuildingEntity> buildings,
+    required String? selectedBuildingId,
+    required ValueChanged<String?> onSelected,
+    bool includeAllOption = false,
+  }) {
+    return DashboardBuildingSelector(
+      buildings: buildings,
+      scope: selectedBuildingId == null
+          ? const DashboardFilterScope.all()
+          : DashboardFilterScope.building(selectedBuildingId),
+      includeAllOption: includeAllOption,
+      onScopeChanged: (next) {
+        onSelected(next.buildingId);
+      },
+    );
+  }
+
+  BuildingEntity? _selectedBuilding() {
+    final id = scope.buildingId;
+    if (id == null) return null;
     for (final b in buildings) {
-      if (b.id == selectedBuildingId) return b;
+      if (b.id == id) return b;
     }
     return null;
   }
 
-  Future<void> _openPicker(BuildContext context) async {
+  SiteEntity? _selectedSite(List<SiteEntity> sites) {
+    final id = scope.siteId;
+    if (id == null) return null;
+    for (final site in sites) {
+      if (site.id == id) return site;
+    }
+    return null;
+  }
+
+  int _siteBuildingCount(String siteId) {
+    return buildings.where((b) => b.siteId == siteId).length;
+  }
+
+  Future<void> _openPicker(BuildContext context, WidgetRef ref) async {
+    final sites = ref.read(sitesStoreProvider).value ?? const <SiteEntity>[];
     final result = await BuildingPickerSheet.show(
       context,
       buildings: buildings,
-      selectedBuildingId: selectedBuildingId,
+      sites: sites,
+      selectedBuildingId: scope.buildingId,
+      selectedSiteId: scope.siteId,
       includeAllOption: includeAllOption,
+      enableSiteGrouping: sites.isNotEmpty,
     );
     if (result.cancelled) return;
+
     if (result.isAllBuildings) {
-      if (selectedBuildingId != null) onSelected(null);
+      if (!scope.isAll) onScopeChanged(const DashboardFilterScope.all());
       return;
     }
-    final id = result.buildingId;
-    if (id != null && id != selectedBuildingId) onSelected(id);
+    if (result.isSiteScope && result.siteId != null) {
+      if (scope.siteId != result.siteId || scope.buildingId != null) {
+        onScopeChanged(DashboardFilterScope.site(result.siteId!));
+      }
+      return;
+    }
+    final buildingId = result.buildingId;
+    if (buildingId != null &&
+        (scope.buildingId != buildingId || scope.siteId != null)) {
+      onScopeChanged(DashboardFilterScope.building(buildingId));
+    }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = context.t.features.dashboard;
-    final selected = _selectedBuilding;
-    final isAll = includeAllOption && selectedBuildingId == null;
+    final sites = ref.watch(sitesStoreProvider).value ?? const <SiteEntity>[];
+    final selectedBuilding = _selectedBuilding();
+    final selectedSite = _selectedSite(sites);
 
-    final title = isAll ? t.allBuildings : (selected?.name ?? t.selectBuilding);
-    final subtitle = isAll
-        ? t.allBuildingsSummary.replaceAll('{count}', '${buildings.length}')
-        : selected != null
-            ? _buildingSubtitle(context, selected)
-            : t.buildingPickerTapHint;
+    late final String title;
+    late final String subtitle;
+
+    if (scope.isAll) {
+      title = t.allBuildings;
+      subtitle = t.allBuildingsSummary.replaceAll('{count}', '${buildings.length}');
+    } else if (scope.isSite && selectedSite != null) {
+      title = selectedSite.name;
+      subtitle = t.siteScopeSummary.replaceAll(
+        '{count}',
+        '${_siteBuildingCount(selectedSite.id)}',
+      );
+    } else if (selectedBuilding != null) {
+      title = selectedBuilding.name;
+      subtitle = _buildingSubtitle(context, selectedBuilding);
+    } else {
+      title = t.selectBuilding;
+      subtitle = t.buildingPickerTapHint;
+    }
 
     return _DashboardBuildingSelectorTrigger(
       title: title,
       subtitle: subtitle,
-      onTap: () => _openPicker(context),
+      onTap: () => _openPicker(context, ref),
     );
   }
 
@@ -95,7 +159,7 @@ class DashboardSingleBuildingSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DashboardBuildingSelector(
+    return DashboardBuildingSelector.legacy(
       buildings: buildings,
       selectedBuildingId: selectedBuildingId,
       includeAllOption: false,

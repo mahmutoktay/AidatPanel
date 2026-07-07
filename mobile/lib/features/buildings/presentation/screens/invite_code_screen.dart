@@ -30,7 +30,14 @@ import '../widgets/invite_step_indicator.dart';
 
 /// Davet kodu üretme akışı: Site (varsa) → Bina → Daire → Kod.
 class InviteCodeScreen extends ConsumerStatefulWidget {
-  const InviteCodeScreen({super.key});
+  final String? initialBuildingId;
+  final String? initialApartmentId;
+
+  const InviteCodeScreen({
+    super.key,
+    this.initialBuildingId,
+    this.initialApartmentId,
+  });
 
   @override
   ConsumerState<InviteCodeScreen> createState() => _InviteCodeScreenState();
@@ -44,8 +51,14 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   ApartmentEntity? _selectedApartment;
   String? _generatedCode;
   DateTime? _activeExpiresAt;
+  bool _directLoading = false;
+  bool _directStarted = false;
+
+  bool get _isDirectMode =>
+      widget.initialBuildingId != null && widget.initialApartmentId != null;
 
   bool get _hasSiteStep {
+    if (_isDirectMode) return false;
     final sites = ref.watch(sitesStoreProvider);
     return sites.maybeWhen(data: (list) => list.isNotEmpty, orElse: () => false);
   }
@@ -53,12 +66,21 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   int get _buildingStep => _hasSiteStep ? 1 : 0;
   int get _apartmentStep => _hasSiteStep ? 2 : 1;
   int get _codeStep => _hasSiteStep ? 3 : 2;
+  int get _resultDisplayStep => _codeStep + 1;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isDirectMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _startDirectInvite());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return DashboardSecondaryScaffold(
       title: context.t.common.createInviteCode,
-      canPop: _step == 0,
+      canPop: _step == 0 && !_directLoading,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         _onBackPressed();
@@ -75,12 +97,127 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
               duration: const Duration(milliseconds: 200),
               switchInCurve: Curves.easeInOut,
               switchOutCurve: Curves.easeInOut,
-              child: _buildStepContent(),
+              child: _directLoading
+                  ? const Center(
+                      key: ValueKey('direct-loading'),
+                      child: CircularProgressIndicator(),
+                    )
+                  : _buildStepContent(),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _startDirectInvite() async {
+    if (_directStarted) return;
+    _directStarted = true;
+
+    final buildingId = widget.initialBuildingId!;
+    final apartmentId = widget.initialApartmentId!;
+
+    setState(() => _directLoading = true);
+
+    BuildingEntity? building;
+    final allBuildings = ref.read(buildingsStoreProvider).value ?? const [];
+    for (final b in allBuildings) {
+      if (b.id == buildingId) {
+        building = b;
+        break;
+      }
+    }
+    if (building == null) {
+      final standalone =
+          ref.read(standaloneBuildingsStoreProvider).value ?? const [];
+      for (final b in standalone) {
+        if (b.id == buildingId) {
+          building = b;
+          break;
+        }
+      }
+    }
+    if (building == null) {
+      await ref.read(buildingsStoreProvider.notifier).loadBuildings();
+      final refreshed = ref.read(buildingsStoreProvider).value ?? const [];
+      for (final b in refreshed) {
+        if (b.id == buildingId) {
+          building = b;
+          break;
+        }
+      }
+    }
+
+    if (!mounted) return;
+    if (building == null) {
+      setState(() => _directLoading = false);
+      ref.read(toastProvider.notifier).show(
+            context.t.common.loadFailed,
+            type: ToastType.error,
+          );
+      context.pop();
+      return;
+    }
+
+    await ref
+        .read(apartmentsStoreProvider(buildingId).notifier)
+        .loadApartments();
+    final apartments = ref.read(apartmentsStoreProvider(buildingId)).value;
+    ApartmentEntity? apartment;
+    for (final apt in apartments ?? const <ApartmentEntity>[]) {
+      if (apt.id == apartmentId) {
+        apartment = apt;
+        break;
+      }
+    }
+
+    if (!mounted) return;
+    if (apartment == null) {
+      setState(() => _directLoading = false);
+      ref.read(toastProvider.notifier).show(
+            context.t.common.loadFailed,
+            type: ToastType.error,
+          );
+      context.pop();
+      return;
+    }
+
+    final active =
+        ref.read(inviteCodeStoreProvider.notifier).activeFor(apartmentId);
+    if (active != null) {
+      setState(() {
+        _selectedBuilding = building;
+        _selectedApartment = apartment;
+        _generatedCode = active.code;
+        _activeExpiresAt = active.expiresAt;
+        _step = _resultDisplayStep;
+        _directLoading = false;
+      });
+      return;
+    }
+
+    final generated = await ref
+        .read(inviteCodeStoreProvider.notifier)
+        .generateInviteCode(apartmentId);
+    if (!mounted) return;
+    if (generated == null) {
+      setState(() => _directLoading = false);
+      ref.read(toastProvider.notifier).show(
+            context.t.common.loadFailed,
+            type: ToastType.error,
+          );
+      context.pop();
+      return;
+    }
+
+    setState(() {
+      _selectedBuilding = building;
+      _selectedApartment = apartment;
+      _generatedCode = generated.code;
+      _activeExpiresAt = generated.expiresAt;
+      _step = _resultDisplayStep;
+      _directLoading = false;
+    });
   }
 
   Widget _buildStepContent() {
@@ -182,7 +319,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       );
     }
 
-    if (_step == _codeStep) {
+    if (_step == _codeStep || _step == _resultDisplayStep) {
       return InviteCodeResultView(
         key: const ValueKey('step-code'),
         code: _generatedCode!,
@@ -194,6 +331,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
         onRevoke: _confirmRevoke,
         onPickAnother: _resetToApartmentStep,
         onGoHome: () => context.pop(),
+        showPickAnother: !_isDirectMode,
       );
     }
 
@@ -249,7 +387,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       _selectedApartment = apt;
       _generatedCode = active.code;
       _activeExpiresAt = active.expiresAt;
-      _step = _codeStep;
+      _step = _resultDisplayStep;
     });
   }
 
@@ -269,7 +407,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       _selectedApartment = apt;
       _generatedCode = active.code;
       _activeExpiresAt = active.expiresAt;
-      _step = _codeStep;
+      _step = _resultDisplayStep;
     });
   }
 
@@ -297,11 +435,16 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   }
 
   void _onBackPressed() {
+    if (_directLoading) return;
+    if (_isDirectMode && _step >= _resultDisplayStep) {
+      context.pop();
+      return;
+    }
     if (_step == 0) {
       context.pop();
       return;
     }
-    if (_step == _codeStep) {
+    if (_step >= _codeStep) {
       setState(() {
         _step = _apartmentStep;
         _selectedApartment = null;
@@ -334,9 +477,6 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
 
   void _copyCode(String code) {
     Clipboard.setData(ClipboardData(text: code));
-    ref
-        .read(toastProvider.notifier)
-        .show('${context.t.common.codeCopied}: $code', type: ToastType.success);
   }
 
   Future<void> _shareCode() async {

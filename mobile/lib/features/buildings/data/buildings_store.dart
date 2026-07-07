@@ -153,9 +153,32 @@ final buildingsStoreProvider =
   BuildingsNotifier.new,
 );
 
-/// Bağımsız (standalone) bina listesi provider'ı.
-/// `buildingsStoreProvider`'dan ayrı bir instance tutar.
+/// Siteye bağlı olmayan binalar — API `standalone=true` ile yüklenir.
+class StandaloneBuildingsNotifier extends BuildingsNotifier {
+  Future<List<BuildingEntity>> _fetchStandalone() =>
+      _repository.fetchBuildings(standalone: true);
+
+  @override
+  Future<List<BuildingEntity>> build() => _fetchStandalone();
+
+  @override
+  Future<void> loadBuildings() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(_fetchStandalone);
+  }
+
+  @override
+  Future<void> refreshBuildings() async {
+    try {
+      final buildings = await _fetchStandalone();
+      state = AsyncValue.data(buildings);
+    } catch (_) {
+      // Mevcut listeyi koru.
+    }
+  }
+}
+
 final standaloneBuildingsStoreProvider =
-    AsyncNotifierProvider<BuildingsNotifier, List<BuildingEntity>>(
-  BuildingsNotifier.new,
+    AsyncNotifierProvider<StandaloneBuildingsNotifier, List<BuildingEntity>>(
+  StandaloneBuildingsNotifier.new,
 );

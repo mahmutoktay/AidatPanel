@@ -4,6 +4,7 @@ import '../../../../core/network/dio_client.dart';
 import '../../../../core/network/paginated_list_result.dart';
 import '../../../../core/network/pagination_parse.dart';
 import '../models/due_model.dart';
+import '../models/due_transaction_model.dart';
 import '../../domain/entities/due_remind_result.dart';
 
 abstract class DuesRemoteDataSource {
@@ -44,6 +45,12 @@ abstract class DuesRemoteDataSource {
   Future<DueRemindResult> remindBuildingDues(
     String buildingId, {
     List<String>? dueIds,
+  });
+
+  Future<PaginatedListResult<DueTransactionModel>> getDueTransactions(
+    String buildingId, {
+    String? cursor,
+    bool paginated = true,
   });
 }
 
@@ -164,6 +171,26 @@ class DuesRemoteDataSourceImpl implements DuesRemoteDataSource {
       );
     }
     return const DueRemindResult(reminded: 0);
+  }
+
+  @override
+  Future<PaginatedListResult<DueTransactionModel>> getDueTransactions(
+    String buildingId, {
+    String? cursor,
+    bool paginated = true,
+  }) async {
+    final response = await _dioClient.get(
+      ApiConstants.buildingDueTransactions(buildingId),
+      queryParameters: paginatedQuery(
+        cursor: cursor,
+        limit: paginated ? AppConstants.pageSize : null,
+        paginated: paginated,
+      ),
+    );
+    return parsePaginatedList(
+      response.data['data'],
+      DueTransactionModel.fromJson,
+    );
   }
 
   static int _toInt(dynamic value) {

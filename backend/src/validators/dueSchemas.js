@@ -93,4 +93,13 @@ export const dueSchemas = {
       affectCurrent: z.boolean().optional(),
     }),
   },
+
+  transactions: {
+    params: z.object({
+      id: z.string().uuid("Geçerli bir bina ID'si giriniz"),
+    }),
+    query: z.object({
+      ...listPaginationFields,
+    }),
+  },
 };

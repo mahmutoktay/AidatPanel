@@ -21,6 +21,7 @@ import '../../features/dekont/presentation/providers/share_intent_provider.dart'
 void invalidateAllCachedProviders(WidgetRef ref) {
   // Binalar
   ref.invalidate(buildingsStoreProvider);
+  ref.invalidate(standaloneBuildingsStoreProvider);
   ref.invalidate(collectionPresetsProvider);
 
   // Aidatlar

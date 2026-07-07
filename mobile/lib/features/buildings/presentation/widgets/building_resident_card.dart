@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../shared/widgets/action_chevron.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -28,10 +28,106 @@ class BuildingResidentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOccupied = apt.isOccupied;
-    final showSelection = selectionMode && isOccupied;
-    final duesStatus = isOccupied
-        ? ApartmentUiUtils.getDuesStatusInfo(context, apt.paymentStatus)
-        : null;
+
+    if (!isOccupied && !selectionMode) {
+      return _VacantApartmentCard(
+        apt: apt,
+        onTap: onShowDetails,
+      );
+    }
+
+    return _OccupiedResidentCard(
+      apt: apt,
+      selectionMode: selectionMode,
+      selected: selected,
+      onToggleSelection: onToggleSelection,
+      onShowDetails: onShowDetails,
+    );
+  }
+}
+
+class _VacantApartmentCard extends StatelessWidget {
+  const _VacantApartmentCard({
+    required this.apt,
+    required this.onTap,
+  });
+
+  final ApartmentEntity apt;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final apartmentLabel =
+        ApartmentUiUtils.formatApartmentLabel(context, apt.apartmentNumber);
+    const tileRadius = BorderRadius.all(Radius.circular(20));
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: tileRadius,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.spacingM,
+            vertical: 14,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: tileRadius,
+            boxShadow: BuildingSummaryCard.cardShadow,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  apartmentLabel,
+                  style: AppTypography.body1.copyWith(
+                    color: AppColors.inkDark,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                context.t.common.emptyApartment,
+                style: AppTypography.body2.copyWith(
+                  color: AppColors.mutedText,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OccupiedResidentCard extends StatelessWidget {
+  const _OccupiedResidentCard({
+    required this.apt,
+    required this.selectionMode,
+    required this.selected,
+    required this.onToggleSelection,
+    required this.onShowDetails,
+  });
+
+  final ApartmentEntity apt;
+  final bool selectionMode;
+  final bool selected;
+  final ValueChanged<ApartmentEntity> onToggleSelection;
+  final VoidCallback onShowDetails;
+
+  @override
+  Widget build(BuildContext context) {
+    final showSelection = selectionMode;
+    final duesStatus =
+        ApartmentUiUtils.getDuesStatusInfo(context, apt.paymentStatus);
     final apartmentLabel =
         ApartmentUiUtils.formatApartmentLabel(context, apt.apartmentNumber);
     final duesText = '₺${apt.monthlyDues.toStringAsFixed(0)}';
@@ -79,7 +175,6 @@ class BuildingResidentCard extends StatelessWidget {
                   userId: apt.resident?.id,
                   userName: apt.residentName,
                   profilePicture: apt.resident?.profilePicture,
-                  isVacant: !isOccupied,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -96,13 +191,9 @@ class BuildingResidentCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        isOccupied
-                            ? apt.residentName
-                            : context.t.common.noResidentInApartment,
+                        apt.residentName,
                         style: AppTypography.body1.copyWith(
-                          color: isOccupied
-                              ? AppColors.inkDark
-                              : AppColors.mutedText,
+                          color: AppColors.inkDark,
                           fontWeight: FontWeight.w800,
                           fontSize: 17,
                           height: 1.25,
@@ -114,18 +205,11 @@ class BuildingResidentCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                if (isOccupied && duesStatus != null)
-                  _StatusChip(
-                    label: duesStatus.label,
-                    color: duesStatus.color,
-                    backgroundColor: duesStatus.bgColor,
-                  )
-                else
-                  _StatusChip(
-                    label: context.t.common.vacantBadge,
-                    color: AppColors.mutedText,
-                    backgroundColor: AppColors.lineLight,
-                  ),
+                _StatusChip(
+                  label: duesStatus.label,
+                  color: duesStatus.color,
+                  backgroundColor: duesStatus.bgColor,
+                ),
               ],
             ),
             if (showSelection) ...[
@@ -143,10 +227,46 @@ class BuildingResidentCard extends StatelessWidget {
               ),
             ] else ...[
               const SizedBox(height: AppSizes.spacingM),
-              _DuesActionRow(
-                duesText: duesText,
-                monthlyDuesLabel: context.t.common.monthlyDues,
-                detailsLabel: context.t.common.details,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          duesText,
+                          style: AppTypography.body1.copyWith(
+                            color: AppColors.inkDark,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 17,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          context.t.common.monthlyDues,
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.mutedText,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    context.t.common.details,
+                    style: AppTypography.body2.copyWith(
+                      color: AppColors.inkDark,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right_rounded, size: 22),
+                ],
               ),
             ],
           ],
@@ -159,8 +279,6 @@ class BuildingResidentCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: tileRadius,
-          splashColor: AppColors.border.withValues(alpha: 0.4),
-          highlightColor: AppColors.border.withValues(alpha: 0.25),
           onTap: () => onToggleSelection(apt),
           child: card,
         ),
@@ -171,8 +289,6 @@ class BuildingResidentCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: tileRadius,
-        splashColor: AppColors.border.withValues(alpha: 0.4),
-        highlightColor: AppColors.border.withValues(alpha: 0.25),
         onTap: onShowDetails,
         child: card,
       ),
@@ -212,74 +328,6 @@ class _StatusChip extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         textAlign: TextAlign.center,
       ),
-    );
-  }
-}
-
-class _DuesActionRow extends StatelessWidget {
-  const _DuesActionRow({
-    required this.duesText,
-    required this.monthlyDuesLabel,
-    required this.detailsLabel,
-  });
-
-  final String duesText;
-  final String monthlyDuesLabel;
-  final String detailsLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                duesText,
-                style: AppTypography.body1.copyWith(
-                  color: AppColors.inkDark,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 17,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                monthlyDuesLabel,
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.mutedText,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: AppSizes.minTouchTarget,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                detailsLabel,
-                style: AppTypography.body2.copyWith(
-                  color: AppColors.inkDark,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                ),
-              ),
-              const SizedBox(width: 2),
-              const ActionChevron(
-                size: 20,
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

@@ -5,7 +5,7 @@ import '../../../../shared/theme/dashboard_screen_style.dart';
 
 /// Aidatlar sekmesi ortak görsel sabitleri (mockup paleti).
 abstract final class DuesScreenStyle {
-  static const double cardRadius = 20.0;
+  static const double cardRadius = DashboardScreenStyle.cardRadius;
   static const double iconBoxRadius = 20.0;
   static const double chipRadius = DashboardScreenStyle.pillRadius;
 

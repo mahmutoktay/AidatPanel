@@ -17,6 +17,8 @@ import '../../../buildings/domain/entities/building_entity.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../../notifications/presentation/widgets/announcement_form_sheet.dart';
+import '../providers/dashboard_filter_scope_provider.dart';
+import '../../domain/entities/dashboard_filter_scope.dart';
 import '../../domain/entities/manager_dashboard_entities.dart';
 import '../providers/manager_dashboard_snapshot_provider.dart';
 import '../providers/manager_home_counts_provider.dart';
@@ -25,8 +27,8 @@ import '../utils/manager_overdue_remind_helper.dart';
 import '../../../../shared/widgets/dashboard_building_selector.dart';
 import 'manager_home/manager_dashboard_charts.dart';
 import 'manager_home/manager_overdue_apartments_section.dart';
+import 'manager_home/manager_dues_summary_card.dart';
 import 'manager_home/manager_quick_actions_section.dart';
-import 'manager_home/manager_summary_stats_grid.dart';
 
 class ManagerHomeTab extends ConsumerStatefulWidget {
   final AsyncValue<List<BuildingEntity>> buildingsAsync;
@@ -45,7 +47,6 @@ class ManagerHomeTab extends ConsumerStatefulWidget {
 class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
   DateTime? _lastTransientErrorHintAt;
   String? _lastTransientErrorMessage;
-  String? _selectedBuildingId;
   String? _remindingDueId;
 
   /// Sağlanan async değerlerden hatası olanların sayısı.
@@ -55,28 +56,32 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
 
   @override
   Widget build(BuildContext context) {
+    final filterScope = ref.watch(dashboardFilterScopeProvider);
     final buildings = widget.buildingsAsync.value ?? const <BuildingEntity>[];
-    final selectedBuildingId = _selectedBuildingId;
-    final filteredBuildings = ManagerDashboardMapper.filterBuildings(
+    final scopedBuildings = ManagerDashboardMapper.filterBuildingsByScope(
       buildings,
-      selectedBuildingId,
+      siteId: filterScope.siteId,
+      buildingId: filterScope.buildingId,
     );
+    final scopedBuildingIds =
+        scopedBuildings.map((building) => building.id).toSet();
 
     final allDuesAsync = ref.watch(allBuildingsDuesProvider);
     final allDues = allDuesAsync.value ?? const <String, List<DueEntity>>{};
-    final filteredDues = ManagerDashboardMapper.filterDues(
+    final filteredDues = ManagerDashboardMapper.filterDuesByScope(
       allDues,
-      selectedBuildingId,
+      scopedBuildings,
     );
 
     final ticketStatsAsync =
-        ref.watch(managerTicketStatusStatsProvider(selectedBuildingId));
+        ref.watch(managerTicketStatusStatsForScopeProvider(filterScope));
     final monthExpenseTotalAsync =
-        ref.watch(managerMonthExpenseTotalProvider(selectedBuildingId));
+        ref.watch(managerMonthExpenseTotalForScopeProvider(filterScope));
     final sixMonthExpensesAsync =
-        ref.watch(managerSixMonthExpenseTotalsProvider(selectedBuildingId));
-    final pendingDekontsAsync =
-        ref.watch(managerPendingDekontsForBuildingProvider(selectedBuildingId));
+        ref.watch(managerSixMonthExpenseTotalsForScopeProvider(filterScope));
+    final pendingDueActionsAsync = ref.watch(
+      managerPendingDekontsForScopeProvider(filterScope),
+    );
 
     final monthExpensesCountAsync = ref.watch(managerMonthExpensesCountProvider);
     final monthAnnouncementsAsync =
@@ -88,7 +93,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
       ticketStatsAsync,
       monthExpenseTotalAsync,
       sixMonthExpensesAsync,
-      pendingDekontsAsync,
+      pendingDueActionsAsync,
       monthExpensesCountAsync,
       monthAnnouncementsAsync,
     ];
@@ -106,9 +111,10 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
 
     final duesStats =
         ManagerDashboardMapper.duesCollectionStats(currentMonthDues);
+    final duesAmountSummary =
+        ManagerDashboardMapper.duesAmountSummary(currentMonthDues);
     final ticketStats = ticketStatsAsync.value ?? ManagerTicketStatusStats.empty;
-    final monthExpenseTotal = monthExpenseTotalAsync.value ?? 0;
-    final pendingDekontCount = pendingDekontsAsync.value ?? 0;
+    final pendingDueActionCount = pendingDueActionsAsync.value ?? 0;
     final expenseTotals = sixMonthExpensesAsync.value ?? const {};
 
     final monthlyFinance = ManagerDashboardMapper.monthlyFinancePoints(
@@ -125,21 +131,17 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
     final overdueItems = ManagerDashboardMapper.overdueApartmentsFromMap(
       allDues,
       buildingNames,
-      buildingId: selectedBuildingId,
+      buildingId: filterScope.buildingId,
+      buildingIds: filterScope.isAll ? null : scopedBuildingIds,
+    );
+    final remindDueIdsByBuilding = groupOverdueDueIdsByBuilding(
+      allDues,
+      buildingIds: filterScope.isAll ? null : scopedBuildingIds,
     );
 
-    final expenseCurrency = filteredBuildings.isNotEmpty
-        ? filteredBuildings.first.currency
+    final expenseCurrency = scopedBuildings.isNotEmpty
+        ? scopedBuildings.first.currency
         : 'TRY';
-
-    final summaryStats = ManagerDashboardMapper.summaryStats(
-      buildings: filteredBuildings,
-      dues: currentMonthDues,
-      openTicketCount: ticketStats.openCount,
-      monthTotalExpense: monthExpenseTotal,
-      expenseCurrency: expenseCurrency,
-      pendingDekontCount: pendingDekontCount,
-    );
 
     final periodLabel = AppDateFormat.monthYear(DateTime.now())
         .replaceRange(
@@ -169,9 +171,11 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
               if (buildings.isNotEmpty) ...[
                 DashboardBuildingSelector(
                   buildings: buildings,
-                  selectedBuildingId: selectedBuildingId,
+                  scope: filterScope,
                   includeAllOption: true,
-                  onSelected: (id) => setState(() => _selectedBuildingId = id),
+                  onScopeChanged: (scope) => ref
+                      .read(dashboardFilterScopeProvider.notifier)
+                      .update(scope),
                 ),
                 const SizedBox(height: AppSizes.spacingS),
               ],
@@ -187,14 +191,20 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
               if (totalErrorCount > 0)
                 _DataWarningBanner(errorCount: totalErrorCount),
               if (totalErrorCount > 0) const SizedBox(height: AppSizes.spacingS),
-              ManagerSummaryStatsGrid(stats: summaryStats),
+              ManagerDuesSummaryCard(
+                summary: duesAmountSummary,
+                currency: expenseCurrency,
+                remindDueIdsByBuilding: remindDueIdsByBuilding.isEmpty
+                    ? null
+                    : remindDueIdsByBuilding,
+              ),
               const SizedBox(height: AppSizes.spacingM),
               ManagerQuickActionsSection(
                 openTicketCount:
                     ticketStats.openCount + ticketStats.inProgressCount,
                 monthExpenseCount: monthExpensesCountAsync.value ?? 0,
                 monthAnnouncementCount: monthAnnouncementsAsync.value ?? 0,
-                pendingDekontCount: pendingDekontCount,
+                pendingDuesActionCount: pendingDueActionCount,
                 onTickets: () => _openAndInvalidate('/manager-dashboard/tickets'),
                 onExpenses: () => _openAndInvalidate('/manager-dashboard/expenses'),
                 onAnnouncement: () async {
@@ -204,7 +214,8 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
                     ref.invalidate(managerMonthAnnouncementsCountProvider);
                   }
                 },
-                onDekonts: () => _openAndInvalidate('/manager-dashboard/dekonts'),
+                onDuesStatus: () =>
+                    _openAndInvalidate('/manager-dashboard/due-transactions'),
               ),
               const SizedBox(height: AppSizes.spacingL),
               ManagerDuesCollectionChart(
@@ -221,7 +232,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
                 onRemind: _onRemindOverdue,
                 remindingDueId: _remindingDueId,
                 onSeeAll: overdueItems.isNotEmpty
-                    ? () => _openOverdueDuesList(selectedBuildingId)
+                    ? () => _openOverdueDuesList(filterScope)
                     : null,
               ),
             ],
@@ -243,7 +254,8 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
     );
   }
 
-  void _openOverdueDuesList(String? buildingId) {
+  void _openOverdueDuesList(DashboardFilterScope scope) {
+    final buildingId = scope.buildingId;
     final query = buildingId != null ? '?buildingId=$buildingId' : '';
     context.push('/manager-dashboard/overdue-apartments$query');
   }
@@ -251,11 +263,12 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
   Future<void> _openAndInvalidate(String route) async {
     await context.push(route);
     if (!mounted) return;
-    ref.invalidate(managerTicketStatusStatsProvider(_selectedBuildingId));
+    final filterScope = ref.read(dashboardFilterScopeProvider);
+    ref.invalidate(managerTicketStatusStatsForScopeProvider(filterScope));
     ref.invalidate(managerMonthExpensesCountProvider);
-    ref.invalidate(managerMonthExpenseTotalProvider(_selectedBuildingId));
-    ref.invalidate(managerSixMonthExpenseTotalsProvider(_selectedBuildingId));
-    ref.invalidate(managerPendingDekontsForBuildingProvider(_selectedBuildingId));
+    ref.invalidate(managerMonthExpenseTotalForScopeProvider(filterScope));
+    ref.invalidate(managerSixMonthExpenseTotalsForScopeProvider(filterScope));
+    ref.invalidate(managerPendingDekontsForScopeProvider(filterScope));
     ref.invalidate(managerMonthAnnouncementsCountProvider);
   }
 
@@ -303,11 +316,12 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
   }
 
   Future<void> _refreshHomeTab() async {
+    final filterScope = ref.read(dashboardFilterScopeProvider);
     ref.invalidate(allBuildingsDuesProvider);
-    ref.invalidate(managerTicketStatusStatsProvider(_selectedBuildingId));
-    ref.invalidate(managerMonthExpenseTotalProvider(_selectedBuildingId));
-    ref.invalidate(managerSixMonthExpenseTotalsProvider(_selectedBuildingId));
-    ref.invalidate(managerPendingDekontsForBuildingProvider(_selectedBuildingId));
+    ref.invalidate(managerTicketStatusStatsForScopeProvider(filterScope));
+    ref.invalidate(managerMonthExpenseTotalForScopeProvider(filterScope));
+    ref.invalidate(managerSixMonthExpenseTotalsForScopeProvider(filterScope));
+    ref.invalidate(managerPendingDekontsForScopeProvider(filterScope));
     ref.invalidate(managerMonthExpensesCountProvider);
     ref.invalidate(managerMonthAnnouncementsCountProvider);
     await Future.wait([

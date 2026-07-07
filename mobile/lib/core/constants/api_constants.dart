@@ -87,6 +87,8 @@ class ApiConstants {
       '$apiVersion/buildings/$buildingId/due-amount';
   static String buildingDuesRemind(String buildingId) =>
       '$apiVersion/buildings/$buildingId/dues/remind';
+  static String buildingDueTransactions(String buildingId) =>
+      '$apiVersion/buildings/$buildingId/dues/transactions';
   static String buildingExpenses(String buildingId) =>
       '$apiVersion/buildings/$buildingId/expenses';
   static String buildingExpensesSummary(String buildingId) =>

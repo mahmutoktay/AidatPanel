@@ -205,14 +205,35 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
     updateData.note = note;
   }
 
-  const updated = await prisma.due.update({
-    where: { id: dueId },
-    data: updateData,
-    include: {
-      apartment: {
-        select: { id: true, number: true },
+  const updated = await prisma.$transaction(async (tx) => {
+    const row = await tx.due.update({
+      where: { id: dueId },
+      data: updateData,
+      include: {
+        apartment: {
+          select: { id: true, number: true },
+        },
       },
-    },
+    });
+
+    if (status === "PAID" && previousStatus !== "PAID") {
+      const existingPayment = await tx.duePayment.findFirst({
+        where: { dueId },
+      });
+      if (!existingPayment) {
+        await tx.duePayment.create({
+          data: {
+            dueId,
+            amount: due.amount,
+            paidAt: updateData.paidAt ?? new Date(),
+            currency: due.currency,
+            note: note ?? "Manuel ödeme",
+          },
+        });
+      }
+    }
+
+    return row;
   });
 
   if (status === "PAID" && previousStatus !== "PAID" && resident) {
@@ -235,6 +256,121 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
     ...updated,
     apartmentNumber: updated.apartment?.number ?? null,
   };
+};
+
+const PENDING_DEKONT_STATUSES = [
+  "RECEIVED",
+  "EXTRACTING",
+  "PARSED",
+  "PARSE_LOW_CONFIDENCE",
+  "MATCHING",
+  "MATCHED",
+  "MATCH_AMBIGUOUS",
+  "UNMATCHED",
+  "NEEDS_MANAGER_REVIEW",
+  "RECIPIENT_MISMATCH",
+];
+
+function mapDueTransactionRow(row) {
+  return {
+    id: row.id,
+    kind: row.kind,
+    source: row.source,
+    amount: row.amount,
+    currency: row.currency,
+    occurredAt: row.occurredAt,
+    apartmentNumber: row.apartmentNumber,
+    residentName: row.residentName,
+    status: row.status,
+    dekontId: row.dekontId ?? null,
+    dueId: row.dueId ?? null,
+  };
+}
+
+/**
+ * Bina aidat işlem geçmişi — onaylı ödemeler + bekleyen/reddedilmiş dekontlar.
+ */
+export const getDueTransactionsService = async (buildingId, managerId, filters = {}) => {
+  const building = await prisma.building.findFirst({
+    where: { id: buildingId, managerId },
+  });
+  if (!building) {
+    throw new HttpError(404, "Bina bulunamadı.");
+  }
+
+  const paginated = wantsPaginatedList(filters);
+  const pageLimit = paginated ? resolvePageLimit(filters.limit) : resolveListTake(filters.limit);
+  const take = paginated ? pageLimit + 1 : pageLimit;
+
+  const [payments, dekonts] = await Promise.all([
+    prisma.duePayment.findMany({
+      where: {
+        due: { apartment: { buildingId } },
+      },
+      include: {
+        due: {
+          include: {
+            apartment: {
+              select: {
+                number: true,
+                resident: { select: userPublicSelect },
+              },
+            },
+          },
+        },
+        dekont: { select: { id: true, status: true } },
+      },
+      orderBy: [{ paidAt: "desc" }, { id: "desc" }],
+    }),
+    prisma.dekont.findMany({
+      where: {
+        buildingId,
+        status: { in: [...PENDING_DEKONT_STATUSES, "REJECTED"] },
+      },
+      include: {
+        apartment: { select: { number: true } },
+        uploadedBy: { select: { id: true, name: true } },
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    }),
+  ]);
+
+  const paymentRows = payments.map((payment) => ({
+    id: payment.id,
+    kind: "PAYMENT",
+    source: payment.dekontId ? "RECEIPT" : "MANUAL",
+    amount: Number(payment.amount),
+    currency: payment.currency,
+    occurredAt: payment.paidAt,
+    apartmentNumber: payment.due.apartment.number,
+    residentName: payment.due.apartment.resident?.name ?? null,
+    status: "APPROVED",
+    dekontId: payment.dekontId,
+    dueId: payment.dueId,
+  }));
+
+  const dekontRows = dekonts.map((dekont) => ({
+    id: dekont.id,
+    kind: "DEKONT",
+    source: "RECEIPT",
+    amount: dekont.parsedAmount != null ? Number(dekont.parsedAmount) : null,
+    currency: "TRY",
+    occurredAt: dekont.transactionDate ?? dekont.createdAt,
+    apartmentNumber: dekont.apartment?.number ?? null,
+    residentName: dekont.uploadedBy?.name ?? null,
+    status: dekont.status === "REJECTED" ? "REJECTED" : "PENDING",
+    dekontId: dekont.id,
+    dueId: dekont.dueId,
+  }));
+
+  const merged = [...paymentRows, ...dekontRows].sort((a, b) => {
+    const diff = new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime();
+    if (diff !== 0) return diff;
+    return String(b.id).localeCompare(String(a.id));
+  });
+
+  const sliced = merged.slice(0, take);
+  return buildListResponse(filters, sliced, mapDueTransactionRow);
 };
 
 /**

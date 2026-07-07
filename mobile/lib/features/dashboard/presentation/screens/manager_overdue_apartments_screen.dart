@@ -8,6 +8,8 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/dashboard_building_selector.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../buildings/data/buildings_store.dart';
+import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
+import '../../../dashboard/presentation/providers/dashboard_filter_scope_provider.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../domain/entities/manager_dashboard_entities.dart';
 import '../utils/manager_dashboard_mapper.dart';
@@ -30,14 +32,21 @@ class ManagerOverdueApartmentsScreen extends ConsumerStatefulWidget {
 
 class _ManagerOverdueApartmentsScreenState
     extends ConsumerState<ManagerOverdueApartmentsScreen> {
-  String? _selectedBuildingId;
   String? _remindingDueId;
   bool _isRemindingAll = false;
 
   @override
   void initState() {
     super.initState();
-    _selectedBuildingId = widget.initialBuildingId;
+    final initialBuildingId = widget.initialBuildingId;
+    if (initialBuildingId == null || initialBuildingId.isEmpty) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(dashboardFilterScopeProvider.notifier).update(
+            DashboardFilterScope.building(initialBuildingId),
+          );
+    });
   }
 
   @override
@@ -45,6 +54,14 @@ class _ManagerOverdueApartmentsScreenState
     final t = context.t.features.dashboard;
     final allDuesAsync = ref.watch(allBuildingsDuesProvider);
     final buildings = ref.watch(buildingsStoreProvider).value ?? const [];
+    final filterScope = ref.watch(dashboardFilterScopeProvider);
+    final scopedBuildingIds = filterScope.isAll
+        ? null
+        : ManagerDashboardMapper.filterBuildingsByScope(
+            buildings,
+            siteId: filterScope.siteId,
+            buildingId: filterScope.buildingId,
+          ).map((building) => building.id).toSet();
 
     final buildingNames = {
       for (final building in buildings) building.id: building.name,
@@ -71,7 +88,8 @@ class _ManagerOverdueApartmentsScreenState
           final items = ManagerDashboardMapper.overdueApartmentsFromMap(
             allDues,
             buildingNames,
-            buildingId: _selectedBuildingId,
+            buildingId: filterScope.buildingId,
+            buildingIds: scopedBuildingIds,
           );
 
           return RefreshIndicator(
@@ -87,10 +105,11 @@ class _ManagerOverdueApartmentsScreenState
                   if (buildings.isNotEmpty) ...[
                     DashboardBuildingSelector(
                       buildings: buildings,
-                      selectedBuildingId: _selectedBuildingId,
+                      scope: filterScope,
                       includeAllOption: true,
-                      onSelected: (id) =>
-                          setState(() => _selectedBuildingId = id),
+                      onScopeChanged: (scope) => ref
+                          .read(dashboardFilterScopeProvider.notifier)
+                          .update(scope),
                     ),
                     const SizedBox(height: AppSizes.spacingM),
                   ],
@@ -102,45 +121,36 @@ class _ManagerOverdueApartmentsScreenState
                     ),
                   ),
                   if (items.isNotEmpty) ...[
-                    const SizedBox(height: AppSizes.spacingS),
-                    SizedBox(
-                      width: double.infinity,
-                      height: AppSizes.minTouchTarget,
-                      child: OutlinedButton(
+                    const SizedBox(height: AppSizes.spacingM),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
                         onPressed: _isRemindingAll || _remindingDueId != null
                             ? null
                             : () => _onRemindAll(items),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.chartBlue,
-                          side: const BorderSide(color: AppColors.chartBlue),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: _isRemindingAll
+                        icon: _isRemindingAll
                             ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : Text(
-                                t.remindAll,
-                                style: AppTypography.body1.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
+                            : const Icon(Icons.notifications_active_outlined),
+                        label: Text(t.remindAll),
                       ),
                     ),
                   ],
                 ],
               ),
-              list: items.isEmpty
-                  ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: AppSizes.screenBodyScrollPadding,
-                      children: [
+              list: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSizes.dashboardScreenPaddingHorizontal,
+                  AppSizes.spacingM,
+                  AppSizes.dashboardScreenPaddingHorizontal,
+                  AppSizes.spacingXL,
+                ),
+                children: items.isEmpty
+                    ? [
                         ManagerDashboardCard(
                           child: Text(
                             t.noOverdueApartments,
@@ -149,27 +159,18 @@ class _ManagerOverdueApartmentsScreenState
                             ),
                           ),
                         ),
+                      ]
+                    : [
+                        for (var i = 0; i < items.length; i++) ...[
+                          if (i > 0) const SizedBox(height: AppSizes.spacingM),
+                          ManagerOverdueApartmentRow(
+                            item: items[i],
+                            onRemind: _onRemind,
+                            isReminding: _remindingDueId == items[i].dueId,
+                          ),
+                        ],
                       ],
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSizes.dashboardScreenPaddingHorizontal,
-                        AppSizes.spacingS,
-                        AppSizes.dashboardScreenPaddingHorizontal,
-                        AppSizes.spacingXL,
-                      ),
-                      itemCount: items.length,
-                      separatorBuilder: (_, _) =>
-                          const SizedBox(height: AppSizes.spacingM),
-                      itemBuilder: (context, index) {
-                        final item = items[index];
-                        return ManagerOverdueApartmentRow(
-                          item: item,
-                          isReminding: _remindingDueId == item.dueId,
-                          onRemind: _isRemindingAll ? null : _onRemind,
-                        );
-                      },
-                    ),
+              ),
             ),
           );
         },

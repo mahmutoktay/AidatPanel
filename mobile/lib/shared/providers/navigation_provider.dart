@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/dashboard/presentation/providers/dashboard_filter_scope_provider.dart';
+
 /// Manager dashboard için tab index state provider
 /// TabController ile sync edilir, BottomNavigationBar'ın currentIndex'ini yönetir
 class ManagerTabIndexNotifier extends Notifier<int> {
@@ -29,6 +31,7 @@ final residentTabIndexProvider =
 /// Manager dashboard tab index'ini sıfırlar (logout/login için)
 void resetManagerTabIndex(WidgetRef ref) {
   ref.read(managerTabIndexProvider.notifier).reset();
+  ref.read(dashboardFilterScopeProvider.notifier).reset();
 }
 
 /// Resident dashboard tab index'ini sıfırlar (logout/login için)

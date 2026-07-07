@@ -24,6 +24,46 @@ abstract final class ManagerDashboardMapper {
     return buildings.where((b) => b.id == buildingId).toList(growable: false);
   }
 
+  /// Site / bina / tümü kapsamına göre bina listesi.
+  static List<BuildingEntity> filterBuildingsByScope(
+    List<BuildingEntity> buildings, {
+    String? siteId,
+    String? buildingId,
+  }) {
+    if (buildingId != null) {
+      return buildings.where((b) => b.id == buildingId).toList(growable: false);
+    }
+    if (siteId != null) {
+      return buildings
+          .where((b) => b.siteId == siteId)
+          .toList(growable: false);
+    }
+    return buildings;
+  }
+
+  static List<DueEntity> filterDuesByScope(
+    Map<String, List<DueEntity>> allDues,
+    List<BuildingEntity> scopedBuildings,
+  ) {
+    final ids = scopedBuildings.map((b) => b.id).toSet();
+    return allDues.entries
+        .where((entry) => ids.contains(entry.key))
+        .expand((entry) => entry.value)
+        .toList(growable: false);
+  }
+
+  static Set<String> buildingIdsForScope(
+    List<BuildingEntity> buildings, {
+    String? siteId,
+    String? buildingId,
+  }) {
+    return filterBuildingsByScope(
+      buildings,
+      siteId: siteId,
+      buildingId: buildingId,
+    ).map((b) => b.id).toSet();
+  }
+
   /// Donut ve özet kartları için seçili ay/yıl aidatları.
   static List<DueEntity> filterDuesForMonth(
     List<DueEntity> dues, {
@@ -90,10 +130,12 @@ abstract final class ManagerDashboardMapper {
     Map<String, List<DueEntity>> allDues,
     Map<String, String> buildingNamesById, {
     String? buildingId,
+    Set<String>? buildingIds,
   }) {
     final items = <ManagerOverdueApartmentItem>[];
     for (final entry in allDues.entries) {
       if (buildingId != null && entry.key != buildingId) continue;
+      if (buildingIds != null && !buildingIds.contains(entry.key)) continue;
       final buildingName =
           buildingId == null ? buildingNamesById[entry.key] : null;
       items.addAll(
@@ -158,6 +200,30 @@ abstract final class ManagerDashboardMapper {
     }
 
     return points;
+  }
+
+  static ManagerDuesAmountSummary duesAmountSummary(List<DueEntity> dues) {
+    if (dues.isEmpty) return ManagerDuesAmountSummary.empty;
+
+    var expected = 0.0;
+    var collected = 0.0;
+    var overdueCount = 0;
+
+    for (final due in dues) {
+      expected += due.amount;
+      if (due.status == DueStatus.paid) {
+        collected += due.amount;
+      }
+      if (due.status == DueStatus.overdue) {
+        overdueCount++;
+      }
+    }
+
+    return ManagerDuesAmountSummary(
+      collectedAmount: collected,
+      expectedAmount: expected,
+      overdueCount: overdueCount,
+    );
   }
 
   static ManagerDashboardSummaryStats summaryStats({

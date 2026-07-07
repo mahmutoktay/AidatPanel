@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_button_styles.dart';
@@ -22,6 +24,7 @@ class InviteCodeResultView extends StatelessWidget {
   final VoidCallback onRevoke;
   final VoidCallback onPickAnother;
   final VoidCallback onGoHome;
+  final bool showPickAnother;
 
   const InviteCodeResultView({
     super.key,
@@ -34,6 +37,7 @@ class InviteCodeResultView extends StatelessWidget {
     required this.onRevoke,
     required this.onPickAnother,
     required this.onGoHome,
+    this.showPickAnother = true,
   });
 
   @override
@@ -44,7 +48,7 @@ class InviteCodeResultView extends StatelessWidget {
       const SizedBox(height: AppSizes.spacingL),
       _buildCodeCard(context, remaining),
       const SizedBox(height: AppSizes.spacingL),
-      _buildPrimaryActions(context),
+      _InviteCopyShareActions(onCopy: onCopy, onShare: onShare),
       const SizedBox(height: AppSizes.spacingM),
       _buildInfoNote(context),
       const SizedBox(height: AppSizes.spacingM),
@@ -204,36 +208,6 @@ class InviteCodeResultView extends StatelessWidget {
     );
   }
 
-  Widget _buildPrimaryActions(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: AppSizes.buttonHeightPrimary,
-            child: ElevatedButton.icon(
-              onPressed: onCopy,
-              style: AppButtonStyles.elevatedPrimary(fullWidth: true),
-              icon: const Icon(Icons.copy_rounded),
-              label: Text(context.t.features.buildings.copy),
-            ),
-          ),
-        ),
-        const SizedBox(width: AppSizes.spacingM),
-        Expanded(
-          child: SizedBox(
-            height: AppSizes.buttonHeightPrimary,
-            child: OutlinedButton.icon(
-              onPressed: onShare,
-              style: AppButtonStyles.outlinedPrimary(fullWidth: true),
-              icon: const Icon(Icons.share_rounded),
-              label: Text(context.t.features.buildings.share),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildInfoNote(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacingM),
@@ -264,6 +238,19 @@ class InviteCodeResultView extends StatelessWidget {
   }
 
   Widget _buildSecondaryActions(BuildContext context) {
+    if (!showPickAnother) {
+      return SizedBox(
+        height: AppSizes.buttonHeightSecondary,
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: onRevoke,
+          style: AppButtonStyles.outlinedDanger(fullWidth: true),
+          icon: const Icon(Icons.cancel_outlined),
+          label: Text(context.t.features.buildings.cancelCode),
+        ),
+      );
+    }
+
     return Row(
       children: [
         Expanded(
@@ -303,6 +290,98 @@ class InviteCodeResultView extends StatelessWidget {
         icon: const Icon(Icons.home_rounded),
         label: Text(context.t.features.buildings.backToMainMenu),
       ),
+    );
+  }
+}
+
+class _InviteCopyShareActions extends StatefulWidget {
+  const _InviteCopyShareActions({
+    required this.onCopy,
+    required this.onShare,
+  });
+
+  final VoidCallback onCopy;
+  final VoidCallback onShare;
+
+  @override
+  State<_InviteCopyShareActions> createState() => _InviteCopyShareActionsState();
+}
+
+class _InviteCopyShareActionsState extends State<_InviteCopyShareActions> {
+  static const _copyResetDuration = Duration(seconds: 2);
+  static const _copyButtonWidth = 168.0;
+
+  bool _copied = false;
+  Timer? _resetTimer;
+
+  @override
+  void dispose() {
+    _resetTimer?.cancel();
+    super.dispose();
+  }
+
+  void _handleCopy() {
+    widget.onCopy();
+    _resetTimer?.cancel();
+    setState(() => _copied = true);
+    _resetTimer = Timer(_copyResetDuration, () {
+      if (mounted) setState(() => _copied = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final buildingsT = context.t.features.buildings;
+
+    return Row(
+      children: [
+        SizedBox(
+          width: _copyButtonWidth,
+          height: AppSizes.buttonHeightPrimary,
+          child: ElevatedButton(
+            onPressed: _handleCopy,
+            style: AppButtonStyles.elevatedPrimary(fullWidth: true),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              switchInCurve: Curves.easeInOut,
+              switchOutCurve: Curves.easeInOut,
+              transitionBuilder: (child, animation) =>
+                  FadeTransition(opacity: animation, child: child),
+              child: _copied
+                  ? Row(
+                      key: const ValueKey('copied'),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.check_rounded, size: 20),
+                        const SizedBox(width: 6),
+                        Text(buildingsT.copyDone),
+                      ],
+                    )
+                  : Row(
+                      key: const ValueKey('copy'),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.copy_rounded, size: 20),
+                        const SizedBox(width: 6),
+                        Text(buildingsT.copy),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSizes.spacingM),
+        Expanded(
+          child: SizedBox(
+            height: AppSizes.buttonHeightPrimary,
+            child: OutlinedButton.icon(
+              onPressed: widget.onShare,
+              style: AppButtonStyles.outlinedPrimary(fullWidth: true),
+              icon: const Icon(Icons.person_add_outlined),
+              label: Text(context.t.common.inviteResident),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

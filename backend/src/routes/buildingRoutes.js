@@ -13,6 +13,7 @@ import {
   updateBuildingDueAmount,
   postRemindBuildingDues,
   postBulkGenerateBuildingDues,
+  getDueTransactions,
 } from "../controllers/dueController.js";
 import { getTicketsByBuilding } from "../controllers/ticketController.js";
 import {
@@ -54,6 +55,11 @@ router.post("/dashboard-summary/batch", getBatchDashboardSummary);
 
 // Aidatlar — /:id/... bina detayından önce (okunabilirlik; Express yine de doğru eşleştirir)
 router.get("/:id/dues", validate(dueSchemas.getByBuilding), getDuesByBuilding);
+router.get(
+  "/:id/dues/transactions",
+  validate(dueSchemas.transactions),
+  getDueTransactions
+);
 router.post("/:id/dues/remind", validate(dueSchemas.remind), postRemindBuildingDues);
 router.post("/:id/dues/bulk", validate(dueSchemas.bulk), postBulkGenerateBuildingDues);
 router.get(

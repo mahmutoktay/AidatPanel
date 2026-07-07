@@ -16,17 +16,23 @@ import '../../../../shared/widgets/async_error_widget.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../apartments/data/apartments_store.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
+import '../../../apartments/presentation/widgets/add_apartment_bottom_sheet.dart';
 import '../../domain/entities/building_entity.dart';
 
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../reports/presentation/widgets/report_download_sheet.dart';
+import '../../../dashboard/presentation/utils/manager_dashboard_mapper.dart';
 import '../models/building_list_item_model.dart';
+import '../utils/apartment_ui_utils.dart';
 import '../widgets/apartment_details_sheet.dart';
+import '../widgets/building_detail_bottom_toolbar.dart';
 import '../widgets/building_detail_overview.dart';
+import '../../../dashboard/presentation/utils/manager_overdue_remind_helper.dart';
 import '../widgets/building_resident_card.dart';
 import '../widgets/building_summary_card.dart';
-import '../utils/apartment_ui_utils.dart';
+import '../widgets/delete_building_dialog.dart';
+import '../widgets/edit_building_bottom_sheet.dart';
 
 class BuildingResidentsScreen extends ConsumerStatefulWidget {
   final BuildingEntity building;
@@ -334,6 +340,33 @@ class _BuildingResidentsScreenState
               label: '${context.t.common.remove} ($selectedCount)',
             )
           : null,
+      bottomNavigationBar: _selectionMode
+          ? null
+          : BuildingDetailBottomToolbar(
+              onEdit: () => EditBuildingBottomSheet.show(
+                context,
+                building: widget.building,
+              ),
+              onDelete: () =>
+                  DeleteBuildingDialog.show(context, building: widget.building),
+              onReport: () => ReportDownloadSheet.show(
+                context,
+                building: widget.building,
+              ),
+              onMultiSelect: () {
+                if (!hasOccupied) {
+                  ref.read(toastProvider.notifier).show(
+                        context.t.common.noResidentsToRemoveInBuilding,
+                        type: ToastType.info,
+                      );
+                  return;
+                }
+                setState(() {
+                  _selectionMode = true;
+                  _selectedApartmentIds.clear();
+                });
+              },
+            ),
       body: asyncApartments.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => AsyncErrorWidget(
@@ -415,50 +448,20 @@ class _BuildingResidentsScreenState
                           AppSizes.dashboardScreenPaddingHorizontal,
                           96,
                         )
-                      : AppSizes.screenBodyScrollPadding,
+                      : AppSizes.screenBodyScrollPadding.copyWith(
+                          bottom: AppSizes.spacingXL,
+                        ),
                   itemCount: enrichedResidents.isEmpty
-                      ? 4
-                      : 4 + enrichedResidents.length,
+                      ? 3
+                      : 3 + enrichedResidents.length,
                   itemBuilder: (context, index) {
                     if (index == 0) {
                       return _buildHeader(widget.building);
                     }
                     if (index == 1) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: AppSizes.spacingM),
-                        child: _BuildingToolbarRow(
-                          reportLabel: context.t.features.reports.menuDownload,
-                          onReportTap: () => ReportDownloadSheet.show(
-                            context,
-                            building: widget.building,
-                          ),
-                          showSelectTrigger: !_selectionMode,
-                          onSelectTap: () {
-                            if (!hasOccupied) {
-                              ref
-                                  .read(toastProvider.notifier)
-                                  .show(
-                                    context
-                                        .t
-                                        .common
-                                        .noResidentsToRemoveInBuilding,
-                                    type: ToastType.info,
-                                  );
-                              return;
-                            }
-                            setState(() {
-                              _selectionMode = true;
-                              _selectedApartmentIds.clear();
-                            });
-                          },
-                          selectLabel: context.t.common.multiSelectResidents,
-                        ),
-                      );
-                    }
-                    if (index == 2) {
                       return const SizedBox(height: AppSizes.spacingL);
                     }
-                    if (index == 3) {
+                    if (index == 2) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -473,7 +476,7 @@ class _BuildingResidentsScreenState
                       );
                     }
 
-                    final residentIndex = index - 4;
+                    final residentIndex = index - 3;
                     final apt = enrichedResidents[residentIndex];
                     return BuildingResidentCard(
                       apt: apt,
@@ -524,6 +527,20 @@ class _BuildingResidentsScreenState
             ),
           ),
         ),
+        const Spacer(),
+        IconButton(
+          tooltip: context.t.common.addApartment,
+          onPressed: () => AddApartmentBottomSheet.show(
+            context,
+            buildingId: widget.building.id,
+          ),
+          icon: const Icon(Icons.add_rounded),
+          color: AppColors.primary,
+          style: IconButton.styleFrom(
+            minimumSize: const Size(40, 40),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
       ],
     );
   }
@@ -534,8 +551,25 @@ class _BuildingResidentsScreenState
       building: building,
       allDues: allDues,
     );
+    final buildingDues = allDues[building.id] ?? const <DueEntity>[];
+    final now = DateTime.now();
+    final currentMonthDues = ManagerDashboardMapper.filterDuesForMonth(
+      buildingDues,
+      month: now.month,
+      year: now.year,
+    );
+    final summary = ManagerDashboardMapper.duesAmountSummary(currentMonthDues);
+    final overdueDueIdsByBuilding = groupOverdueDueIdsByBuilding(
+      allDues,
+      buildingIds: {building.id},
+    );
 
-    return BuildingDetailOverview(item: item);
+    return BuildingDetailOverview(
+      item: item,
+      summary: summary,
+      currency: building.currency,
+      remindDueIdsByBuilding: overdueDueIdsByBuilding,
+    );
   }
 
   Widget _buildEmptyState(BuildContext context) {
@@ -556,69 +590,6 @@ class _BuildingResidentsScreenState
           ),
         ],
       ),
-    );
-  }
-}
-
-class _BuildingToolbarRow extends StatelessWidget {
-  const _BuildingToolbarRow({
-    required this.reportLabel,
-    required this.onReportTap,
-    required this.showSelectTrigger,
-    required this.onSelectTap,
-    required this.selectLabel,
-  });
-
-  final String reportLabel;
-  final VoidCallback onReportTap;
-  final bool showSelectTrigger;
-  final VoidCallback onSelectTap;
-  final String selectLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Flexible(
-          child: TextButton.icon(
-            onPressed: onReportTap,
-            icon: const Icon(Icons.download_rounded, size: 22),
-            label: Text(reportLabel),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              backgroundColor: Colors.transparent,
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              minimumSize: const Size(0, AppSizes.minTouchTargetComfort),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              textStyle: AppTypography.button.copyWith(
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-        ),
-        if (showSelectTrigger) ...[
-          const SizedBox(width: AppSizes.spacingS),
-          Flexible(
-            child: TextButton.icon(
-              onPressed: onSelectTap,
-              icon: const Icon(Icons.person_remove_outlined, size: 22),
-              label: Text(selectLabel),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.warning,
-                backgroundColor: Colors.transparent,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                minimumSize: const Size(0, AppSizes.minTouchTargetComfort),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                textStyle: AppTypography.button.copyWith(
-                  color: AppColors.warning,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ],
     );
   }
 }

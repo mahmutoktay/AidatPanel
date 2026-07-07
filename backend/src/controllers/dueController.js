@@ -3,6 +3,7 @@ import {
   updateDueStatusService,
   getMyDuesService,
   updateBuildingDueAmountService,
+  getDueTransactionsService,
 } from "../services/dueService.js";
 import { remindBuildingDuesService } from "../services/dueReminderService.js";
 import { bulkGenerateBuildingDuesService } from "../services/dueBulkService.js";
@@ -29,6 +30,27 @@ export const getDuesByBuilding = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     data: dues,
+  });
+});
+
+/**
+ * GET /api/v1/buildings/:id/dues/transactions
+ * Yönetici: Dekont + manuel ödemelerin birleşik işlem geçmişi
+ */
+export const getDueTransactions = asyncHandler(async (req, res) => {
+  const { id: buildingId } = req.params;
+  const { cursor, limit, paginated } = req.query;
+  const managerId = req.user.id;
+
+  const data = await getDueTransactionsService(buildingId, managerId, {
+    cursor,
+    limit,
+    paginated,
+  });
+
+  res.json({
+    success: true,
+    data,
   });
 });
 

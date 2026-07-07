@@ -26,6 +26,7 @@ import '../../features/expenses/domain/entities/expense_entity.dart';
 import '../../features/expenses/presentation/screens/expense_detail_screen.dart';
 import '../../features/dekont/presentation/screens/dekont_detail_screen.dart';
 import '../../features/dekont/presentation/screens/make_payment_screen.dart';
+import '../../features/dues/presentation/screens/due_transactions_screen.dart';
 import '../../features/dekont/presentation/screens/manager_dekonts_screen.dart';
 import '../../features/dekont/presentation/screens/my_dekonts_screen.dart';
 import '../../features/buildings/presentation/screens/saved_ibans_screen.dart';
@@ -76,6 +77,12 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
       final expense = state.extra as ExpenseEntity?;
       return ExpenseFormScreen(buildingId: buildingId, expense: expense);
     },
+  ),
+  GoRoute(
+    path: 'due-transactions',
+    name: 'manager_dashboard_due_transactions',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const DueTransactionsScreen(),
   ),
   GoRoute(
     path: 'dekonts',
@@ -145,7 +152,10 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
     path: 'invite-code',
     name: 'manager_invite_code',
     parentNavigatorKey: rootNavigatorKey,
-    builder: (context, state) => const InviteCodeScreen(),
+    builder: (context, state) => InviteCodeScreen(
+      initialBuildingId: state.uri.queryParameters['buildingId'],
+      initialApartmentId: state.uri.queryParameters['apartmentId'],
+    ),
   ),
   GoRoute(
     path: 'buildings/:buildingId',
@@ -320,12 +330,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/register',
         name: 'register',
-        redirect: (_, __) => '/login?role=manager&flow=register',
+        redirect: (_, _) => '/login?role=manager&flow=register',
       ),
       GoRoute(
         path: '/join',
         name: 'join',
-        redirect: (_, __) => '/login?role=resident&flow=join',
+        redirect: (_, _) => '/login?role=resident&flow=join',
       ),
       GoRoute(
         path: '/forgot-password',

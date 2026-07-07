@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,20 +7,43 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
+import '../../../dashboard/domain/entities/manager_dashboard_entities.dart';
+import '../../../dashboard/presentation/widgets/manager_home/manager_dues_summary_card.dart';
 import '../../data/sites_store.dart';
-import 'delete_site_dialog.dart';
-import 'edit_site_bottom_sheet.dart';
+import '../../domain/entities/site_entity.dart';
 import 'site_list_card.dart';
 
-class ManagerSitesTab extends ConsumerWidget {
+class ManagerSitesTab extends ConsumerStatefulWidget {
   const ManagerSitesTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ManagerSitesTab> createState() => _ManagerSitesTabState();
+}
+
+class _ManagerSitesTabState extends ConsumerState<ManagerSitesTab> {
+  String _searchQuery = '';
+
+  List<SiteEntity> _filterBySearch(List<SiteEntity> sites, String query) {
+    final normalized = query.trim().toLowerCase();
+    if (normalized.isEmpty) return sites;
+
+    return sites.where((site) {
+      final haystack = '${site.name} ${site.displayAddress}'.toLowerCase();
+      return haystack.contains(normalized);
+    }).toList(growable: false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final sitesAsync = ref.watch(sitesStoreProvider);
     final sites = sitesAsync.value ?? const [];
+    final visibleSites = _filterBySearch(sites, _searchQuery);
     final t = context.t.features.sites;
     final isRefreshing = sitesAsync.isLoading && sites.isNotEmpty;
+    final portfolioSummary = _portfolioSummaryFromSites(sites);
+    final currency = sites.isNotEmpty ? sites.first.currency : 'TRY';
+    final hasSearch = _searchQuery.trim().isNotEmpty;
 
     return RefreshIndicator(
       onRefresh: () => ref.read(sitesStoreProvider.notifier).loadSites(),
@@ -37,6 +58,16 @@ class ManagerSitesTab extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                ManagerDuesSummaryCard(
+                  summary: portfolioSummary,
+                  currency: currency,
+                ),
+                const SizedBox(height: AppSizes.spacingM),
+                MinimalSearchField(
+                  hint: t.searchSites,
+                  onChanged: (value) => setState(() => _searchQuery = value),
+                ),
+                const SizedBox(height: AppSizes.spacingL),
                 Text(
                   t.mySites,
                   style: AppTypography.h3.copyWith(
@@ -108,24 +139,31 @@ class ManagerSitesTab extends ConsumerWidget {
                 ),
               ),
             )
+          else if (visibleSites.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Text(
+                  hasSearch
+                      ? context.t.common.noResults
+                      : t.emptySites,
+                  style: AppTypography.body1.copyWith(
+                    color: AppColors.mutedText,
+                  ),
+                ),
+              ),
+            )
           else
             SliverPadding(
               padding: AppSizes.screenBodyScrollPadding.copyWith(top: 0),
               sliver: SliverList.builder(
-                itemCount: sites.length,
+                itemCount: visibleSites.length,
                 itemBuilder: (context, index) {
-                  final site = sites[index];
+                  final site = visibleSites[index];
                   return SiteListCard(
                     site: site,
                     onTap: () => context.push(
                       '/manager-dashboard/sites/${site.id}',
-                    ),
-                    onEdit: () => EditSiteBottomSheet.show(
-                      context,
-                      site: site,
-                    ),
-                    onDelete: () => unawaited(
-                      DeleteSiteDialog.show(context, site: site),
                     ),
                   );
                 },
@@ -133,6 +171,28 @@ class ManagerSitesTab extends ConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+
+  static ManagerDuesAmountSummary _portfolioSummaryFromSites(
+    List<SiteEntity> sites,
+  ) {
+    if (sites.isEmpty) return ManagerDuesAmountSummary.empty;
+
+    var collected = 0.0;
+    var expected = 0.0;
+    var overdue = 0;
+
+    for (final site in sites) {
+      collected += site.collectedAmount;
+      expected += site.expectedAmount;
+      overdue += site.overdueCount;
+    }
+
+    return ManagerDuesAmountSummary(
+      collectedAmount: collected,
+      expectedAmount: expected,
+      overdueCount: overdue,
     );
   }
 }

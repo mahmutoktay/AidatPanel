@@ -118,7 +118,32 @@ class ManagerOverdueApartmentItem extends Equatable {
       ];
 }
 
-/// Üst özet kartları (3×2 grid).
+/// Bankacılık tarzı özet kartı için tutar özeti (bu ay).
+class ManagerDuesAmountSummary extends Equatable {
+  final double collectedAmount;
+  final double expectedAmount;
+  final int overdueCount;
+
+  const ManagerDuesAmountSummary({
+    required this.collectedAmount,
+    required this.expectedAmount,
+    required this.overdueCount,
+  });
+
+  double get collectionProgress =>
+      expectedAmount <= 0 ? 0 : collectedAmount / expectedAmount;
+
+  static const empty = ManagerDuesAmountSummary(
+    collectedAmount: 0,
+    expectedAmount: 0,
+    overdueCount: 0,
+  );
+
+  @override
+  List<Object?> get props => [collectedAmount, expectedAmount, overdueCount];
+}
+
+/// Üst özet kartları (3×2 grid) — dashboard-summary endpoint'i için.
 class ManagerDashboardSummaryStats extends Equatable {
   final int totalApartments;
   final double collectionRatePercent;

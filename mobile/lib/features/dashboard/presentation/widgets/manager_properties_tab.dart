@@ -3,12 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_sizes.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
-import '../../../sites/data/sites_store.dart';
 import '../widgets/manager_buildings_tab.dart';
-import 'property_type_selector.dart';
 import '../../../sites/presentation/widgets/buildings_expandable_fab.dart';
 import '../../../sites/presentation/widgets/manager_sites_tab.dart';
-import 'property_type_picker_sheet.dart';
+import 'property_type_segmented_tab.dart';
 
 /// Siteler | Binalar geçişi için premium seçici.
 class ManagerPropertiesTab extends ConsumerStatefulWidget {
@@ -25,31 +23,23 @@ class ManagerPropertiesTab extends ConsumerStatefulWidget {
 }
 
 class _ManagerPropertiesTabState extends ConsumerState<ManagerPropertiesTab> {
-  PropertyType _selectedType = PropertyType.sites;
+  PropertyType _selectedType = PropertyType.buildings;
 
   @override
   Widget build(BuildContext context) {
-    final sitesAsync = ref.watch(sitesStoreProvider);
-    final sites = sitesAsync.value ?? [];
-    final siteCount = sites.length;
-    final buildingCount =
-        widget.standaloneBuildingsAsync.value?.length ?? 0;
-
     return Stack(
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: PropertyTypeSelector(
-                  selectedType: _selectedType,
-                  onChanged: (type) => setState(() => _selectedType = type),
-                  siteCount: siteCount,
-                  buildingCount: buildingCount,
-                ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: PropertyTypeSegmentedTab(
+                selectedType: _selectedType,
+                onChanged: (type) => setState(() => _selectedType = type),
               ),
-              const SizedBox(height: 4.0),
+            ),
+            const SizedBox(height: 4),
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),

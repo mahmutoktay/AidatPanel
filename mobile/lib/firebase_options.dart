@@ -59,5 +59,4 @@ class DefaultFirebaseOptions {
     projectId: 'aidatpanel',
     storageBucket: 'aidatpanel.firebasestorage.app',
   );
-
 }

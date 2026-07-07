@@ -2,25 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
-import '../../../../l10n/strings.g.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../models/building_list_item_model.dart';
 import 'building_summary_card.dart';
 
-/// Tek bina kartı — durum şeridi, metrikler, progress bar ve rozet.
+/// Tek bina kartı — minimal: ikon, ad, adres ve gecikmiş daire rozeti.
 class BuildingListCard extends StatelessWidget {
   final BuildingListItemModel item;
   final VoidCallback onTap;
-  final VoidCallback? onEdit;
-  final VoidCallback? onCollection;
-  final VoidCallback? onDelete;
 
   const BuildingListCard({
     super.key,
     required this.item,
     required this.onTap,
-    this.onEdit,
-    this.onCollection,
-    this.onDelete,
   });
 
   @override
@@ -32,56 +26,111 @@ class BuildingListCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(BuildingSummaryCard.cardRadius),
-          child: BuildingSummaryCard(
-            item: item,
-            trailing: _buildMenu(context),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(BuildingSummaryCard.cardRadius),
+              boxShadow: BuildingSummaryCard.cardShadow,
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.spacingM,
+              vertical: 12,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.lineLight,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.apartment_rounded,
+                    color: AppColors.inkDark,
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.name,
+                        style: AppTypography.body1.copyWith(
+                          color: AppColors.inkDark,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 17,
+                          height: 1.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (item.address.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          item.address,
+                          style: AppTypography.body2.copyWith(
+                            color: AppColors.mutedText,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            height: 1.25,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (item.overdueCount > 0) ...[
+                  const SizedBox(width: 8),
+                  _OverdueBadge(count: item.overdueCount),
+                ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildMenu(BuildContext context) {
-    final buildingsT = context.t.features.buildings;
-    return PopupMenuButton<String>(
-      tooltip: MaterialLocalizations.of(context).showMenuTooltip,
-      icon: Icon(
-        Icons.more_vert,
-        color: AppColors.mutedText,
-        size: AppSizes.iconSize,
+class _OverdueBadge extends StatelessWidget {
+  const _OverdueBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.statusRed.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
       ),
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(
-        minWidth: AppSizes.minTouchTarget,
-        minHeight: AppSizes.minTouchTarget,
-      ),
-      onSelected: (value) {
-        switch (value) {
-          case 'edit':
-            onEdit?.call();
-          case 'collection':
-            onCollection?.call();
-          case 'delete':
-            onDelete?.call();
-        }
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 'edit',
-          child: Text(context.t.common.edit),
-        ),
-        PopupMenuItem(
-          value: 'collection',
-          child: Text(buildingsT.collection.menuEdit),
-        ),
-        PopupMenuItem(
-          value: 'delete',
-          child: Text(
-            context.t.common.delete,
-            style: const TextStyle(color: AppColors.statusRed),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.warning_amber_rounded,
+            size: 14,
+            color: AppColors.statusRed,
           ),
-        ),
-      ],
+          const SizedBox(width: 4),
+          Text(
+            '$count',
+            style: AppTypography.caption.copyWith(
+              color: AppColors.statusRed,
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

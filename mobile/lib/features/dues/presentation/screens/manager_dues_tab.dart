@@ -9,8 +9,11 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
-import '../../../../shared/widgets/building_picker_sheet.dart';
+import '../../../../shared/widgets/dashboard_building_selector.dart';
 import '../../../../shared/widgets/premium_filter_button.dart';
+import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
+import '../../../dashboard/presentation/providers/dashboard_filter_scope_provider.dart';
+import '../../../dashboard/presentation/utils/manager_dashboard_mapper.dart';
 import '../../../../shared/widgets/premium_filter_picker.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -20,7 +23,6 @@ import '../../domain/entities/due_entity.dart';
 import '../providers/dues_provider.dart';
 import '../utils/dues_ui_helpers.dart';
 import '../widgets/due_status_sheet.dart';
-import '../widgets/dues_building_selector_card.dart';
 import '../widgets/dues_list_item_card.dart';
 import '../widgets/dues_quick_amount_card.dart';
 import '../widgets/dues_stat_cards_row.dart';
@@ -66,6 +68,15 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     final buildings = ref.watch(buildingsStoreProvider).value ?? [];
     final duesState = ref.watch(duesNotifierProvider);
     final highlightDueId = ref.watch(managerDueHighlightIdProvider);
+    final filterScope = ref.watch(dashboardFilterScopeProvider);
+
+    ref.listen<DashboardFilterScope>(dashboardFilterScopeProvider, (
+      previous,
+      next,
+    ) {
+      if (previous == next || !_initialized) return;
+      _reloadDues();
+    });
 
     ref.listen<ManagerDueNavigationIntent?>(
       managerDueNavigationIntentProvider,
@@ -77,7 +88,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
           if (buildingId != null &&
               buildingId.isNotEmpty &&
               buildings.any((b) => b.id == buildingId)) {
-            ref.read(selectedBuildingIdProvider.notifier).select(buildingId);
+            ref.read(dashboardFilterScopeProvider.notifier).update(
+                  DashboardFilterScope.building(buildingId),
+                );
           }
           final statusFilter = _statusFromIntent(next.statusFilter);
           if (statusFilter != null) {
@@ -120,13 +133,14 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     });
 
     final isLoading = duesState.isLoading;
-    final selectedBuildingId = ref.watch(selectedBuildingIdProvider);
-    final selectedBuilding = selectedBuildingId != null
-        ? _buildingFor(selectedBuildingId, buildings)
-        : null;
-    final statsSource =
-        _statusFilter == null ? dues : _statsDues;
-    final totalUnits = _resolveTotalUnits(selectedBuilding, statsSource);
+    final selectedBuilding = _selectedBuilding(filterScope, buildings);
+    final scopedBuildingIds = _scopedBuildingIds(filterScope, buildings);
+    final statsSource = _statusFilter == null ? dues : _statsDues;
+    final totalUnits = _resolveTotalUnits(
+      filterScope,
+      buildings,
+      statsSource,
+    );
     final currencySymbol = _currencySymbol();
 
     return RefreshIndicator(
@@ -145,11 +159,14 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                if (selectedBuilding != null) ...[
-                  DuesBuildingSelectorCard(
-                    building: selectedBuilding,
-                    currencySymbol: currencySymbol,
-                    onTap: () => _showBuildingPicker(context, buildings),
+                if (buildings.isNotEmpty) ...[
+                  DashboardBuildingSelector(
+                    buildings: buildings,
+                    scope: filterScope,
+                    includeAllOption: true,
+                    onScopeChanged: (scope) => ref
+                        .read(dashboardFilterScopeProvider.notifier)
+                        .update(scope),
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                 ],
@@ -159,7 +176,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                   onPressed: () => _openFilterSheet(context, dues, isLoading),
                 ),
                 const SizedBox(height: AppSizes.spacingM),
-                if (statsSource.isNotEmpty || selectedBuilding != null)
+                if (statsSource.isNotEmpty || scopedBuildingIds.isNotEmpty)
                   DuesStatCardsRow(
                     paidCount: statsSource
                         .where((d) => d.status == DueStatus.paid)
@@ -173,7 +190,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                     totalUnits: totalUnits,
                   ),
                 const SizedBox(height: AppSizes.spacingM),
-                if (selectedBuilding != null)
+                if (filterScope.isBuilding && selectedBuilding != null)
                   DuesQuickAmountCard(
                     amountText: selectedBuilding.dueAmount != null
                         ? '$currencySymbol${selectedBuilding.dueAmount!.toStringAsFixed(0)}'
@@ -186,7 +203,8 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                     ),
                   ),
                 const SizedBox(height: AppSizes.spacingL),
-                if (selectedBuilding != null) _buildDueListHeader(dues.length),
+                if (scopedBuildingIds.isNotEmpty)
+                  _buildDueListHeader(dues.length),
                 const SizedBox(height: AppSizes.spacingM),
                 if (isLoading && dues.isNotEmpty)
                   Padding(
@@ -285,22 +303,24 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     );
   }
 
-  Future<void> _showBuildingPicker(
-    BuildContext context,
+  List<String> _scopedBuildingIds(
+    DashboardFilterScope scope,
     List<BuildingEntity> buildings,
-  ) async {
-    final result = await BuildingPickerSheet.show(
-      context,
-      buildings: buildings,
-      selectedBuildingId: ref.watch(selectedBuildingIdProvider),
-    );
-    if (result.cancelled || result.buildingId == null) return;
-    if (result.buildingId == ref.read(selectedBuildingIdProvider)) return;
-    ref.read(selectedBuildingIdProvider.notifier).select(result.buildingId);
-    setState(() {
-      _selectedDueDay = null;
-    });
-    _reloadDues();
+  ) {
+    return ManagerDashboardMapper.filterBuildingsByScope(
+      buildings,
+      siteId: scope.siteId,
+      buildingId: scope.buildingId,
+    ).map((building) => building.id).toList(growable: false);
+  }
+
+  BuildingEntity? _selectedBuilding(
+    DashboardFilterScope scope,
+    List<BuildingEntity> buildings,
+  ) {
+    final id = scope.buildingId;
+    if (id == null) return null;
+    return _buildingFor(id, buildings);
   }
 
   Future<void> _openAmountUpdateSheet(
@@ -499,31 +519,46 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   }
 
   int _resolveTotalUnits(
-    BuildingEntity? building,
+    DashboardFilterScope scope,
+    List<BuildingEntity> buildings,
     List<DueEntity> statsSource,
   ) {
-    final fromBuilding = building?.totalApartments ?? 0;
+    final scoped = ManagerDashboardMapper.filterBuildingsByScope(
+      buildings,
+      siteId: scope.siteId,
+      buildingId: scope.buildingId,
+    );
+    final fromBuildings = scoped.fold<int>(
+      0,
+      (sum, building) => sum + building.totalApartments,
+    );
     final fromDues = statsSource.length;
-    return math.max(math.max(fromBuilding, fromDues), 1);
+    return math.max(math.max(fromBuildings, fromDues), 1);
   }
 
   void _tryInitialize(List<BuildingEntity> buildings) {
     if (_initialized || buildings.isEmpty) return;
     _initialized = true;
-    final firstId = buildings.first.id;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(selectedBuildingIdProvider.notifier).select(firstId);
+      final scope = ref.read(dashboardFilterScopeProvider);
+      if (_scopedBuildingIds(scope, buildings).isEmpty) {
+        ref.read(dashboardFilterScopeProvider.notifier).update(
+              DashboardFilterScope.building(buildings.first.id),
+            );
+      }
       _reloadDues();
     });
   }
 
   Future<void> _reloadDues() async {
-    final buildingId = ref.read(selectedBuildingIdProvider);
-    if (buildingId == null) return;
+    final buildings = ref.read(buildingsStoreProvider).value ?? [];
+    final scope = ref.read(dashboardFilterScopeProvider);
+    final buildingIds = _scopedBuildingIds(scope, buildings);
+    if (buildingIds.isEmpty) return;
 
-    await ref.read(duesNotifierProvider.notifier).loadBuildingDues(
-          buildingId,
+    await ref.read(duesNotifierProvider.notifier).loadScopedBuildingDues(
+          buildingIds,
           month: _monthFilter,
           year: _yearFilter,
           status: _statusFilter,
@@ -534,13 +569,18 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
 
     if (_statusFilter != null) {
       try {
-        final result = await ref.read(duesRepositoryProvider).getBuildingDues(
-              buildingId,
-              month: _monthFilter,
-              year: _yearFilter,
-              paginated: false,
-            );
-        setState(() => _statsDues = result.items);
+        final merged = <DueEntity>[];
+        final repo = ref.read(duesRepositoryProvider);
+        for (final buildingId in buildingIds) {
+          final result = await repo.getBuildingDues(
+            buildingId,
+            month: _monthFilter,
+            year: _yearFilter,
+            paginated: false,
+          );
+          merged.addAll(result.items);
+        }
+        setState(() => _statsDues = merged);
       } catch (_) {
         setState(() => _statsDues = ref.read(duesNotifierProvider).dues);
       }
@@ -592,7 +632,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   }
 
   Future<void> _updateDueAmount(List<BuildingEntity> buildings) async {
-    final buildingId = ref.read(selectedBuildingIdProvider);
+    final buildingId = ref.read(dashboardFilterScopeProvider).buildingId;
     if (buildingId == null) return;
 
     final toast = ref.read(toastProvider.notifier);
@@ -677,7 +717,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   }
 
   Future<void> _updateStatus(String dueId, DueStatus status) async {
-    final buildingId = ref.read(selectedBuildingIdProvider);
+    final buildingId =
+        ref.read(duesNotifierProvider.notifier).dueBuildingIds[dueId] ??
+            ref.read(dashboardFilterScopeProvider).buildingId;
     if (buildingId == null) return;
     await ref.read(duesNotifierProvider.notifier).updateStatus(
           buildingId: buildingId,
