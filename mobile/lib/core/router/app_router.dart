@@ -63,13 +63,17 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
     path: 'tickets',
     name: 'manager_dashboard_tickets',
     parentNavigatorKey: rootNavigatorKey,
-    builder: (context, state) => const ManagerTicketsScreen(),
+    builder: (context, state) => ManagerTicketsScreen(
+      initialScope: dashboardFilterScopeFromQuery(state.uri.queryParameters),
+    ),
   ),
   GoRoute(
     path: 'expenses',
     name: 'manager_dashboard_expenses',
     parentNavigatorKey: rootNavigatorKey,
-    builder: (context, state) => const ManagerExpensesScreen(),
+    builder: (context, state) => ManagerExpensesScreen(
+      initialScope: dashboardFilterScopeFromQuery(state.uri.queryParameters),
+    ),
   ),
   GoRoute(
     path: 'expenses/form',
@@ -204,7 +208,7 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
     name: 'manager_overdue_apartments',
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) => ManagerOverdueApartmentsScreen(
-      initialBuildingId: state.uri.queryParameters['buildingId'],
+      initialScope: dashboardFilterScopeFromQuery(state.uri.queryParameters),
     ),
   ),
   GoRoute(

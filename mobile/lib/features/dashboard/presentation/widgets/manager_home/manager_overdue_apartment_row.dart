@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
@@ -11,13 +12,17 @@ import '../../../domain/entities/manager_dashboard_entities.dart';
 class ManagerOverdueApartmentRow extends StatelessWidget {
   final ManagerOverdueApartmentItem item;
   final void Function(ManagerOverdueApartmentItem item)? onRemind;
+  final VoidCallback? onTap;
   final bool isReminding;
+  final bool compact;
 
   const ManagerOverdueApartmentRow({
     super.key,
     required this.item,
     this.onRemind,
+    this.onTap,
     this.isReminding = false,
+    this.compact = false,
   });
 
   @override
@@ -34,123 +39,159 @@ class ManagerOverdueApartmentRow extends StatelessWidget {
             .replaceAll('{floor}', '${item.floor}')
         : t.apartmentTitle.replaceAll('{number}', item.apartmentNumber);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSizes.spacingM),
-      decoration: DashboardScreenStyle.whiteCard(color: AppColors.surface),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.errorBg,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              'D${item.apartmentNumber}',
-              style: AppTypography.caption.copyWith(
-                color: AppColors.chartRed,
-                fontWeight: FontWeight.w800,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const SizedBox(width: AppSizes.spacingS),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    final shortApartmentLabel = t.apartmentShortLabel
+        .replaceAll('{number}', item.apartmentNumber);
+
+    final card = Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
+        child: Ink(
+          decoration: DashboardScreenStyle.whiteCard(color: AppColors.surface),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSizes.spacingM),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  item.residentName,
-                  style: AppTypography.body1.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.errorBg,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  apartmentLabel,
-                  style: AppTypography.body2.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                RichText(
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  text: TextSpan(
-                    style: AppTypography.body2.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    children: [
-                      TextSpan(
-                        text:
-                            '${item.overdueDays} ${context.t.common.overdueDays}',
-                        style: const TextStyle(
-                          color: AppColors.chartRed,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      TextSpan(text: ' - $amountText'),
-                    ],
-                  ),
-                ),
-                if (item.buildingName != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    item.buildingName!,
+                  alignment: Alignment.center,
+                  child: Text(
+                    shortApartmentLabel,
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondary,
+                      color: AppColors.chartRed,
+                      fontWeight: FontWeight.w800,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: AppSizes.spacingS),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.residentName,
+                        style: AppTypography.body1.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        apartmentLabel,
+                        style: AppTypography.body2.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (!compact) ...[
+                        const SizedBox(height: 2),
+                        RichText(
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          text: TextSpan(
+                            style: AppTypography.body2.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                            children: [
+                              TextSpan(
+                                text:
+                                    '${item.overdueDays} ${context.t.common.overdueDays}',
+                                style: const TextStyle(
+                                  color: AppColors.chartRed,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              TextSpan(text: ' - $amountText'),
+                            ],
+                          ),
+                        ),
+                      ],
+                      if (item.buildingName != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          item.buildingName!,
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (onRemind != null) ...[
+                  const SizedBox(width: 4),
+                  SizedBox(
+                    width: 96,
+                    height: AppSizes.minTouchTarget,
+                    child: isReminding
+                        ? const Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        : TextButton(
+                            onPressed: () => onRemind!(item),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.chartBlue,
+                              minimumSize: const Size(88, 48),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            child: Text(
+                              t.remind,
+                              style: AppTypography.body2.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.visible,
+                              softWrap: false,
+                            ),
+                          ),
                   ),
                 ],
               ],
             ),
           ),
-          const SizedBox(width: 4),
-          SizedBox(
-            width: 96,
-            height: AppSizes.minTouchTarget,
-            child: isReminding
-                ? const Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                : TextButton(
-                    onPressed:
-                        onRemind == null ? null : () => onRemind!(item),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.chartBlue,
-                      minimumSize: const Size(88, 48),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    child: Text(
-                      t.remind,
-                      style: AppTypography.body2.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.visible,
-                      softWrap: false,
-                    ),
-                  ),
+        ),
+      ),
+    );
+
+    if (onRemind == null || isReminding) return card;
+
+    return Slidable(
+      key: ValueKey<String>(item.dueId),
+      endActionPane: ActionPane(
+        motion: const BehindMotion(),
+        extentRatio: 0.34,
+        children: [
+          SlidableAction(
+            onPressed: (_) => onRemind!(item),
+            backgroundColor: AppColors.chartBlue,
+            foregroundColor: Colors.white,
+            icon: Icons.notifications_active_outlined,
+            label: t.remind,
+            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
           ),
         ],
       ),
+      child: card,
     );
   }
 }

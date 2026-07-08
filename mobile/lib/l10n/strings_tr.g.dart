@@ -1428,6 +1428,7 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get monthTotalExpense => 'Bu Ay Toplam Gider';
 	@override String get pendingDekonts => 'Bekleyen Dekont';
 	@override String get duesCollectionStatus => 'Aidat Tahsilat Durumu';
+	@override String get financeTrendTitle => 'Son 6 Ay';
 	@override String get incomeExpenseComparison => 'Gelir / Gider Karşılaştırması';
 	@override String get last6Months => 'Son 6 Ay';
 	@override String get collectedDues => 'Toplanan Aidat';
@@ -1449,6 +1450,7 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get remindCooldown => 'Bu aidat için son 24 saat içinde hatırlatma gönderildi.';
 	@override String get remindNoRecipient => 'Bu dairede hatırlatma gönderilecek sakin bulunamadı.';
 	@override String get apartmentTitle => 'Daire {number}';
+	@override String get apartmentShortLabel => 'D{number}';
 	@override String get apartmentWithFloor => 'Daire {number} · {floor}. Kat';
 	@override String get noOverdueApartments => 'Geciken ödeme bulunmuyor';
 	@override String get noChartData => 'Henüz yeterli veri yok';
@@ -1461,6 +1463,7 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get residentDebtAndPaySubtitle => 'Ödeme yaparak ödeyin.';
 	@override String get duesStatusAction => 'Aidat Durumu';
 	@override String get overdueDuesBadge => '{count} gecikmiş aidat';
+	@override String get dataWarningBanner => '{count} bölüm yüklenemedi. Çekerek yeniden dene.';
 	@override String get sitesSection => 'Siteler';
 	@override String get independentBuildingsSection => 'Bağımsız Binalar';
 	@override String get sitePickerSummary => '{name} · {count} bina';
@@ -3178,6 +3181,7 @@ extension on TranslationsTr {
 			'features.dashboard.monthTotalExpense' => 'Bu Ay Toplam Gider',
 			'features.dashboard.pendingDekonts' => 'Bekleyen Dekont',
 			'features.dashboard.duesCollectionStatus' => 'Aidat Tahsilat Durumu',
+			'features.dashboard.financeTrendTitle' => 'Son 6 Ay',
 			'features.dashboard.incomeExpenseComparison' => 'Gelir / Gider Karşılaştırması',
 			'features.dashboard.last6Months' => 'Son 6 Ay',
 			'features.dashboard.collectedDues' => 'Toplanan Aidat',
@@ -3199,6 +3203,7 @@ extension on TranslationsTr {
 			'features.dashboard.remindCooldown' => 'Bu aidat için son 24 saat içinde hatırlatma gönderildi.',
 			'features.dashboard.remindNoRecipient' => 'Bu dairede hatırlatma gönderilecek sakin bulunamadı.',
 			'features.dashboard.apartmentTitle' => 'Daire {number}',
+			'features.dashboard.apartmentShortLabel' => 'D{number}',
 			'features.dashboard.apartmentWithFloor' => 'Daire {number} · {floor}. Kat',
 			'features.dashboard.noOverdueApartments' => 'Geciken ödeme bulunmuyor',
 			'features.dashboard.noChartData' => 'Henüz yeterli veri yok',
@@ -3211,6 +3216,7 @@ extension on TranslationsTr {
 			'features.dashboard.residentDebtAndPaySubtitle' => 'Ödeme yaparak ödeyin.',
 			'features.dashboard.duesStatusAction' => 'Aidat Durumu',
 			'features.dashboard.overdueDuesBadge' => '{count} gecikmiş aidat',
+			'features.dashboard.dataWarningBanner' => '{count} bölüm yüklenemedi. Çekerek yeniden dene.',
 			'features.dashboard.sitesSection' => 'Siteler',
 			'features.dashboard.independentBuildingsSection' => 'Bağımsız Binalar',
 			'features.dashboard.sitePickerSummary' => '{name} · {count} bina',

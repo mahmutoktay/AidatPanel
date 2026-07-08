@@ -16,6 +16,8 @@ import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../../shared/widgets/premium_filter_picker.dart';
 import '../../../../shared/widgets/building_selector_provider.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
+import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
+import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/manager_open_tickets_count_provider.dart';
 import '../providers/tickets_provider.dart';
@@ -24,7 +26,12 @@ import '../utils/ticket_labels.dart';
 import '../widgets/ticket_list_card.dart';
 
 class ManagerTicketsScreen extends ConsumerStatefulWidget {
-  const ManagerTicketsScreen({super.key});
+  const ManagerTicketsScreen({
+    super.key,
+    this.initialScope = const DashboardFilterScope.all(),
+  });
+
+  final DashboardFilterScope initialScope;
 
   @override
   ConsumerState<ManagerTicketsScreen> createState() =>
@@ -44,6 +51,15 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
       () => ref.read(ticketsNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(ticketsNotifierProvider).canLoadMore,
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final buildings = ref.read(buildingsStoreProvider).value ?? const [];
+      final buildingId =
+          resolveScopeBuildingId(widget.initialScope, buildings);
+      if (buildingId != null) {
+        ref.read(selectedBuildingIdProvider.notifier).select(buildingId);
+      }
+    });
   }
 
   @override

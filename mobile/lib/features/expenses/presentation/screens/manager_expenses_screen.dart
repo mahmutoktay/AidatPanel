@@ -21,13 +21,20 @@ import '../../../../shared/widgets/premium_filter_picker.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
 import '../../../../shared/widgets/building_selector_provider.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
+import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
+import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../providers/expenses_provider.dart';
 import '../utils/expense_labels.dart';
 import '../widgets/expense_list_item_card.dart';
 
 class ManagerExpensesScreen extends ConsumerStatefulWidget {
-  const ManagerExpensesScreen({super.key});
+  const ManagerExpensesScreen({
+    super.key,
+    this.initialScope = const DashboardFilterScope.all(),
+  });
+
+  final DashboardFilterScope initialScope;
 
   @override
   ConsumerState<ManagerExpensesScreen> createState() =>
@@ -52,6 +59,15 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
       () => ref.read(expensesNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(expensesNotifierProvider).canLoadMore,
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final buildings = ref.read(buildingsStoreProvider).value ?? const [];
+      final buildingId =
+          resolveScopeBuildingId(widget.initialScope, buildings);
+      if (buildingId != null) {
+        ref.read(selectedBuildingIdProvider.notifier).select(buildingId);
+      }
+    });
   }
 
   @override

@@ -8,19 +8,22 @@ import '../../domain/entities/dashboard_filter_scope.dart';
 import '../../data/providers/dashboard_provider.dart';
 import '../utils/manager_dashboard_mapper.dart';
 
-/// Yönetici ana sayfa — bu ay tüm binalardaki gider kayıt sayısı.
-/// Özet endpoint + paralel istek (tam liste çekilmez).
-final managerMonthExpensesCountProvider = FutureProvider.autoDispose<int>((
-  ref,
-) async {
-  final buildings = ref.watch(buildingsStoreProvider).value;
-  if (buildings == null || buildings.isEmpty) return 0;
+/// Yönetici ana sayfa — bu ay gider kayıt sayısı (site/bina kapsamına göre).
+final managerMonthExpensesCountForScopeProvider =
+    FutureProvider.autoDispose.family<int, DashboardFilterScope>((ref, scope) async {
+  final buildings = ref.watch(buildingsStoreProvider).value ?? const [];
+  final targetBuildings = ManagerDashboardMapper.filterBuildingsByScope(
+    buildings,
+    siteId: scope.siteId,
+    buildingId: scope.buildingId,
+  );
+  if (targetBuildings.isEmpty) return 0;
 
   final now = DateTime.now();
   final repo = ref.watch(expenseRepositoryProvider);
 
   final counts = await Future.wait<int>(
-    buildings.map((building) async {
+    targetBuildings.map((building) async {
       try {
         return await repo.countExpensesInMonth(
           building.id,
@@ -34,6 +37,17 @@ final managerMonthExpensesCountProvider = FutureProvider.autoDispose<int>((
   );
 
   return counts.fold<int>(0, (sum, n) => sum + n);
+});
+
+/// Geriye dönük uyumluluk — tüm binalar kapsamı.
+final managerMonthExpensesCountProvider = FutureProvider.autoDispose<int>((
+  ref,
+) async {
+  return ref.watch(
+    managerMonthExpensesCountForScopeProvider(
+      const DashboardFilterScope.all(),
+    ).future,
+  );
 });
 
 /// Yönetici ana sayfa — bu ay gönderilen duyuru bildirimi sayısı.

@@ -3787,6 +3787,9 @@ class Translations$features$dashboard$en {
 	/// en: 'Dues Collection Status'
 	String get duesCollectionStatus => 'Dues Collection Status';
 
+	/// en: 'Last 6 Months'
+	String get financeTrendTitle => 'Last 6 Months';
+
 	/// en: 'Income / Expense Comparison'
 	String get incomeExpenseComparison => 'Income / Expense Comparison';
 
@@ -3850,6 +3853,9 @@ class Translations$features$dashboard$en {
 	/// en: 'Apt. {number}'
 	String get apartmentTitle => 'Apt. {number}';
 
+	/// en: 'A{number}'
+	String get apartmentShortLabel => 'A{number}';
+
 	/// en: 'Apt. {number} · Floor {floor}'
 	String get apartmentWithFloor => 'Apt. {number} · Floor {floor}';
 
@@ -3885,6 +3891,9 @@ class Translations$features$dashboard$en {
 
 	/// en: '{count} overdue dues'
 	String get overdueDuesBadge => '{count} overdue dues';
+
+	/// en: '{count} sections failed to load. Pull down to retry.'
+	String get dataWarningBanner => '{count} sections failed to load. Pull down to retry.';
 
 	/// en: 'Sites'
 	String get sitesSection => 'Sites';
@@ -6118,6 +6127,7 @@ extension on Translations {
 			'features.dashboard.monthTotalExpense' => 'This Month\'s Expenses',
 			'features.dashboard.pendingDekonts' => 'Pending Receipts',
 			'features.dashboard.duesCollectionStatus' => 'Dues Collection Status',
+			'features.dashboard.financeTrendTitle' => 'Last 6 Months',
 			'features.dashboard.incomeExpenseComparison' => 'Income / Expense Comparison',
 			'features.dashboard.last6Months' => 'Last 6 Months',
 			'features.dashboard.collectedDues' => 'Collected Dues',
@@ -6139,6 +6149,7 @@ extension on Translations {
 			'features.dashboard.remindCooldown' => 'A reminder was already sent for this due within the last 24 hours.',
 			'features.dashboard.remindNoRecipient' => 'No resident found to send a reminder for this apartment.',
 			'features.dashboard.apartmentTitle' => 'Apt. {number}',
+			'features.dashboard.apartmentShortLabel' => 'A{number}',
 			'features.dashboard.apartmentWithFloor' => 'Apt. {number} · Floor {floor}',
 			'features.dashboard.noOverdueApartments' => 'No overdue payments',
 			'features.dashboard.noChartData' => 'Not enough data yet',
@@ -6151,6 +6162,7 @@ extension on Translations {
 			'features.dashboard.residentDebtAndPaySubtitle' => 'Pay your dues here.',
 			'features.dashboard.duesStatusAction' => 'Dues Status',
 			'features.dashboard.overdueDuesBadge' => '{count} overdue dues',
+			'features.dashboard.dataWarningBanner' => '{count} sections failed to load. Pull down to retry.',
 			'features.dashboard.sitesSection' => 'Sites',
 			'features.dashboard.independentBuildingsSection' => 'Independent Buildings',
 			'features.dashboard.sitePickerSummary' => '{name} · {count} buildings',

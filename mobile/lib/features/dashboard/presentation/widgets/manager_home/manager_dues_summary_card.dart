@@ -168,44 +168,52 @@ class _CompactRemindButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback? onPressed;
 
+  static const double _width = 88;
+  static const double _height = 28;
+
   @override
   Widget build(BuildContext context) {
     final label = context.t.features.dashboard.remind;
 
-    if (isLoading) {
-      return const SizedBox(
-        width: 28,
-        height: 28,
-        child: Center(
-          child: SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      );
-    }
-
-    return FilledButton(
-      onPressed: onPressed,
-      style: FilledButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        minimumSize: const Size(0, 28),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(999),
-        ),
-      ),
-      child: Text(
-        label,
-        style: AppTypography.caption.copyWith(
-          color: AppColors.surface,
-          fontWeight: FontWeight.w700,
-          fontSize: 13,
-        ),
+    return SizedBox(
+      width: _width,
+      height: _height,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        switchInCurve: Curves.easeInOut,
+        switchOutCurve: Curves.easeInOut,
+        child: isLoading
+            ? const Center(
+                key: ValueKey('loading'),
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
+            : FilledButton(
+                key: const ValueKey('idle'),
+                onPressed: onPressed,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.surface,
+                  minimumSize: const Size(_width, _height),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                child: Text(
+                  label,
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.surface,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
       ),
     );
   }

@@ -9,6 +9,17 @@ import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../domain/entities/manager_dashboard_entities.dart';
 
+DueEntity? findDueById(
+  Map<String, List<DueEntity>> allDues,
+  String dueId,
+  String buildingId,
+) {
+  for (final due in allDues[buildingId] ?? const <DueEntity>[]) {
+    if (due.id == dueId) return due;
+  }
+  return null;
+}
+
 Map<String, List<String>> groupOverdueDueIdsByBuilding(
   Map<String, List<DueEntity>> allDues, {
   Set<String>? buildingIds,
@@ -19,7 +30,7 @@ Map<String, List<String>> groupOverdueDueIdsByBuilding(
     if (buildingIds != null && !buildingIds.contains(entry.key)) continue;
 
     final overdueIds = entry.value
-        .where((due) => due.status == DueStatus.overdue)
+        .where((due) => due.status == DueStatus.overdue && due.resident != null)
         .map((due) => due.id)
         .toList(growable: false);
     if (overdueIds.isNotEmpty) {

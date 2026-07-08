@@ -75,11 +75,16 @@ abstract final class ManagerDashboardMapper {
           .toList(growable: false);
 
   static ManagerDuesCollectionStats duesCollectionStats(List<DueEntity> dues) {
-    if (dues.isEmpty) return ManagerDuesCollectionStats.empty;
+    final occupiedDues =
+        dues.where((d) => d.resident != null).toList(growable: false);
+    if (occupiedDues.isEmpty) return ManagerDuesCollectionStats.empty;
 
-    final paid = dues.where((d) => d.status == DueStatus.paid).length;
-    final overdue = dues.where((d) => d.status == DueStatus.overdue).length;
-    final pending = dues.where((d) => d.status == DueStatus.pending).length;
+    final paid =
+        occupiedDues.where((d) => d.status == DueStatus.paid).length;
+    final overdue =
+        occupiedDues.where((d) => d.status == DueStatus.overdue).length;
+    final pending =
+        occupiedDues.where((d) => d.status == DueStatus.pending).length;
 
     return ManagerDuesCollectionStats(
       paidCount: paid,
@@ -89,13 +94,18 @@ abstract final class ManagerDashboardMapper {
   }
 
   static double collectionRate(List<DueEntity> dues) {
-    if (dues.isEmpty) return 0;
-    final paid = dues.where((d) => d.status == DueStatus.paid).length;
-    return (paid / dues.length) * 100;
+    final occupiedDues =
+        dues.where((d) => d.resident != null).toList(growable: false);
+    if (occupiedDues.isEmpty) return 0;
+    final paid =
+        occupiedDues.where((d) => d.status == DueStatus.paid).length;
+    return (paid / occupiedDues.length) * 100;
   }
 
   static int overdueCount(List<DueEntity> dues) {
-    return dues.where((d) => d.status == DueStatus.overdue).length;
+    return dues
+        .where((d) => d.status == DueStatus.overdue && d.resident != null)
+        .length;
   }
 
   static List<ManagerOverdueApartmentItem> overdueApartments(
@@ -203,13 +213,15 @@ abstract final class ManagerDashboardMapper {
   }
 
   static ManagerDuesAmountSummary duesAmountSummary(List<DueEntity> dues) {
-    if (dues.isEmpty) return ManagerDuesAmountSummary.empty;
+    final occupiedDues =
+        dues.where((d) => d.resident != null).toList(growable: false);
+    if (occupiedDues.isEmpty) return ManagerDuesAmountSummary.empty;
 
     var expected = 0.0;
     var collected = 0.0;
     var overdueCount = 0;
 
-    for (final due in dues) {
+    for (final due in occupiedDues) {
       expected += due.amount;
       if (due.status == DueStatus.paid) {
         collected += due.amount;

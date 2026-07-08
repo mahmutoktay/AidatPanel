@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/utils/app_date_format.dart';
 import '../../../../core/utils/app_intl_locale.dart';
+import '../../../../core/utils/app_currency_format.dart';
+import '../../../dues/presentation/utils/dues_ui_helpers.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/notifications/notification_toast.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -16,6 +17,7 @@ import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
+import '../../../dues/presentation/widgets/due_detail_sheet.dart';
 import '../../../notifications/presentation/widgets/announcement_form_sheet.dart';
 import '../providers/dashboard_filter_scope_provider.dart';
 import '../../domain/entities/dashboard_filter_scope.dart';
@@ -84,7 +86,8 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
       managerPendingDekontsForScopeProvider(filterScope),
     );
 
-    final monthExpensesCountAsync = ref.watch(managerMonthExpensesCountProvider);
+    final monthExpensesCountAsync =
+        ref.watch(managerMonthExpensesCountForScopeProvider(filterScope));
     final monthAnnouncementsAsync =
         ref.watch(managerMonthAnnouncementsCountProvider);
 
@@ -110,8 +113,6 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
       year: now.year,
     );
 
-    final duesStats =
-        ManagerDashboardMapper.duesCollectionStats(currentMonthDues);
     final duesAmountSummary =
         ManagerDashboardMapper.duesAmountSummary(currentMonthDues);
     final ticketStats = ticketStatsAsync.value ?? ManagerTicketStatusStats.empty;
@@ -121,7 +122,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
     final monthlyFinance = ManagerDashboardMapper.monthlyFinancePoints(
       dues: filteredDues,
       expenseTotalsByMonth: expenseTotals,
-      anchor: DateTime.now(),
+      anchor: now,
       localeName: languageCode,
     );
 
@@ -143,13 +144,6 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
     final expenseCurrency = scopedBuildings.isNotEmpty
         ? scopedBuildings.first.currency
         : 'TRY';
-
-    final periodLabel = AppDateFormat.monthYear(DateTime.now())
-        .replaceRange(
-          0,
-          1,
-          AppDateFormat.monthYear(DateTime.now()).substring(0, 1).toUpperCase(),
-        );
 
     final isRefreshing = widget.buildingsAsync.isLoading ||
         allDuesAsync.isLoading ||
@@ -206,8 +200,8 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
                 monthExpenseCount: monthExpensesCountAsync.value ?? 0,
                 monthAnnouncementCount: monthAnnouncementsAsync.value ?? 0,
                 pendingDuesActionCount: pendingDueActionCount,
-                onTickets: () => _openAndInvalidate('/manager-dashboard/tickets'),
-                onExpenses: () => _openAndInvalidate('/manager-dashboard/expenses'),
+                onTickets: () => _openAndInvalidate(ticketsPath(filterScope)),
+                onExpenses: () => _openAndInvalidate(expensesPath(filterScope)),
                 onAnnouncement: () async {
                   final sent = await AnnouncementFormSheet.show(context);
                   if (!mounted) return;
@@ -221,23 +215,15 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
                 },
               ),
               const SizedBox(height: AppSizes.spacingL),
-              ManagerDuesCollectionChart(
-                stats: duesStats,
-                periodLabel: periodLabel,
-              ),
-              const SizedBox(height: AppSizes.spacingM),
-              ManagerFinanceBarChart(points: monthlyFinance),
-              const SizedBox(height: AppSizes.spacingM),
-              ManagerTicketStatusBars(stats: ticketStats),
-              const SizedBox(height: AppSizes.spacingL),
               ManagerOverdueApartmentsSection(
                 items: overdueItems,
                 onRemind: _onRemindOverdue,
+                onTap: (item) => _openOverdueDueDetail(item, allDues),
                 remindingDueId: _remindingDueId,
-                onSeeAll: overdueItems.isNotEmpty
-                    ? () => _openOverdueDuesList(filterScope)
-                    : null,
+                onSeeAll: () => _openOverdueDuesList(filterScope),
               ),
+              const SizedBox(height: AppSizes.spacingL),
+              ManagerFinanceBarChart(points: monthlyFinance),
             ],
           ),
         ),
@@ -258,9 +244,28 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
   }
 
   void _openOverdueDuesList(DashboardFilterScope scope) {
-    final buildingId = scope.buildingId;
-    final query = buildingId != null ? '?buildingId=$buildingId' : '';
-    context.push('/manager-dashboard/overdue-apartments$query');
+    context.push(overdueApartmentsPath(scope));
+  }
+
+  Future<void> _openOverdueDueDetail(
+    ManagerOverdueApartmentItem item,
+    Map<String, List<DueEntity>> allDues,
+  ) async {
+    final due = findDueById(allDues, item.dueId, item.buildingId);
+    if (due == null || !mounted) return;
+
+    final monthLabel = '${monthName(context, due.month)} ${due.year}';
+    final currencySymbol =
+        item.currency == 'TRY' ? AppCurrencyFormat.symbol : item.currency;
+
+    await DueDetailSheet.show(
+      context,
+      due: due,
+      buildingId: item.buildingId,
+      monthLabel: monthLabel,
+      currencySymbol: currencySymbol,
+      onCollectPayment: null,
+    );
   }
 
   Future<void> _openAndInvalidate(String route) async {
@@ -268,7 +273,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
     if (!mounted) return;
     final filterScope = ref.read(dashboardFilterScopeProvider);
     ref.invalidate(managerTicketStatusStatsForScopeProvider(filterScope));
-    ref.invalidate(managerMonthExpensesCountProvider);
+    ref.invalidate(managerMonthExpensesCountForScopeProvider(filterScope));
     ref.invalidate(managerMonthExpenseTotalForScopeProvider(filterScope));
     ref.invalidate(managerSixMonthExpenseTotalsForScopeProvider(filterScope));
     ref.invalidate(managerPendingDekontsForScopeProvider(filterScope));
@@ -325,7 +330,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
     ref.invalidate(managerMonthExpenseTotalForScopeProvider(filterScope));
     ref.invalidate(managerSixMonthExpenseTotalsForScopeProvider(filterScope));
     ref.invalidate(managerPendingDekontsForScopeProvider(filterScope));
-    ref.invalidate(managerMonthExpensesCountProvider);
+    ref.invalidate(managerMonthExpensesCountForScopeProvider(filterScope));
     ref.invalidate(managerMonthAnnouncementsCountProvider);
     await Future.wait([
       ref.read(buildingsStoreProvider.notifier).loadBuildings(),
@@ -356,7 +361,8 @@ class _DataWarningBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '$errorCount bölüm yüklenemedi. Çekerek yeniden dene.',
+              context.t.features.dashboard.dataWarningBanner
+                  .replaceAll('{count}', '$errorCount'),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.statusAmber,
                   ),
