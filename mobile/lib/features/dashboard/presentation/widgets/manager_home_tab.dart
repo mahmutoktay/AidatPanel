@@ -23,6 +23,7 @@ import '../../domain/entities/manager_dashboard_entities.dart';
 import '../providers/manager_dashboard_snapshot_provider.dart';
 import '../providers/manager_home_counts_provider.dart';
 import '../utils/manager_dashboard_mapper.dart';
+import '../utils/dashboard_filter_scope_routing.dart';
 import '../utils/manager_overdue_remind_helper.dart';
 import '../../../../shared/widgets/dashboard_building_selector.dart';
 import 'manager_home/manager_dashboard_charts.dart';
@@ -214,8 +215,10 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
                     ref.invalidate(managerMonthAnnouncementsCountProvider);
                   }
                 },
-                onDuesStatus: () =>
-                    _openAndInvalidate('/manager-dashboard/due-transactions'),
+                onDuesStatus: () {
+                  final scope = ref.read(dashboardFilterScopeProvider);
+                  _openAndInvalidate(dueTransactionsPath(scope));
+                },
               ),
               const SizedBox(height: AppSizes.spacingL),
               ManagerDuesCollectionChart(

@@ -181,6 +181,27 @@ class _OccupiedApartmentSheet extends ConsumerWidget {
           const SizedBox(height: AppSizes.spacingL),
           _PhoneInfoRow(phoneText: phoneText),
           const SizedBox(height: AppSizes.spacingL),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () {
+                final resident = apt.resident!;
+                ApartmentDetailsSheet._afterApartmentSheetClosed(
+                  pageContext,
+                  context,
+                  () => pageContext.push(
+                    '/manager-dashboard/buildings/${apt.buildingId}'
+                    '/apartments/${apt.id}/payment-history'
+                    '?apartmentNumber=${Uri.encodeComponent(apt.apartmentNumber)}'
+                    '&residentName=${Uri.encodeComponent(resident.name)}',
+                  ),
+                );
+              },
+              icon: const Icon(Icons.history_rounded),
+              label: Text(context.t.common.viewPaymentHistory),
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingS),
           Text(
             context.t.common.accountSummary,
             style: AppTypography.h4.copyWith(

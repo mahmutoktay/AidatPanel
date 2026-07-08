@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../domain/entities/due_entity.dart';
 import 'dues_screen_style.dart';
 
 class DuesStatCardsRow extends StatelessWidget {
@@ -11,6 +12,8 @@ class DuesStatCardsRow extends StatelessWidget {
   final int pendingCount;
   final int overdueCount;
   final int totalUnits;
+  final DueStatus? selectedStatus;
+  final ValueChanged<DueStatus> onStatusTap;
 
   const DuesStatCardsRow({
     super.key,
@@ -18,6 +21,8 @@ class DuesStatCardsRow extends StatelessWidget {
     required this.pendingCount,
     required this.overdueCount,
     required this.totalUnits,
+    required this.selectedStatus,
+    required this.onStatusTap,
   });
 
   @override
@@ -36,6 +41,8 @@ class DuesStatCardsRow extends StatelessWidget {
               paidCount,
               totalUnits,
             ),
+            selected: selectedStatus == DueStatus.paid,
+            onTap: () => onStatusTap(DueStatus.paid),
           ),
         ),
         const SizedBox(width: AppSizes.spacingS),
@@ -50,6 +57,8 @@ class DuesStatCardsRow extends StatelessWidget {
               pendingCount,
               totalUnits,
             ),
+            selected: selectedStatus == DueStatus.pending,
+            onTap: () => onStatusTap(DueStatus.pending),
           ),
         ),
         const SizedBox(width: AppSizes.spacingS),
@@ -64,6 +73,8 @@ class DuesStatCardsRow extends StatelessWidget {
               overdueCount,
               totalUnits,
             ),
+            selected: selectedStatus == DueStatus.overdue,
+            onTap: () => onStatusTap(DueStatus.overdue),
           ),
         ),
       ],
@@ -78,6 +89,8 @@ class _DuesStatCard extends StatelessWidget {
   final Color bgColor;
   final IconData icon;
   final double progress;
+  final bool selected;
+  final VoidCallback onTap;
 
   const _DuesStatCard({
     required this.count,
@@ -86,72 +99,86 @@ class _DuesStatCard extends StatelessWidget {
     required this.bgColor,
     required this.icon,
     required this.progress,
+    required this.selected,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 12, 10, 10),
-      decoration: DuesScreenStyle.whiteCard(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(DuesScreenStyle.cardRadius),
+        child: Ink(
+          padding: const EdgeInsets.fromLTRB(12, 12, 10, 10),
+          decoration: DuesScreenStyle.whiteCard().copyWith(
+            color: selected ? bgColor.withValues(alpha: 0.55) : null,
+            border: selected
+                ? Border.all(color: color, width: 2)
+                : Border.all(color: Colors.transparent, width: 2),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Text(
-                  '$count',
-                  style: AppTypography.h2.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 26,
-                    height: 1,
-                  ),
-                ),
-              ),
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: bgColor,
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Icon(icon, size: 16, color: color),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: AppTypography.caption.copyWith(
-              color: AppColors.mutedText,
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: SizedBox(
-              height: 4,
-              child: Stack(
-                fit: StackFit.expand,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(color: AppColors.lineLight),
-                  FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: progress,
-                    child: Container(color: color),
+                  Expanded(
+                    child: Text(
+                      '$count',
+                      style: AppTypography.h2.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 26,
+                        height: 1,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(icon, size: 16, color: color),
                   ),
                 ],
               ),
-            ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.mutedText,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: SizedBox(
+                  height: 4,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Container(color: AppColors.lineLight),
+                      FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: progress,
+                        child: Container(color: color),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -806,6 +806,18 @@ class Translations$common$en {
 	/// en: 'Update Due Amount'
 	String get updateDueAmount => 'Update Due Amount';
 
+	/// en: 'Due Settings'
+	String get dueSettings => 'Due Settings';
+
+	/// en: '{days} days late'
+	String get dueLatePaymentBadge => '{days} days late';
+
+	/// en: 'View Payment History'
+	String get viewPaymentHistory => 'View Payment History';
+
+	/// en: 'Payment History'
+	String get paymentHistoryTitle => 'Payment History';
+
 	/// en: 'Due amount updated'
 	String get dueAmountUpdated => 'Due amount updated';
 
@@ -5047,6 +5059,10 @@ extension on Translations {
 			'common.duesUpdated' => 'Dues status updated',
 			'common.amount' => 'Amount',
 			'common.updateDueAmount' => 'Update Due Amount',
+			'common.dueSettings' => 'Due Settings',
+			'common.dueLatePaymentBadge' => '{days} days late',
+			'common.viewPaymentHistory' => 'View Payment History',
+			'common.paymentHistoryTitle' => 'Payment History',
 			'common.dueAmountUpdated' => 'Due amount updated',
 			'common.dueAmountUpdateFailed' => 'Could not update due amount',
 			'common.dueDay' => 'Due Day (1-28)',
@@ -5266,12 +5282,12 @@ extension on Translations {
 			'common.errorKeys.reportFileEmpty' => 'The report file was empty. Please try again.',
 			'common.errorKeys.downloadStarted' => 'Download started...',
 			'common.errorKeys.downloadSavedToGallery' => 'Saved to your phone\'s Gallery (AidatPanel album).',
+			_ => null,
+		} ?? switch (path) {
 			'common.errorKeys.downloadSavedToDownloads' => 'Receipt saved to your Downloads folder.',
 			'common.errorKeys.downloadFallbackShare' => 'Share screen opened. You can save it to Files from there.',
 			'common.errorKeys.downloadError' => 'An error occurred while downloading the file.',
 			'common.errorKeys.galleryPermissionDenied' => 'Gallery access permission was denied.',
-			_ => null,
-		} ?? switch (path) {
 			'validation.emailRequired' => 'Email address cannot be empty',
 			'validation.emailInvalid' => 'Please enter a valid email address',
 			'validation.emailTooLong' => 'Email address is too long',
@@ -5780,12 +5796,12 @@ extension on Translations {
 			'features.dekont.reviewFailed' => 'Review failed',
 			'features.dekont.selectDueForApprove' => 'Select due to approve',
 			'features.dekont.uploadedBy' => 'Uploaded by',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.apartment' => 'Apartment',
 			'features.dekont.amount' => 'Amount',
 			'features.dekont.loadError' => 'Could not load receipts',
 			'features.dekont.systemInfoTitle' => 'System information',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.systemInfoSubtitle' => 'Below is what we read from your receipt. Payment is not approved automatically; your manager will verify the bank account and approve.',
 			'features.dekont.systemReadLabel' => 'Read from receipt',
 			'features.dekont.systemInfoProcessing' => 'Your receipt is being processed. Amount, date and bank details will appear here shortly.',

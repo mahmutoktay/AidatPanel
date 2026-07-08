@@ -4,19 +4,21 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 
-/// Bina detay ekranı alt araç çubuğu — Düzenle, Sil, Rapor, Çoklu Seç.
+/// Bina detay ekranı alt araç çubuğu — Düzenle, Sil, Rapor, Aidat Ayarları, Çoklu Seç.
 class BuildingDetailBottomToolbar extends StatelessWidget {
   const BuildingDetailBottomToolbar({
     super.key,
     required this.onEdit,
     required this.onDelete,
     required this.onReport,
+    required this.onDueSettings,
     required this.onMultiSelect,
   });
 
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onReport;
+  final VoidCallback onDueSettings;
   final VoidCallback onMultiSelect;
 
   @override
@@ -54,6 +56,11 @@ class BuildingDetailBottomToolbar extends StatelessWidget {
                 icon: Icons.download_rounded,
                 label: t.features.reports.menuDownload,
                 onTap: onReport,
+              ),
+              _ToolbarAction(
+                icon: Icons.payments_outlined,
+                label: t.common.dueSettings,
+                onTap: onDueSettings,
               ),
               _ToolbarAction(
                 icon: Icons.checklist_rounded,

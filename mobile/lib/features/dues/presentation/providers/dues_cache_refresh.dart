@@ -1,4 +1,6 @@
 import '../../../buildings/presentation/providers/apartment_dues_history_provider.dart';
+import '../../../buildings/presentation/providers/apartment_payment_history_provider.dart';
+import 'due_payment_detail_provider.dart';
 import 'due_transactions_provider.dart';
 import 'dues_provider.dart';
 
@@ -9,6 +11,8 @@ Future<void> invalidateDuesRelatedCaches(dynamic ref) async {
 
   ref.invalidate(allBuildingsDuesProvider);
   ref.invalidate(apartmentDuesHistoryProvider);
+  ref.invalidate(apartmentPaymentHistoryProvider);
+  ref.invalidate(duePaymentDetailProvider);
   ref.invalidate(dueTransactionsNotifierProvider);
 
   final futures = <Future<void>>[

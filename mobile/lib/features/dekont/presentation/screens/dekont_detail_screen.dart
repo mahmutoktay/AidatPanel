@@ -22,6 +22,7 @@ import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../data/dekont_preview_cache.dart';
@@ -220,7 +221,7 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     final t = context.t.features.dekont;
     final downloadActions = _downloadActions(detail);
     final fallbackRoute = isManager
-        ? '/manager-dashboard/due-transactions'
+        ? _managerDueTransactionsFallback(detail)
         : '/resident-dashboard/dekonts';
 
     final body = detail.when(
@@ -318,6 +319,14 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
       fallbackRoute: fallbackRoute,
       body: body,
     );
+  }
+
+  String _managerDueTransactionsFallback(AsyncValue<DekontEntity> detail) {
+    final buildingId = detail.asData?.value.buildingId;
+    if (buildingId != null && buildingId.isNotEmpty) {
+      return dueTransactionsPathForBuilding(buildingId);
+    }
+    return '/manager-dashboard/due-transactions';
   }
 }
 

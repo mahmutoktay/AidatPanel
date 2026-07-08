@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../shared/widgets/action_chevron.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -9,81 +8,6 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/show_due_day_picker.dart';
-import 'dues_screen_style.dart';
-
-class DuesQuickAmountCard extends StatelessWidget {
-  final String amountText;
-  final String currencySymbol;
-  final VoidCallback onTap;
-
-  const DuesQuickAmountCard({
-    super.key,
-    required this.amountText,
-    required this.currencySymbol,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(DuesScreenStyle.cardRadius),
-        child: Ink(
-          decoration: DuesScreenStyle.whiteCard(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.spacingM,
-              vertical: 14,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: AppColors.dashboardBackground,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.edit_note_rounded,
-                    color: AppColors.inkDark,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    context.t.common.updateDueAmount,
-                    style: AppTypography.body1.copyWith(
-                      color: AppColors.inkDark,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                Text(
-                  amountText,
-                  style: AppTypography.body1.copyWith(
-                    color: AppColors.mutedText,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                const ActionChevron(
-                  size: 22,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// Aidat tutarı güncelleme alt sayfası.
 class DuesAmountUpdateSheet extends StatefulWidget {

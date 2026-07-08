@@ -9,16 +9,22 @@ import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/building_selector_provider.dart';
-import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/dashboard_building_selector.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
+import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
+import '../../../dashboard/presentation/utils/manager_dashboard_mapper.dart';
 import '../../domain/entities/due_transaction_entity.dart';
 import '../providers/due_transactions_provider.dart';
 import '../widgets/due_transaction_tile.dart';
 
 class DueTransactionsScreen extends ConsumerStatefulWidget {
-  const DueTransactionsScreen({super.key});
+  const DueTransactionsScreen({
+    super.key,
+    this.initialScope = const DashboardFilterScope.all(),
+  });
+
+  final DashboardFilterScope initialScope;
 
   @override
   ConsumerState<DueTransactionsScreen> createState() =>
@@ -27,17 +33,21 @@ class DueTransactionsScreen extends ConsumerStatefulWidget {
 
 class _DueTransactionsScreenState extends ConsumerState<DueTransactionsScreen> {
   final ScrollController _scrollController = ScrollController();
-  String? _lastRequestedBuildingId;
-  String? _pendingSyncBuildingId;
+  late DashboardFilterScope _filterScope;
+  String? _lastLoadedScopeKey;
 
   @override
   void initState() {
     super.initState();
+    _filterScope = widget.initialScope;
     attachPaginationScroll(
       _scrollController,
       () => ref.read(dueTransactionsNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(dueTransactionsNotifierProvider).canLoadMore,
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_loadForCurrentScope());
+    });
   }
 
   @override
@@ -46,59 +56,43 @@ class _DueTransactionsScreenState extends ConsumerState<DueTransactionsScreen> {
     super.dispose();
   }
 
-  void _syncSelectedBuildingAndLoad(
-    List<BuildingEntity> buildings,
-    String? selectedBuildingId,
-  ) {
+  String _scopeKey(DashboardFilterScope scope) {
+    if (scope.isBuilding) return 'b:${scope.buildingId}';
+    if (scope.isSite) return 's:${scope.siteId}';
+    return 'all';
+  }
+
+  List<BuildingEntity> _scopedBuildings(List<BuildingEntity> buildings) {
+    return ManagerDashboardMapper.filterBuildingsByScope(
+      buildings,
+      siteId: _filterScope.siteId,
+      buildingId: _filterScope.buildingId,
+    );
+  }
+
+  Future<void> _loadForCurrentScope() async {
+    final buildings = ref.read(buildingsStoreProvider).value ?? [];
     if (buildings.isEmpty) return;
 
-    final selectedExists =
-        selectedBuildingId != null &&
-        buildings.any((building) => building.id == selectedBuildingId);
-    final effectiveId = selectedExists
-        ? selectedBuildingId
-        : buildings.first.id;
+    final scopeKey = _scopeKey(_filterScope);
+    if (_lastLoadedScopeKey == scopeKey) return;
+    _lastLoadedScopeKey = scopeKey;
 
-    if (_lastRequestedBuildingId == effectiveId && selectedExists) return;
-    if (_pendingSyncBuildingId == effectiveId) return;
+    final scopedBuildings = _scopedBuildings(buildings);
+    final buildingIds =
+        scopedBuildings.map((building) => building.id).toList(growable: false);
 
-    _pendingSyncBuildingId = effectiveId;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _pendingSyncBuildingId = null;
-      if (!mounted) return;
-
-      final latestBuildings = ref.read(buildingsStoreProvider).value ?? [];
-      if (latestBuildings.isEmpty) return;
-
-      final latestSelectedId = ref.read(selectedBuildingIdProvider);
-      final latestSelectedExists =
-          latestSelectedId != null &&
-          latestBuildings.any((building) => building.id == latestSelectedId);
-      final id = latestSelectedExists
-          ? latestSelectedId
-          : latestBuildings.first.id;
-
-      if (!latestSelectedExists) {
-        ref.read(selectedBuildingIdProvider.notifier).select(id);
-      }
-      if (_lastRequestedBuildingId == id) return;
-
-      _lastRequestedBuildingId = id;
-      unawaited(_loadBuilding(id));
-    });
-  }
-
-  Future<void> _loadBuilding(String buildingId) {
-    return ref
+    await ref
         .read(dueTransactionsNotifierProvider.notifier)
-        .loadBuilding(buildingId);
+        .loadBuildings(buildingIds);
   }
 
-  Future<void> _load() async {
-    final id = ref.read(selectedBuildingIdProvider);
-    if (id == null) return;
-    _lastRequestedBuildingId = id;
-    await _loadBuilding(id);
+  void _onScopeChanged(DashboardFilterScope scope) {
+    setState(() {
+      _filterScope = scope;
+      _lastLoadedScopeKey = null;
+    });
+    unawaited(_loadForCurrentScope());
   }
 
   void _openTransaction(DueTransactionEntity transaction) {
@@ -112,9 +106,6 @@ class _DueTransactionsScreenState extends ConsumerState<DueTransactionsScreen> {
     final buildings = ref.watch(buildingsStoreProvider).value ?? [];
     final state = ref.watch(dueTransactionsNotifierProvider);
     final t = context.t.features.dues.transactions;
-    final buildingId = ref.watch(selectedBuildingIdProvider);
-
-    _syncSelectedBuildingAndLoad(buildings, buildingId);
 
     return DashboardSecondaryScaffold(
       title: t.title,
@@ -123,16 +114,14 @@ class _DueTransactionsScreenState extends ConsumerState<DueTransactionsScreen> {
       body: DashboardListScreenBody(
         header: buildings.isEmpty
             ? null
-            : DashboardSingleBuildingSelector(
+            : DashboardBuildingSelector(
                 buildings: buildings,
-                selectedBuildingId: buildingId,
-                onSelected: (id) {
-                  ref.read(selectedBuildingIdProvider.notifier).select(id);
-                  unawaited(_load());
-                },
+                scope: _filterScope,
+                includeAllOption: true,
+                onScopeChanged: _onScopeChanged,
               ),
         list: RefreshIndicator(
-          onRefresh: _load,
+          onRefresh: _loadForCurrentScope,
           child: buildings.isEmpty
               ? ListView(
                   physics: const AlwaysScrollableScrollPhysics(),

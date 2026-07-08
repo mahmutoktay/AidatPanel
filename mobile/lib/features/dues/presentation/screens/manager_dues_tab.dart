@@ -10,7 +10,6 @@ import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/dashboard_building_selector.dart';
-import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
 import '../../../dashboard/presentation/providers/dashboard_filter_scope_provider.dart';
 import '../../../dashboard/presentation/utils/manager_dashboard_mapper.dart';
@@ -20,13 +19,11 @@ import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
 import '../../domain/entities/due_entity.dart';
-import '../providers/dues_cache_refresh.dart';
 import '../providers/dues_provider.dart';
 import '../utils/dues_ui_helpers.dart';
 import '../utils/due_collect_payment_flow.dart';
 import '../widgets/due_detail_sheet.dart';
 import '../widgets/dues_list_item_slidable.dart';
-import '../widgets/dues_quick_amount_card.dart';
 import '../widgets/dues_stat_cards_row.dart';
 
 class ManagerDuesTab extends ConsumerStatefulWidget {
@@ -37,15 +34,12 @@ class ManagerDuesTab extends ConsumerStatefulWidget {
 }
 
 class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
-  final TextEditingController _amountController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isCollectingPayment = false;
 
-  int? _selectedDueDay;
   DueStatus? _statusFilter;
   int? _monthFilter = DateTime.now().month;
   int? _yearFilter = DateTime.now().year;
-  bool _affectCurrent = false;
   bool _initialized = false;
   List<DueEntity> _statsDues = const [];
 
@@ -62,7 +56,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _amountController.dispose();
     super.dispose();
   }
 
@@ -136,7 +129,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     });
 
     final isLoading = duesState.isLoading;
-    final selectedBuilding = _selectedBuilding(filterScope, buildings);
     final scopedBuildingIds = _scopedBuildingIds(filterScope, buildings);
     final statsSource = _statusFilter == null ? dues : _statsDues;
     final totalUnits = _resolveTotalUnits(
@@ -171,14 +163,18 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                         .read(dashboardFilterScopeProvider.notifier)
                         .update(scope),
                   ),
+                  const SizedBox(height: AppSizes.spacingS),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _PeriodFilterChip(
+                      label: _periodFilterLabel(context),
+                      hasActiveFilters: _hasActivePeriodFilters,
+                      enabled: !isLoading,
+                      onTap: () => _openFilterSheet(context, dues, isLoading),
+                    ),
+                  ),
                   const SizedBox(height: AppSizes.spacingM),
                 ],
-                PremiumFilterButton(
-                  enabled: !isLoading,
-                  hasActiveFilters: _hasActiveFilters,
-                  onPressed: () => _openFilterSheet(context, dues, isLoading),
-                ),
-                const SizedBox(height: AppSizes.spacingM),
                 if (statsSource.isNotEmpty || scopedBuildingIds.isNotEmpty)
                   DuesStatCardsRow(
                     paidCount: statsSource
@@ -191,19 +187,8 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                         .where((d) => d.status == DueStatus.overdue)
                         .length,
                     totalUnits: totalUnits,
-                  ),
-                const SizedBox(height: AppSizes.spacingM),
-                if (filterScope.isBuilding && selectedBuilding != null)
-                  DuesQuickAmountCard(
-                    amountText: selectedBuilding.dueAmount != null
-                        ? '$currencySymbol${selectedBuilding.dueAmount!.toStringAsFixed(0)}'
-                        : '—',
-                    currencySymbol: currencySymbol,
-                    onTap: () => _openAmountUpdateSheet(
-                      context,
-                      selectedBuilding,
-                      isLoading,
-                    ),
+                    selectedStatus: _statusFilter,
+                    onStatusTap: _toggleStatusFilter,
                   ),
                 const SizedBox(height: AppSizes.spacingL),
                 if (scopedBuildingIds.isNotEmpty)
@@ -320,38 +305,34 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     ).map((building) => building.id).toList(growable: false);
   }
 
-  BuildingEntity? _selectedBuilding(
-    DashboardFilterScope scope,
-    List<BuildingEntity> buildings,
-  ) {
-    final id = scope.buildingId;
-    if (id == null) return null;
-    return _buildingFor(id, buildings);
+  void _toggleStatusFilter(DueStatus status) {
+    setState(() {
+      _statusFilter = _statusFilter == status ? null : status;
+    });
+    _reloadDues();
   }
 
-  Future<void> _openAmountUpdateSheet(
-    BuildContext context,
-    BuildingEntity building,
-    bool isLoading,
-  ) async {
-    _amountController.clear();
-    setState(() {
-      _selectedDueDay = null;
-      _affectCurrent = false;
-    });
-    await DuesAmountUpdateSheet.show(
-      context,
-      amountController: _amountController,
-      selectedDueDay: _selectedDueDay,
-      affectCurrent: _affectCurrent,
-      isLoading: isLoading,
-      hintAmount: building.dueAmount?.toStringAsFixed(0),
-      currencySymbol: _currencySymbol(),
-      onDueDayChanged: (value) => setState(() => _selectedDueDay = value),
-      onAffectCurrentChanged: (value) =>
-          setState(() => _affectCurrent = value),
-      onSubmit: () => _updateDueAmount([building]),
-    );
+  String _periodFilterLabel(BuildContext context) {
+    final common = context.t.common;
+    final monthPart = _monthFilter == null
+        ? common.allMonths
+        : monthName(context, _monthFilter!);
+    final yearPart =
+        _yearFilter == null ? common.allYears : '${_yearFilter!}';
+    if (_monthFilter != null && _yearFilter != null) {
+      return '$monthPart $yearPart';
+    }
+    if (_monthFilter != null) return monthPart;
+    if (_yearFilter != null) return yearPart;
+    return common.filter;
+  }
+
+  bool get _hasActivePeriodFilters {
+    final now = DateTime.now();
+    return _monthFilter == null ||
+        _yearFilter == null ||
+        _monthFilter != now.month ||
+        _yearFilter != now.year;
   }
 
   List<int> _yearOptions(List<DueEntity> dues) {
@@ -363,37 +344,12 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     return yearSet.toList()..sort((a, b) => b.compareTo(a));
   }
 
-  bool get _hasActiveFilters {
-    final now = DateTime.now();
-    return _statusFilter != null ||
-        _monthFilter == null ||
-        _yearFilter == null ||
-        _monthFilter != now.month ||
-        _yearFilter != now.year;
-  }
-
-  String _dueStatusLabel(BuildContext context, DueStatus? status) {
-    final common = context.t.common;
-    if (status == null) return common.all;
-    switch (status) {
-      case DueStatus.paid:
-        return common.paidStatus;
-      case DueStatus.pending:
-        return common.pendingStatus;
-      case DueStatus.overdue:
-        return common.overdueStatus;
-      case DueStatus.waived:
-        return common.all;
-    }
-  }
-
   Future<void> _openFilterSheet(
     BuildContext context,
     List<DueEntity> dues,
     bool isLoading,
   ) async {
     if (isLoading) return;
-    var draftStatus = _statusFilter;
     var draftMonth = _monthFilter;
     var draftYear = _yearFilter;
     final common = context.t.common;
@@ -404,51 +360,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
       title: common.filter,
       applyLabel: common.apply,
       fieldBuilder: (ctx, setSheetState) {
-        final statusAllToken = Object();
         final monthAllToken = Object();
         final yearAllToken = Object();
         return [
-          PremiumFilterFieldConfig(
-            label: common.status,
-            value: _dueStatusLabel(ctx, draftStatus),
-            hint: common.all,
-            icon: Icons.flag_outlined,
-            onTap: () async {
-              final picked = await showPremiumSingleSelectPicker<Object?>(
-                context: ctx,
-                title: common.status,
-                selected: draftStatus ?? statusAllToken,
-                options: [
-                  PremiumFilterPickerOption(
-                    value: statusAllToken,
-                    label: common.all,
-                    icon: Icons.layers_outlined,
-                  ),
-                  PremiumFilterPickerOption(
-                    value: DueStatus.paid,
-                    label: common.paidStatus,
-                    icon: Icons.check_circle_outline,
-                  ),
-                  PremiumFilterPickerOption(
-                    value: DueStatus.pending,
-                    label: common.pendingStatus,
-                    icon: Icons.schedule_outlined,
-                  ),
-                  PremiumFilterPickerOption(
-                    value: DueStatus.overdue,
-                    label: common.overdueStatus,
-                    icon: Icons.warning_amber_rounded,
-                  ),
-                ],
-              );
-              if (picked == null) return;
-              setSheetState(() {
-                draftStatus = identical(picked, statusAllToken)
-                    ? null
-                    : picked as DueStatus;
-              });
-            },
-          ),
           PremiumFilterFieldConfig(
             label: common.month,
             value: draftMonth == null
@@ -515,7 +429,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
       },
       onApply: () {
         setState(() {
-          _statusFilter = draftStatus;
           _monthFilter = draftMonth;
           _yearFilter = draftYear;
         });
@@ -640,6 +553,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     await DueDetailSheet.show(
       context,
       due: due,
+      buildingId: buildingId,
       monthLabel: monthLabel,
       currencySymbol: _currencySymbol(),
       isCollecting: _isCollectingPayment,
@@ -664,96 +578,75 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     );
   }
 
-  Future<void> _updateDueAmount(List<BuildingEntity> buildings) async {
-    final buildingId = ref.read(dashboardFilterScopeProvider).buildingId;
-    if (buildingId == null) return;
-
-    final toast = ref.read(toastProvider.notifier);
-    void validationToast(String msg) {
-      toast.show(msg, type: ToastType.info);
-    }
-
-    final amountText = _amountController.text
-        .trim()
-        .replaceAll(',', '.')
-        .replaceAll(' ', '');
-    final dueDay = _selectedDueDay;
-
-    double? parsedAmount;
-    if (amountText.isNotEmpty) {
-      parsedAmount = double.tryParse(amountText);
-      if (parsedAmount == null || parsedAmount <= 0) {
-        validationToast(context.t.common.dueAmountInvalidPositive);
-        return;
-      }
-    }
-
-    final hasAmount = parsedAmount != null && parsedAmount > 0;
-    final hasDueDay = dueDay != null;
-    if (!hasAmount && !hasDueDay) {
-      validationToast(context.t.common.dueUpdateNeedAmountOrDay);
-      return;
-    }
-
-    final building = _buildingFor(buildingId, buildings);
-    late final double resolvedAmount;
-    if (hasAmount) {
-      resolvedAmount = parsedAmount;
-    } else {
-      final stored = building?.dueAmount;
-      if (stored == null || stored <= 0) {
-        validationToast(context.t.common.dueUpdateNeedStoredAmount);
-        return;
-      }
-      resolvedAmount = stored;
-    }
-
-    final ok = await ref
-        .read(duesNotifierProvider.notifier)
-        .updateBuildingDueAmount(
-          buildingId: buildingId,
-          dueAmount: resolvedAmount,
-          dueDay: dueDay,
-          currency: _currencyCode(),
-          affectCurrent: _affectCurrent,
-        );
-
-    if (!mounted) return;
-    toast.show(
-      ok
-          ? context.t.common.dueAmountUpdated
-          : context.t.common.dueAmountUpdateFailed,
-      type: ok ? ToastType.success : ToastType.error,
-    );
-    if (ok) {
-      _amountController.clear();
-      setState(() {
-        _selectedDueDay = null;
-        _affectCurrent = false;
-      });
-      if (context.mounted) {
-        Navigator.of(context).maybePop();
-      }
-      await ref.read(buildingsStoreProvider.notifier).refreshBuildings();
-      if (!mounted) return;
-      await invalidateDuesRelatedCaches(ref);
-      if (!mounted) return;
-      await _reloadDues();
-    }
-  }
-
-  BuildingEntity? _buildingFor(String buildingId, List<BuildingEntity> list) {
-    for (final b in list) {
-      if (b.id == buildingId) return b;
-    }
-    return null;
-  }
-
-  String _currencyCode() {
-    return 'TRY';
-  }
-
   String _currencySymbol() {
     return '₺';
+  }
+}
+
+class _PeriodFilterChip extends StatelessWidget {
+  const _PeriodFilterChip({
+    required this.label,
+    required this.hasActiveFilters,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool hasActiveFilters;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          borderRadius: BorderRadius.circular(999),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: hasActiveFilters
+                  ? AppColors.inkDark.withValues(alpha: 0.08)
+                  : AppColors.dashboardBackground,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: hasActiveFilters
+                    ? AppColors.inkDark.withValues(alpha: 0.2)
+                    : AppColors.lineLight,
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.calendar_month_outlined,
+                  size: 18,
+                  color: enabled ? AppColors.inkDark : AppColors.mutedText,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: AppTypography.body2.copyWith(
+                    color: enabled ? AppColors.inkDark : AppColors.mutedText,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 20,
+                  color: enabled ? AppColors.mutedText : AppColors.mutedText,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

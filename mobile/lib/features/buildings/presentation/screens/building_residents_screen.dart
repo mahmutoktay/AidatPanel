@@ -33,6 +33,7 @@ import '../widgets/building_resident_card.dart';
 import '../widgets/building_summary_card.dart';
 import '../widgets/delete_building_dialog.dart';
 import '../widgets/edit_building_bottom_sheet.dart';
+import '../../../dues/presentation/utils/dues_amount_update_flow.dart';
 
 class BuildingResidentsScreen extends ConsumerStatefulWidget {
   final BuildingEntity building;
@@ -352,6 +353,11 @@ class _BuildingResidentsScreenState
               onReport: () => ReportDownloadSheet.show(
                 context,
                 building: widget.building,
+              ),
+              onDueSettings: () => showBuildingDueAmountUpdateSheet(
+                context,
+                ref,
+                widget.building,
               ),
               onMultiSelect: () {
                 if (!hasOccupied) {

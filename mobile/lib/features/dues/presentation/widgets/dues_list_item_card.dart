@@ -26,11 +26,12 @@ class DuesListItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visual = duesStatusVisual(context, due.status);
-    final meta = dueMetaSubtitle(
+    final subtitle = dueListRowSubtitle(
       context,
       due,
       currencySymbol: currencySymbol,
     );
+    final lateDays = latePaymentDays(due);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
@@ -78,36 +79,66 @@ class DuesListItemCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        meta,
+                        subtitle,
                         style: AppTypography.body2.copyWith(
                           color: AppColors.mutedText,
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                         ),
-                        maxLines: 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: visual.bg,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    visual.label,
-                    style: AppTypography.caption.copyWith(
-                      color: visual.fg,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
+                Wrap(
+                  spacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    if (due.status == DueStatus.paid &&
+                        lateDays != null &&
+                        lateDays > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.dashboardBackground,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.lineLight,
+                          ),
+                        ),
+                        child: Text(
+                          dueLatePaymentBadge(context, lateDays),
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.mutedText,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: visual.bg,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        visual.label,
+                        style: AppTypography.caption.copyWith(
+                          color: visual.fg,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),

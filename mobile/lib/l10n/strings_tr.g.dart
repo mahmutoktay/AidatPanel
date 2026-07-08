@@ -302,6 +302,10 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get duesUpdated => 'Aidat durumu güncellendi';
 	@override String get amount => 'Tutar';
 	@override String get updateDueAmount => 'Aidat Tutarını Güncelle';
+	@override String get dueSettings => 'Aidat Ayarları';
+	@override String get dueLatePaymentBadge => '{days} gün geç';
+	@override String get viewPaymentHistory => 'Ödeme Geçmişini Gör';
+	@override String get paymentHistoryTitle => 'Ödeme Geçmişi';
 	@override String get dueAmountUpdated => 'Aidat tutarı güncellendi';
 	@override String get dueAmountUpdateFailed => 'Aidat tutarı güncellenemedi';
 	@override String get dueDay => 'Aidat Günü (1-28)';
@@ -2115,6 +2119,10 @@ extension on TranslationsTr {
 			'common.duesUpdated' => 'Aidat durumu güncellendi',
 			'common.amount' => 'Tutar',
 			'common.updateDueAmount' => 'Aidat Tutarını Güncelle',
+			'common.dueSettings' => 'Aidat Ayarları',
+			'common.dueLatePaymentBadge' => '{days} gün geç',
+			'common.viewPaymentHistory' => 'Ödeme Geçmişini Gör',
+			'common.paymentHistoryTitle' => 'Ödeme Geçmişi',
 			'common.dueAmountUpdated' => 'Aidat tutarı güncellendi',
 			'common.dueAmountUpdateFailed' => 'Aidat tutarı güncellenemedi',
 			'common.dueDay' => 'Aidat Günü (1-28)',
@@ -2334,12 +2342,12 @@ extension on TranslationsTr {
 			'common.errorKeys.reportFileEmpty' => 'Rapor dosyası boş geldi. Lütfen tekrar deneyin.',
 			'common.errorKeys.downloadStarted' => 'İndirme başlatıldı...',
 			'common.errorKeys.downloadSavedToGallery' => 'Görsel telefonunuzun Galerisine (AidatPanel albümüne) kaydedildi.',
+			_ => null,
+		} ?? switch (path) {
 			'common.errorKeys.downloadSavedToDownloads' => 'Dekont, telefonunuzun İndirilenler (Downloads) klasörüne kaydedildi.',
 			'common.errorKeys.downloadFallbackShare' => 'Paylaşım ekranı açıldı, buradan Dosyalara Kaydet diyebilirsiniz.',
 			'common.errorKeys.downloadError' => 'Dosya indirilirken bir hata oluştu.',
 			'common.errorKeys.galleryPermissionDenied' => 'Galeriye erişim izni reddedildi.',
-			_ => null,
-		} ?? switch (path) {
 			'validation.emailRequired' => 'Email adresi boş bırakılamaz',
 			'validation.emailInvalid' => 'Geçerli bir email adresi giriniz',
 			'validation.emailTooLong' => 'Email adresi çok uzun',
@@ -2848,12 +2856,12 @@ extension on TranslationsTr {
 			'features.dekont.reviewFailed' => 'İnceleme kaydedilemedi',
 			'features.dekont.selectDueForApprove' => 'Onay için aidat seçin',
 			'features.dekont.uploadedBy' => 'Yükleyen',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.apartment' => 'Daire',
 			'features.dekont.amount' => 'Tutar',
 			'features.dekont.loadError' => 'Dekontlar yüklenemedi',
 			'features.dekont.systemInfoTitle' => 'Sistem bilgileri',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.systemInfoSubtitle' => 'Dekontunuzdan okuduğumuz bilgiler aşağıdadır. Ödeme otomatik onaylanmaz; yönetici hesabını kontrol ederek onaylar.',
 			'features.dekont.systemReadLabel' => 'Dekonttan okunanlar',
 			'features.dekont.systemInfoProcessing' => 'Dekontunuz işleniyor. Okunan tutar, tarih ve banka bilgileri birkaç dakika içinde burada görünecek.',

@@ -181,6 +181,20 @@ String dueStatusDetail(BuildContext context, DueEntity due) {
   }
 }
 
+String dueListRowSubtitle(
+  BuildContext context,
+  DueEntity due, {
+  required String currencySymbol,
+}) {
+  final period = '${monthName(context, due.month)} ${due.year}';
+  final amount = '$currencySymbol${due.amount.toStringAsFixed(0)}';
+  return '$period · $amount';
+}
+
+String dueLatePaymentBadge(BuildContext context, int days) {
+  return context.t.common.dueLatePaymentBadge.replaceAll('{days}', '$days');
+}
+
 String dueMetaSubtitle(
   BuildContext context,
   DueEntity due, {

@@ -22,7 +22,8 @@ class DueTransactionsState {
     this.buildingId,
   });
 
-  bool get canLoadMore => nextCursor != null && !isLoadingMore && !isLoading;
+  bool get canLoadMore =>
+      buildingId != null && nextCursor != null && !isLoadingMore && !isLoading;
 
   DueTransactionsState copyWith({
     bool? isLoading,
@@ -69,6 +70,53 @@ class DueTransactionsNotifier extends Notifier<DueTransactionsState> {
         isLoading: false,
         transactions: result.items,
         nextCursor: result.nextCursor,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: _message(e),
+      );
+    }
+  }
+
+  Future<void> loadBuildings(List<String> buildingIds) async {
+    if (buildingIds.isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        buildingId: null,
+        transactions: const [],
+        clearCursor: true,
+        clearError: true,
+      );
+      return;
+    }
+
+    if (buildingIds.length == 1) {
+      return loadBuilding(buildingIds.first);
+    }
+
+    state = state.copyWith(
+      isLoading: true,
+      buildingId: null,
+      clearError: true,
+      clearCursor: true,
+      transactions: const [],
+    );
+
+    try {
+      final merged = <DueTransactionEntity>[];
+      for (final buildingId in buildingIds) {
+        final result = await _repo.getDueTransactions(
+          buildingId,
+          paginated: false,
+        );
+        merged.addAll(result.items);
+      }
+      merged.sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
+
+      state = state.copyWith(
+        isLoading: false,
+        transactions: merged,
       );
     } catch (e) {
       state = state.copyWith(

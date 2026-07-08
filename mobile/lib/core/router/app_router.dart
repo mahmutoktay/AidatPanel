@@ -27,11 +27,13 @@ import '../../features/expenses/domain/entities/expense_entity.dart';
 import '../../features/expenses/presentation/screens/expense_detail_screen.dart';
 import '../../features/dekont/presentation/screens/dekont_detail_screen.dart';
 import '../../features/dekont/presentation/screens/make_payment_screen.dart';
+import '../../features/dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
 import '../../features/dues/presentation/screens/due_transactions_screen.dart';
 import '../../features/dekont/presentation/screens/manager_dekonts_screen.dart';
 import '../../features/dekont/presentation/screens/my_dekonts_screen.dart';
 import '../../features/buildings/presentation/screens/saved_ibans_screen.dart';
 import '../../features/buildings/presentation/screens/add_building_screen.dart';
+import '../../features/buildings/presentation/screens/apartment_payment_history_screen.dart';
 import '../../features/buildings/presentation/screens/building_residents_screen.dart';
 import '../../features/buildings/presentation/screens/invite_code_screen.dart';
 import '../../features/buildings/data/buildings_store.dart';
@@ -83,7 +85,9 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
     path: 'due-transactions',
     name: 'manager_dashboard_due_transactions',
     parentNavigatorKey: rootNavigatorKey,
-    builder: (context, state) => const DueTransactionsScreen(),
+    builder: (context, state) => DueTransactionsScreen(
+      initialScope: dueTransactionsScopeFromQuery(state.uri.queryParameters),
+    ),
   ),
   GoRoute(
     path: 'dekonts',
@@ -164,6 +168,17 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) => _BuildingResidentsRoute(
       buildingId: state.pathParameters['buildingId']!,
+    ),
+  ),
+  GoRoute(
+    path: 'buildings/:buildingId/apartments/:apartmentId/payment-history',
+    name: 'manager_apartment_payment_history',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => ApartmentPaymentHistoryScreen(
+      buildingId: state.pathParameters['buildingId']!,
+      apartmentId: state.pathParameters['apartmentId']!,
+      apartmentNumber: state.uri.queryParameters['apartmentNumber'] ?? '',
+      residentName: state.uri.queryParameters['residentName'] ?? '',
     ),
   ),
   GoRoute(

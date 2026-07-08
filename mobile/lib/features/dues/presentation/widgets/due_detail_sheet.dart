@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -10,12 +11,15 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../buildings/presentation/utils/apartment_ui_utils.dart';
 import '../../domain/entities/due_entity.dart';
+import '../../domain/entities/due_transaction_entity.dart';
+import '../providers/due_payment_detail_provider.dart';
 import '../utils/dues_ui_helpers.dart';
 
-class DueDetailSheet extends StatelessWidget {
+class DueDetailSheet extends ConsumerWidget {
   const DueDetailSheet({
     super.key,
     required this.due,
+    required this.buildingId,
     required this.monthLabel,
     required this.currencySymbol,
     required this.onCollectPayment,
@@ -23,6 +27,7 @@ class DueDetailSheet extends StatelessWidget {
   });
 
   final DueEntity due;
+  final String? buildingId;
   final String monthLabel;
   final String currencySymbol;
   final VoidCallback? onCollectPayment;
@@ -31,6 +36,7 @@ class DueDetailSheet extends StatelessWidget {
   static Future<void> show(
     BuildContext context, {
     required DueEntity due,
+    required String? buildingId,
     required String monthLabel,
     required String currencySymbol,
     required VoidCallback? onCollectPayment,
@@ -40,6 +46,7 @@ class DueDetailSheet extends StatelessWidget {
       context: context,
       builder: (_) => DueDetailSheet(
         due: due,
+        buildingId: buildingId,
         monthLabel: monthLabel,
         currencySymbol: currencySymbol,
         onCollectPayment: onCollectPayment,
@@ -51,8 +58,9 @@ class DueDetailSheet extends StatelessWidget {
   bool get _isPaid => due.status == DueStatus.paid;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = context.t.features.dues;
+    final txT = context.t.features.dues.transactions;
     final visual = duesStatusVisual(context, due.status);
     final languageCode = AppIntlLocale.fromContext(context);
     final amountText = AppCurrencyFormat.format(
@@ -67,6 +75,15 @@ class DueDetailSheet extends StatelessWidget {
       context,
       due.apartmentNumber,
     );
+
+    final paymentAsync = buildingId == null
+        ? const AsyncValue<DueTransactionEntity?>.data(null)
+        : ref.watch(
+            duePaymentDetailProvider((
+              buildingId: buildingId!,
+              dueId: due.id,
+            )),
+          );
 
     return PremiumBottomSheetScaffold(
       title: t.detailTitle,
@@ -121,16 +138,107 @@ class DueDetailSheet extends StatelessWidget {
               value: duePaidSummary(context, due),
             ),
           ],
+          if (_isPaid && buildingId != null)
+            paymentAsync.when(
+              loading: () => const Padding(
+                padding: EdgeInsets.only(top: AppSizes.spacingM),
+                child: Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              ),
+              error: (_, _) => const SizedBox.shrink(),
+              data: (transaction) {
+                if (transaction == null) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(top: AppSizes.spacingM),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          _PaymentChip(
+                            label: transaction.source ==
+                                    DueTransactionSource.receipt
+                                ? txT.sourceReceipt
+                                : txT.sourceManual,
+                            background: AppColors.infoBg,
+                            color: AppColors.chartBlue,
+                          ),
+                          _PaymentChip(
+                            label: _transactionStatusLabel(context, transaction),
+                            background: _transactionStatusBackground(transaction),
+                            color: _transactionStatusColor(transaction),
+                          ),
+                        ],
+                      ),
+                      if (transaction.dekontId != null) ...[
+                        const SizedBox(height: AppSizes.spacingS),
+                        Material(
+                          color: AppColors.fill,
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.cardRadius),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.pop(context);
+                              context.push(
+                                '/dekonts/${transaction.dekontId}',
+                              );
+                            },
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.cardRadius),
+                            child: Padding(
+                              padding: const EdgeInsets.all(AppSizes.spacingM),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.infoBg,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Icon(
+                                      Icons.receipt_long_outlined,
+                                      color: AppColors.chartBlue,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSizes.spacingM),
+                                  Expanded(
+                                    child: Text(
+                                      context.t.features.dekont
+                                          .paymentDetailsSection,
+                                      style: AppTypography.body2.copyWith(
+                                        color: AppColors.textPrimary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.chevron_right_rounded,
+                                    color: AppColors.mutedText,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              },
+            ),
         ],
       ),
       actions: _isPaid
-          ? PremiumSheetActions(
-              primaryLabel: t.paymentDetail,
-              onPrimary: () {
-                Navigator.pop(context);
-                context.push('/manager-dashboard/due-transactions');
-              },
-            )
+          ? null
           : PremiumSheetActions(
               primaryLabel: t.collectPayment,
               primaryLoading: isCollecting,
@@ -138,6 +246,43 @@ class DueDetailSheet extends StatelessWidget {
               onPrimary: onCollectPayment,
             ),
     );
+  }
+
+  String _transactionStatusLabel(
+    BuildContext context,
+    DueTransactionEntity transaction,
+  ) {
+    final txT = context.t.features.dues.transactions;
+    switch (transaction.status) {
+      case DueTransactionStatus.pending:
+        return txT.statusPending;
+      case DueTransactionStatus.rejected:
+        return txT.statusRejected;
+      case DueTransactionStatus.approved:
+        return txT.statusApproved;
+    }
+  }
+
+  Color _transactionStatusBackground(DueTransactionEntity transaction) {
+    switch (transaction.status) {
+      case DueTransactionStatus.pending:
+        return AppColors.warningBg;
+      case DueTransactionStatus.rejected:
+        return AppColors.errorBg;
+      case DueTransactionStatus.approved:
+        return AppColors.successBg;
+    }
+  }
+
+  Color _transactionStatusColor(DueTransactionEntity transaction) {
+    switch (transaction.status) {
+      case DueTransactionStatus.pending:
+        return AppColors.chartOrange;
+      case DueTransactionStatus.rejected:
+        return AppColors.chartRed;
+      case DueTransactionStatus.approved:
+        return AppColors.chartGreen;
+    }
   }
 }
 
@@ -173,6 +318,37 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PaymentChip extends StatelessWidget {
+  const _PaymentChip({
+    required this.label,
+    required this.background,
+    required this.color,
+  });
+
+  final String label;
+  final Color background;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: AppTypography.caption.copyWith(
+          color: color,
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
+      ),
     );
   }
 }
