@@ -12,11 +12,13 @@ class TicketModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? apartmentNumber;
+  final String? buildingId;
   final String? residentName;
   final String? residentPhone;
   final String? residentEmail;
   final String? residentProfilePicture;
   final String? creatorName;
+  final String? attachmentUrl;
   final List<TicketUpdateModel> updates;
 
   const TicketModel({
@@ -30,11 +32,13 @@ class TicketModel {
     required this.createdAt,
     required this.updatedAt,
     this.apartmentNumber,
+    this.buildingId,
     this.residentName,
     this.residentPhone,
     this.residentEmail,
     this.residentProfilePicture,
     this.creatorName,
+    this.attachmentUrl,
     this.updates = const [],
   });
 
@@ -48,6 +52,7 @@ class TicketModel {
         : <TicketUpdateModel>[];
 
     String? aptNum;
+    String? buildingId;
     final flat = json['apartmentNumber'];
     if (flat is String && flat.isNotEmpty) {
       aptNum = flat;
@@ -56,6 +61,17 @@ class TicketModel {
       if (apt is Map && apt['number'] is String) {
         aptNum = apt['number'] as String;
       }
+    }
+    final aptMap = json['apartment'];
+    if (aptMap is Map && aptMap['buildingId'] is String) {
+      final id = (aptMap['buildingId'] as String).trim();
+      if (id.isNotEmpty) buildingId = id;
+    }
+    final flatBuildingId = json['buildingId'];
+    if (buildingId == null &&
+        flatBuildingId is String &&
+        flatBuildingId.trim().isNotEmpty) {
+      buildingId = flatBuildingId.trim();
     }
 
     // Backend'de ticket user ilişkisi üzerinden sakin bilgisi döner
@@ -79,6 +95,12 @@ class TicketModel {
       crName = createdBy['name'] as String?;
     }
 
+    String? attachmentUrl;
+    final rawAttachment = json['attachmentUrl'] ?? json['attachment_url'];
+    if (rawAttachment is String && rawAttachment.trim().isNotEmpty) {
+      attachmentUrl = rawAttachment.trim();
+    }
+
     return TicketModel(
       id: (json['id'] ?? '') as String,
       apartmentId: (json['apartmentId'] ?? '') as String,
@@ -90,11 +112,13 @@ class TicketModel {
       createdAt: parseDate(json['createdAt']),
       updatedAt: parseDate(json['updatedAt']),
       apartmentNumber: aptNum,
+      buildingId: buildingId,
       residentName: resName,
       residentPhone: resPhone,
       residentEmail: resEmail,
       residentProfilePicture: resPic,
       creatorName: crName,
+      attachmentUrl: attachmentUrl,
       updates: updates,
     );
   }
@@ -117,11 +141,13 @@ class TicketModel {
         createdAt: createdAt,
         updatedAt: updatedAt,
         apartmentNumber: apartmentNumber,
+        buildingId: buildingId,
         residentName: residentName,
         residentPhone: residentPhone,
         residentEmail: residentEmail,
         residentProfilePicture: residentProfilePicture,
         creatorName: creatorName,
+        attachmentUrl: attachmentUrl,
         updates: updates.map((u) => u.toEntity()).toList(),
       );
 

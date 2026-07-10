@@ -7,6 +7,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../utils/ticket_labels.dart';
+import '../utils/ticket_status_style.dart';
 
 class TicketListCard extends StatelessWidget {
   final TicketEntity ticket;
@@ -14,7 +15,6 @@ class TicketListCard extends StatelessWidget {
   final String? subtitlePrefix;
   /// Sakin listesi: daire/kategori satırı gizlenir.
   final bool showSubtitleMeta;
-  final int descriptionMaxLines;
 
   const TicketListCard({
     super.key,
@@ -22,12 +22,11 @@ class TicketListCard extends StatelessWidget {
     this.onTap,
     this.subtitlePrefix,
     this.showSubtitleMeta = true,
-    this.descriptionMaxLines = 2,
   });
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _statusColor(ticket.status);
+    final statusColor = ticketStatusColor(ticket.status);
     final date =
         '${ticket.createdAt.day}.${ticket.createdAt.month}.${ticket.createdAt.year}';
     final apt = ticket.apartmentNumber?.trim();
@@ -79,12 +78,15 @@ class TicketListCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               ticket.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: AppTypography.h4.copyWith(
                                 color: AppColors.textPrimary,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
                           ),
+                          const SizedBox(width: AppSizes.spacingS),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
@@ -108,21 +110,13 @@ class TicketListCard extends StatelessWidget {
                         const SizedBox(height: AppSizes.spacingXS),
                         Text(
                           meta,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: AppTypography.caption.copyWith(
                             color: AppColors.textSecondary,
                           ),
                         ),
                       ],
-                      const SizedBox(height: AppSizes.spacingS),
-                      Text(
-                        ticket.description,
-                        maxLines: descriptionMaxLines,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.body2.copyWith(
-                          color: AppColors.textSecondary,
-                          height: 1.35,
-                        ),
-                      ),
                       const SizedBox(height: AppSizes.spacingS),
                       Row(
                         children: [
@@ -162,19 +156,6 @@ class TicketListCard extends StatelessWidget {
         return Icons.build_circle_outlined;
       case TicketCategory.other:
         return Icons.more_horiz_rounded;
-    }
-  }
-
-  Color _statusColor(TicketStatus status) {
-    switch (status) {
-      case TicketStatus.open:
-        return AppColors.warning;
-      case TicketStatus.inProgress:
-        return AppColors.info;
-      case TicketStatus.resolved:
-        return AppColors.success;
-      case TicketStatus.closed:
-        return AppColors.textSecondary;
     }
   }
 }

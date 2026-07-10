@@ -1371,6 +1371,13 @@ class MockTicketRepository implements TicketRepository {
       createdAt: old.createdAt,
       updatedAt: DateTime.now(),
       apartmentNumber: old.apartmentNumber,
+      buildingId: old.buildingId,
+      residentName: old.residentName,
+      residentPhone: old.residentPhone,
+      residentEmail: old.residentEmail,
+      residentProfilePicture: old.residentProfilePicture,
+      creatorName: old.creatorName,
+      attachmentUrl: old.attachmentUrl,
       updates: [...old.updates, update],
     );
     return _tickets[idx];
@@ -1396,6 +1403,13 @@ class MockTicketRepository implements TicketRepository {
       createdAt: old.createdAt,
       updatedAt: DateTime.now(),
       apartmentNumber: old.apartmentNumber,
+      buildingId: old.buildingId,
+      residentName: old.residentName,
+      residentPhone: old.residentPhone,
+      residentEmail: old.residentEmail,
+      residentProfilePicture: old.residentProfilePicture,
+      creatorName: old.creatorName,
+      attachmentUrl: old.attachmentUrl,
       updates: old.updates,
     );
     return _tickets[idx];

@@ -16,11 +16,12 @@ import {
   mergeCreatedAtCursorWhere,
 } from "../utils/listQuery.js";
 
+/** Yönetici akışı: Açık→Onaylandı/Reddedildi; Onaylandı→Yapıldı; Geri Al ters geçişleri. */
 const ALLOWED_STATUS_TRANSITIONS = {
-  OPEN: ["IN_PROGRESS", "RESOLVED", "CLOSED"],
-  IN_PROGRESS: ["RESOLVED", "CLOSED"],
-  RESOLVED: ["CLOSED"],
-  CLOSED: [],
+  OPEN: ["IN_PROGRESS", "CLOSED"],
+  IN_PROGRESS: ["RESOLVED", "OPEN"],
+  RESOLVED: ["IN_PROGRESS"],
+  CLOSED: ["OPEN"],
 };
 
 const UPDATABLE_STATUSES = new Set(["OPEN", "IN_PROGRESS"]);
@@ -299,10 +300,6 @@ export async function changeTicketStatusService(ticketId, managerId, nextStatus)
 
   if (!ticket || ticket.apartment.building.managerId !== managerId) {
     throw new HttpError(404, "Talep bulunamadı.");
-  }
-
-  if (ticket.status === "CLOSED") {
-    throw new HttpError(409, "Kapatılmış talebin durumu değiştirilemez.");
   }
 
   const allowed = ALLOWED_STATUS_TRANSITIONS[ticket.status] ?? [];

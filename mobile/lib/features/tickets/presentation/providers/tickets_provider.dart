@@ -57,12 +57,14 @@ class TicketsState {
 }
 
 class TicketsNotifier extends Notifier<TicketsState> {
-  TicketRepository get _repository => ref.read(ticketRepositoryProvider);  bool _isCreating = false;
+  TicketRepository get _repository => ref.read(ticketRepositoryProvider);
+  bool _isCreating = false;
   bool _isResidentList = true;
   String? _buildingId;
 
   @override
   TicketsState build() => const TicketsState();
+
   Future<void> loadMyTickets({bool refresh = true}) async {
     final effectiveRefresh = refresh || !_isResidentList;
     if (!effectiveRefresh && !state.canLoadMore) return;

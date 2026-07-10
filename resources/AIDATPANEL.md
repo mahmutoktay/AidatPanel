@@ -401,6 +401,17 @@ PATCH  /api/v1/tickets/:id/status
 GET    /api/v1/me/tickets
 ```
 
+**TicketStatus geçişleri** (`PATCH .../status`, yalnızca MANAGER):
+
+| Mevcut | İzin verilen sonraki | UI anlamı |
+|--------|----------------------|-----------|
+| `OPEN` | `IN_PROGRESS`, `CLOSED` | Açık → Onaylandı / Reddedildi |
+| `IN_PROGRESS` | `RESOLVED`, `OPEN` | Onaylandı → Yapıldı / Geri Al |
+| `RESOLVED` | `IN_PROGRESS` | Yapıldı → Geri Al |
+| `CLOSED` | `OPEN` | Reddedildi → Geri Al |
+
+Enum değerleri değişmez; mobil etiketler: Açık / Onaylandı / Yapıldı / Reddedildi.
+
 ### Dekont
 ```
 POST   /api/v1/dekonts/upload

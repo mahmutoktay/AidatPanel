@@ -2416,6 +2416,24 @@ class Translations$features$tickets$en {
 	/// en: 'Create a request here to reach your building manager.'
 	String get residentEmptySubtitle => 'Create a request here to reach your building manager.';
 
+	/// en: 'You have no buildings yet'
+	String get managerNoBuildingsTitle => 'You have no buildings yet';
+
+	/// en: 'Add a building first to see requests.'
+	String get managerNoBuildingsSubtitle => 'Add a building first to see requests.';
+
+	/// en: 'Select a building'
+	String get managerSelectBuildingTitle => 'Select a building';
+
+	/// en: 'Choose a building to view its requests.'
+	String get managerSelectBuildingSubtitle => 'Choose a building to view its requests.';
+
+	/// en: 'No requests match these criteria'
+	String get managerNoMatchingTicketsTitle => 'No requests match these criteria';
+
+	/// en: 'Try changing filters or selecting another building.'
+	String get managerNoMatchingTicketsSubtitle => 'Try changing filters or selecting another building.';
+
 	/// en: 'Title must be at least 3 characters'
 	String get titleTooShort => 'Title must be at least 3 characters';
 
@@ -2425,14 +2443,14 @@ class Translations$features$tickets$en {
 	/// en: 'Open'
 	String get statusOpen => 'Open';
 
-	/// en: 'In progress'
-	String get statusInProgress => 'In progress';
+	/// en: 'Approved'
+	String get statusInProgress => 'Approved';
 
-	/// en: 'Resolved'
-	String get statusResolved => 'Resolved';
+	/// en: 'Done'
+	String get statusResolved => 'Done';
 
-	/// en: 'Closed'
-	String get statusClosed => 'Closed';
+	/// en: 'Rejected'
+	String get statusClosed => 'Rejected';
 
 	/// en: 'REQUEST STATUS'
 	String get statusTrackerTitle => 'REQUEST STATUS';
@@ -2440,26 +2458,26 @@ class Translations$features$tickets$en {
 	/// en: 'Awaiting review'
 	String get statusStepWaiting => 'Awaiting review';
 
-	/// en: 'Management is handling it'
-	String get statusStepInProgress => 'Management is handling it';
+	/// en: 'Approved'
+	String get statusStepInProgress => 'Approved';
 
-	/// en: 'Resolved'
-	String get statusStepResolved => 'Resolved';
+	/// en: 'Done'
+	String get statusStepResolved => 'Done';
 
-	/// en: 'Closed'
-	String get statusStepClosed => 'Closed';
+	/// en: 'Rejected'
+	String get statusStepClosed => 'Rejected';
 
 	/// en: 'Your request is waiting'
 	String get statusHeadlineOpen => 'Your request is waiting';
 
-	/// en: 'Your request is in progress'
-	String get statusHeadlineInProgress => 'Your request is in progress';
+	/// en: 'Your request was approved'
+	String get statusHeadlineInProgress => 'Your request was approved';
 
-	/// en: 'Your request is resolved'
-	String get statusHeadlineResolved => 'Your request is resolved';
+	/// en: 'Your request is done'
+	String get statusHeadlineResolved => 'Your request is done';
 
-	/// en: 'Your request is closed'
-	String get statusHeadlineClosed => 'Your request is closed';
+	/// en: 'Your request was rejected'
+	String get statusHeadlineClosed => 'Your request was rejected';
 
 	/// en: 'Request details'
 	String get detailTitle => 'Request details';
@@ -2488,14 +2506,26 @@ class Translations$features$tickets$en {
 	/// en: 'Note added'
 	String get noteAdded => 'Note added';
 
+	/// en: 'Undo'
+	String get undo => 'Undo';
+
+	/// en: 'Approve'
+	String get actionApprove => 'Approve';
+
+	/// en: 'Reject'
+	String get actionReject => 'Reject';
+
+	/// en: 'Mark as done'
+	String get actionMarkDone => 'Mark as done';
+
 	/// en: 'Could not load requests'
 	String get loadError => 'Could not load requests';
 
-	/// en: 'Cannot add notes to a closed request'
-	String get noteDisabledClosed => 'Cannot add notes to a closed request';
+	/// en: 'Cannot add notes to a rejected or completed request'
+	String get noteDisabledClosed => 'Cannot add notes to a rejected or completed request';
 
-	/// en: 'This request is closed; status cannot be changed.'
-	String get statusClosedHint => 'This request is closed; status cannot be changed.';
+	/// en: 'This request was rejected; status cannot be changed.'
+	String get statusClosedHint => 'This request was rejected; status cannot be changed.';
 
 	/// en: 'Apartment not linked. Please sign in again.'
 	String get apartmentRequired => 'Apartment not linked. Please sign in again.';
@@ -3185,6 +3215,15 @@ class Translations$features$notifications$en {
 
 	/// en: 'Unread'
 	String get filterUnread => 'Unread';
+
+	/// en: 'Read'
+	String get filterRead => 'Read';
+
+	/// en: 'No read notifications'
+	String get emptyReadTitle => 'No read notifications';
+
+	/// en: 'Notifications you have read will appear here'
+	String get emptyReadSubtitle => 'Notifications you have read will appear here';
 
 	/// en: 'Today'
 	String get sectionToday => 'Today';
@@ -5660,21 +5699,27 @@ extension on Translations {
 			'features.tickets.emptySubtitle' => 'You can create your request here',
 			'features.tickets.residentEmptyTitle' => 'You have no requests yet',
 			'features.tickets.residentEmptySubtitle' => 'Create a request here to reach your building manager.',
+			'features.tickets.managerNoBuildingsTitle' => 'You have no buildings yet',
+			'features.tickets.managerNoBuildingsSubtitle' => 'Add a building first to see requests.',
+			'features.tickets.managerSelectBuildingTitle' => 'Select a building',
+			'features.tickets.managerSelectBuildingSubtitle' => 'Choose a building to view its requests.',
+			'features.tickets.managerNoMatchingTicketsTitle' => 'No requests match these criteria',
+			'features.tickets.managerNoMatchingTicketsSubtitle' => 'Try changing filters or selecting another building.',
 			'features.tickets.titleTooShort' => 'Title must be at least 3 characters',
 			'features.tickets.descriptionTooShort' => 'Description must be at least 10 characters',
 			'features.tickets.statusOpen' => 'Open',
-			'features.tickets.statusInProgress' => 'In progress',
-			'features.tickets.statusResolved' => 'Resolved',
-			'features.tickets.statusClosed' => 'Closed',
+			'features.tickets.statusInProgress' => 'Approved',
+			'features.tickets.statusResolved' => 'Done',
+			'features.tickets.statusClosed' => 'Rejected',
 			'features.tickets.statusTrackerTitle' => 'REQUEST STATUS',
 			'features.tickets.statusStepWaiting' => 'Awaiting review',
-			'features.tickets.statusStepInProgress' => 'Management is handling it',
-			'features.tickets.statusStepResolved' => 'Resolved',
-			'features.tickets.statusStepClosed' => 'Closed',
+			'features.tickets.statusStepInProgress' => 'Approved',
+			'features.tickets.statusStepResolved' => 'Done',
+			'features.tickets.statusStepClosed' => 'Rejected',
 			'features.tickets.statusHeadlineOpen' => 'Your request is waiting',
-			'features.tickets.statusHeadlineInProgress' => 'Your request is in progress',
-			'features.tickets.statusHeadlineResolved' => 'Your request is resolved',
-			'features.tickets.statusHeadlineClosed' => 'Your request is closed',
+			'features.tickets.statusHeadlineInProgress' => 'Your request was approved',
+			'features.tickets.statusHeadlineResolved' => 'Your request is done',
+			'features.tickets.statusHeadlineClosed' => 'Your request was rejected',
 			'features.tickets.detailTitle' => 'Request details',
 			'features.tickets.managerTitle' => 'Building requests',
 			'features.tickets.statusLabel' => 'Status',
@@ -5684,9 +5729,13 @@ extension on Translations {
 			'features.tickets.addNote' => 'Add note',
 			'features.tickets.statusUpdated' => 'Status updated',
 			'features.tickets.noteAdded' => 'Note added',
+			'features.tickets.undo' => 'Undo',
+			'features.tickets.actionApprove' => 'Approve',
+			'features.tickets.actionReject' => 'Reject',
+			'features.tickets.actionMarkDone' => 'Mark as done',
 			'features.tickets.loadError' => 'Could not load requests',
-			'features.tickets.noteDisabledClosed' => 'Cannot add notes to a closed request',
-			'features.tickets.statusClosedHint' => 'This request is closed; status cannot be changed.',
+			'features.tickets.noteDisabledClosed' => 'Cannot add notes to a rejected or completed request',
+			'features.tickets.statusClosedHint' => 'This request was rejected; status cannot be changed.',
 			'features.tickets.apartmentRequired' => 'Apartment not linked. Please sign in again.',
 			'features.tickets.managerUpdateLabel' => 'Manager update',
 			'features.tickets.residentUpdateLabel' => 'Your update',
@@ -5795,6 +5844,8 @@ extension on Translations {
 			'features.dekont.paymentDetailsSection' => 'Payment details',
 			'features.dekont.fileSection' => 'File',
 			'features.dekont.filePreview' => 'File preview',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.pdfPreviewHint' => 'Pinch to zoom and scroll to view pages.',
 			'features.dekont.pdfPreviewUnavailable' => 'PDF could not be opened on this device. Use «Share file» below to open it in another app.',
 			'features.dekont.shareFile' => 'Share file',
@@ -5805,8 +5856,6 @@ extension on Translations {
 			'features.dekont.reviewFailed' => 'Review failed',
 			'features.dekont.selectDueForApprove' => 'Select due to approve',
 			'features.dekont.uploadedBy' => 'Uploaded by',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.apartment' => 'Apartment',
 			'features.dekont.amount' => 'Amount',
 			'features.dekont.loadError' => 'Could not load receipts',
@@ -5920,6 +5969,9 @@ extension on Translations {
 			'features.notifications.loadError' => 'Could not load notifications',
 			'features.notifications.filterAll' => 'All',
 			'features.notifications.filterUnread' => 'Unread',
+			'features.notifications.filterRead' => 'Read',
+			'features.notifications.emptyReadTitle' => 'No read notifications',
+			'features.notifications.emptyReadSubtitle' => 'Notifications you have read will appear here',
 			'features.notifications.sectionToday' => 'Today',
 			'features.notifications.sectionYesterday' => 'Yesterday',
 			'features.notifications.sectionThisWeek' => 'This week',

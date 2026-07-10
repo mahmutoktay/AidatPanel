@@ -12,9 +12,7 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
-import '../../../../shared/widgets/premium_filter_button.dart';
-import '../../../../shared/widgets/premium_filter_picker.dart';
-import '../../../../shared/widgets/premium_filter_sheet.dart';
+import '../../../../shared/widgets/sliding_segmented_control.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../providers/notifications_provider.dart';
@@ -23,7 +21,7 @@ import '../utils/notification_time.dart';
 import '../widgets/notification_detail_sheet.dart';
 import '../widgets/notification_list_tile.dart';
 
-enum _NotificationFilter { all, unread }
+enum _NotificationFilter { all, unread, read }
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -102,68 +100,43 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
     );
   }
 
-  String _notificationFilterLabel(BuildContext context, _NotificationFilter filter) {
-    return filter == _NotificationFilter.unread
-        ? context.t.features.notifications.filterUnread
-        : context.t.features.notifications.filterAll;
+  List<NotificationEntity> _visibleItems(List<NotificationEntity> items) {
+    switch (_filter) {
+      case _NotificationFilter.unread:
+        return items.where((n) => !n.isRead).toList();
+      case _NotificationFilter.read:
+        return items.where((n) => n.isRead).toList();
+      case _NotificationFilter.all:
+        return items;
+    }
   }
 
-  Future<void> _openFilterSheet() async {
-    var draftFilter = _filter;
-    final common = context.t.common;
-    final t = context.t.features.notifications;
+  int get _filterIndex {
+    switch (_filter) {
+      case _NotificationFilter.all:
+        return 0;
+      case _NotificationFilter.unread:
+        return 1;
+      case _NotificationFilter.read:
+        return 2;
+    }
+  }
 
-    await PremiumFilterSheet.show(
-      context: context,
-      title: common.filter,
-      applyLabel: common.apply,
-      fieldBuilder: (ctx, setSheetState) {
-        return [
-          PremiumFilterFieldConfig(
-            label: common.status,
-            value: _notificationFilterLabel(ctx, draftFilter),
-            hint: t.filterUnread,
-            icon: Icons.visibility_outlined,
-            onTap: () async {
-              final picked = await showPremiumSingleSelectPicker<_NotificationFilter>(
-                context: ctx,
-                title: common.status,
-                selected: draftFilter,
-                options: [
-                  PremiumFilterPickerOption(
-                    value: _NotificationFilter.unread,
-                    label: t.filterUnread,
-                    icon: Icons.mark_email_unread_outlined,
-                  ),
-                  PremiumFilterPickerOption(
-                    value: _NotificationFilter.all,
-                    label: t.filterAll,
-                    icon: Icons.inbox_outlined,
-                  ),
-                ],
-              );
-              if (picked == null) return;
-              setSheetState(() => draftFilter = picked);
-            },
-          ),
-        ];
-      },
-      onApply: () => setState(() => _filter = draftFilter),
-    );
+  void _onFilterIndexChanged(int index) {
+    final next = switch (index) {
+      0 => _NotificationFilter.all,
+      2 => _NotificationFilter.read,
+      _ => _NotificationFilter.unread,
+    };
+    if (next == _filter) return;
+    setState(() => _filter = next);
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(notificationsNotifierProvider);
     final t = context.t.features.notifications;
-
-    final visible = _filter == _NotificationFilter.unread
-        ? state.items.where((n) => !n.isRead).toList()
-        : state.items;
-
-    final filterLabel = _filter == _NotificationFilter.unread
-        ? t.filterUnread
-        : t.filterAll;
+    final visible = _visibleItems(state.items);
 
     return DashboardSecondaryScaffold(
       title: context.t.common.notifications,
@@ -183,14 +156,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
         header: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            PremiumFilterButton(
-              hasActiveFilters: _filter != _NotificationFilter.unread,
-              onPressed: _openFilterSheet,
-            ),
-            const SizedBox(height: AppSizes.spacingM),
-            DashboardSectionTitle(
-              title: filterLabel,
-              trailing: _CountBadge(count: visible.length),
+            SlidingSegmentedControl(
+              segments: [t.filterAll, t.filterUnread, t.filterRead],
+              selectedIndex: _filterIndex,
+              onChanged: _onFilterIndexChanged,
             ),
             if (state.isLoading && state.items.isNotEmpty) ...[
               const SizedBox(height: AppSizes.spacingS),
@@ -259,17 +228,31 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
     }
 
     if (visible.isEmpty) {
-      final unreadFilter = _filter == _NotificationFilter.unread;
       final t = context.t.features.notifications;
+      final (title, subtitle, icon) = switch (_filter) {
+        _NotificationFilter.unread => (
+            t.emptyUnreadTitle,
+            t.emptyUnreadSubtitle,
+            Icons.mark_email_read_outlined,
+          ),
+        _NotificationFilter.read => (
+            t.emptyReadTitle,
+            t.emptyReadSubtitle,
+            Icons.mark_email_read_outlined,
+          ),
+        _NotificationFilter.all => (
+            t.emptyTitle,
+            t.emptySubtitle,
+            Icons.notifications_none_outlined,
+          ),
+      };
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           EmptyStateWidget(
-            icon: unreadFilter
-                ? Icons.mark_email_read_outlined
-                : Icons.notifications_none_outlined,
-            title: unreadFilter ? t.emptyUnreadTitle : t.emptyTitle,
-            subtitle: unreadFilter ? t.emptyUnreadSubtitle : t.emptySubtitle,
+            icon: icon,
+            title: title,
+            subtitle: subtitle,
           ),
         ],
       );
@@ -347,32 +330,4 @@ class _SectionRow extends _Row {
 class _ItemRow extends _Row {
   final NotificationEntity notification;
   const _ItemRow(this.notification);
-}
-
-class _CountBadge extends StatelessWidget {
-  final int count;
-
-  const _CountBadge({required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.spacingS,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.lineLight),
-      ),
-      child: Text(
-        count.toString(),
-        style: AppTypography.caption.copyWith(
-          color: AppColors.primary,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
 }

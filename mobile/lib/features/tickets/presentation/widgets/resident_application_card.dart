@@ -6,6 +6,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/month_labels.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../utils/ticket_labels.dart';
+import '../utils/ticket_status_style.dart';
 import '../../domain/entities/ticket_entity.dart';
 
 class ResidentApplicationCard extends StatelessWidget {
@@ -20,7 +21,7 @@ class ResidentApplicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _statusColor(ticket.status);
+    final statusColor = ticketStatusColor(ticket.status);
     final date =
         '${ticket.createdAt.day} ${localizedMonthName(context, ticket.createdAt.month)} ${ticket.createdAt.year}';
 
@@ -57,6 +58,8 @@ class ResidentApplicationCard extends StatelessWidget {
                         ticket.description.trim().isNotEmpty
                             ? ticket.description.trim().split('\n').first
                             : ticket.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: AppTypography.body1.copyWith(
                           fontWeight: FontWeight.w800,
                           color: AppColors.textPrimary,
@@ -100,16 +103,4 @@ class ResidentApplicationCard extends StatelessWidget {
     );
   }
 
-  Color _statusColor(TicketStatus status) {
-    switch (status) {
-      case TicketStatus.open:
-        return AppColors.error;
-      case TicketStatus.inProgress:
-        return AppColors.warning;
-      case TicketStatus.resolved:
-        return AppColors.success;
-      case TicketStatus.closed:
-        return AppColors.textSecondary;
-    }
-  }
 }

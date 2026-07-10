@@ -15,7 +15,7 @@ import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../../shared/widgets/premium_filter_picker.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
 import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
-import '../../../dashboard/presentation/utils/manager_dashboard_mapper.dart';
+import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/manager_open_tickets_count_provider.dart';
 import '../providers/tickets_provider.dart';
@@ -39,22 +39,18 @@ class ManagerTicketsScreen extends ConsumerStatefulWidget {
 class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
   final ScrollController _scrollController = ScrollController();
   late DashboardFilterScope _filterScope;
-  String? _localBuildingId;
 
   @override
   void initState() {
     super.initState();
     _filterScope = widget.initialScope;
-    if (widget.initialScope.isBuilding) {
-      _localBuildingId = widget.initialScope.buildingId;
-    }
     attachPaginationScroll(
       _scrollController,
       () => ref.read(ticketsNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(ticketsNotifierProvider).canLoadMore,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) unawaited(_loadForCurrentScope());
+      if (mounted) unawaited(_bootstrap());
     });
   }
 
@@ -64,59 +60,54 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     super.dispose();
   }
 
-  List<BuildingEntity> _scopedBuildings(List<BuildingEntity> buildings) {
-    return ManagerDashboardMapper.filterBuildingsByScope(
-      buildings,
-      siteId: _filterScope.siteId,
-      buildingId: _filterScope.buildingId,
-    );
-  }
-
-  String? _resolveLocalBuildingId(List<BuildingEntity> buildings) {
-    if (_filterScope.isBuilding) return _filterScope.buildingId;
-    final scoped = _scopedBuildings(buildings);
-    if (_localBuildingId != null &&
-        scoped.any((b) => b.id == _localBuildingId)) {
-      return _localBuildingId;
+  /// Talepler yalnızca tek bina ile çalışır; Tümü/Site → somut binaya düşürülür.
+  DashboardFilterScope _normalizeToBuildingScope(
+    DashboardFilterScope scope,
+    List<BuildingEntity> buildings,
+  ) {
+    if (scope.isBuilding &&
+        scope.buildingId != null &&
+        buildings.any((b) => b.id == scope.buildingId)) {
+      return scope;
     }
-    return null;
+    final resolved = resolveScopeBuildingId(scope, buildings);
+    if (resolved != null) {
+      return DashboardFilterScope.building(resolved);
+    }
+    if (buildings.isNotEmpty) {
+      final sorted = [...buildings]..sort((a, b) => a.name.compareTo(b.name));
+      return DashboardFilterScope.building(sorted.first.id);
+    }
+    return scope;
   }
 
-  Future<void> _loadForCurrentScope() async {
+  Future<void> _bootstrap() async {
     final buildings = ref.read(buildingsStoreProvider).value ?? [];
     if (buildings.isEmpty) return;
-    final buildingId = _resolveLocalBuildingId(buildings);
-    if (buildingId == null) {
-      return;
+    final normalized = _normalizeToBuildingScope(_filterScope, buildings);
+    if (normalized != _filterScope) {
+      setState(() => _filterScope = normalized);
     }
-    await _load(buildingId);
+    await _loadCurrentBuilding();
   }
 
-  Future<void> _load(String buildingId) {
-    _localBuildingId = buildingId;
-    return ref
-        .read(ticketsNotifierProvider.notifier)
-        .loadBuildingTickets(buildingId);
+  Future<void> _loadCurrentBuilding() async {
+    final id = _filterScope.buildingId;
+    if (id == null || id.isEmpty) return;
+    await ref.read(ticketsNotifierProvider.notifier).loadBuildingTickets(id);
   }
 
   void _onScopeChanged(DashboardFilterScope scope) {
-    setState(() {
-      _filterScope = scope;
-      if (scope.isBuilding) {
-        _localBuildingId = scope.buildingId;
-      } else {
-        _localBuildingId = null;
-      }
-    });
-    unawaited(_loadForCurrentScope());
+    final buildings = ref.read(buildingsStoreProvider).value ?? [];
+    final normalized = _normalizeToBuildingScope(scope, buildings);
+    setState(() => _filterScope = normalized);
+    unawaited(_loadCurrentBuilding());
   }
 
   Future<void> _openTicket(String ticketId) async {
     await context.push('/tickets/$ticketId');
-    final buildings = ref.read(buildingsStoreProvider).value ?? [];
-    final id = _resolveLocalBuildingId(buildings);
-    if (id != null && mounted) {
-      await _load(id);
+    if (mounted) {
+      await _loadCurrentBuilding();
       ref.invalidate(managerOpenTicketsCountProvider);
     }
   }
@@ -168,12 +159,17 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                   PremiumFilterPickerOption(
                     value: TicketStatus.inProgress,
                     label: TicketStatus.inProgress.label(ctx),
-                    icon: Icons.autorenew_rounded,
+                    icon: Icons.verified_outlined,
+                  ),
+                  PremiumFilterPickerOption(
+                    value: TicketStatus.resolved,
+                    label: TicketStatus.resolved.label(ctx),
+                    icon: Icons.task_alt_rounded,
                   ),
                   PremiumFilterPickerOption(
                     value: TicketStatus.closed,
                     label: TicketStatus.closed.label(ctx),
-                    icon: Icons.check_circle_outline,
+                    icon: Icons.cancel_outlined,
                   ),
                 ],
               );
@@ -199,9 +195,8 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     final state = ref.watch(ticketsNotifierProvider);
     final t = context.t.features.tickets;
     final filtered = _filteredTickets(state.tickets);
-    final buildingId = _resolveLocalBuildingId(buildings);
-    final needsBuildingPick =
-        buildings.isNotEmpty && buildingId == null && !_filterScope.isBuilding;
+    final buildingId = _filterScope.buildingId;
+    final canFilter = buildingId != null && buildingId.isNotEmpty;
 
     return DashboardSecondaryScaffold(
       title: t.managerTitle,
@@ -214,37 +209,50 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                 children: [
                   DashboardBuildingSelector(
                     buildings: buildings,
-                    scope: _filterScope,
-                    includeAllOption: true,
+                    scope: _filterScope.isBuilding
+                        ? _filterScope
+                        : _normalizeToBuildingScope(_filterScope, buildings),
+                    includeAllOption: false,
                     onScopeChanged: _onScopeChanged,
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                   PremiumFilterButton(
                     hasActiveFilters:
                         ref.watch(managerTicketFilterProvider) != null,
-                    onPressed: buildingId == null ? null : _openFilterSheet,
+                    onPressed: canFilter ? _openFilterSheet : null,
                   ),
                 ],
               ),
         list: RefreshIndicator(
-          onRefresh: () async {
-            final id = _resolveLocalBuildingId(
-              ref.read(buildingsStoreProvider).value ?? [],
-            );
-            if (id != null) await _load(id);
-          },
-          child: needsBuildingPick
+          onRefresh: _loadCurrentBuilding,
+          child: buildings.isEmpty
               ? ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: [
                     EmptyStateWidget(
                       icon: Icons.apartment_outlined,
-                      title: context.t.features.notifications.noBuilding,
-                      subtitle: t.emptySubtitle,
+                      title: t.managerNoBuildingsTitle,
+                      subtitle: t.managerNoBuildingsSubtitle,
+                    ),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.spacingL,
+                        ),
+                        child: SizedBox(
+                          height: AppSizes.buttonHeightSecondary,
+                          child: FilledButton(
+                            onPressed: () => context.push(
+                              '/manager-dashboard/add-building',
+                            ),
+                            child: Text(context.t.common.addBuilding),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 )
-              : _buildList(context, state, filtered, buildingId),
+              : _buildList(context, state, filtered),
         ),
       ),
     );
@@ -254,7 +262,6 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     BuildContext context,
     TicketsState state,
     List<TicketEntity> tickets,
-    String? buildingId,
   ) {
     final t = context.t.features.tickets;
     if (state.isLoading && state.tickets.isEmpty) {
@@ -280,7 +287,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                   Text(state.error ?? t.loadError, textAlign: TextAlign.center),
                   const SizedBox(height: AppSizes.spacingM),
                   FilledButton(
-                    onPressed: buildingId == null ? null : () => _load(buildingId),
+                    onPressed: _loadCurrentBuilding,
                     child: Text(context.t.common.tryAgain),
                   ),
                 ],
@@ -297,8 +304,8 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
         children: [
           EmptyStateWidget(
             icon: Icons.support_agent_outlined,
-            title: context.t.features.tickets.emptyTitle,
-            subtitle: context.t.features.tickets.emptySubtitle,
+            title: t.managerNoMatchingTicketsTitle,
+            subtitle: t.managerNoMatchingTicketsSubtitle,
           ),
         ],
       );
