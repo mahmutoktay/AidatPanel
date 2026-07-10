@@ -961,7 +961,7 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	@override String get managerUpdateForResident => 'Yönetimden güncelleme';
 	@override String get quickReplyTemplatesTitle => 'Hızlı yanıt şablonları';
 	@override String get confirmChanges => 'Onayla';
-	@override String get residentInfoTitle => 'Talep sahibi bilgileri';
+	@override String get residentInfoTitle => 'Sakin bilgileri';
 	@override String get defaultResidentName => 'Daire sakin';
 	@override String get apartmentNumberTag => 'Daire {number}';
 	@override String get apartmentInfoMissing => 'Daire bilgisi yok';
@@ -1032,7 +1032,7 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 	@override String get processing => 'Dekont işleniyor…';
 	@override String get viewDekonts => 'Dekontlarım';
 	@override String get breakdownDetails => 'Detaylar';
-	@override String get breakdownBaseDue => 'Baz aidat';
+	@override String get breakdownBaseDue => 'Aylık aidat';
 	@override String get breakdownTotal => 'Toplam';
 	@override String get emptyTitle => 'Henüz dekont yok';
 	@override String get emptySubtitleResident => 'Henüz bir dekontunuz bulunmuyor. Yeni dekont eklemek için sağ üst köşedeki yükleme butonunu kullanabilirsiniz.';
@@ -1534,7 +1534,7 @@ class _Translations$features$buildings$collection$tr implements Translations$fea
 	@override String get accountTitleLabel => 'Alıcı Adı';
 	@override String get accountTitleHint => 'Örn: Ahmet Yılmaz veya Site Yönetimi';
 	@override String get referenceTemplateLabel => 'Havale açıklaması';
-	@override String get referenceTemplateHint => 'Örn: Daire {{number}}';
+	@override String get referenceTemplateHint => 'Örn: Daire 5';
 	@override String get presetsEmpty => 'Henüz kayıtlı tahsilat bilgisi yok';
 	@override String get presetsLoadFailed => 'Öneriler yüklenemedi';
 	@override String get presetBuildingCount => '{count} bina';
@@ -2420,7 +2420,7 @@ extension on TranslationsTr {
 			'features.buildings.collection.accountTitleLabel' => 'Alıcı Adı',
 			'features.buildings.collection.accountTitleHint' => 'Örn: Ahmet Yılmaz veya Site Yönetimi',
 			'features.buildings.collection.referenceTemplateLabel' => 'Havale açıklaması',
-			'features.buildings.collection.referenceTemplateHint' => 'Örn: Daire {{number}}',
+			'features.buildings.collection.referenceTemplateHint' => 'Örn: Daire 5',
 			'features.buildings.collection.presetsEmpty' => 'Henüz kayıtlı tahsilat bilgisi yok',
 			'features.buildings.collection.presetsLoadFailed' => 'Öneriler yüklenemedi',
 			'features.buildings.collection.presetBuildingCount' => '{count} bina',
@@ -2747,7 +2747,7 @@ extension on TranslationsTr {
 			'features.tickets.managerUpdateForResident' => 'Yönetimden güncelleme',
 			'features.tickets.quickReplyTemplatesTitle' => 'Hızlı yanıt şablonları',
 			'features.tickets.confirmChanges' => 'Onayla',
-			'features.tickets.residentInfoTitle' => 'Talep sahibi bilgileri',
+			'features.tickets.residentInfoTitle' => 'Sakin bilgileri',
 			'features.tickets.defaultResidentName' => 'Daire sakin',
 			'features.tickets.apartmentNumberTag' => 'Daire {number}',
 			'features.tickets.apartmentInfoMissing' => 'Daire bilgisi yok',
@@ -2809,7 +2809,7 @@ extension on TranslationsTr {
 			'features.dekont.processing' => 'Dekont işleniyor…',
 			'features.dekont.viewDekonts' => 'Dekontlarım',
 			'features.dekont.breakdownDetails' => 'Detaylar',
-			'features.dekont.breakdownBaseDue' => 'Baz aidat',
+			'features.dekont.breakdownBaseDue' => 'Aylık aidat',
 			'features.dekont.breakdownTotal' => 'Toplam',
 			'features.dekont.emptyTitle' => 'Henüz dekont yok',
 			'features.dekont.emptySubtitleResident' => 'Henüz bir dekontunuz bulunmuyor. Yeni dekont eklemek için sağ üst köşedeki yükleme butonunu kullanabilirsiniz.',

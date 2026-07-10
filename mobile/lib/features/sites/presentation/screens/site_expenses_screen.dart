@@ -8,6 +8,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/month_labels.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/app_confirm_actions.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -72,14 +73,17 @@ class _SiteExpensesScreenState extends ConsumerState<SiteExpensesScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(t.deleteExpenseTitle),
         content: Text(t.deleteExpenseConfirm),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.t.common.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(context.t.common.delete),
+          SizedBox(
+            width: double.maxFinite,
+            child: AppConfirmActions(
+              cancelLabel: context.t.common.cancel,
+              confirmLabel: context.t.common.delete,
+              onCancel: () => Navigator.pop(ctx, false),
+              onConfirm: () => Navigator.pop(ctx, true),
+              dangerConfirm: true,
+            ),
           ),
         ],
       ),
@@ -104,9 +108,10 @@ class _SiteExpensesScreenState extends ConsumerState<SiteExpensesScreen> {
 
     return DashboardSecondaryScaffold(
       title: t.siteExpensesTitle,
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openForm(),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: Text(t.addExpense),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -19,7 +19,7 @@ abstract final class ProfileSettingsUi {
   static const double avatarSizeLarge = 96;
   static const double iconSize = 24;
   static const double rowIconBox = 40;
-  static const double buttonHeight = 52;
+  static const double buttonHeight = AppSizes.buttonHeightSecondary;
   static const double rowHeight = 58;
   static const double radiusMd = 12;
   static const double radiusLg = 16;

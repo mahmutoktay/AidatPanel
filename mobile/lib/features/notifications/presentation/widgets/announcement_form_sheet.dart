@@ -3,15 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/user_error_message.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/providers/navigation_provider.dart';
+import '../../../../shared/widgets/building_picker_sheet.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
+import '../../../dashboard/presentation/providers/dashboard_filter_scope_provider.dart';
+import '../../../sites/data/sites_store.dart';
 import '../providers/notifications_provider.dart';
 
 /// Yönetici duyuru formu → `POST /buildings/:id/announcements` (B5).
@@ -34,6 +37,7 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
   final _formKey = GlobalKey<FormState>();
   final _bodyController = TextEditingController();
   String? _buildingId;
+  bool _initializedDefault = false;
   bool _submitting = false;
 
   @override
@@ -47,6 +51,26 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
     context.push('/manager-dashboard/add-building');
   }
 
+  void _initDefaultBuilding(List<BuildingEntity> buildings) {
+    if (_initializedDefault || buildings.isEmpty) return;
+    _initializedDefault = true;
+
+    final scope = ref.read(dashboardFilterScopeProvider);
+    if (scope.isBuilding &&
+        scope.buildingId != null &&
+        buildings.any((b) => b.id == scope.buildingId)) {
+      _buildingId = scope.buildingId;
+      return;
+    }
+
+    final selectedId = ref.read(selectedBuildingIdProvider);
+    if (selectedId != null && buildings.any((b) => b.id == selectedId)) {
+      _buildingId = selectedId;
+      return;
+    }
+    // Otomatik first yok — kullanıcı picker ile seçer (K6/K11).
+  }
+
   @override
   Widget build(BuildContext context) {
     final buildingsAsync = ref.watch(buildingsStoreProvider);
@@ -56,9 +80,7 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
         buildingsAsync.isLoading && buildings.isEmpty;
     final loadFailed = buildingsAsync.hasError && buildings.isEmpty;
 
-    if (_buildingId == null && buildings.isNotEmpty) {
-      _buildingId = buildings.first.id;
-    }
+    _initDefaultBuilding(buildings);
 
     return Form(
       key: _formKey,
@@ -140,17 +162,22 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
       );
     }
 
+    BuildingEntity? selectedBuilding;
+    if (_buildingId != null) {
+      for (final b in buildings) {
+        if (b.id == _buildingId) {
+          selectedBuilding = b;
+          break;
+        }
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         MinimalPickerField(
           label: context.t.common.buildingName,
-          value: buildings
-              .firstWhere(
-                (b) => b.id == _buildingId,
-                orElse: () => buildings.first,
-              )
-              .name,
+          value: selectedBuilding?.name,
           hint: context.t.common.buildingName,
           icon: Icons.apartment_outlined,
           required: true,
@@ -179,34 +206,29 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
     BuildContext context,
     List<BuildingEntity> buildings,
   ) async {
-    final picked = await PremiumBottomSheetScaffold.show<String>(
-      context: context,
-      builder: (ctx) => PremiumBottomSheetScaffold(
-        title: context.t.common.buildingName,
-        scrollable: true,
-        body: PremiumActionSheetList(
-          children: [
-            for (final b in buildings)
-              PremiumActionSheetTile(
-                icon: Icons.apartment_outlined,
-                label: b.name,
-                subtitle: b.displayAddress,
-                trailing: _buildingId == b.id
-                    ? Icon(Icons.check_rounded, color: AppColors.inkDark)
-                    : null,
-                onTap: () => Navigator.pop(ctx, b.id),
-              ),
-          ],
-        ),
-      ),
+    final sites = ref.read(sitesStoreProvider).value ?? const [];
+    final result = await BuildingPickerSheet.show(
+      context,
+      buildings: buildings,
+      sites: sites,
+      selectedBuildingId: _buildingId,
+      includeAllOption: false,
+      enableSiteGrouping: true,
     );
-    if (picked != null) setState(() => _buildingId = picked);
+    if (result.cancelled || result.buildingId == null) return;
+    setState(() => _buildingId = result.buildingId);
   }
 
   Future<void> _submit() async {
+    if (_buildingId == null) {
+      ref.read(toastProvider.notifier).show(
+            context.t.features.notifications.fieldRequired,
+            type: ToastType.error,
+          );
+      return;
+    }
     if (!_formKey.currentState!.validate()) return;
-    final id = _buildingId;
-    if (id == null) return;
+    final id = _buildingId!;
 
     setState(() => _submitting = true);
     final result = await ref

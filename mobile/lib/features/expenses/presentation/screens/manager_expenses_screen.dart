@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../shared/providers/navigation_provider.dart';
-
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -13,16 +11,17 @@ import '../../../../core/utils/month_labels.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
+import '../../../../shared/widgets/app_confirm_actions.dart';
+import '../../../../shared/widgets/building_selector_provider.dart';
 import '../../../../shared/widgets/dashboard_building_selector.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../../shared/widgets/premium_filter_picker.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
-import '../../../../shared/widgets/building_selector_provider.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
-import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
+import '../../../dashboard/presentation/utils/manager_dashboard_mapper.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../providers/expenses_provider.dart';
 import '../utils/expense_labels.dart';
@@ -43,8 +42,9 @@ class ManagerExpensesScreen extends ConsumerStatefulWidget {
 
 class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
   final ScrollController _scrollController = ScrollController();
-  String? _lastRequestedBuildingId;
-  String? _pendingSyncBuildingId;
+  late DashboardFilterScope _filterScope;
+  String? _localBuildingId;
+  String? _lastLoadedBuildingId;
   late int _month;
   late int _year;
 
@@ -54,19 +54,17 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     final now = DateTime.now();
     _month = now.month;
     _year = now.year;
+    _filterScope = widget.initialScope;
+    if (widget.initialScope.isBuilding) {
+      _localBuildingId = widget.initialScope.buildingId;
+    }
     attachPaginationScroll(
       _scrollController,
       () => ref.read(expensesNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(expensesNotifierProvider).canLoadMore,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final buildings = ref.read(buildingsStoreProvider).value ?? const [];
-      final buildingId =
-          resolveScopeBuildingId(widget.initialScope, buildings);
-      if (buildingId != null) {
-        ref.read(selectedBuildingIdProvider.notifier).select(buildingId);
-      }
+      if (mounted) unawaited(_loadForCurrentScope());
     });
   }
 
@@ -76,63 +74,72 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     super.dispose();
   }
 
-  void _syncSelectedBuildingAndLoad(
-    List<BuildingEntity> buildings,
-    String? selectedBuildingId,
-  ) {
+  List<BuildingEntity> _scopedBuildings(List<BuildingEntity> buildings) {
+    return ManagerDashboardMapper.filterBuildingsByScope(
+      buildings,
+      siteId: _filterScope.siteId,
+      buildingId: _filterScope.buildingId,
+    );
+  }
+
+  String? _resolveLocalBuildingId(List<BuildingEntity> buildings) {
+    if (_filterScope.isBuilding) return _filterScope.buildingId;
+    final scoped = _scopedBuildings(buildings);
+    if (_localBuildingId != null &&
+        scoped.any((b) => b.id == _localBuildingId)) {
+      return _localBuildingId;
+    }
+    return null;
+  }
+
+  Future<void> _loadForCurrentScope() async {
+    final buildings = ref.read(buildingsStoreProvider).value ?? [];
     if (buildings.isEmpty) return;
 
-    final selectedExists =
-        selectedBuildingId != null &&
-        buildings.any((building) => building.id == selectedBuildingId);
-    final effectiveId = selectedExists
-        ? selectedBuildingId
-        : buildings.first.id;
-
-    if (_lastRequestedBuildingId == effectiveId && selectedExists) return;
-    if (_pendingSyncBuildingId == effectiveId) return;
-
-    _pendingSyncBuildingId = effectiveId;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _pendingSyncBuildingId = null;
-      if (!mounted) return;
-
-      final latestBuildings = ref.read(buildingsStoreProvider).value ?? [];
-      if (latestBuildings.isEmpty) return;
-
-      final latestSelectedId = ref.read(selectedBuildingIdProvider);
-      final latestSelectedExists =
-          latestSelectedId != null &&
-          latestBuildings.any((building) => building.id == latestSelectedId);
-      final id = latestSelectedExists
-          ? latestSelectedId
-          : latestBuildings.first.id;
-
-      if (!latestSelectedExists) {
-        ref.read(selectedBuildingIdProvider.notifier).select(id);
-      }
-      if (_lastRequestedBuildingId == id) return;
-
-      _lastRequestedBuildingId = id;
-      unawaited(_loadBuilding(id));
-    });
+    final buildingId = _resolveLocalBuildingId(buildings);
+    if (buildingId == null) {
+      _lastLoadedBuildingId = null;
+      return;
+    }
+    if (_lastLoadedBuildingId == buildingId) {
+      await _loadBuilding(buildingId);
+      return;
+    }
+    await _loadBuilding(buildingId);
   }
 
   Future<void> _loadBuilding(String buildingId) {
-    _lastRequestedBuildingId = buildingId;
+    _lastLoadedBuildingId = buildingId;
+    _localBuildingId = buildingId;
     return ref
         .read(expensesNotifierProvider.notifier)
         .load(buildingId, month: _month, year: _year);
   }
 
   Future<void> _load() async {
-    final id = ref.read(selectedBuildingIdProvider);
+    final buildings = ref.read(buildingsStoreProvider).value ?? [];
+    final id = _resolveLocalBuildingId(buildings);
     if (id == null) return;
     await _loadBuilding(id);
   }
 
+  void _onScopeChanged(DashboardFilterScope scope) {
+    setState(() {
+      _filterScope = scope;
+      if (scope.isBuilding) {
+        _localBuildingId = scope.buildingId;
+      } else {
+        // Site/Tümü: üst ekranı bozmadan yerel bina seçimini temizle.
+        _localBuildingId = null;
+        _lastLoadedBuildingId = null;
+      }
+    });
+    unawaited(_loadForCurrentScope());
+  }
+
   Future<void> _openForm({ExpenseEntity? expense}) async {
-    final id = ref.read(selectedBuildingIdProvider);
+    final buildings = ref.read(buildingsStoreProvider).value ?? [];
+    final id = _resolveLocalBuildingId(buildings);
     if (id == null) return;
     final ok = await context.push<bool>(
       '/manager-dashboard/expenses/form?buildingId=${Uri.encodeComponent(id)}',
@@ -148,14 +155,17 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(t.deleteTitle),
         content: Text(t.deleteConfirm),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.t.common.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(t.deleteAction),
+          SizedBox(
+            width: double.maxFinite,
+            child: AppConfirmActions(
+              cancelLabel: context.t.common.cancel,
+              confirmLabel: t.deleteAction,
+              onCancel: () => Navigator.pop(ctx, false),
+              onConfirm: () => Navigator.pop(ctx, true),
+              dangerConfirm: true,
+            ),
           ),
         ],
       ),
@@ -252,39 +262,38 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     final buildings = ref.watch(buildingsStoreProvider).value ?? [];
     final state = ref.watch(expensesNotifierProvider);
     final t = context.t.features.expenses;
-
-    final buildingId = ref.watch(selectedBuildingIdProvider);
-    _syncSelectedBuildingAndLoad(buildings, buildingId);
+    final buildingId = _resolveLocalBuildingId(buildings);
+    final needsBuildingPick =
+        buildings.isNotEmpty && buildingId == null && !_filterScope.isBuilding;
 
     return DashboardSecondaryScaffold(
       title: t.title,
       showNotificationAction: true,
-      actions: [
-        IconButton(
-          icon: Icon(Icons.add, color: AppColors.inkDark),
-          onPressed: buildingId == null ? null : () => _openForm(),
-        ),
-      ],
+      floatingActionButton: buildingId == null
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () => _openForm(),
+              icon: const Icon(Icons.add),
+              label: Text(t.createTitle),
+            ),
       body: DashboardListScreenBody(
         header: buildings.isEmpty
             ? null
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  DashboardSingleBuildingSelector(
+                  DashboardBuildingSelector(
                     buildings: buildings,
-                    selectedBuildingId: buildingId,
-                    onSelected: (id) {
-                      ref.read(selectedBuildingIdProvider.notifier).select(id);
-                      unawaited(_load());
-                    },
+                    scope: _filterScope,
+                    includeAllOption: true,
+                    onScopeChanged: _onScopeChanged,
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                   PremiumFilterButton(
                     hasActiveFilters: _hasNonDefaultPeriod,
-                    onPressed: _openFilterSheet,
+                    onPressed: buildingId == null ? null : _openFilterSheet,
                   ),
-                  if (state.summary != null) ...[
+                  if (state.summary != null && buildingId != null) ...[
                     const SizedBox(height: AppSizes.spacingM),
                     _SummaryCard(summary: state.summary!),
                   ],
@@ -292,7 +301,18 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
               ),
         list: RefreshIndicator(
           onRefresh: _load,
-          child: _buildList(context, state),
+          child: needsBuildingPick
+              ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    EmptyStateWidget(
+                      icon: Icons.apartment_outlined,
+                      title: context.t.features.notifications.noBuilding,
+                      subtitle: t.emptySubtitle,
+                    ),
+                  ],
+                )
+              : _buildList(context, state),
         ),
       ),
     );

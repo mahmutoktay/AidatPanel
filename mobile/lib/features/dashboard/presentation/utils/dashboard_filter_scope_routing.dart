@@ -45,6 +45,11 @@ String overdueApartmentsPath(DashboardFilterScope scope) {
   return '/manager-dashboard/overdue-apartments${_scopeQuery(scope)}';
 }
 
+/// Ana Sayfa scope'unu yönetici dekont listesine kodlar.
+String dekontsPath(DashboardFilterScope scope) {
+  return '/manager-dashboard/dekonts${_scopeQuery(scope)}';
+}
+
 /// Route query parametrelerinden başlangıç scope'unu çözer (aidat işlemleri).
 DashboardFilterScope dueTransactionsScopeFromQuery(Map<String, String> query) =>
     dashboardFilterScopeFromQuery(query);

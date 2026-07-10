@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/app_confirm_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/apartments_store.dart';
 import '../../domain/entities/apartment_entity.dart';
@@ -141,47 +142,23 @@ class _DeleteApartmentDialogState extends ConsumerState<DeleteApartmentDialog> {
           ),
         ],
       ),
+      actionsPadding: const EdgeInsets.fromLTRB(
+        AppSizes.spacingL,
+        0,
+        AppSizes.spacingL,
+        AppSizes.spacingM,
+      ),
       actions: [
-        OutlinedButton(
-          onPressed: _deleting ? null : () => Navigator.of(context).pop(false),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.textPrimary,
-            side: AppColors.cardBorderSide,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            minimumSize: const Size(48, 48),
+        SizedBox(
+          width: double.maxFinite,
+          child: AppConfirmActions(
+            cancelLabel: context.t.common.cancelBtn,
+            confirmLabel: context.t.common.delete,
+            onCancel: _deleting ? null : () => Navigator.of(context).pop(false),
+            onConfirm: _deleting ? null : _delete,
+            confirmLoading: _deleting,
+            dangerConfirm: true,
           ),
-          child: Text(
-            context.t.common.cancelBtn,
-            style: AppTypography.button.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        ElevatedButton.icon(
-          onPressed: _deleting ? null : _delete,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.error,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(48, 48),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.spacingL,
-              vertical: AppSizes.spacingS,
-            ),
-          ),
-          icon: _deleting
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : const Icon(Icons.delete_outline, size: 20),
-          label: Text(context.t.common.delete),
         ),
       ],
     );

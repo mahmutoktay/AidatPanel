@@ -74,11 +74,15 @@ class DuesRepositoryImpl implements DuesRepository {
     required String dueId,
     required DueStatus status,
   }) async {
+    // Kural 2: Yalnızca "Ödendi" manuel işaretlenebilir.
+    if (status != DueStatus.paid) {
+      throw ApiException(message: 'due_status_update_failed');
+    }
     try {
       final model = await _remoteDataSource.updateDueStatus(
         buildingId: buildingId,
         dueId: dueId,
-        status: _toApiStatus(status),
+        status: 'PAID',
       );
       return model.toEntity();
     } on ApiException {

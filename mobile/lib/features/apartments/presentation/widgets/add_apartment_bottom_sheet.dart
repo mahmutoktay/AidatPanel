@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
+import '../../../../shared/widgets/number_grid_selector.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/apartments_store.dart';
@@ -35,13 +37,16 @@ class AddApartmentBottomSheet extends ConsumerStatefulWidget {
 class _AddApartmentBottomSheetState extends ConsumerState<AddApartmentBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _numberController = TextEditingController();
-  final _floorController = TextEditingController();
+  int? _floor;
   bool _saving = false;
+
+  static const int _floorMin = -5;
+  static const int _floorQuickMax = 15;
+  static const int _floorManualMax = 200;
 
   @override
   void dispose() {
     _numberController.dispose();
-    _floorController.dispose();
     super.dispose();
   }
 
@@ -50,13 +55,11 @@ class _AddApartmentBottomSheetState extends ConsumerState<AddApartmentBottomShee
     setState(() => _saving = true);
 
     final number = _numberController.text.trim();
-    final floorRaw = _floorController.text.trim();
-    final floor = floorRaw.isEmpty ? null : int.tryParse(floorRaw);
 
     try {
       await ref
           .read(apartmentsStoreProvider(widget.buildingId).notifier)
-          .addApartment(number: number, floor: floor);
+          .addApartment(number: number, floor: _floor);
       if (!mounted) return;
       Navigator.of(context).pop();
       ref.read(toastProvider.notifier).show(
@@ -88,7 +91,7 @@ class _AddApartmentBottomSheetState extends ConsumerState<AddApartmentBottomShee
       key: _formKey,
       child: PremiumBottomSheetScaffold(
         title: t.addApartment,
-        scrollable: false,
+        scrollable: true,
         body: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -103,23 +106,22 @@ class _AddApartmentBottomSheetState extends ConsumerState<AddApartmentBottomShee
                   v == null || v.trim().isEmpty ? t.fieldRequired : null,
             ),
             const SizedBox(height: AppSizes.spacingM),
-            MinimalTextField(
-              controller: _floorController,
-              label: t.floorOptional,
-              icon: Icons.stairs_outlined,
-              enabled: !_saving,
-              keyboardType:
-                  const TextInputType.numberWithOptions(signed: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^-?\d*')),
-              ],
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return null;
-                final n = int.tryParse(v.trim());
-                if (n == null) return t.fieldRequired;
-                if (n < -5 || n > 200) return t.fieldRequired;
-                return null;
-              },
+            Text(
+              t.floorOptional,
+              style: AppTypography.body2.copyWith(
+                color: AppColors.inkDark,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: AppSizes.spacingS),
+            NumberGridSelector(
+              min: _floorMin,
+              maxQuickPick: _floorQuickMax,
+              gridColumns: 5,
+              manualMax: _floorManualMax,
+              selected: _floor,
+              onQuickPick: (value) => setState(() => _floor = value),
+              onManualConfirm: (value) => setState(() => _floor = value),
             ),
           ],
         ),

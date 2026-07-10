@@ -28,6 +28,15 @@ class AppTypography {
     letterSpacing: 0.2,
   );
 
+  /// Liste/sekme bölüm başlığı (Binalar, Siteler, Sakinler).
+  static const TextStyle sectionTitle = TextStyle(
+    fontSize: 22,
+    fontWeight: FontWeight.w800,
+    height: 1.25,
+    fontFamily: fontFamily,
+    letterSpacing: 0.2,
+  );
+
   static const TextStyle h4 = TextStyle(
     fontSize: 16, // -2
     fontWeight: FontWeight.w700,

@@ -2,6 +2,7 @@ import 'dart:math' show max, min;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
@@ -491,6 +492,13 @@ class _BuildingResidentsScreenState
                       onToggleSelection: _toggleApartmentSelection,
                       onShowDetails: () =>
                           ApartmentDetailsSheet.show(context, apt: apt),
+                      onInvite: apt.isOccupied
+                          ? null
+                          : () => context.push(
+                                '/manager-dashboard/invite-code'
+                                '?buildingId=${apt.buildingId}'
+                                '&apartmentId=${apt.id}',
+                              ),
                     );
                   },
                 ),
@@ -511,10 +519,8 @@ class _BuildingResidentsScreenState
       children: [
         Text(
           context.t.common.residents,
-          style: AppTypography.h3.copyWith(
+          style: AppTypography.sectionTitle.copyWith(
             color: AppColors.inkDark,
-            fontWeight: FontWeight.w800,
-            fontSize: 22,
           ),
         ),
         const SizedBox(width: AppSizes.spacingS),

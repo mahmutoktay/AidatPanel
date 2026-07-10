@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -49,12 +50,13 @@ class ExpenseListItemCard extends StatelessWidget {
     final date =
         '${expense.date.day}.${expense.date.month}.${expense.date.year}';
     final categoryColor = AppColors.primary;
-    final showMenu = onEdit != null || onDelete != null;
+    final canSwipe = onEdit != null || onDelete != null;
 
-    return Material(
+    final card = Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap ?? () => context.push('/expenses/${expense.id}', extra: expense),
+        onTap: onTap ??
+            () => context.push('/expenses/${expense.id}', extra: expense),
         borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
         child: Ink(
           decoration: DashboardScreenStyle.whiteCard().copyWith(
@@ -130,34 +132,43 @@ class ExpenseListItemCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (showMenu)
-                  PopupMenuButton<String>(
-                    icon: Icon(
-                      Icons.more_vert,
-                      color: AppColors.textDisabled,
-                    ),
-                    onSelected: (v) {
-                      if (v == 'edit') onEdit?.call();
-                      if (v == 'delete') onDelete?.call();
-                    },
-                    itemBuilder: (ctx) => [
-                      if (onEdit != null)
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Text(context.t.features.expenses.editAction),
-                        ),
-                      if (onDelete != null)
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Text(context.t.features.expenses.deleteAction),
-                        ),
-                    ],
-                  ),
               ],
             ),
           ),
         ),
       ),
+    );
+
+    if (!canSwipe) return card;
+
+    final t = context.t.features.expenses;
+    return Slidable(
+      key: ValueKey<String>(expense.id),
+      endActionPane: ActionPane(
+        motion: const BehindMotion(),
+        extentRatio: onEdit != null && onDelete != null ? 0.5 : 0.34,
+        children: [
+          if (onEdit != null)
+            SlidableAction(
+              onPressed: (_) => onEdit!(),
+              backgroundColor: AppColors.statusBlue,
+              foregroundColor: Colors.white,
+              icon: Icons.edit_outlined,
+              label: t.editAction,
+              borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+            ),
+          if (onDelete != null)
+            SlidableAction(
+              onPressed: (_) => onDelete!(),
+              backgroundColor: AppColors.statusRed,
+              foregroundColor: Colors.white,
+              icon: Icons.delete_outline,
+              label: t.deleteAction,
+              borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+            ),
+        ],
+      ),
+      child: card,
     );
   }
 }

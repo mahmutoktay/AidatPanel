@@ -8,6 +8,7 @@ import '../../../../core/utils/app_date_format.dart';
 import '../../../../core/utils/app_intl_locale.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../domain/entities/due_transaction_entity.dart';
+import 'due_transaction_status_chip.dart';
 
 class DueTransactionTile extends StatelessWidget {
   final DueTransactionEntity transaction;
@@ -73,17 +74,13 @@ class DueTransactionTile extends StatelessWidget {
                       spacing: 6,
                       runSpacing: 6,
                       children: [
-                        _Chip(
-                          label: transaction.source == DueTransactionSource.receipt
-                              ? t.sourceReceipt
-                              : t.sourceManual,
-                          background: AppColors.infoBg,
-                          color: AppColors.chartBlue,
+                        DueTransactionStatusChip.source(
+                          context,
+                          transaction.source,
                         ),
-                        _Chip(
-                          label: _statusLabel(t),
-                          background: _statusBackground(),
-                          color: _statusColor(),
+                        DueTransactionStatusChip.status(
+                          context,
+                          transaction.status,
                         ),
                       ],
                     ),
@@ -127,68 +124,5 @@ class DueTransactionTile extends StatelessWidget {
     );
     return date;
   }
-
-  String _statusLabel(dynamic t) {
-    switch (transaction.status) {
-      case DueTransactionStatus.pending:
-        return t.statusPending;
-      case DueTransactionStatus.rejected:
-        return t.statusRejected;
-      case DueTransactionStatus.approved:
-        return t.statusApproved;
-    }
-  }
-
-  Color _statusBackground() {
-    switch (transaction.status) {
-      case DueTransactionStatus.pending:
-        return AppColors.warningBg;
-      case DueTransactionStatus.rejected:
-        return AppColors.errorBg;
-      case DueTransactionStatus.approved:
-        return AppColors.successBg;
-    }
-  }
-
-  Color _statusColor() {
-    switch (transaction.status) {
-      case DueTransactionStatus.pending:
-        return AppColors.chartOrange;
-      case DueTransactionStatus.rejected:
-        return AppColors.chartRed;
-      case DueTransactionStatus.approved:
-        return AppColors.chartGreen;
-    }
-  }
 }
 
-class _Chip extends StatelessWidget {
-  final String label;
-  final Color background;
-  final Color color;
-
-  const _Chip({
-    required this.label,
-    required this.background,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        label,
-        style: AppTypography.caption.copyWith(
-          color: color,
-          fontWeight: FontWeight.w700,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-}

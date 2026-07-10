@@ -218,51 +218,57 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               },
             ),
             const SizedBox(height: AppSizes.spacingFieldSpacing),
-            ElevatedButton(
-              onPressed: authState.isLoading
-                  ? null
-                  : () => _handleLogin(context),
-              style: ProfileSettingsUi.primaryButton,
-              child: authState.isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Text(context.t.features.auth.login),
+            SizedBox(
+              width: double.infinity,
+              height: AppSizes.buttonHeightSecondary,
+              child: FilledButton(
+                onPressed: authState.isLoading
+                    ? null
+                    : () => _handleLogin(context),
+                child: authState.isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(context.t.features.auth.login),
+              ),
             ),
-            const SizedBox(height: AppSizes.spacingXS),
-            OutlinedButton.icon(
-              onPressed: authState.isLoading ? null : _toggleLoginMode,
-              icon: Icon(
-                _usePhoneLogin
-                    ? Icons.email_outlined
-                    : Icons.phone_iphone_outlined,
-                size: 20,
-              ),
-              label: Text(
-                _usePhoneLogin
-                    ? context.t.features.auth.emailLogin
-                    : context.t.features.auth.phoneLogin,
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.inkDark,
-                backgroundColor: AppColors.surface,
-                side: BorderSide(
-                  color: AppColors.lineLight,
-                  width: 1,
+            const SizedBox(height: AppSizes.spacingS),
+            SizedBox(
+              width: double.infinity,
+              height: AppSizes.buttonHeightSecondary,
+              child: OutlinedButton.icon(
+                onPressed: authState.isLoading ? null : _toggleLoginMode,
+                icon: Icon(
+                  _usePhoneLogin
+                      ? Icons.email_outlined
+                      : Icons.phone_iphone_outlined,
+                  size: 20,
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    AppSizes.cardRadius,
+                label: Text(
+                  _usePhoneLogin
+                      ? context.t.features.auth.emailLogin
+                      : context.t.features.auth.phoneLogin,
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.inkDark,
+                  backgroundColor: AppColors.surface,
+                  side: BorderSide(
+                    color: AppColors.lineLight,
+                    width: 1,
                   ),
-                ),
-                textStyle: AppTypography.body1.copyWith(
-                  fontWeight: FontWeight.w600,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      AppSizes.buttonRadius,
+                    ),
+                  ),
+                  textStyle: AppTypography.body1.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),

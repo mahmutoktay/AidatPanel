@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/app_confirm_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/apartments_store.dart';
 import '../../domain/entities/apartment_entity.dart';
@@ -188,47 +189,23 @@ class _RemoveResidentDialogState extends ConsumerState<RemoveResidentDialog> {
           ),
         ],
       ),
+      actionsPadding: const EdgeInsets.fromLTRB(
+        AppSizes.spacingL,
+        0,
+        AppSizes.spacingL,
+        AppSizes.spacingM,
+      ),
       actions: [
-        OutlinedButton(
-          onPressed: _removing ? null : () => Navigator.of(context).pop(false),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.textPrimary,
-            side: AppColors.cardBorderSide,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            minimumSize: const Size(48, 48),
+        SizedBox(
+          width: double.maxFinite,
+          child: AppConfirmActions(
+            cancelLabel: context.t.common.cancelBtn,
+            confirmLabel: context.t.common.remove,
+            onCancel: _removing ? null : () => Navigator.of(context).pop(false),
+            onConfirm: _removing ? null : _remove,
+            confirmLoading: _removing,
+            dangerConfirm: true,
           ),
-          child: Text(
-            context.t.common.cancelBtn,
-            style: AppTypography.button.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        ElevatedButton.icon(
-          onPressed: _removing ? null : _remove,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.warning,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(48, 48),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.spacingL,
-              vertical: AppSizes.spacingS,
-            ),
-          ),
-          icon: _removing
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : const Icon(Icons.person_remove_outlined, size: 20),
-          label: Text(context.t.common.remove),
         ),
       ],
     );

@@ -48,10 +48,11 @@ class _NumberGridSelectorState extends State<NumberGridSelector> {
     setState(() {
       _showManual = true;
       _manualError = null;
-      _manualController.text =
-          widget.selected != null && widget.selected! > widget.maxQuickPick
-              ? '${widget.selected}'
-              : '';
+      final selected = widget.selected;
+      _manualController.text = selected != null &&
+              (selected > widget.maxQuickPick || selected < widget.min)
+          ? '$selected'
+          : '';
     });
   }
 
@@ -111,7 +112,8 @@ class _NumberGridSelectorState extends State<NumberGridSelector> {
       );
     }
 
-    final itemCount = widget.maxQuickPick + 1;
+    final quickCount = widget.maxQuickPick - widget.min + 1;
+    final itemCount = quickCount + 1;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -123,12 +125,14 @@ class _NumberGridSelectorState extends State<NumberGridSelector> {
       ),
       itemCount: itemCount,
       itemBuilder: (_, index) {
-        final isMore = index == widget.maxQuickPick;
+        final isMore = index == quickCount;
         if (isMore) {
+          final selected = widget.selected;
+          final moreSelected = selected != null &&
+              (selected > widget.maxQuickPick || selected < widget.min);
           return _GridCell(
             label: context.t.common.wizardMore,
-            selected: widget.selected != null &&
-                widget.selected! > widget.maxQuickPick,
+            selected: moreSelected,
             onTap: _onMoreTap,
             isMore: true,
           );

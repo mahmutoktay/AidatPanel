@@ -4,20 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../shared/providers/navigation_provider.dart';
-
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/building_selector_provider.dart';
 import '../../../../shared/widgets/dashboard_building_selector.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../../shared/widgets/premium_filter_picker.dart';
-import '../../../../shared/widgets/building_selector_provider.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
 import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
-import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
+import '../../../dashboard/presentation/utils/manager_dashboard_mapper.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/manager_open_tickets_count_provider.dart';
 import '../providers/tickets_provider.dart';
@@ -40,25 +38,23 @@ class ManagerTicketsScreen extends ConsumerStatefulWidget {
 
 class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
   final ScrollController _scrollController = ScrollController();
-  String? _lastRequestedBuildingId;
-  String? _pendingSyncBuildingId;
+  late DashboardFilterScope _filterScope;
+  String? _localBuildingId;
 
   @override
   void initState() {
     super.initState();
+    _filterScope = widget.initialScope;
+    if (widget.initialScope.isBuilding) {
+      _localBuildingId = widget.initialScope.buildingId;
+    }
     attachPaginationScroll(
       _scrollController,
       () => ref.read(ticketsNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(ticketsNotifierProvider).canLoadMore,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final buildings = ref.read(buildingsStoreProvider).value ?? const [];
-      final buildingId =
-          resolveScopeBuildingId(widget.initialScope, buildings);
-      if (buildingId != null) {
-        ref.read(selectedBuildingIdProvider.notifier).select(buildingId);
-      }
+      if (mounted) unawaited(_loadForCurrentScope());
     });
   }
 
@@ -68,58 +64,57 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     super.dispose();
   }
 
-  void _syncSelectedBuildingAndLoad(
-    List<BuildingEntity> buildings,
-    String? selectedBuildingId,
-  ) {
+  List<BuildingEntity> _scopedBuildings(List<BuildingEntity> buildings) {
+    return ManagerDashboardMapper.filterBuildingsByScope(
+      buildings,
+      siteId: _filterScope.siteId,
+      buildingId: _filterScope.buildingId,
+    );
+  }
+
+  String? _resolveLocalBuildingId(List<BuildingEntity> buildings) {
+    if (_filterScope.isBuilding) return _filterScope.buildingId;
+    final scoped = _scopedBuildings(buildings);
+    if (_localBuildingId != null &&
+        scoped.any((b) => b.id == _localBuildingId)) {
+      return _localBuildingId;
+    }
+    return null;
+  }
+
+  Future<void> _loadForCurrentScope() async {
+    final buildings = ref.read(buildingsStoreProvider).value ?? [];
     if (buildings.isEmpty) return;
-
-    final selectedExists =
-        selectedBuildingId != null &&
-        buildings.any((building) => building.id == selectedBuildingId);
-    final effectiveId = selectedExists
-        ? selectedBuildingId
-        : buildings.first.id;
-
-    if (_lastRequestedBuildingId == effectiveId && selectedExists) return;
-    if (_pendingSyncBuildingId == effectiveId) return;
-
-    _pendingSyncBuildingId = effectiveId;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _pendingSyncBuildingId = null;
-      if (!mounted) return;
-
-      final latestBuildings = ref.read(buildingsStoreProvider).value ?? [];
-      if (latestBuildings.isEmpty) return;
-
-      final latestSelectedId = ref.read(selectedBuildingIdProvider);
-      final latestSelectedExists =
-          latestSelectedId != null &&
-          latestBuildings.any((building) => building.id == latestSelectedId);
-      final id = latestSelectedExists
-          ? latestSelectedId
-          : latestBuildings.first.id;
-
-      if (!latestSelectedExists) {
-        ref.read(selectedBuildingIdProvider.notifier).select(id);
-      }
-      if (_lastRequestedBuildingId == id) return;
-
-      _lastRequestedBuildingId = id;
-      unawaited(_load(id));
-    });
+    final buildingId = _resolveLocalBuildingId(buildings);
+    if (buildingId == null) {
+      return;
+    }
+    await _load(buildingId);
   }
 
   Future<void> _load(String buildingId) {
-    _lastRequestedBuildingId = buildingId;
+    _localBuildingId = buildingId;
     return ref
         .read(ticketsNotifierProvider.notifier)
         .loadBuildingTickets(buildingId);
   }
 
+  void _onScopeChanged(DashboardFilterScope scope) {
+    setState(() {
+      _filterScope = scope;
+      if (scope.isBuilding) {
+        _localBuildingId = scope.buildingId;
+      } else {
+        _localBuildingId = null;
+      }
+    });
+    unawaited(_loadForCurrentScope());
+  }
+
   Future<void> _openTicket(String ticketId) async {
     await context.push('/tickets/$ticketId');
-    final id = ref.read(selectedBuildingIdProvider);
+    final buildings = ref.read(buildingsStoreProvider).value ?? [];
+    final id = _resolveLocalBuildingId(buildings);
     if (id != null && mounted) {
       await _load(id);
       ref.invalidate(managerOpenTicketsCountProvider);
@@ -204,9 +199,9 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     final state = ref.watch(ticketsNotifierProvider);
     final t = context.t.features.tickets;
     final filtered = _filteredTickets(state.tickets);
-
-    final buildingId = ref.watch(selectedBuildingIdProvider);
-    _syncSelectedBuildingAndLoad(buildings, buildingId);
+    final buildingId = _resolveLocalBuildingId(buildings);
+    final needsBuildingPick =
+        buildings.isNotEmpty && buildingId == null && !_filterScope.isBuilding;
 
     return DashboardSecondaryScaffold(
       title: t.managerTitle,
@@ -217,28 +212,39 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  DashboardSingleBuildingSelector(
+                  DashboardBuildingSelector(
                     buildings: buildings,
-                    selectedBuildingId: buildingId,
-                    onSelected: (id) {
-                      ref.read(selectedBuildingIdProvider.notifier).select(id);
-                      unawaited(_load(id));
-                    },
+                    scope: _filterScope,
+                    includeAllOption: true,
+                    onScopeChanged: _onScopeChanged,
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                   PremiumFilterButton(
                     hasActiveFilters:
                         ref.watch(managerTicketFilterProvider) != null,
-                    onPressed: _openFilterSheet,
+                    onPressed: buildingId == null ? null : _openFilterSheet,
                   ),
                 ],
               ),
         list: RefreshIndicator(
           onRefresh: () async {
-            final id = ref.read(selectedBuildingIdProvider);
+            final id = _resolveLocalBuildingId(
+              ref.read(buildingsStoreProvider).value ?? [],
+            );
             if (id != null) await _load(id);
           },
-          child: _buildList(context, state, filtered),
+          child: needsBuildingPick
+              ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    EmptyStateWidget(
+                      icon: Icons.apartment_outlined,
+                      title: context.t.features.notifications.noBuilding,
+                      subtitle: t.emptySubtitle,
+                    ),
+                  ],
+                )
+              : _buildList(context, state, filtered, buildingId),
         ),
       ),
     );
@@ -248,6 +254,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     BuildContext context,
     TicketsState state,
     List<TicketEntity> tickets,
+    String? buildingId,
   ) {
     final t = context.t.features.tickets;
     if (state.isLoading && state.tickets.isEmpty) {
@@ -273,10 +280,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                   Text(state.error ?? t.loadError, textAlign: TextAlign.center),
                   const SizedBox(height: AppSizes.spacingM),
                   FilledButton(
-                    onPressed: () {
-                      final id = ref.read(selectedBuildingIdProvider);
-                      if (id != null) _load(id);
-                    },
+                    onPressed: buildingId == null ? null : () => _load(buildingId),
                     child: Text(context.t.common.tryAgain),
                   ),
                 ],

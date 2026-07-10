@@ -15,6 +15,7 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/async_error_widget.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
+import '../../../../shared/widgets/form_step_indicator.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../apartments/data/apartments_store.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
@@ -26,7 +27,6 @@ import '../utils/apartment_ui_utils.dart';
 import '../widgets/invite_code_result_view.dart';
 import '../widgets/invite_confirm_dialogs.dart';
 import '../widgets/invite_selectable_tile.dart';
-import '../widgets/invite_step_indicator.dart';
 
 /// Davet kodu üretme akışı: Site (varsa) → Bina → Daire → Kod.
 class InviteCodeScreen extends ConsumerStatefulWidget {
@@ -88,9 +88,27 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       onBack: _onBackPressed,
       body: Column(
         children: [
-          InviteStepIndicator(
+          FormStepIndicator(
             currentStep: _step,
-            includeSiteStep: _hasSiteStep,
+            steps: [
+              if (_hasSiteStep)
+                FormStepDescriptor(
+                  label: context.t.common.stepSite,
+                  icon: Icons.domain_rounded,
+                ),
+              FormStepDescriptor(
+                label: context.t.common.stepBuilding,
+                icon: Icons.apartment_rounded,
+              ),
+              FormStepDescriptor(
+                label: context.t.common.stepApartment,
+                icon: Icons.door_front_door_outlined,
+              ),
+              FormStepDescriptor(
+                label: context.t.common.stepCode,
+                icon: Icons.qr_code_2_rounded,
+              ),
+            ],
           ),
           Expanded(
             child: AnimatedSwitcher(

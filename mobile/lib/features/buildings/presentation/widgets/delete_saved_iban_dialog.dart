@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
-import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/iban_utils.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/app_confirm_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../domain/entities/saved_iban_item.dart';
@@ -154,24 +154,23 @@ class _DeleteSavedIbanDialogState extends ConsumerState<DeleteSavedIbanDialog> {
           ],
         ),
       ),
+      actionsPadding: const EdgeInsets.fromLTRB(
+        AppSizes.spacingL,
+        0,
+        AppSizes.spacingL,
+        AppSizes.spacingM,
+      ),
       actions: [
-        TextButton(
-          onPressed: _deleting ? null : () => Navigator.of(context).pop(false),
-          child: Text(context.t.common.cancelBtn),
-        ),
-        FilledButton(
-          onPressed: _deleting ? null : _delete,
-          style: AppButtonStyles.filledDanger(),
-          child: _deleting
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : Text(context.t.common.delete),
+        SizedBox(
+          width: double.maxFinite,
+          child: AppConfirmActions(
+            cancelLabel: context.t.common.cancelBtn,
+            confirmLabel: context.t.common.delete,
+            onCancel: _deleting ? null : () => Navigator.of(context).pop(false),
+            onConfirm: _deleting ? null : _delete,
+            confirmLoading: _deleting,
+            dangerConfirm: true,
+          ),
         ),
       ],
     );

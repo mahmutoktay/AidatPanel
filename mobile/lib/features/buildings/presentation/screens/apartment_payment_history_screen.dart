@@ -11,8 +11,8 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/app_back_button.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
-import '../../../dues/domain/entities/due_transaction_entity.dart';
 import '../../../dues/presentation/utils/dues_ui_helpers.dart';
+import '../../../dues/presentation/widgets/due_transaction_status_chip.dart';
 import '../providers/apartment_payment_history_provider.dart';
 import '../utils/apartment_ui_utils.dart';
 
@@ -140,7 +140,6 @@ class _PaymentHistoryTile extends StatelessWidget {
       languageCode: languageCode,
       decimalDigits: 0,
     );
-    final txT = context.t.features.dues.transactions;
 
     return Material(
       color: AppColors.background,
@@ -188,19 +187,14 @@ class _PaymentHistoryTile extends StatelessWidget {
                       runSpacing: 6,
                       children: [
                         if (item.paymentSource != null)
-                          _Chip(
-                            label: item.paymentSource ==
-                                    DueTransactionSource.receipt
-                                ? txT.sourceReceipt
-                                : txT.sourceManual,
-                            background: AppColors.infoBg,
-                            color: AppColors.chartBlue,
+                          DueTransactionStatusChip.source(
+                            context,
+                            item.paymentSource!,
                           ),
                         if (item.transactionStatus != null)
-                          _Chip(
-                            label: _statusLabel(context, item.transactionStatus!),
-                            background: _statusBackground(item.transactionStatus!),
-                            color: _statusColor(item.transactionStatus!),
+                          DueTransactionStatusChip.status(
+                            context,
+                            item.transactionStatus!,
                           ),
                       ],
                     ),
@@ -216,71 +210,6 @@ class _PaymentHistoryTile extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  String _statusLabel(BuildContext context, DueTransactionStatus status) {
-    final txT = context.t.features.dues.transactions;
-    switch (status) {
-      case DueTransactionStatus.pending:
-        return txT.statusPending;
-      case DueTransactionStatus.rejected:
-        return txT.statusRejected;
-      case DueTransactionStatus.approved:
-        return txT.statusApproved;
-    }
-  }
-
-  Color _statusBackground(DueTransactionStatus status) {
-    switch (status) {
-      case DueTransactionStatus.pending:
-        return AppColors.warningBg;
-      case DueTransactionStatus.rejected:
-        return AppColors.errorBg;
-      case DueTransactionStatus.approved:
-        return AppColors.successBg;
-    }
-  }
-
-  Color _statusColor(DueTransactionStatus status) {
-    switch (status) {
-      case DueTransactionStatus.pending:
-        return AppColors.chartOrange;
-      case DueTransactionStatus.rejected:
-        return AppColors.chartRed;
-      case DueTransactionStatus.approved:
-        return AppColors.chartGreen;
-    }
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({
-    required this.label,
-    required this.background,
-    required this.color,
-  });
-
-  final String label;
-  final Color background;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        label,
-        style: AppTypography.caption.copyWith(
-          color: color,
-          fontWeight: FontWeight.w700,
-          fontSize: 12,
         ),
       ),
     );

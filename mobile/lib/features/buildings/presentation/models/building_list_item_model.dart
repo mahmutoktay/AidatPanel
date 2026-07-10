@@ -45,13 +45,24 @@ class BuildingListItemModel {
       targetDues = dues.where((d) => d.year == maxYear && d.month == maxMonth).toList();
     }
 
-    final paid = targetDues.where((d) => d.status == DueStatus.paid).length;
-    final pending = targetDues.where((d) => d.status == DueStatus.pending).length;
-    final overdue = targetDues.where((d) => d.status == DueStatus.overdue).length;
-    final rate = targetDues.isEmpty ? 0.0 : (paid / targetDues.length) * 100;
-    
-    final unitCount =
-        building.totalApartments > 0 ? building.totalApartments : targetDues.length;
+    // Boş daireler tahsilat istatistiklerine dahil edilmez (K4).
+    final occupiedDues =
+        targetDues.where((d) => d.resident != null).toList(growable: false);
+    final paid =
+        occupiedDues.where((d) => d.status == DueStatus.paid).length;
+    final pending =
+        occupiedDues.where((d) => d.status == DueStatus.pending).length;
+    final overdue =
+        occupiedDues.where((d) => d.status == DueStatus.overdue).length;
+    final rate = occupiedDues.isEmpty
+        ? 0.0
+        : (paid / occupiedDues.length) * 100;
+
+    final unitCount = occupiedDues.isNotEmpty
+        ? occupiedDues.length
+        : (building.totalApartments > 0
+            ? building.totalApartments
+            : targetDues.length);
 
     return BuildingListItemModel(
       id: building.id,

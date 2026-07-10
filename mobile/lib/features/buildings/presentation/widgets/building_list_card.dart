@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../models/building_list_item_model.dart';
-import 'building_summary_card.dart';
 
 /// Tek bina kartı — minimal: ikon, ad, adres ve gecikmiş daire rozeti.
 class BuildingListCard extends StatelessWidget {
@@ -20,18 +20,14 @@ class BuildingListCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
+      padding: DashboardScreenStyle.listItemPadding,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(BuildingSummaryCard.cardRadius),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(BuildingSummaryCard.cardRadius),
-              boxShadow: BuildingSummaryCard.cardShadow,
-            ),
+          borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
+          child: Ink(
+            decoration: DashboardScreenStyle.whiteCard(),
             padding: const EdgeInsets.symmetric(
               horizontal: AppSizes.spacingM,
               vertical: 12,
@@ -50,7 +46,7 @@ class BuildingListCard extends StatelessWidget {
                   child: Icon(
                     Icons.apartment_rounded,
                     color: AppColors.inkDark,
-                    size: 26,
+                    size: 24,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -63,8 +59,6 @@ class BuildingListCard extends StatelessWidget {
                         style: AppTypography.body1.copyWith(
                           color: AppColors.inkDark,
                           fontWeight: FontWeight.w800,
-                          fontSize: 17,
-                          height: 1.2,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -76,8 +70,6 @@ class BuildingListCard extends StatelessWidget {
                           style: AppTypography.body2.copyWith(
                             color: AppColors.mutedText,
                             fontWeight: FontWeight.w500,
-                            fontSize: 14,
-                            height: 1.25,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
@@ -126,13 +127,13 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
               child: FloatingActionButton.extended(
                 onPressed: () => _openCreate(context),
                 backgroundColor: AppColors.primary,
-                icon: const Icon(Icons.add, color: Colors.white),
+                foregroundColor: Colors.white,
+                icon: const Icon(Icons.add),
                 label: Text(
                   ticketsT.createTitle,
-                  style: const TextStyle(
+                  style: AppTypography.button.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
-                    fontSize: 16,
                   ),
                 ),
               ),

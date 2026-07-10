@@ -97,7 +97,9 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
     path: 'dekonts',
     name: 'manager_dashboard_dekonts',
     parentNavigatorKey: rootNavigatorKey,
-    builder: (context, state) => const ManagerDekontsScreen(),
+    builder: (context, state) => ManagerDekontsScreen(
+      initialScope: dashboardFilterScopeFromQuery(state.uri.queryParameters),
+    ),
   ),
   GoRoute(
     path: 'notifications',

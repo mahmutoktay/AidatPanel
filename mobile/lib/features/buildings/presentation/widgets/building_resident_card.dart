@@ -15,6 +15,7 @@ class BuildingResidentCard extends StatelessWidget {
   final bool selected;
   final ValueChanged<ApartmentEntity> onToggleSelection;
   final VoidCallback onShowDetails;
+  final VoidCallback? onInvite;
 
   const BuildingResidentCard({
     super.key,
@@ -23,6 +24,7 @@ class BuildingResidentCard extends StatelessWidget {
     required this.selected,
     required this.onToggleSelection,
     required this.onShowDetails,
+    this.onInvite,
   });
 
   @override
@@ -33,6 +35,7 @@ class BuildingResidentCard extends StatelessWidget {
       return _VacantApartmentCard(
         apt: apt,
         onTap: onShowDetails,
+        onInvite: onInvite,
       );
     }
 
@@ -50,10 +53,12 @@ class _VacantApartmentCard extends StatelessWidget {
   const _VacantApartmentCard({
     required this.apt,
     required this.onTap,
+    this.onInvite,
   });
 
   final ApartmentEntity apt;
   final VoidCallback onTap;
+  final VoidCallback? onInvite;
 
   @override
   Widget build(BuildContext context) {
@@ -80,26 +85,53 @@ class _VacantApartmentCard extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Text(
-                  apartmentLabel,
-                  style: AppTypography.body1.copyWith(
-                    color: AppColors.inkDark,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      apartmentLabel,
+                      style: AppTypography.body1.copyWith(
+                        color: AppColors.inkDark,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      context.t.common.emptyApartment,
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.mutedText,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (onInvite != null) ...[
+                const SizedBox(width: 8),
+                SizedBox(
+                  height: AppSizes.minTouchTarget,
+                  child: TextButton(
+                    onPressed: onInvite,
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      minimumSize: const Size(48, 48),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    child: Text(
+                      context.t.common.inviteResident,
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                context.t.common.emptyApartment,
-                style: AppTypography.body2.copyWith(
-                  color: AppColors.mutedText,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
+              ],
             ],
           ),
         ),

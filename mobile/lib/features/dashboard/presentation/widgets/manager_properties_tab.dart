@@ -33,13 +33,17 @@ class _ManagerPropertiesTabState extends ConsumerState<ManagerPropertiesTab> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              padding: const EdgeInsets.fromLTRB(
+                AppSizes.dashboardScreenPaddingHorizontal,
+                AppSizes.spacingS,
+                AppSizes.dashboardScreenPaddingHorizontal,
+                AppSizes.spacingS,
+              ),
               child: PropertyTypeSegmentedTab(
                 selectedType: _selectedType,
                 onChanged: (type) => setState(() => _selectedType = type),
               ),
             ),
-            const SizedBox(height: 4),
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),

@@ -78,10 +78,8 @@ class _BuildingIdentityCard extends StatelessWidget {
               children: [
                 Text(
                   item.name,
-                  style: AppTypography.h3.copyWith(
+                  style: AppTypography.sectionTitle.copyWith(
                     color: AppColors.inkDark,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 22,
                     height: 1.2,
                   ),
                   maxLines: 2,

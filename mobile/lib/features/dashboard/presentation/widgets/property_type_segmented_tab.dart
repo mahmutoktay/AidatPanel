@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/strings.g.dart';
-import '../../../../shared/widgets/sliding_segmented_control.dart';
+import '../../../dues/presentation/widgets/dues_segment_toggle.dart';
 
 enum PropertyType { sites, buildings }
 
-/// Binalar | Siteler görünüm geçişi — dolgulu pill segment kontrol.
+/// Binalar | Siteler — sakin aidatlar sekmesindeki [DuesSegmentToggle] tasarımı.
 class PropertyTypeSegmentedTab extends StatelessWidget {
   const PropertyTypeSegmentedTab({
     super.key,
@@ -21,14 +21,12 @@ class PropertyTypeSegmentedTab extends StatelessWidget {
     final t = context.t.features.sites;
     final selectedIndex = selectedType == PropertyType.buildings ? 0 : 1;
 
-    return SlidingSegmentedControl(
+    return DuesSegmentToggle(
       segments: [t.tabBuildings, t.tabSites],
       selectedIndex: selectedIndex,
       onChanged: (index) {
         onChanged(index == 0 ? PropertyType.buildings : PropertyType.sites);
       },
-      height: 44,
-      fontSize: 15,
     );
   }
 }

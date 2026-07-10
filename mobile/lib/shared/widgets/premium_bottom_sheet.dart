@@ -200,6 +200,46 @@ class PremiumSheetActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryButton = SizedBox(
+      height: AppSizes.buttonHeightSecondary,
+      child: FilledButton(
+        onPressed: primaryLoading || !primaryEnabled ? null : onPrimary,
+        style: FilledButton.styleFrom(
+          backgroundColor: dangerPrimary ? ProfileSettingsUi.danger : null,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
+              ProfileSettingsUi.primaryButtonRadius,
+            ),
+          ),
+          textStyle: ProfileSettingsUi.buttonLabel,
+        ),
+        child: primaryLoading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.4,
+                  color: Colors.white,
+                ),
+              )
+            : icon != null
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(icon, size: 20),
+                      const SizedBox(width: 8),
+                      Flexible(child: Text(primaryLabel)),
+                    ],
+                  )
+                : Text(primaryLabel),
+      ),
+    );
+
+    final hasSecondary = secondaryLabel != null;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSizes.spacingL,
@@ -207,74 +247,39 @@ class PremiumSheetActions extends StatelessWidget {
         AppSizes.spacingL,
         AppSizes.spacingL,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            height: ProfileSettingsUi.buttonHeight,
-            child: ElevatedButton(
-              onPressed: primaryLoading || !primaryEnabled ? null : onPrimary,
-              style: dangerPrimary
-                  ? ElevatedButton.styleFrom(
-                      backgroundColor: ProfileSettingsUi.danger,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      minimumSize: const Size(double.infinity, ProfileSettingsUi.buttonHeight),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          ProfileSettingsUi.primaryButtonRadius,
+      child: hasSecondary
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: AppSizes.buttonHeightSecondary,
+                    child: OutlinedButton(
+                      onPressed: secondaryEnabled ? onSecondary : null,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.inkDark,
+                        side: ProfileSettingsUi.cardBorderSide,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            ProfileSettingsUi.primaryButtonRadius,
+                          ),
+                        ),
+                        textStyle: ProfileSettingsUi.fieldValue.copyWith(
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      textStyle: ProfileSettingsUi.buttonLabel,
-                    )
-                  : ProfileSettingsUi.primaryButton,
-              child: primaryLoading
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.4,
-                        color: Colors.white,
-                      ),
-                    )
-                  : icon != null
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(icon, size: 20),
-                            const SizedBox(width: 8),
-                            Text(primaryLabel),
-                          ],
-                        )
-                      : Text(primaryLabel),
-            ),
-          ),
-          if (secondaryLabel != null) ...[
-            const SizedBox(height: AppSizes.spacingS),
-            SizedBox(
-              height: ProfileSettingsUi.buttonHeight,
-              child: TextButton(
-                onPressed: secondaryEnabled ? onSecondary : null,
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.inkDark,
-                  backgroundColor: AppColors.surface,
-                  side: ProfileSettingsUi.cardBorderSide,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      ProfileSettingsUi.primaryButtonRadius,
+                      child: Text(secondaryLabel!),
                     ),
                   ),
-                  textStyle: ProfileSettingsUi.fieldValue.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
                 ),
-                child: Text(secondaryLabel!),
-              ),
+                const SizedBox(width: AppSizes.spacingS),
+                Expanded(child: primaryButton),
+              ],
+            )
+          : SizedBox(
+              width: double.infinity,
+              child: primaryButton,
             ),
-          ],
-        ],
-      ),
     );
   }
 }

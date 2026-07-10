@@ -14,6 +14,7 @@ import '../../domain/entities/due_entity.dart';
 import '../../domain/entities/due_transaction_entity.dart';
 import '../providers/due_payment_detail_provider.dart';
 import '../utils/dues_ui_helpers.dart';
+import 'due_transaction_status_chip.dart';
 
 class DueDetailSheet extends ConsumerWidget {
   const DueDetailSheet({
@@ -60,7 +61,6 @@ class DueDetailSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.t.features.dues;
-    final txT = context.t.features.dues.transactions;
     final visual = duesStatusVisual(context, due.status);
     final languageCode = AppIntlLocale.fromContext(context);
     final amountText = AppCurrencyFormat.format(
@@ -162,18 +162,13 @@ class DueDetailSheet extends ConsumerWidget {
                         spacing: 6,
                         runSpacing: 6,
                         children: [
-                          _PaymentChip(
-                            label: transaction.source ==
-                                    DueTransactionSource.receipt
-                                ? txT.sourceReceipt
-                                : txT.sourceManual,
-                            background: AppColors.infoBg,
-                            color: AppColors.chartBlue,
+                          DueTransactionStatusChip.source(
+                            context,
+                            transaction.source,
                           ),
-                          _PaymentChip(
-                            label: _transactionStatusLabel(context, transaction),
-                            background: _transactionStatusBackground(transaction),
-                            color: _transactionStatusColor(transaction),
+                          DueTransactionStatusChip.status(
+                            context,
+                            transaction.status,
                           ),
                         ],
                       ),
@@ -247,43 +242,6 @@ class DueDetailSheet extends ConsumerWidget {
             ),
     );
   }
-
-  String _transactionStatusLabel(
-    BuildContext context,
-    DueTransactionEntity transaction,
-  ) {
-    final txT = context.t.features.dues.transactions;
-    switch (transaction.status) {
-      case DueTransactionStatus.pending:
-        return txT.statusPending;
-      case DueTransactionStatus.rejected:
-        return txT.statusRejected;
-      case DueTransactionStatus.approved:
-        return txT.statusApproved;
-    }
-  }
-
-  Color _transactionStatusBackground(DueTransactionEntity transaction) {
-    switch (transaction.status) {
-      case DueTransactionStatus.pending:
-        return AppColors.warningBg;
-      case DueTransactionStatus.rejected:
-        return AppColors.errorBg;
-      case DueTransactionStatus.approved:
-        return AppColors.successBg;
-    }
-  }
-
-  Color _transactionStatusColor(DueTransactionEntity transaction) {
-    switch (transaction.status) {
-      case DueTransactionStatus.pending:
-        return AppColors.chartOrange;
-      case DueTransactionStatus.rejected:
-        return AppColors.chartRed;
-      case DueTransactionStatus.approved:
-        return AppColors.chartGreen;
-    }
-  }
 }
 
 class _InfoRow extends StatelessWidget {
@@ -318,37 +276,6 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PaymentChip extends StatelessWidget {
-  const _PaymentChip({
-    required this.label,
-    required this.background,
-    required this.color,
-  });
-
-  final String label;
-  final Color background;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        label,
-        style: AppTypography.caption.copyWith(
-          color: color,
-          fontWeight: FontWeight.w700,
-          fontSize: 12,
-        ),
-      ),
     );
   }
 }

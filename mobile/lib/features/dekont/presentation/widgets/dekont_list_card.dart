@@ -47,6 +47,21 @@ class DekontListCard extends StatelessWidget {
             children: [
               Row(
                 children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: visual.background,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.receipt_long_outlined,
+                      color: visual.color,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.spacingM),
                   Expanded(
                     child: Text(
                       dekont.originalFilename,
@@ -64,7 +79,7 @@ class DekontListCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: visual.background,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       visual.label,

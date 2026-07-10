@@ -7,9 +7,8 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
-import '../../../dashboard/domain/entities/manager_dashboard_entities.dart';
-import '../../../dashboard/presentation/widgets/manager_home/manager_dues_summary_card.dart';
 import '../../data/sites_store.dart';
 import '../../domain/entities/site_entity.dart';
 import 'site_list_card.dart';
@@ -41,8 +40,6 @@ class _ManagerSitesTabState extends ConsumerState<ManagerSitesTab> {
     final visibleSites = _filterBySearch(sites, _searchQuery);
     final t = context.t.features.sites;
     final isRefreshing = sitesAsync.isLoading && sites.isNotEmpty;
-    final portfolioSummary = _portfolioSummaryFromSites(sites);
-    final currency = sites.isNotEmpty ? sites.first.currency : 'TRY';
     final hasSearch = _searchQuery.trim().isNotEmpty;
 
     return RefreshIndicator(
@@ -58,11 +55,6 @@ class _ManagerSitesTabState extends ConsumerState<ManagerSitesTab> {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                ManagerDuesSummaryCard(
-                  summary: portfolioSummary,
-                  currency: currency,
-                ),
-                const SizedBox(height: AppSizes.spacingM),
                 MinimalSearchField(
                   hint: t.searchSites,
                   onChanged: (value) => setState(() => _searchQuery = value),
@@ -70,10 +62,8 @@ class _ManagerSitesTabState extends ConsumerState<ManagerSitesTab> {
                 const SizedBox(height: AppSizes.spacingL),
                 Text(
                   t.mySites,
-                  style: AppTypography.h3.copyWith(
+                  style: AppTypography.sectionTitle.copyWith(
                     color: AppColors.inkDark,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 22,
                   ),
                 ),
                 if (isRefreshing) ...[
@@ -130,27 +120,17 @@ class _ManagerSitesTabState extends ConsumerState<ManagerSitesTab> {
           else if (sites.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(
-                child: Text(
-                  t.emptySites,
-                  style: AppTypography.body1.copyWith(
-                    color: AppColors.mutedText,
-                  ),
-                ),
+              child: EmptyStateWidget(
+                icon: Icons.location_city_outlined,
+                title: t.emptySites,
               ),
             )
           else if (visibleSites.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(
-                child: Text(
-                  hasSearch
-                      ? context.t.common.noResults
-                      : t.emptySites,
-                  style: AppTypography.body1.copyWith(
-                    color: AppColors.mutedText,
-                  ),
-                ),
+              child: EmptyStateWidget(
+                icon: Icons.search_off_outlined,
+                title: hasSearch ? context.t.common.noResults : t.emptySites,
               ),
             )
           else
@@ -171,28 +151,6 @@ class _ManagerSitesTabState extends ConsumerState<ManagerSitesTab> {
             ),
         ],
       ),
-    );
-  }
-
-  static ManagerDuesAmountSummary _portfolioSummaryFromSites(
-    List<SiteEntity> sites,
-  ) {
-    if (sites.isEmpty) return ManagerDuesAmountSummary.empty;
-
-    var collected = 0.0;
-    var expected = 0.0;
-    var overdue = 0;
-
-    for (final site in sites) {
-      collected += site.collectedAmount;
-      expected += site.expectedAmount;
-      overdue += site.overdueCount;
-    }
-
-    return ManagerDuesAmountSummary(
-      collectedAmount: collected,
-      expectedAmount: expected,
-      overdueCount: overdue,
     );
   }
 }

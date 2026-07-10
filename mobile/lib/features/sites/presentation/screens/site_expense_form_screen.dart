@@ -191,21 +191,27 @@ class _SiteExpenseFormScreenState extends ConsumerState<SiteExpenseFormScreen> {
               ),
               maxLines: 3,
             ),
-            const SizedBox(height: AppSizes.spacingXL),
-            SizedBox(
-              height: AppSizes.buttonHeightPrimary,
-              child: FilledButton(
-                onPressed: _submitting ? null : _onSubmit,
-                child: _submitting
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2.5),
-                      )
-                    : Text(_isEdit ? context.t.common.save : t.addExpense),
-              ),
-            ),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+        child: SizedBox(
+          height: AppSizes.buttonHeightPrimary,
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: _submitting ? null : _onSubmit,
+            child: _submitting
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(_isEdit ? context.t.common.save : t.addExpense),
+          ),
         ),
       ),
     );

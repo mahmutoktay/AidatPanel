@@ -7,6 +7,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
@@ -16,9 +17,6 @@ import '../../../buildings/presentation/widgets/building_list_card.dart';
 import '../../../buildings/presentation/widgets/building_sort_bottom_sheet.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
-import '../../domain/entities/manager_dashboard_entities.dart';
-import '../../presentation/utils/manager_dashboard_mapper.dart';
-import 'manager_home/manager_dues_summary_card.dart';
 
 class ManagerBuildingsTab extends ConsumerStatefulWidget {
   final AsyncValue<List<BuildingEntity>> buildingsAsync;
@@ -89,20 +87,6 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
     }).toList(growable: false);
   }
 
-  ManagerDuesAmountSummary _portfolioSummary(
-    Map<String, List<DueEntity>> allDues,
-  ) {
-    final allDuesList =
-        allDues.values.expand((list) => list).toList(growable: false);
-    final now = DateTime.now();
-    final currentMonthDues = ManagerDashboardMapper.filterDuesForMonth(
-      allDuesList,
-      month: now.month,
-      year: now.year,
-    );
-    return ManagerDashboardMapper.duesAmountSummary(currentMonthDues);
-  }
-
   Widget _buildScrollContent(
     BuildContext context, {
     required List<BuildingEntity> buildings,
@@ -120,10 +104,6 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
         )
         .toList(growable: false);
     final sortedItems = sortBuildingListItems(items, _sort);
-    final portfolioSummary = _portfolioSummary(allDues);
-    final allBuildings = ref.watch(buildingsStoreProvider).value ?? const [];
-    final currency =
-        allBuildings.isNotEmpty ? allBuildings.first.currency : 'TRY';
     final hasSearch = _searchQuery.trim().isNotEmpty;
 
     return RefreshIndicator(
@@ -139,11 +119,6 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                ManagerDuesSummaryCard(
-                  summary: portfolioSummary,
-                  currency: currency,
-                ),
-                const SizedBox(height: AppSizes.spacingM),
                 MinimalSearchField(
                   hint: context.t.features.dashboard.searchBuildings,
                   onChanged: (value) => setState(() => _searchQuery = value),
@@ -167,27 +142,19 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
           if (standaloneBuildings.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(
-                child: Text(
-                  context.t.common.myBuildings,
-                  style: AppTypography.body1.copyWith(
-                    color: AppColors.mutedText,
-                  ),
-                ),
+              child: EmptyStateWidget(
+                icon: Icons.apartment_outlined,
+                title: context.t.common.myBuildings,
               ),
             )
           else if (sortedItems.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(
-                child: Text(
-                  hasSearch
-                      ? context.t.common.noResults
-                      : context.t.common.myBuildings,
-                  style: AppTypography.body1.copyWith(
-                    color: AppColors.mutedText,
-                  ),
-                ),
+              child: EmptyStateWidget(
+                icon: Icons.search_off_outlined,
+                title: hasSearch
+                    ? context.t.common.noResults
+                    : context.t.common.myBuildings,
               ),
             )
           else
@@ -218,10 +185,8 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
         Expanded(
           child: Text(
             context.t.common.myBuildings,
-            style: AppTypography.h3.copyWith(
+            style: AppTypography.sectionTitle.copyWith(
               color: AppColors.inkDark,
-              fontWeight: FontWeight.w800,
-              fontSize: 22,
             ),
           ),
         ),

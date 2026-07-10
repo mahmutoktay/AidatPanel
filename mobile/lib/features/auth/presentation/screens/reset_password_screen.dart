@@ -5,10 +5,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
-import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/auth_screen_shell.dart';
 import '../../../../shared/widgets/auth_form_styles.dart';
@@ -279,41 +279,50 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               },
             ),
             const SizedBox(height: AppSizes.spacingL),
-            ElevatedButton(
-              onPressed: _submitting ? null : _submit,
-              style: ProfileSettingsUi.primaryButton,
-              child: _submitting
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: AppSizes.buttonHeightSecondary,
+                    child: OutlinedButton(
+                      onPressed: _submitting ? null : () => context.go('/login'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.inkDark,
+                        backgroundColor: AppColors.surface,
+                        side: BorderSide(color: AppColors.lineLight, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.buttonRadius),
+                        ),
+                        textStyle: AppTypography.body1.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    )
-                  : Text(t.common.resetPasswordSubmit),
-            ),
-            const SizedBox(height: AppSizes.spacingM),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: OutlinedButton(
-                onPressed: _submitting ? null : () => context.go('/login'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF15140F),
-                  backgroundColor: Colors.white,
-                  side: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  textStyle: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                      child: Text(t.common.backToLogin),
+                    ),
                   ),
                 ),
-                child: Text(t.common.backToLogin),
-              ),
+                const SizedBox(width: AppSizes.spacingS),
+                Expanded(
+                  child: SizedBox(
+                    height: AppSizes.buttonHeightSecondary,
+                    child: FilledButton(
+                      onPressed: _submitting ? null : _submit,
+                      child: _submitting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(t.common.resetPasswordSubmit),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

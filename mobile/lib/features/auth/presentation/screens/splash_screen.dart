@@ -127,51 +127,51 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSizes.spacingL),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton.icon(
-              onPressed: _bootstrap,
-              icon: Icon(Icons.refresh, color: AppColors.primary),
-              label: Text(
-                context.t.features.buildings.tekrarDene,
-                style: AppTypography.body1.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: AppSizes.buttonHeightSecondary,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      if (!mounted) return;
+                      context.go('/login');
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: BorderSide(color: AppColors.primary, width: 1.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSizes.buttonRadius),
+                      ),
+                    ),
+                    child: Text(
+                      context.t.features.auth.skipToLogin,
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+              const SizedBox(width: AppSizes.spacingS),
+              Expanded(
+                child: SizedBox(
+                  height: AppSizes.buttonHeightSecondary,
+                  child: FilledButton.icon(
+                    onPressed: _bootstrap,
+                    icon: const Icon(Icons.refresh, size: 20),
+                    label: Text(
+                      context.t.features.buildings.tekrarDene,
+                      style: AppTypography.body1.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: AppSizes.spacingS),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: OutlinedButton(
-              onPressed: () {
-                if (!mounted) return;
-                context.go('/login');
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: BorderSide(color: AppColors.primary, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-                ),
-              ),
-              child: Text(
-                context.t.features.auth.skipToLogin,
-                style: AppTypography.body2.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+            ],
           ),
         ],
       ),

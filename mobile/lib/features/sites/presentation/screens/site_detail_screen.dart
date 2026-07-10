@@ -188,10 +188,8 @@ class _SiteIdentityCard extends StatelessWidget {
               children: [
                 Text(
                   site.name,
-                  style: AppTypography.h3.copyWith(
+                  style: AppTypography.sectionTitle.copyWith(
                     color: AppColors.inkDark,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 22,
                     height: 1.2,
                   ),
                   maxLines: 2,
@@ -238,10 +236,8 @@ class _BlocksSectionHeader extends StatelessWidget {
       children: [
         Text(
           t.blocksTitle,
-          style: AppTypography.h3.copyWith(
-            fontWeight: FontWeight.w800,
+          style: AppTypography.sectionTitle.copyWith(
             color: AppColors.inkDark,
-            fontSize: 22,
           ),
         ),
         const SizedBox(width: AppSizes.spacingS),

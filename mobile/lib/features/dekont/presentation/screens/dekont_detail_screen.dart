@@ -525,6 +525,24 @@ class _BuildingDuesPicker extends ConsumerWidget {
   }
 }
 
+class _ReviewButtonSpinner extends StatelessWidget {
+  const _ReviewButtonSpinner({this.color});
+
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 22,
+      height: 22,
+      child: CircularProgressIndicator(
+        strokeWidth: 2.5,
+        valueColor: AlwaysStoppedAnimation<Color>(color ?? AppColors.error),
+      ),
+    );
+  }
+}
+
 final buildingDuesForReviewProvider = FutureProvider.autoDispose
     .family<List<DueEntity>, String>((ref, buildingId) async {
       final repo = ref.read(duesRepositoryProvider);
@@ -544,21 +562,3 @@ final buildingDuesForReviewProvider = FutureProvider.autoDispose
             });
       return reviewable;
     });
-
-class _ReviewButtonSpinner extends StatelessWidget {
-  const _ReviewButtonSpinner({this.color});
-
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 22,
-      height: 22,
-      child: CircularProgressIndicator(
-        strokeWidth: 2.5,
-        valueColor: AlwaysStoppedAnimation<Color>(color ?? AppColors.error),
-      ),
-    );
-  }
-}

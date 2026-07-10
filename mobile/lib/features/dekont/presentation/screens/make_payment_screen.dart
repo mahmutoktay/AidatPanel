@@ -411,7 +411,7 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
       child: SafeArea(
         minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
         child: SizedBox(
-          height: ProfileSettingsUi.buttonHeight,
+          height: AppSizes.buttonHeightPrimary,
           child: Material(
             color: AppColors.primary,
             borderRadius:
@@ -420,7 +420,7 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
             child: InkWell(
               onTap: !busy && canSubmit ? onContinue : null,
               child: SizedBox(
-                height: ProfileSettingsUi.buttonHeight,
+                height: AppSizes.buttonHeightPrimary,
                 width: double.infinity,
                 child: Center(
                   child: busy

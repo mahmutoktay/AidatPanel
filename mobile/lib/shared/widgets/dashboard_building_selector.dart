@@ -144,32 +144,6 @@ class DashboardBuildingSelector extends ConsumerWidget {
   }
 }
 
-/// Tek bina seçimi — aynı aranabilir liste (tüm binalar seçeneği yok).
-class DashboardSingleBuildingSelector extends StatelessWidget {
-  final List<BuildingEntity> buildings;
-  final String? selectedBuildingId;
-  final ValueChanged<String> onSelected;
-
-  const DashboardSingleBuildingSelector({
-    super.key,
-    required this.buildings,
-    required this.selectedBuildingId,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return DashboardBuildingSelector.legacy(
-      buildings: buildings,
-      selectedBuildingId: selectedBuildingId,
-      includeAllOption: false,
-      onSelected: (id) {
-        if (id != null) onSelected(id);
-      },
-    );
-  }
-}
-
 class _DashboardBuildingSelectorTrigger extends StatelessWidget {
   final String title;
   final String subtitle;

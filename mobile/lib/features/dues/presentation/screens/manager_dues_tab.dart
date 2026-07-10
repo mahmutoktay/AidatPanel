@@ -10,6 +10,8 @@ import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/dashboard_building_selector.dart';
+import '../../../../shared/widgets/empty_state_widget.dart';
+import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
 import '../../../dashboard/presentation/providers/dashboard_filter_scope_provider.dart';
 import '../../../dashboard/presentation/utils/manager_dashboard_mapper.dart';
@@ -102,7 +104,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
 
     _tryInitialize(buildings);
 
-    final rawDues = duesState.dues;
+    final rawDues = duesState.dues
+        .where((due) => due.resident != null)
+        .toList(growable: false);
     final dues = List<DueEntity>.from(rawDues)..sort((a, b) {
       if (a.year != b.year) {
         return b.year.compareTo(a.year);
@@ -130,7 +134,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
 
     final isLoading = duesState.isLoading;
     final scopedBuildingIds = _scopedBuildingIds(filterScope, buildings);
-    final statsSource = _statusFilter == null ? dues : _statsDues;
+    final statsSource = (_statusFilter == null ? dues : _statsDues)
+        .where((due) => due.resident != null)
+        .toList(growable: false);
     final totalUnits = _resolveTotalUnits(
       filterScope,
       buildings,
@@ -164,14 +170,12 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                         .update(scope),
                   ),
                   const SizedBox(height: AppSizes.spacingS),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: _PeriodFilterChip(
-                      label: _periodFilterLabel(context),
-                      hasActiveFilters: _hasActivePeriodFilters,
-                      enabled: !isLoading,
-                      onTap: () => _openFilterSheet(context, dues, isLoading),
-                    ),
+                  PremiumFilterButton(
+                    hasActiveFilters: _hasActivePeriodFilters,
+                    enabled: !isLoading,
+                    onPressed: isLoading
+                        ? null
+                        : () => _openFilterSheet(context, dues, isLoading),
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                 ],
@@ -267,9 +271,8 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
       children: [
         Text(
           context.t.common.buildingDues,
-          style: AppTypography.h3.copyWith(
+          style: AppTypography.sectionTitle.copyWith(
             color: AppColors.inkDark,
-            fontWeight: FontWeight.w800,
           ),
         ),
         Container(
@@ -310,21 +313,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
       _statusFilter = _statusFilter == status ? null : status;
     });
     _reloadDues();
-  }
-
-  String _periodFilterLabel(BuildContext context) {
-    final common = context.t.common;
-    final monthPart = _monthFilter == null
-        ? common.allMonths
-        : monthName(context, _monthFilter!);
-    final yearPart =
-        _yearFilter == null ? common.allYears : '${_yearFilter!}';
-    if (_monthFilter != null && _yearFilter != null) {
-      return '$monthPart $yearPart';
-    }
-    if (_monthFilter != null) return monthPart;
-    if (_yearFilter != null) return yearPart;
-    return common.filter;
   }
 
   bool get _hasActivePeriodFilters {
@@ -450,12 +438,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     _initialized = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final scope = ref.read(dashboardFilterScopeProvider);
-      if (_scopedBuildingIds(scope, buildings).isEmpty) {
-        ref.read(dashboardFilterScopeProvider.notifier).update(
-              DashboardFilterScope.building(buildings.first.id),
-            );
-      }
+      // Boş scope'ta alfabetik/ilk binaya düşme — "Tümü" korunur (K11).
       _reloadDues();
     });
   }
@@ -487,7 +470,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
             year: _yearFilter,
             paginated: false,
           );
-          merged.addAll(result.items);
+          merged.addAll(
+            result.items.where((due) => due.resident != null),
+          );
         }
         setState(() => _statsDues = merged);
       } catch (_) {
@@ -546,6 +531,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   }
 
   Future<void> _openDueDetailSheet(BuildContext context, DueEntity due) async {
+    // Boş daire aidatı detayda açılmaz (K4).
+    if (due.resident == null) return;
+
     final monthLabel = '${monthName(context, due.month)} ${due.year}';
     final buildingId = _dueBuildingId(due);
     final canCollect = _canCollectPayment(due) && buildingId != null;
@@ -567,86 +555,13 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingL),
-        child: Text(
-          context.t.common.noDuesYet,
-          style: AppTypography.body1.copyWith(color: AppColors.mutedText),
-        ),
-      ),
+    return EmptyStateWidget(
+      icon: Icons.receipt_long_outlined,
+      title: context.t.common.noDuesYet,
     );
   }
 
   String _currencySymbol() {
     return '₺';
-  }
-}
-
-class _PeriodFilterChip extends StatelessWidget {
-  const _PeriodFilterChip({
-    required this.label,
-    required this.hasActiveFilters,
-    required this.enabled,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool hasActiveFilters;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: enabled ? onTap : null,
-          borderRadius: BorderRadius.circular(999),
-          child: Ink(
-            decoration: BoxDecoration(
-              color: hasActiveFilters
-                  ? AppColors.inkDark.withValues(alpha: 0.08)
-                  : AppColors.dashboardBackground,
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: hasActiveFilters
-                    ? AppColors.inkDark.withValues(alpha: 0.2)
-                    : AppColors.lineLight,
-              ),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.calendar_month_outlined,
-                  size: 18,
-                  color: enabled ? AppColors.inkDark : AppColors.mutedText,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: AppTypography.body2.copyWith(
-                    color: enabled ? AppColors.inkDark : AppColors.mutedText,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(width: 2),
-                Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  size: 20,
-                  color: enabled ? AppColors.mutedText : AppColors.mutedText,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

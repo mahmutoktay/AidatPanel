@@ -2515,8 +2515,8 @@ class Translations$features$tickets$en {
 	/// en: 'Confirm'
 	String get confirmChanges => 'Confirm';
 
-	/// en: 'Requester details'
-	String get residentInfoTitle => 'Requester details';
+	/// en: 'Resident details'
+	String get residentInfoTitle => 'Resident details';
 
 	/// en: 'Resident'
 	String get defaultResidentName => 'Resident';
@@ -2710,8 +2710,8 @@ class Translations$features$dekont$en {
 	/// en: 'Details'
 	String get breakdownDetails => 'Details';
 
-	/// en: 'Base due'
-	String get breakdownBaseDue => 'Base due';
+	/// en: 'Monthly due'
+	String get breakdownBaseDue => 'Monthly due';
 
 	/// en: 'Total'
 	String get breakdownTotal => 'Total';
@@ -4047,8 +4047,8 @@ class Translations$features$buildings$collection$en {
 	/// en: 'Payment reference'
 	String get referenceTemplateLabel => 'Payment reference';
 
-	/// en: 'e.g. Apt {{number}}'
-	String get referenceTemplateHint => 'e.g. Apt {{number}}';
+	/// en: 'e.g. Apt 5'
+	String get referenceTemplateHint => 'e.g. Apt 5';
 
 	/// en: 'No saved collection details yet'
 	String get presetsEmpty => 'No saved collection details yet';
@@ -5366,7 +5366,7 @@ extension on Translations {
 			'features.buildings.collection.accountTitleLabel' => 'Recipient name',
 			'features.buildings.collection.accountTitleHint' => 'e.g. Ahmet Yilmaz or Building Management',
 			'features.buildings.collection.referenceTemplateLabel' => 'Payment reference',
-			'features.buildings.collection.referenceTemplateHint' => 'e.g. Apt {{number}}',
+			'features.buildings.collection.referenceTemplateHint' => 'e.g. Apt 5',
 			'features.buildings.collection.presetsEmpty' => 'No saved collection details yet',
 			'features.buildings.collection.presetsLoadFailed' => 'Could not load suggestions',
 			'features.buildings.collection.presetBuildingCount' => '{count} buildings',
@@ -5693,7 +5693,7 @@ extension on Translations {
 			'features.tickets.managerUpdateForResident' => 'Update from management',
 			'features.tickets.quickReplyTemplatesTitle' => 'Quick reply templates',
 			'features.tickets.confirmChanges' => 'Confirm',
-			'features.tickets.residentInfoTitle' => 'Requester details',
+			'features.tickets.residentInfoTitle' => 'Resident details',
 			'features.tickets.defaultResidentName' => 'Resident',
 			'features.tickets.apartmentNumberTag' => 'Apt {number}',
 			'features.tickets.apartmentInfoMissing' => 'No apartment info',
@@ -5755,7 +5755,7 @@ extension on Translations {
 			'features.dekont.processing' => 'Processing receipt…',
 			'features.dekont.viewDekonts' => 'My receipts',
 			'features.dekont.breakdownDetails' => 'Details',
-			'features.dekont.breakdownBaseDue' => 'Base due',
+			'features.dekont.breakdownBaseDue' => 'Monthly due',
 			'features.dekont.breakdownTotal' => 'Total',
 			'features.dekont.emptyTitle' => 'No receipts yet',
 			'features.dekont.emptySubtitleResident' => 'You don\'t have any receipts yet. You can use the upload button on the top right to add a new receipt.',
