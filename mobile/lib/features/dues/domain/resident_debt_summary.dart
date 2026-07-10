@@ -13,6 +13,10 @@ int overdueDueCount(List<DueEntity> dues) {
   return dues.where((due) => due.status == DueStatus.overdue).length;
 }
 
+int pendingDueCount(List<DueEntity> dues) {
+  return dues.where((due) => due.status == DueStatus.pending).length;
+}
+
 bool hasOutstandingDebt(List<DueEntity> dues) => totalOutstandingAmount(dues) > 0;
 
 DueEntity? pickFeaturedDue(List<DueEntity> dues) {

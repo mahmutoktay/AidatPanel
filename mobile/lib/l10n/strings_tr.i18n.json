@@ -1475,7 +1475,18 @@
         "overdueDetail": "Aidatınız {days} gündür gecikmiş",
         "pendingDetail": "Son ödeme tarihi {day} {month}",
         "paidLateSummary": "{date} tarihinde ödediniz · {days} gün gecikme",
-        "paidOnTimeSummary": "{date} tarihinde ödediniz"
+        "paidOnTimeSummary": "{date} tarihinde ödediniz",
+        "duesUpToDate": "Aidatlarınız güncel",
+        "debtBannerOverdue": "{count} aidatınız gecikmiş · {amount}",
+        "debtBannerPending": "{count} aidatınız bekliyor · {amount}",
+        "paymentRecordsLabel": "Ödeme kayıtları",
+        "ledgerPaidSubtitle": "{date}'te ödendi",
+        "ledgerOverdueSubtitle": "{days} gündür gecikti",
+        "ledgerPendingSubtitle": "Son ödeme: {date}",
+        "badgePaid": "Ödendi",
+        "badgePending": "Bekliyor",
+        "badgeOverdue": "Gecikmiş",
+        "badgeWaived": "Muaf"
       },
       "transactions": {
         "title": "Aidat İşlem Geçmişi",

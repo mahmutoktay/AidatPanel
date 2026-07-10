@@ -1811,6 +1811,17 @@ class _Translations$features$dues$resident$tr implements Translations$features$d
 	@override String get pendingDetail => 'Son ödeme tarihi {day} {month}';
 	@override String get paidLateSummary => '{date} tarihinde ödediniz · {days} gün gecikme';
 	@override String get paidOnTimeSummary => '{date} tarihinde ödediniz';
+	@override String get duesUpToDate => 'Aidatlarınız güncel';
+	@override String get debtBannerOverdue => '{count} aidatınız gecikmiş · {amount}';
+	@override String get debtBannerPending => '{count} aidatınız bekliyor · {amount}';
+	@override String get paymentRecordsLabel => 'Ödeme kayıtları';
+	@override String get ledgerPaidSubtitle => '{date}\'te ödendi';
+	@override String get ledgerOverdueSubtitle => '{days} gündür gecikti';
+	@override String get ledgerPendingSubtitle => 'Son ödeme: {date}';
+	@override String get badgePaid => 'Ödendi';
+	@override String get badgePending => 'Bekliyor';
+	@override String get badgeOverdue => 'Gecikmiş';
+	@override String get badgeWaived => 'Muaf';
 }
 
 // Path: features.dues.transactions
@@ -3271,6 +3282,17 @@ extension on TranslationsTr {
 			'features.dues.resident.pendingDetail' => 'Son ödeme tarihi {day} {month}',
 			'features.dues.resident.paidLateSummary' => '{date} tarihinde ödediniz · {days} gün gecikme',
 			'features.dues.resident.paidOnTimeSummary' => '{date} tarihinde ödediniz',
+			'features.dues.resident.duesUpToDate' => 'Aidatlarınız güncel',
+			'features.dues.resident.debtBannerOverdue' => '{count} aidatınız gecikmiş · {amount}',
+			'features.dues.resident.debtBannerPending' => '{count} aidatınız bekliyor · {amount}',
+			'features.dues.resident.paymentRecordsLabel' => 'Ödeme kayıtları',
+			'features.dues.resident.ledgerPaidSubtitle' => '{date}\'te ödendi',
+			'features.dues.resident.ledgerOverdueSubtitle' => '{days} gündür gecikti',
+			'features.dues.resident.ledgerPendingSubtitle' => 'Son ödeme: {date}',
+			'features.dues.resident.badgePaid' => 'Ödendi',
+			'features.dues.resident.badgePending' => 'Bekliyor',
+			'features.dues.resident.badgeOverdue' => 'Gecikmiş',
+			'features.dues.resident.badgeWaived' => 'Muaf',
 			'features.dues.transactions.title' => 'Aidat İşlem Geçmişi',
 			'features.dues.transactions.residentTitle' => 'İşlem Geçmişiniz',
 			'features.dues.transactions.emptyTitle' => 'Henüz işlem yok',

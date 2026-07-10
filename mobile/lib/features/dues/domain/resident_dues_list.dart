@@ -44,21 +44,3 @@ bool shouldShowInAccountSummary(DueEntity due, {DateTime? now}) {
   }
   return isCurrentPeriodDue(due, clock);
 }
-
-/// Görüntüleme: güncel dönem(ler) ve geçmiş; sıra korunur.
-({List<DueEntity> current, List<DueEntity> past}) splitResidentDuesForDisplay(
-  List<DueEntity> dues, {
-  DateTime? now,
-}) {
-  final clock = now ?? DateTime.now();
-  final current = <DueEntity>[];
-  final past = <DueEntity>[];
-  for (final due in dues) {
-    if (isCurrentPeriodDue(due, clock)) {
-      current.add(due);
-    } else {
-      past.add(due);
-    }
-  }
-  return (current: current, past: past);
-}

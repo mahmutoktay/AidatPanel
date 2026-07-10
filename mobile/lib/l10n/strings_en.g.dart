@@ -4751,6 +4751,39 @@ class Translations$features$dues$resident$en {
 
 	/// en: 'You paid on {date}'
 	String get paidOnTimeSummary => 'You paid on {date}';
+
+	/// en: 'Your dues are up to date'
+	String get duesUpToDate => 'Your dues are up to date';
+
+	/// en: '{count} overdue due · {amount}'
+	String get debtBannerOverdue => '{count} overdue due · {amount}';
+
+	/// en: '{count} due pending · {amount}'
+	String get debtBannerPending => '{count} due pending · {amount}';
+
+	/// en: 'Payment records'
+	String get paymentRecordsLabel => 'Payment records';
+
+	/// en: 'Paid on {date}'
+	String get ledgerPaidSubtitle => 'Paid on {date}';
+
+	/// en: '{days} days overdue'
+	String get ledgerOverdueSubtitle => '{days} days overdue';
+
+	/// en: 'Due by: {date}'
+	String get ledgerPendingSubtitle => 'Due by: {date}';
+
+	/// en: 'Paid'
+	String get badgePaid => 'Paid';
+
+	/// en: 'Pending'
+	String get badgePending => 'Pending';
+
+	/// en: 'Overdue'
+	String get badgeOverdue => 'Overdue';
+
+	/// en: 'Waived'
+	String get badgeWaived => 'Waived';
 }
 
 // Path: features.dues.transactions
@@ -6243,6 +6276,17 @@ extension on Translations {
 			'features.dues.resident.pendingDetail' => 'Due by {day} {month}',
 			'features.dues.resident.paidLateSummary' => 'You paid on {date} · {days} days late',
 			'features.dues.resident.paidOnTimeSummary' => 'You paid on {date}',
+			'features.dues.resident.duesUpToDate' => 'Your dues are up to date',
+			'features.dues.resident.debtBannerOverdue' => '{count} overdue due · {amount}',
+			'features.dues.resident.debtBannerPending' => '{count} due pending · {amount}',
+			'features.dues.resident.paymentRecordsLabel' => 'Payment records',
+			'features.dues.resident.ledgerPaidSubtitle' => 'Paid on {date}',
+			'features.dues.resident.ledgerOverdueSubtitle' => '{days} days overdue',
+			'features.dues.resident.ledgerPendingSubtitle' => 'Due by: {date}',
+			'features.dues.resident.badgePaid' => 'Paid',
+			'features.dues.resident.badgePending' => 'Pending',
+			'features.dues.resident.badgeOverdue' => 'Overdue',
+			'features.dues.resident.badgeWaived' => 'Waived',
 			'features.dues.transactions.title' => 'Dues Transaction History',
 			'features.dues.transactions.residentTitle' => 'Your Transaction History',
 			'features.dues.transactions.emptyTitle' => 'No transactions yet',

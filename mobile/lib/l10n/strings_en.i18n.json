@@ -1475,7 +1475,18 @@
         "overdueDetail": "Your due is {days} days overdue",
         "pendingDetail": "Due by {day} {month}",
         "paidLateSummary": "You paid on {date} · {days} days late",
-        "paidOnTimeSummary": "You paid on {date}"
+        "paidOnTimeSummary": "You paid on {date}",
+        "duesUpToDate": "Your dues are up to date",
+        "debtBannerOverdue": "{count} overdue due · {amount}",
+        "debtBannerPending": "{count} due pending · {amount}",
+        "paymentRecordsLabel": "Payment records",
+        "ledgerPaidSubtitle": "Paid on {date}",
+        "ledgerOverdueSubtitle": "{days} days overdue",
+        "ledgerPendingSubtitle": "Due by: {date}",
+        "badgePaid": "Paid",
+        "badgePending": "Pending",
+        "badgeOverdue": "Overdue",
+        "badgeWaived": "Waived"
       },
       "transactions": {
         "title": "Dues Transaction History",

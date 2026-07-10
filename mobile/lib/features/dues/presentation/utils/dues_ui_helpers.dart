@@ -250,3 +250,70 @@ String residentDueStatusDetail(BuildContext context, DueEntity due) {
 String residentDueCardSubtitle(BuildContext context, DueEntity due) {
   return residentDueStatusDetail(context, due);
 }
+
+/// Ledger satırı alt metni — kısa, durum odaklı.
+String residentDueLedgerSubtitle(BuildContext context, DueEntity due) {
+  final r = context.t.features.dues.resident;
+  final languageCode = AppIntlLocale.fromContext(context);
+  switch (due.status) {
+    case DueStatus.overdue:
+      return r.ledgerOverdueSubtitle
+          .replaceAll('{days}', '${_overdueDayCount(due)}');
+    case DueStatus.paid:
+      final paidAt = due.paidAt;
+      if (paidAt == null) return r.badgePaid;
+      final dateStr = AppDateFormat.dateMedium(
+        paidAt,
+        languageCode: languageCode,
+      );
+      return r.ledgerPaidSubtitle.replaceAll('{date}', dateStr);
+    case DueStatus.pending:
+      final dueDate = due.dueDate;
+      if (dueDate == null) return context.t.common.dueDateLabel;
+      final dateStr = AppDateFormat.dateMedium(
+        dueDate,
+        languageCode: languageCode,
+      );
+      return r.ledgerPendingSubtitle.replaceAll('{date}', dateStr);
+    case DueStatus.waived:
+      return r.waivedStatus;
+  }
+}
+
+/// Ledger rozeti — kısa etiket (Ödendi / Bekliyor / Gecikmiş).
+DuesStatusVisual residentDueLedgerStatusVisual(
+  BuildContext context,
+  DueStatus status,
+) {
+  final r = context.t.features.dues.resident;
+  switch (status) {
+    case DueStatus.paid:
+      return DuesStatusVisual(
+        label: r.badgePaid,
+        fg: AppColors.statusGreen,
+        bg: AppColors.statusGreenBg,
+        icon: Icons.check_rounded,
+      );
+    case DueStatus.overdue:
+      return DuesStatusVisual(
+        label: r.badgeOverdue,
+        fg: AppColors.statusRed,
+        bg: AppColors.statusRedBg,
+        icon: Icons.warning_amber_rounded,
+      );
+    case DueStatus.waived:
+      return DuesStatusVisual(
+        label: r.badgeWaived,
+        fg: AppColors.mutedText,
+        bg: AppColors.dashboardBackground,
+        icon: Icons.remove_circle_outline,
+      );
+    case DueStatus.pending:
+      return DuesStatusVisual(
+        label: r.badgePending,
+        fg: AppColors.statusAmber,
+        bg: AppColors.statusAmberBg,
+        icon: Icons.schedule_rounded,
+      );
+  }
+}
