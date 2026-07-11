@@ -16,7 +16,7 @@ import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../../shared/widgets/premium_filter_picker.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
 import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
-import '../../../dashboard/presentation/utils/manager_dashboard_mapper.dart';
+import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
 import '../providers/dekont_provider.dart';
 import '../providers/manager_dekont_filter_provider.dart';
 import '../widgets/dekont_list_card.dart';
@@ -37,22 +37,18 @@ class ManagerDekontsScreen extends ConsumerStatefulWidget {
 class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
   final ScrollController _scrollController = ScrollController();
   late DashboardFilterScope _filterScope;
-  String? _localBuildingId;
 
   @override
   void initState() {
     super.initState();
     _filterScope = widget.initialScope;
-    if (widget.initialScope.isBuilding) {
-      _localBuildingId = widget.initialScope.buildingId;
-    }
     attachPaginationScroll(
       _scrollController,
       () => ref.read(managerDekontsNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(managerDekontsNotifierProvider).canLoadMore,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) unawaited(_loadForCurrentScope());
+      if (mounted) unawaited(_bootstrap());
     });
   }
 
@@ -62,59 +58,38 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
     super.dispose();
   }
 
-  List<BuildingEntity> _scopedBuildings(List<BuildingEntity> buildings) {
-    return ManagerDashboardMapper.filterBuildingsByScope(
-      buildings,
-      siteId: _filterScope.siteId,
-      buildingId: _filterScope.buildingId,
-    );
+  /// Dekontlar yalnızca tek bina ile çalışır; Tümü/Site → somut binaya düşürülür.
+  DashboardFilterScope _normalizeToBuildingScope(
+    DashboardFilterScope scope,
+    List<BuildingEntity> buildings,
+  ) {
+    return normalizeToBuildingScope(scope, buildings);
   }
 
-  String? _resolveLocalBuildingId(List<BuildingEntity> buildings) {
-    if (_filterScope.isBuilding) return _filterScope.buildingId;
-    final scoped = _scopedBuildings(buildings);
-    if (_localBuildingId != null &&
-        scoped.any((b) => b.id == _localBuildingId)) {
-      return _localBuildingId;
-    }
-    return null;
-  }
-
-  Future<void> _loadForCurrentScope() async {
+  Future<void> _bootstrap() async {
     final buildings = ref.read(buildingsStoreProvider).value ?? [];
     if (buildings.isEmpty) return;
-    final buildingId = _resolveLocalBuildingId(buildings);
-    if (buildingId == null) {
-      return;
+    final normalized = _normalizeToBuildingScope(_filterScope, buildings);
+    if (normalized != _filterScope) {
+      setState(() => _filterScope = normalized);
     }
-    await _loadBuilding(buildingId);
+    await _loadCurrentBuilding();
   }
 
-  Future<void> _loadBuilding(String buildingId) {
-    _localBuildingId = buildingId;
-    return ref.read(managerDekontsNotifierProvider.notifier).loadBuilding(
-          buildingId,
+  Future<void> _loadCurrentBuilding() async {
+    final id = _filterScope.buildingId;
+    if (id == null || id.isEmpty) return;
+    await ref.read(managerDekontsNotifierProvider.notifier).loadBuilding(
+          id,
           filterKey: ref.read(managerDekontFilterProvider),
         );
   }
 
-  Future<void> _load() async {
-    final buildings = ref.read(buildingsStoreProvider).value ?? [];
-    final id = _resolveLocalBuildingId(buildings);
-    if (id == null) return;
-    await _loadBuilding(id);
-  }
-
   void _onScopeChanged(DashboardFilterScope scope) {
-    setState(() {
-      _filterScope = scope;
-      if (scope.isBuilding) {
-        _localBuildingId = scope.buildingId;
-      } else {
-        _localBuildingId = null;
-      }
-    });
-    unawaited(_loadForCurrentScope());
+    final buildings = ref.read(buildingsStoreProvider).value ?? [];
+    final normalized = _normalizeToBuildingScope(scope, buildings);
+    setState(() => _filterScope = normalized);
+    unawaited(_loadCurrentBuilding());
   }
 
   String _dekontFilterLabel(BuildContext context, String? key) {
@@ -185,7 +160,7 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
       ],
       onApply: () {
         ref.read(managerDekontFilterProvider.notifier).select(draftKey);
-        _load();
+        unawaited(_loadCurrentBuilding());
       },
     );
   }
@@ -195,9 +170,8 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
     final buildings = ref.watch(buildingsStoreProvider).value ?? [];
     final state = ref.watch(managerDekontsNotifierProvider);
     final t = context.t.features.dekont;
-    final buildingId = _resolveLocalBuildingId(buildings);
-    final needsBuildingPick =
-        buildings.isNotEmpty && buildingId == null && !_filterScope.isBuilding;
+    final buildingId = _filterScope.buildingId;
+    final canFilter = buildingId != null && buildingId.isNotEmpty;
 
     return DashboardSecondaryScaffold(
       title: t.managerTitle,
@@ -210,20 +184,22 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
                 children: [
                   DashboardBuildingSelector(
                     buildings: buildings,
-                    scope: _filterScope,
-                    includeAllOption: true,
+                    scope: _filterScope.isBuilding
+                        ? _filterScope
+                        : _normalizeToBuildingScope(_filterScope, buildings),
+                    includeAllOption: false,
                     onScopeChanged: _onScopeChanged,
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                   PremiumFilterButton(
                     hasActiveFilters:
                         ref.watch(managerDekontFilterProvider) != null,
-                    onPressed: buildingId == null ? null : _openFilterSheet,
+                    onPressed: canFilter ? _openFilterSheet : null,
                   ),
                 ],
               ),
         list: RefreshIndicator(
-          onRefresh: _load,
+          onRefresh: _loadCurrentBuilding,
           child: buildings.isEmpty
               ? ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -234,18 +210,7 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
                     ),
                   ],
                 )
-              : needsBuildingPick
-                  ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        EmptyStateWidget(
-                          icon: Icons.apartment_outlined,
-                          title: context.t.features.notifications.noBuilding,
-                          subtitle: t.emptySubtitleManager,
-                        ),
-                      ],
-                    )
-                  : _buildList(context, state),
+              : _buildList(context, state),
         ),
       ),
     );

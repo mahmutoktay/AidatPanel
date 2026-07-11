@@ -54,6 +54,21 @@ class AppRouteGuard {
       return '/resident-dashboard';
     }
 
+    // Çapraz role dashboard erişimini engelle.
+    if (authState.isAuthenticated && authState.user != null) {
+      final role = authState.user!.role;
+      if (role == UserRole.resident &&
+          (loc == '/manager-dashboard' ||
+              loc.startsWith('/manager-dashboard/'))) {
+        return '/resident-dashboard';
+      }
+      if (role == UserRole.manager &&
+          (loc == '/resident-dashboard' ||
+              loc.startsWith('/resident-dashboard/'))) {
+        return '/manager-dashboard';
+      }
+    }
+
     // Eski URL uyumu → dashboard alt route'ları (root navigator).
     if (path == '/manager/tickets') return '/manager-dashboard/tickets';
     if (path == '/manager/expenses') return '/manager-dashboard/expenses';

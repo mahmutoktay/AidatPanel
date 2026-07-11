@@ -21,7 +21,7 @@ import '../../../../shared/widgets/premium_filter_picker.dart';
 import '../../../../shared/widgets/premium_filter_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
-import '../../../dashboard/presentation/utils/manager_dashboard_mapper.dart';
+import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../providers/expenses_provider.dart';
 import '../utils/expense_labels.dart';
@@ -43,8 +43,6 @@ class ManagerExpensesScreen extends ConsumerStatefulWidget {
 class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
   final ScrollController _scrollController = ScrollController();
   late DashboardFilterScope _filterScope;
-  String? _localBuildingId;
-  String? _lastLoadedBuildingId;
   late int _month;
   late int _year;
 
@@ -55,16 +53,13 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     _month = now.month;
     _year = now.year;
     _filterScope = widget.initialScope;
-    if (widget.initialScope.isBuilding) {
-      _localBuildingId = widget.initialScope.buildingId;
-    }
     attachPaginationScroll(
       _scrollController,
       () => ref.read(expensesNotifierProvider.notifier).loadMore(),
       canLoad: () => ref.read(expensesNotifierProvider).canLoadMore,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) unawaited(_loadForCurrentScope());
+      if (mounted) unawaited(_bootstrap());
     });
   }
 
@@ -74,78 +69,47 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     super.dispose();
   }
 
-  List<BuildingEntity> _scopedBuildings(List<BuildingEntity> buildings) {
-    return ManagerDashboardMapper.filterBuildingsByScope(
-      buildings,
-      siteId: _filterScope.siteId,
-      buildingId: _filterScope.buildingId,
-    );
+  /// Giderler yalnızca tek bina ile çalışır; Tümü/Site → somut binaya düşürülür.
+  DashboardFilterScope _normalizeToBuildingScope(
+    DashboardFilterScope scope,
+    List<BuildingEntity> buildings,
+  ) {
+    return normalizeToBuildingScope(scope, buildings);
   }
 
-  String? _resolveLocalBuildingId(List<BuildingEntity> buildings) {
-    if (_filterScope.isBuilding) return _filterScope.buildingId;
-    final scoped = _scopedBuildings(buildings);
-    if (_localBuildingId != null &&
-        scoped.any((b) => b.id == _localBuildingId)) {
-      return _localBuildingId;
-    }
-    return null;
-  }
-
-  Future<void> _loadForCurrentScope() async {
+  Future<void> _bootstrap() async {
     final buildings = ref.read(buildingsStoreProvider).value ?? [];
     if (buildings.isEmpty) return;
-
-    final buildingId = _resolveLocalBuildingId(buildings);
-    if (buildingId == null) {
-      _lastLoadedBuildingId = null;
-      return;
+    final normalized = _normalizeToBuildingScope(_filterScope, buildings);
+    if (normalized != _filterScope) {
+      setState(() => _filterScope = normalized);
     }
-    if (_lastLoadedBuildingId == buildingId) {
-      await _loadBuilding(buildingId);
-      return;
-    }
-    await _loadBuilding(buildingId);
+    await _loadCurrentBuilding();
   }
 
-  Future<void> _loadBuilding(String buildingId) {
-    _lastLoadedBuildingId = buildingId;
-    _localBuildingId = buildingId;
-    return ref
+  Future<void> _loadCurrentBuilding() async {
+    final id = _filterScope.buildingId;
+    if (id == null || id.isEmpty) return;
+    await ref
         .read(expensesNotifierProvider.notifier)
-        .load(buildingId, month: _month, year: _year);
-  }
-
-  Future<void> _load() async {
-    final buildings = ref.read(buildingsStoreProvider).value ?? [];
-    final id = _resolveLocalBuildingId(buildings);
-    if (id == null) return;
-    await _loadBuilding(id);
+        .load(id, month: _month, year: _year);
   }
 
   void _onScopeChanged(DashboardFilterScope scope) {
-    setState(() {
-      _filterScope = scope;
-      if (scope.isBuilding) {
-        _localBuildingId = scope.buildingId;
-      } else {
-        // Site/Tümü: üst ekranı bozmadan yerel bina seçimini temizle.
-        _localBuildingId = null;
-        _lastLoadedBuildingId = null;
-      }
-    });
-    unawaited(_loadForCurrentScope());
+    final buildings = ref.read(buildingsStoreProvider).value ?? [];
+    final normalized = _normalizeToBuildingScope(scope, buildings);
+    setState(() => _filterScope = normalized);
+    unawaited(_loadCurrentBuilding());
   }
 
   Future<void> _openForm({ExpenseEntity? expense}) async {
-    final buildings = ref.read(buildingsStoreProvider).value ?? [];
-    final id = _resolveLocalBuildingId(buildings);
+    final id = _filterScope.buildingId;
     if (id == null) return;
     final ok = await context.push<bool>(
       '/manager-dashboard/expenses/form?buildingId=${Uri.encodeComponent(id)}',
       extra: expense,
     );
-    if (ok == true && mounted) unawaited(_load());
+    if (ok == true && mounted) unawaited(_loadCurrentBuilding());
   }
 
   Future<void> _confirmDelete(ExpenseEntity expense) async {
@@ -252,7 +216,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
           _month = draftMonth;
           _year = draftYear;
         });
-        _load();
+        unawaited(_loadCurrentBuilding());
       },
     );
   }
@@ -262,14 +226,13 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
     final buildings = ref.watch(buildingsStoreProvider).value ?? [];
     final state = ref.watch(expensesNotifierProvider);
     final t = context.t.features.expenses;
-    final buildingId = _resolveLocalBuildingId(buildings);
-    final needsBuildingPick =
-        buildings.isNotEmpty && buildingId == null && !_filterScope.isBuilding;
+    final buildingId = _filterScope.buildingId;
+    final canOperate = buildingId != null && buildingId.isNotEmpty;
 
     return DashboardSecondaryScaffold(
       title: t.title,
       showNotificationAction: true,
-      floatingActionButton: buildingId == null
+      floatingActionButton: !canOperate
           ? null
           : FloatingActionButton.extended(
               onPressed: () => _openForm(),
@@ -284,24 +247,26 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
                 children: [
                   DashboardBuildingSelector(
                     buildings: buildings,
-                    scope: _filterScope,
-                    includeAllOption: true,
+                    scope: _filterScope.isBuilding
+                        ? _filterScope
+                        : _normalizeToBuildingScope(_filterScope, buildings),
+                    includeAllOption: false,
                     onScopeChanged: _onScopeChanged,
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                   PremiumFilterButton(
                     hasActiveFilters: _hasNonDefaultPeriod,
-                    onPressed: buildingId == null ? null : _openFilterSheet,
+                    onPressed: canOperate ? _openFilterSheet : null,
                   ),
-                  if (state.summary != null && buildingId != null) ...[
+                  if (state.summary != null && canOperate) ...[
                     const SizedBox(height: AppSizes.spacingM),
                     _SummaryCard(summary: state.summary!),
                   ],
                 ],
               ),
         list: RefreshIndicator(
-          onRefresh: _load,
-          child: needsBuildingPick
+          onRefresh: _loadCurrentBuilding,
+          child: buildings.isEmpty
               ? ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: [
@@ -344,7 +309,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
                   Text(state.error!, textAlign: TextAlign.center),
                   const SizedBox(height: AppSizes.spacingM),
                   FilledButton(
-                    onPressed: () => unawaited(_load()),
+                    onPressed: () => unawaited(_loadCurrentBuilding()),
                     child: Text(context.t.common.tryAgain),
                   ),
                 ],

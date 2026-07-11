@@ -9,6 +9,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
+import '../../../../shared/widgets/form_step_actions.dart';
 import '../../../../shared/widgets/profile_avatar.dart';
 import '../../../../shared/widgets/profile_avatar_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -232,9 +233,6 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
           ),
       ],
       body: _buildBody(context, profileState, user, subscriptionState),
-      bottomNavigationBar: _editing && user != null
-          ? _buildSaveBar(context, profileState)
-          : null,
     );
   }
 
@@ -418,6 +416,14 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                 ),
               ],
             ),
+          ] else ...[
+            FormStepActions(
+              primaryLabel: t.common.save,
+              onPrimary: profileState.isSaving ? null : _save,
+              onBack: profileState.isSaving ? null : _cancelEdit,
+              backLabel: t.common.cancel,
+              isLoading: profileState.isSaving,
+            ),
           ],
         ],
       ),
@@ -433,35 +439,6 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
         }
       },
       child: content,
-    );
-  }
-
-  Widget _buildSaveBar(BuildContext context, ProfileState profileState) {
-    final t = context.t;
-    final saving = profileState.isSaving;
-
-    return ColoredBox(
-      color: AppColors.dashboardBackground,
-      child: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-        child: SizedBox(
-          height: ProfileSettingsUi.buttonHeight,
-          child: ElevatedButton(
-            onPressed: saving ? null : _save,
-            style: ProfileSettingsUi.primaryButton,
-            child: saving
-                ? const SizedBox(
-                    height: 22,
-                    width: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.4,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(t.common.save),
-          ),
-        ),
-      ),
     );
   }
 }

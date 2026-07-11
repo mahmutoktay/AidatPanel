@@ -1154,6 +1154,9 @@
       "loadError": "Could not load expenses",
       "emptyTitle": "No expenses this period",
       "emptySubtitle": "Add a new expense from the top-right button",
+      "residentTitle": "Building Expenses",
+      "residentEmptySubtitle": "Your manager has not added expenses for this period yet",
+      "quickActionLabel": "Building Expenses",
       "receiptUrlLabel": "Receipt link (HTTPS)",
       "receiptUrlHint": "Optional — public URL to the receipt file",
       "receiptUrlInvalid": "URL must start with https://",
@@ -1409,6 +1412,7 @@
     },
     "dashboard": {
       "allBuildings": "All Buildings",
+      "properties": "Properties",
       "selectBuilding": "Select building",
       "searchBuildings": "Search by name or address",
       "buildingPickerTapHint": "Tap to search and select a building",

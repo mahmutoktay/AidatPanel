@@ -10,6 +10,7 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/app_date_field.dart';
 import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
+import '../../../../shared/widgets/form_step_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../expenses/domain/entities/expense_entity.dart';
 import '../../../expenses/presentation/utils/expense_labels.dart';
@@ -191,27 +192,12 @@ class _SiteExpenseFormScreenState extends ConsumerState<SiteExpenseFormScreen> {
               ),
               maxLines: 3,
             ),
+            FormStepActions(
+              primaryLabel: _isEdit ? context.t.common.save : t.addExpense,
+              onPrimary: _submitting ? null : _onSubmit,
+              isLoading: _submitting,
+            ),
           ],
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-        child: SizedBox(
-          height: AppSizes.buttonHeightPrimary,
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: _submitting ? null : _onSubmit,
-            child: _submitting
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(_isEdit ? context.t.common.save : t.addExpense),
-          ),
         ),
       ),
     );

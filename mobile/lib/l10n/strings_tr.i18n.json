@@ -1154,6 +1154,9 @@
       "loadError": "Giderler yüklenemedi",
       "emptyTitle": "Bu dönemde gider yok",
       "emptySubtitle": "Sağ üstten yeni gider ekleyebilirsiniz",
+      "residentTitle": "Bina Giderleri",
+      "residentEmptySubtitle": "Yönetici bu dönem için henüz gider eklemedi",
+      "quickActionLabel": "Bina Giderleri",
       "receiptUrlLabel": "Makbuz bağlantısı (HTTPS)",
       "receiptUrlHint": "Opsiyonel — internetteki makbuz dosyası adresi",
       "receiptUrlInvalid": "Adres https:// ile başlamalıdır",
@@ -1409,6 +1412,7 @@
     },
     "dashboard": {
       "allBuildings": "Tüm Binalar",
+      "properties": "Mülkler",
       "selectBuilding": "Bina seç",
       "searchBuildings": "Bina adı veya adres ara",
       "buildingPickerTapHint": "Dokunarak bina arayın ve seçin",

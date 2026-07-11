@@ -130,20 +130,18 @@ class TicketDetailTimelineEntry extends StatelessWidget {
                           ),
                           child: Text(
                             roleText.toUpperCase(),
-                            style: AppTypography.caption.copyWith(
+                            style: AppTypography.body2.copyWith(
                               color: themeColor,
                               fontWeight: FontWeight.w900,
-                              fontSize: 9,
                               letterSpacing: 0.5,
                             ),
                           ),
                         ),
                         Text(
                           dateStr,
-                          style: AppTypography.caption.copyWith(
+                          style: AppTypography.body2.copyWith(
                             color: AppColors.textDisabled,
                             fontWeight: FontWeight.w700,
-                            fontSize: 11,
                           ),
                         ),
                       ],

@@ -715,41 +715,49 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
                   ),
                   const SizedBox(height: AppSizes.spacingS),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: AnimatedSwitcher(
-                            duration: onboardingStepTransitionDuration,
-                            switchInCurve: Curves.easeInOutCubic,
-                            switchOutCurve: Curves.easeInOutCubic,
-                            layoutBuilder: (currentChild, previousChildren) {
-                              return Stack(
-                                fit: StackFit.expand,
-                                alignment: Alignment.topCenter,
-                                children: [
-                                  ...previousChildren,
-                                  ?currentChild,
-                                ],
-                              );
-                            },
-                            transitionBuilder: (child, animation) {
-                              return onboardingStepTransition(child, animation);
-                            },
-                            child: KeyedSubtree(
-                              key: ValueKey(ob.currentStepId),
-                              child: SizedBox.expand(
-                                child: _buildStep(
+                    child: AnimatedSwitcher(
+                      duration: onboardingStepTransitionDuration,
+                      switchInCurve: Curves.easeInOutCubic,
+                      switchOutCurve: Curves.easeInOutCubic,
+                      layoutBuilder: (currentChild, previousChildren) {
+                        return Stack(
+                          fit: StackFit.expand,
+                          alignment: Alignment.topCenter,
+                          children: [
+                            ...previousChildren,
+                            ?currentChild,
+                          ],
+                        );
+                      },
+                      transitionBuilder: (child, animation) {
+                        return onboardingStepTransition(child, animation);
+                      },
+                      child: KeyedSubtree(
+                        key: ValueKey(ob.currentStepId),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: SingleChildScrollView(
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildStep(
                                   context,
                                   ob,
                                   authState.isLoading,
                                 ),
-                              ),
+                                _buildStepActions(
+                                  context,
+                                  ob,
+                                  authState.isLoading,
+                                ),
+                                const SizedBox(height: AppSizes.spacingXL),
+                              ],
                             ),
                           ),
                         ),
-                        _buildStepActions(context, ob, authState.isLoading),
-                      ],
+                      ),
                     ),
                   ),
                 ],

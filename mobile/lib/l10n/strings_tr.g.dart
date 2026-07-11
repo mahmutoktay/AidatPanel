@@ -1176,6 +1176,9 @@ class _Translations$features$expenses$tr implements Translations$features$expens
 	@override String get loadError => 'Giderler yüklenemedi';
 	@override String get emptyTitle => 'Bu dönemde gider yok';
 	@override String get emptySubtitle => 'Sağ üstten yeni gider ekleyebilirsiniz';
+	@override String get residentTitle => 'Bina Giderleri';
+	@override String get residentEmptySubtitle => 'Yönetici bu dönem için henüz gider eklemedi';
+	@override String get quickActionLabel => 'Bina Giderleri';
 	@override String get receiptUrlLabel => 'Makbuz bağlantısı (HTTPS)';
 	@override String get receiptUrlHint => 'Opsiyonel — internetteki makbuz dosyası adresi';
 	@override String get receiptUrlInvalid => 'Adres https:// ile başlamalıdır';
@@ -1442,6 +1445,7 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 
 	// Translations
 	@override String get allBuildings => 'Tüm Binalar';
+	@override String get properties => 'Mülkler';
 	@override String get selectBuilding => 'Bina seç';
 	@override String get searchBuildings => 'Bina adı veya adres ara';
 	@override String get buildingPickerTapHint => 'Dokunarak bina arayın ve seçin';
@@ -2994,6 +2998,9 @@ extension on TranslationsTr {
 			'features.expenses.loadError' => 'Giderler yüklenemedi',
 			'features.expenses.emptyTitle' => 'Bu dönemde gider yok',
 			'features.expenses.emptySubtitle' => 'Sağ üstten yeni gider ekleyebilirsiniz',
+			'features.expenses.residentTitle' => 'Bina Giderleri',
+			'features.expenses.residentEmptySubtitle' => 'Yönetici bu dönem için henüz gider eklemedi',
+			'features.expenses.quickActionLabel' => 'Bina Giderleri',
 			'features.expenses.receiptUrlLabel' => 'Makbuz bağlantısı (HTTPS)',
 			'features.expenses.receiptUrlHint' => 'Opsiyonel — internetteki makbuz dosyası adresi',
 			'features.expenses.receiptUrlInvalid' => 'Adres https:// ile başlamalıdır',
@@ -3233,6 +3240,7 @@ extension on TranslationsTr {
 			'features.reports.shareFailed' => 'Rapor paylaşılamadı. Lütfen tekrar deneyin.',
 			'features.reports.failed' => 'Rapor oluşturulamadı. Lütfen tekrar deneyin.',
 			'features.dashboard.allBuildings' => 'Tüm Binalar',
+			'features.dashboard.properties' => 'Mülkler',
 			'features.dashboard.selectBuilding' => 'Bina seç',
 			'features.dashboard.searchBuildings' => 'Bina adı veya adres ara',
 			'features.dashboard.buildingPickerTapHint' => 'Dokunarak bina arayın ve seçin',

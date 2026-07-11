@@ -14,6 +14,7 @@ import '../../domain/entities/due_entity.dart';
 import '../../domain/entities/due_transaction_entity.dart';
 import '../providers/due_payment_detail_provider.dart';
 import '../utils/dues_ui_helpers.dart';
+import 'due_breakdown_section.dart';
 import 'due_transaction_status_chip.dart';
 
 class DueDetailSheet extends ConsumerWidget {
@@ -102,6 +103,10 @@ class DueDetailSheet extends ConsumerWidget {
           _InfoRow(label: t.periodLabel, value: monthLabel),
           const SizedBox(height: AppSizes.spacingS),
           _InfoRow(label: t.amountLabel, value: amountText),
+          DueBreakdownSection(
+            breakdown: due.breakdown,
+            currency: due.currency,
+          ),
           const SizedBox(height: AppSizes.spacingS),
           Row(
             children: [
@@ -232,12 +237,12 @@ class DueDetailSheet extends ConsumerWidget {
             ),
         ],
       ),
-      actions: _isPaid
+      actions: _isPaid || onCollectPayment == null
           ? null
           : PremiumSheetActions(
               primaryLabel: t.collectPayment,
               primaryLoading: isCollecting,
-              primaryEnabled: onCollectPayment != null && !isCollecting,
+              primaryEnabled: !isCollecting,
               onPrimary: onCollectPayment,
             ),
     );

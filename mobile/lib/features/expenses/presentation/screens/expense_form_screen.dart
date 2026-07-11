@@ -12,6 +12,7 @@ import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/app_date_field.dart';
 import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
+import '../../../../shared/widgets/form_step_actions.dart';
 import '../../../../shared/widgets/sliding_segmented_control.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../profile/presentation/theme/profile_settings_ui.dart';
@@ -53,6 +54,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   int get _sectionCount {
     var count = 2; // category+date, receipt
     if (!_isEdit) count += 1; // target month
+    count += 1; // submit actions
     return count;
   }
 
@@ -104,42 +106,6 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     return DashboardSecondaryScaffold(
       title: _isEdit ? t.editTitle : t.createTitle,
       canPop: !_submitting,
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (!_isEdit && _receiptFiles.isEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSizes.spacingS),
-                child: Text(
-                  t.receiptRequired,
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.error,
-                  ),
-                ),
-              ),
-            SizedBox(
-              height: AppSizes.buttonHeightPrimary,
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _submitting ? null : _submit,
-                child: _submitting
-                    ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(t.submit),
-              ),
-            ),
-          ],
-        ),
-      ),
       body: Form(
         key: _formKey,
         child: ListView.builder(
@@ -345,6 +311,34 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                           );
                     },
                   ),
+                ),
+              );
+            }
+            sectionIndex -= 1;
+
+            if (sectionIndex == 0) {
+              return Padding(
+                padding: DashboardScreenStyle.listItemPadding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!_isEdit && _receiptFiles.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSizes.spacingS),
+                        child: Text(
+                          t.receiptRequired,
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.error,
+                          ),
+                        ),
+                      ),
+                    FormStepActions(
+                      primaryLabel: t.submit,
+                      onPrimary: _submitting ? null : _submit,
+                      isLoading: _submitting,
+                      includeTopSpacing: false,
+                    ),
+                  ],
                 ),
               );
             }

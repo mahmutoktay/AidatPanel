@@ -65,20 +65,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     DashboardFilterScope scope,
     List<BuildingEntity> buildings,
   ) {
-    if (scope.isBuilding &&
-        scope.buildingId != null &&
-        buildings.any((b) => b.id == scope.buildingId)) {
-      return scope;
-    }
-    final resolved = resolveScopeBuildingId(scope, buildings);
-    if (resolved != null) {
-      return DashboardFilterScope.building(resolved);
-    }
-    if (buildings.isNotEmpty) {
-      final sorted = [...buildings]..sort((a, b) => a.name.compareTo(b.name));
-      return DashboardFilterScope.building(sorted.first.id);
-    }
-    return scope;
+    return normalizeToBuildingScope(scope, buildings);
   }
 
   Future<void> _bootstrap() async {

@@ -293,6 +293,16 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 - [x] Firebase Analytics & Crashlytics
 - [ ] v1.0.0 release tag
 
+### Lansman öncesi UX / akış temizliği (2026-07-11)
+
+- [x] Aidat breakdown UI bağlandı (`DueDetailSheet`, `MakePaymentScreen`, sakin ledger detay)
+- [x] Sakin gider listesi (`ResidentExpensesScreen` + `/resident-dashboard/expenses` + quick actions)
+- [x] Giderler / Dekontlar: «Tüm Binalar» kaldırıldı (tickets normalize pattern + deep-link resolve)
+- [x] Çapraz role route guard (`/manager-dashboard` ↔ `/resident-dashboard`)
+- [x] Yönetici nav etiketi: «Mülkler» (Siteler | Binalar)
+- [x] Kritik tipografi (ledger, bildirim chip, ticket timeline → min 16sp)
+- [x] Gider listesi 500: `Expense.rawText` vb. OCR kolonları migration eksikti → `20260711220000_expense_ocr_fields` deploy
+
 ---
 
 ## ▶ FAZ 8 — Site Yönetimi (AKTİF)

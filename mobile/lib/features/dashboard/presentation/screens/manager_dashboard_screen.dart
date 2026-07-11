@@ -171,7 +171,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
             DashboardNavDestination(
               icon: Icons.apartment_outlined,
               selectedIcon: Icons.apartment,
-              label: context.t.common.buildings,
+              label: context.t.features.dashboard.properties,
             ),
             DashboardNavDestination(
               icon: Icons.receipt_outlined,

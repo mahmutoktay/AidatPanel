@@ -254,10 +254,9 @@ class _BadgeChip extends StatelessWidget {
           ],
           Text(
             label,
-            style: AppTypography.caption.copyWith(
+            style: AppTypography.body2.copyWith(
               color: textColor,
               fontWeight: FontWeight.w700,
-              fontSize: 11,
             ),
           ),
         ],

@@ -17,11 +17,12 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/document_preview_screen.dart';
+import '../../../../shared/widgets/form_step_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../../dues/presentation/utils/dues_ui_helpers.dart';
-import '../../../profile/presentation/theme/profile_settings_ui.dart';
+import '../../../dues/presentation/widgets/due_breakdown_section.dart';
 import '../providers/dekont_provider.dart';
 import '../providers/share_intent_provider.dart';
 import '../widgets/copy_payment_field.dart';
@@ -331,63 +332,14 @@ class _MakePaymentScreenState extends ConsumerState<MakePaymentScreen> {
                         ? null
                         : () => _openPickedPreview(paymentState),
                   ),
+                FormStepActions(
+                  primaryLabel:
+                      context.t.features.auth.onboarding.continueButton,
+                  onPrimary: !busy && canSubmit ? _upload : null,
+                  isLoading: busy,
+                ),
               ],
             ),
-      bottomNavigationBar: _buildSubmitBar(
-        context,
-        busy: busy,
-        canSubmit: canSubmit,
-        onContinue: _upload,
-      ),
-    );
-  }
-
-  Widget _buildSubmitBar(
-    BuildContext context, {
-    required bool busy,
-    required bool canSubmit,
-    required VoidCallback onContinue,
-  }) {
-    final continueLabel = context.t.features.auth.onboarding.continueButton;
-    return ColoredBox(
-      color: AppColors.dashboardBackground,
-      child: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-        child: SizedBox(
-          height: AppSizes.buttonHeightPrimary,
-          child: Material(
-            color: AppColors.primary,
-            borderRadius:
-                BorderRadius.circular(ProfileSettingsUi.radiusPill),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: !busy && canSubmit ? onContinue : null,
-              child: SizedBox(
-                height: AppSizes.buttonHeightPrimary,
-                width: double.infinity,
-                child: Center(
-                  child: busy
-                      ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.4,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(
-                          continueLabel,
-                          style: AppTypography.button.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -439,80 +391,100 @@ class _DueSelectableCard extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-          constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSizes.spacingM),
-          decoration: DashboardScreenStyle.whiteCard().copyWith(
-            borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-            border: selected
-                ? Border.all(color: AppColors.inkDark, width: 2)
-                : null,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                selected
-                    ? Icons.check_box_rounded
-                    : Icons.check_box_outline_blank_rounded,
-                color: selected ? AppColors.inkDark : AppColors.mutedText,
-                size: 26,
-              ),
-              const SizedBox(width: AppSizes.spacingM),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        width: double.infinity,
+        decoration: DashboardScreenStyle.whiteCard().copyWith(
+          borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+          border: selected
+              ? Border.all(color: AppColors.inkDark, width: 2)
+              : null,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            InkWell(
+              onTap: enabled ? onTap : null,
+              borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+              child: Padding(
+                padding: const EdgeInsets.all(AppSizes.spacingM),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      '$monthLabel ${due.year}',
-                      style: AppTypography.body1.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.inkDark,
+                    Icon(
+                      selected
+                          ? Icons.check_box_rounded
+                          : Icons.check_box_outline_blank_rounded,
+                      color:
+                          selected ? AppColors.inkDark : AppColors.mutedText,
+                      size: 26,
+                    ),
+                    const SizedBox(width: AppSizes.spacingM),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$monthLabel ${due.year}',
+                            style: AppTypography.body1.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.inkDark,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            subtitle,
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textSecondary,
+                    const SizedBox(width: AppSizes.spacingS),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: pillBg,
+                        borderRadius: BorderRadius.circular(
+                          DashboardScreenStyle.pillRadius,
+                        ),
+                      ),
+                      child: Text(
+                        AppCurrencyFormat.format(
+                          due.remainingAmount > 0
+                              ? due.remainingAmount
+                              : due.amount,
+                          decimalDigits: 2,
+                        ),
+                        style: AppTypography.caption.copyWith(
+                          color: pillFg,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: AppSizes.spacingS),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
+            ),
+            if (due.breakdown != null && due.breakdown!.hasExtras)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSizes.spacingM,
+                  0,
+                  AppSizes.spacingM,
+                  AppSizes.spacingM,
                 ),
-                decoration: BoxDecoration(
-                  color: pillBg,
-                  borderRadius: BorderRadius.circular(
-                    DashboardScreenStyle.pillRadius,
-                  ),
-                ),
-                child: Text(
-                  AppCurrencyFormat.format(
-                    due.remainingAmount > 0
-                        ? due.remainingAmount
-                        : due.amount,
-                    decimalDigits: 2,
-                  ),
-                  style: AppTypography.caption.copyWith(
-                    color: pillFg,
-                    fontWeight: FontWeight.w700,
-                  ),
+                child: DueBreakdownSection(
+                  breakdown: due.breakdown,
+                  currency: due.currency,
                 ),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );

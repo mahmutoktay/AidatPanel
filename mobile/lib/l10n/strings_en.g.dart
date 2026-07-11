@@ -3123,6 +3123,15 @@ class Translations$features$expenses$en {
 	/// en: 'Add a new expense from the top-right button'
 	String get emptySubtitle => 'Add a new expense from the top-right button';
 
+	/// en: 'Building Expenses'
+	String get residentTitle => 'Building Expenses';
+
+	/// en: 'Your manager has not added expenses for this period yet'
+	String get residentEmptySubtitle => 'Your manager has not added expenses for this period yet';
+
+	/// en: 'Building Expenses'
+	String get quickActionLabel => 'Building Expenses';
+
 	/// en: 'Receipt link (HTTPS)'
 	String get receiptUrlLabel => 'Receipt link (HTTPS)';
 
@@ -3828,6 +3837,9 @@ class Translations$features$dashboard$en {
 
 	/// en: 'All Buildings'
 	String get allBuildings => 'All Buildings';
+
+	/// en: 'Properties'
+	String get properties => 'Properties';
 
 	/// en: 'Select building'
 	String get selectBuilding => 'Select building';
@@ -6014,6 +6026,9 @@ extension on Translations {
 			'features.expenses.loadError' => 'Could not load expenses',
 			'features.expenses.emptyTitle' => 'No expenses this period',
 			'features.expenses.emptySubtitle' => 'Add a new expense from the top-right button',
+			'features.expenses.residentTitle' => 'Building Expenses',
+			'features.expenses.residentEmptySubtitle' => 'Your manager has not added expenses for this period yet',
+			'features.expenses.quickActionLabel' => 'Building Expenses',
 			'features.expenses.receiptUrlLabel' => 'Receipt link (HTTPS)',
 			'features.expenses.receiptUrlHint' => 'Optional — public URL to the receipt file',
 			'features.expenses.receiptUrlInvalid' => 'URL must start with https://',
@@ -6253,6 +6268,7 @@ extension on Translations {
 			'features.reports.shareFailed' => 'Could not share the report. Please try again.',
 			'features.reports.failed' => 'Could not generate the report. Please try again.',
 			'features.dashboard.allBuildings' => 'All Buildings',
+			'features.dashboard.properties' => 'Properties',
 			'features.dashboard.selectBuilding' => 'Select building',
 			'features.dashboard.searchBuildings' => 'Search by name or address',
 			'features.dashboard.buildingPickerTapHint' => 'Tap to search and select a building',

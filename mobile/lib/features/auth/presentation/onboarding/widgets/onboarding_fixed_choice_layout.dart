@@ -4,7 +4,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
 import '../../../../../core/theme/app_typography.dart';
 
-/// Rol / deneyim seçim adımları — kartlar sabit bölgede, alt aksiyonlar ekranda.
+/// Rol / deneyim seçim adımları — kartlar başlığın hemen altında.
 class OnboardingFixedChoiceLayout extends StatelessWidget {
   const OnboardingFixedChoiceLayout({
     super.key,
@@ -27,35 +27,25 @@ class OnboardingFixedChoiceLayout extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Flexible(
-          fit: FlexFit.loose,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  title,
-                  style: AppTypography.h2,
-                  textAlign: textAlign,
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: AppSizes.spacingS),
-                  Text(
-                    subtitle!,
-                    style: AppTypography.body1.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    textAlign: textAlign,
-                  ),
-                ],
-              ],
-            ),
-          ),
+        Text(
+          title,
+          style: AppTypography.h2,
+          textAlign: textAlign,
         ),
+        if (subtitle != null) ...[
+          const SizedBox(height: AppSizes.spacingS),
+          Text(
+            subtitle!,
+            style: AppTypography.body1.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: textAlign,
+          ),
+        ],
         const SizedBox(height: _choicesTopGap),
         choices,
-        const Spacer(),
       ],
     );
   }

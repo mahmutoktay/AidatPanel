@@ -23,6 +23,7 @@ import '../../features/tickets/presentation/screens/manager_tickets_screen.dart'
 import '../../features/tickets/presentation/screens/ticket_detail_screen.dart';
 import '../../features/expenses/presentation/screens/expense_form_screen.dart';
 import '../../features/expenses/presentation/screens/manager_expenses_screen.dart';
+import '../../features/expenses/presentation/screens/resident_expenses_screen.dart';
 import '../../features/expenses/domain/entities/expense_entity.dart';
 import '../../features/expenses/presentation/screens/expense_detail_screen.dart';
 import '../../features/dekont/presentation/screens/dekont_detail_screen.dart';
@@ -237,6 +238,12 @@ List<RouteBase> _residentDashboardChildRoutes() => [
       final dueId = state.uri.queryParameters['dueId'];
       return MakePaymentScreen(preselectedDueId: dueId);
     },
+  ),
+  GoRoute(
+    path: 'expenses',
+    name: 'resident_dashboard_expenses',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const ResidentExpensesScreen(),
   ),
   GoRoute(
     path: 'dekonts',

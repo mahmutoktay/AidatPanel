@@ -13,6 +13,7 @@ import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
+import '../../../../shared/widgets/form_step_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/ticket_entity.dart';
@@ -84,26 +85,6 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
         ref.read(residentTabIndexProvider.notifier).update(2);
         context.go('/resident-dashboard');
       },
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-        child: SizedBox(
-          height: AppSizes.buttonHeightPrimary,
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: _submitting ? null : _submit,
-            child: _submitting
-                ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(t.createTitle),
-          ),
-        ),
-      ),
       body: SafeArea(
         child: AbsorbPointer(
           absorbing: _submitting,
@@ -136,6 +117,11 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
                   imageName: _pickedImageName,
                   onPick: _pickImage,
                   onRemove: _removeImage,
+                ),
+                FormStepActions(
+                  primaryLabel: t.createTitle,
+                  onPrimary: _submitting ? null : _submit,
+                  isLoading: _submitting,
                 ),
               ],
             ),

@@ -25,19 +25,52 @@ DashboardFilterScope dashboardFilterScopeFromQuery(Map<String, String> query) {
   return const DashboardFilterScope.all();
 }
 
+/// Bina zorunlu ekranlar için Tümü/Site → somut bina.
+DashboardFilterScope normalizeToBuildingScope(
+  DashboardFilterScope scope,
+  List<BuildingEntity> buildings,
+) {
+  if (scope.isBuilding &&
+      scope.buildingId != null &&
+      buildings.any((b) => b.id == scope.buildingId)) {
+    return scope;
+  }
+  final resolved = resolveScopeBuildingId(scope, buildings);
+  if (resolved != null) {
+    return DashboardFilterScope.building(resolved);
+  }
+  if (buildings.isNotEmpty) {
+    final sorted = [...buildings]..sort((a, b) => a.name.compareTo(b.name));
+    return DashboardFilterScope.building(sorted.first.id);
+  }
+  return scope;
+}
+
 /// Ana Sayfa scope'unu Aidat İşlem Geçmişi route'una kodlar.
 String dueTransactionsPath(DashboardFilterScope scope) {
   return '/manager-dashboard/due-transactions${_scopeQuery(scope)}';
 }
 
-/// Ana Sayfa scope'unu Talepler ekranına kodlar.
-String ticketsPath(DashboardFilterScope scope) {
-  return '/manager-dashboard/tickets${_scopeQuery(scope)}';
+/// Ana Sayfa scope'unu Talepler ekranına kodlar (bina zorunlu).
+String ticketsPath(
+  DashboardFilterScope scope, [
+  List<BuildingEntity> buildings = const [],
+]) {
+  final normalized = buildings.isEmpty
+      ? scope
+      : normalizeToBuildingScope(scope, buildings);
+  return '/manager-dashboard/tickets${_scopeQuery(normalized)}';
 }
 
-/// Ana Sayfa scope'unu Giderler ekranına kodlar.
-String expensesPath(DashboardFilterScope scope) {
-  return '/manager-dashboard/expenses${_scopeQuery(scope)}';
+/// Ana Sayfa scope'unu Giderler ekranına kodlar (bina zorunlu).
+String expensesPath(
+  DashboardFilterScope scope, [
+  List<BuildingEntity> buildings = const [],
+]) {
+  final normalized = buildings.isEmpty
+      ? scope
+      : normalizeToBuildingScope(scope, buildings);
+  return '/manager-dashboard/expenses${_scopeQuery(normalized)}';
 }
 
 /// Ana Sayfa scope'unu geciken daireler listesine kodlar.
@@ -45,9 +78,15 @@ String overdueApartmentsPath(DashboardFilterScope scope) {
   return '/manager-dashboard/overdue-apartments${_scopeQuery(scope)}';
 }
 
-/// Ana Sayfa scope'unu yönetici dekont listesine kodlar.
-String dekontsPath(DashboardFilterScope scope) {
-  return '/manager-dashboard/dekonts${_scopeQuery(scope)}';
+/// Ana Sayfa scope'unu yönetici dekont listesine kodlar (bina zorunlu).
+String dekontsPath(
+  DashboardFilterScope scope, [
+  List<BuildingEntity> buildings = const [],
+]) {
+  final normalized = buildings.isEmpty
+      ? scope
+      : normalizeToBuildingScope(scope, buildings);
+  return '/manager-dashboard/dekonts${_scopeQuery(normalized)}';
 }
 
 /// Route query parametrelerinden başlangıç scope'unu çözer (aidat işlemleri).

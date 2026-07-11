@@ -200,8 +200,12 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
                 monthExpenseCount: monthExpensesCountAsync.value ?? 0,
                 monthAnnouncementCount: monthAnnouncementsAsync.value ?? 0,
                 pendingDuesActionCount: pendingDueActionCount,
-                onTickets: () => _openAndInvalidate(ticketsPath(filterScope)),
-                onExpenses: () => _openAndInvalidate(expensesPath(filterScope)),
+                onTickets: () => _openAndInvalidate(
+                  ticketsPath(filterScope, buildings),
+                ),
+                onExpenses: () => _openAndInvalidate(
+                  expensesPath(filterScope, buildings),
+                ),
                 onAnnouncement: () async {
                   final sent = await AnnouncementFormSheet.show(context);
                   if (!mounted) return;
