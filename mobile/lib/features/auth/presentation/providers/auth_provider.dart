@@ -145,24 +145,22 @@ class AuthNotifier extends Notifier<AuthState> {
     await login(identifier, password, ref);
   }
 
-  Future<void> checkManagerIdentifier({
-    required String rawIdentifier,
-    required bool isRegister,
-  }) async {
-    if (state.isLoading) return;
+  /// Yönetici e-posta/telefon kayıtlı mı? (`purpose: manager_identifier`).
+  Future<bool> checkManagerIdentifierExists(String rawIdentifier) async {
+    if (state.isLoading) return false;
     final identifierError =
         InputValidators.validateLoginIdentifier(rawIdentifier);
     if (identifierError != null) {
       state = state.copyWith(error: _identifierErrorMessage(identifierError));
-      return;
+      return false;
     }
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      await _authRepository.checkIdentifier(
-        identifier: rawIdentifier.trim(),
-        purpose: isRegister ? 'manager_register' : 'manager_login',
+      final exists = await _authRepository.checkManagerIdentifierExists(
+        rawIdentifier.trim(),
       );
       state = state.copyWith(isLoading: false, clearError: true);
+      return exists;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
       rethrow;

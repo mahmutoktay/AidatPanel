@@ -94,6 +94,25 @@ export async function checkIdentifierService({ identifier, purpose }) {
     throw new HttpError(400, "E-posta veya telefon numarası gereklidir.");
   }
 
+  if (purpose === "manager_identifier") {
+    const phone = isEmail ? null : normalizeTrPhone(normalized);
+    if (!isEmail && !phone) {
+      throw new HttpError(400, "Geçerli bir telefon numarası giriniz.");
+    }
+    const manager = await prisma.user.findFirst({
+      where: isEmail
+        ? { email: normalized, deletedAt: null, role: "MANAGER" }
+        : { phone, deletedAt: null, role: "MANAGER" },
+    });
+    if (manager) {
+      return { exists: true };
+    }
+    if (isEmail) {
+      await assertEmailAvailable(normalized);
+    }
+    return { exists: false };
+  }
+
   if (purpose === "manager_register") {
     if (isEmail) {
       await assertEmailAvailable(normalized);

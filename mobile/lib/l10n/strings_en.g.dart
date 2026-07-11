@@ -2731,8 +2731,8 @@ class Translations$features$dekont$en {
 	/// en: 'Amount to apply: {amount}'
 	String get reviewApplyAmount => 'Amount to apply: {amount}';
 
-	/// en: 'Remaining on selected dues: {amount}'
-	String get reviewRemainingAmount => 'Remaining on selected dues: {amount}';
+	/// en: 'Remaining after approval: {amount}'
+	String get reviewRemainingAmount => 'Remaining after approval: {amount}';
 
 	/// en: 'This receipt cannot be approved or rejected right now. Try again later.'
 	String get errorReviewStatus => 'This receipt cannot be approved or rejected right now. Try again later.';
@@ -2792,6 +2792,7 @@ class Translations$features$dekont$en {
 	String get filterRejected => 'Rejected';
 
 	late final Translations$features$dekont$resident$en resident = Translations$features$dekont$resident$en._(_root);
+	late final Translations$features$dekont$manager$en manager = Translations$features$dekont$manager$en._(_root);
 
 	/// en: 'Received'
 	String get statusReceived => 'Received';
@@ -4626,23 +4627,44 @@ class Translations$features$dekont$resident$en {
 
 	// Translations
 
-	/// en: 'Your receipt is being processed'
-	String get statusProcessing => 'Your receipt is being processed';
+	/// en: 'Processing'
+	String get statusProcessing => 'Processing';
 
-	/// en: 'Your receipt is awaiting approval'
-	String get statusAwaitingApproval => 'Your receipt is awaiting approval';
+	/// en: 'Awaiting approval'
+	String get statusAwaitingApproval => 'Awaiting approval';
 
-	/// en: 'Your payment was approved'
-	String get statusApproved => 'Your payment was approved';
+	/// en: 'Approved'
+	String get statusApproved => 'Approved';
 
-	/// en: 'Your payment was partially approved'
-	String get statusPartiallyApproved => 'Your payment was partially approved';
+	/// en: 'Partially approved'
+	String get statusPartiallyApproved => 'Partially approved';
 
-	/// en: 'Your receipt was rejected'
-	String get statusRejected => 'Your receipt was rejected';
+	/// en: 'Rejected'
+	String get statusRejected => 'Rejected';
 
-	/// en: 'Your receipt could not be matched'
-	String get statusCouldNotMatch => 'Your receipt could not be matched';
+	/// en: 'Manual review needed'
+	String get statusCouldNotMatch => 'Manual review needed';
+
+	/// en: 'Your receipt is being reviewed. The amount will appear shortly.'
+	String get statusDetailProcessing => 'Your receipt is being reviewed. The amount will appear shortly.';
+
+	/// en: 'Waiting for the manager's approval.'
+	String get statusDetailAwaitingApproval => 'Waiting for the manager\'s approval.';
+
+	/// en: 'Recipient details matched. Waiting for the manager's approval.'
+	String get statusDetailAwaitingIbanOk => 'Recipient details matched. Waiting for the manager\'s approval.';
+
+	/// en: 'Recipient details unclear. Waiting for the manager's approval.'
+	String get statusDetailAwaitingIbanIssue => 'Recipient details unclear. Waiting for the manager\'s approval.';
+
+	/// en: 'Your payment was approved.'
+	String get statusDetailApproved => 'Your payment was approved.';
+
+	/// en: 'Your payment was partially approved.'
+	String get statusDetailPartiallyApproved => 'Your payment was partially approved.';
+
+	/// en: 'Your receipt was rejected.'
+	String get statusDetailRejected => 'Your receipt was rejected.';
 
 	/// en: 'All your receipts'
 	String get filterAll => 'All your receipts';
@@ -4658,6 +4680,51 @@ class Translations$features$dekont$resident$en {
 
 	/// en: 'This due is overdue'
 	String get dueOverdueHint => 'This due is overdue';
+}
+
+// Path: features.dekont.manager
+class Translations$features$dekont$manager$en {
+	Translations$features$dekont$manager$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Processing'
+	String get statusProcessing => 'Processing';
+
+	/// en: 'Awaiting approval'
+	String get statusAwaitingApproval => 'Awaiting approval';
+
+	/// en: 'Approved'
+	String get statusApproved => 'Approved';
+
+	/// en: 'Partially approved'
+	String get statusPartiallyApproved => 'Partially approved';
+
+	/// en: 'Rejected'
+	String get statusRejected => 'Rejected';
+
+	/// en: 'Receipt is being processed. Details will appear shortly.'
+	String get statusDetailProcessing => 'Receipt is being processed. Details will appear shortly.';
+
+	/// en: 'Your approval is needed.'
+	String get statusDetailAwaitingApproval => 'Your approval is needed.';
+
+	/// en: 'Recipient details matched. Your approval is needed.'
+	String get statusDetailAwaitingIbanOk => 'Recipient details matched. Your approval is needed.';
+
+	/// en: 'Recipient details unclear. Check and decide.'
+	String get statusDetailAwaitingIbanIssue => 'Recipient details unclear. Check and decide.';
+
+	/// en: 'Payment approved.'
+	String get statusDetailApproved => 'Payment approved.';
+
+	/// en: 'Payment partially approved.'
+	String get statusDetailPartiallyApproved => 'Payment partially approved.';
+
+	/// en: 'Receipt rejected.'
+	String get statusDetailRejected => 'Receipt rejected.';
 }
 
 // Path: features.notifications.resident
@@ -4709,6 +4776,12 @@ class Translations$features$notifications$resident$en {
 
 	/// en: 'Announcement from management'
 	String get announcementFeedLabel => 'Announcement from management';
+
+	/// en: 'No announcements yet'
+	String get announcementsEmptyTitle => 'No announcements yet';
+
+	/// en: 'Announcements from management will appear here.'
+	String get announcementsEmptySubtitle => 'Announcements from management will appear here.';
 }
 
 // Path: features.notifications.permissionPrompt
@@ -5886,7 +5959,7 @@ extension on Translations {
 			'features.dekont.reviewAmountLabel' => 'Amount to approve (₺)',
 			'features.dekont.reviewAmountRequiredHint' => 'No amount was read from this receipt. Enter the amount manually — do not approve without an amount or the remaining balance will not be applied correctly.',
 			'features.dekont.reviewApplyAmount' => 'Amount to apply: {amount}',
-			'features.dekont.reviewRemainingAmount' => 'Remaining on selected dues: {amount}',
+			'features.dekont.reviewRemainingAmount' => 'Remaining after approval: {amount}',
 			'features.dekont.errorReviewStatus' => 'This receipt cannot be approved or rejected right now. Try again later.',
 			'features.dekont.errorNoFileSelected' => 'Please select a receipt file first.',
 			'features.dekont.errorNoDueSelected' => 'Please select at least one due.',
@@ -5906,17 +5979,38 @@ extension on Translations {
 			'features.dekont.filterPending' => 'Under review',
 			'features.dekont.filterApproved' => 'Approved',
 			'features.dekont.filterRejected' => 'Rejected',
-			'features.dekont.resident.statusProcessing' => 'Your receipt is being processed',
-			'features.dekont.resident.statusAwaitingApproval' => 'Your receipt is awaiting approval',
-			'features.dekont.resident.statusApproved' => 'Your payment was approved',
-			'features.dekont.resident.statusPartiallyApproved' => 'Your payment was partially approved',
-			'features.dekont.resident.statusRejected' => 'Your receipt was rejected',
-			'features.dekont.resident.statusCouldNotMatch' => 'Your receipt could not be matched',
+			'features.dekont.resident.statusProcessing' => 'Processing',
+			'features.dekont.resident.statusAwaitingApproval' => 'Awaiting approval',
+			'features.dekont.resident.statusApproved' => 'Approved',
+			'features.dekont.resident.statusPartiallyApproved' => 'Partially approved',
+			'features.dekont.resident.statusRejected' => 'Rejected',
+			'features.dekont.resident.statusCouldNotMatch' => 'Manual review needed',
+			'features.dekont.resident.statusDetailProcessing' => 'Your receipt is being reviewed. The amount will appear shortly.',
+			'features.dekont.resident.statusDetailAwaitingApproval' => 'Waiting for the manager\'s approval.',
+			'features.dekont.resident.statusDetailAwaitingIbanOk' => 'Recipient details matched. Waiting for the manager\'s approval.',
+			'features.dekont.resident.statusDetailAwaitingIbanIssue' => 'Recipient details unclear. Waiting for the manager\'s approval.',
+			'features.dekont.resident.statusDetailApproved' => 'Your payment was approved.',
+			'features.dekont.resident.statusDetailPartiallyApproved' => 'Your payment was partially approved.',
+			'features.dekont.resident.statusDetailRejected' => 'Your receipt was rejected.',
 			'features.dekont.resident.filterAll' => 'All your receipts',
 			'features.dekont.resident.filterPending' => 'Awaiting approval',
 			'features.dekont.resident.filterApproved' => 'Approved',
 			'features.dekont.resident.filterRejected' => 'Rejected',
 			'features.dekont.resident.dueOverdueHint' => 'This due is overdue',
+			'features.dekont.manager.statusProcessing' => 'Processing',
+			'features.dekont.manager.statusAwaitingApproval' => 'Awaiting approval',
+			'features.dekont.manager.statusApproved' => 'Approved',
+			'features.dekont.manager.statusPartiallyApproved' => 'Partially approved',
+			_ => null,
+		} ?? switch (path) {
+			'features.dekont.manager.statusRejected' => 'Rejected',
+			'features.dekont.manager.statusDetailProcessing' => 'Receipt is being processed. Details will appear shortly.',
+			'features.dekont.manager.statusDetailAwaitingApproval' => 'Your approval is needed.',
+			'features.dekont.manager.statusDetailAwaitingIbanOk' => 'Recipient details matched. Your approval is needed.',
+			'features.dekont.manager.statusDetailAwaitingIbanIssue' => 'Recipient details unclear. Check and decide.',
+			'features.dekont.manager.statusDetailApproved' => 'Payment approved.',
+			'features.dekont.manager.statusDetailPartiallyApproved' => 'Payment partially approved.',
+			'features.dekont.manager.statusDetailRejected' => 'Receipt rejected.',
 			'features.dekont.statusReceived' => 'Received',
 			'features.dekont.statusExtracting' => 'Reading',
 			'features.dekont.statusExtractFailed' => 'Read failed',
@@ -5928,8 +6022,6 @@ extension on Translations {
 			'features.dekont.statusUnmatched' => 'Unmatched',
 			'features.dekont.statusPaymentApplied' => 'Payment applied',
 			'features.dekont.statusPaymentPartial' => 'Partial payment',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.statusRejected' => 'Rejected',
 			'features.dekont.statusRecipientMismatch' => 'Recipient mismatch',
 			'features.dekont.statusNeedsManagerReview' => 'Manager review',
@@ -6121,6 +6213,8 @@ extension on Translations {
 			'features.notifications.resident.typeOther' => 'Your notification',
 			'features.notifications.resident.allApartmentsTag' => 'Announcement for you',
 			'features.notifications.resident.announcementFeedLabel' => 'Announcement from management',
+			'features.notifications.resident.announcementsEmptyTitle' => 'No announcements yet',
+			'features.notifications.resident.announcementsEmptySubtitle' => 'Announcements from management will appear here.',
 			'features.notifications.allApartmentsTag' => 'All apartments',
 			'features.notifications.sendTitle' => 'Announcement to residents',
 			'features.notifications.fieldTitle' => 'Title',

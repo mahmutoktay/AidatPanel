@@ -357,7 +357,14 @@ export async function getDekontByIdForUser(dekontId, user) {
       parseError: true,
       parserProfile: true,
       parsedJson: true,
-      building: { select: { managerId: true } },
+      building: {
+        select: {
+          managerId: true,
+          name: true,
+          blockLabel: true,
+          site: { select: { name: true } },
+        },
+      },
       apartment: { select: { id: true, number: true } },
       uploadedBy: { select: { id: true, name: true, email: true } },
       dueAllocations: {
@@ -379,13 +386,28 @@ export async function getDekontByIdForUser(dekontId, user) {
     throw new HttpError(404, "Dekont bulunamadı.");
   }
 
-  const { building: _b, ...rest } = row;
+  const { building, ...rest } = row;
+  const buildingName = resolveDekontBuildingDisplayName(building);
   const formatted = formatDekont(rest);
   return {
     ...formatted,
+    buildingName,
     apartment: row.apartment ?? undefined,
     uploadedBy: row.uploadedBy ?? undefined,
   };
+}
+
+/** Site altı bloklarda `site · blok`, aksi halde bina adı. */
+function resolveDekontBuildingDisplayName(building) {
+  if (!building) return null;
+  const name = building.name?.trim() || "";
+  const block = building.blockLabel?.trim() || "";
+  const siteName = building.site?.name?.trim() || "";
+  const core = name || block;
+  if (!core) return siteName || null;
+  if (siteName && block && !name) return `${siteName} · ${block}`;
+  if (siteName && core) return `${siteName} · ${core}`;
+  return core;
 }
 
 export async function listDekontsForResident(userId, filters = {}) {

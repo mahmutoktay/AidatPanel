@@ -51,6 +51,7 @@ class PaymentCollectionModel {
 class DekontModel {
   final String id;
   final String buildingId;
+  final String? buildingName;
   final String? apartmentId;
   final String uploadedById;
   final String? dueId;
@@ -80,6 +81,7 @@ class DekontModel {
   const DekontModel({
     required this.id,
     required this.buildingId,
+    this.buildingName,
     this.apartmentId,
     required this.uploadedById,
     this.dueId,
@@ -176,6 +178,7 @@ class DekontModel {
     return DekontModel(
       id: _asString(json['id']),
       buildingId: _asString(json['buildingId']),
+      buildingName: _optionalTrimmedString(json['buildingName']),
       apartmentId: json['apartmentId'] as String?,
       uploadedById: _asString(json['uploadedById']),
       dueId: primaryDueId,
@@ -216,6 +219,12 @@ class DekontModel {
     return value.toString();
   }
 
+  static String? _optionalTrimmedString(dynamic value) {
+    if (value == null) return null;
+    final s = value.toString().trim();
+    return s.isEmpty ? null : s;
+  }
+
   static int _asInt(dynamic value) {
     if (value is int) return value;
     if (value is num) return value.toInt();
@@ -249,6 +258,7 @@ class DekontModel {
     return DekontEntity(
       id: id,
       buildingId: buildingId,
+      buildingName: buildingName,
       apartmentId: apartmentId,
       uploadedById: uploadedById,
       dueId: dueId,

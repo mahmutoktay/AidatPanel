@@ -1039,7 +1039,7 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 	@override String get reviewAmountLabel => 'Onaylanacak tutar (₺)';
 	@override String get reviewAmountRequiredHint => 'Bu dekonttan tutar okunamadı. Kalan borcun tamamını kapatmak istemiyorsanız tutarı elle girin.';
 	@override String get reviewApplyAmount => 'Uygulanacak tutar: {amount}';
-	@override String get reviewRemainingAmount => 'Seçili aidatlarda kalan: {amount}';
+	@override String get reviewRemainingAmount => 'Onay sonrası kalan: {amount}';
 	@override String get errorReviewStatus => 'Bu dekont şu an onaylanamaz veya reddedilemez. Biraz sonra tekrar deneyin.';
 	@override String get errorNoFileSelected => 'Lütfen önce bir dekont dosyası seçin.';
 	@override String get errorNoDueSelected => 'Lütfen en az bir aidat seçin.';
@@ -1060,6 +1060,7 @@ class _Translations$features$dekont$tr implements Translations$features$dekont$e
 	@override String get filterApproved => 'Onaylandı';
 	@override String get filterRejected => 'Reddedildi';
 	@override late final _Translations$features$dekont$resident$tr resident = _Translations$features$dekont$resident$tr._(_root);
+	@override late final _Translations$features$dekont$manager$tr manager = _Translations$features$dekont$manager$tr._(_root);
 	@override String get statusReceived => 'Alındı';
 	@override String get statusExtracting => 'Okunuyor';
 	@override String get statusExtractFailed => 'Okunamadı';
@@ -1745,17 +1746,45 @@ class _Translations$features$dekont$resident$tr implements Translations$features
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String get statusProcessing => 'Dekontunuz işleniyor';
-	@override String get statusAwaitingApproval => 'Dekontunuz onay bekliyor';
-	@override String get statusApproved => 'Ödemeniz onaylandı';
-	@override String get statusPartiallyApproved => 'Ödemeniz kısmen onaylandı';
-	@override String get statusRejected => 'Dekontunuz reddedildi';
-	@override String get statusCouldNotMatch => 'Dekontunuz eşleştirilemedi';
+	@override String get statusProcessing => 'İşleniyor';
+	@override String get statusAwaitingApproval => 'Onay bekliyor';
+	@override String get statusApproved => 'Onaylandı';
+	@override String get statusPartiallyApproved => 'Kısmen onaylandı';
+	@override String get statusRejected => 'Reddedildi';
+	@override String get statusCouldNotMatch => 'Manuel inceleme gerekiyor';
+	@override String get statusDetailProcessing => 'Dekontunuz inceleniyor. Tutar birkaç dakika içinde görünecek.';
+	@override String get statusDetailAwaitingApproval => 'Yöneticinin onayı bekleniyor.';
+	@override String get statusDetailAwaitingIbanOk => 'Alıcı bilgileri eşleşti. Yöneticinin onayı bekleniyor.';
+	@override String get statusDetailAwaitingIbanIssue => 'Alıcı bilgileri net değil. Yöneticinin onayı bekleniyor.';
+	@override String get statusDetailApproved => 'Ödemeniz onaylandı.';
+	@override String get statusDetailPartiallyApproved => 'Ödemeniz kısmen onaylandı.';
+	@override String get statusDetailRejected => 'Dekontunuz reddedildi.';
 	@override String get filterAll => 'Tüm dekontlarınız';
 	@override String get filterPending => 'Onay bekleyenler';
 	@override String get filterApproved => 'Onaylananlar';
 	@override String get filterRejected => 'Reddedilenler';
 	@override String get dueOverdueHint => 'Bu aidatınız gecikmiş';
+}
+
+// Path: features.dekont.manager
+class _Translations$features$dekont$manager$tr implements Translations$features$dekont$manager$en {
+	_Translations$features$dekont$manager$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get statusProcessing => 'İşleniyor';
+	@override String get statusAwaitingApproval => 'Onay bekliyor';
+	@override String get statusApproved => 'Onaylandı';
+	@override String get statusPartiallyApproved => 'Kısmen onaylandı';
+	@override String get statusRejected => 'Reddedildi';
+	@override String get statusDetailProcessing => 'Dekont işleniyor. Bilgiler birkaç dakika içinde görünecek.';
+	@override String get statusDetailAwaitingApproval => 'Onayınız bekleniyor.';
+	@override String get statusDetailAwaitingIbanOk => 'Alıcı bilgileri eşleşti. Onayınız bekleniyor.';
+	@override String get statusDetailAwaitingIbanIssue => 'Alıcı bilgileri net değil. Kontrol edip karar verin.';
+	@override String get statusDetailApproved => 'Ödeme onaylandı.';
+	@override String get statusDetailPartiallyApproved => 'Ödeme kısmen onaylandı.';
+	@override String get statusDetailRejected => 'Dekont reddedildi.';
 }
 
 // Path: features.notifications.resident
@@ -1779,6 +1808,8 @@ class _Translations$features$notifications$resident$tr implements Translations$f
 	@override String get typeOther => 'Bildiriminiz';
 	@override String get allApartmentsTag => 'Size duyuru';
 	@override String get announcementFeedLabel => 'Yönetimden duyuru';
+	@override String get announcementsEmptyTitle => 'Henüz duyuru yok';
+	@override String get announcementsEmptySubtitle => 'Yönetimden gelen duyurular burada listelenir.';
 }
 
 // Path: features.notifications.permissionPrompt
@@ -2858,7 +2889,7 @@ extension on TranslationsTr {
 			'features.dekont.reviewAmountLabel' => 'Onaylanacak tutar (₺)',
 			'features.dekont.reviewAmountRequiredHint' => 'Bu dekonttan tutar okunamadı. Kalan borcun tamamını kapatmak istemiyorsanız tutarı elle girin.',
 			'features.dekont.reviewApplyAmount' => 'Uygulanacak tutar: {amount}',
-			'features.dekont.reviewRemainingAmount' => 'Seçili aidatlarda kalan: {amount}',
+			'features.dekont.reviewRemainingAmount' => 'Onay sonrası kalan: {amount}',
 			'features.dekont.errorReviewStatus' => 'Bu dekont şu an onaylanamaz veya reddedilemez. Biraz sonra tekrar deneyin.',
 			'features.dekont.errorNoFileSelected' => 'Lütfen önce bir dekont dosyası seçin.',
 			'features.dekont.errorNoDueSelected' => 'Lütfen en az bir aidat seçin.',
@@ -2878,17 +2909,38 @@ extension on TranslationsTr {
 			'features.dekont.filterPending' => 'İncelemede',
 			'features.dekont.filterApproved' => 'Onaylandı',
 			'features.dekont.filterRejected' => 'Reddedildi',
-			'features.dekont.resident.statusProcessing' => 'Dekontunuz işleniyor',
-			'features.dekont.resident.statusAwaitingApproval' => 'Dekontunuz onay bekliyor',
-			'features.dekont.resident.statusApproved' => 'Ödemeniz onaylandı',
-			'features.dekont.resident.statusPartiallyApproved' => 'Ödemeniz kısmen onaylandı',
-			'features.dekont.resident.statusRejected' => 'Dekontunuz reddedildi',
-			'features.dekont.resident.statusCouldNotMatch' => 'Dekontunuz eşleştirilemedi',
+			'features.dekont.resident.statusProcessing' => 'İşleniyor',
+			'features.dekont.resident.statusAwaitingApproval' => 'Onay bekliyor',
+			'features.dekont.resident.statusApproved' => 'Onaylandı',
+			'features.dekont.resident.statusPartiallyApproved' => 'Kısmen onaylandı',
+			'features.dekont.resident.statusRejected' => 'Reddedildi',
+			'features.dekont.resident.statusCouldNotMatch' => 'Manuel inceleme gerekiyor',
+			'features.dekont.resident.statusDetailProcessing' => 'Dekontunuz inceleniyor. Tutar birkaç dakika içinde görünecek.',
+			'features.dekont.resident.statusDetailAwaitingApproval' => 'Yöneticinin onayı bekleniyor.',
+			'features.dekont.resident.statusDetailAwaitingIbanOk' => 'Alıcı bilgileri eşleşti. Yöneticinin onayı bekleniyor.',
+			'features.dekont.resident.statusDetailAwaitingIbanIssue' => 'Alıcı bilgileri net değil. Yöneticinin onayı bekleniyor.',
+			'features.dekont.resident.statusDetailApproved' => 'Ödemeniz onaylandı.',
+			'features.dekont.resident.statusDetailPartiallyApproved' => 'Ödemeniz kısmen onaylandı.',
+			'features.dekont.resident.statusDetailRejected' => 'Dekontunuz reddedildi.',
 			'features.dekont.resident.filterAll' => 'Tüm dekontlarınız',
 			'features.dekont.resident.filterPending' => 'Onay bekleyenler',
 			'features.dekont.resident.filterApproved' => 'Onaylananlar',
 			'features.dekont.resident.filterRejected' => 'Reddedilenler',
 			'features.dekont.resident.dueOverdueHint' => 'Bu aidatınız gecikmiş',
+			'features.dekont.manager.statusProcessing' => 'İşleniyor',
+			'features.dekont.manager.statusAwaitingApproval' => 'Onay bekliyor',
+			'features.dekont.manager.statusApproved' => 'Onaylandı',
+			'features.dekont.manager.statusPartiallyApproved' => 'Kısmen onaylandı',
+			_ => null,
+		} ?? switch (path) {
+			'features.dekont.manager.statusRejected' => 'Reddedildi',
+			'features.dekont.manager.statusDetailProcessing' => 'Dekont işleniyor. Bilgiler birkaç dakika içinde görünecek.',
+			'features.dekont.manager.statusDetailAwaitingApproval' => 'Onayınız bekleniyor.',
+			'features.dekont.manager.statusDetailAwaitingIbanOk' => 'Alıcı bilgileri eşleşti. Onayınız bekleniyor.',
+			'features.dekont.manager.statusDetailAwaitingIbanIssue' => 'Alıcı bilgileri net değil. Kontrol edip karar verin.',
+			'features.dekont.manager.statusDetailApproved' => 'Ödeme onaylandı.',
+			'features.dekont.manager.statusDetailPartiallyApproved' => 'Ödeme kısmen onaylandı.',
+			'features.dekont.manager.statusDetailRejected' => 'Dekont reddedildi.',
 			'features.dekont.statusReceived' => 'Alındı',
 			'features.dekont.statusExtracting' => 'Okunuyor',
 			'features.dekont.statusExtractFailed' => 'Okunamadı',
@@ -2900,8 +2952,6 @@ extension on TranslationsTr {
 			'features.dekont.statusUnmatched' => 'Eşleşmedi',
 			'features.dekont.statusPaymentApplied' => 'Ödeme uygulandı',
 			'features.dekont.statusPaymentPartial' => 'Kısmi ödeme',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.statusRejected' => 'Reddedildi',
 			'features.dekont.statusRecipientMismatch' => 'Alıcı uyuşmuyor',
 			'features.dekont.statusNeedsManagerReview' => 'Yönetici incelemesi',
@@ -3093,6 +3143,8 @@ extension on TranslationsTr {
 			'features.notifications.resident.typeOther' => 'Bildiriminiz',
 			'features.notifications.resident.allApartmentsTag' => 'Size duyuru',
 			'features.notifications.resident.announcementFeedLabel' => 'Yönetimden duyuru',
+			'features.notifications.resident.announcementsEmptyTitle' => 'Henüz duyuru yok',
+			'features.notifications.resident.announcementsEmptySubtitle' => 'Yönetimden gelen duyurular burada listelenir.',
 			'features.notifications.allApartmentsTag' => 'Tüm daireler',
 			'features.notifications.sendTitle' => 'Sakinlere Duyuru',
 			'features.notifications.fieldTitle' => 'Başlık',

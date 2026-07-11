@@ -9,7 +9,6 @@ import '../../debug/dekont_debug_log.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/errors/duplicate_dekont_exception.dart';
 import '../../domain/entities/dekont_entity.dart';
-import '../../../dues/presentation/providers/dues_cache_refresh.dart';
 import '../../domain/entities/payment_collection_entity.dart';
 import '../../domain/repositories/dekont_repository.dart';
 import '../utils/dekont_labels.dart';
@@ -554,9 +553,7 @@ class ManagerDekontsNotifier extends Notifier<ManagerDekontsState> {
         dueIds: dueIds,
         amount: amount,
       );
-      if (decision == DekontReviewDecision.approve) {
-        await invalidateDuesRelatedCaches(ref);
-      }
+      // Aidat önbellek yenilemesi sheet'i bloklamasın — çağıran taraf tetikler.
       dekontDebugLog('provider.review ok');
       return true;
     } catch (e, st) {

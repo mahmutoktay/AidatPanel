@@ -19,6 +19,9 @@ abstract class AuthRemoteDataSource {
   /// `POST /auth/check-identifier` purpose=`resident_phone` → `data.exists`.
   Future<bool> checkResidentPhoneExists(String phone);
 
+  /// `POST /auth/check-identifier` purpose=`manager_identifier` → `data.exists`.
+  Future<bool> checkManagerIdentifierExists(String identifier);
+
   Future<RegisterResponse> register(RegisterRequest request);
   Future<JoinResponse> join(JoinRequest request);
   Future<TokenRefreshResult> refreshToken(String refreshToken);
@@ -122,6 +125,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       data: {
         'identifier': phone,
         'purpose': 'resident_phone',
+      },
+    );
+    final data = response.data['data'] as Map<String, dynamic>?;
+    return data?['exists'] == true;
+  }
+
+  @override
+  Future<bool> checkManagerIdentifierExists(String identifier) async {
+    final response = await _dioClient.post(
+      ApiConstants.checkIdentifier,
+      data: {
+        'identifier': identifier,
+        'purpose': 'manager_identifier',
       },
     );
     final data = response.data['data'] as Map<String, dynamic>?;

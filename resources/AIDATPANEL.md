@@ -318,7 +318,7 @@ enum NotificationType {
 ```
 POST   /api/v1/auth/register
 POST   /api/v1/auth/login             # body: identifier (email veya telefon) + password
-POST   /api/v1/auth/check-identifier  # purpose: manager_register | manager_login | resident_phone
+POST   /api/v1/auth/check-identifier  # purpose: manager_identifier | manager_register | manager_login | resident_phone
 POST   /api/v1/auth/refresh
 POST   /api/v1/auth/logout            # FCM token temizler
 POST   /api/v1/auth/logout-all-devices
@@ -331,11 +331,17 @@ POST   /api/v1/auth/forgot-password
 POST   /api/v1/auth/reset-password
 ```
 
+**Yönetici identifier-öncelikli akış (mobil):**
+1. `POST /auth/check-identifier` `{ identifier: email|phone, purpose: "manager_identifier" }` → `{ exists: true|false }`
+   - E-posta başka rolde doluysa `409`
+2. Kayıtlıysa (`exists: true`) → `POST /auth/login` (şifre)
+3. Yeniyse (`exists: false`) → isim + şifre → `POST /auth/register` + `POST /auth/login`
+
 **Sakin telefon-öncelikli akış (mobil):**
 1. `POST /auth/check-identifier` `{ identifier: phone, purpose: "resident_phone" }` → `{ exists: true|false }`
 2. Kayıtlıysa `otp/send` + `otp/verify` (`resident_login`) → JWT
 3. Yeniyse `otp/send` + `otp/verify` (`resident_join`, davet kodu opsiyonel) → `{ requireName: true }`
-4. İsim + davet kodu → `otp/complete-resident-join` → JWT  
+4. İsim + davet kodu → `otp/complete-resident-join` → JWT
    Davet linki (`https://aidatpanel.com/join?code=...` / `aidatpanel://join?code=...`) ile gelindiyse kod arka planda tutulur; kullanıcıdan tekrar sorulmaz.
 
 **Davet linki:** Yönetici paylaşım mesajı `https://aidatpanel.com/join?code=AP3-...` içerir. Uygulama yoksa web landing; varsa deep link ile sakin telefon ekranı açılır.
@@ -438,6 +444,8 @@ PATCH  /api/v1/dekonts/:id/review
 GET    /api/v1/me/dekonts
 GET    /api/v1/me/payment-collection
 ```
+
+`GET /dekonts/:id` yanıtına `buildingName` eklenir (site altı bloklarda `Site · Blok`, aksi halde bina adı). Yönetici detay UI’da `Bina · Daire N · Yükleyen` tek satır bağlamı için kullanılır.
 
 Upload (multipart): `file` + `dueId` (tek) ve/veya `dueIds` (JSON dizi). Çoklu aidat `DekontDueAllocation` ile saklanır.
 Onay (`APPROVE`): OCR tutarı seçili aidatlara FIFO dağıtılır; her dilim bir `DuePayment`. Tüm hedefler kapanırsa `PAYMENT_APPLIED`, aksi halde `PAYMENT_PARTIAL`.

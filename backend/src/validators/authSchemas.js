@@ -53,7 +53,12 @@ export const authSchemas = {
   checkIdentifier: {
     body: z.object({
       identifier: z.string().min(1, "E-posta veya telefon numarası gereklidir"),
-      purpose: z.enum(["manager_register", "manager_login", "resident_phone"]),
+      purpose: z.enum([
+        "manager_identifier",
+        "manager_register",
+        "manager_login",
+        "resident_phone",
+      ]),
     }),
   },
 

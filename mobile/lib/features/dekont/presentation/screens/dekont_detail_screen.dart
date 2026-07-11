@@ -24,12 +24,14 @@ import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
+import '../../../dues/presentation/providers/dues_cache_refresh.dart';
 import '../../data/dekont_preview_cache.dart';
 import '../../domain/entities/dekont_entity.dart';
 import '../../domain/entities/dekont_status.dart';
 import '../providers/dekont_provider.dart';
 import '../providers/dekont_download_provider.dart';
 import '../../../../shared/widgets/document_preview_screen.dart';
+import '../utils/dekont_parsed_fields.dart';
 import '../widgets/dekont_detail_file_row.dart';
 import '../widgets/dekont_system_info_section.dart';
 
@@ -42,10 +44,64 @@ class DekontDetailScreen extends ConsumerStatefulWidget {
   ConsumerState<DekontDetailScreen> createState() => _DekontDetailScreenState();
 }
 
-class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
+class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen>
+    with WidgetsBindingObserver {
+  static const _pollInterval = Duration(seconds: 7);
+
   Uint8List? _fileBytes;
   bool _loadingFile = false;
   String? _fileError;
+  Timer? _pollTimer;
+  bool _appInForeground = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    _stopPolling();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _appInForeground = true;
+      _syncPolling();
+      return;
+    }
+    _appInForeground = false;
+    _stopPolling();
+  }
+
+  void _syncPolling([DekontEntity? dekont]) {
+    final current = dekont ??
+        ref.read(dekontDetailProvider(widget.dekontId)).asData?.value;
+    if (current != null &&
+        DekontParsedFields.isAwaitingPipeline(current) &&
+        _appInForeground) {
+      _startPolling();
+    } else {
+      _stopPolling();
+    }
+  }
+
+  void _startPolling() {
+    if (_pollTimer != null) return;
+    _pollTimer = Timer.periodic(_pollInterval, (_) {
+      if (!mounted || !_appInForeground) return;
+      ref.invalidate(dekontDetailProvider(widget.dekontId));
+    });
+  }
+
+  void _stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+  }
 
   Future<void> _loadFile({bool forceFromServer = false}) async {
     setState(() {
@@ -147,15 +203,23 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
       context: context,
       builder: (sheetContext) => _ManagerReviewSheet(dekont: dekont),
     );
-    if (ok == true && mounted) {
-      ref.invalidate(dekontDetailProvider(widget.dekontId));
-      ref
-          .read(toastProvider.notifier)
-          .show(
-            context.t.features.dekont.reviewSuccess,
-            type: ToastType.success,
-          );
+    if (ok != true || !mounted) return;
+
+    ref.invalidate(dekontDetailProvider(widget.dekontId));
+    // Aidat oran çubukları / ledger / işlem geçmişi — sheet kapandıktan sonra.
+    unawaited(invalidateDuesRelatedCaches(ref));
+    if (dekont.buildingId.isNotEmpty) {
+      unawaited(
+        ref.read(managerDekontsNotifierProvider.notifier).loadBuilding(
+              dekont.buildingId,
+              refresh: true,
+            ),
+      );
     }
+    ref.read(toastProvider.notifier).show(
+          context.t.features.dekont.reviewSuccess,
+          type: ToastType.success,
+        );
   }
 
   Future<void> _downloadDekont(DekontEntity dekont) async {
@@ -222,6 +286,12 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen> {
     final fallbackRoute = isManager
         ? _managerDueTransactionsFallback(detail)
         : '/resident-dashboard/dekonts';
+
+    ref.listen(dekontDetailProvider(widget.dekontId), (previous, next) {
+      next.whenData(_syncPolling);
+      if (next.hasError || next.isLoading) return;
+      if (next.asData == null) _stopPolling();
+    });
 
     final body = detail.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -366,6 +436,30 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
     });
   }
 
+  /// Onayda uygulanacak tutar (OCR veya elle girilen).
+  double? get _applyAmountPreview {
+    if (!_needsManualAmount) return _parsedAmount;
+    final typed = _amountController.text.trim().replaceAll(',', '.');
+    if (typed.isEmpty) return null;
+    return double.tryParse(typed);
+  }
+
+  /// Uygulama sonrası seçili aidatlarda kalacak tutar.
+  double? get _remainingAfterApply {
+    final apply = _applyAmountPreview;
+    if (apply == null || apply <= 0) return null;
+    final after = _totalRemaining - apply;
+    return after < 0 ? 0 : after;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _amountController.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   void dispose() {
     _noteController.dispose();
@@ -413,6 +507,7 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
     if (!mounted) return;
     setState(() => _pendingDecision = null);
     if (ok) {
+      // Modal sheet route'unu kapat (iç içe navigator olsa da doğru route).
       Navigator.of(context).pop(true);
     } else {
       final err = ref.read(managerDekontsNotifierProvider).reviewError;
@@ -426,10 +521,8 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.dekont;
-    final remaining = _totalRemaining;
-    final applyPreview = _needsManualAmount
-        ? null
-        : _parsedAmount;
+    final remainingAfter = _remainingAfterApply;
+    final applyPreview = _applyAmountPreview;
 
     return PremiumBottomSheetScaffold(
       title: t.reviewAction,
@@ -444,7 +537,8 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
             ),
           ),
           const SizedBox(height: AppSizes.spacingM),
-          if (remaining > 0 || applyPreview != null)
+          if ((applyPreview != null && applyPreview > 0) ||
+              remainingAfter != null)
             Container(
               padding: const EdgeInsets.all(AppSizes.spacingM),
               decoration: BoxDecoration(
@@ -454,7 +548,7 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (applyPreview != null)
+                  if (applyPreview != null && applyPreview > 0)
                     Text(
                       t.reviewApplyAmount.replaceAll(
                         '{amount}',
@@ -464,12 +558,13 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                  if (remaining > 0) ...[
-                    if (applyPreview != null) const SizedBox(height: 4),
+                  if (remainingAfter != null) ...[
+                    if (applyPreview != null && applyPreview > 0)
+                      const SizedBox(height: 4),
                     Text(
                       t.reviewRemainingAmount.replaceAll(
                         '{amount}',
-                        AppCurrencyFormat.format(remaining),
+                        AppCurrencyFormat.format(remainingAfter),
                       ),
                       style: AppTypography.body2.copyWith(
                         color: AppColors.textSecondary,

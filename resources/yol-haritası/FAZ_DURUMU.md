@@ -302,6 +302,9 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 - [x] Yönetici nav etiketi: «Mülkler» (Siteler | Binalar)
 - [x] Kritik tipografi (ledger, bildirim chip, ticket timeline → min 16sp)
 - [x] Gider listesi 500: `Expense.rawText` vb. OCR kolonları migration eksikti → `20260711220000_expense_ocr_fields` deploy
+- [x] Sakin Hızlı İşlemler: 2×2 ayrık renkli kartlar (Aidat / Talepler / Giderler / Duyurular) + `ResidentAnnouncementsScreen`
+- [x] Dekont detay: OCR polling (7sn) + tek durum kartı (çelişkili notice kutuları kaldırıldı)
+- [x] Yönetici auth: deneyim adımı kaldırıldı; e-posta/telefon → `manager_identifier` exists dallanması (giriş veya isim+şifre kayıt)
 
 ---
 

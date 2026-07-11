@@ -65,6 +65,8 @@ class DekontDueAllocationSummary extends Equatable {
 class DekontEntity extends Equatable {
   final String id;
   final String buildingId;
+  /// Detay API'den gelen görünen bina adı (site · blok / bina adı).
+  final String? buildingName;
   final String? apartmentId;
   final String uploadedById;
   final String? dueId;
@@ -94,6 +96,7 @@ class DekontEntity extends Equatable {
   const DekontEntity({
     required this.id,
     required this.buildingId,
+    this.buildingName,
     this.apartmentId,
     required this.uploadedById,
     this.dueId,
@@ -139,6 +142,7 @@ class DekontEntity extends Equatable {
   List<Object?> get props => [
         id,
         buildingId,
+        buildingName,
         apartmentId,
         uploadedById,
         dueId,

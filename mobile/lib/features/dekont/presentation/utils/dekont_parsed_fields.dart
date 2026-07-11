@@ -119,5 +119,6 @@ class DekontParsedFields {
 
   static bool isAwaitingPipeline(DekontEntity dekont) =>
       dekont.status.isProcessing ||
-      dekont.status == DekontStatus.received;
+      dekont.status == DekontStatus.received ||
+      dekont.status == DekontStatus.parsed;
 }

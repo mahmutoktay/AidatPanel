@@ -22,6 +22,7 @@ abstract class AuthRepository {
     required String purpose,
   });
   Future<bool> checkResidentPhoneExists(String phone);
+  Future<bool> checkManagerIdentifierExists(String identifier);
   Future<void> register(
     String? email,
     String password,
@@ -202,6 +203,19 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> checkResidentPhoneExists(String phone) async {
     try {
       return await _remoteDataSource.checkResidentPhoneExists(phone);
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'identifier_check_failed');
+    }
+  }
+
+  @override
+  Future<bool> checkManagerIdentifierExists(String identifier) async {
+    try {
+      return await _remoteDataSource.checkManagerIdentifierExists(
+        PhoneUtils.normalizeLoginIdentifier(identifier),
+      );
     } on ApiException {
       rethrow;
     } catch (_) {

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_sizes.dart';
 import '../../domain/entities/dekont_entity.dart';
 import 'dekont_detail_hero.dart';
-import 'dekont_detail_metrics_card.dart';
 
-/// Dekont sistem bilgisi — hero + metrik kart kompozisyonu.
+/// Dekont sistem bilgisi — sadeleştirilmiş hero (sakin + yönetici).
 class DekontSystemInfoSection extends StatelessWidget {
   final DekontEntity dekont;
   final bool isManager;
@@ -18,13 +16,6 @@ class DekontSystemInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        DekontDetailHero(dekont: dekont, forResident: !isManager),
-        const SizedBox(height: AppSizes.spacingM),
-        DekontDetailMetricsCard(dekont: dekont, isManager: isManager),
-      ],
-    );
+    return DekontDetailHero(dekont: dekont, forResident: !isManager);
   }
 }

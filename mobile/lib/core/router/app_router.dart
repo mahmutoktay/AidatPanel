@@ -18,6 +18,7 @@ import '../../features/dashboard/presentation/screens/manager_overdue_apartments
 import '../../features/dashboard/presentation/screens/resident_activity_history_screen.dart';
 import '../../features/dashboard/presentation/screens/resident_dashboard_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/notifications/presentation/screens/resident_announcements_screen.dart';
 import '../../features/tickets/presentation/screens/create_ticket_screen.dart';
 import '../../features/tickets/presentation/screens/manager_tickets_screen.dart';
 import '../../features/tickets/presentation/screens/ticket_detail_screen.dart';
@@ -262,6 +263,12 @@ List<RouteBase> _residentDashboardChildRoutes() => [
     name: 'resident_dashboard_notifications',
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) => const NotificationsScreen(),
+  ),
+  GoRoute(
+    path: 'announcements',
+    name: 'resident_dashboard_announcements',
+    parentNavigatorKey: rootNavigatorKey,
+    builder: (context, state) => const ResidentAnnouncementsScreen(),
   ),
   GoRoute(
     path: 'profile',

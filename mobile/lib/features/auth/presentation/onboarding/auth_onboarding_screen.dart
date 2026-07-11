@@ -268,7 +268,6 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       return;
     }
     onboarding.setName(name);
-    _identifierController.clear();
     onboarding.goNextStep();
   }
 
@@ -322,10 +321,12 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
     }
     onboarding.setIdentifierFromRaw(raw);
     try {
-      await auth.checkManagerIdentifier(
-        rawIdentifier: raw,
-        isRegister: ob.flow == AuthOnboardingFlow.register,
-      );
+      final exists = await auth.checkManagerIdentifierExists(raw);
+      if (exists) {
+        onboarding.applyManagerLoginFlow();
+      } else {
+        onboarding.applyManagerRegisterFlow();
+      }
       _passwordController.clear();
       _confirmPasswordController.clear();
       onboarding.goNextStep();
@@ -921,18 +922,8 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
         );
 
       case AuthOnboardingStepId.managerExperience:
-        return OnboardingFixedChoiceLayout(
-          title: tOb.managerExperienceTitle,
-          subtitle: tOb.managerExperienceSubtitle,
-          choices: OnboardingRoleCards(
-            selectedRole: null,
-            managerLabel: tOb.managerReturningOption,
-            residentLabel: tOb.managerFirstTimeOption,
-            enabled: !isLoading,
-            onManagerTap: isLoading ? () {} : onboarding.startManagerReturning,
-            onResidentTap: isLoading ? () {} : onboarding.startManagerFirstTime,
-          ),
-        );
+        // Deneyim adımı kaldırıldı; rol seçiminden sonra doğrudan identifier.
+        return const SizedBox.shrink();
 
       case AuthOnboardingStepId.residentExperience:
         return OnboardingFixedChoiceLayout(

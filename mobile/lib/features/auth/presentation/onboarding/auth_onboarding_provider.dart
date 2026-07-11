@@ -4,19 +4,23 @@ import '../../../../core/utils/phone_utils.dart';
 import '../../domain/entities/user_entity.dart';
 import 'auth_onboarding_models.dart';
 
-/// Yönetici ilk kayıt — ad + iletişim + şifre.
+/// Yönetici — e-posta/telefon kontrolü (giriş/kayıt henüz bilinmiyor).
+const _managerLookupSteps = [
+  AuthOnboardingStepId.role,
+  AuthOnboardingStepId.identifier,
+];
+
+/// Yönetici kayıt — iletişim → isim → şifre.
 const _managerPasswordRegisterSteps = [
   AuthOnboardingStepId.role,
-  AuthOnboardingStepId.managerExperience,
-  AuthOnboardingStepId.name,
   AuthOnboardingStepId.identifier,
+  AuthOnboardingStepId.name,
   AuthOnboardingStepId.credentials,
 ];
 
-/// Yönetici tekrar giriş — yalnızca iletişim + şifre.
+/// Yönetici giriş — iletişim → şifre.
 const _managerPasswordLoginSteps = [
   AuthOnboardingStepId.role,
-  AuthOnboardingStepId.managerExperience,
   AuthOnboardingStepId.identifier,
   AuthOnboardingStepId.credentials,
 ];
@@ -112,7 +116,7 @@ class AuthOnboardingState {
 
   bool get isManagerPasswordFlow =>
       role == UserRole.manager &&
-      visibleSteps.contains(AuthOnboardingStepId.managerExperience);
+      visibleSteps.contains(AuthOnboardingStepId.identifier);
 
   bool get hasPrefetchedInvite =>
       inviteFromDeepLink &&
@@ -240,6 +244,11 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
       steps = List<AuthOnboardingStepId>.from(_residentLoginSteps);
     }
 
+    // Yönetici deep link / query: deneyim adımı yok; identifier ile başla.
+    if (next.role == UserRole.manager) {
+      steps = List<AuthOnboardingStepId>.from(_managerLookupSteps);
+    }
+
     if (skipRoleStep &&
         steps.isNotEmpty &&
         steps.first == AuthOnboardingStepId.role) {
@@ -258,6 +267,9 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
     }
     if (s.role == UserRole.manager && s.flow == AuthOnboardingFlow.login) {
       return List<AuthOnboardingStepId>.from(_managerPasswordLoginSteps);
+    }
+    if (s.role == UserRole.manager) {
+      return List<AuthOnboardingStepId>.from(_managerLookupSteps);
     }
     if (s.role == UserRole.resident && s.flow == AuthOnboardingFlow.login) {
       return List<AuthOnboardingStepId>.from(_residentLoginSteps);
@@ -306,17 +318,16 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
     state = state.copyWith(role: role, clearError: true);
   }
 
-  /// Yönetici kartı — deneyim seçimine geç.
+  /// Yönetici kartı — doğrudan e-posta/telefon girişi.
   void pickManagerRole() {
     state = state.copyWith(
       role: UserRole.manager,
-      visibleSteps: const [
-        AuthOnboardingStepId.role,
-        AuthOnboardingStepId.managerExperience,
-      ],
+      flow: AuthOnboardingFlow.login,
+      isFirstTimeSetup: false,
+      visibleSteps: List<AuthOnboardingStepId>.from(_managerLookupSteps),
       clearError: true,
     );
-    _goToStep(AuthOnboardingStepId.managerExperience);
+    _goToStep(AuthOnboardingStepId.identifier);
   }
 
   /// Sakin kartı — doğrudan telefon girişi (deneyim seçimi yok).
@@ -389,18 +400,9 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
     }
   }
 
-  void startManagerFirstTime() {
-    state = state.copyWith(
-      role: UserRole.manager,
-      flow: AuthOnboardingFlow.register,
-      isFirstTimeSetup: true,
-      visibleSteps: List<AuthOnboardingStepId>.from(_managerPasswordRegisterSteps),
-      clearError: true,
-    );
-    _goToStep(AuthOnboardingStepId.name);
-  }
-
-  void startManagerReturning() {
+  /// Identifier kontrolü sonrası: kayıtlı yönetici girişi.
+  void applyManagerLoginFlow({bool keepCurrentStep = true}) {
+    final current = keepCurrentStep ? state.currentStepId : null;
     state = state.copyWith(
       role: UserRole.manager,
       flow: AuthOnboardingFlow.login,
@@ -408,7 +410,28 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
       visibleSteps: List<AuthOnboardingStepId>.from(_managerPasswordLoginSteps),
       clearError: true,
     );
-    _goToStep(AuthOnboardingStepId.identifier);
+    if (current != null && state.visibleSteps.contains(current)) {
+      _goToStep(current);
+    } else {
+      _goToStep(AuthOnboardingStepId.identifier);
+    }
+  }
+
+  /// Identifier kontrolü sonrası: yeni yönetici kaydı.
+  void applyManagerRegisterFlow({bool keepCurrentStep = true}) {
+    final current = keepCurrentStep ? state.currentStepId : null;
+    state = state.copyWith(
+      role: UserRole.manager,
+      flow: AuthOnboardingFlow.register,
+      isFirstTimeSetup: true,
+      visibleSteps: List<AuthOnboardingStepId>.from(_managerPasswordRegisterSteps),
+      clearError: true,
+    );
+    if (current != null && state.visibleSteps.contains(current)) {
+      _goToStep(current);
+    } else {
+      _goToStep(AuthOnboardingStepId.identifier);
+    }
   }
 
   void startReturningLoginForRole(UserRole role) {
