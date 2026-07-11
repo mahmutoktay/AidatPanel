@@ -7,7 +7,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        // image_cropper (ucrop) — yalnızca com.github.*; io.flutter JitPack'te aranmasın
+        // JitPack — yalnızca com.github.*; io.flutter JitPack'te aranmasın
         maven {
             url = uri("https://jitpack.io")
             content {

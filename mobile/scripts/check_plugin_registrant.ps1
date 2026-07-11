@@ -15,6 +15,7 @@ $text = Get-Content $registrantFile -Raw
 
 # pub name -> PluginRegistrant.kt içinde aranacak alt dize
 $symbolByPlugin = @{
+    "app_links"                     = "app_links.AppLinksPlugin"
     "device_info_plus"              = "device_info.DeviceInfoPlusPlugin"
     "file_picker"                   = "FilePickerPlugin"
     "firebase_analytics"            = "firebase.analytics.FlutterFirebaseAnalyticsPlugin"
@@ -36,6 +37,7 @@ $symbolByPlugin = @{
     "receive_sharing_intent"        = "ReceiveSharingIntentPlugin"
     "share_plus"                    = "share.SharePlusPlugin"
     "sqflite_android"               = "sqflite.SqflitePlugin"
+    "url_launcher_android"          = "urllauncher.UrlLauncherPlugin"
 }
 
 $failed = @()
