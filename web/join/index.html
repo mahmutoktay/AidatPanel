@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Davet | AidatPanel</title>
+  <meta name="description" content="AidatPanel davet bağlantısı ile apartmanınıza katılın." />
+  <meta name="robots" content="noindex" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="join.css" />
+</head>
+<body class="join-page">
+  <header>
+    <nav class="container nav-bar join-nav">
+      <a href="../index.html" class="logo" aria-label="AidatPanel ana sayfa">Aidat<span>Panel</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <article class="join-card">
+      <h1>Apartmana davet edildiniz</h1>
+      <p class="join-lead" id="lead">
+        AidatPanel uygulaması ile kayıt olarak dairenize katılabilirsiniz.
+      </p>
+
+      <div id="code-wrap" hidden>
+        <p class="join-code-label">Davet kodunuz</p>
+        <div class="join-code-box" id="code-display" aria-live="polite"></div>
+      </div>
+
+      <p id="error" class="join-error" hidden role="alert"></p>
+
+      <div class="join-actions">
+        <a class="btn btn-accent" id="open-app" href="#">Uygulamayı aç</a>
+      </div>
+
+      <section class="join-stores" aria-label="Uygulama mağazaları">
+        <p class="join-code-label" style="margin-bottom: 0;">Henüz yüklü değilse indirin</p>
+        <div class="store-buttons">
+          <a
+            id="app-store"
+            href="https://apps.apple.com/tr/app/aidatpanel/id000000000"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="store-link"
+          >
+            <img src="../assets/apple-icon.png" alt="App Store'dan indirin" class="store-img" width="180" height="54" />
+          </a>
+          <a
+            id="play-store"
+            href="https://play.google.com/store/apps/details?id=com.aidatpanel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="store-link"
+          >
+            <img src="../assets/google-icon.png" alt="Google Play'den indirin" class="store-img" width="180" height="54" />
+          </a>
+        </div>
+      </section>
+
+      <p class="join-hint">
+        Uygulama yüklü değilse mağazadan indirin. Kurulumdan sonra
+        <strong>bu sayfadaki &ldquo;Uygulamayı aç&rdquo; düğmesine veya paylaşılan bağlantıya tekrar dokunun</strong>;
+        uygulama açılır ve davet kodunuz kayıt ekranında hazır gelir.
+      </p>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 AidatPanel. |
+        <a href="../kvkk.html">KVKK</a> |
+        <a href="../gizlilik.html">Gizlilik</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="join.js"></script>
+</body>
+</html>

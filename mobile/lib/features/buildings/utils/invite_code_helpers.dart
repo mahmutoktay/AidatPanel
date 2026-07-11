@@ -70,9 +70,10 @@ class InviteCodeHelpers {
       ..writeln('Bina: ${building.displayName}')
       ..writeln('Daire: ${formatApartmentLabel(apartment.apartmentNumber)}')
       ..writeln('Kod: $code\n')
+      ..writeln('Katıl: https://aidatpanel.com/join?code=$code\n')
       ..writeln('Son kullanma: ${formatDate(expiresAt)} (7 gün geçerli)\n')
       ..write(
-        'AidatPanel uygulamasını indirip kayıt olurken bu kodu kullanabilirsiniz.',
+        'Linke dokunun veya AidatPanel uygulamasını indirip bu kodu kullanın.',
       );
     return buffer.toString();
   }

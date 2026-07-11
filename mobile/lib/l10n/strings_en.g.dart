@@ -4395,11 +4395,14 @@ class Translations$features$auth$onboarding$en {
 	/// en: 'We will send you a one-time sign-in code.'
 	String get residentPhoneSubtitle => 'We will send you a one-time sign-in code.';
 
-	/// en: 'Welcome!'
-	String get residentWelcomeTitle => 'Welcome!';
+	/// en: 'Country code +90 is fixed. Enter your number as (5XX) XXX XX XX.'
+	String get residentPhoneNote => 'Country code +90 is fixed. Enter your number as (5XX) XXX XX XX.';
 
-	/// en: 'Your phone is verified. Please enter your name.'
-	String get residentWelcomeSubtitle => 'Your phone is verified. Please enter your name.';
+	/// en: 'What is your name?'
+	String get residentWelcomeTitle => 'What is your name?';
+
+	/// en: 'Your phone is verified. How should we address you?'
+	String get residentWelcomeSubtitle => 'Your phone is verified. How should we address you?';
 
 	/// en: 'Go to Dashboard'
 	String get residentCompleteJoinButton => 'Go to Dashboard';
@@ -4431,8 +4434,8 @@ class Translations$features$auth$onboarding$en {
 	/// en: 'Code sent to {phone}.'
 	String get step3OtpSentTo => 'Code sent to {phone}.';
 
-	/// en: 'Resend code ({seconds} s)'
-	String get step3ResendOtp => 'Resend code ({seconds} s)';
+	/// en: 'Resend code ({time})'
+	String get step3ResendOtp => 'Resend code ({time})';
 
 	/// en: 'Resend code'
 	String get step3ResendOtpReady => 'Resend code';
@@ -5671,8 +5674,9 @@ extension on Translations {
 			'features.auth.onboarding.residentInviteOption' => 'I have an invite code',
 			'features.auth.onboarding.residentPhoneTitle' => 'Your phone number',
 			'features.auth.onboarding.residentPhoneSubtitle' => 'We will send you a one-time sign-in code.',
-			'features.auth.onboarding.residentWelcomeTitle' => 'Welcome!',
-			'features.auth.onboarding.residentWelcomeSubtitle' => 'Your phone is verified. Please enter your name.',
+			'features.auth.onboarding.residentPhoneNote' => 'Country code +90 is fixed. Enter your number as (5XX) XXX XX XX.',
+			'features.auth.onboarding.residentWelcomeTitle' => 'What is your name?',
+			'features.auth.onboarding.residentWelcomeSubtitle' => 'Your phone is verified. How should we address you?',
 			'features.auth.onboarding.residentCompleteJoinButton' => 'Go to Dashboard',
 			'features.auth.onboarding.step2Title' => 'Enter Your Contact Information',
 			'features.auth.onboarding.step2Subtitle' => 'Enter your phone number or email address to continue.',
@@ -5683,7 +5687,7 @@ extension on Translations {
 			'features.auth.onboarding.step3OtpSubtitleEmail' => 'Enter the 6-digit code sent to {email}.',
 			'features.auth.onboarding.step3OtpSubtitle' => 'Enter the 6-digit code below.',
 			'features.auth.onboarding.step3OtpSentTo' => 'Code sent to {phone}.',
-			'features.auth.onboarding.step3ResendOtp' => 'Resend code ({seconds} s)',
+			'features.auth.onboarding.step3ResendOtp' => 'Resend code ({time})',
 			'features.auth.onboarding.step3ResendOtpReady' => 'Resend code',
 			'features.auth.onboarding.step3PasswordTitle' => 'Enter your password',
 			'features.auth.onboarding.step3RegisterPasswordTitle' => 'Create your password',
@@ -5912,9 +5916,9 @@ extension on Translations {
 			'features.dekont.statusUnmatched' => 'Unmatched',
 			'features.dekont.statusPaymentApplied' => 'Payment applied',
 			'features.dekont.statusPaymentPartial' => 'Partial payment',
-			'features.dekont.statusRejected' => 'Rejected',
 			_ => null,
 		} ?? switch (path) {
+			'features.dekont.statusRejected' => 'Rejected',
 			'features.dekont.statusRecipientMismatch' => 'Recipient mismatch',
 			'features.dekont.statusNeedsManagerReview' => 'Manager review',
 			'features.dekont.reupload' => 'Upload again',

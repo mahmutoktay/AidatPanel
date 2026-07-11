@@ -385,11 +385,12 @@ export async function verifyOtpService(body) {
   } else if (purpose === "resident_join") {
     const inviteCode = body.inviteCode ?? record.payload?.inviteCode;
     const name = body.name?.trim();
-    if (!inviteCode) {
-      throw new HttpError(400, "Davet kodu gereklidir.");
-    }
     if (!name || name.length < 2) {
-      await validateInviteCode(inviteCode);
+      // Davet kodu isim adımından sonra (complete-resident-join) alınır;
+      // deep link'ten gelmişse payload'da tutulabilir.
+      if (inviteCode) {
+        await validateInviteCode(inviteCode);
+      }
       await prisma.phoneOtpToken.update({
         where: { id: record.id },
         data: {
@@ -397,12 +398,15 @@ export async function verifyOtpService(body) {
             ...(record.payload && typeof record.payload === "object"
               ? record.payload
               : {}),
-            inviteCode,
+            ...(inviteCode ? { inviteCode } : {}),
             joinOtpConfirmed: true,
           },
         },
       });
       return { requireName: true };
+    }
+    if (!inviteCode) {
+      throw new HttpError(400, "Davet kodu gereklidir.");
     }
     result = await joinResidentWithOtp(
       contact,

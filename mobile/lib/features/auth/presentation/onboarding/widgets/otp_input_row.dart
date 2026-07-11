@@ -5,7 +5,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
 import '../../../../../core/theme/app_typography.dart';
 
-/// 6 haneli OTP girişi — tek satır, otomatik ilerleme.
+/// 6 haneli OTP girişi — esnek hücre genişliği, backspace ile önceki hücreye geçiş.
 class OtpInputRow extends StatefulWidget {
   const OtpInputRow({
     super.key,
@@ -24,14 +24,18 @@ class OtpInputRow extends StatefulWidget {
 
 class _OtpInputRowState extends State<OtpInputRow> {
   static const _length = 6;
-  late List<TextEditingController> _controllers;
-  late List<FocusNode> _focusNodes;
+  late final List<TextEditingController> _controllers;
+  late final List<FocusNode> _focusNodes;
 
   @override
   void initState() {
     super.initState();
     _controllers = List.generate(_length, (_) => TextEditingController());
-    _focusNodes = List.generate(_length, (_) => FocusNode());
+    _focusNodes = List.generate(_length, (_) {
+      final node = FocusNode();
+      node.onKeyEvent = _onKeyEvent;
+      return node;
+    });
   }
 
   @override
@@ -55,6 +59,28 @@ class _OtpInputRowState extends State<OtpInputRow> {
     }
   }
 
+  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (event.logicalKey != LogicalKeyboardKey.backspace) {
+      return KeyEventResult.ignored;
+    }
+    final index = _focusNodes.indexOf(node);
+    if (index < 0) return KeyEventResult.ignored;
+
+    if (_controllers[index].text.isNotEmpty) {
+      _controllers[index].clear();
+      _notify();
+      return KeyEventResult.handled;
+    }
+    if (index > 0) {
+      _controllers[index - 1].clear();
+      _focusNodes[index - 1].requestFocus();
+      _notify();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
   void _onChanged(int index, String value) {
     if (value.length > 1) {
       _fillFromPaste(value);
@@ -74,40 +100,60 @@ class _OtpInputRowState extends State<OtpInputRow> {
     _notify();
     if (digits.length >= _length) {
       _focusNodes[_length - 1].unfocus();
+    } else if (digits.isNotEmpty) {
+      _focusNodes[digits.length.clamp(0, _length - 1)].requestFocus();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(_length, (i) {
-        return SizedBox(
-          width: 48,
-          height: 56,
-          child: TextField(
-            controller: _controllers[i],
-            focusNode: _focusNodes[i],
-            enabled: widget.enabled,
-            keyboardType: TextInputType.number,
-            textAlign: TextAlign.center,
-            maxLength: 1,
-            style: AppTypography.h3,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: InputDecoration(
-              counterText: '',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final gap = AppSizes.spacingXS;
+        final totalGaps = gap * (_length - 1);
+        final cellWidth =
+            ((constraints.maxWidth - totalGaps) / _length).clamp(40.0, 56.0);
+        final fontSize = cellWidth >= 48 ? 22.0 : 18.0;
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(_length, (i) {
+            return SizedBox(
+              width: cellWidth,
+              height: 56,
+              child: TextField(
+                controller: _controllers[i],
+                focusNode: _focusNodes[i],
+                enabled: widget.enabled,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                textAlignVertical: TextAlignVertical.center,
+                maxLength: 1,
+                style: AppTypography.h3.copyWith(
+                  fontSize: fontSize,
+                  height: 1.1,
+                  fontWeight: FontWeight.w700,
+                ),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: InputDecoration(
+                  counterText: '',
+                  contentPadding: EdgeInsets.zero,
+                  isDense: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
+                    borderSide:
+                        BorderSide(color: AppColors.primary, width: 2),
+                  ),
+                ),
+                onChanged: (v) => _onChanged(i, v),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                borderSide: BorderSide(color: AppColors.primary, width: 2),
-              ),
-            ),
-            onChanged: (v) => _onChanged(i, v),
-          ),
+            );
+          }),
         );
-      }),
+      },
     );
   }
 }

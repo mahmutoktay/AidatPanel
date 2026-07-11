@@ -17,6 +17,7 @@ import 'core/theme/app_theme.dart';
 import 'core/utils/init_date_formatting.dart';
 import 'core/storage/secure_storage.dart';
 import 'features/dekont/presentation/providers/share_intent_provider.dart';
+import 'core/deep_link/invite_deep_link.dart';
 import 'shared/widgets/friendly_error_screen.dart';
 import 'shared/widgets/toast_overlay.dart';
 import 'l10n/strings.g.dart';
@@ -224,6 +225,7 @@ class _MyAppContentState extends ConsumerState<_MyAppContent>
   @override
   Widget build(BuildContext context) {
     ref.watch(shareIntentProvider);
+    ref.watch(inviteDeepLinkProvider);
 
     final themePref = ref.watch(themeModeProvider);
     final platformBrightness = MediaQuery.platformBrightnessOf(context);

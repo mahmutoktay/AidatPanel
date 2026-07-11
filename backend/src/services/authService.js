@@ -120,6 +120,20 @@ export async function checkIdentifierService({ identifier, purpose }) {
     return { ok: true };
   }
 
+  if (purpose === "resident_phone") {
+    if (isEmail) {
+      throw new HttpError(400, "Sakin girişi için telefon numarası gereklidir.");
+    }
+    const phone = normalizeTrPhone(normalized);
+    if (!phone) {
+      throw new HttpError(400, "Geçerli bir telefon numarası giriniz.");
+    }
+    const user = await prisma.user.findFirst({
+      where: { phone, deletedAt: null, role: "RESIDENT" },
+    });
+    return { exists: Boolean(user) };
+  }
+
   throw new HttpError(400, "Geçersiz istek.");
 }
 

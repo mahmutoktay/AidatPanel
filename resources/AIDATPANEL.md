@@ -318,14 +318,27 @@ enum NotificationType {
 ```
 POST   /api/v1/auth/register
 POST   /api/v1/auth/login             # body: identifier (email veya telefon) + password
+POST   /api/v1/auth/check-identifier  # purpose: manager_register | manager_login | resident_phone
 POST   /api/v1/auth/refresh
 POST   /api/v1/auth/logout            # FCM token temizler
 POST   /api/v1/auth/logout-all-devices
-POST   /api/v1/auth/join
+POST   /api/v1/auth/join              # Legacy: email+şifre + davet kodu
+POST   /api/v1/auth/invite/validate   # Public: { inviteCode } → { valid, label }
+POST   /api/v1/auth/otp/send          # purpose: resident_login | resident_join | manager_*
+POST   /api/v1/auth/otp/verify
+POST   /api/v1/auth/otp/complete-resident-join  # phone + name + inviteCode (OTP sonrası)
 POST   /api/v1/auth/forgot-password
 POST   /api/v1/auth/reset-password
 ```
 
+**Sakin telefon-öncelikli akış (mobil):**
+1. `POST /auth/check-identifier` `{ identifier: phone, purpose: "resident_phone" }` → `{ exists: true|false }`
+2. Kayıtlıysa `otp/send` + `otp/verify` (`resident_login`) → JWT
+3. Yeniyse `otp/send` + `otp/verify` (`resident_join`, davet kodu opsiyonel) → `{ requireName: true }`
+4. İsim + davet kodu → `otp/complete-resident-join` → JWT  
+   Davet linki (`https://aidatpanel.com/join?code=...` / `aidatpanel://join?code=...`) ile gelindiyse kod arka planda tutulur; kullanıcıdan tekrar sorulmaz.
+
+**Davet linki:** Yönetici paylaşım mesajı `https://aidatpanel.com/join?code=AP3-...` içerir. Uygulama yoksa web landing; varsa deep link ile sakin telefon ekranı açılır.
 ### Buildings (Yönetici)
 ```
 GET    /api/v1/buildings                    # ?standalone=true → site altı olmayan binalar

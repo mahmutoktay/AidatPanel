@@ -15,6 +15,10 @@ abstract class AuthRemoteDataSource {
     required String identifier,
     required String purpose,
   });
+
+  /// `POST /auth/check-identifier` purpose=`resident_phone` → `data.exists`.
+  Future<bool> checkResidentPhoneExists(String phone);
+
   Future<RegisterResponse> register(RegisterRequest request);
   Future<JoinResponse> join(JoinRequest request);
   Future<TokenRefreshResult> refreshToken(String refreshToken);
@@ -67,7 +71,7 @@ abstract class AuthRemoteDataSource {
   Future<bool> verifyResidentJoinOtp({
     required String phone,
     required String code,
-    required String inviteCode,
+    String? inviteCode,
   });
 
   Future<LoginResponse> completeResidentJoin({
@@ -109,6 +113,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'purpose': purpose,
       },
     );
+  }
+
+  @override
+  Future<bool> checkResidentPhoneExists(String phone) async {
+    final response = await _dioClient.post(
+      ApiConstants.checkIdentifier,
+      data: {
+        'identifier': phone,
+        'purpose': 'resident_phone',
+      },
+    );
+    final data = response.data['data'] as Map<String, dynamic>?;
+    return data?['exists'] == true;
   }
 
   @override
@@ -247,7 +264,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<bool> verifyResidentJoinOtp({
     required String phone,
     required String code,
-    required String inviteCode,
+    String? inviteCode,
   }) async {
     final device = await DeviceInfoService.currentDeviceMeta();
     final response = await _dioClient.post(
@@ -256,7 +273,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'phone': phone,
         'code': code,
         'purpose': 'resident_join',
-        'inviteCode': inviteCode,
+        if (inviteCode != null && inviteCode.isNotEmpty) 'inviteCode': inviteCode,
         ...device.toJson(),
       },
     );

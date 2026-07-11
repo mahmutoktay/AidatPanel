@@ -1662,8 +1662,9 @@ class _Translations$features$auth$onboarding$tr implements Translations$features
 	@override String get residentInviteOption => 'Davet kodum var';
 	@override String get residentPhoneTitle => 'Telefon numaranız';
 	@override String get residentPhoneSubtitle => 'Size tek kullanımlık giriş kodu göndereceğiz.';
-	@override String get residentWelcomeTitle => 'Hoş geldiniz!';
-	@override String get residentWelcomeSubtitle => 'Telefon numaranız doğrulandı. Son olarak adınızı girin.';
+	@override String get residentPhoneNote => 'Ülke kodu +90 sabittir. Numaranızı (5XX) XXX XX XX şeklinde girin.';
+	@override String get residentWelcomeTitle => 'Adınız nedir?';
+	@override String get residentWelcomeSubtitle => 'Telefon numaranız doğrulandı. Size nasıl hitap edelim?';
 	@override String get residentCompleteJoinButton => 'Panele Git';
 	@override String get step2Title => 'İletişim Bilgilerinizi Giriniz';
 	@override String get step2Subtitle => 'Devam etmek için telefon numaranızı veya e-posta adresinizi girin.';
@@ -1674,7 +1675,7 @@ class _Translations$features$auth$onboarding$tr implements Translations$features
 	@override String get step3OtpSubtitleEmail => '{email} adresine gönderilen 6 haneli kodu giriniz.';
 	@override String get step3OtpSubtitle => '6 haneli kodu aşağıya girin.';
 	@override String get step3OtpSentTo => 'Kod {phone} numarasına gönderildi.';
-	@override String get step3ResendOtp => 'Kodu yeniden gönder ({seconds} sn)';
+	@override String get step3ResendOtp => 'Kodu yeniden gönder ({time})';
 	@override String get step3ResendOtpReady => 'Kodu yeniden gönder';
 	@override String get step3PasswordTitle => 'Şifrenizi yazın';
 	@override String get step3RegisterPasswordTitle => 'Şifrenizi belirleyin';
@@ -2653,8 +2654,9 @@ extension on TranslationsTr {
 			'features.auth.onboarding.residentInviteOption' => 'Davet kodum var',
 			'features.auth.onboarding.residentPhoneTitle' => 'Telefon numaranız',
 			'features.auth.onboarding.residentPhoneSubtitle' => 'Size tek kullanımlık giriş kodu göndereceğiz.',
-			'features.auth.onboarding.residentWelcomeTitle' => 'Hoş geldiniz!',
-			'features.auth.onboarding.residentWelcomeSubtitle' => 'Telefon numaranız doğrulandı. Son olarak adınızı girin.',
+			'features.auth.onboarding.residentPhoneNote' => 'Ülke kodu +90 sabittir. Numaranızı (5XX) XXX XX XX şeklinde girin.',
+			'features.auth.onboarding.residentWelcomeTitle' => 'Adınız nedir?',
+			'features.auth.onboarding.residentWelcomeSubtitle' => 'Telefon numaranız doğrulandı. Size nasıl hitap edelim?',
 			'features.auth.onboarding.residentCompleteJoinButton' => 'Panele Git',
 			'features.auth.onboarding.step2Title' => 'İletişim Bilgilerinizi Giriniz',
 			'features.auth.onboarding.step2Subtitle' => 'Devam etmek için telefon numaranızı veya e-posta adresinizi girin.',
@@ -2665,7 +2667,7 @@ extension on TranslationsTr {
 			'features.auth.onboarding.step3OtpSubtitleEmail' => '{email} adresine gönderilen 6 haneli kodu giriniz.',
 			'features.auth.onboarding.step3OtpSubtitle' => '6 haneli kodu aşağıya girin.',
 			'features.auth.onboarding.step3OtpSentTo' => 'Kod {phone} numarasına gönderildi.',
-			'features.auth.onboarding.step3ResendOtp' => 'Kodu yeniden gönder ({seconds} sn)',
+			'features.auth.onboarding.step3ResendOtp' => 'Kodu yeniden gönder ({time})',
 			'features.auth.onboarding.step3ResendOtpReady' => 'Kodu yeniden gönder',
 			'features.auth.onboarding.step3PasswordTitle' => 'Şifrenizi yazın',
 			'features.auth.onboarding.step3RegisterPasswordTitle' => 'Şifrenizi belirleyin',
@@ -2894,9 +2896,9 @@ extension on TranslationsTr {
 			'features.dekont.statusUnmatched' => 'Eşleşmedi',
 			'features.dekont.statusPaymentApplied' => 'Ödeme uygulandı',
 			'features.dekont.statusPaymentPartial' => 'Kısmi ödeme',
-			'features.dekont.statusRejected' => 'Reddedildi',
 			_ => null,
 		} ?? switch (path) {
+			'features.dekont.statusRejected' => 'Reddedildi',
 			'features.dekont.statusRecipientMismatch' => 'Alıcı uyuşmuyor',
 			'features.dekont.statusNeedsManagerReview' => 'Yönetici incelemesi',
 			'features.dekont.reupload' => 'Yeniden yükle',

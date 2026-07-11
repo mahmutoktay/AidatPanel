@@ -27,6 +27,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
+import 'core/deep_link/invite_deep_link.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/secure_storage.dart';
 import 'core/utils/init_date_formatting.dart';
@@ -133,6 +134,7 @@ class _DevApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(inviteDeepLinkProvider);
     final router = ref.watch(appRouterProvider);
     return TranslationProvider(
       child: MaterialApp.router(

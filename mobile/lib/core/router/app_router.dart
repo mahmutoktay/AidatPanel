@@ -340,7 +340,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return AuthOnboardingScreen(
             initialRole: parseAuthRole(q['role']),
             initialFlow: parseAuthFlow(q['flow']),
-            skipRoleStep: q['role'] != null || q['flow'] != null,
+            skipRoleStep:
+                q['role'] != null || q['flow'] != null || q['code'] != null,
+            initialInviteCode: q['code'],
           );
         },
       ),
@@ -352,7 +354,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           if (role == 'manager') {
             return '/login?role=manager&flow=register';
           }
-          return '/login?role=resident&flow=join';
+          return '/login?role=resident';
         },
       ),
       GoRoute(
@@ -363,7 +365,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/join',
         name: 'join',
-        redirect: (_, _) => '/login?role=resident&flow=join',
+        redirect: (_, state) {
+          final code = state.uri.queryParameters['code'];
+          if (code != null && code.isNotEmpty) {
+            return '/login?role=resident&code=${Uri.encodeComponent(code)}';
+          }
+          return '/login?role=resident';
+        },
       ),
       GoRoute(
         path: '/forgot-password',

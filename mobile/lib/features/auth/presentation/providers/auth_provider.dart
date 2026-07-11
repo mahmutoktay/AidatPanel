@@ -169,6 +169,20 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Sakin telefonu kayıtlı mı? (`purpose: resident_phone`).
+  Future<bool> checkResidentPhoneExists(String phone) async {
+    if (state.isLoading) return false;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final exists = await _authRepository.checkResidentPhoneExists(phone);
+      state = state.copyWith(isLoading: false, clearError: true);
+      return exists;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
   String _passwordErrorMessage(String key) {
     switch (key) {
       case 'password_required':
@@ -317,7 +331,7 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<bool> verifyResidentJoinOtp({
     required String phone,
     required String code,
-    required String inviteCode,
+    String? inviteCode,
   }) async {
     if (state.isLoading) return false;
     state = state.copyWith(isLoading: true, clearError: true);

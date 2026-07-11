@@ -1,0 +1,541 @@
+/* --- GÜNDÜZ MODU (Senin Orijinal Değişkenlerin) --- */
+:root {
+    --primary: #1B3A6B;
+    --accent: #F59E0B;
+    --bg: #ffffff;
+    --white: #ffffff;
+    --text-main: #0F172A; /* Gündüz modunda orijinal koyu renk */
+    --text-sec: #334155;  /* İkincil metinler için */
+    --light-bg: #EFF6FF;
+    --border-light: #E2E8F0;
+    --nav-bg: #ffffff;
+}
+
+/* --- GECE MODU (Sadece Sınıf Eklendiğinde Devreye Girer) --- */
+body.dark-mode {
+    --primary: #60A5FA;       /* Gece modunda başlıklar için parlayan mavi */
+    --bg: #0F172A;            /* Ana arka plan koyu lacivert */
+    --white: #1E293B;         /* Kartların arka planı (Koyu gri/lacivert) */
+    --text-main: #F8FAFC;     /* Gece modunda yazılar AÇIK RENK olur */
+    --text-sec: #CBD5E1;      /* Gece modunda alt metinler açık gri olur */
+    --light-bg: #0B1120;
+    --border-light: #334155;
+    --nav-bg: #1E293B;
+}
+
+* { box-sizing: border-box; }
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--bg);
+    color: var(--text-main);
+    margin: 0;
+    font-size: 18px; 
+    line-height: 1.7;
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header & Navigasyon */
+header {
+    background: var(--nav-bg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: background-color 0.4s ease;
+}
+
+.nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 0;
+}
+
+/* SAĞ MENÜ (İkon ve Buton Hizalaması) */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 24px; /* Buton ile Çerçeveli İkon Arasındaki Mesafeyi Açtık */
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: -0.5px;
+}
+
+.logo span { 
+    color: var(--accent); 
+}
+
+/* GECE/GÜNDÜZ MODU BUTONU (Çerçeveli Yapı) */
+.theme-btn {
+    background: transparent;
+    border: 2px solid var(--border-light); /* Çerçeve Eklendi */
+    border-radius: 50%; /* Tam yuvarlak çerçeve */
+    width: 44px; /* Çerçeve genişliği */
+    height: 44px; /* Çerçeve yüksekliği */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.theme-btn:hover {
+    transform: scale(1.1);
+    border-color: var(--accent); /* Üstüne gelince çerçeve turuncu olur */
+    color: var(--accent);
+}
+
+/* Genel Buton Yapısı (Tüm butonlar için ortak) */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 18px;
+    min-height: 56px;
+    transition: 0.3s;
+}
+
+.btn-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 12px;
+    object-fit: contain;
+}
+
+.btn-primary {
+    background-color: #1B3A6B !important; /* Gece modunda da lacivert kalsın */
+    color: white !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 220px;
+}
+
+.btn-primary:hover {
+    background: #153052 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(27, 58, 107, 0.2);
+}
+
+.btn-accent { 
+    background: var(--accent); 
+    color: #ffffff !important;
+}
+
+.btn-accent:hover {
+    background: #E68A00;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(245, 158, 11, 0.2);
+}
+
+.btn-sm { 
+    padding: 10px 20px; 
+    font-size: 16px; 
+    min-height: auto; /* Küçük buton ayarı korundu */
+}
+
+.btn i {
+    margin-right: 8px;
+}
+
+/* Mağaza Butonları Konteynırı */
+.store-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+/* Rozet Link Yapısı */
+.store-link {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.store-link:hover {
+    transform: translateY(-5px);
+}
+
+/* Rozet Resim Boyutu */
+.store-img {
+    height: 60px;
+    width: auto;
+    display: block;
+}
+
+/* Hero */
+.hero { 
+    padding: 100px 0; 
+    text-align: center;
+    background: linear-gradient(135deg, var(--light-bg) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.hero-content {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.hero h1 { 
+    font-size: 48px; 
+    font-weight: 700;
+    color: var(--primary); 
+    margin-bottom: 24px;
+    line-height: 1.2;
+}
+
+.hero p {
+    font-size: 20px;
+    color: var(--text-sec);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+/* Özellikler */
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 80px 0;
+    background: var(--bg); /* Arka planı dinamik yaptık */
+}
+
+.features h2 {
+    grid-column: 1 / -1;
+    font-size: 36px;
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+
+.feature-card {
+    background: var(--white); /* Değişkene bağlandı */
+    padding: 40px 30px;
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    border-color: var(--accent);
+}
+
+.feature-card h3 {
+    font-size: 24px;
+    color: var(--primary);
+    margin: 0 0 16px 0;
+}
+
+.feature-card p {
+    color: var(--text-sec);
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+/* Fiyatlandırma */
+.pricing { 
+    padding: 80px 0; 
+    text-align: center;
+    background: linear-gradient(135deg, var(--light-bg) 0%, var(--bg) 100%);
+}
+
+.pricing h2 {
+    font-size: 36px;
+    color: var(--primary);
+    margin-bottom: 16px;
+}
+
+.pricing-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 50px;
+    flex-wrap: wrap;
+}
+
+.price-card {
+    background: var(--white);
+    padding: 50px 40px;
+    border-radius: 16px;
+    width: 320px;
+    border: 2px solid var(--border-light);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
+.price-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+}
+
+.price-card.popular { 
+    border-color: var(--accent); 
+    position: relative;
+    transform: scale(1.05);
+}
+
+.price-card.popular:hover {
+    transform: scale(1.05) translateY(-8px);
+}
+
+.price-card h3 {
+    font-size: 22px;
+    color: var(--primary);
+    margin: 16px 0;
+}
+
+.price { 
+    font-size: 48px; 
+    font-weight: 700; 
+    color: var(--primary); 
+    margin: 24px 0;
+}
+
+.price span {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-sec);
+}
+
+.price-card p {
+    color: var(--text-sec);
+    margin: 0;
+    font-size: 16px;
+}
+
+.badge {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--accent) 0%, #E68A00 100%);
+    color: var(--white);
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+footer { 
+    padding: 50px 0; 
+    text-align: center; 
+    background: #1B3A6B; /* Gece gündüz hep lacivert */
+    color: #ffffff;
+    font-size: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+footer a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.3s ease;
+}
+
+footer a:hover {
+    opacity: 0.8;
+}/* --- GECE MODU İÇİN GARANTİ YAZI RENKLERİ --- */
+
+/* Normal yazılar ve açıklamalar (Açık Gri) */
+body.dark-mode .feature-card p,
+body.dark-mode .price-card p,
+body.dark-mode .hero p,
+body.dark-mode .price span {
+    color: #CBD5E1 !important; /* 50+ yaş kuralına uygun, göz yormayan açık gri */
+}
+
+/* Başlıklar ve fiyatlar (Açık Mavi) */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode .price {
+    color: #ffffff !important; /* Geceleri parlayan şık bir mavi */
+}  
+
+/* Kartların kendi arka planları ve sınır çizgileri */
+body.dark-mode .feature-card,
+body.dark-mode .price-card {
+    background-color: #1E293B !important; 
+    border-color: #f3821f !important;
+}
+/* Navbar İçindeki Planlar Butonu */
+.nav-link-btn {
+    text-decoration: none;
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 18px; /* 50+ yaş kuralına sadık kaldık */
+    padding: 8px 20px;
+    border: 2px solid var(--primary); /* Şık bir çerçeve */
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.nav-link-btn:hover {
+    background-color: var(--primary);
+    color: white !important;
+    transform: translateY(-2px);
+}
+
+/* Gece modunda çerçevenin rengini de uyduralım */
+body.dark-mode .nav-link-btn {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+body.dark-mode .nav-link-btn:hover {
+    background-color: var(--accent);
+    color: var(--bg) !important;
+}
+/* --- CTA Alanı Karanlık Mod Düzeltmesi --- */
+.cta {
+    transition: all 0.4s ease;
+}
+
+body.dark-mode .cta {
+    background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%) !important;
+    border: 1px solid var(--accent);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* --- YENİ PLAN KARTLARI (TABLO YERİNE) --- */
+.pricing-cards-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 40px;
+}
+
+.plan-card {
+    background: var(--white);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.plan-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+}
+
+.plan-card.premium {
+    border: 2px solid var(--accent);
+    position: relative;
+    transform: scale(1.02);
+}
+
+.plan-card.premium:hover {
+    transform: scale(1.02) translateY(-8px);
+}
+
+.plan-card h3 {
+    color: var(--primary);
+    font-size: 26px;
+    margin: 0 0 10px 0;
+}
+
+.plan-card p {
+    color: var(--text-sec);
+    margin: 0 0 20px 0;
+    font-size: 16px;
+}
+
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 30px 0;
+    flex-grow: 1; /* Butonların alt hizada eşit kalmasını sağlar */
+}
+
+.plan-features li {
+    margin-bottom: 16px;
+    font-size: 18px; /* 50+ yaş kuralı */
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.plan-features li.disabled {
+    color: var(--text-sec);
+    opacity: 0.6;
+    text-decoration: line-through; /* Yok olan özellikleri üstü çizili yapar */
+}
+
+.plan-features .check { color: #16A34A; font-weight: bold; font-size: 20px; }
+.plan-features .cross { color: #DC2626; font-weight: bold; font-size: 20px; text-decoration: none; display: inline-block; }
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.btn-outline:hover {
+    background: var(--primary) !important;
+    color: #fff !important;
+}
+
+/* Karanlık Mod Uyumları */
+body.dark-mode .plan-card { background-color: #1E293B !important; }
+body.dark-mode .plan-card.premium { border-color: var(--accent) !important; }
+body.dark-mode .plan-features li.disabled { color: #64748b; }
+/* --- MOBİL YATAY KAYDIRMA (SWIPE) KESİN ÇÖZÜM --- */
+@media (max-width: 768px) {
+    .pricing-cards-wrapper {
+        display: flex;
+        flex-wrap: nowrap !important; /* KARTLARIN ALT ALTA İNMESİNİ KESİN ENGELLER */
+        overflow-x: auto; 
+        scroll-snap-type: x mandatory; 
+        padding: 20px 20px 40px 20px; 
+        gap: 20px;
+        -webkit-overflow-scrolling: touch; 
+        justify-content: flex-start;
+    }
+    
+    .plan-card {
+        flex: 0 0 85%; /* Ekranın %85'i kadar genişlik */
+        scroll-snap-align: center; 
+        max-width: none;
+    }
+
+    /* Gizli scrollbar */
+    .pricing-cards-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+}

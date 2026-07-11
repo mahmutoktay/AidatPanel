@@ -21,6 +21,7 @@ abstract class AuthRepository {
     required String identifier,
     required String purpose,
   });
+  Future<bool> checkResidentPhoneExists(String phone);
   Future<void> register(
     String? email,
     String password,
@@ -82,7 +83,7 @@ abstract class AuthRepository {
   Future<bool> verifyResidentJoinOtp({
     required String phone,
     required String code,
-    required String inviteCode,
+    String? inviteCode,
   });
 
   Future<UserEntity> completeResidentJoin({
@@ -190,6 +191,17 @@ class AuthRepositoryImpl implements AuthRepository {
         identifier: PhoneUtils.normalizeLoginIdentifier(identifier),
         purpose: purpose,
       );
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'identifier_check_failed');
+    }
+  }
+
+  @override
+  Future<bool> checkResidentPhoneExists(String phone) async {
+    try {
+      return await _remoteDataSource.checkResidentPhoneExists(phone);
     } on ApiException {
       rethrow;
     } catch (_) {
@@ -458,7 +470,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> verifyResidentJoinOtp({
     required String phone,
     required String code,
-    required String inviteCode,
+    String? inviteCode,
   }) async {
     try {
       return await _remoteDataSource.verifyResidentJoinOtp(

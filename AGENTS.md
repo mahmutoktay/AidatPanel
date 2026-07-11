@@ -160,7 +160,7 @@ mobile/lib/
 │   └── notifications/         # FCM + WebSocket + Polling coordinator
 ├── l10n/                      # Slang TR/EN i18n JSON dosyaları
 ├── features/                  # Feature-first yapı (referans: auth/)
-│   ├── auth/                  # Giriş, kayıt, OTP, onboarding
+│   ├── auth/                  # Giriş, kayıt, OTP, onboarding (sakin: telefon→OTP→login|isim+davet; deep link `aidatpanel://join?code=`)
 │   ├── dashboard/             # Manager + Resident dashboard; ManagerPropertiesTab (Siteler|Binalar)
 │   ├── sites/                 # Site CRUD, site gideri, site raporu (FAZ 8)
 │   ├── buildings/             # Bina CRUD, davet kodu, IBAN

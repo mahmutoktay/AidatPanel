@@ -24,16 +24,22 @@ const _managerPasswordLoginSteps = [
 /// Sakin tekrar giriş — telefon + OTP.
 const _residentLoginSteps = [
   AuthOnboardingStepId.role,
-  AuthOnboardingStepId.residentExperience,
   AuthOnboardingStepId.contact,
   AuthOnboardingStepId.verification,
 ];
 
-/// Sakin davet kodu ile katılım — davet + telefon + OTP + isim.
+/// Sakin katılım — telefon + OTP + isim + davet.
 const _residentJoinSteps = [
   AuthOnboardingStepId.role,
-  AuthOnboardingStepId.residentExperience,
+  AuthOnboardingStepId.contact,
+  AuthOnboardingStepId.verification,
+  AuthOnboardingStepId.name,
   AuthOnboardingStepId.invite,
+];
+
+/// Davet linkinden gelen sakin — davet adımı atlanır.
+const _residentJoinDeepLinkSteps = [
+  AuthOnboardingStepId.role,
   AuthOnboardingStepId.contact,
   AuthOnboardingStepId.verification,
   AuthOnboardingStepId.name,
@@ -70,6 +76,8 @@ class AuthOnboardingState {
   final String? errorMessage;
   final bool joinOtpVerified;
   final bool stepForward;
+  /// Davet linkinden (`?code=` / deep link) gelen kod; invite adımı atlanır.
+  final bool inviteFromDeepLink;
 
   const AuthOnboardingState({
     this.currentStepId = AuthOnboardingStepId.role,
@@ -92,6 +100,7 @@ class AuthOnboardingState {
     this.errorMessage,
     this.joinOtpVerified = false,
     this.stepForward = true,
+    this.inviteFromDeepLink = false,
   });
 
   int get currentStepIndex {
@@ -104,6 +113,11 @@ class AuthOnboardingState {
   bool get isManagerPasswordFlow =>
       role == UserRole.manager &&
       visibleSteps.contains(AuthOnboardingStepId.managerExperience);
+
+  bool get hasPrefetchedInvite =>
+      inviteFromDeepLink &&
+      inviteCode != null &&
+      inviteCode!.trim().isNotEmpty;
 
   AuthOnboardingState copyWith({
     AuthOnboardingStepId? currentStepId,
@@ -126,6 +140,7 @@ class AuthOnboardingState {
     String? errorMessage,
     bool? joinOtpVerified,
     bool? stepForward,
+    bool? inviteFromDeepLink,
     bool clearError = false,
     bool clearInviteLabel = false,
     bool clearPhone = false,
@@ -152,6 +167,7 @@ class AuthOnboardingState {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       joinOtpVerified: joinOtpVerified ?? this.joinOtpVerified,
       stepForward: stepForward ?? this.stepForward,
+      inviteFromDeepLink: inviteFromDeepLink ?? this.inviteFromDeepLink,
     );
   }
 }
@@ -169,6 +185,7 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
     UserRole? role,
     AuthOnboardingFlow? flow,
     bool skipRoleStep = false,
+    String? inviteCode,
   }) {
     var next = state.copyWith(clearError: true);
     if (role != null) next = next.copyWith(role: role);
@@ -182,9 +199,47 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
             : next.contact,
       );
     }
-    var steps = role != null || flow != null
+
+    final rawCode = inviteCode?.trim();
+    if (rawCode != null && rawCode.isNotEmpty) {
+      next = next.copyWith(
+        inviteCode: rawCode.toUpperCase().replaceAll(RegExp(r'\s+'), ''),
+        inviteFromDeepLink: true,
+        role: UserRole.resident,
+        contact: AuthContactChannel.phone,
+      );
+      // Deep link: telefon-öncelikli; flow henüz login/join bilinmiyor.
+      if (flow == null || flow == AuthOnboardingFlow.join) {
+        next = next.copyWith(
+          flow: AuthOnboardingFlow.login,
+          isFirstTimeSetup: false,
+        );
+      }
+    }
+
+    // Eski /join?flow=join → telefon-öncelikli sakin girişi.
+    if (next.role == UserRole.resident &&
+        (flow == AuthOnboardingFlow.join || next.inviteFromDeepLink)) {
+      next = next.copyWith(
+        role: UserRole.resident,
+        contact: AuthContactChannel.phone,
+        flow: AuthOnboardingFlow.login,
+        isFirstTimeSetup: false,
+        joinOtpVerified: false,
+      );
+    }
+
+    var steps = role != null || flow != null || next.inviteFromDeepLink
         ? _computeVisibleSteps(next)
         : List<AuthOnboardingStepId>.from(_defaultRegistrationSteps);
+
+    if (next.role == UserRole.resident &&
+        (flow == AuthOnboardingFlow.join ||
+            next.inviteFromDeepLink ||
+            role == UserRole.resident)) {
+      steps = List<AuthOnboardingStepId>.from(_residentLoginSteps);
+    }
+
     if (skipRoleStep &&
         steps.isNotEmpty &&
         steps.first == AuthOnboardingStepId.role) {
@@ -208,17 +263,23 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
       return List<AuthOnboardingStepId>.from(_residentLoginSteps);
     }
     if (s.flow == AuthOnboardingFlow.join && s.role == UserRole.resident) {
-      return List<AuthOnboardingStepId>.from(_residentJoinSteps);
+      return List<AuthOnboardingStepId>.from(
+        s.hasPrefetchedInvite
+            ? _residentJoinDeepLinkSteps
+            : _residentJoinSteps,
+      );
     }
     if (s.flow == AuthOnboardingFlow.legacyLogin ||
-        (s.flow == AuthOnboardingFlow.login && s.contact == AuthContactChannel.email)) {
+        (s.flow == AuthOnboardingFlow.login &&
+            s.contact == AuthContactChannel.email)) {
       return const [
         AuthOnboardingStepId.role,
         AuthOnboardingStepId.contact,
         AuthOnboardingStepId.verification,
       ];
     }
-    if (s.flow == AuthOnboardingFlow.login && s.contact == AuthContactChannel.phone) {
+    if (s.flow == AuthOnboardingFlow.login &&
+        s.contact == AuthContactChannel.phone) {
       return const [
         AuthOnboardingStepId.role,
         AuthOnboardingStepId.contact,
@@ -233,6 +294,12 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
       AuthOnboardingStepId.features,
       AuthOnboardingStepId.complete,
     ];
+  }
+
+  List<AuthOnboardingStepId> _residentJoinStepsFor(AuthOnboardingState s) {
+    return List<AuthOnboardingStepId>.from(
+      s.hasPrefetchedInvite ? _residentJoinDeepLinkSteps : _residentJoinSteps,
+    );
   }
 
   void selectRole(UserRole role) {
@@ -252,16 +319,18 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
     _goToStep(AuthOnboardingStepId.managerExperience);
   }
 
+  /// Sakin kartı — doğrudan telefon girişi (deneyim seçimi yok).
   void pickResidentRole() {
     state = state.copyWith(
       role: UserRole.resident,
-      visibleSteps: const [
-        AuthOnboardingStepId.role,
-        AuthOnboardingStepId.residentExperience,
-      ],
+      flow: AuthOnboardingFlow.login,
+      contact: AuthContactChannel.phone,
+      isFirstTimeSetup: false,
+      joinOtpVerified: false,
+      visibleSteps: List<AuthOnboardingStepId>.from(_residentLoginSteps),
       clearError: true,
     );
-    _goToStep(AuthOnboardingStepId.residentExperience);
+    _goToStep(AuthOnboardingStepId.contact);
   }
 
   void startResidentReturning() {
@@ -278,16 +347,46 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
   }
 
   void startResidentWithInvite() {
+    applyResidentJoinFlow(keepCurrentStep: false);
+  }
+
+  /// Telefon kontrolü sonrası: kayıtlı sakin girişi.
+  void applyResidentLoginFlow({bool keepCurrentStep = true}) {
+    final current = keepCurrentStep ? state.currentStepId : null;
+    state = state.copyWith(
+      role: UserRole.resident,
+      flow: AuthOnboardingFlow.login,
+      contact: AuthContactChannel.phone,
+      isFirstTimeSetup: false,
+      joinOtpVerified: false,
+      visibleSteps: List<AuthOnboardingStepId>.from(_residentLoginSteps),
+      clearError: true,
+    );
+    if (current != null && state.visibleSteps.contains(current)) {
+      _goToStep(current);
+    } else {
+      _goToStep(AuthOnboardingStepId.contact);
+    }
+  }
+
+  /// Telefon kontrolü sonrası: yeni sakin katılımı.
+  void applyResidentJoinFlow({bool keepCurrentStep = true}) {
+    final current = keepCurrentStep ? state.currentStepId : null;
+    final steps = _residentJoinStepsFor(state);
     state = state.copyWith(
       role: UserRole.resident,
       flow: AuthOnboardingFlow.join,
       contact: AuthContactChannel.phone,
       isFirstTimeSetup: true,
       joinOtpVerified: false,
-      visibleSteps: List<AuthOnboardingStepId>.from(_residentJoinSteps),
+      visibleSteps: steps,
       clearError: true,
     );
-    _goToStep(AuthOnboardingStepId.invite);
+    if (current != null && state.visibleSteps.contains(current)) {
+      _goToStep(current);
+    } else {
+      _goToStep(AuthOnboardingStepId.contact);
+    }
   }
 
   void startManagerFirstTime() {
@@ -408,6 +507,17 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
     state = state.copyWith(inviteCode: code.trim(), clearError: true);
   }
 
+  void setInviteFromDeepLink(String code) {
+    final normalized = code.trim().toUpperCase().replaceAll(RegExp(r'\s+'), '');
+    state = state.copyWith(
+      inviteCode: normalized,
+      inviteFromDeepLink: true,
+      role: UserRole.resident,
+      contact: AuthContactChannel.phone,
+      clearError: true,
+    );
+  }
+
   void setInviteFields({String? inviteCode, String? name}) {
     state = state.copyWith(
       inviteCode: inviteCode ?? state.inviteCode,
@@ -417,7 +527,7 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
   }
 
   void markOtpSent() {
-    state = state.copyWith(otpSent: true, otpResendSeconds: 52);
+    state = state.copyWith(otpSent: true, otpResendSeconds: 120);
   }
 
   void tickOtpResend() {

@@ -65,6 +65,23 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="*/*" />
             </intent-filter>
+            <!-- Davet deep link: aidatpanel://join?code=... -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="aidatpanel" android:host="join" />
+            </intent-filter>
+            <!-- HTTPS App Links (SHA-256 doğrulaması production'da tamamlanmalı) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="aidatpanel.com"
+                    android:pathPrefix="/join" />
+            </intent-filter>
         </activity>
 
         <!-- Don't delete the meta-data below.

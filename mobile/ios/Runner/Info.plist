@@ -85,6 +85,16 @@
 				<string>ShareMedia-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.aidatpanel.join</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>aidatpanel</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>

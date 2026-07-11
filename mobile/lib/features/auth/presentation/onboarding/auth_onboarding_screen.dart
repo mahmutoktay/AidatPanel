@@ -36,6 +36,8 @@ import 'widgets/onboarding_step_transition.dart';
 import 'widgets/onboarding_step_actions.dart';
 import 'widgets/onboarding_step_scaffold.dart';
 import 'widgets/otp_input_row.dart';
+import 'widgets/invite_code_input_row.dart';
+import 'widgets/phone_input_row.dart';
 
 /// 6 adımlı auth onboarding — tek giriş noktası `/login`.
 class AuthOnboardingScreen extends ConsumerStatefulWidget {
@@ -45,12 +47,14 @@ class AuthOnboardingScreen extends ConsumerStatefulWidget {
     this.initialFlow,
     this.initialStep,
     this.skipRoleStep = false,
+    this.initialInviteCode,
   });
 
   final UserRole? initialRole;
   final AuthOnboardingFlow? initialFlow;
   final int? initialStep;
   final bool skipRoleStep;
+  final String? initialInviteCode;
 
   @override
   ConsumerState<AuthOnboardingScreen> createState() =>
@@ -77,6 +81,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
             role: widget.initialRole,
             flow: widget.initialFlow,
             skipRoleStep: widget.skipRoleStep,
+            inviteCode: widget.initialInviteCode,
           );
     });
     _passwordFocusNode.addListener(() => setState(() {}));
@@ -122,8 +127,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       ob.role == UserRole.resident && ob.flow == AuthOnboardingFlow.login;
 
   bool _isResidentOtpFlow(AuthOnboardingState ob) =>
-      ob.role == UserRole.resident &&
-      ob.visibleSteps.contains(AuthOnboardingStepId.residentExperience);
+      ob.role == UserRole.resident;
 
   String? _validateResidentPhoneInput(String raw) {
     final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
@@ -134,6 +138,12 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       return 'phone_invalid';
     }
     return null;
+  }
+
+  String _formatOtpResendTime(int seconds) {
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
   }
 
   String _validationMessage(BuildContext context, String key) {
@@ -200,7 +210,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
 
       case AuthOnboardingStepId.name:
         if (_isResidentJoin(ob) && ob.joinOtpVerified) {
-          await _handleResidentJoinNameStep(ob, auth);
+          await _handleResidentJoinNameStep(ob, onboarding, auth);
         } else {
           _handleManagerNameStep(ob, onboarding);
         }
@@ -264,6 +274,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
 
   Future<void> _handleResidentJoinNameStep(
     AuthOnboardingState ob,
+    AuthOnboardingNotifier onboarding,
     AuthNotifier auth,
   ) async {
     final name = _nameController.text.trim();
@@ -276,17 +287,23 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       return;
     }
     final phone = ob.phone;
-    final inviteCode = ob.inviteCode;
-    if (phone == null || inviteCode == null || inviteCode.isEmpty) return;
-    try {
-      final user = await auth.completeResidentJoinAndAuthenticate(
-        phone: phone,
-        name: name,
-        inviteCode: inviteCode,
-        ref: ref,
-      );
-      _goDashboard(user);
-    } catch (_) {}
+    if (phone == null) return;
+    onboarding.setName(name);
+
+    if (ob.hasPrefetchedInvite) {
+      try {
+        final user = await auth.completeResidentJoinAndAuthenticate(
+          phone: phone,
+          name: name,
+          inviteCode: ob.inviteCode!,
+          ref: ref,
+        );
+        _goDashboard(user);
+      } catch (_) {}
+      return;
+    }
+
+    onboarding.goNextStep();
   }
 
   Future<void> _handleIdentifierStep(
@@ -385,13 +402,21 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       final phone = PhoneUtils.normalizeTrPhone(raw)!;
       onboarding.setContactValue(phone);
       try {
-        await auth.sendOtp(
-          phone: phone,
-          purpose: _otpPurpose(ob),
-          payload: _isResidentJoin(ob) && ob.inviteCode != null
-              ? {'inviteCode': ob.inviteCode}
-              : null,
-        );
+        final exists = await auth.checkResidentPhoneExists(phone);
+        if (exists) {
+          onboarding.applyResidentLoginFlow();
+          await auth.sendOtp(phone: phone, purpose: 'resident_login');
+        } else {
+          onboarding.applyResidentJoinFlow();
+          final invite = ref.read(authOnboardingProvider).inviteCode;
+          await auth.sendOtp(
+            phone: phone,
+            purpose: 'resident_join',
+            payload: invite != null && invite.isNotEmpty
+                ? {'inviteCode': invite}
+                : null,
+          );
+        }
         onboarding.markOtpSent();
         _startOtpTimer();
         onboarding.goNextStep();
@@ -461,13 +486,11 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
         return;
       }
       if (_isResidentJoin(ob)) {
-        final inviteCode = ob.inviteCode;
-        if (inviteCode == null || inviteCode.isEmpty) return;
         try {
           final requireName = await auth.verifyResidentJoinOtp(
             phone: phone!,
             code: code,
-            inviteCode: inviteCode,
+            inviteCode: ob.inviteCode,
           );
           if (requireName) {
             onboarding.markJoinOtpVerified();
@@ -594,12 +617,23 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
             );
         return;
       }
+      final phone = ob.phone;
+      final name = ob.name ?? _nameController.text.trim();
+      if (phone == null || name.isEmpty) return;
       try {
         final label = await auth.validateInviteCode(invite);
         onboarding.setInviteCode(invite);
         onboarding.setInviteLabel(label);
-        onboarding.goNextStep();
+        final user = await auth.completeResidentJoinAndAuthenticate(
+          phone: phone,
+          name: name,
+          inviteCode: invite,
+          ref: ref,
+        );
+        if (!mounted) return;
+        _goDashboard(user);
       } catch (_) {
+        if (!mounted) return;
         ref.read(toastProvider.notifier).show(
               context.t.features.auth.onboarding.inviteInvalid,
               type: ToastType.error,
@@ -750,10 +784,13 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
 
       case AuthOnboardingStepId.name:
         final isResidentWelcome = _isResidentJoin(ob) && ob.joinOtpVerified;
+        final primaryLabel = isResidentWelcome
+            ? (ob.hasPrefetchedInvite
+                ? tOb.residentCompleteJoinButton
+                : tOb.continueButton)
+            : tOb.continueButton;
         return OnboardingStepActions(
-          primaryLabel: isResidentWelcome
-              ? tOb.residentCompleteJoinButton
-              : tOb.continueButton,
+          primaryLabel: primaryLabel,
           onPrimary: _onContinue,
           onBack: isLoading ? null : onboarding.goBack,
           backLabel: tOb.backButton,
@@ -825,7 +862,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       case AuthOnboardingStepId.invite:
         if (_isResidentJoin(ob)) {
           return OnboardingStepActions(
-            primaryLabel: tOb.continueButton,
+            primaryLabel: tOb.residentJoinButton,
             onPrimary: _onContinue,
             onBack: isLoading ? null : onboarding.goBack,
             backLabel: tOb.backButton,
@@ -998,17 +1035,16 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextField(
-                  controller: _contactController,
+                PhoneInputRow(
                   enabled: !isLoading,
-                  keyboardType: TextInputType.phone,
-                  maxLength: 11,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: InputDecoration(
-                    labelText: context.t.features.auth.phone,
-                    hintText: '05XXXXXXXXX',
-                    counterText: '',
-                  ),
+                  initialPhone: _contactController.text.isNotEmpty
+                      ? _contactController.text
+                      : (ob.phone != null && ob.phone!.length == 10
+                          ? '0${ob.phone}'
+                          : ob.phone),
+                  onChanged: (digits) {
+                    _contactController.text = digits;
+                  },
                 ),
                 const SizedBox(height: AppSizes.spacingS),
                 Row(
@@ -1022,7 +1058,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
                     const SizedBox(width: AppSizes.spacingXS),
                     Expanded(
                       child: Text(
-                        tOb.managerIdentifierPhoneNote,
+                        tOb.residentPhoneNote,
                         style: AppTypography.caption.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -1154,8 +1190,8 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
                     prompt: tOb.residentResendPrompt,
                     linkLabel: ob.otpResendSeconds > 0
                         ? tOb.step3ResendOtp.replaceAll(
-                            '{seconds}',
-                            '${ob.otpResendSeconds}',
+                            '{time}',
+                            _formatOtpResendTime(ob.otpResendSeconds),
                           )
                         : tOb.residentResendLink,
                     enabled: ob.otpResendSeconds <= 0 && !isLoading,
@@ -1226,8 +1262,8 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
                   AuthTextButton(
                     label: ob.otpResendSeconds > 0
                         ? tOb.step3ResendOtp.replaceAll(
-                            '{seconds}',
-                            '${ob.otpResendSeconds}',
+                            '{time}',
+                            _formatOtpResendTime(ob.otpResendSeconds),
                           )
                         : tOb.step3ResendOtpReady,
                     onTap: ob.otpResendSeconds > 0 || isLoading
@@ -1242,8 +1278,8 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
                     prompt: tOb.residentResendPrompt,
                     linkLabel: ob.otpResendSeconds > 0
                         ? tOb.step3ResendOtp.replaceAll(
-                            '{seconds}',
-                            '${ob.otpResendSeconds}',
+                            '{time}',
+                            _formatOtpResendTime(ob.otpResendSeconds),
                           )
                         : tOb.residentResendLink,
                     enabled: ob.otpResendSeconds <= 0 && !isLoading,
@@ -1346,15 +1382,13 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextField(
-                  controller: _inviteController,
+                InviteCodeInputRow(
                   enabled: !isLoading,
-                  textCapitalization: TextCapitalization.characters,
-                  decoration: InputDecoration(
-                    labelText: tOb.residentInviteCodeLabel,
-                    hintText: tOb.residentInviteCodeHint,
-                    prefixIcon: const Icon(Icons.card_giftcard_outlined),
-                  ),
+                  initialCode: ob.inviteCode,
+                  onChanged: (code) {
+                    _inviteController.text = code;
+                    onboarding.setInviteCode(code);
+                  },
                 ),
                 if (ob.inviteLabel != null) ...[
                   const SizedBox(height: AppSizes.spacingS),
@@ -1559,6 +1593,11 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
             phone: phone,
             email: email,
             purpose: _otpPurpose(ob),
+            payload: _isResidentJoin(ob) &&
+                    ob.inviteCode != null &&
+                    ob.inviteCode!.isNotEmpty
+                ? {'inviteCode': ob.inviteCode}
+                : null,
           );
       onboarding.markOtpSent();
       _startOtpTimer();
