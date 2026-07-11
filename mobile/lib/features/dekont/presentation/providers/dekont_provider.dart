@@ -58,7 +58,7 @@ class MakePaymentState {
   final bool isLoadingInfo;
   final bool isUploading;
   final PaymentCollectionEntity? collection;
-  final String? selectedDueId;
+  final Set<String> selectedDueIds;
   final String? pickedFileName;
   final List<int>? pickedFileBytes;
   final String? pickedFilePath;
@@ -71,7 +71,7 @@ class MakePaymentState {
     this.isLoadingInfo = false,
     this.isUploading = false,
     this.collection,
-    this.selectedDueId,
+    this.selectedDueIds = const {},
     this.pickedFileName,
     this.pickedFileBytes,
     this.pickedFilePath,
@@ -81,11 +81,14 @@ class MakePaymentState {
     this.error,
   });
 
+  String? get selectedDueId =>
+      selectedDueIds.isEmpty ? null : selectedDueIds.first;
+
   MakePaymentState copyWith({
     bool? isLoadingInfo,
     bool? isUploading,
     PaymentCollectionEntity? collection,
-    String? selectedDueId,
+    Set<String>? selectedDueIds,
     String? pickedFileName,
     List<int>? pickedFileBytes,
     String? pickedFilePath,
@@ -100,7 +103,7 @@ class MakePaymentState {
       isLoadingInfo: isLoadingInfo ?? this.isLoadingInfo,
       isUploading: isUploading ?? this.isUploading,
       collection: collection ?? this.collection,
-      selectedDueId: selectedDueId ?? this.selectedDueId,
+      selectedDueIds: selectedDueIds ?? this.selectedDueIds,
       pickedFileName: clearFile
           ? null
           : (pickedFileName ?? this.pickedFileName),
@@ -172,7 +175,25 @@ class MakePaymentNotifier extends Notifier<MakePaymentState> {
   }
 
   void selectDue(String? dueId) {
-    state = state.copyWith(selectedDueId: dueId);
+    if (dueId == null || dueId.isEmpty) {
+      state = state.copyWith(selectedDueIds: {});
+      return;
+    }
+    state = state.copyWith(selectedDueIds: {dueId});
+  }
+
+  void toggleDue(String dueId) {
+    final next = Set<String>.from(state.selectedDueIds);
+    if (next.contains(dueId)) {
+      next.remove(dueId);
+    } else {
+      next.add(dueId);
+    }
+    state = state.copyWith(selectedDueIds: next);
+  }
+
+  void setSelectedDueIds(Set<String> dueIds) {
+    state = state.copyWith(selectedDueIds: dueIds);
   }
 
   void setPickedReceipt({
@@ -208,6 +229,17 @@ class MakePaymentNotifier extends Notifier<MakePaymentState> {
       );
       return null;
     }
+    if (state.selectedDueIds.isEmpty) {
+      state = state.copyWith(
+        error: LocaleSettings
+            .instance
+            .currentTranslations
+            .features
+            .dekont
+            .errorNoDueSelected,
+      );
+      return null;
+    }
     _isUploading = true;
     state = state.copyWith(
       isUploading: true,
@@ -215,16 +247,18 @@ class MakePaymentNotifier extends Notifier<MakePaymentState> {
       uploadWasDuplicate: false,
       uploadWasRecovered: false,
     );
+    final dueIds = state.selectedDueIds.toList();
     dekontDebugLog('provider.upload start', {
       'file': name,
-      'dueId': state.selectedDueId,
+      'dueIds': dueIds,
     });
     try {
       final result = await _repository.uploadDekont(
         fileName: name,
         fileBytes: bytes,
         filePath: state.pickedFilePath,
-        dueId: state.selectedDueId,
+        dueId: dueIds.first,
+        dueIds: dueIds,
       );
       final dekont = result.dekont;
       await _cacheLocalPreview(ref, dekont.id, bytes);
@@ -495,6 +529,8 @@ class ManagerDekontsNotifier extends Notifier<ManagerDekontsState> {
     required DekontReviewDecision decision,
     String? note,
     String? dueId,
+    List<String>? dueIds,
+    double? amount,
   }) async {
     if (_isReviewing) {
       dekontDebugLog('provider.review skip', 'already in flight');
@@ -506,6 +542,8 @@ class ManagerDekontsNotifier extends Notifier<ManagerDekontsState> {
       'id': id,
       'decision': decision.name,
       'dueId': dueId,
+      'dueIds': dueIds,
+      'amount': amount,
     });
     try {
       await _repository.reviewDekont(
@@ -513,6 +551,8 @@ class ManagerDekontsNotifier extends Notifier<ManagerDekontsState> {
         decision: decision,
         note: note,
         dueId: dueId,
+        dueIds: dueIds,
+        amount: amount,
       );
       if (decision == DekontReviewDecision.approve) {
         await invalidateDuesRelatedCaches(ref);

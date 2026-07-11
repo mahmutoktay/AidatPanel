@@ -1,4 +1,5 @@
 import { computeOverdueDays } from "./trDueDate.js";
+import { computeDuePaymentTotals } from "./duePaymentTotals.js";
 
 /**
  * Sakinli daire aidatları veya sakin çıkmış açık borçlar (snapshot ile).
@@ -62,6 +63,11 @@ export function resolveEffectiveOverdueDays(due) {
 }
 
 export function serializeDueForApi(due, apartment) {
+  const { payments, ...rest } = due;
+  const { paidAmount, remainingAmount } = computeDuePaymentTotals({
+    ...due,
+    payments,
+  });
   const effectiveStatus = resolveEffectiveDueStatus(due);
   const resident =
     apartment?.resident ??
@@ -70,7 +76,9 @@ export function serializeDueForApi(due, apartment) {
       : null);
 
   return {
-    ...due,
+    ...rest,
+    paidAmount,
+    remainingAmount,
     status: effectiveStatus,
     overdueDays: resolveEffectiveOverdueDays(due),
     apartmentNumber: apartment?.number ?? due.apartmentNumber,

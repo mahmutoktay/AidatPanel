@@ -23,6 +23,10 @@ class DueEntity extends Equatable {
   final DueBreakdownEntity? breakdown;
   final DateTime createdAt;
   final DateTime updatedAt;
+  /// Ödenen toplam (DuePayment sum). Yoksa 0.
+  final double paidAmount;
+  /// Kalan borç. Yoksa [amount] (eski API uyumu).
+  final double remainingAmount;
 
   const DueEntity({
     required this.id,
@@ -42,7 +46,14 @@ class DueEntity extends Equatable {
     this.breakdown,
     required this.createdAt,
     required this.updatedAt,
-  });
+    this.paidAmount = 0,
+    double? remainingAmount,
+  }) : remainingAmount = remainingAmount ?? amount;
+
+  bool get hasRemainingBalance =>
+      status != DueStatus.paid &&
+      status != DueStatus.waived &&
+      remainingAmount > 0.01;
 
   @override
   List<Object?> get props => [
@@ -63,5 +74,7 @@ class DueEntity extends Equatable {
         breakdown,
         createdAt,
         updatedAt,
+        paidAmount,
+        remainingAmount,
       ];
 }

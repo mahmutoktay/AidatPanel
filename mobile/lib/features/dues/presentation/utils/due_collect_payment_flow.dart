@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/utils/app_currency_format.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../buildings/presentation/utils/apartment_ui_utils.dart';
@@ -62,6 +63,9 @@ Future<bool> collectDuePayment({
     due.apartmentNumber,
   );
   final periodLabel = '${monthName(context, due.month)} ${due.year}';
+  final remainingLabel = AppCurrencyFormat.format(
+    due.remainingAmount > 0 ? due.remainingAmount : due.amount,
+  );
 
   final confirmed = await showDialog<bool>(
     context: context,
@@ -70,7 +74,8 @@ Future<bool> collectDuePayment({
       content: Text(
         t.collectPaymentConfirmBody
             .replaceAll('{apartment}', apartmentLabel)
-            .replaceAll('{period}', periodLabel),
+            .replaceAll('{period}', periodLabel)
+            .replaceAll('{amount}', remainingLabel),
       ),
       actions: [
         TextButton(

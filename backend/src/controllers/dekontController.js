@@ -11,6 +11,7 @@ import {
   safeDekontFilename,
 } from "../services/dekontStorageService.js";
 import { dekontLog, dekontLogError } from "../utils/dekontDebug.js";
+import { parseDueIdsFromBody } from "../utils/duePaymentTotals.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const uploadDekont = asyncHandler(async (req, res) => {
@@ -21,8 +22,10 @@ export const uploadDekont = asyncHandler(async (req, res) => {
     });
   }
 
+  const dueIds = parseDueIdsFromBody(req.body);
   const data = await createDekontFromUpload(req.user, req.file, {
-    dueId: req.body.dueId,
+    dueId: dueIds[0],
+    dueIds,
   });
 
   res.status(201).json({
@@ -79,6 +82,8 @@ export const reviewDekont = asyncHandler(async (req, res) => {
     managerId: req.user?.id,
     decision: req.body?.decision,
     dueId: req.body?.dueId ?? null,
+    dueIds: req.body?.dueIds ?? null,
+    amount: req.body?.amount ?? null,
   });
   const data = await reviewDekontService(req.params.id, req.user.id, req.body);
   dekontLog("PATCH /dekonts/:id/review ok", {

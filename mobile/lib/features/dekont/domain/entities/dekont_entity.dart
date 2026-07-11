@@ -27,12 +27,49 @@ class DekontUserSummary extends Equatable {
   List<Object?> get props => [id, name, email];
 }
 
+/// Sakinin dekont yüklerken seçtiği aidat özeti.
+class DekontDueAllocationSummary extends Equatable {
+  final String dueId;
+  final String? allocatedAmount;
+  final int? month;
+  final int? year;
+  final String? amount;
+  final String? remainingAmount;
+  final String? apartmentNumber;
+  final String? status;
+
+  const DekontDueAllocationSummary({
+    required this.dueId,
+    this.allocatedAmount,
+    this.month,
+    this.year,
+    this.amount,
+    this.remainingAmount,
+    this.apartmentNumber,
+    this.status,
+  });
+
+  @override
+  List<Object?> get props => [
+        dueId,
+        allocatedAmount,
+        month,
+        year,
+        amount,
+        remainingAmount,
+        apartmentNumber,
+        status,
+      ];
+}
+
 class DekontEntity extends Equatable {
   final String id;
   final String buildingId;
   final String? apartmentId;
   final String uploadedById;
   final String? dueId;
+  final List<String> dueIds;
+  final List<DekontDueAllocationSummary> allocations;
   final DekontStatus status;
   final String source;
   final String originalFilename;
@@ -60,6 +97,8 @@ class DekontEntity extends Equatable {
     this.apartmentId,
     required this.uploadedById,
     this.dueId,
+    this.dueIds = const [],
+    this.allocations = const [],
     required this.status,
     required this.source,
     required this.originalFilename,
@@ -82,6 +121,16 @@ class DekontEntity extends Equatable {
     this.uploadedBy,
   });
 
+  /// Onayda kullanılacak aidat id listesi (sakin seçimi).
+  List<String> get targetDueIds {
+    if (dueIds.isNotEmpty) return dueIds;
+    if (allocations.isNotEmpty) {
+      return allocations.map((a) => a.dueId).toList();
+    }
+    if (dueId != null && dueId!.isNotEmpty) return [dueId!];
+    return const [];
+  }
+
   bool get isTerminal => status.isTerminal;
 
   bool get isProcessing => status.isProcessing;
@@ -93,6 +142,8 @@ class DekontEntity extends Equatable {
         apartmentId,
         uploadedById,
         dueId,
+        dueIds,
+        allocations,
         status,
         source,
         originalFilename,

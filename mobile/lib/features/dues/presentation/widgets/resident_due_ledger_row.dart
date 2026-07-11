@@ -25,7 +25,9 @@ class ResidentDueLedgerRow extends StatelessWidget {
     final visual = residentDueLedgerStatusVisual(context, due.status);
     final periodLabel = '${monthName(context, due.month)} ${due.year}';
     final subtitle = residentDueLedgerSubtitle(context, due);
-    final amountText = AppCurrencyFormat.format(due.amount);
+    final amountText = AppCurrencyFormat.format(
+      due.hasRemainingBalance ? due.remainingAmount : due.amount,
+    );
     final canPay =
         due.status == DueStatus.pending || due.status == DueStatus.overdue;
     final subtitleColor = due.status == DueStatus.overdue

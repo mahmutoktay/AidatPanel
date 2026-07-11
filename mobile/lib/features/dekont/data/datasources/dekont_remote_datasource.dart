@@ -21,6 +21,7 @@ abstract class DekontRemoteDataSource {
     required List<int> fileBytes,
     String? filePath,
     String? dueId,
+    List<String>? dueIds,
   });
 
   Future<DekontModel> getDekont(String id);
@@ -44,6 +45,8 @@ abstract class DekontRemoteDataSource {
     required String decision,
     String? note,
     String? dueId,
+    List<String>? dueIds,
+    double? amount,
   });
 
   Future<List<int>> getDekontFileBytes(String id, {bool download = false});
@@ -98,6 +101,7 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
     required List<int> fileBytes,
     String? filePath,
     String? dueId,
+    List<String>? dueIds,
   }) async {
     if ((filePath == null || filePath.isEmpty) && fileBytes.isEmpty) {
       throw ApiException(message: 'file_empty');
@@ -113,6 +117,11 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
       throw ApiException(message: 'unsupported_file_type');
     }
 
+    final resolvedDueIds = <String>{
+      ...?dueIds?.where((id) => id.isNotEmpty),
+      if (dueId != null && dueId.isNotEmpty) dueId,
+    }.toList();
+
     FormData buildForm() {
       final filePart = MultipartFile.fromBytes(
         fileBytes,
@@ -121,15 +130,16 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
       );
 
       final formFields = <String, dynamic>{'file': filePart};
-      if (dueId != null && dueId.isNotEmpty) {
-        formFields['dueId'] = dueId;
+      if (resolvedDueIds.isNotEmpty) {
+        formFields['dueId'] = resolvedDueIds.first;
+        formFields['dueIds'] = jsonEncode(resolvedDueIds);
       }
       return FormData.fromMap(formFields);
     }
 
     dekontDebugLog(
       'datasource.uploadDekont start',
-      '$safeName ${(fileBytes.length / 1024).toStringAsFixed(1)} KB dueId=${dueId ?? "-"}',
+      '$safeName ${(fileBytes.length / 1024).toStringAsFixed(1)} KB dueIds=$resolvedDueIds',
     );
 
     Object? lastError;
@@ -369,16 +379,22 @@ class DekontRemoteDataSourceImpl implements DekontRemoteDataSource {
     required String decision,
     String? note,
     String? dueId,
+    List<String>? dueIds,
+    double? amount,
   }) async {
     dekontDebugLog('datasource.reviewDekont start', {
       'id': id,
       'decision': decision,
       'dueId': dueId,
+      'dueIds': dueIds,
+      'amount': amount,
     });
     try {
       final body = <String, dynamic>{'decision': decision};
       if (note != null && note.trim().isNotEmpty) body['note'] = note.trim();
       if (dueId != null && dueId.isNotEmpty) body['dueId'] = dueId;
+      if (dueIds != null && dueIds.isNotEmpty) body['dueIds'] = dueIds;
+      if (amount != null) body['amount'] = amount;
 
       final response = await _dioClient.patch(
         ApiConstants.dekontReview(id),

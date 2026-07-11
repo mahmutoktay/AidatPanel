@@ -151,6 +151,18 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
   }
 
+  String _formatAmount(
+    BuildContext context,
+    ExpenseEntity expense,
+    NumberFormat currencyFormat,
+  ) {
+    final value = expense.amount ?? expense.parsedAmount;
+    if (value == null) {
+      return context.t.features.expenses.amountPending;
+    }
+    return currencyFormat.format(value);
+  }
+
   Widget _buildFileIcon(IconData icon, Color color) {
     return Container(
       width: 64,
@@ -335,7 +347,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
           Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
           const SizedBox(height: AppSizes.spacingM),
           Text(
-            '${context.t.features.dekont.amount}: ${currencyFormat.format(expense.amount)}',
+            '${context.t.features.dekont.amount}: ${_formatAmount(context, expense, currencyFormat)}',
             style: AppTypography.h3.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.error,

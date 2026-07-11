@@ -127,7 +127,9 @@ abstract final class ManagerDashboardMapper {
             apartmentNumber: due.apartmentNumber,
             floor: due.apartmentFloor ?? _parseFloor(due.apartmentNumber),
             overdueDays: due.overdueDays,
-            amount: due.amount,
+            amount: due.hasRemainingBalance
+                ? due.remainingAmount
+                : due.amount,
             currency: due.currency,
             buildingName: singleBuildingName,
           ),
@@ -188,11 +190,11 @@ abstract final class ManagerDashboardMapper {
       final collected = dues
           .where(
             (d) =>
-                d.status == DueStatus.paid &&
                 d.month == month &&
-                d.year == year,
+                d.year == year &&
+                d.resident != null,
           )
-          .fold<double>(0, (sum, d) => sum + d.amount);
+          .fold<double>(0, (sum, d) => sum + d.paidAmount);
 
       final expenses = expenseTotalsByMonth[(month, year)] ?? 0;
 
@@ -223,10 +225,8 @@ abstract final class ManagerDashboardMapper {
 
     for (final due in occupiedDues) {
       expected += due.amount;
-      if (due.status == DueStatus.paid) {
-        collected += due.amount;
-      }
-      if (due.status == DueStatus.overdue) {
+      collected += due.paidAmount;
+      if (due.status == DueStatus.overdue && due.hasRemainingBalance) {
         overdueCount++;
       }
     }

@@ -2650,11 +2650,17 @@ class Translations$features$dekont$en {
 	/// en: 'Copied to clipboard'
 	String get copied => 'Copied to clipboard';
 
-	/// en: 'Select due'
-	String get selectDue => 'Select due';
+	/// en: 'Select dues'
+	String get selectDue => 'Select dues';
 
-	/// en: 'Select the due you paid'
-	String get selectDueHint => 'Select the due you paid';
+	/// en: 'Select the dues you paid (you can select more than one)'
+	String get selectDueHint => 'Select the dues you paid (you can select more than one)';
+
+	/// en: 'Selected total: {amount}'
+	String get selectedTotal => 'Selected total: {amount}';
+
+	/// en: 'Recipient details'
+	String get recipientSection => 'Recipient details';
 
 	/// en: 'No pending dues'
 	String get noPendingDues => 'No pending dues';
@@ -2713,11 +2719,29 @@ class Translations$features$dekont$en {
 	/// en: 'Select a due to approve.'
 	String get errorReviewNeedDue => 'Select a due to approve.';
 
+	/// en: 'Receipt amount could not be read. Enter the amount to approve.'
+	String get errorReviewNeedAmount => 'Receipt amount could not be read. Enter the amount to approve.';
+
+	/// en: 'Amount to approve (₺)'
+	String get reviewAmountLabel => 'Amount to approve (₺)';
+
+	/// en: 'No amount was read from this receipt. Enter the amount manually — do not approve without an amount or the remaining balance will not be applied correctly.'
+	String get reviewAmountRequiredHint => 'No amount was read from this receipt. Enter the amount manually — do not approve without an amount or the remaining balance will not be applied correctly.';
+
+	/// en: 'Amount to apply: {amount}'
+	String get reviewApplyAmount => 'Amount to apply: {amount}';
+
+	/// en: 'Remaining on selected dues: {amount}'
+	String get reviewRemainingAmount => 'Remaining on selected dues: {amount}';
+
 	/// en: 'This receipt cannot be approved or rejected right now. Try again later.'
 	String get errorReviewStatus => 'This receipt cannot be approved or rejected right now. Try again later.';
 
 	/// en: 'Please select a receipt file first.'
 	String get errorNoFileSelected => 'Please select a receipt file first.';
+
+	/// en: 'Please select at least one due.'
+	String get errorNoDueSelected => 'Please select at least one due.';
 
 	/// en: 'File must be 10 MB or smaller'
 	String get fileTooLarge => 'File must be 10 MB or smaller';
@@ -2913,8 +2937,14 @@ class Translations$features$dekont$en {
 	/// en: 'Your receipt has been submitted for manager approval. Payment is not approved automatically; your manager will verify the account.'
 	String get residentPendingReviewNotice => 'Your receipt has been submitted for manager approval. Payment is not approved automatically; your manager will verify the account.';
 
-	/// en: 'Check the amount received in your account, then approve or reject.'
-	String get managerApprovalHint => 'Check the amount received in your account, then approve or reject.';
+	/// en: 'Check the amount in your account, then approve. The amount is applied to the resident's selected dues oldest-first; a shortfall leaves remaining balance open.'
+	String get managerApprovalHint => 'Check the amount in your account, then approve. The amount is applied to the resident\'s selected dues oldest-first; a shortfall leaves remaining balance open.';
+
+	/// en: 'Dues selected by resident'
+	String get residentSelectedDues => 'Dues selected by resident';
+
+	/// en: 'The resident marked these periods when uploading. On approval the amount is applied to these dues.'
+	String get residentSelectedDuesHint => 'The resident marked these periods when uploading. On approval the amount is applied to these dues.';
 
 	/// en: '{resident} sent {amount} in dues on {date} via {bank}. Please check your account and approve.'
 	String get managerPaymentSummary => '{resident} sent {amount} in dues on {date} via {bank}. Please check your account and approve.';
@@ -3009,14 +3039,17 @@ class Translations$features$expenses$en {
 	/// en: 'Enter a valid amount'
 	String get amountInvalid => 'Enter a valid amount';
 
-	/// en: 'Amount is read automatically from receipts.'
-	String get amountFromReceiptsHint => 'Amount is read automatically from receipts.';
+	/// en: 'Amount is read automatically from the receipt or bank statement.'
+	String get amountFromReceiptsHint => 'Amount is read automatically from the receipt or bank statement.';
 
-	/// en: 'Add at least one receipt photo'
-	String get receiptRequired => 'Add at least one receipt photo';
+	/// en: 'Add at least one receipt or bank statement (PDF/photo)'
+	String get receiptRequired => 'Add at least one receipt or bank statement (PDF/photo)';
 
-	/// en: 'Reading receipt amounts. They will appear in the list shortly.'
-	String get amountOcrPending => 'Reading receipt amounts. They will appear in the list shortly.';
+	/// en: 'Reading receipt/statement amounts. They will appear in the list shortly.'
+	String get amountOcrPending => 'Reading receipt/statement amounts. They will appear in the list shortly.';
+
+	/// en: 'Reading amount…'
+	String get amountPending => 'Reading amount…';
 
 	/// en: 'Total'
 	String get total => 'Total';
@@ -3099,29 +3132,32 @@ class Translations$features$expenses$en {
 	/// en: 'URL must start with https://'
 	String get receiptUrlInvalid => 'URL must start with https://';
 
-	/// en: 'Receipt photo'
-	String get receiptTitle => 'Receipt photo';
+	/// en: 'Receipt / bank statement'
+	String get receiptTitle => 'Receipt / bank statement';
 
-	/// en: 'PDF or photo (JPEG, PNG). Amount is read from receipts automatically (Max 10 MB)'
-	String get receiptHint => 'PDF or photo (JPEG, PNG). Amount is read from receipts automatically (Max 10 MB)';
+	/// en: 'Bank statement (PDF) or receipt photo (JPEG, PNG). Amount is read automatically (Max 10 MB)'
+	String get receiptHint => 'Bank statement (PDF) or receipt photo (JPEG, PNG). Amount is read automatically (Max 10 MB)';
 
-	/// en: 'Add photo'
-	String get receiptAdd => 'Add photo';
+	/// en: 'Add file'
+	String get receiptAdd => 'Add file';
 
-	/// en: 'Change photo'
-	String get receiptChange => 'Change photo';
+	/// en: 'Change file'
+	String get receiptChange => 'Change file';
 
-	/// en: 'Remove photo'
-	String get receiptRemove => 'Remove photo';
+	/// en: 'Remove file'
+	String get receiptRemove => 'Remove file';
 
-	/// en: 'Expense saved. Receipt will upload when the API is live.'
-	String get receiptPendingBackend => 'Expense saved. Receipt will upload when the API is live.';
+	/// en: 'Expense saved. File will upload when the API is live.'
+	String get receiptPendingBackend => 'Expense saved. File will upload when the API is live.';
 
-	/// en: 'Receipt upload failed. The expense was saved.'
-	String get receiptUploadFailed => 'Receipt upload failed. The expense was saved.';
+	/// en: 'File upload failed. The expense was saved.'
+	String get receiptUploadFailed => 'File upload failed. The expense was saved.';
 
-	/// en: 'Could not pick a photo'
-	String get receiptPickFailed => 'Could not pick a photo';
+	/// en: 'Could not pick a file'
+	String get receiptPickFailed => 'Could not pick a file';
+
+	/// en: 'File stored on server'
+	String get receiptStoredOnServer => 'File stored on server';
 
 	/// en: 'Expense Detail'
 	String get detailTitle => 'Expense Detail';
@@ -3129,11 +3165,11 @@ class Translations$features$expenses$en {
 	/// en: 'Created at'
 	String get fieldCreatedAt => 'Created at';
 
-	/// en: 'View receipt'
-	String get viewReceipt => 'View receipt';
+	/// en: 'View file'
+	String get viewReceipt => 'View file';
 
-	/// en: 'No receipt uploaded'
-	String get receiptMissing => 'No receipt uploaded';
+	/// en: 'No receipt or statement uploaded'
+	String get receiptMissing => 'No receipt or statement uploaded';
 
 	/// en: 'Month applied to dues'
 	String get targetMonthLabel => 'Month applied to dues';
@@ -3966,8 +4002,8 @@ class Translations$features$dues$en {
 	/// en: 'Record cash payment?'
 	String get collectPaymentConfirmTitle => 'Record cash payment?';
 
-	/// en: '{apartment} — {period} due will be marked as paid.'
-	String get collectPaymentConfirmBody => '{apartment} — {period} due will be marked as paid.';
+	/// en: '{apartment} — remaining {amount} for {period} will be marked as paid.'
+	String get collectPaymentConfirmBody => '{apartment} — remaining {amount} for {period} will be marked as paid.';
 
 	/// en: 'Review Receipt'
 	String get reviewDekont => 'Review Receipt';
@@ -5807,8 +5843,10 @@ extension on Translations {
 			'features.dekont.referenceLabel' => 'Transfer reference',
 			'features.dekont.copy' => 'Copy',
 			'features.dekont.copied' => 'Copied to clipboard',
-			'features.dekont.selectDue' => 'Select due',
-			'features.dekont.selectDueHint' => 'Select the due you paid',
+			'features.dekont.selectDue' => 'Select dues',
+			'features.dekont.selectDueHint' => 'Select the dues you paid (you can select more than one)',
+			'features.dekont.selectedTotal' => 'Selected total: {amount}',
+			'features.dekont.recipientSection' => 'Recipient details',
 			'features.dekont.noPendingDues' => 'No pending dues',
 			'features.dekont.uploadSectionTitle' => 'Upload receipt',
 			'features.dekont.uploadHint' => 'PDF document or photo (JPEG, PNG) (Max 10 MB)',
@@ -5828,8 +5866,14 @@ extension on Translations {
 			'features.dekont.errorReviewPaymentDone' => 'Payment for this receipt has already been processed.',
 			'features.dekont.errorReviewRejected' => 'A rejected receipt cannot be approved again.',
 			'features.dekont.errorReviewNeedDue' => 'Select a due to approve.',
+			'features.dekont.errorReviewNeedAmount' => 'Receipt amount could not be read. Enter the amount to approve.',
+			'features.dekont.reviewAmountLabel' => 'Amount to approve (₺)',
+			'features.dekont.reviewAmountRequiredHint' => 'No amount was read from this receipt. Enter the amount manually — do not approve without an amount or the remaining balance will not be applied correctly.',
+			'features.dekont.reviewApplyAmount' => 'Amount to apply: {amount}',
+			'features.dekont.reviewRemainingAmount' => 'Remaining on selected dues: {amount}',
 			'features.dekont.errorReviewStatus' => 'This receipt cannot be approved or rejected right now. Try again later.',
 			'features.dekont.errorNoFileSelected' => 'Please select a receipt file first.',
+			'features.dekont.errorNoDueSelected' => 'Please select at least one due.',
 			'features.dekont.fileTooLarge' => 'File must be 10 MB or smaller',
 			'features.dekont.fileEmpty' => 'The selected file is empty',
 			'features.dekont.fileNotFound' => 'File not found',
@@ -5869,6 +5913,8 @@ extension on Translations {
 			'features.dekont.statusPaymentApplied' => 'Payment applied',
 			'features.dekont.statusPaymentPartial' => 'Partial payment',
 			'features.dekont.statusRejected' => 'Rejected',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.statusRecipientMismatch' => 'Recipient mismatch',
 			'features.dekont.statusNeedsManagerReview' => 'Manager review',
 			'features.dekont.reupload' => 'Upload again',
@@ -5877,8 +5923,6 @@ extension on Translations {
 			'features.dekont.paymentDetailsSection' => 'Payment details',
 			'features.dekont.fileSection' => 'File',
 			'features.dekont.filePreview' => 'File preview',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.pdfPreviewHint' => 'Pinch to zoom and scroll to view pages.',
 			'features.dekont.pdfPreviewUnavailable' => 'PDF could not be opened on this device. Use «Share file» below to open it in another app.',
 			'features.dekont.shareFile' => 'Share file',
@@ -5907,7 +5951,9 @@ extension on Translations {
 			'features.dekont.ibanMismatchNotice' => 'The recipient IBAN on the receipt does not match your building\'s collection account. Your manager will verify the account and decide.',
 			'features.dekont.ibanVerifiedNotice' => 'The recipient IBAN matches your building\'s collection account. Payment still requires manager approval.',
 			'features.dekont.residentPendingReviewNotice' => 'Your receipt has been submitted for manager approval. Payment is not approved automatically; your manager will verify the account.',
-			'features.dekont.managerApprovalHint' => 'Check the amount received in your account, then approve or reject.',
+			'features.dekont.managerApprovalHint' => 'Check the amount in your account, then approve. The amount is applied to the resident\'s selected dues oldest-first; a shortfall leaves remaining balance open.',
+			'features.dekont.residentSelectedDues' => 'Dues selected by resident',
+			'features.dekont.residentSelectedDuesHint' => 'The resident marked these periods when uploading. On approval the amount is applied to these dues.',
 			'features.dekont.managerPaymentSummary' => '{resident} sent {amount} in dues on {date} via {bank}. Please check your account and approve.',
 			'features.dekont.residentWithApartment' => '{name} (Apt. {apartment})',
 			'features.dekont.apartmentOnly' => 'Apt. {apartment}',
@@ -5936,9 +5982,10 @@ extension on Translations {
 			'features.expenses.submit' => 'Save',
 			'features.expenses.required' => 'Required field',
 			'features.expenses.amountInvalid' => 'Enter a valid amount',
-			'features.expenses.amountFromReceiptsHint' => 'Amount is read automatically from receipts.',
-			'features.expenses.receiptRequired' => 'Add at least one receipt photo',
-			'features.expenses.amountOcrPending' => 'Reading receipt amounts. They will appear in the list shortly.',
+			'features.expenses.amountFromReceiptsHint' => 'Amount is read automatically from the receipt or bank statement.',
+			'features.expenses.receiptRequired' => 'Add at least one receipt or bank statement (PDF/photo)',
+			'features.expenses.amountOcrPending' => 'Reading receipt/statement amounts. They will appear in the list shortly.',
+			'features.expenses.amountPending' => 'Reading amount…',
 			'features.expenses.total' => 'Total',
 			'features.expenses.createSuccess' => 'Expense saved',
 			'features.expenses.categoryCleaning' => 'Cleaning',
@@ -5966,18 +6013,19 @@ extension on Translations {
 			'features.expenses.receiptUrlLabel' => 'Receipt link (HTTPS)',
 			'features.expenses.receiptUrlHint' => 'Optional — public URL to the receipt file',
 			'features.expenses.receiptUrlInvalid' => 'URL must start with https://',
-			'features.expenses.receiptTitle' => 'Receipt photo',
-			'features.expenses.receiptHint' => 'PDF or photo (JPEG, PNG). Amount is read from receipts automatically (Max 10 MB)',
-			'features.expenses.receiptAdd' => 'Add photo',
-			'features.expenses.receiptChange' => 'Change photo',
-			'features.expenses.receiptRemove' => 'Remove photo',
-			'features.expenses.receiptPendingBackend' => 'Expense saved. Receipt will upload when the API is live.',
-			'features.expenses.receiptUploadFailed' => 'Receipt upload failed. The expense was saved.',
-			'features.expenses.receiptPickFailed' => 'Could not pick a photo',
+			'features.expenses.receiptTitle' => 'Receipt / bank statement',
+			'features.expenses.receiptHint' => 'Bank statement (PDF) or receipt photo (JPEG, PNG). Amount is read automatically (Max 10 MB)',
+			'features.expenses.receiptAdd' => 'Add file',
+			'features.expenses.receiptChange' => 'Change file',
+			'features.expenses.receiptRemove' => 'Remove file',
+			'features.expenses.receiptPendingBackend' => 'Expense saved. File will upload when the API is live.',
+			'features.expenses.receiptUploadFailed' => 'File upload failed. The expense was saved.',
+			'features.expenses.receiptPickFailed' => 'Could not pick a file',
+			'features.expenses.receiptStoredOnServer' => 'File stored on server',
 			'features.expenses.detailTitle' => 'Expense Detail',
 			'features.expenses.fieldCreatedAt' => 'Created at',
-			'features.expenses.viewReceipt' => 'View receipt',
-			'features.expenses.receiptMissing' => 'No receipt uploaded',
+			'features.expenses.viewReceipt' => 'View file',
+			'features.expenses.receiptMissing' => 'No receipt or statement uploaded',
 			'features.expenses.targetMonthLabel' => 'Month applied to dues',
 			'features.expenses.targetThisMonth' => 'This month',
 			'features.expenses.targetNextMonth' => 'Next month',
@@ -6263,7 +6311,7 @@ extension on Translations {
 			'features.dues.detailTitle' => 'Due Details',
 			'features.dues.collectPayment' => 'Collect Payment',
 			'features.dues.collectPaymentConfirmTitle' => 'Record cash payment?',
-			'features.dues.collectPaymentConfirmBody' => '{apartment} — {period} due will be marked as paid.',
+			'features.dues.collectPaymentConfirmBody' => '{apartment} — remaining {amount} for {period} will be marked as paid.',
 			'features.dues.reviewDekont' => 'Review Receipt',
 			'features.dues.paymentDetail' => 'Payment Details',
 			'features.dues.amountLabel' => 'Amount',

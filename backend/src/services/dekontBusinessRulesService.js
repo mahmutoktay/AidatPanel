@@ -3,22 +3,33 @@ import { recipientMatchesCollectionIban } from "../utils/iban.js";
 import { HttpError } from "../utils/httpError.js";
 import { dekontLog } from "../utils/dekontDebug.js";
 import { resolveEffectiveBuildingConfig } from "./buildingConfigService.js";
+import {
+  computeDuePaymentTotals,
+  withinAmountTolerance,
+} from "../utils/duePaymentTotals.js";
+import { duePaymentsAmountInclude } from "../utils/dueQueryIncludes.js";
 
-const AMOUNT_TOLERANCE = Number(process.env.DEKONT_AMOUNT_TOLERANCE) || 0.05;
 const GRACE_DAYS = Number(process.env.DEKONT_GRACE_DAYS) || 7;
-
-function withinTolerance(a, b) {
-  if (a == null || b == null) return false;
-  const aa = Number(a);
-  const bb = Number(b);
-  if (!Number.isFinite(aa) || !Number.isFinite(bb) || bb === 0) return false;
-  return Math.abs(aa - bb) / Math.abs(bb) <= AMOUNT_TOLERANCE;
-}
 
 function addDays(date, days) {
   const d = new Date(date);
   d.setUTCDate(d.getUTCDate() + days);
   return d;
+}
+
+async function loadTargetDuesForRules(dekont) {
+  const allocations = await prisma.dekontDueAllocation.findMany({
+    where: { dekontId: dekont.id },
+    select: { dueId: true },
+  });
+  let ids = allocations.map((a) => a.dueId);
+  if (ids.length === 0 && dekont.dueId) ids = [dekont.dueId];
+  if (ids.length === 0) return [];
+
+  return prisma.due.findMany({
+    where: { id: { in: ids } },
+    include: duePaymentsAmountInclude,
+  });
 }
 
 export async function evaluateDekontBusinessRules(dekontId, parsed) {
@@ -68,7 +79,6 @@ export async function evaluateDekontBusinessRules(dekontId, parsed) {
     });
   }
 
-  // reference uniqueness (building scoped)
   const ref = parsed?.referenceNumber ? String(parsed.referenceNumber) : null;
   if (ref) {
     const dup = await prisma.dekont.findFirst({
@@ -87,13 +97,18 @@ export async function evaluateDekontBusinessRules(dekontId, parsed) {
     }
   }
 
-  if (!dekont.dueId || !dekont.due) {
+  const targetDues = await loadTargetDuesForRules(dekont);
+  if (targetDues.length === 0) {
     result.reasons.push("due_missing");
     return result;
   }
 
+  const totalRemaining = targetDues.reduce(
+    (sum, due) => sum + computeDuePaymentTotals(due).remainingAmount,
+    0
+  );
   const amount = parsed?.amount;
-  result.amountOk = withinTolerance(amount, dekont.due.amount);
+  result.amountOk = withinAmountTolerance(amount, totalRemaining);
   if (!result.amountOk) {
     result.suggestedStatus = "UNMATCHED";
     result.reasons.push("amount_mismatch");
@@ -102,8 +117,18 @@ export async function evaluateDekontBusinessRules(dekontId, parsed) {
   const txDateIso = parsed?.transactionDate;
   if (txDateIso) {
     const txDate = new Date(txDateIso);
-    const periodStart = new Date(Date.UTC(dekont.due.year, dekont.due.month - 1, 1));
-    const periodEnd = addDays(new Date(dekont.due.dueDate), GRACE_DAYS);
+    const years = targetDues.map((d) => d.year);
+    const months = targetDues.map((d) => d.month);
+    const minYear = Math.min(...years);
+    const minMonth = Math.min(
+      ...targetDues.filter((d) => d.year === minYear).map((d) => d.month)
+    );
+    const periodStart = new Date(Date.UTC(minYear, minMonth - 1, 1));
+    const latestDueDate = targetDues.reduce(
+      (max, d) => (new Date(d.dueDate) > max ? new Date(d.dueDate) : max),
+      new Date(targetDues[0].dueDate)
+    );
+    const periodEnd = addDays(latestDueDate, GRACE_DAYS);
     result.dateOk = txDate >= periodStart && txDate <= periodEnd;
     if (!result.dateOk) {
       result.suggestedStatus = "UNMATCHED";
@@ -124,8 +149,9 @@ export async function evaluateDekontBusinessRules(dekontId, parsed) {
     recipientOk: result.recipientOk,
     amountOk: result.amountOk,
     dateOk: result.dateOk,
+    targetDueCount: targetDues.length,
+    totalRemaining,
   });
 
   return result;
 }
-

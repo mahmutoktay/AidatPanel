@@ -82,6 +82,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
 
     if (!mounted) return;
 
+    // Deep link varsa doğrudan ilgili sayfaya git; "İlgili kayda git" ara adımı yok.
+    if (path != null && _shouldNavigateDirectly(path)) {
+      navigateFromNotificationPath(context, ref, path);
+      return;
+    }
+
     var shown = n;
     for (final e in ref.read(notificationsNotifierProvider).items) {
       if (e.id == n.id) {
@@ -94,10 +100,15 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
       context,
       notification: shown,
       onMarkRead: () {},
-      onNavigate: path != null
-          ? () => navigateFromNotificationPath(context, ref, path)
-          : null,
+      onNavigate: null,
     );
+  }
+
+  /// Liste zaten bildirimler ekranındayken `/notifications` döngüsüne girme.
+  bool _shouldNavigateDirectly(String path) {
+    final loc = Uri.parse(path).path;
+    if (loc == '/notifications') return false;
+    return true;
   }
 
   List<NotificationEntity> _visibleItems(List<NotificationEntity> items) {

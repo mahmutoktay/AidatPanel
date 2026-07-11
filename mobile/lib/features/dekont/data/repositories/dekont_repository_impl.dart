@@ -45,11 +45,13 @@ class DekontRepositoryImpl implements DekontRepository {
     required List<int> fileBytes,
     String? filePath,
     String? dueId,
+    List<String>? dueIds,
   }) async {
     dekontDebugLog('repository.uploadDekont', {
       'fileName': fileName,
       'bytes': fileBytes.length,
       'dueId': dueId,
+      'dueIds': dueIds,
     });
     try {
       final entity = (await _remote.uploadDekont(
@@ -57,6 +59,7 @@ class DekontRepositoryImpl implements DekontRepository {
         fileBytes: fileBytes,
         filePath: filePath,
         dueId: dueId,
+        dueIds: dueIds,
       )).toEntity();
       dekontDebugLog(
         'repository.uploadDekont ok',
@@ -326,11 +329,15 @@ class DekontRepositoryImpl implements DekontRepository {
     required DekontReviewDecision decision,
     String? note,
     String? dueId,
+    List<String>? dueIds,
+    double? amount,
   }) async {
     dekontDebugLog('repository.reviewDekont', {
       'id': id,
       'decision': decision.name,
       'dueId': dueId,
+      'dueIds': dueIds,
+      'amount': amount,
     });
     try {
       final apiDecision = decision == DekontReviewDecision.approve
@@ -341,6 +348,8 @@ class DekontRepositoryImpl implements DekontRepository {
         decision: apiDecision,
         note: note,
         dueId: dueId,
+        dueIds: dueIds,
+        amount: amount,
       )).toEntity();
       dekontDebugLog('repository.reviewDekont ok', entity.status.apiValue);
       return entity;

@@ -378,6 +378,10 @@ PATCH  /api/v1/buildings/:id/due-amount
 GET    /api/v1/me/dues                      # Sakin
 ```
 
+Aidat yanıt alanları (computed): `paidAmount` (DuePayment toplamı), `remainingAmount` (`amount - paidAmount`).
+Kısmi ödeme sonrası aidat `PENDING`/`OVERDUE` kalır; `remainingAmount <= tolerans` olunca `PAID`.
+Manuel `PATCH .../status { status: "PAID" }` kalan tutar kadar `DuePayment` (dekontId=null) oluşturur.
+
 ### Expenses (Gider)
 ```
 GET    /api/v1/buildings/:id/expenses
@@ -421,6 +425,11 @@ PATCH  /api/v1/dekonts/:id/review
 GET    /api/v1/me/dekonts
 GET    /api/v1/me/payment-collection
 ```
+
+Upload (multipart): `file` + `dueId` (tek) ve/veya `dueIds` (JSON dizi). Çoklu aidat `DekontDueAllocation` ile saklanır.
+Onay (`APPROVE`): OCR tutarı seçili aidatlara FIFO dağıtılır; her dilim bir `DuePayment`. Tüm hedefler kapanırsa `PAYMENT_APPLIED`, aksi halde `PAYMENT_PARTIAL`.
+Review body: `{ decision, note?, dueId?, dueIds?, amount? }`.
+`amount` (opsiyonel): OCR `parsedAmount` yoksa zorunlu; varsa OCR tutarı kullanılır. Uygulanan tutar `min(amount|parsedAmount, kalan borç)` ile sınırlanır — tutarsız onayda kalan borcun tamamı otomatik kapanmaz.
 
 ### Notifications
 ```

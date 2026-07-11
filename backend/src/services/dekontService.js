@@ -31,7 +31,7 @@ import {
   buildListResponse,
   mergeCreatedAtCursorWhere,
 } from "../utils/listQuery.js";
-import { dekontListSelect, formatDekont } from "../utils/dekontFormat.js";
+import { dekontListSelect, formatDekont, dekontAllocationWithDueSelect } from "../utils/dekontFormat.js";
 import { dekontLog, dekontLogError } from "../utils/dekontDebug.js";
 
 /**
@@ -77,7 +77,9 @@ async function removeBrokenDekontRecord(row) {
   dekontLog("removed broken dekont record", { dekontId: row.id });
 }
 
-async function resolveUploadContext(user, dueId) {
+async function resolveUploadContext(user, dueIds = []) {
+  const ids = [...new Set((dueIds ?? []).filter(Boolean))];
+
   if (user.role === "RESIDENT") {
     const resident = await prisma.user.findFirst({
       where: { id: user.id, deletedAt: null, role: "RESIDENT" },
@@ -97,12 +99,12 @@ async function resolveUploadContext(user, dueId) {
       throw new HttpError(404, "Daire bulunamadı.");
     }
 
-    let due = null;
-    if (dueId) {
-      due = await prisma.due.findFirst({
-        where: { id: dueId, apartmentId: resident.apartmentId },
+    let dues = [];
+    if (ids.length > 0) {
+      dues = await prisma.due.findMany({
+        where: { id: { in: ids }, apartmentId: resident.apartmentId },
       });
-      if (!due) {
+      if (dues.length !== ids.length) {
         throw new HttpError(404, "Aidat kaydı bulunamadı.");
       }
     }
@@ -110,31 +112,44 @@ async function resolveUploadContext(user, dueId) {
     return {
       buildingId: apartment.buildingId,
       apartmentId: apartment.id,
-      dueId: due?.id ?? null,
+      dueId: dues[0]?.id ?? null,
+      dueIds: dues.map((d) => d.id),
       source: "RESIDENT_UPLOAD",
     };
   }
 
   if (user.role === "MANAGER") {
-    if (!dueId) {
+    if (ids.length === 0) {
       throw new HttpError(400, "Yönetici yüklemesi için dueId zorunludur.");
     }
 
-    const due = await prisma.due.findUnique({
-      where: { id: dueId },
+    const dues = await prisma.due.findMany({
+      where: { id: { in: ids } },
       include: {
         apartment: { include: { building: true } },
       },
     });
 
-    if (!due || due.apartment.building.managerId !== user.id) {
+    if (dues.length !== ids.length) {
       throw new HttpError(404, "Aidat kaydı bulunamadı.");
     }
 
+    for (const due of dues) {
+      if (due.apartment.building.managerId !== user.id) {
+        throw new HttpError(404, "Aidat kaydı bulunamadı.");
+      }
+    }
+
+    const apartmentId = dues[0].apartmentId;
+    if (dues.some((d) => d.apartmentId !== apartmentId)) {
+      throw new HttpError(400, "Seçilen aidatlar aynı daireye ait olmalıdır.");
+    }
+
     return {
-      buildingId: due.apartment.buildingId,
-      apartmentId: due.apartmentId,
-      dueId: due.id,
+      buildingId: dues[0].apartment.buildingId,
+      apartmentId,
+      dueId: dues[0].id,
+      dueIds: dues.map((d) => d.id),
       source: "MANAGER_UPLOAD",
     };
   }
@@ -142,7 +157,13 @@ async function resolveUploadContext(user, dueId) {
   throw new HttpError(403, "Bu işlem için yetkiniz yok.");
 }
 
-export async function createDekontFromUpload(user, file, { dueId } = {}) {
+export async function createDekontFromUpload(user, file, { dueId, dueIds } = {}) {
+  const resolvedDueIds = [
+    ...new Set([
+      ...(Array.isArray(dueIds) ? dueIds : []),
+      ...(dueId ? [dueId] : []),
+    ].filter(Boolean)),
+  ];
   if (!file?.buffer?.length && !file?.path) {
     throw new HttpError(400, "Dosya gereklidir.");
   }
@@ -156,7 +177,7 @@ export async function createDekontFromUpload(user, file, { dueId } = {}) {
       throw new HttpError(validation.code, validation.message);
     }
 
-    const context = await resolveUploadContext(user, dueId ?? undefined);
+    const context = await resolveUploadContext(user, resolvedDueIds);
 
     const duplicate = await prisma.dekont.findFirst({
       where: {
@@ -221,22 +242,36 @@ export async function createDekontFromUpload(user, file, { dueId } = {}) {
     }
     savedStoredPath = storedPath;
 
-    const dekont = await prisma.dekont.create({
-      data: {
-        id: dekontId,
-        buildingId: context.buildingId,
-        apartmentId: context.apartmentId,
-        uploadedById: user.id,
-        dueId: context.dueId,
-        status: "RECEIVED",
-        source: context.source,
-        storedPath,
-        originalFilename: file.originalname || "dekont",
-        mimeType: validation.mime,
-        sizeBytes,
-        fileHash: validation.fileHash,
-      },
-      select: dekontListSelect,
+    const dekont = await prisma.$transaction(async (tx) => {
+      const row = await tx.dekont.create({
+        data: {
+          id: dekontId,
+          buildingId: context.buildingId,
+          apartmentId: context.apartmentId,
+          uploadedById: user.id,
+          dueId: context.dueId,
+          status: "RECEIVED",
+          source: context.source,
+          storedPath,
+          originalFilename: file.originalname || "dekont",
+          mimeType: validation.mime,
+          sizeBytes,
+          fileHash: validation.fileHash,
+        },
+        select: dekontListSelect,
+      });
+
+      if (context.dueIds?.length) {
+        await tx.dekontDueAllocation.createMany({
+          data: context.dueIds.map((id) => ({
+            dekontId: row.id,
+            dueId: id,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      return row;
     });
     createdDekontId = dekont.id;
 
@@ -274,7 +309,7 @@ export async function createDekontFromUpload(user, file, { dueId } = {}) {
         fields.includes("buildingId_fileHash") ||
         (fields.includes("buildingId") && fields.includes("fileHash"));
       if (isFileHashConflict && validation?.fileHash) {
-        const context = await resolveUploadContext(user, dueId ?? undefined);
+        const context = await resolveUploadContext(user, resolvedDueIds);
         const duplicate = await prisma.dekont.findFirst({
           where: {
             buildingId: context.buildingId,
@@ -325,6 +360,10 @@ export async function getDekontByIdForUser(dekontId, user) {
       building: { select: { managerId: true } },
       apartment: { select: { id: true, number: true } },
       uploadedBy: { select: { id: true, name: true, email: true } },
+      dueAllocations: {
+        select: dekontAllocationWithDueSelect,
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
 
@@ -419,7 +458,11 @@ export async function listDekontsForBuilding(buildingId, managerId, filters = {}
   });
 }
 
-export async function reviewDekont(dekontId, managerId, { decision, note, dueId }) {
+export async function reviewDekont(
+  dekontId,
+  managerId,
+  { decision, note, dueId, dueIds, amount }
+) {
   const dekont = await prisma.dekont.findUnique({
     where: { id: dekontId },
     include: { building: { select: { managerId: true } } },
@@ -429,7 +472,10 @@ export async function reviewDekont(dekontId, managerId, { decision, note, dueId 
     throw new HttpError(404, "Dekont bulunamadı.");
   }
 
-  if (dekont.status === "PAYMENT_APPLIED") {
+  if (
+    dekont.status === "PAYMENT_APPLIED" ||
+    dekont.status === "PAYMENT_PARTIAL"
+  ) {
     throw new HttpError(409, "Bu dekont için ödeme zaten işlenmiş.");
   }
 
@@ -459,11 +505,19 @@ export async function reviewDekont(dekontId, managerId, { decision, note, dueId 
         `Bu durumda dekont onaylanamaz: ${dekont.status}. Önce pipeline tamamlanmalı veya reddedilmiş olmamalı.`
       );
     }
+    const resolvedDueIds = [
+      ...new Set([
+        ...(Array.isArray(dueIds) ? dueIds : []),
+        ...(dueId ? [dueId] : []),
+      ].filter(Boolean)),
+    ];
     const result = await applyDekontPayment({
       dekontId,
       managerId,
       dueId: dueId ?? undefined,
+      dueIds: resolvedDueIds.length ? resolvedDueIds : undefined,
       note: note ?? undefined,
+      amount: amount ?? undefined,
     });
 
     return formatDekont(result.updatedDekont);

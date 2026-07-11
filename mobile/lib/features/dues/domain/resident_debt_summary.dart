@@ -1,12 +1,19 @@
 import 'entities/due_entity.dart';
 
+double dueOutstandingAmount(DueEntity due) {
+  if (due.status == DueStatus.paid || due.status == DueStatus.waived) {
+    return 0;
+  }
+  return due.remainingAmount > 0 ? due.remainingAmount : due.amount;
+}
+
 double totalOutstandingAmount(List<DueEntity> dues) {
   return dues
       .where(
         (due) =>
             due.status == DueStatus.pending || due.status == DueStatus.overdue,
       )
-      .fold<double>(0, (sum, due) => sum + due.amount);
+      .fold<double>(0, (sum, due) => sum + dueOutstandingAmount(due));
 }
 
 int overdueDueCount(List<DueEntity> dues) {

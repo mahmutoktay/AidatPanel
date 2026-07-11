@@ -115,7 +115,9 @@ class ExpenseListItemCard extends StatelessWidget {
                       ],
                       const SizedBox(height: AppSizes.spacingS),
                       Text(
-                        '${expense.amount?.toStringAsFixed(2) ?? "0.00"} ₺',
+                        expense.amount != null
+                            ? '${expense.amount!.toStringAsFixed(2)} ₺'
+                            : context.t.features.expenses.amountPending,
                         style: AppTypography.body1.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,

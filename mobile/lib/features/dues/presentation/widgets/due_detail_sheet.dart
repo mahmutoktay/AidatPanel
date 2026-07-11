@@ -64,7 +64,7 @@ class DueDetailSheet extends ConsumerWidget {
     final visual = duesStatusVisual(context, due.status);
     final languageCode = AppIntlLocale.fromContext(context);
     final amountText = AppCurrencyFormat.format(
-      due.amount,
+      due.hasRemainingBalance ? due.remainingAmount : due.amount,
       languageCode: languageCode,
       decimalDigits: 0,
     ).replaceAll(AppCurrencyFormat.symbol, currencySymbol);

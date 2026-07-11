@@ -12,19 +12,18 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/api_user_message.dart';
+import '../../../../core/utils/app_currency_format.dart';
+import '../../../../core/utils/month_labels.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
-import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
-import '../../../dues/domain/entities/due_entity.dart';
-import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../data/dekont_preview_cache.dart';
 import '../../domain/entities/dekont_entity.dart';
 import '../../domain/entities/dekont_status.dart';
@@ -342,24 +341,62 @@ class _ManagerReviewSheet extends ConsumerStatefulWidget {
 
 class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
   final _noteController = TextEditingController();
-  String? _selectedDueId;
+  final _amountController = TextEditingController();
   DekontReviewDecision? _pendingDecision;
+
+  bool get _needsManualAmount {
+    final raw = widget.dekont.parsedAmount;
+    if (raw == null || raw.trim().isEmpty) return true;
+    final n = double.tryParse(raw.replaceAll(',', '.'));
+    return n == null || n <= 0;
+  }
+
+  double? get _parsedAmount {
+    final raw = widget.dekont.parsedAmount;
+    if (raw == null) return null;
+    return double.tryParse(raw.replaceAll(',', '.'));
+  }
+
+  double get _totalRemaining {
+    return widget.dekont.allocations.fold<double>(0, (sum, a) {
+      final rem = double.tryParse(a.remainingAmount ?? '') ??
+          double.tryParse(a.amount ?? '') ??
+          0;
+      return sum + rem;
+    });
+  }
 
   @override
   void dispose() {
     _noteController.dispose();
+    _amountController.dispose();
     super.dispose();
   }
 
   Future<void> _submit(DekontReviewDecision decision) async {
     final t = context.t.features.dekont;
-    final dueId = _selectedDueId ?? widget.dekont.dueId;
-    if (decision == DekontReviewDecision.approve &&
-        (dueId == null || dueId.isEmpty)) {
+    final dueIds = widget.dekont.targetDueIds;
+    if (decision == DekontReviewDecision.approve && dueIds.isEmpty) {
       ref
           .read(toastProvider.notifier)
-          .show(t.selectDueForApprove, type: ToastType.info);
+          .show(t.errorReviewNeedDue, type: ToastType.info);
       return;
+    }
+
+    double? amount;
+    if (decision == DekontReviewDecision.approve) {
+      if (_needsManualAmount) {
+        final typed = _amountController.text.trim().replaceAll(',', '.');
+        amount = double.tryParse(typed);
+        if (amount == null || amount <= 0) {
+          ref
+              .read(toastProvider.notifier)
+              .show(t.errorReviewNeedAmount, type: ToastType.info);
+          return;
+        }
+      } else {
+        amount = _parsedAmount;
+      }
     }
 
     setState(() => _pendingDecision = decision);
@@ -369,23 +406,30 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
           id: widget.dekont.id,
           decision: decision,
           note: _noteController.text,
-          dueId: dueId,
+          dueId: dueIds.isNotEmpty ? dueIds.first : null,
+          dueIds: dueIds.isNotEmpty ? dueIds : null,
+          amount: amount,
         );
     if (!mounted) return;
     setState(() => _pendingDecision = null);
     if (ok) {
       Navigator.of(context).pop(true);
     } else {
-      ref
-          .read(toastProvider.notifier)
-          .show(t.reviewFailed, type: ToastType.error);
+      final err = ref.read(managerDekontsNotifierProvider).reviewError;
+      ref.read(toastProvider.notifier).show(
+            err ?? t.reviewFailed,
+            type: ToastType.error,
+          );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.dekont;
-    final buildingId = widget.dekont.buildingId;
+    final remaining = _totalRemaining;
+    final applyPreview = _needsManualAmount
+        ? null
+        : _parsedAmount;
 
     return PremiumBottomSheetScaffold(
       title: t.reviewAction,
@@ -399,6 +443,61 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
               fontWeight: FontWeight.w500,
             ),
           ),
+          const SizedBox(height: AppSizes.spacingM),
+          if (remaining > 0 || applyPreview != null)
+            Container(
+              padding: const EdgeInsets.all(AppSizes.spacingM),
+              decoration: BoxDecoration(
+                color: AppColors.fill,
+                borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (applyPreview != null)
+                    Text(
+                      t.reviewApplyAmount.replaceAll(
+                        '{amount}',
+                        AppCurrencyFormat.format(applyPreview),
+                      ),
+                      style: AppTypography.body1.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  if (remaining > 0) ...[
+                    if (applyPreview != null) const SizedBox(height: 4),
+                    Text(
+                      t.reviewRemainingAmount.replaceAll(
+                        '{amount}',
+                        AppCurrencyFormat.format(remaining),
+                      ),
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          if (_needsManualAmount) ...[
+            const SizedBox(height: AppSizes.spacingM),
+            Text(
+              t.reviewAmountRequiredHint,
+              style: AppTypography.body2.copyWith(
+                color: AppColors.statusRed,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: AppSizes.spacingS),
+            MinimalTextField(
+              controller: _amountController,
+              label: t.reviewAmountLabel,
+              icon: Icons.payments_outlined,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+            ),
+          ],
           const SizedBox(height: AppSizes.spacingL),
           MinimalTextField(
             controller: _noteController,
@@ -407,12 +506,7 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
             maxLines: 3,
           ),
           const SizedBox(height: AppSizes.spacingM),
-          _BuildingDuesPicker(
-            buildingId: buildingId,
-            apartmentId: widget.dekont.apartmentId,
-            selectedDueId: _selectedDueId ?? widget.dekont.dueId,
-            onChanged: (id) => setState(() => _selectedDueId = id),
-          ),
+          _ResidentSelectedDuesInfo(dekont: widget.dekont),
         ],
       ),
       actions: Padding(
@@ -454,73 +548,131 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
   }
 }
 
-class _BuildingDuesPicker extends ConsumerWidget {
-  final String buildingId;
-  final String? apartmentId;
-  final String? selectedDueId;
-  final ValueChanged<String?> onChanged;
+class _ResidentSelectedDuesInfo extends StatelessWidget {
+  const _ResidentSelectedDuesInfo({required this.dekont});
 
-  const _BuildingDuesPicker({
-    required this.buildingId,
-    this.apartmentId,
-    this.selectedDueId,
-    required this.onChanged,
-  });
-
-  static String? _resolveDropdownValue(
-    List<DueEntity> dues,
-    String? selectedDueId,
-  ) {
-    if (selectedDueId == null || selectedDueId.isEmpty) return null;
-    final exists = dues.any((d) => d.id == selectedDueId);
-    return exists ? selectedDueId : null;
-  }
-
-  static List<DueEntity> _filterForReview(
-    List<DueEntity> dues,
-    String? apartmentId,
-  ) {
-    if (apartmentId == null || apartmentId.isEmpty) return dues;
-    final forApartment = dues
-        .where((d) => d.apartmentId == apartmentId)
-        .toList();
-    return forApartment.isNotEmpty ? forApartment : dues;
-  }
+  final DekontEntity dekont;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = context.t.features.dekont;
-    final duesAsync = ref.watch(buildingDuesForReviewProvider(buildingId));
+    final allocations = dekont.allocations;
+    final dueIds = dekont.targetDueIds;
 
-    return duesAsync.when(
-      loading: () => const LinearProgressIndicator(),
-      error: (_, _) => Text(t.selectDueForApprove),
-      data: (dues) {
-        final reviewDues = _filterForReview(dues, apartmentId);
-        if (reviewDues.isEmpty) {
-          return Text(t.noPendingDues);
-        }
-        final effectiveValue = _resolveDropdownValue(reviewDues, selectedDueId);
-        final options = <AppSelectOption<String>>[];
-        final seenIds = <String>{};
-        for (final d in reviewDues) {
-          if (!seenIds.add(d.id)) continue;
-          options.add(
-            AppSelectOption(
-              value: d.id,
-              label:
-                  '${d.month}/${d.year} — ${d.apartmentNumber} — ${d.amount}',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          t.residentSelectedDues,
+          style: AppTypography.body1.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: AppSizes.spacingXS),
+        Text(
+          t.residentSelectedDuesHint,
+          style: AppTypography.body2.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: AppSizes.spacingS),
+        if (allocations.isEmpty && dueIds.isEmpty)
+          Text(
+            t.noPendingDues,
+            style: AppTypography.body2.copyWith(
+              color: AppColors.textSecondary,
             ),
-          );
-        }
-        return AppSelectField<String>(
-          label: t.selectDueForApprove,
-          sheetTitle: t.selectDueForApprove,
-          value: effectiveValue,
-          options: options,
-          onChanged: onChanged,
-        );
-      },
+          )
+        else if (allocations.isNotEmpty)
+          for (final a in allocations)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSizes.spacingXS),
+              child: _SelectedDueRow(
+                title: _allocationTitle(context, a),
+                subtitle: _allocationSubtitle(context, a),
+              ),
+            )
+        else
+          for (final id in dueIds)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSizes.spacingXS),
+              child: _SelectedDueRow(
+                title: id,
+                subtitle: null,
+              ),
+            ),
+      ],
+    );
+  }
+
+  String _allocationTitle(BuildContext context, DekontDueAllocationSummary a) {
+    if (a.month != null && a.year != null) {
+      final month = localizedMonthName(context, a.month!);
+      final apt = a.apartmentNumber;
+      if (apt != null && apt.isNotEmpty) {
+        return '$month ${a.year} · ${context.t.common.stepApartment} $apt';
+      }
+      return '$month ${a.year}';
+    }
+    return a.dueId;
+  }
+
+  String? _allocationSubtitle(
+    BuildContext context,
+    DekontDueAllocationSummary a,
+  ) {
+    final amount = a.remainingAmount ?? a.amount;
+    if (amount == null || amount.isEmpty) return null;
+    final parsed = double.tryParse(amount);
+    if (parsed == null) return amount;
+    return AppCurrencyFormat.format(parsed);
+  }
+}
+
+class _SelectedDueRow extends StatelessWidget {
+  const _SelectedDueRow({required this.title, this.subtitle});
+
+  final String title;
+  final String? subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingM,
+        vertical: AppSizes.spacingS,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSizes.cardRadius),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.receipt_long_outlined, color: AppColors.mutedText, size: 22),
+          const SizedBox(width: AppSizes.spacingS),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTypography.body1.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    style: AppTypography.body2.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -542,23 +694,3 @@ class _ReviewButtonSpinner extends StatelessWidget {
     );
   }
 }
-
-final buildingDuesForReviewProvider = FutureProvider.autoDispose
-    .family<List<DueEntity>, String>((ref, buildingId) async {
-      final repo = ref.read(duesRepositoryProvider);
-      final all = await repo.getBuildingDues(buildingId, paginated: false);
-      final reviewable =
-          all.items
-              .where(
-                (d) =>
-                    d.status == DueStatus.pending ||
-                    d.status == DueStatus.overdue,
-              )
-              .toList()
-            ..sort((a, b) {
-              final yearCmp = b.year.compareTo(a.year);
-              if (yearCmp != 0) return yearCmp;
-              return b.month.compareTo(a.month);
-            });
-      return reviewable;
-    });

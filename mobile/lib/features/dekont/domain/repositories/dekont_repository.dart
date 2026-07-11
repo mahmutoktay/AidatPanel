@@ -11,6 +11,7 @@ abstract class DekontRepository {
     required List<int> fileBytes,
     String? filePath,
     String? dueId,
+    List<String>? dueIds,
   });
 
   Future<DekontEntity> getDekont(String id);
@@ -34,6 +35,8 @@ abstract class DekontRepository {
     required DekontReviewDecision decision,
     String? note,
     String? dueId,
+    List<String>? dueIds,
+    double? amount,
   });
 
   Future<List<int>> getDekontFileBytes(String id, {bool download = false});

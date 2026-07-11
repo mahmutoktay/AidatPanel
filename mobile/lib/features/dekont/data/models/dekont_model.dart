@@ -54,6 +54,8 @@ class DekontModel {
   final String? apartmentId;
   final String uploadedById;
   final String? dueId;
+  final List<String> dueIds;
+  final List<DekontDueAllocationSummary> allocations;
   final String status;
   final String source;
   final String originalFilename;
@@ -81,6 +83,8 @@ class DekontModel {
     this.apartmentId,
     required this.uploadedById,
     this.dueId,
+    this.dueIds = const [],
+    this.allocations = const [],
     required this.status,
     required this.source,
     required this.originalFilename,
@@ -129,12 +133,54 @@ class DekontModel {
       parsedJson = Map<String, dynamic>.from(rawParsed);
     }
 
+    final dueIds = <String>[];
+    final rawDueIds = json['dueIds'];
+    if (rawDueIds is List) {
+      for (final id in rawDueIds) {
+        if (id != null && id.toString().isNotEmpty) {
+          dueIds.add(id.toString());
+        }
+      }
+    }
+
+    final allocations = <DekontDueAllocationSummary>[];
+    final rawAlloc = json['allocations'];
+    if (rawAlloc is List) {
+      for (final item in rawAlloc) {
+        if (item is! Map) continue;
+        final dueId = _asString(item['dueId']);
+        if (dueId.isEmpty) continue;
+        allocations.add(
+          DekontDueAllocationSummary(
+            dueId: dueId,
+            allocatedAmount: item['allocatedAmount']?.toString(),
+            month: item['month'] is num ? (item['month'] as num).toInt() : null,
+            year: item['year'] is num ? (item['year'] as num).toInt() : null,
+            amount: item['amount']?.toString(),
+            remainingAmount: item['remainingAmount']?.toString(),
+            apartmentNumber: item['apartmentNumber']?.toString(),
+            status: item['status']?.toString(),
+          ),
+        );
+        if (!dueIds.contains(dueId)) dueIds.add(dueId);
+      }
+    }
+
+    final primaryDueId = json['dueId'] as String?;
+    if (primaryDueId != null &&
+        primaryDueId.isNotEmpty &&
+        !dueIds.contains(primaryDueId)) {
+      dueIds.insert(0, primaryDueId);
+    }
+
     return DekontModel(
       id: _asString(json['id']),
       buildingId: _asString(json['buildingId']),
       apartmentId: json['apartmentId'] as String?,
       uploadedById: _asString(json['uploadedById']),
-      dueId: json['dueId'] as String?,
+      dueId: primaryDueId,
+      dueIds: dueIds,
+      allocations: allocations,
       status: _asString(json['status'], fallback: 'RECEIVED'),
       source: _asString(json['source'], fallback: 'RESIDENT_UPLOAD'),
       originalFilename: _asString(json['originalFilename']),
@@ -206,6 +252,8 @@ class DekontModel {
       apartmentId: apartmentId,
       uploadedById: uploadedById,
       dueId: dueId,
+      dueIds: dueIds,
+      allocations: allocations,
       status: parsedStatus,
       source: source,
       originalFilename: originalFilename,

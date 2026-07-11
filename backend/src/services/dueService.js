@@ -9,6 +9,8 @@ import {
   buildManagerDueVisibilityWhere,
   serializeDueForApi,
 } from "../utils/dueStatus.js";
+import { computeDuePaymentTotals } from "../utils/duePaymentTotals.js";
+import { duePaymentsAmountInclude } from "../utils/dueQueryIncludes.js";
 import {
   resolveListTake,
   resolvePageLimit,
@@ -130,6 +132,7 @@ export const getDuesByBuildingService = async (buildingId, managerId, filters = 
           resident: { select: userPublicSelect },
         },
       },
+      ...duePaymentsAmountInclude,
     },
     orderBy,
     take,
@@ -158,6 +161,7 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
       apartment: {
         include: { building: true },
       },
+      ...duePaymentsAmountInclude,
     },
   });
 
@@ -171,6 +175,19 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
 
   if (buildingId && due.apartment.buildingId !== buildingId) {
     throw new HttpError(403, "Bu aidat kaydını güncelleme yetkiniz yok.");
+  }
+
+  if (due.status === "PAID") {
+    throw new HttpError(409, "Bu aidat zaten ödenmiş.");
+  }
+
+  if (due.status === "WAIVED") {
+    throw new HttpError(409, "Muaf aidat ödendi işaretlenemez.");
+  }
+
+  const { remainingAmount } = computeDuePaymentTotals(due);
+  if (remainingAmount <= 0.01) {
+    throw new HttpError(409, "Bu aidatın kalan borcu yok.");
   }
 
   const previousStatus = due.status;
@@ -205,25 +222,19 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
         apartment: {
           select: { id: true, number: true },
         },
+        ...duePaymentsAmountInclude,
       },
     });
 
-    if (status === "PAID" && previousStatus !== "PAID") {
-      const existingPayment = await tx.duePayment.findFirst({
-        where: { dueId },
-      });
-      if (!existingPayment) {
-        await tx.duePayment.create({
-          data: {
-            dueId,
-            amount: due.amount,
-            paidAt: updateData.paidAt ?? new Date(),
-            currency: due.currency,
-            note: note ?? "Manuel ödeme",
-          },
-        });
-      }
-    }
+    await tx.duePayment.create({
+      data: {
+        dueId,
+        amount: remainingAmount,
+        paidAt: updateData.paidAt ?? new Date(),
+        currency: due.currency,
+        note: note ?? "Manuel ödeme",
+      },
+    });
 
     return row;
   });
@@ -244,10 +255,10 @@ export const updateDueStatusService = async (dueId, managerId, { status, paidAt,
     });
   }
 
-  return {
-    ...updated,
-    apartmentNumber: updated.apartment?.number ?? null,
-  };
+  return serializeDueForApi(
+    { ...updated, payments: [...(due.payments ?? []), { amount: remainingAmount }] },
+    updated.apartment
+  );
 };
 
 const PENDING_DEKONT_STATUSES = [
@@ -424,6 +435,7 @@ export const getMyDuesService = async (userId, filters = {}) => {
 
   const dues = await prisma.due.findMany({
     where: whereClause,
+    include: duePaymentsAmountInclude,
     orderBy,
     take,
   });

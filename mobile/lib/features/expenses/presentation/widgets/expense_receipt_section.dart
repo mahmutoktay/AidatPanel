@@ -115,7 +115,7 @@ class ExpenseReceiptSection extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.receipt_long_outlined,
+                Icons.attach_file,
                 color: AppColors.primary,
                 size: 24,
               ),
@@ -258,7 +258,7 @@ class ExpenseReceiptSection extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      "Sunucuda Kayıtlı Makbuz",
+                      context.t.features.expenses.receiptStoredOnServer,
                       style: AppTypography.caption.copyWith(
                         color: AppColors.textSecondary,
                       ),

@@ -21,6 +21,8 @@ class DueModel {
   final DueBreakdownModel? breakdown;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final double paidAmount;
+  final double remainingAmount;
 
   const DueModel({
     required this.id,
@@ -40,7 +42,9 @@ class DueModel {
     this.breakdown,
     required this.createdAt,
     required this.updatedAt,
-  });
+    this.paidAmount = 0,
+    double? remainingAmount,
+  }) : remainingAmount = remainingAmount ?? amount;
 
   factory DueModel.fromJson(Map<String, dynamic> json) {
     // Yönetici listesinde apartmentNumber düz alan; PATCH yanıtında ise
@@ -91,6 +95,12 @@ class DueModel {
           : null,
       createdAt: _toDateTime(json['createdAt']) ?? DateTime.now(),
       updatedAt: _toDateTime(json['updatedAt']) ?? DateTime.now(),
+      paidAmount: json['paidAmount'] != null
+          ? _toDouble(json['paidAmount'])
+          : 0,
+      remainingAmount: json['remainingAmount'] != null
+          ? _toDouble(json['remainingAmount'])
+          : null,
     );
   }
 
@@ -132,6 +142,8 @@ class DueModel {
       breakdown: breakdown?.toEntity(),
       createdAt: createdAt,
       updatedAt: updatedAt,
+      paidAmount: paidAmount,
+      remainingAmount: remainingAmount,
     );
   }
 
