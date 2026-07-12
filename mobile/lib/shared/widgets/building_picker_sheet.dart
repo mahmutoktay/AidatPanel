@@ -72,6 +72,7 @@ class BuildingPickerSheet extends StatefulWidget {
   final List<SiteEntity> sites;
   final String? selectedBuildingId;
   final String? selectedSiteId;
+  final bool selectedIsAll;
   final bool includeAllOption;
   final bool enableSiteGrouping;
 
@@ -81,6 +82,7 @@ class BuildingPickerSheet extends StatefulWidget {
     this.sites = const [],
     required this.selectedBuildingId,
     this.selectedSiteId,
+    this.selectedIsAll = false,
     this.includeAllOption = false,
     this.enableSiteGrouping = true,
   });
@@ -91,6 +93,7 @@ class BuildingPickerSheet extends StatefulWidget {
     List<SiteEntity> sites = const [],
     required String? selectedBuildingId,
     String? selectedSiteId,
+    bool selectedIsAll = false,
     bool includeAllOption = false,
     bool enableSiteGrouping = true,
   }) async {
@@ -101,6 +104,7 @@ class BuildingPickerSheet extends StatefulWidget {
         sites: sites,
         selectedBuildingId: selectedBuildingId,
         selectedSiteId: selectedSiteId,
+        selectedIsAll: selectedIsAll,
         includeAllOption: includeAllOption,
         enableSiteGrouping: enableSiteGrouping,
       ),
@@ -219,19 +223,21 @@ class _BuildingPickerSheetState extends State<BuildingPickerSheet> {
   }
 
   bool _isSiteSelected(String siteId) {
-    return widget.selectedSiteId == siteId &&
+    return !widget.selectedIsAll &&
+        widget.selectedSiteId == siteId &&
         widget.selectedBuildingId == null;
   }
 
   bool _isBuildingSelected(String buildingId) {
-    return widget.selectedBuildingId == buildingId;
+    return !widget.selectedIsAll &&
+        widget.selectedBuildingId == buildingId;
   }
 
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.dashboard;
     final showAllOption =
-        widget.includeAllOption && _query.trim().isEmpty && _useHierarchy;
+        widget.includeAllOption && _query.trim().isEmpty;
 
     final hasHierarchyContent = _useHierarchy &&
         (_visibleSiteGroups.isNotEmpty || _visibleStandaloneBuildings.isNotEmpty);
@@ -278,9 +284,7 @@ class _BuildingPickerSheetState extends State<BuildingPickerSheet> {
                   '{count}',
                   '${widget.buildings.length}',
                 ),
-                selected:
-                    widget.selectedBuildingId == null &&
-                    widget.selectedSiteId == null,
+                selected: widget.selectedIsAll,
                 leadingIcon: Icons.grid_view_rounded,
                 onTap: () => Navigator.of(context).pop(
                   const BuildingPickerResult.allBuildings(),

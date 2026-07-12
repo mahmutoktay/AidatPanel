@@ -124,6 +124,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get settings => 'Ayarlar';
 	@override String get user => 'Kullanıcı';
 	@override String get welcome => 'Hoş Geldiniz';
+	@override String get welcomeBack => 'Tekrar Hoş Geldiniz';
 	@override String get managedBuildings => 'Yönetilen Binalar';
 	@override String get issues => 'Talepler';
 	@override String get issuesTab => 'Talepler Sekmesi';
@@ -834,7 +835,8 @@ class _Translations$features$auth$tr implements Translations$features$auth$en {
 	@override String get passwordRequired => 'Şifre gerekli';
 	@override String get errorOccurred => 'Bir hata oluştu';
 	@override String get registrationSuccess => 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.';
-	@override String get loginSuccess => 'Giriş başarılı. Hoş geldiniz.';
+	@override String get loginSuccess => 'Hoş geldiniz!';
+	@override String get loginSuccessWelcomeBack => 'Tekrar hoş geldiniz!';
 	@override String get appTitle => 'AidatPanel';
 	@override String get appSubtitle => 'Apartman Yönetim Sistemi';
 	@override String get splashConnectionError => 'Sunucuya bağlanılamadı';
@@ -1274,6 +1276,8 @@ class _Translations$features$notifications$tr implements Translations$features$n
 	@override String get fieldBody => 'Mesaj';
 	@override String get sendButton => 'Gönder';
 	@override String get sendSuccess => 'Duyuru gönderildi';
+	@override String get sendSuccessAll => 'Duyuru tüm binalara gönderildi';
+	@override String get sendPartialFailed => 'Duyuru {ok}/{total} binaya gönderildi';
 	@override String get sendFailed => 'Duyuru gönderilemedi';
 	@override String get fieldRequired => 'Zorunlu alan';
 	@override late final _Translations$features$notifications$permissionPrompt$tr permissionPrompt = _Translations$features$notifications$permissionPrompt$tr._(_root);
@@ -2023,6 +2027,7 @@ extension on TranslationsTr {
 			'common.settings' => 'Ayarlar',
 			'common.user' => 'Kullanıcı',
 			'common.welcome' => 'Hoş Geldiniz',
+			'common.welcomeBack' => 'Tekrar Hoş Geldiniz',
 			'common.managedBuildings' => 'Yönetilen Binalar',
 			'common.issues' => 'Talepler',
 			'common.issuesTab' => 'Talepler Sekmesi',
@@ -2423,9 +2428,9 @@ extension on TranslationsTr {
 			'common.errorKeys.dekontResponseParseFailed' => 'Dekont yanıtı işlenemedi. Lütfen tekrar deneyin.',
 			'common.errorKeys.reportFileEmpty' => 'Rapor dosyası boş geldi. Lütfen tekrar deneyin.',
 			'common.errorKeys.downloadStarted' => 'İndirme başlatıldı...',
-			'common.errorKeys.downloadSavedToGallery' => 'Görsel telefonunuzun Galerisine (AidatPanel albümüne) kaydedildi.',
 			_ => null,
 		} ?? switch (path) {
+			'common.errorKeys.downloadSavedToGallery' => 'Görsel telefonunuzun Galerisine (AidatPanel albümüne) kaydedildi.',
 			'common.errorKeys.downloadSavedToDownloads' => 'Dekont, telefonunuzun İndirilenler (Downloads) klasörüne kaydedildi.',
 			'common.errorKeys.downloadFallbackShare' => 'Paylaşım ekranı açıldı, buradan Dosyalara Kaydet diyebilirsiniz.',
 			'common.errorKeys.downloadError' => 'Dosya indirilirken bir hata oluştu.',
@@ -2609,7 +2614,8 @@ extension on TranslationsTr {
 			'features.auth.passwordRequired' => 'Şifre gerekli',
 			'features.auth.errorOccurred' => 'Bir hata oluştu',
 			'features.auth.registrationSuccess' => 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.',
-			'features.auth.loginSuccess' => 'Giriş başarılı. Hoş geldiniz.',
+			'features.auth.loginSuccess' => 'Hoş geldiniz!',
+			'features.auth.loginSuccessWelcomeBack' => 'Tekrar hoş geldiniz!',
 			'features.auth.appTitle' => 'AidatPanel',
 			'features.auth.appSubtitle' => 'Apartman Yönetim Sistemi',
 			'features.auth.splashConnectionError' => 'Sunucuya bağlanılamadı',
@@ -2936,10 +2942,10 @@ extension on TranslationsTr {
 			'features.dekont.resident.dueOverdueHint' => 'Bu aidatınız gecikmiş',
 			'features.dekont.manager.statusProcessing' => 'İşleniyor',
 			'features.dekont.manager.statusAwaitingApproval' => 'Onay bekliyor',
-			'features.dekont.manager.statusApproved' => 'Onaylandı',
-			'features.dekont.manager.statusPartiallyApproved' => 'Kısmen onaylandı',
 			_ => null,
 		} ?? switch (path) {
+			'features.dekont.manager.statusApproved' => 'Onaylandı',
+			'features.dekont.manager.statusPartiallyApproved' => 'Kısmen onaylandı',
 			'features.dekont.manager.statusRejected' => 'Reddedildi',
 			'features.dekont.manager.statusDetailProcessing' => 'Dekont işleniyor. Bilgiler birkaç dakika içinde görünecek.',
 			'features.dekont.manager.statusDetailAwaitingApproval' => 'Onayınız bekleniyor.',
@@ -3158,6 +3164,8 @@ extension on TranslationsTr {
 			'features.notifications.fieldBody' => 'Mesaj',
 			'features.notifications.sendButton' => 'Gönder',
 			'features.notifications.sendSuccess' => 'Duyuru gönderildi',
+			'features.notifications.sendSuccessAll' => 'Duyuru tüm binalara gönderildi',
+			'features.notifications.sendPartialFailed' => 'Duyuru {ok}/{total} binaya gönderildi',
 			'features.notifications.sendFailed' => 'Duyuru gönderilemedi',
 			'features.notifications.fieldRequired' => 'Zorunlu alan',
 			'features.notifications.permissionPrompt.residentTitle' => 'Bildirimlere izin verin',
@@ -3448,6 +3456,8 @@ extension on TranslationsTr {
 			'legal.helpBody' => 'Sık sorulan sorular, adım adım rehberler ve destek kanalları yakında bu bölümde yer alacak. Uygulama desteği için: store@vefayazilim.com (Vefa Yazılım). Acil apartman işleri için yöneticiniz veya site yönetiminizle iletişime geçebilirsiniz.',
 			'db_context.user_entry' => 'Kayıt: {value}',
 			'db_context.building_name' => 'Bina: {value}',
+			_ => null,
+		} ?? switch (path) {
 			'db_context.apartment_label' => 'Daire: {value}',
 			'db_context.code_value' => 'Kod: {value}',
 			'db_context.expiry_date' => 'Son kullanma: {value}',

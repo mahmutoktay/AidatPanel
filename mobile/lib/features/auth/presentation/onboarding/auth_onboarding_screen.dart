@@ -189,6 +189,13 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
   }
 
   void _goDashboard(UserEntity user) {
+    final isReturning = ref.read(authStateProvider).isReturningUser;
+    final authT = context.t.features.auth;
+    ref.read(toastProvider.notifier).show(
+          isReturning ? authT.loginSuccessWelcomeBack : authT.loginSuccess,
+          type: ToastType.success,
+          duration: const Duration(seconds: 4),
+        );
     final path = user.role == UserRole.manager
         ? '/manager-dashboard'
         : '/resident-dashboard';

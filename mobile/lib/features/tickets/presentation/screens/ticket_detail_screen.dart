@@ -63,6 +63,9 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
           SnackBar(
             content: Text(t.statusUpdated),
             duration: const Duration(seconds: 5),
+            // Flutter 3.44+: aksiyonlu SnackBar varsayılan persist:true —
+            // süre dolunca kaybolmaz; geri alma için süreye izin ver.
+            persist: false,
             action: SnackBarAction(
               label: t.undo,
               onPressed: () {

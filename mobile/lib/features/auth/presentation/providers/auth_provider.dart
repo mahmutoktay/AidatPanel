@@ -43,6 +43,10 @@ class AuthState {
   final bool isManualLogout;
   final bool showLogoutToast;
 
+  /// true: tekrar giriş / oturum geri yükleme → "Tekrar Hoş Geldiniz"
+  /// false: ilk kayıt / davet ile katılım → "Hoş Geldiniz"
+  final bool isReturningUser;
+
   const AuthState({
     this.logoutReason,
     this.isLoading = false,
@@ -52,6 +56,7 @@ class AuthState {
     this.registrationSuccess = false,
     this.isManualLogout = false,
     this.showLogoutToast = true,
+    this.isReturningUser = false,
   });
 
   AuthState copyWith({
@@ -63,6 +68,7 @@ class AuthState {
     bool? registrationSuccess,
     bool? isManualLogout,
     bool? showLogoutToast,
+    bool? isReturningUser,
     bool clearUser = false,
     bool clearError = false,
   }) {
@@ -75,6 +81,7 @@ class AuthState {
       registrationSuccess: registrationSuccess ?? this.registrationSuccess,
       isManualLogout: isManualLogout ?? this.isManualLogout,
       showLogoutToast: showLogoutToast ?? this.showLogoutToast,
+      isReturningUser: isReturningUser ?? this.isReturningUser,
     );
   }
 }
@@ -223,6 +230,8 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<void> login(String identifier, String password, WidgetRef ref) async {
     if (state.isLoading) return;
+    // register → login zincirinde ilk karşılama gösterilir.
+    final justRegistered = state.registrationSuccess;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final user = await _authRepository.login(identifier, password);
@@ -233,6 +242,8 @@ class AuthNotifier extends Notifier<AuthState> {
         isLoading: false,
         user: user,
         isAuthenticated: true,
+        isReturningUser: !justRegistered,
+        registrationSuccess: false,
         clearError: true,
       );
     } catch (e) {
@@ -297,6 +308,7 @@ class AuthNotifier extends Notifier<AuthState> {
         isLoading: false,
         user: user,
         isAuthenticated: true,
+        isReturningUser: false,
         clearError: true,
       );
     } catch (e) {
@@ -368,6 +380,7 @@ class AuthNotifier extends Notifier<AuthState> {
         isLoading: false,
         user: user,
         isAuthenticated: true,
+        isReturningUser: false,
         clearError: true,
       );
       return user;
@@ -408,12 +421,26 @@ class AuthNotifier extends Notifier<AuthState> {
         isLoading: false,
         user: user,
         isAuthenticated: true,
+        isReturningUser: _isReturningOtpPurpose(purpose),
         clearError: true,
       );
       return user;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
       rethrow;
+    }
+  }
+
+  /// OTP purpose'a göre ilk giriş mi tekrar giriş mi.
+  bool _isReturningOtpPurpose(String purpose) {
+    switch (purpose) {
+      case 'manager_login':
+      case 'resident_login':
+        return true;
+      case 'manager_register':
+      case 'resident_join':
+      default:
+        return false;
     }
   }
 
@@ -454,6 +481,7 @@ class AuthNotifier extends Notifier<AuthState> {
           user: user,
           isAuthenticated: true,
           isLoading: false,
+          isReturningUser: true,
           clearError: true,
         );
         ref.read(profileNotifierProvider.notifier).loadProfile();

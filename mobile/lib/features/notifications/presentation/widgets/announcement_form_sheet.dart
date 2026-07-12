@@ -18,6 +18,7 @@ import '../../../sites/data/sites_store.dart';
 import '../providers/notifications_provider.dart';
 
 /// Yönetici duyuru formu → `POST /buildings/:id/announcements` (B5).
+/// "Tüm Binalar" seçilirse her bina için sırayla gönderilir.
 class AnnouncementFormSheet extends ConsumerStatefulWidget {
   const AnnouncementFormSheet({super.key});
 
@@ -37,6 +38,7 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
   final _formKey = GlobalKey<FormState>();
   final _bodyController = TextEditingController();
   String? _buildingId;
+  bool _allBuildings = false;
   bool _initializedDefault = false;
   bool _submitting = false;
 
@@ -56,16 +58,23 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
     _initializedDefault = true;
 
     final scope = ref.read(dashboardFilterScopeProvider);
+    if (scope.isAll) {
+      _allBuildings = true;
+      _buildingId = null;
+      return;
+    }
     if (scope.isBuilding &&
         scope.buildingId != null &&
         buildings.any((b) => b.id == scope.buildingId)) {
       _buildingId = scope.buildingId;
+      _allBuildings = false;
       return;
     }
 
     final selectedId = ref.read(selectedBuildingIdProvider);
     if (selectedId != null && buildings.any((b) => b.id == selectedId)) {
       _buildingId = selectedId;
+      _allBuildings = false;
       return;
     }
     // Otomatik first yok — kullanıcı picker ile seçer (K6/K11).
@@ -97,7 +106,7 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
             ? null
             : PremiumSheetActions(
                 primaryLabel: t.sendButton,
-                onPrimary: _submitting ? null : _submit,
+                onPrimary: _submitting ? null : () => _submit(buildings),
                 primaryLoading: _submitting,
               ),
       ),
@@ -162,11 +171,14 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
       );
     }
 
-    BuildingEntity? selectedBuilding;
-    if (_buildingId != null) {
+    final dashboardT = context.t.features.dashboard;
+    String? pickerValue;
+    if (_allBuildings) {
+      pickerValue = dashboardT.allBuildings;
+    } else if (_buildingId != null) {
       for (final b in buildings) {
         if (b.id == _buildingId) {
-          selectedBuilding = b;
+          pickerValue = b.name;
           break;
         }
       }
@@ -177,7 +189,7 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
       children: [
         MinimalPickerField(
           label: context.t.common.buildingName,
-          value: selectedBuilding?.name,
+          value: pickerValue,
           hint: context.t.common.buildingName,
           icon: Icons.apartment_outlined,
           required: true,
@@ -211,47 +223,88 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
       context,
       buildings: buildings,
       sites: sites,
-      selectedBuildingId: _buildingId,
-      includeAllOption: false,
-      enableSiteGrouping: true,
+      selectedBuildingId: _allBuildings ? null : _buildingId,
+      selectedIsAll: _allBuildings,
+      includeAllOption: true,
+      enableSiteGrouping: sites.isNotEmpty,
     );
-    if (result.cancelled || result.buildingId == null) return;
-    setState(() => _buildingId = result.buildingId);
+    if (result.cancelled) return;
+    if (result.isAllBuildings) {
+      setState(() {
+        _allBuildings = true;
+        _buildingId = null;
+      });
+      return;
+    }
+    if (result.buildingId == null) return;
+    setState(() {
+      _allBuildings = false;
+      _buildingId = result.buildingId;
+    });
   }
 
-  Future<void> _submit() async {
-    if (_buildingId == null) {
+  Future<void> _submit(List<BuildingEntity> buildings) async {
+    final t = context.t.features.notifications;
+    if (!_allBuildings && _buildingId == null) {
       ref.read(toastProvider.notifier).show(
-            context.t.features.notifications.fieldRequired,
+            t.fieldRequired,
             type: ToastType.error,
           );
       return;
     }
     if (!_formKey.currentState!.validate()) return;
-    final id = _buildingId!;
 
+    final targetIds = _allBuildings
+        ? buildings.map((b) => b.id).toList(growable: false)
+        : <String>[_buildingId!];
+    if (targetIds.isEmpty) {
+      ref.read(toastProvider.notifier).show(
+            t.noBuilding,
+            type: ToastType.error,
+          );
+      return;
+    }
+
+    final body = _bodyController.text.trim();
     setState(() => _submitting = true);
-    final result = await ref
-        .read(notificationsNotifierProvider.notifier)
-        .sendAnnouncement(
-          id,
-          body: _bodyController.text.trim(),
-        );
+
+    var okCount = 0;
+    for (final id in targetIds) {
+      final result = await ref
+          .read(notificationsNotifierProvider.notifier)
+          .sendAnnouncement(id, body: body);
+      if (result != null) okCount++;
+    }
+
     if (!mounted) return;
     setState(() => _submitting = false);
 
-    if (result != null) {
+    if (okCount == targetIds.length) {
       ref.read(toastProvider.notifier).show(
-            context.t.features.notifications.sendSuccess,
+            _allBuildings && targetIds.length > 1
+                ? t.sendSuccessAll
+                : t.sendSuccess,
             type: ToastType.success,
           );
       Navigator.of(context).pop(true);
-    } else {
-      final err = ref.read(notificationsNotifierProvider).error;
-      ref.read(toastProvider.notifier).show(
-            err ?? context.t.features.notifications.sendFailed,
-            type: ToastType.error,
-          );
+      return;
     }
+
+    if (okCount > 0) {
+      ref.read(toastProvider.notifier).show(
+            t.sendPartialFailed
+                .replaceAll('{ok}', '$okCount')
+                .replaceAll('{total}', '${targetIds.length}'),
+            type: ToastType.warning,
+          );
+      Navigator.of(context).pop(true);
+      return;
+    }
+
+    final err = ref.read(notificationsNotifierProvider).error;
+    ref.read(toastProvider.notifier).show(
+          err ?? t.sendFailed,
+          type: ToastType.error,
+        );
   }
 }

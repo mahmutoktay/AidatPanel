@@ -31,52 +31,63 @@ class TicketDetailManagerActions extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (ticket.status == TicketStatus.open) ...[
-          SizedBox(
-            height: AppSizes.buttonHeightPrimary,
-            child: FilledButton(
-              onPressed: submitting
-                  ? null
-                  : () => onAction(TicketStatus.inProgress),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.success,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: AppColors.success.withValues(
-                  alpha: 0.5,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                textStyle: AppTypography.button,
-              ),
-              child: submitting
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: AppSizes.buttonHeightPrimary,
+                  child: OutlinedButton(
+                    onPressed: submitting
+                        ? null
+                        : () => onAction(TicketStatus.closed),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      side: const BorderSide(
+                        color: AppColors.error,
+                        width: 1.5,
                       ),
-                    )
-                  : Text(t.actionApprove),
-            ),
-          ),
-          const SizedBox(height: AppSizes.spacingM),
-          SizedBox(
-            height: AppSizes.buttonHeightPrimary,
-            child: OutlinedButton(
-              onPressed: submitting
-                  ? null
-                  : () => onAction(TicketStatus.closed),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error,
-                side: const BorderSide(color: AppColors.error, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      textStyle: AppTypography.button,
+                    ),
+                    child: Text(t.actionReject),
+                  ),
                 ),
-                textStyle: AppTypography.button,
               ),
-              child: Text(t.actionReject),
-            ),
+              const SizedBox(width: AppSizes.spacingM),
+              Expanded(
+                child: SizedBox(
+                  height: AppSizes.buttonHeightPrimary,
+                  child: FilledButton(
+                    onPressed: submitting
+                        ? null
+                        : () => onAction(TicketStatus.inProgress),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.success,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: AppColors.success.withValues(
+                        alpha: 0.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      textStyle: AppTypography.button,
+                    ),
+                    child: submitting
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(t.actionApprove),
+                  ),
+                ),
+              ),
+            ],
           ),
         ] else if (ticket.status == TicketStatus.inProgress) ...[
           SizedBox(

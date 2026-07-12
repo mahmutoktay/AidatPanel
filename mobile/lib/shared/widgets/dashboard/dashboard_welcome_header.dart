@@ -11,17 +11,20 @@ class DashboardPageHeader extends StatelessWidget {
   final String title;
   final String userName;
   final bool showWelcome;
+  final bool isReturningUser;
 
   const DashboardPageHeader({
     super.key,
     required this.title,
     required this.userName,
     this.showWelcome = true,
+    this.isReturningUser = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final t = context.t.common;
+    final welcomeLabel = isReturningUser ? t.welcomeBack : t.welcome;
 
     return Row(
       crossAxisAlignment: showWelcome ? CrossAxisAlignment.start : CrossAxisAlignment.center,
@@ -45,7 +48,7 @@ class DashboardPageHeader extends StatelessWidget {
                   TextSpan(
                     children: [
                       TextSpan(
-                        text: '${t.welcome}, ',
+                        text: '$welcomeLabel, ',
                         style: AppTypography.body1.copyWith(
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w500,

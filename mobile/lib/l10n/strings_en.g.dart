@@ -272,6 +272,9 @@ class Translations$common$en {
 	/// en: 'Welcome'
 	String get welcome => 'Welcome';
 
+	/// en: 'Welcome Back'
+	String get welcomeBack => 'Welcome Back';
+
 	/// en: 'Managed Buildings'
 	String get managedBuildings => 'Managed Buildings';
 
@@ -2171,8 +2174,11 @@ class Translations$features$auth$en {
 	/// en: 'Account created. You can now log in.'
 	String get registrationSuccess => 'Account created. You can now log in.';
 
-	/// en: 'Signed in successfully. Welcome.'
-	String get loginSuccess => 'Signed in successfully. Welcome.';
+	/// en: 'Welcome!'
+	String get loginSuccess => 'Welcome!';
+
+	/// en: 'Welcome back!'
+	String get loginSuccessWelcomeBack => 'Welcome back!';
 
 	/// en: 'AidatPanel'
 	String get appTitle => 'AidatPanel';
@@ -3395,6 +3401,12 @@ class Translations$features$notifications$en {
 
 	/// en: 'Announcement sent'
 	String get sendSuccess => 'Announcement sent';
+
+	/// en: 'Announcement sent to all buildings'
+	String get sendSuccessAll => 'Announcement sent to all buildings';
+
+	/// en: 'Announcement sent to {ok}/{total} buildings'
+	String get sendPartialFailed => 'Announcement sent to {ok}/{total} buildings';
 
 	/// en: 'Could not send announcement'
 	String get sendFailed => 'Could not send announcement';
@@ -5107,6 +5119,7 @@ extension on Translations {
 			'common.settings' => 'Settings',
 			'common.user' => 'User',
 			'common.welcome' => 'Welcome',
+			'common.welcomeBack' => 'Welcome Back',
 			'common.managedBuildings' => 'Managed Buildings',
 			'common.issues' => 'Requests',
 			'common.issuesTab' => 'Requests tab',
@@ -5507,9 +5520,9 @@ extension on Translations {
 			'common.errorKeys.dekontResponseParseFailed' => 'Could not process the receipt response. Please try again.',
 			'common.errorKeys.reportFileEmpty' => 'The report file was empty. Please try again.',
 			'common.errorKeys.downloadStarted' => 'Download started...',
-			'common.errorKeys.downloadSavedToGallery' => 'Saved to your phone\'s Gallery (AidatPanel album).',
 			_ => null,
 		} ?? switch (path) {
+			'common.errorKeys.downloadSavedToGallery' => 'Saved to your phone\'s Gallery (AidatPanel album).',
 			'common.errorKeys.downloadSavedToDownloads' => 'Receipt saved to your Downloads folder.',
 			'common.errorKeys.downloadFallbackShare' => 'Share screen opened. You can save it to Files from there.',
 			'common.errorKeys.downloadError' => 'An error occurred while downloading the file.',
@@ -5693,7 +5706,8 @@ extension on Translations {
 			'features.auth.passwordRequired' => 'Password required',
 			'features.auth.errorOccurred' => 'An error occurred',
 			'features.auth.registrationSuccess' => 'Account created. You can now log in.',
-			'features.auth.loginSuccess' => 'Signed in successfully. Welcome.',
+			'features.auth.loginSuccess' => 'Welcome!',
+			'features.auth.loginSuccessWelcomeBack' => 'Welcome back!',
 			'features.auth.appTitle' => 'AidatPanel',
 			'features.auth.appSubtitle' => 'Apartment Management System',
 			'features.auth.splashConnectionError' => 'Could not connect to server',
@@ -6020,10 +6034,10 @@ extension on Translations {
 			'features.dekont.resident.dueOverdueHint' => 'This due is overdue',
 			'features.dekont.manager.statusProcessing' => 'Processing',
 			'features.dekont.manager.statusAwaitingApproval' => 'Awaiting approval',
-			'features.dekont.manager.statusApproved' => 'Approved',
-			'features.dekont.manager.statusPartiallyApproved' => 'Partially approved',
 			_ => null,
 		} ?? switch (path) {
+			'features.dekont.manager.statusApproved' => 'Approved',
+			'features.dekont.manager.statusPartiallyApproved' => 'Partially approved',
 			'features.dekont.manager.statusRejected' => 'Rejected',
 			'features.dekont.manager.statusDetailProcessing' => 'Receipt is being processed. Details will appear shortly.',
 			'features.dekont.manager.statusDetailAwaitingApproval' => 'Your approval is needed.',
@@ -6242,6 +6256,8 @@ extension on Translations {
 			'features.notifications.fieldBody' => 'Message',
 			'features.notifications.sendButton' => 'Send',
 			'features.notifications.sendSuccess' => 'Announcement sent',
+			'features.notifications.sendSuccessAll' => 'Announcement sent to all buildings',
+			'features.notifications.sendPartialFailed' => 'Announcement sent to {ok}/{total} buildings',
 			'features.notifications.sendFailed' => 'Could not send announcement',
 			'features.notifications.fieldRequired' => 'Required field',
 			'features.notifications.permissionPrompt.residentTitle' => 'Enable notifications',
@@ -6532,6 +6548,8 @@ extension on Translations {
 			'legal.helpBody' => 'FAQs, step-by-step guides, and support channels will be added here soon. For app support: store@vefayazilim.com (Vefa Yazılım). For urgent building matters, contact your building manager or site administration.',
 			'db_context.user_entry' => 'Record: {value}',
 			'db_context.building_name' => 'Building: {value}',
+			_ => null,
+		} ?? switch (path) {
 			'db_context.apartment_label' => 'Apartment: {value}',
 			'db_context.code_value' => 'Code: {value}',
 			'db_context.expiry_date' => 'Expires at: {value}',

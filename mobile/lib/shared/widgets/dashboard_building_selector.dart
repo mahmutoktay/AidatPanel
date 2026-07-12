@@ -77,6 +77,7 @@ class DashboardBuildingSelector extends ConsumerWidget {
       sites: sites,
       selectedBuildingId: scope.buildingId,
       selectedSiteId: scope.siteId,
+      selectedIsAll: scope.isAll,
       includeAllOption: includeAllOption,
       enableSiteGrouping: sites.isNotEmpty,
     );

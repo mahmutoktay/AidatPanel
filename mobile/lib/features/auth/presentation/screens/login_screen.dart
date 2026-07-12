@@ -111,10 +111,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (next.isAuthenticated &&
           next.user != null &&
           !(previous?.isAuthenticated ?? false)) {
+        final authT = context.t.features.auth;
         ref
             .read(toastProvider.notifier)
             .show(
-              context.t.features.auth.loginSuccess,
+              next.isReturningUser
+                  ? authT.loginSuccessWelcomeBack
+                  : authT.loginSuccess,
               type: ToastType.success,
               duration: const Duration(seconds: 4),
             );

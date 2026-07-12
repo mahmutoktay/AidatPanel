@@ -74,6 +74,13 @@ class _DueTransactionsScreenState extends ConsumerState<DueTransactionsScreen> {
     final buildings = ref.read(buildingsStoreProvider).value ?? [];
     if (buildings.isEmpty) return;
 
+    // "Tüm Binalar" bu ekranda yok; all → alfabetik ilk bina (site korunur).
+    if (_filterScope.isAll) {
+      final sorted = [...buildings]..sort((a, b) => a.name.compareTo(b.name));
+      _filterScope = DashboardFilterScope.building(sorted.first.id);
+      if (mounted) setState(() {});
+    }
+
     final scopeKey = _scopeKey(_filterScope);
     if (_lastLoadedScopeKey == scopeKey) return;
     _lastLoadedScopeKey = scopeKey;
@@ -117,7 +124,7 @@ class _DueTransactionsScreenState extends ConsumerState<DueTransactionsScreen> {
             : DashboardBuildingSelector(
                 buildings: buildings,
                 scope: _filterScope,
-                includeAllOption: true,
+                includeAllOption: false,
                 onScopeChanged: _onScopeChanged,
               ),
         list: RefreshIndicator(

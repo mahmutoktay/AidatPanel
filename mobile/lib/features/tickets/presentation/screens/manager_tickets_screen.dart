@@ -11,9 +11,7 @@ import '../../../../shared/widgets/building_selector_provider.dart';
 import '../../../../shared/widgets/dashboard_building_selector.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
-import '../../../../shared/widgets/premium_filter_button.dart';
-import '../../../../shared/widgets/premium_filter_picker.dart';
-import '../../../../shared/widgets/premium_filter_sheet.dart';
+import '../../../../shared/widgets/sliding_segmented_control.dart';
 import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
 import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
 import '../../domain/entities/ticket_entity.dart';
@@ -39,6 +37,14 @@ class ManagerTicketsScreen extends ConsumerStatefulWidget {
 class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
   final ScrollController _scrollController = ScrollController();
   late DashboardFilterScope _filterScope;
+
+  /// Segment sırası: Tümü | Onaylandı | Yapıldı | Reddedildi (Açık yok).
+  static const _statusFilterOptions = <TicketStatus?>[
+    null,
+    TicketStatus.inProgress,
+    TicketStatus.resolved,
+    TicketStatus.closed,
+  ];
 
   @override
   void initState() {
@@ -101,79 +107,31 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
 
   List<TicketEntity> _filteredTickets(List<TicketEntity> tickets) {
     final filterStatus = ref.watch(managerTicketFilterProvider);
-    if (filterStatus == null) return tickets;
+    if (filterStatus == null || filterStatus == TicketStatus.open) {
+      return tickets;
+    }
     return tickets.where((t) => t.status == filterStatus).toList();
   }
 
-  String _statusFilterLabel(BuildContext context, TicketStatus? status) {
-    if (status == null) return context.t.common.all;
-    return status.label(context);
+  int get _filterIndex {
+    final status = ref.watch(managerTicketFilterProvider);
+    final index = _statusFilterOptions.indexOf(status);
+    return index < 0 ? 0 : index;
   }
 
-  Future<void> _openFilterSheet() async {
-    final currentStatus = ref.read(managerTicketFilterProvider);
-    var draftStatus = currentStatus;
-    final common = context.t.common;
+  void _onFilterIndexChanged(int index) {
+    if (index < 0 || index >= _statusFilterOptions.length) return;
+    final next = _statusFilterOptions[index];
+    if (next == ref.read(managerTicketFilterProvider)) return;
+    ref.read(managerTicketFilterProvider.notifier).select(next);
+  }
 
-    await PremiumFilterSheet.show(
-      context: context,
-      title: common.filter,
-      applyLabel: common.apply,
-      fieldBuilder: (ctx, setSheetState) {
-        final allToken = Object();
-        return [
-          PremiumFilterFieldConfig(
-            label: common.status,
-            value: _statusFilterLabel(ctx, draftStatus),
-            hint: common.all,
-            icon: Icons.flag_outlined,
-            onTap: () async {
-              final picked = await showPremiumSingleSelectPicker<Object?>(
-                context: ctx,
-                title: common.status,
-                selected: draftStatus ?? allToken,
-                options: [
-                  PremiumFilterPickerOption(
-                    value: allToken,
-                    label: common.all,
-                    icon: Icons.layers_outlined,
-                  ),
-                  PremiumFilterPickerOption(
-                    value: TicketStatus.open,
-                    label: TicketStatus.open.label(ctx),
-                    icon: Icons.radio_button_unchecked,
-                  ),
-                  PremiumFilterPickerOption(
-                    value: TicketStatus.inProgress,
-                    label: TicketStatus.inProgress.label(ctx),
-                    icon: Icons.verified_outlined,
-                  ),
-                  PremiumFilterPickerOption(
-                    value: TicketStatus.resolved,
-                    label: TicketStatus.resolved.label(ctx),
-                    icon: Icons.task_alt_rounded,
-                  ),
-                  PremiumFilterPickerOption(
-                    value: TicketStatus.closed,
-                    label: TicketStatus.closed.label(ctx),
-                    icon: Icons.cancel_outlined,
-                  ),
-                ],
-              );
-              if (picked == null) return;
-              setSheetState(() {
-                draftStatus = identical(picked, allToken)
-                    ? null
-                    : picked as TicketStatus;
-              });
-            },
-          ),
-        ];
-      },
-      onApply: () {
-        ref.read(managerTicketFilterProvider.notifier).select(draftStatus);
-      },
-    );
+  List<String> _filterLabels(BuildContext context) {
+    return [
+      context.t.common.all,
+      for (final status in _statusFilterOptions.skip(1))
+        status!.label(context),
+    ];
   }
 
   @override
@@ -203,10 +161,12 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                     onScopeChanged: _onScopeChanged,
                   ),
                   const SizedBox(height: AppSizes.spacingM),
-                  PremiumFilterButton(
-                    hasActiveFilters:
-                        ref.watch(managerTicketFilterProvider) != null,
-                    onPressed: canFilter ? _openFilterSheet : null,
+                  SlidingSegmentedControl(
+                    segments: _filterLabels(context),
+                    selectedIndex: _filterIndex,
+                    onChanged: _onFilterIndexChanged,
+                    enabled: canFilter,
+                    fontSize: 14,
                   ),
                 ],
               ),

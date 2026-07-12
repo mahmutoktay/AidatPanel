@@ -117,6 +117,9 @@ class _ResidentDashboardScreenState
     final userName =
         ref.watch(authStateProvider.select((state) => state.user?.name)) ??
         context.t.common.user;
+    final isReturningUser = ref.watch(
+      authStateProvider.select((state) => state.isReturningUser),
+    );
     final title = switch (selectedTab) {
       3 => t.mySettings,
       2 => t.issues,
@@ -159,6 +162,7 @@ class _ResidentDashboardScreenState
                   title: title,
                   userName: userName,
                   showWelcome: selectedTab == 0,
+                  isReturningUser: isReturningUser,
                 ),
               ),
             ),

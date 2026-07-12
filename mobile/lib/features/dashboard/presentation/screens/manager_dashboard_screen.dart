@@ -85,6 +85,9 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     final userName =
         ref.watch(authStateProvider.select((state) => state.user?.name)) ??
         context.t.common.user;
+    final isReturningUser = ref.watch(
+      authStateProvider.select((state) => state.isReturningUser),
+    );
     final selectedTab = ref.watch(managerTabIndexProvider);
     final isSettings = selectedTab == 3;
     final title = isSettings
@@ -126,6 +129,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                   title: title,
                   userName: userName,
                   showWelcome: selectedTab == 0,
+                  isReturningUser: isReturningUser,
                 ),
               ),
             ),

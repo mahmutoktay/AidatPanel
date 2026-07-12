@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,12 +9,9 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/dashboard_building_selector.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
-import '../../../../shared/widgets/premium_filter_button.dart';
 import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
 import '../../../dashboard/presentation/providers/dashboard_filter_scope_provider.dart';
 import '../../../dashboard/presentation/utils/manager_dashboard_mapper.dart';
-import '../../../../shared/widgets/premium_filter_picker.dart';
-import '../../../../shared/widgets/premium_filter_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
@@ -26,7 +21,8 @@ import '../utils/dues_ui_helpers.dart';
 import '../utils/due_collect_payment_flow.dart';
 import '../widgets/due_detail_sheet.dart';
 import '../widgets/dues_list_item_slidable.dart';
-import '../widgets/dues_stat_cards_row.dart';
+import '../widgets/dues_period_filter_row.dart';
+import '../widgets/dues_status_filter_bar.dart';
 
 class ManagerDuesTab extends ConsumerStatefulWidget {
   const ManagerDuesTab({super.key});
@@ -137,11 +133,6 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     final statsSource = (_statusFilter == null ? dues : _statsDues)
         .where((due) => due.resident != null)
         .toList(growable: false);
-    final totalUnits = _resolveTotalUnits(
-      filterScope,
-      buildings,
-      statsSource,
-    );
     final currencySymbol = _currencySymbol();
 
     return RefreshIndicator(
@@ -164,23 +155,32 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                   DashboardBuildingSelector(
                     buildings: buildings,
                     scope: filterScope,
-                    includeAllOption: true,
+                    includeAllOption: false,
                     onScopeChanged: (scope) => ref
                         .read(dashboardFilterScopeProvider.notifier)
                         .update(scope),
                   ),
                   const SizedBox(height: AppSizes.spacingS),
-                  PremiumFilterButton(
-                    hasActiveFilters: _hasActivePeriodFilters,
+                  DuesPeriodFilterRow(
+                    month: _monthFilter,
+                    year: _yearFilter,
+                    yearOptions: _yearOptions(dues),
                     enabled: !isLoading,
-                    onPressed: isLoading
-                        ? null
-                        : () => _openFilterSheet(context, dues, isLoading),
+                    onMonthChanged: (month) {
+                      if (month == _monthFilter) return;
+                      setState(() => _monthFilter = month);
+                      _reloadDues();
+                    },
+                    onYearChanged: (year) {
+                      if (year == _yearFilter) return;
+                      setState(() => _yearFilter = year);
+                      _reloadDues();
+                    },
                   ),
                   const SizedBox(height: AppSizes.spacingM),
                 ],
                 if (statsSource.isNotEmpty || scopedBuildingIds.isNotEmpty)
-                  DuesStatCardsRow(
+                  DuesStatusFilterBar(
                     paidCount: statsSource
                         .where((d) => d.status == DueStatus.paid)
                         .length,
@@ -190,9 +190,9 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                     overdueCount: statsSource
                         .where((d) => d.status == DueStatus.overdue)
                         .length,
-                    totalUnits: totalUnits,
                     selectedStatus: _statusFilter,
-                    onStatusTap: _toggleStatusFilter,
+                    enabled: !isLoading,
+                    onChanged: _onStatusFilterChanged,
                   ),
                 const SizedBox(height: AppSizes.spacingL),
                 if (scopedBuildingIds.isNotEmpty)
@@ -308,19 +308,10 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     ).map((building) => building.id).toList(growable: false);
   }
 
-  void _toggleStatusFilter(DueStatus status) {
-    setState(() {
-      _statusFilter = _statusFilter == status ? null : status;
-    });
+  void _onStatusFilterChanged(DueStatus? status) {
+    if (status == _statusFilter) return;
+    setState(() => _statusFilter = status);
     _reloadDues();
-  }
-
-  bool get _hasActivePeriodFilters {
-    final now = DateTime.now();
-    return _monthFilter == null ||
-        _yearFilter == null ||
-        _monthFilter != now.month ||
-        _yearFilter != now.year;
   }
 
   List<int> _yearOptions(List<DueEntity> dues) {
@@ -332,113 +323,20 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
     return yearSet.toList()..sort((a, b) => b.compareTo(a));
   }
 
-  Future<void> _openFilterSheet(
-    BuildContext context,
-    List<DueEntity> dues,
-    bool isLoading,
-  ) async {
-    if (isLoading) return;
-    var draftMonth = _monthFilter;
-    var draftYear = _yearFilter;
-    final common = context.t.common;
-    final years = _yearOptions(dues);
-
-    await PremiumFilterSheet.show(
-      context: context,
-      title: common.filter,
-      applyLabel: common.apply,
-      fieldBuilder: (ctx, setSheetState) {
-        final monthAllToken = Object();
-        final yearAllToken = Object();
-        return [
-          PremiumFilterFieldConfig(
-            label: common.month,
-            value: draftMonth == null
-                ? common.allMonths
-                : monthName(ctx, draftMonth!),
-            hint: common.allMonths,
-            icon: Icons.calendar_month_outlined,
-            onTap: () async {
-              final picked = await showPremiumSingleSelectPicker<Object?>(
-                context: ctx,
-                title: common.month,
-                selected: draftMonth ?? monthAllToken,
-                options: [
-                  PremiumFilterPickerOption(
-                    value: monthAllToken,
-                    label: common.allMonths,
-                    icon: Icons.calendar_view_month_outlined,
-                  ),
-                  for (var m = 1; m <= 12; m++)
-                    PremiumFilterPickerOption(
-                      value: m,
-                      label: monthName(ctx, m),
-                      icon: Icons.event_outlined,
-                    ),
-                ],
-              );
-              if (picked == null) return;
-              setSheetState(() {
-                draftMonth = identical(picked, monthAllToken) ? null : picked as int;
-              });
-            },
-          ),
-          PremiumFilterFieldConfig(
-            label: common.year,
-            value: draftYear == null ? common.allYears : '$draftYear',
-            hint: common.allYears,
-            icon: Icons.date_range_outlined,
-            onTap: () async {
-              final picked = await showPremiumSingleSelectPicker<Object?>(
-                context: ctx,
-                title: common.year,
-                selected: draftYear ?? yearAllToken,
-                options: [
-                  PremiumFilterPickerOption(
-                    value: yearAllToken,
-                    label: common.allYears,
-                    icon: Icons.date_range_outlined,
-                  ),
-                  for (final y in years)
-                    PremiumFilterPickerOption(
-                      value: y,
-                      label: '$y',
-                      icon: Icons.calendar_today_outlined,
-                    ),
-                ],
-              );
-              if (picked == null) return;
-              setSheetState(() {
-                draftYear = identical(picked, yearAllToken) ? null : picked as int;
-              });
-            },
-          ),
-        ];
-      },
-      onApply: () {
-        setState(() {
-          _monthFilter = draftMonth;
-          _yearFilter = draftYear;
-        });
-        _reloadDues();
-      },
-    );
-  }
-
-  int _resolveTotalUnits(
-    DashboardFilterScope scope,
-    List<BuildingEntity> buildings,
-    List<DueEntity> statsSource,
-  ) {
-    return math.max(statsSource.length, 1);
-  }
-
   void _tryInitialize(List<BuildingEntity> buildings) {
     if (_initialized || buildings.isEmpty) return;
     _initialized = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      // Boş scope'ta alfabetik/ilk binaya düşme — "Tümü" korunur (K11).
+      // Aidat sekmesinde "Tüm Binalar" yok; anasayfadan gelen all → ilk bina.
+      final scope = ref.read(dashboardFilterScopeProvider);
+      if (scope.isAll) {
+        final sorted = [...buildings]
+          ..sort((a, b) => a.name.compareTo(b.name));
+        ref.read(dashboardFilterScopeProvider.notifier).update(
+              DashboardFilterScope.building(sorted.first.id),
+            );
+      }
       _reloadDues();
     });
   }
