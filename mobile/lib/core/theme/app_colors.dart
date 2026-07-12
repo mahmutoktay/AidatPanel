@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'app_color_palette.dart';
 import 'app_sizes.dart';
 
-/// Monokrom marka (siyah) + anlamlı durum renkleri.
-/// Nötr renkler aktif paletten gelir; tema değişiminde [applyPalette] çağrılır.
+/// Marka: logo lacivert + turuncu; nötrler aktif paletten.
+/// Tema değişiminde [applyPalette] çağrılır.
 class AppColors {
   static AppColorPalette _palette = AppColorPalette.light;
 
@@ -17,14 +17,16 @@ class AppColors {
   // Ana marka — palet tabanlı
   static Color get primary => _palette.primary;
   static Color get primaryLight => _palette.primaryLight;
+  static Color get accent => _palette.accent;
 
-  static const Color accent = Color(0xFFF59E0B);
-  static const Color darkCard = Color(0xFF161B22);
+  /// Koyu kart / yükseltilmiş yüzey (onboarding, abonelik vurgusu).
+  static Color get darkCard =>
+      isDark ? _palette.fill : const Color(0xFF0B2F6B);
 
   static Color get paymentCta => _palette.paymentCta;
   static Color get paymentCtaForeground => _palette.paymentCtaForeground;
 
-  // Durum renkleri — metin / rozet vurgusu (tema bağımsız)
+  // Durum renkleri — metin / rozet vurgusu (tema bağımsız semantik)
   static const Color success = Color(0xFF16A34A);
   static const Color successLight = Color(0xFF10B981);
   static const Color error = Color(0xFFDC2626);

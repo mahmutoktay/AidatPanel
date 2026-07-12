@@ -896,34 +896,41 @@ AidatPanel kullanıcılarının önemli bir kısmı **50+ yaş** grubundadır (a
 
 ### Renk Paleti
 
+Kaynak: logo lacivert (`#082860`) + turuncu (`#F86000`) ile aşağıdaki slate/amber
+doküman paletinin harmanı. Uygulama token’ları:
+`mobile/lib/core/theme/app_color_palette.dart` (`light` / `dark`) → `AppColors`.
+
 ```dart
-// core/theme/app_colors.dart
+// core/theme/app_color_palette.dart (özet)
 
-class AppColors {
-  // Ana renkler
-  static const primary       = Color(0xFF1B3A6B); // Koyu lacivert — güven, resmiyet
-  static const primaryLight  = Color(0xFF2D5FA8); // Hover/pressed state
-  static const accent        = Color(0xFFF59E0B); // Amber — aksiyon butonları, vurgu
+// Marka (açık tema)
+primary       = Color(0xFF0B2F6B); // Logo + doküman lacivert harmanı
+primaryLight  = Color(0xFF2D5FA8); // Hover / pressed
+accent        = Color(0xFFF86000); // Logo turuncu — CTA / vurgu
 
-  // Durum renkleri
-  static const success       = Color(0xFF16A34A); // Ödendi, tamamlandı
-  static const error         = Color(0xFFDC2626); // Gecikmiş aidat, hata
-  static const warning       = Color(0xFFF59E0B); // Beklemede, uyarı
-  static const info          = Color(0xFF2563EB); // Bilgi mesajları
+// Semantik durum (tema bağımsız)
+success       = Color(0xFF16A34A); // Ödendi, tamamlandı
+error         = Color(0xFFDC2626); // Gecikmiş aidat, hata
+warning       = Color(0xFFF59E0B); // Beklemede (amber; accent’ten ayrı)
+info          = Color(0xFF2563EB); // Bilgi mesajları
 
-  // Nötr renkler
-  static const background    = Color(0xFFF8FAFC); // Ana arka plan (saf beyaz değil)
-  static const surface       = Color(0xFFFFFFFF); // Kart, modal yüzeyi
-  static const border        = Color(0xFFE2E8F0); // Ayırıcı çizgiler
-  static const textPrimary   = Color(0xFF0F172A); // Ana metin
-  static const textSecondary = Color(0xFF475569); // İkincil metin
-  static const textDisabled  = Color(0xFF94A3B8); // Devre dışı metin
+// Nötrler — açık
+background    = Color(0xFFF8FAFC);
+surface       = Color(0xFFFFFFFF);
+dashboardBackground = Color(0xFFF3F5F9);
+border        = Color(0xFFE2E8F0);
+textPrimary   = Color(0xFF0F172A);
+textSecondary = Color(0xFF475569);
+textDisabled  = Color(0xFF94A3B8);
 
-  // Durum badge arka planları (açık ton)
-  static const successBg     = Color(0xFFDCFCE7);
-  static const errorBg       = Color(0xFFFEE2E2);
-  static const warningBg     = Color(0xFFFEF3C7);
-}
+// Nötrler — koyu (lacivert-siyah yüzey)
+// dashboardBackground #0A101C · surface #121A2A · fill #1A2438
+// primary (ink) #E8EEF8 · actionButton = accent turuncu
+
+// Durum badge arka planları (açık ton)
+successBg     = Color(0xFFDCFCE7);
+errorBg       = Color(0xFFFEE2E2);
+warningBg     = Color(0xFFFEF3C7);
 ```
 
 ---

@@ -5,7 +5,7 @@ import 'app_colors.dart';
 import 'app_sizes.dart';
 import 'app_typography.dart';
 
-/// Monokrom + anlamlı renkli CTA stilleri.
+/// Marka lacivert + turuncu CTA stilleri.
 abstract final class AppButtonStyles {
   static final RoundedRectangleBorder shape = RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(AppSizes.buttonRadius),

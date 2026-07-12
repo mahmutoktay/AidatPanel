@@ -30,7 +30,9 @@ class AppTheme {
           ? ColorScheme.dark(
               primary: palette.primary,
               onPrimary: palette.datePickerSelectedDayForeground,
-              secondary: palette.textSecondary,
+              secondary: palette.accent,
+              onSecondary: Colors.white,
+              tertiary: palette.primaryLight,
               error: AppColors.error,
               surface: palette.surface,
               onSurface: palette.textPrimary,
@@ -38,7 +40,9 @@ class AppTheme {
           : ColorScheme.light(
               primary: palette.primary,
               onPrimary: Colors.white,
-              secondary: palette.textSecondary,
+              secondary: palette.accent,
+              onSecondary: Colors.white,
+              tertiary: palette.primaryLight,
               error: AppColors.error,
               surface: palette.surface,
               onSurface: palette.textPrimary,
