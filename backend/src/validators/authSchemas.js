@@ -19,6 +19,7 @@ const otpPurpose = z.enum([
   "manager_login",
   "resident_join",
   "resident_login",
+  "resident_phone_change",
 ]);
 
 export const authSchemas = {

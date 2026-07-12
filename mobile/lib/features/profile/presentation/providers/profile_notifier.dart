@@ -85,6 +85,9 @@ class ProfileNotifier extends Notifier<ProfileState> {
     String? email,
     String? phone,
     String? currentPassword,
+    String? otpCode,
+    bool includeEmail = true,
+    bool includePhone = true,
   }) async {
     if (state.isSaving) return false;
     state = state.copyWith(isSaving: true, clearError: true);
@@ -94,6 +97,9 @@ class ProfileNotifier extends Notifier<ProfileState> {
         email: email,
         phone: phone,
         currentPassword: currentPassword,
+        otpCode: otpCode,
+        includeEmail: includeEmail,
+        includePhone: includePhone,
       );
       await ref.read(authStateProvider.notifier).syncCachedUser(user);
       state = state.copyWith(isSaving: false, user: user, clearError: true);

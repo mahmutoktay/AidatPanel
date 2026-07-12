@@ -14,6 +14,7 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/form_step_actions.dart';
+import '../../../../shared/widgets/image_source_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/ticket_entity.dart';
@@ -43,9 +44,11 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
 
   Future<void> _pickImage() async {
     if (_submitting) return;
+    final source = await showImageSourceSheet(context);
+    if (source == null || !mounted) return;
     try {
       final file = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         maxWidth: 2048,
         maxHeight: 2048,
         imageQuality: 85,
@@ -59,8 +62,11 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
       });
     } catch (_) {
       if (!mounted) return;
+      final isCamera = source == ImageSource.camera;
       ref.read(toastProvider.notifier).show(
-            context.t.features.tickets.attachmentPickFailed,
+            isCamera
+                ? context.t.features.profile.avatarCameraError
+                : context.t.features.tickets.attachmentPickFailed,
             type: ToastType.error,
           );
     }
@@ -152,15 +158,11 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
             title: title,
             description: description,
             category: TicketCategory.request,
+            attachmentBytes: _pickedImageBytes,
+            attachmentFilename: _pickedImageName,
           );
       if (!mounted) return;
       if (ok) {
-        if (_pickedImageBytes != null) {
-          ref.read(toastProvider.notifier).show(
-                context.t.features.tickets.attachmentComingSoon,
-                type: ToastType.info,
-              );
-        }
         ref.read(toastProvider.notifier).show(
               context.t.features.tickets.createSuccess,
               type: ToastType.success,

@@ -19,6 +19,7 @@ import '../../features/profile/presentation/providers/profile_notifier.dart';
 import '../../l10n/strings.g.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'premium_bottom_sheet.dart';
+import 'image_source_sheet.dart';
 import 'toast_overlay.dart';
 
 /// Opens the custom profile photo editor bottom sheet.
@@ -186,6 +187,41 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
             .read(toastProvider.notifier)
             .show(
               context.t.features.profile.avatarPhotoProcessError,
+              type: ToastType.error,
+            );
+      }
+    }
+  }
+
+  Future<void> _pickFromSource() async {
+    if (_isProcessing) return;
+    final source = await showImageSourceSheet(context);
+    if (source == null || !mounted) return;
+    if (source == ImageSource.camera) {
+      await _pickFromCamera();
+    } else {
+      await _pickFromGallery();
+    }
+  }
+
+  Future<void> _pickFromCamera() async {
+    if (_isProcessing) return;
+    try {
+      final picked = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 2048,
+        maxHeight: 2048,
+        imageQuality: 90,
+      );
+      if (picked != null) {
+        await _handlePickedFile(picked);
+      }
+    } catch (e) {
+      if (mounted) {
+        ref
+            .read(toastProvider.notifier)
+            .show(
+              context.t.features.profile.avatarCameraError,
               type: ToastType.error,
             );
       }
@@ -426,7 +462,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
         return GestureDetector(
           onTap: _isProcessing || showCrop
               ? null
-              : _pickFromGallery,
+              : _pickFromSource,
           child: Container(
             width: viewportW,
             height: _kViewportH,
@@ -578,7 +614,7 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
           ),
           const SizedBox(height: 12),
           Text(
-            profileT.avatarCamera,
+            profileT.avatarChooseSource,
             style: AppTypography.caption.copyWith(
               color: Colors.white.withValues(alpha: 0.3),
               fontWeight: FontWeight.w600,

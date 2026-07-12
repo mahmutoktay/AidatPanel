@@ -1,3 +1,4 @@
+import { currencyDisplay } from "../utils/currencyDisplay.js";
 import { prisma } from "../config/db.js";
 import { logger } from "../config/logger.js";
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
@@ -46,7 +47,7 @@ export async function notifyResidentsOfNewExpense(buildingId, payload) {
       where: { id: buildingId },
       select: { currency: true },
     });
-    const currency = building?.currency ?? "TRY";
+    const currency = currencyDisplay(building?.currency);
     const categoryLabel = EXPENSE_CATEGORY_LABELS[category] ?? category;
     const amountStr =
       amount != null && !Number.isNaN(Number(amount)) && Number(amount) > 0

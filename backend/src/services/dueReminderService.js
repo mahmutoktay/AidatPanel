@@ -5,6 +5,8 @@ import { assertManagerOwnsBuilding } from "../utils/access.js";
 import { createForUsers } from "./notificationService.js";
 import { runPool } from "../utils/asyncPool.js";
 import { resolveListTake } from "../utils/listQuery.js";
+import { computeDuePaymentTotals } from "../utils/duePaymentTotals.js";
+import { currencyDisplay } from "../utils/currencyDisplay.js";
 
 const REMIND_CONCURRENCY = Math.max(
   1,
@@ -36,6 +38,7 @@ async function wasRemindedRecently(residentId, dueId) {
 
 /**
  * Binadaki PENDING/OVERDUE aidatlar için sakinlere hatırlatma (in-app + FCM).
+ * Tutar: sakinin seçilen aidatlardaki kalan borcu (ödemeler düşülmüş).
  * POST /api/v1/buildings/:buildingId/dues/remind
  */
 export async function remindBuildingDuesService(
@@ -69,7 +72,9 @@ export async function remindBuildingDuesService(
           resident: { select: { id: true } },
         },
       },
+      payments: { select: { amount: true } },
     },
+    orderBy: [{ year: "asc" }, { month: "asc" }, { id: "asc" }],
     take: resolveListTake(),
   });
 
@@ -83,48 +88,74 @@ export async function remindBuildingDuesService(
     };
   }
 
-  /** @type {Map<string, typeof dues[0]>} */
-  const firstDueByResident = new Map();
+  /** @type {Map<string, typeof dues>} */
+  const duesByResident = new Map();
   for (const due of dues) {
     const residentId = due.apartment?.resident?.id;
-    if (!residentId || firstDueByResident.has(residentId)) {
-      continue;
-    }
-    firstDueByResident.set(residentId, due);
+    if (!residentId) continue;
+    const list = duesByResident.get(residentId);
+    if (list) list.push(due);
+    else duesByResident.set(residentId, [due]);
   }
 
-  const jobs = [...firstDueByResident.entries()];
+  const jobs = [...duesByResident.entries()];
   let skippedCooldown = 0;
 
-  const outcomes = await runPool(jobs, REMIND_CONCURRENCY, async ([residentId, due]) => {
-    if (await wasRemindedRecently(residentId, due.id)) {
-      skippedCooldown += 1;
-      return {
-        skipped: true,
-        pushSent: 0,
-        pushFailed: 0,
-        pushSkipped: 0,
-      };
+  const outcomes = await runPool(
+    jobs,
+    REMIND_CONCURRENCY,
+    async ([residentId, residentDues]) => {
+      const primaryDue = residentDues[0];
+      if (await wasRemindedRecently(residentId, primaryDue.id)) {
+        skippedCooldown += 1;
+        return {
+          skipped: true,
+          pushSent: 0,
+          pushFailed: 0,
+          pushSkipped: 0,
+        };
+      }
+
+      let remaining = 0;
+      for (const d of residentDues) {
+        remaining += computeDuePaymentTotals(d).remainingAmount;
+      }
+      remaining = Math.max(0, Math.round(remaining * 100) / 100);
+      if (remaining <= 0) {
+        skippedCooldown += 1;
+        return {
+          skipped: true,
+          pushSent: 0,
+          pushFailed: 0,
+          pushSkipped: 0,
+        };
+      }
+
+      const amount = remaining.toFixed(2);
+      const currency = currencyDisplay(
+        primaryDue.currency ?? building.currency
+      );
+
+      return createForUsers([residentId], {
+        type: NOTIFICATION_TYPES.DUE_REMINDER,
+        code: NOTIFICATION_CODES.DUE_REMINDER_RESIDENT,
+        params: {
+          month: primaryDue.month,
+          year: primaryDue.year,
+          amount,
+          currency,
+        },
+        data: {
+          dueId: primaryDue.id,
+          buildingId,
+          apartmentId: primaryDue.apartmentId,
+          month: String(primaryDue.month),
+          year: String(primaryDue.year),
+          route: "/resident-dashboard",
+        },
+      });
     }
-
-    const amount =
-      due.amount != null ? Number(due.amount).toFixed(2) : "0.00";
-    const currency = due.currency ?? building.currency ?? "TRY";
-
-    return createForUsers([residentId], {
-      type: NOTIFICATION_TYPES.DUE_REMINDER,
-      code: NOTIFICATION_CODES.DUE_REMINDER_RESIDENT,
-      params: { month: due.month, year: due.year, amount, currency },
-      data: {
-        dueId: due.id,
-        buildingId,
-        apartmentId: due.apartmentId,
-        month: String(due.month),
-        year: String(due.year),
-        route: "/resident-dashboard",
-      },
-    });
-  });
+  );
 
   let reminded = 0;
   let pushSent = 0;

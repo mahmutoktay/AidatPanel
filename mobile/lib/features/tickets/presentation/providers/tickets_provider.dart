@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -152,6 +154,8 @@ class TicketsNotifier extends Notifier<TicketsState> {
     required String title,
     required String description,
     required TicketCategory category,
+    Uint8List? attachmentBytes,
+    String? attachmentFilename,
   }) async {
     if (_isCreating) return false;
     _isCreating = true;
@@ -161,6 +165,8 @@ class TicketsNotifier extends Notifier<TicketsState> {
         title: title,
         description: description,
         category: category,
+        attachmentBytes: attachmentBytes,
+        attachmentFilename: attachmentFilename,
       );
       state = state.copyWith(
         tickets: [created, ...state.tickets],

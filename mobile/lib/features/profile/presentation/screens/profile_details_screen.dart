@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
+import '../../../../core/utils/phone_utils.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/form_step_actions.dart';
@@ -14,6 +15,7 @@ import '../../../../shared/widgets/profile_avatar.dart';
 import '../../../../shared/widgets/profile_avatar_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/presentation/onboarding/widgets/phone_input_row.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../subscription/domain/entities/subscription_entity.dart';
 import '../../../subscription/presentation/providers/subscription_provider.dart';
@@ -21,11 +23,13 @@ import '../providers/profile_notifier.dart';
 import '../theme/profile_settings_ui.dart';
 import '../widgets/delete_account_sheet.dart';
 import '../widgets/logout_all_devices_tile.dart';
+import '../widgets/phone_change_otp_sheet.dart';
 
 /// Ayarlar → Profil bilgileri.
 ///
 /// FAZ 4: `GET /me` ile yükleme, `PUT /me` ile ad + telefon güncelleme.
 /// Görünüm: Ayarlar sekmesi ile aynı kart tabanlı dashboard dili.
+/// Sakin: e-posta yok; telefon değişiminde SMS OTP (şifre yok).
 class ProfileDetailsScreen extends ConsumerStatefulWidget {
   const ProfileDetailsScreen({super.key});
 
@@ -39,6 +43,10 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
+
+  /// Sakin — `PhoneInputRow` çıktısı (`05XXXXXXXXX` veya kısmi).
+  String _residentPhoneRaw = '';
+  int _phoneInputKey = 0;
 
   bool _editing = false;
 
@@ -79,6 +87,9 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     _nameController.text = user.name;
     _emailController.text = user.email ?? '';
     _phoneController.text = _phoneDigits(user.phone);
+    final national = _phoneDigits(user.phone);
+    _residentPhoneRaw = national.isEmpty ? '' : '0$national';
+    _phoneInputKey++;
     setState(() => _editing = true);
   }
 
@@ -87,21 +98,52 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     setState(() => _editing = false);
   }
 
+  String? _validateResidentPhoneInput(String raw) {
+    final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return 'phone_required';
+    if (digits.length != 11 || !digits.startsWith('0')) {
+      return 'phone_invalid_eleven_digits';
+    }
+    if (PhoneUtils.normalizeTrPhone(digits) == null) {
+      return 'phone_invalid';
+    }
+    return null;
+  }
+
+  String _phoneValidationMessage(String key) {
+    final t = context.t;
+    switch (key) {
+      case 'phone_required':
+        return t.features.profile.phoneRequired;
+      case 'phone_invalid_eleven_digits':
+        return t.features.auth.onboarding.phoneInvalidElevenDigits;
+      case 'phone_invalid':
+        return t.features.auth.onboarding.phoneInvalid;
+      default:
+        return t.validation.phoneInvalid;
+    }
+  }
+
   Future<void> _save() async {
     final t = context.t;
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    FocusScope.of(context).unfocus();
-
     final user = _currentUser;
     if (user == null) return;
+
+    final isResident = user.role == UserRole.resident;
+
+    if (isResident) {
+      await _saveResident(user);
+      return;
+    }
+
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    FocusScope.of(context).unfocus();
 
     final phone = _phoneController.text.trim();
     final newEmail = _emailController.text.trim();
 
     if (phone.isEmpty && newEmail.isEmpty) {
-      ref
-          .read(toastProvider.notifier)
-          .show(
+      ref.read(toastProvider.notifier).show(
             t.features.profile.contactRequired,
             type: ToastType.error,
           );
@@ -115,30 +157,69 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     if (isEmailChanged || isPhoneChanged) {
       currentPassword = await _showPasswordDialog(context);
       if (currentPassword == null || currentPassword.isEmpty) {
-        return; // User cancelled or didn't enter password
+        return;
       }
     }
 
-    final ok = await ref
-        .read(profileNotifierProvider.notifier)
-        .saveProfile(
+    final ok = await ref.read(profileNotifierProvider.notifier).saveProfile(
           name: _nameController.text.trim(),
           email: newEmail.isEmpty ? null : newEmail,
           phone: phone.isEmpty ? null : phone,
           currentPassword: currentPassword,
+          includeEmail: true,
+          includePhone: true,
         );
     if (!mounted) return;
+    _handleSaveResult(ok);
+  }
 
+  Future<void> _saveResident(UserEntity user) async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final phoneError = _validateResidentPhoneInput(_residentPhoneRaw);
+    if (phoneError != null) {
+      ref.read(toastProvider.notifier).show(
+            _phoneValidationMessage(phoneError),
+            type: ToastType.error,
+          );
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+
+    final newPhone = PhoneUtils.normalizeTrPhone(_residentPhoneRaw)!;
+    final currentPhone = _phoneDigits(user.phone);
+    final isPhoneChanged = newPhone != currentPhone;
+    final name = _nameController.text.trim();
+
+    String? otpCode;
+    if (isPhoneChanged) {
+      otpCode = await PhoneChangeOtpSheet.show(context, phone10: newPhone);
+      if (otpCode == null || otpCode.length != 6) return;
+    }
+
+    final ok = await ref.read(profileNotifierProvider.notifier).saveProfile(
+          name: name,
+          phone: isPhoneChanged ? newPhone : null,
+          otpCode: otpCode,
+          includeEmail: false,
+          includePhone: isPhoneChanged,
+        );
+    if (!mounted) return;
+    _handleSaveResult(ok);
+  }
+
+  void _handleSaveResult(bool ok) {
+    final t = context.t;
     if (ok) {
-      ref
-          .read(toastProvider.notifier)
-          .show(t.features.profile.profileUpdated, type: ToastType.success);
+      ref.read(toastProvider.notifier).show(
+            t.features.profile.profileUpdated,
+            type: ToastType.success,
+          );
       setState(() => _editing = false);
     } else {
       final error = ref.read(profileNotifierProvider).error;
-      ref
-          .read(toastProvider.notifier)
-          .show(
+      ref.read(toastProvider.notifier).show(
             error ?? t.features.profile.profileUpdateFailed,
             type: ToastType.error,
           );
@@ -155,12 +236,15 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
           backgroundColor: ProfileSettingsUi.background,
-          title: Text(t.features.profile.securityVerificationTitle, style: ProfileSettingsUi.title),
+          title: Text(
+            t.features.profile.securityVerificationTitle,
+            style: ProfileSettingsUi.title,
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                t.features.profile.securityVerificationMessage,
+                t.features.profile.securityVerificationMessageManager,
                 style: ProfileSettingsUi.fieldValue,
               ),
               const SizedBox(height: 16),
@@ -276,9 +360,8 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
       );
     }
 
-    final roleLabel = user.role == UserRole.manager
-        ? t.common.manager
-        : t.common.resident;
+    final isResident = user.role == UserRole.resident;
+    final roleLabel = isResident ? t.common.resident : t.common.manager;
     final languageLabel = user.language == 'en' ? 'English' : t.common.turkish;
 
     final content = Form(
@@ -315,50 +398,65 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                       autofillHints: const [AutofillHints.name],
                       validator: (value) => InputValidators.validateName(value),
                     ),
-                    _InlineField(
-                      icon: Icons.email_outlined,
-                      label: t.features.profile.email,
-                      controller: _emailController,
-                      enabled: !profileState.isSaving,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.email],
-                      validator: (value) {
-                        final raw = value?.trim() ?? '';
-                        if (raw.isEmpty) return null;
-                        final key = InputValidators.validateEmail(raw);
-                        if (key == 'email_required') return null;
-                        if (key == null) return null;
-                        return t.validation.emailInvalid;
-                      },
-                      showClearSuffix: true,
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    _InlineField(
-                      icon: Icons.phone_outlined,
-                      label: t.features.profile.phone,
-                      controller: _phoneController,
-                      enabled: !profileState.isSaving,
-                      keyboardType: TextInputType.number,
-                      textInputAction: TextInputAction.done,
-                      autofillHints: const [
-                        AutofillHints.telephoneNumberNational,
-                      ],
-                      maxLength: 10,
-                      prefixText: '+90 ',
-                      helperText: t.features.profile.phoneOptionalHint,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      showClearSuffix: true,
-                      onChanged: (_) => setState(() {}),
-                      onSubmitted: (_) => _save(),
-                      validator: (value) {
-                        final raw = value?.trim() ?? '';
-                        if (raw.isEmpty) return null;
-                        final key = InputValidators.validatePhone(raw);
-                        if (key == null) return null;
-                        return t.validation.phoneInvalid;
-                      },
-                    ),
+                    if (!isResident)
+                      _InlineField(
+                        icon: Icons.email_outlined,
+                        label: t.features.profile.email,
+                        controller: _emailController,
+                        enabled: !profileState.isSaving,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.email],
+                        validator: (value) {
+                          final raw = value?.trim() ?? '';
+                          if (raw.isEmpty) return null;
+                          final key = InputValidators.validateEmail(raw);
+                          if (key == 'email_required') return null;
+                          if (key == null) return null;
+                          return t.validation.emailInvalid;
+                        },
+                        showClearSuffix: true,
+                        onChanged: (_) => setState(() {}),
+                      ),
+                    if (isResident)
+                      _ResidentPhoneEditField(
+                        key: ValueKey('resident-phone-$_phoneInputKey'),
+                        label: t.features.profile.phone,
+                        enabled: !profileState.isSaving,
+                        initialPhone: _residentPhoneRaw.isEmpty
+                            ? null
+                            : _residentPhoneRaw,
+                        onChanged: (v) =>
+                            setState(() => _residentPhoneRaw = v),
+                      )
+                    else
+                      _InlineField(
+                        icon: Icons.phone_outlined,
+                        label: t.features.profile.phone,
+                        controller: _phoneController,
+                        enabled: !profileState.isSaving,
+                        keyboardType: TextInputType.number,
+                        textInputAction: TextInputAction.done,
+                        autofillHints: const [
+                          AutofillHints.telephoneNumberNational,
+                        ],
+                        maxLength: 10,
+                        prefixText: '+90 ',
+                        helperText: t.features.profile.phoneOptionalHint,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        showClearSuffix: true,
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: (_) => _save(),
+                        validator: (value) {
+                          final raw = value?.trim() ?? '';
+                          if (raw.isEmpty) return null;
+                          final key = InputValidators.validatePhone(raw);
+                          if (key == null) return null;
+                          return t.validation.phoneInvalid;
+                        },
+                      ),
                   ]
                 : [
                     _InfoTile(
@@ -366,14 +464,15 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                       label: t.features.profile.fullName,
                       value: user.name,
                     ),
-                    _InfoTile(
-                      icon: Icons.email_outlined,
-                      label: t.features.profile.email,
-                      value: (user.email != null && user.email!.isNotEmpty)
-                          ? user.email!
-                          : t.features.profile.notProvided,
-                      isEmpty: user.email == null || user.email!.isEmpty,
-                    ),
+                    if (!isResident)
+                      _InfoTile(
+                        icon: Icons.email_outlined,
+                        label: t.features.profile.email,
+                        value: (user.email != null && user.email!.isNotEmpty)
+                            ? user.email!
+                            : t.features.profile.notProvided,
+                        isEmpty: user.email == null || user.email!.isEmpty,
+                      ),
                     _InfoTile(
                       icon: Icons.phone_outlined,
                       label: t.features.profile.phone,
@@ -495,6 +594,60 @@ String _formatPhone(String phone) {
   final p = digits;
   return '+90 ${p.substring(0, 3)} ${p.substring(3, 6)} '
       '${p.substring(6, 8)} ${p.substring(8, 10)}';
+}
+
+/// Sakin telefon düzenleme — giriş ekranındaki `PhoneInputRow` segmentasyonu.
+class _ResidentPhoneEditField extends StatelessWidget {
+  final String label;
+  final bool enabled;
+  final String? initialPhone;
+  final ValueChanged<String> onChanged;
+
+  const _ResidentPhoneEditField({
+    super.key,
+    required this.label,
+    required this.enabled,
+    required this.onChanged,
+    this.initialPhone,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingM,
+        vertical: 6,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 40),
+            child: Text(label, style: ProfileSettingsUi.fieldLabel),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.phone_outlined,
+                size: ProfileSettingsUi.iconSize,
+                color: ProfileSettingsUi.ink,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: PhoneInputRow(
+                  enabled: enabled,
+                  initialPhone: initialPhone,
+                  onChanged: onChanged,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Avatar solda; sağda abonelik özeti ve hesap oluşturulma tarihi.

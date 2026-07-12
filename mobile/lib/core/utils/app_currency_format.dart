@@ -8,6 +8,14 @@ abstract final class AppCurrencyFormat {
   static const String symbol = '₺';
   static const String isoCode = 'TRY';
 
+  /// API/DB ISO kodunu UI sembolüne çevirir (`TRY` → `₺`).
+  static String displaySymbol(String? code) {
+    if (code == null || code.trim().isEmpty) return symbol;
+    final normalized = code.trim().toUpperCase();
+    if (normalized == 'TRY' || normalized == 'TL') return symbol;
+    return code.trim();
+  }
+
   static NumberFormat standard({
     String? languageCode,
     int decimalDigits = 2,
@@ -27,4 +35,15 @@ abstract final class AppCurrencyFormat {
         languageCode: languageCode,
         decimalDigits: decimalDigits,
       ).format(value);
+
+  /// `1250.50 TRY` benzeri ham metinleri `₺` ile birleştirir.
+  static String formatWithCode(
+    num value,
+    String? currencyCode, {
+    String? languageCode,
+    int decimalDigits = 2,
+  }) {
+    final formatted = value.toStringAsFixed(decimalDigits);
+    return '$formatted ${displaySymbol(currencyCode)}';
+  }
 }

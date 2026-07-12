@@ -21,6 +21,12 @@ export const meSchemas = {
         phone: profilePhone,
         language: z.enum(["tr", "en"]).optional(),
         currentPassword: z.string().optional(),
+        /** Sakin telefon değişiminde SMS OTP (şifre yerine). */
+        otpCode: z
+          .string()
+          .length(6, "Doğrulama kodu 6 haneli olmalıdır")
+          .regex(/^\d{6}$/, "Doğrulama kodu yalnızca rakam içermelidir")
+          .optional(),
       })
       .refine(
         (d) =>

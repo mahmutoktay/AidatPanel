@@ -3,8 +3,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- Makbuz yalnızca galeri (image_picker gallery). CAMERA Play'de kamera
-         zorunlu sayılır → tablet/Chromebook/TV/AAOS cihazları elenir. -->
+    <!-- Galeri + kamera (profil / talep). camera feature required=false →
+         Play filtrelemesi tablet/Chromebook'ları elemez. -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />

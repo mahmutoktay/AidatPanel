@@ -59,4 +59,10 @@ export const ticketSchemas = {
       status: ticketStatusEnum,
     }),
   },
+
+  uploadAttachment: {
+    params: z.object({
+      ticketId: z.string().uuid("Geçerli bir talep ID'si giriniz"),
+    }),
+  },
 };

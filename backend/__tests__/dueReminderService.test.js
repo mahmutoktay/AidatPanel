@@ -44,6 +44,7 @@ const sampleDue = {
   year: 2026,
   amount: 500,
   currency: "TRY",
+  payments: [],
   apartment: {
     id: "a1",
     number: "3",
@@ -149,6 +150,49 @@ describe("dueReminderService", () => {
         pushFailed: 0,
         pushSkipped: 0,
       });
+      expect(createForUsersMock).not.toHaveBeenCalled();
+    });
+
+    test("uses remaining debt after partial payment, not invoice amount", async () => {
+      prisma.due.findMany.mockResolvedValue([
+        {
+          ...sampleDue,
+          amount: 1000,
+          payments: [{ amount: 500 }],
+        },
+      ]);
+      prisma.notification.findFirst.mockResolvedValue(null);
+
+      await remindBuildingDuesService(buildingId, managerId, {
+        dueIds: [dueId],
+      });
+
+      expect(createForUsersMock).toHaveBeenCalledWith(
+        [residentId],
+        expect.objectContaining({
+          params: expect.objectContaining({
+            amount: "500.00",
+            currency: "₺",
+          }),
+        })
+      );
+    });
+
+    test("skips when remaining debt is zero", async () => {
+      prisma.due.findMany.mockResolvedValue([
+        {
+          ...sampleDue,
+          amount: 500,
+          payments: [{ amount: 500 }],
+        },
+      ]);
+      prisma.notification.findFirst.mockResolvedValue(null);
+
+      const result = await remindBuildingDuesService(buildingId, managerId, {
+        dueIds: [dueId],
+      });
+
+      expect(result.reminded).toBe(0);
       expect(createForUsersMock).not.toHaveBeenCalled();
     });
   });

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../../../../core/network/paginated_list_result.dart';
 import '../entities/ticket_entity.dart';
 
@@ -24,6 +26,8 @@ abstract class TicketRepository {
     required String title,
     required String description,
     required TicketCategory category,
+    Uint8List? attachmentBytes,
+    String? attachmentFilename,
   });
 
   Future<TicketEntity> addManagerUpdate({

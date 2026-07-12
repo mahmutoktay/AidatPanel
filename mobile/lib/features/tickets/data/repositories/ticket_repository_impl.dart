@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/paginated_list_result.dart';
 import '../../domain/entities/ticket_entity.dart';
@@ -82,9 +84,11 @@ class TicketRepositoryImpl implements TicketRepository {
     required String title,
     required String description,
     required TicketCategory category,
+    Uint8List? attachmentBytes,
+    String? attachmentFilename,
   }) async {
     try {
-      final model = await _remoteDataSource.createTicket(
+      var model = await _remoteDataSource.createTicket(
         apartmentId,
         CreateTicketRequest(
           title: title.trim(),
@@ -92,6 +96,16 @@ class TicketRepositoryImpl implements TicketRepository {
           category: TicketModel.categoryToApi(category),
         ),
       );
+      if (attachmentBytes != null && attachmentBytes.isNotEmpty) {
+        final name = (attachmentFilename != null && attachmentFilename.isNotEmpty)
+            ? attachmentFilename
+            : 'ticket.jpg';
+        model = await _remoteDataSource.uploadTicketAttachment(
+          ticketId: model.id,
+          bytes: attachmentBytes,
+          filename: name,
+        );
+      }
       return model.toEntity();
     } on ApiException {
       rethrow;

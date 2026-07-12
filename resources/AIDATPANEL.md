@@ -324,12 +324,18 @@ POST   /api/v1/auth/logout            # FCM token temizler
 POST   /api/v1/auth/logout-all-devices
 POST   /api/v1/auth/join              # Legacy: email+şifre + davet kodu
 POST   /api/v1/auth/invite/validate   # Public: { inviteCode } → { valid, label }
-POST   /api/v1/auth/otp/send          # purpose: resident_login | resident_join | manager_*
+POST   /api/v1/auth/otp/send          # purpose: resident_login | resident_join | resident_phone_change | manager_*
 POST   /api/v1/auth/otp/verify
 POST   /api/v1/auth/otp/complete-resident-join  # phone + name + inviteCode (OTP sonrası)
 POST   /api/v1/auth/forgot-password
 POST   /api/v1/auth/reset-password
 ```
+
+**Yönetici identifier-öncelikli akış (mobil):**
+1. `POST /auth/check-identifier` `{ identifier: email|phone, purpose: "manager_identifier" }` → `{ exists: true|false }`
+   - E-posta başka rolde doluysa `409`
+2. Kayıtlıysa (`exists: true`) → `POST /auth/login` (şifre)
+3. Yeniyse (`exists: false`) → isim + şifre → `POST /auth/register` + `POST /auth/login`
 
 **Yönetici identifier-öncelikli akış (mobil):**
 1. `POST /auth/check-identifier` `{ identifier: email|phone, purpose: "manager_identifier" }` → `{ exists: true|false }`
@@ -419,9 +425,11 @@ GET    /api/v1/me/expenses                  # Sakin (okuma)
 GET    /api/v1/buildings/:id/tickets
 GET    /api/v1/tickets/:id
 POST   /api/v1/apartments/:apartmentId/tickets
+POST   /api/v1/tickets/:id/attachment   # multipart file (JPG/PNG, max 5MB) — sakin, OPEN talep
 POST   /api/v1/tickets/:id/updates
 PATCH  /api/v1/tickets/:id/status
 GET    /api/v1/me/tickets
+# Ticket.attachmentPath → yanıtta attachmentUrl: /uploads/tickets/{filename}
 ```
 
 **TicketStatus geçişleri** (`PATCH .../status`, yalnızca MANAGER):
@@ -447,6 +455,8 @@ GET    /api/v1/me/payment-collection
 
 `GET /dekonts/:id` yanıtına `buildingName` eklenir (site altı bloklarda `Site · Blok`, aksi halde bina adı). Yönetici detay UI’da `Bina · Daire N · Yükleyen` tek satır bağlamı için kullanılır.
 
+`GET /dekonts/:id` yanıtına `buildingName` eklenir (site altı bloklarda `Site · Blok`, aksi halde bina adı). Yönetici detay UI’da `Bina · Daire N · Yükleyen` tek satır bağlamı için kullanılır.
+
 Upload (multipart): `file` + `dueId` (tek) ve/veya `dueIds` (JSON dizi). Çoklu aidat `DekontDueAllocation` ile saklanır.
 Onay (`APPROVE`): OCR tutarı seçili aidatlara FIFO dağıtılır; her dilim bir `DuePayment`. Tüm hedefler kapanırsa `PAYMENT_APPLIED`, aksi halde `PAYMENT_PARTIAL`.
 Review body: `{ decision, note?, dueId?, dueIds?, amount? }`.
@@ -464,7 +474,7 @@ PUT    /api/v1/me/fcm-token
 ### Profile (`/api/v1/me`)
 ```
 GET    /api/v1/me
-PUT    /api/v1/me               # name, email, phone, language (email/phone değişimi → currentPassword)
+PUT    /api/v1/me               # name, email?, phone?, language; yönetici email/phone → currentPassword; sakin phone → otpCode (SMS)
 PUT    /api/v1/me/password
 PUT    /api/v1/me/language
 DELETE /api/v1/me               # KVKK hesap kapatma

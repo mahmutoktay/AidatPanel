@@ -305,6 +305,11 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 - [x] Sakin Hızlı İşlemler: 2×2 ayrık renkli kartlar (Aidat / Talepler / Giderler / Duyurular) + `ResidentAnnouncementsScreen`
 - [x] Dekont detay: OCR polling (7sn) + tek durum kartı (çelişkili notice kutuları kaldırıldı)
 - [x] Yönetici auth: deneyim adımı kaldırıldı; e-posta/telefon → `manager_identifier` exists dallanması (giriş veya isim+şifre kayıt)
+- [x] Profil/talep: Kamera|Galeri seçici; talep `attachmentPath` + `POST /tickets/:id/attachment`
+- [x] Bildirim: liste gövdesi kısaltılmıyor; tıklamada önce sheet (başlık+metin); ilgili kayıt sheet butonuyla
+- [x] Sakin profil: e-posta gizli; telefon değişiminde SMS OTP (`resident_phone_change` + `otpCode`)
+- [x] Para birimi gösterimi ₺ (`currencyDisplay` / `AppCurrencyFormat.displaySymbol`); hatırlatmada kalan borç
+- [x] Sakin «Ödeme Yap» butonu yüksekliği 48dp (`buttonHeightSmall`)
 
 ---
 

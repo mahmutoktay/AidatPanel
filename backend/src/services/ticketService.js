@@ -15,6 +15,11 @@ import {
   buildListResponse,
   mergeCreatedAtCursorWhere,
 } from "../utils/listQuery.js";
+import fs from "fs/promises";
+import path from "path";
+import sharp from "sharp";
+
+const TICKET_ATTACHMENT_DIR = "uploads/tickets";
 
 /** Yönetici akışı: Açık→Onaylandı/Reddedildi; Onaylandı→Yapıldı; Geri Al ters geçişleri. */
 const ALLOWED_STATUS_TRANSITIONS = {
@@ -91,9 +96,13 @@ const ticketIncludeList = {
 };
 
 function formatTicketRow(ticket) {
-  const { apartment, user, ...rest } = ticket;
+  const { apartment, user, attachmentPath, ...rest } = ticket;
   return {
     ...rest,
+    attachmentPath: attachmentPath ?? null,
+    attachmentUrl: attachmentPath
+      ? `/uploads/tickets/${attachmentPath}`
+      : null,
     apartmentNumber: apartment?.number ?? null,
     apartment: apartment
       ? {
@@ -329,6 +338,76 @@ export async function changeTicketStatusService(ticketId, managerId, nextStatus)
       }
     );
   }
+
+  return formatTicketRow(updated);
+}
+
+/**
+ * Talep görsel eki — yalnızca talep sahibi, OPEN durumda.
+ * @param {string} ticketId
+ * @param {string} userId
+ * @param {Object} file — multer memory file
+ */
+export async function uploadTicketAttachmentService(ticketId, userId, file) {
+  if (!file) {
+    throw new HttpError(400, "Lütfen bir dosya yükleyin.");
+  }
+
+  const allowedMimeTypes = ["image/jpeg", "image/png"];
+  if (!allowedMimeTypes.includes(file.mimetype)) {
+    throw new HttpError(
+      400,
+      "Desteklenmeyen dosya türü. Sadece JPG veya PNG yükleyebilirsiniz."
+    );
+  }
+
+  const maxSizeBytes = 5 * 1024 * 1024;
+  if (file.size > maxSizeBytes) {
+    throw new HttpError(400, "Dosya boyutu çok büyük. Maksimum 5MB yükleyebilirsiniz.");
+  }
+
+  const ticket = await prisma.ticket.findUnique({
+    where: { id: ticketId },
+    select: {
+      id: true,
+      userId: true,
+      status: true,
+      attachmentPath: true,
+    },
+  });
+
+  if (!ticket || ticket.userId !== userId) {
+    throw new HttpError(404, "Talep bulunamadı.");
+  }
+
+  if (ticket.status !== "OPEN") {
+    throw new HttpError(409, "Yalnızca açık taleplere görsel eklenebilir.");
+  }
+
+  await fs.mkdir(TICKET_ATTACHMENT_DIR, { recursive: true });
+
+  if (ticket.attachmentPath) {
+    const oldPath = path.join(TICKET_ATTACHMENT_DIR, ticket.attachmentPath);
+    await fs.unlink(oldPath).catch(() => {});
+  }
+
+  const filename = `ticket-${ticketId}-${Date.now()}.jpg`;
+  const destPath = path.join(TICKET_ATTACHMENT_DIR, filename);
+
+  await sharp(file.buffer)
+    .rotate()
+    .resize(2048, 2048, {
+      fit: "inside",
+      withoutEnlargement: true,
+    })
+    .jpeg({ quality: 85 })
+    .toFile(destPath);
+
+  const updated = await prisma.ticket.update({
+    where: { id: ticketId },
+    data: { attachmentPath: filename },
+    include: ticketIncludeList,
+  });
 
   return formatTicketRow(updated);
 }

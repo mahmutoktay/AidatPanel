@@ -24,7 +24,7 @@ export const DUE_REMINDER_RESIDENT = {
   key: "due_reminder_resident",
   title: "Aidat Ödeme Hatırlatması",
   body: (month, year, amount, currency) =>
-    `${month}/${year} dönemi aidat tutarınız (${amount} ${currency}) henüz ödenmemiştir. Lütfen ödemenizi gerçekleştiriniz.`,
+    `${month}/${year} dönemi kalan aidat borcunuz (${amount} ${currency === "TRY" || currency === "TL" ? "₺" : currency || "₺"}) henüz ödenmemiştir. Lütfen ödemenizi gerçekleştiriniz.`,
 };
 
 export const DEKONT_RECEIVED_MANAGER = {

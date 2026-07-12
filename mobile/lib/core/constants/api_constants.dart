@@ -162,6 +162,8 @@ class ApiConstants {
       '$apiVersion/tickets/$ticketId/updates';
   static String ticketStatus(String ticketId) =>
       '$apiVersion/tickets/$ticketId/status';
+  static String ticketAttachment(String ticketId) =>
+      '$apiVersion/tickets/$ticketId/attachment';
   static const String myTickets = '$apiVersion/me/tickets';
 
   // Notifications endpoints

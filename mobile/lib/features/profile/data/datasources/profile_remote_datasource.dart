@@ -15,6 +15,9 @@ abstract class ProfileRemoteDataSource {
     String? email,
     String? phone,
     String? currentPassword,
+    String? otpCode,
+    bool includeEmail = true,
+    bool includePhone = true,
   });
 
   /// `PUT /api/v1/me/language` — bildirim dili (tr | en).
@@ -64,23 +67,36 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     String? email,
     String? phone,
     String? currentPassword,
+    String? otpCode,
+    bool includeEmail = true,
+    bool includePhone = true,
   }) async {
     final body = <String, dynamic>{'name': name.trim()};
-    final trimmedPhone = phone?.trim();
-    if (trimmedPhone != null && trimmedPhone.isNotEmpty) {
-      body['phone'] = trimmedPhone.startsWith('+90') ? trimmedPhone : '+90$trimmedPhone';
-    } else {
-      body['phone'] = null;
+
+    if (includePhone) {
+      final trimmedPhone = phone?.trim();
+      if (trimmedPhone != null && trimmedPhone.isNotEmpty) {
+        // Backend `normalizeTrPhone` — 10 hane `5xxxxxxxxx` veya `+90...`.
+        body['phone'] = trimmedPhone;
+      } else {
+        body['phone'] = null;
+      }
     }
-    
-    final trimmedEmail = email?.trim();
-    if (trimmedEmail != null && trimmedEmail.isNotEmpty) {
-      body['email'] = trimmedEmail;
-    } else {
-      body['email'] = null;
+
+    if (includeEmail) {
+      final trimmedEmail = email?.trim();
+      if (trimmedEmail != null && trimmedEmail.isNotEmpty) {
+        body['email'] = trimmedEmail;
+      } else {
+        body['email'] = null;
+      }
     }
+
     if (currentPassword != null && currentPassword.isNotEmpty) {
       body['currentPassword'] = currentPassword;
+    }
+    if (otpCode != null && otpCode.isNotEmpty) {
+      body['otpCode'] = otpCode;
     }
 
     final response = await _dioClient.put(

@@ -8,6 +8,9 @@ abstract class ProfileRepository {
     String? email,
     String? phone,
     String? currentPassword,
+    String? otpCode,
+    bool includeEmail = true,
+    bool includePhone = true,
   });
 
   Future<UserEntity> updateLanguage(String languageCode);

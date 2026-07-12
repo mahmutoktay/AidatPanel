@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/month_labels.dart';
+import '../../../../core/utils/app_currency_format.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
@@ -372,7 +373,7 @@ class _SummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${t.total}: ${summary.totalAmount.toStringAsFixed(2)} ${summary.currency}',
+            '${t.total}: ${AppCurrencyFormat.formatWithCode(summary.totalAmount, summary.currency)}',
             style: AppTypography.h4.copyWith(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w800,

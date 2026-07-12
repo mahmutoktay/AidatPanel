@@ -134,13 +134,19 @@ class ResidentDebtSummaryCard extends StatelessWidget {
             ],
             const SizedBox(height: AppSizes.spacingM),
             SizedBox(
-              height: AppSizes.buttonHeightPrimary,
+              height: AppSizes.buttonHeightSmall,
               child: FilledButton(
                 onPressed: featuredDue == null
                     ? null
                     : () => context.push(
                           '/resident-dashboard/payment?dueId=${featuredDue.id}',
                         ),
+                style: FilledButton.styleFrom(
+                  textStyle: AppTypography.button.copyWith(fontSize: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.spacingM,
+                  ),
+                ),
                 child: Text(context.t.common.payDue),
               ),
             ),

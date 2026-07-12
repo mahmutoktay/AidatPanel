@@ -100,12 +100,12 @@ export const NOTIFICATION_CATALOG = Object.freeze({
     tr: Object.freeze({
       title: () => "Aidat Ödeme Hatırlatması",
       body: (params) =>
-        `${period(params)} dönemi aidat tutarınız (${text(params, "amount", "0.00")} ${text(params, "currency", "TRY")}) henüz ödenmemiştir. Lütfen ödemenizi gerçekleştiriniz.`,
+        `${period(params)} dönemi kalan aidat borcunuz (${text(params, "amount", "0.00")} ${text(params, "currency", "₺")}) henüz ödenmemiştir. Lütfen ödemenizi gerçekleştiriniz.`,
     }),
     en: Object.freeze({
       title: () => "Due Payment Reminder",
       body: (params) =>
-        `Your due amount for ${period(params)} (${text(params, "amount", "0.00")} ${text(params, "currency", "TRY")}) has not been paid yet. Please proceed with your payment.`,
+        `Your remaining due for ${period(params)} (${text(params, "amount", "0.00")} ${text(params, "currency", "₺")}) has not been paid yet. Please proceed with your payment.`,
     }),
   }),
 

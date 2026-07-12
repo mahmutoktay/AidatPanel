@@ -27,6 +27,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
     String? email,
     String? phone,
     String? currentPassword,
+    String? otpCode,
+    bool includeEmail = true,
+    bool includePhone = true,
   }) async {
     try {
       final data = await _remoteDataSource.updateMe(
@@ -34,6 +37,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
         email: email,
         phone: phone,
         currentPassword: currentPassword,
+        otpCode: otpCode,
+        includeEmail: includeEmail,
+        includePhone: includePhone,
       );
       return data.toEntity();
     } on ApiException {

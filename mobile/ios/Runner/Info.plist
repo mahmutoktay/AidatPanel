@@ -71,10 +71,12 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Profil fotoğrafı ve talep ekleri için kamerayla fotoğraf çekmemiz gerekiyor.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Dekont görsellerini telefonunuzun galerisine kaydetmek için bu izne ihtiyacımız var.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Dekont yüklemek için fotoğraflarınıza erişmemiz gerekiyor.</string>
+	<string>Profil fotoğrafı, talep ekleri ve dekont yüklemek için fotoğraflarınıza erişmemiz gerekiyor.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

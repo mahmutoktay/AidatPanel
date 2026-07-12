@@ -28,7 +28,9 @@ class ResidentDueLedgerRow extends StatelessWidget {
       due: due,
       buildingId: null,
       monthLabel: monthLabel,
-      currencySymbol: due.currency.isNotEmpty ? due.currency : '₺',
+      currencySymbol: due.currency.isNotEmpty
+          ? AppCurrencyFormat.displaySymbol(due.currency)
+          : AppCurrencyFormat.symbol,
       onCollectPayment: null,
     );
   }

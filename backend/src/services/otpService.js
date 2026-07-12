@@ -27,6 +27,8 @@ const REGISTER_PURPOSES = new Set([
   "manager_register",
   "resident_join",
 ]);
+/** Profil telefon güncelleme — OTP, yeni numaraya gider; JWT üretmez. */
+const PHONE_CHANGE_PURPOSES = new Set(["resident_phone_change"]);
 
 function hashOtp(code) {
   return crypto.createHash("sha256").update(String(code).trim(), "utf8").digest("hex");
@@ -122,7 +124,11 @@ async function purgeExpiredOtps(contact, purpose) {
 export async function sendOtpService({ phone, email, purpose, payload }) {
   const contact = resolveOtpContact({ phone, email });
 
-  const allPurposes = new Set([...LOGIN_PURPOSES, ...REGISTER_PURPOSES]);
+  const allPurposes = new Set([
+    ...LOGIN_PURPOSES,
+    ...REGISTER_PURPOSES,
+    ...PHONE_CHANGE_PURPOSES,
+  ]);
   if (!allPurposes.has(purpose)) {
     throw new HttpError(400, "Geçersiz doğrulama isteği.");
   }
@@ -157,6 +163,19 @@ export async function sendOtpService({ phone, email, purpose, payload }) {
           ? "Bu e-posta adresi zaten kullanılıyor."
           : "Bu telefon numarası zaten kullanılıyor."
       );
+    }
+  }
+
+  if (purpose === "resident_phone_change") {
+    if (!contact.phone) {
+      throw new HttpError(400, "Telefon numarası gereklidir.");
+    }
+    const existing = await prisma.user.findFirst({
+      where: { phone: contact.phone, role: "RESIDENT", deletedAt: null },
+      select: { id: true },
+    });
+    if (existing) {
+      throw new HttpError(409, "Bu telefon numarası zaten kullanılıyor.");
     }
   }
 
@@ -418,6 +437,10 @@ export async function verifyOtpService(body) {
         inviteCode,
       }
     );
+  } else if (purpose === "resident_phone_change") {
+    // Kod doğrulandı; asıl tüketim PUT /me ile yapılır (çift kullanım yok).
+    // Burada yalnızca istemciye onay döner — kayıt henüz usedAt işaretlenmez.
+    return { verified: true };
   } else {
     throw new HttpError(400, "Geçersiz doğrulama isteği.");
   }
@@ -428,6 +451,71 @@ export async function verifyOtpService(body) {
   });
 
   return result;
+}
+
+/**
+ * Profil telefon güncellemesi — geçerli OTP'yi doğrular ve tüketir.
+ * `PUT /me` içinde sakin telefon değişiminde çağrılır.
+ */
+export async function consumePhoneChangeOtp({ phone, code }) {
+  const contact = resolveOtpContact({ phone });
+  if (!contact.phone) {
+    throw new HttpError(400, "Geçerli bir telefon numarası giriniz.");
+  }
+  if (!code || String(code).trim().length !== 6) {
+    throw new HttpError(400, "Doğrulama kodu 6 haneli olmalıdır.");
+  }
+
+  const purpose = "resident_phone_change";
+  const record = await prisma.phoneOtpToken.findFirst({
+    where: {
+      phone: contact.phone,
+      purpose,
+      usedAt: null,
+      expiresAt: { gt: new Date() },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (!record) {
+    throw new HttpError(400, "Kod süresi dolmuş veya geçersiz. Yeni kod isteyin.");
+  }
+
+  if (record.attempts >= MAX_ATTEMPTS) {
+    throw new HttpError(429, "Çok fazla deneme yaptınız. Yeni kod isteyin.");
+  }
+
+  const twilioVerify =
+    record.payload &&
+    typeof record.payload === "object" &&
+    record.payload.twilioVerify === true;
+
+  if (twilioVerify) {
+    const check = await checkTwilioVerification(contact.phone, code);
+    if (!check.ok) {
+      await prisma.phoneOtpToken.update({
+        where: { id: record.id },
+        data: { attempts: { increment: 1 } },
+      });
+      throw new HttpError(400, "Kod yanlış. Tekrar deneyin.");
+    }
+  } else {
+    const codeHash = hashOtp(code);
+    if (codeHash !== record.tokenHash) {
+      await prisma.phoneOtpToken.update({
+        where: { id: record.id },
+        data: { attempts: { increment: 1 } },
+      });
+      throw new HttpError(400, "Kod yanlış. Tekrar deneyin.");
+    }
+  }
+
+  await prisma.phoneOtpToken.update({
+    where: { id: record.id },
+    data: { usedAt: new Date() },
+  });
+
+  return { phone: contact.phone };
 }
 
 /**

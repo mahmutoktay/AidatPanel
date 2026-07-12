@@ -91,6 +91,7 @@ app.use("/api/v1/subscription", subscriptionRoutes);
 app.use("/api/v1/admin", adminRoutes);
 
 app.use("/uploads/avatars", express.static("uploads/avatars"));
+app.use("/uploads/tickets", express.static("uploads/tickets"));
 
 // 404 Handler - Tanımlanmamış route'lar
 app.use(notFoundHandler);
@@ -119,6 +120,7 @@ async function bootstrap() {
   initFirebase();
   await ensureDekontStorageDirs();
   await fs.promises.mkdir("uploads/avatars", { recursive: true });
+  await fs.promises.mkdir("uploads/tickets", { recursive: true });
   server = app.listen(port, () => {
     logger.info("Server started", { port });
   });

@@ -5,6 +5,7 @@ import {
   createTicketService,
   addTicketUpdateService,
   changeTicketStatusService,
+  uploadTicketAttachmentService,
 } from "../services/ticketService.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -44,6 +45,19 @@ export const createTicket = asyncHandler(async (req, res) => {
   res.status(201).json({
     success: true,
     message: "Talep oluşturuldu.",
+    data,
+  });
+});
+
+export const uploadTicketAttachment = asyncHandler(async (req, res) => {
+  const data = await uploadTicketAttachmentService(
+    req.params.ticketId,
+    req.user.id,
+    req.file
+  );
+  res.status(200).json({
+    success: true,
+    message: "Görsel eklendi.",
     data,
   });
 });

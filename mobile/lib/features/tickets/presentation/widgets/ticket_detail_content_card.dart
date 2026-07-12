@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -8,6 +9,15 @@ import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../utils/ticket_labels.dart';
 import '../utils/ticket_status_style.dart';
+
+String resolveTicketAttachmentUrl(String raw) {
+  final trimmed = raw.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  final path = trimmed.startsWith('/') ? trimmed : '/$trimmed';
+  return '${ApiConstants.baseUrl}$path';
+}
 
 /// Tek talep kartı: ikon + tarih + durum (tek satır), ardından düz açıklama.
 class TicketDetailContentCard extends StatelessWidget {
@@ -28,6 +38,8 @@ class TicketDetailContentCard extends StatelessWidget {
     final attachmentUrl = ticket.attachmentUrl?.trim();
     final hasAttachment =
         attachmentUrl != null && attachmentUrl.isNotEmpty;
+    final resolvedAttachmentUrl =
+        hasAttachment ? resolveTicketAttachmentUrl(attachmentUrl) : null;
 
     return Container(
       width: double.infinity,
@@ -100,11 +112,11 @@ class TicketDetailContentCard extends StatelessWidget {
               height: 1.45,
             ),
           ),
-          if (hasAttachment) ...[
+          if (hasAttachment && resolvedAttachmentUrl != null) ...[
             const SizedBox(height: AppSizes.spacingM),
             Align(
               alignment: Alignment.centerLeft,
-              child: _AttachmentThumbnail(url: attachmentUrl),
+              child: _AttachmentThumbnail(url: resolvedAttachmentUrl),
             ),
           ],
         ],

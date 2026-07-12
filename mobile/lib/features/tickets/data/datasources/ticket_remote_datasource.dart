@@ -1,3 +1,7 @@
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
+
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/network/dio_client.dart';
@@ -28,6 +32,12 @@ abstract class TicketRemoteDataSource {
     String apartmentId,
     CreateTicketRequest request,
   );
+
+  Future<TicketModel> uploadTicketAttachment({
+    required String ticketId,
+    required Uint8List bytes,
+    required String filename,
+  });
 
   Future<void> addTicketUpdate(String ticketId, String message);
 
@@ -110,6 +120,24 @@ class TicketRemoteDataSourceImpl implements TicketRemoteDataSource {
     final response = await _dioClient.post(
       ApiConstants.apartmentTickets(apartmentId),
       data: request.toJson(),
+    );
+    return TicketModel.fromJson(response.data['data'] as Map<String, dynamic>);
+  }
+
+  @override
+  Future<TicketModel> uploadTicketAttachment({
+    required String ticketId,
+    required Uint8List bytes,
+    required String filename,
+  }) async {
+    Future<FormData> buildForm() async => FormData.fromMap({
+          'file': MultipartFile.fromBytes(bytes, filename: filename),
+        });
+
+    final response = await _dioClient.postMultipart(
+      ApiConstants.ticketAttachment(ticketId),
+      data: await buildForm(),
+      rebuildFormData: buildForm,
     );
     return TicketModel.fromJson(response.data['data'] as Map<String, dynamic>);
   }

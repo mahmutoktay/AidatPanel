@@ -170,8 +170,6 @@ class NotificationListTile extends ConsumerWidget {
                                   fontWeight: FontWeight.w500,
                                   height: 1.4,
                                 ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
                               ),
                               if (badges.isNotEmpty) ...[
                                 const SizedBox(height: 12),

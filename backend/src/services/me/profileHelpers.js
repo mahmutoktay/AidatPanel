@@ -49,6 +49,15 @@ export async function assertCurrentPasswordForSensitiveChange(
   }
 }
 
+/** Sakin telefonu zorunludur (e-posta tutulmaz). */
+export function assertResidentPhoneRequired(newPhone) {
+  if (!newPhone) {
+    throw new HttpError(400, "Telefon numarası gereklidir.", {
+      code: "RESIDENT_PHONE_REQUIRED",
+    });
+  }
+}
+
 export async function assertEmailAvailableForUser(userId, email) {
   if (email === null || email === undefined) return;
 

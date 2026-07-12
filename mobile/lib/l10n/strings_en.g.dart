@@ -3461,6 +3461,21 @@ class Translations$features$profile$en {
 	/// en: 'Optional'
 	String get phoneOptionalHint => 'Optional';
 
+	/// en: 'Phone number is required'
+	String get phoneRequired => 'Phone number is required';
+
+	/// en: 'Phone verification'
+	String get phoneOtpTitle => 'Phone verification';
+
+	/// en: 'Enter the 6-digit code sent to {phone}.'
+	String get phoneOtpMessage => 'Enter the 6-digit code sent to {phone}.';
+
+	/// en: 'Verify and save'
+	String get phoneOtpConfirm => 'Verify and save';
+
+	/// en: 'Could not send the verification code. Please try again.'
+	String get phoneOtpSendFailed => 'Could not send the verification code. Please try again.';
+
 	/// en: 'Your profile has been updated.'
 	String get profileUpdated => 'Your profile has been updated.';
 
@@ -3482,6 +3497,9 @@ class Translations$features$profile$en {
 	/// en: 'You must enter your current password to change your email or phone number.'
 	String get securityVerificationMessage => 'You must enter your current password to change your email or phone number.';
 
+	/// en: 'You must enter your current password to change your email or phone number.'
+	String get securityVerificationMessageManager => 'You must enter your current password to change your email or phone number.';
+
 	/// en: 'Only name and phone can be updated. Other details are shown on the profile screen above.'
 	String get editSheetHint => 'Only name and phone can be updated. Other details are shown on the profile screen above.';
 
@@ -3493,6 +3511,9 @@ class Translations$features$profile$en {
 
 	/// en: 'Remove profile photo'
 	String get removePhoto => 'Remove profile photo';
+
+	/// en: 'Choose photo'
+	String get avatarChooseSource => 'Choose photo';
 
 	/// en: 'Camera'
 	String get avatarCamera => 'Camera';
@@ -6245,6 +6266,11 @@ extension on Translations {
 			'features.profile.editPhotoHint' => 'Tap to change photo',
 			'features.profile.editTitle' => 'Edit Profile',
 			'features.profile.phoneOptionalHint' => 'Optional',
+			'features.profile.phoneRequired' => 'Phone number is required',
+			'features.profile.phoneOtpTitle' => 'Phone verification',
+			'features.profile.phoneOtpMessage' => 'Enter the 6-digit code sent to {phone}.',
+			'features.profile.phoneOtpConfirm' => 'Verify and save',
+			'features.profile.phoneOtpSendFailed' => 'Could not send the verification code. Please try again.',
 			'features.profile.profileUpdated' => 'Your profile has been updated.',
 			'features.profile.profileUpdateFailed' => 'Could not update profile. Please try again.',
 			'features.profile.profileLoadFailed' => 'Could not load profile.',
@@ -6252,10 +6278,12 @@ extension on Translations {
 			'features.profile.contactRequired' => 'At least one contact channel (Email or Phone) must be registered.',
 			'features.profile.securityVerificationTitle' => 'Security Verification',
 			'features.profile.securityVerificationMessage' => 'You must enter your current password to change your email or phone number.',
+			'features.profile.securityVerificationMessageManager' => 'You must enter your current password to change your email or phone number.',
 			'features.profile.editSheetHint' => 'Only name and phone can be updated. Other details are shown on the profile screen above.',
 			'features.profile.photoSaved' => 'Profile photo saved for this account.',
 			'features.profile.photoRemoved' => 'Profile photo removed.',
 			'features.profile.removePhoto' => 'Remove profile photo',
+			'features.profile.avatarChooseSource' => 'Choose photo',
 			'features.profile.avatarCamera' => 'Camera',
 			'features.profile.avatarGallery' => 'Gallery',
 			'features.profile.avatarSave' => 'Save',

@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/action_chevron.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/app_currency_format.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../domain/entities/due_breakdown_entity.dart';
 
@@ -135,7 +136,7 @@ class _BreakdownRow extends StatelessWidget {
             ),
           ),
           Text(
-            '${amount.toStringAsFixed(2)} $currency',
+            AppCurrencyFormat.formatWithCode(amount, currency),
             style: style.copyWith(
               color: AppColors.textPrimary,
               fontWeight: emphasized ? FontWeight.w700 : FontWeight.w600,
