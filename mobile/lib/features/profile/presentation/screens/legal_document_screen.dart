@@ -128,7 +128,7 @@ class LegalDocumentScreen extends StatelessWidget {
               SelectableText(
                 legal.contactEmail,
                 style: ProfileSettingsUi.fieldValue.copyWith(
-                  color: AppColors.primary,
+                  color: AppColors.brand,
                   fontWeight: FontWeight.w600,
                 ),
               ),

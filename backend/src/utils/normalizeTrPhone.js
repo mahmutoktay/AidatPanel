@@ -19,6 +19,24 @@ export function normalizeTrPhone(input) {
 }
 
 /**
+ * Aynı numaranın DB'de geçmişte kalmış olası yazılışları.
+ * Kanonik değer her zaman listededir; lookup `phone IN variants` ile yapılır.
+ * @param {string} phone10 — kanonik 10 hane
+ * @returns {string[]}
+ */
+export function phoneLookupVariants(phone10) {
+  if (typeof phone10 !== "string" || !/^5\d{9}$/.test(phone10)) {
+    return phone10 ? [phone10] : [];
+  }
+  return [
+    phone10,
+    `0${phone10}`,
+    `90${phone10}`,
+    `+90${phone10}`,
+  ];
+}
+
+/**
  * Login identifier: email veya normalize telefon.
  * @param {string} identifier
  * @returns {string}

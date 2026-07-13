@@ -582,14 +582,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             onPressed: isLoading ? null : _onSubmit,
             style: ProfileSettingsUi.primaryButton,
             child: isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
+                ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onAction))
                 : Text(
                     _isManager
                         ? context.t.features.auth.register

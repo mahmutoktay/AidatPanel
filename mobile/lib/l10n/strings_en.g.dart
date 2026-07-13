@@ -1171,11 +1171,23 @@ class Translations$common$en {
 	/// en: 'Forgot Password'
 	String get forgotPasswordTitle => 'Forgot Password';
 
-	/// en: 'Enter your registered email and we'll send you a reset code.'
-	String get forgotPasswordSubtitle => 'Enter your registered email and we\'ll send you a reset code.';
+	/// en: 'Enter your registered email or phone and we'll send you a reset code.'
+	String get forgotPasswordSubtitle => 'Enter your registered email or phone and we\'ll send you a reset code.';
 
-	/// en: 'If this email is registered, a reset code has been sent. Please check your inbox.'
-	String get forgotPasswordSuccess => 'If this email is registered, a reset code has been sent. Please check your inbox.';
+	/// en: 'If you're registered, a reset code has been sent. Please check your email or SMS.'
+	String get forgotPasswordSuccess => 'If you\'re registered, a reset code has been sent. Please check your email or SMS.';
+
+	/// en: 'If you're registered, a reset code has been sent to your email.'
+	String get forgotPasswordSuccessEmail => 'If you\'re registered, a reset code has been sent to your email.';
+
+	/// en: 'If you're registered, a reset code has been sent by SMS.'
+	String get forgotPasswordSuccessSms => 'If you\'re registered, a reset code has been sent by SMS.';
+
+	/// en: 'Didn't get the code? Send via SMS'
+	String get forgotPasswordSmsFallback => 'Didn\'t get the code? Send via SMS';
+
+	/// en: 'A reset code has been sent by SMS.'
+	String get forgotPasswordSmsFallbackSuccess => 'A reset code has been sent by SMS.';
 
 	/// en: 'Send Code'
 	String get sendResetCode => 'Send Code';
@@ -1186,8 +1198,14 @@ class Translations$common$en {
 	/// en: 'Set New Password'
 	String get resetPasswordTitle => 'Set New Password';
 
+	/// en: 'Enter the 6-character code you received and a new password.'
+	String get resetPasswordSubtitle => 'Enter the 6-character code you received and a new password.';
+
 	/// en: 'Enter the 6-character code from your email and a new password.'
-	String get resetPasswordSubtitle => 'Enter the 6-character code from your email and a new password.';
+	String get resetPasswordSubtitleEmail => 'Enter the 6-character code from your email and a new password.';
+
+	/// en: 'Enter the 6-character code from your SMS and a new password.'
+	String get resetPasswordSubtitleSms => 'Enter the 6-character code from your SMS and a new password.';
 
 	/// en: 'Reset Code'
 	String get resetCode => 'Reset Code';
@@ -3986,6 +4004,12 @@ class Translations$features$dashboard$en {
 	/// en: 'Not enough data yet'
 	String get noChartData => 'Not enough data yet';
 
+	/// en: 'You don't have a building yet. Add your first building to start managing.'
+	String get noBuildingsEmptyMessage => 'You don\'t have a building yet. Add your first building to start managing.';
+
+	/// en: 'Add Building'
+	String get noBuildingsEmptyCta => 'Add Building';
+
 	/// en: 'See more (+{count})'
 	String get seeMoreOverdue => 'See more (+{count})';
 
@@ -4381,8 +4405,11 @@ class Translations$features$auth$onboarding$en {
 	/// en: 'I am using the app for the first time'
 	String get managerFirstTimeOption => 'I am using the app for the first time';
 
-	/// en: 'What is your name?'
-	String get managerNameTitle => 'What is your name?';
+	/// en: 'Creating your account'
+	String get managerNameEyebrow => 'Creating your account';
+
+	/// en: 'Let's get to know you — what's your name?'
+	String get managerNameTitle => 'Let\'s get to know you — what\'s your name?';
 
 	/// en: 'How should we address you?'
 	String get managerNameSubtitle => 'How should we address you?';
@@ -4410,6 +4437,15 @@ class Translations$features$auth$onboarding$en {
 
 	/// en: 'Enter your password'
 	String get managerLoginPasswordTitle => 'Enter your password';
+
+	/// en: 'Welcome back!'
+	String get managerLoginWelcomeTitle => 'Welcome back!';
+
+	/// en: 'Welcome back, {name}!'
+	String get managerLoginWelcomeNamedTitle => 'Welcome back, {name}!';
+
+	/// en: 'Enter your password to continue'
+	String get managerLoginWelcomeSubtitle => 'Enter your password to continue';
 
 	/// en: 'Set your password'
 	String get managerRegisterPasswordTitle => 'Set your password';
@@ -5427,12 +5463,18 @@ extension on Translations {
 			'common.dangerZone' => 'Danger Zone',
 			'common.forgotPassword' => 'Forgot Password',
 			'common.forgotPasswordTitle' => 'Forgot Password',
-			'common.forgotPasswordSubtitle' => 'Enter your registered email and we\'ll send you a reset code.',
-			'common.forgotPasswordSuccess' => 'If this email is registered, a reset code has been sent. Please check your inbox.',
+			'common.forgotPasswordSubtitle' => 'Enter your registered email or phone and we\'ll send you a reset code.',
+			'common.forgotPasswordSuccess' => 'If you\'re registered, a reset code has been sent. Please check your email or SMS.',
+			'common.forgotPasswordSuccessEmail' => 'If you\'re registered, a reset code has been sent to your email.',
+			'common.forgotPasswordSuccessSms' => 'If you\'re registered, a reset code has been sent by SMS.',
+			'common.forgotPasswordSmsFallback' => 'Didn\'t get the code? Send via SMS',
+			'common.forgotPasswordSmsFallbackSuccess' => 'A reset code has been sent by SMS.',
 			'common.sendResetCode' => 'Send Code',
 			'common.iHaveACode' => 'I already have a code',
 			'common.resetPasswordTitle' => 'Set New Password',
-			'common.resetPasswordSubtitle' => 'Enter the 6-character code from your email and a new password.',
+			'common.resetPasswordSubtitle' => 'Enter the 6-character code you received and a new password.',
+			'common.resetPasswordSubtitleEmail' => 'Enter the 6-character code from your email and a new password.',
+			'common.resetPasswordSubtitleSms' => 'Enter the 6-character code from your SMS and a new password.',
 			'common.resetCode' => 'Reset Code',
 			'common.resetCodeHint' => 'ABC123',
 			'common.resetCodeRequired' => 'Reset code required',
@@ -5514,14 +5556,14 @@ extension on Translations {
 			'common.errorKeys.invalidExpenseResponse' => 'Could not read expense information. Please try again.',
 			'common.errorKeys.invalidSiteExpenseResponse' => 'Could not read site expense information. Please try again.',
 			'common.errorKeys.unsupportedFileType' => 'This file type is not supported.',
+			_ => null,
+		} ?? switch (path) {
 			'common.errorKeys.dekontUploadFailed' => 'Could not upload the receipt. Please try again.',
 			'common.errorKeys.serverResponseUnreadable' => 'Could not read the server response. Please try again.',
 			'common.errorKeys.dekontResponseMissing' => 'The receipt response is incomplete. Please try again.',
 			'common.errorKeys.dekontResponseParseFailed' => 'Could not process the receipt response. Please try again.',
 			'common.errorKeys.reportFileEmpty' => 'The report file was empty. Please try again.',
 			'common.errorKeys.downloadStarted' => 'Download started...',
-			_ => null,
-		} ?? switch (path) {
 			'common.errorKeys.downloadSavedToGallery' => 'Saved to your phone\'s Gallery (AidatPanel album).',
 			'common.errorKeys.downloadSavedToDownloads' => 'Receipt saved to your Downloads folder.',
 			'common.errorKeys.downloadFallbackShare' => 'Share screen opened. You can save it to Files from there.',
@@ -5774,7 +5816,8 @@ extension on Translations {
 			'features.auth.onboarding.managerExperienceSubtitle' => 'Have you registered before?',
 			'features.auth.onboarding.managerReturningOption' => 'I have registered before',
 			'features.auth.onboarding.managerFirstTimeOption' => 'I am using the app for the first time',
-			'features.auth.onboarding.managerNameTitle' => 'What is your name?',
+			'features.auth.onboarding.managerNameEyebrow' => 'Creating your account',
+			'features.auth.onboarding.managerNameTitle' => 'Let\'s get to know you — what\'s your name?',
 			'features.auth.onboarding.managerNameSubtitle' => 'How should we address you?',
 			'features.auth.onboarding.managerIdentifierTitle' => 'Enter your email or phone',
 			'features.auth.onboarding.managerIdentifierSubtitle' => 'This will be used for sign-in.',
@@ -5784,6 +5827,9 @@ extension on Translations {
 			'features.auth.onboarding.identifierRequired' => 'Enter your email or phone',
 			'features.auth.onboarding.phoneInvalidElevenDigits' => 'Enter an 11-digit phone number starting with 0',
 			'features.auth.onboarding.managerLoginPasswordTitle' => 'Enter your password',
+			'features.auth.onboarding.managerLoginWelcomeTitle' => 'Welcome back!',
+			'features.auth.onboarding.managerLoginWelcomeNamedTitle' => 'Welcome back, {name}!',
+			'features.auth.onboarding.managerLoginWelcomeSubtitle' => 'Enter your password to continue',
 			'features.auth.onboarding.managerRegisterPasswordTitle' => 'Set your password',
 			'features.auth.onboarding.managerRegisterPasswordSubtitle' => 'At least 6 characters; letters and numbers only.',
 			'features.auth.onboarding.managerCreateAccountButton' => 'Create Account',
@@ -6024,6 +6070,8 @@ extension on Translations {
 			'features.dekont.resident.statusDetailAwaitingApproval' => 'Waiting for the manager\'s approval.',
 			'features.dekont.resident.statusDetailAwaitingIbanOk' => 'Recipient details matched. Waiting for the manager\'s approval.',
 			'features.dekont.resident.statusDetailAwaitingIbanIssue' => 'Recipient details unclear. Waiting for the manager\'s approval.',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.resident.statusDetailApproved' => 'Your payment was approved.',
 			'features.dekont.resident.statusDetailPartiallyApproved' => 'Your payment was partially approved.',
 			'features.dekont.resident.statusDetailRejected' => 'Your receipt was rejected.',
@@ -6034,8 +6082,6 @@ extension on Translations {
 			'features.dekont.resident.dueOverdueHint' => 'This due is overdue',
 			'features.dekont.manager.statusProcessing' => 'Processing',
 			'features.dekont.manager.statusAwaitingApproval' => 'Awaiting approval',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.manager.statusApproved' => 'Approved',
 			'features.dekont.manager.statusPartiallyApproved' => 'Partially approved',
 			'features.dekont.manager.statusRejected' => 'Rejected',
@@ -6444,6 +6490,8 @@ extension on Translations {
 			'features.dashboard.apartmentWithFloor' => 'Apt. {number} · Floor {floor}',
 			'features.dashboard.noOverdueApartments' => 'No overdue payments',
 			'features.dashboard.noChartData' => 'Not enough data yet',
+			'features.dashboard.noBuildingsEmptyMessage' => 'You don\'t have a building yet. Add your first building to start managing.',
+			'features.dashboard.noBuildingsEmptyCta' => 'Add Building',
 			'features.dashboard.seeMoreOverdue' => 'See more (+{count})',
 			'features.dashboard.payNow' => 'Pay Now',
 			'features.dashboard.overduePaymentsBadge' => '{count} overdue payment(s)',
@@ -6536,6 +6584,8 @@ extension on Translations {
 			'legal.kvkkS1Body' => 'The data controller for AidatPanel is Vefa Yazılım. You may submit KVKK requests to store@vefayazilim.com or using your registered email in the app.',
 			'legal.kvkkS2Title' => 'Data categories',
 			'legal.kvkkS2Body' => 'Categories may include identity and contact, customer transaction (dues, payments, expenses), visual records (receipts), security (logs, tokens), and communication (notification consent).',
+			_ => null,
+		} ?? switch (path) {
 			'legal.kvkkS3Title' => 'Purposes and legal bases',
 			'legal.kvkkS3Body' => 'Processing is based on contract performance, legal obligation, legitimate interest, and your explicit consent where required (e.g. notifications).',
 			'legal.kvkkS4Title' => 'Transfers',
@@ -6548,8 +6598,6 @@ extension on Translations {
 			'legal.helpBody' => 'FAQs, step-by-step guides, and support channels will be added here soon. For app support: store@vefayazilim.com (Vefa Yazılım). For urgent building matters, contact your building manager or site administration.',
 			'db_context.user_entry' => 'Record: {value}',
 			'db_context.building_name' => 'Building: {value}',
-			_ => null,
-		} ?? switch (path) {
 			'db_context.apartment_label' => 'Apartment: {value}',
 			'db_context.code_value' => 'Code: {value}',
 			'db_context.expiry_date' => 'Expires at: {value}',

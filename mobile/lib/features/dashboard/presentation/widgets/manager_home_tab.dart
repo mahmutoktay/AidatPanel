@@ -10,6 +10,8 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/notifications/notification_toast.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/app_button_styles.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -153,7 +155,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
       color: AppColors.dashboardBackground,
       child: RefreshIndicator(
         onRefresh: _refreshHomeTab,
-        color: AppColors.primary,
+        color: AppColors.brand,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: AppSizes.screenBodyScrollPadding.copyWith(
@@ -186,13 +188,19 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
               if (totalErrorCount > 0)
                 _DataWarningBanner(errorCount: totalErrorCount),
               if (totalErrorCount > 0) const SizedBox(height: AppSizes.spacingS),
-              ManagerDuesSummaryCard(
-                summary: duesAmountSummary,
-                currency: expenseCurrency,
-                remindDueIdsByBuilding: remindDueIdsByBuilding.isEmpty
-                    ? null
-                    : remindDueIdsByBuilding,
-              ),
+              if (buildings.isEmpty)
+                _NoBuildingsEmptyState(
+                  onAddBuilding: () =>
+                      context.push('/manager-dashboard/add-building'),
+                )
+              else
+                ManagerDuesSummaryCard(
+                  summary: duesAmountSummary,
+                  currency: expenseCurrency,
+                  remindDueIdsByBuilding: remindDueIdsByBuilding.isEmpty
+                      ? null
+                      : remindDueIdsByBuilding,
+                ),
               const SizedBox(height: AppSizes.spacingM),
               ManagerQuickActionsSection(
                 openTicketCount:
@@ -371,6 +379,40 @@ class _DataWarningBanner extends StatelessWidget {
                     color: AppColors.statusAmber,
                   ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Hiç bina yokken özet kart yerine gösterilen boş durum.
+class _NoBuildingsEmptyState extends StatelessWidget {
+  final VoidCallback onAddBuilding;
+
+  const _NoBuildingsEmptyState({required this.onAddBuilding});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t.features.dashboard;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            t.noBuildingsEmptyMessage,
+            textAlign: TextAlign.center,
+            style: AppTypography.body1.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          ElevatedButton(
+            onPressed: onAddBuilding,
+            style: AppButtonStyles.elevatedPrimary(fullWidth: true),
+            child: Text(t.noBuildingsEmptyCta),
           ),
         ],
       ),

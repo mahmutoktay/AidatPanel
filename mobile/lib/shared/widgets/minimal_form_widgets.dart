@@ -368,12 +368,12 @@ class MinimalStickyActionBar extends StatelessWidget {
                 onPressed: loading ? null : onPressed,
                 style: ProfileSettingsUi.primaryButton,
                 child: loading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 22,
                         width: 22,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.4,
-                          color: Colors.white,
+                          color: AppColors.onAction,
                         ),
                       )
                     : Text(label),
@@ -446,7 +446,7 @@ class CollectionIbanSegmentToggle extends StatelessWidget {
                     width: segmentWidth,
                     height: controlHeight,
                     decoration: BoxDecoration(
-                      color: AppColors.inkDark,
+                      color: AppColors.action,
                       borderRadius: BorderRadius.circular(
                         ProfileSettingsUi.fieldRadius - 2,
                       ),
@@ -497,7 +497,7 @@ class _SegmentOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? Colors.white : ProfileSettingsUi.muted;
+    final color = selected ? AppColors.onAction : ProfileSettingsUi.muted;
 
     return Material(
       color: Colors.transparent,

@@ -205,7 +205,7 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                  borderSide: BorderSide(color: AppColors.brand, width: 2),
                 ),
               ),
               onChanged: (v) => _onChanged(i, v),

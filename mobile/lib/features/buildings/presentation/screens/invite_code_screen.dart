@@ -570,7 +570,7 @@ class _SitePickerStep extends StatelessWidget {
         final site = sites[index - 2];
         return InviteSelectableTile(
           icon: Icons.domain_rounded,
-          iconColor: AppColors.primary,
+          iconColor: AppColors.brand,
           title: site.name,
           subtitle: site.displayAddress,
           onTap: () => onSitePick(site),
@@ -622,7 +622,7 @@ class _BuildingPickerStep extends StatelessWidget {
         final b = buildings[index - offset];
         return InviteSelectableTile(
           icon: Icons.apartment_rounded,
-          iconColor: AppColors.primary,
+          iconColor: AppColors.brand,
           title: b.displayName,
           subtitle: b.displayAddress,
           onTap: () => onPick(b),
@@ -648,13 +648,13 @@ class _InviteSiteBanner extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: AppColors.brand.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
             child: Icon(
               Icons.domain_rounded,
-              color: AppColors.primary,
+              color: AppColors.brand,
               size: 24,
             ),
           ),
@@ -816,13 +816,13 @@ class _InviteBuildingBanner extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: AppColors.brand.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
             child: Icon(
               Icons.apartment_rounded,
-              color: AppColors.primary,
+              color: AppColors.brand,
               size: 24,
             ),
           ),
@@ -838,7 +838,7 @@ class _InviteBuildingBanner extends StatelessWidget {
                     style: ProfileSettingsUi.fieldLabel.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
+                      color: AppColors.brand,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

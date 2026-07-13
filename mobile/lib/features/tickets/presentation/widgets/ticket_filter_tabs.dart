@@ -28,7 +28,7 @@ class TicketFilterTabs extends StatelessWidget {
             Expanded(
               child: Material(
                 color: selectedIndex == i
-                    ? AppColors.primary
+                    ? AppColors.action
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 child: InkWell(
@@ -41,7 +41,7 @@ class TicketFilterTabs extends StatelessWidget {
                         labels[i],
                         style: AppTypography.body2.copyWith(
                           color: selectedIndex == i
-                              ? Colors.white
+                              ? AppColors.onAction
                               : AppColors.textSecondary,
                           fontWeight: FontWeight.w700,
                         ),

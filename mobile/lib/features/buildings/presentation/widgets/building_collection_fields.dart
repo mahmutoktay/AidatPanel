@@ -272,7 +272,7 @@ class _SelectedPresetCompactSummary extends StatelessWidget {
     final rows = <Widget>[
       PremiumInfoRow(
         icon: Icons.account_balance_outlined,
-        iconColor: AppColors.primary,
+        iconColor: AppColors.brand,
         label: context.t.features.buildings.collection.ibanLabel,
         value: IbanUtils.formatDisplay(preset.collectionIban),
       ),
@@ -281,7 +281,7 @@ class _SelectedPresetCompactSummary extends StatelessWidget {
       rows.add(
         PremiumInfoRow(
           icon: Icons.badge_outlined,
-          iconColor: AppColors.primary,
+          iconColor: AppColors.brand,
           label: context.t.features.buildings.collection.accountTitleLabel,
           value: accountTitle,
         ),

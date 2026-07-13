@@ -154,7 +154,7 @@ class _SiteExpensesScreenState extends ConsumerState<SiteExpensesScreen> {
                       )
                     : RefreshIndicator(
                         onRefresh: () async => _load(),
-                        color: AppColors.primary,
+                        color: AppColors.brand,
                         child: ListView.builder(
                           controller: _scrollController,
                           padding: AppSizes.screenBodyScrollPadding.copyWith(

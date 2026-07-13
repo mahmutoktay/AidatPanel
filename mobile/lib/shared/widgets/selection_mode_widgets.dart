@@ -44,9 +44,7 @@ class SelectionActionFab extends StatelessWidget {
     return FloatingActionButton.extended(
       onPressed: onPressed,
       backgroundColor: backgroundColor,
-      foregroundColor: backgroundColor == AppColors.actionButton
-          ? AppColors.actionButtonForeground
-          : Colors.white,
+      foregroundColor: AppColors.onAction,
       elevation: 0,
       highlightElevation: 0,
       icon: Icon(icon),
@@ -91,12 +89,12 @@ class SelectionTriggerButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 18, color: AppColors.primary),
+              Icon(icon, size: 18, color: AppColors.brand),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: AppTypography.body2.copyWith(
-                  color: AppColors.primary,
+                  color: AppColors.brand,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -132,22 +130,22 @@ class SelectionHintBanner extends StatelessWidget {
         vertical: 10,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.06),
+        color: AppColors.brand.withValues(alpha: 0.06),
         border: Border(
           bottom: BorderSide(
-            color: AppColors.primary.withValues(alpha: 0.12),
+            color: AppColors.brand.withValues(alpha: 0.12),
           ),
         ),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppColors.primary),
+          Icon(icon, size: 18, color: AppColors.brand),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               message,
               style: AppTypography.caption.copyWith(
-                color: AppColors.primary,
+                color: AppColors.brand,
                 fontWeight: FontWeight.w700,
                 height: 1.3,
               ),

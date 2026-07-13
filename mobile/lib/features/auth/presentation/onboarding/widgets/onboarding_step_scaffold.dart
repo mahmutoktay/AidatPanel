@@ -8,11 +8,14 @@ import '../../../../../core/theme/app_typography.dart';
 class OnboardingStepScaffold extends StatelessWidget {
   const OnboardingStepScaffold({
     super.key,
+    this.eyebrow,
     required this.title,
     this.subtitle,
     required this.body,
   });
 
+  /// Başlığın üstünde küçük bağlam etiketi (ör. "Hesabınızı oluşturuyoruz").
+  final String? eyebrow;
   final String title;
   final String? subtitle;
   final Widget body;
@@ -23,6 +26,16 @@ class OnboardingStepScaffold extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (eyebrow != null) ...[
+          Text(
+            eyebrow!,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingXS),
+        ],
         Text(title, style: AppTypography.h2),
         if (subtitle != null) ...[
           const SizedBox(height: AppSizes.spacingS),

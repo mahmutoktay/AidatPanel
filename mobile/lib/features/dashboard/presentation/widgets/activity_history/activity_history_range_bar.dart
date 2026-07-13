@@ -67,18 +67,20 @@ class _RangeChip extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            color: selected ? AppColors.primary : AppColors.surface,
+            color: selected ? AppColors.actionButton : AppColors.fill,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: selected
-                  ? AppColors.primary
+                  ? AppColors.actionButton
                   : AppColors.border.withValues(alpha: 0.6),
             ),
           ),
           child: Text(
             label,
             style: AppTypography.body2.copyWith(
-              color: selected ? AppColors.surface : AppColors.textPrimary,
+              color: selected
+                  ? AppColors.actionButtonForeground
+                  : AppColors.textPrimary,
               fontWeight: FontWeight.w700,
               fontSize: 15,
             ),

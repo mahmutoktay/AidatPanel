@@ -171,12 +171,12 @@ class _GridCell extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             color: selected
-                ? AppColors.primary.withValues(alpha: 0.12)
+                ? AppColors.brand.withValues(alpha: 0.12)
                 : ProfileSettingsUi.fieldFill,
             borderRadius: BorderRadius.circular(ProfileSettingsUi.fieldRadius),
             border: Border.all(
               color: selected
-                  ? AppColors.primary
+                  ? AppColors.brand
                   : AppColors.borderColor.withValues(alpha: 0.35),
               width: selected ? 2 : 1,
             ),
@@ -187,7 +187,7 @@ class _GridCell extends StatelessWidget {
               style: ProfileSettingsUi.fieldValue.copyWith(
                 fontWeight: FontWeight.w700,
                 fontSize: isMore ? 15 : 18,
-                color: selected ? AppColors.primary : AppColors.textPrimary,
+                color: selected ? AppColors.brand : AppColors.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),

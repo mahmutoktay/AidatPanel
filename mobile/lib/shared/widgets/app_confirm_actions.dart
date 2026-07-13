@@ -61,7 +61,7 @@ class AppConfirmActions extends StatelessWidget {
               style: FilledButton.styleFrom(
                 backgroundColor:
                     dangerConfirm ? ProfileSettingsUi.danger : null,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.onAction,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(
                     ProfileSettingsUi.primaryButtonRadius,
@@ -72,12 +72,12 @@ class AppConfirmActions extends StatelessWidget {
                 ),
               ),
               child: confirmLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 22,
                       height: 22,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.4,
-                        color: Colors.white,
+                        color: AppColors.onAction,
                       ),
                     )
                   : Text(confirmLabel),

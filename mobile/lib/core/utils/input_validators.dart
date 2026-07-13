@@ -232,7 +232,8 @@ class InputValidators {
     }
   }
 
-  /// E-posta veya 0 ile başlayan 11 haneli telefon — onboarding identifier alanı.
+  /// E-posta veya TR cep telefonu — onboarding identifier alanı.
+  /// Kabul: `05xxxxxxxxx` (11) veya kanonik `5xxxxxxxxx` (10).
   static String? validateLoginIdentifier(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'identifier_required';
@@ -242,12 +243,15 @@ class InputValidators {
       return validateEmail(trimmed);
     }
     final digits = trimmed.replaceAll(_phoneStripRegex, '');
-    if (digits.length != 11 || !digits.startsWith('0')) {
-      return 'phone_invalid_eleven_digits';
+    if (digits.length == 10 && phoneRegex.hasMatch(digits)) {
+      return null;
     }
-    if (!phoneRegex.hasMatch(digits.substring(1))) {
-      return 'phone_invalid';
+    if (digits.length == 11 && digits.startsWith('0')) {
+      if (!phoneRegex.hasMatch(digits.substring(1))) {
+        return 'phone_invalid';
+      }
+      return null;
     }
-    return null;
+    return 'phone_invalid_eleven_digits';
   }
 }

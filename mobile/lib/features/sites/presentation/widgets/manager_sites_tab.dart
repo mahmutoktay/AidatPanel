@@ -44,7 +44,7 @@ class _ManagerSitesTabState extends ConsumerState<ManagerSitesTab> {
 
     return RefreshIndicator(
       onRefresh: () => ref.read(sitesStoreProvider.notifier).loadSites(),
-      color: AppColors.primary,
+      color: AppColors.brand,
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [

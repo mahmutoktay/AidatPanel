@@ -61,7 +61,7 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
           RefreshIndicator(
             onRefresh: () =>
                 ref.read(ticketsNotifierProvider.notifier).loadMyTickets(),
-            color: AppColors.primary,
+            color: AppColors.brand,
             child: ListView.builder(
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
@@ -126,13 +126,13 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
             child: SafeArea(
               child: FloatingActionButton.extended(
                 onPressed: () => _openCreate(context),
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.actionButton,
+                foregroundColor: AppColors.actionButtonForeground,
                 icon: const Icon(Icons.add),
                 label: Text(
                   ticketsT.createTitle,
                   style: AppTypography.button.copyWith(
-                    color: Colors.white,
+                    color: AppColors.actionButtonForeground,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

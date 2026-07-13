@@ -35,10 +35,10 @@ class OnboardingFeatureTile extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.brand.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: AppColors.primary, size: 24),
+            child: Icon(icon, color: AppColors.brand, size: 24),
           ),
           const SizedBox(width: AppSizes.spacingM),
           Expanded(

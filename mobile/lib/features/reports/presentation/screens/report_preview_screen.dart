@@ -203,7 +203,7 @@ class _ReportPreviewScreenState extends ConsumerState<ReportPreviewScreen> {
             Icon(
               Icons.picture_as_pdf_outlined,
               size: 64,
-              color: AppColors.primary,
+              color: AppColors.brand,
             ),
             const SizedBox(height: AppSizes.spacingM),
             Text(

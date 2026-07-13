@@ -609,14 +609,16 @@ class _MonthGrid extends StatelessWidget {
               alignment: Alignment.center,
               decoration: isSelected && !disabled
                   ? BoxDecoration(
-                      color: AppColors.primary,
+                      color: AppColors.action,
                       shape: BoxShape.circle,
                     )
                   : null,
               child: Text(
                 '${day.day}',
                 style: AppTypography.body1.copyWith(
-                  color: isSelected && !disabled ? Colors.white : textColor,
+                  color: isSelected && !disabled
+                      ? AppColors.onAction
+                      : textColor,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -740,7 +742,7 @@ class _DateWheel extends StatelessWidget {
             child: Container(
               height: _wheelItemExtent,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.05),
+                color: AppColors.brand.withValues(alpha: 0.05),
                 border: Border(
                   top: BorderSide(color: AppColors.border),
                   bottom: BorderSide(color: AppColors.border),

@@ -74,7 +74,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(color: AppColors.primary),
+              CircularProgressIndicator(color: AppColors.brand),
               const SizedBox(height: AppSizes.spacingM),
               Text(
                 t.loadingPlans,
@@ -114,7 +114,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           children: [
             Expanded(
               child: RefreshIndicator(
-                color: AppColors.primary,
+                color: AppColors.brand,
                 onRefresh: () =>
                     ref.read(subscriptionNotifierProvider.notifier).load(),
                 child: SingleChildScrollView(
@@ -298,8 +298,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                                   ),
                                   label: Text(t.contactUs),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    foregroundColor: AppColors.actionButtonForeground,
+                                    backgroundColor: AppColors.action,
+                                    foregroundColor: AppColors.onAction,
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -499,11 +499,11 @@ class _BuildingProgressBar extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: (used / limit!).clamp(0.0, 1.0),
                 minHeight: 6,
-                backgroundColor: const Color(0x1A1A1A2E),
+                backgroundColor: AppColors.border.withValues(alpha: 0.35),
                 valueColor: AlwaysStoppedAnimation<Color>(
                   (used / limit!) > 0.85
                       ? AppColors.warning
-                      : AppColors.primary,
+                      : AppColors.brand,
                 ),
               ),
             ),
@@ -692,7 +692,7 @@ class _PlanToggle extends StatelessWidget {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: isMonthly ? AppColors.primary : Colors.transparent,
+                  color: isMonthly ? AppColors.action : Colors.transparent,
                   borderRadius: BorderRadius.circular(11),
                 ),
                 child: Center(
@@ -701,7 +701,7 @@ class _PlanToggle extends StatelessWidget {
                     style: AppTypography.body1.copyWith(
                       fontWeight: FontWeight.w600,
                       color: isMonthly
-                          ? AppColors.actionButtonForeground
+                          ? AppColors.onAction
                           : AppColors.textDisabled,
                     ),
                   ),
@@ -716,7 +716,7 @@ class _PlanToggle extends StatelessWidget {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: !isMonthly ? AppColors.primary : Colors.transparent,
+                  color: !isMonthly ? AppColors.action : Colors.transparent,
                   borderRadius: BorderRadius.circular(11),
                 ),
                 child: Center(
@@ -725,7 +725,7 @@ class _PlanToggle extends StatelessWidget {
                     style: AppTypography.body1.copyWith(
                       fontWeight: FontWeight.w600,
                       color: !isMonthly
-                          ? AppColors.actionButtonForeground
+                          ? AppColors.onAction
                           : AppColors.textDisabled,
                     ),
                   ),
@@ -768,7 +768,7 @@ class _PackageCard extends StatelessWidget {
           color: isActive ? AppColors.surface : AppColors.fill,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isActive ? AppColors.primary : AppColors.border.withValues(alpha: 0.3),
+            color: isActive ? AppColors.brand : AppColors.border.withValues(alpha: 0.3),
             width: isActive ? 1.5 : 1.0,
           ),
         ),
@@ -787,14 +787,14 @@ class _PackageCard extends StatelessWidget {
                         height: 44,
                         decoration: BoxDecoration(
                           color: isActive
-                              ? AppColors.primary.withValues(alpha: 0.1)
+                              ? AppColors.brand.withValues(alpha: 0.1)
                               : AppColors.fill,
                           borderRadius: BorderRadius.circular(11),
                         ),
                         alignment: Alignment.center,
                         child: Icon(
                           icon,
-                          color: isActive ? AppColors.primary : AppColors.textDisabled,
+                          color: isActive ? AppColors.brand : AppColors.textDisabled,
                           size: 22,
                         ),
                       ),
@@ -823,7 +823,7 @@ class _PackageCard extends StatelessWidget {
                                       .currentPlanBadge,
                                   style: AppTypography.caption.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
+                                    color: AppColors.brand,
                                   ),
                                 ),
                               ),
@@ -862,7 +862,7 @@ class _PackageCard extends StatelessWidget {
                       if (!isActive && !isComingSoon)
                         Container(
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
+                            color: AppColors.brand.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           padding: const EdgeInsets.symmetric(
@@ -873,7 +873,7 @@ class _PackageCard extends StatelessWidget {
                             context.t.features.subscription.contactUs,
                             style: AppTypography.caption.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
+                              color: AppColors.brand,
                             ),
                           ),
                         ),
@@ -1016,10 +1016,10 @@ class _PlanOption extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: _canPurchase ? onBuy : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.onAction,
                       foregroundColor: AppColors.darkCard,
                       disabledBackgroundColor:
-                          Colors.white.withValues(alpha: 0.5),
+                          AppColors.onAction.withValues(alpha: 0.5),
                       disabledForegroundColor:
                           AppColors.darkCard.withValues(alpha: 0.5),
                       elevation: 0,

@@ -92,7 +92,7 @@ class _ManagerOverdueApartmentsScreenState
           );
 
           return RefreshIndicator(
-            color: AppColors.primary,
+            color: AppColors.brand,
             onRefresh: () async {
               ref.invalidate(allBuildingsDuesProvider);
               await ref.read(allBuildingsDuesProvider.future);

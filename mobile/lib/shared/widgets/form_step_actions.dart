@@ -34,12 +34,12 @@ class FormStepActions extends StatelessWidget {
     if (!_hasActions) return const SizedBox.shrink();
 
     final primaryChild = isLoading
-        ? const SizedBox(
+        ? SizedBox(
             height: 24,
             width: 24,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: Colors.white,
+              color: AppColors.onAction,
             ),
           )
         : Row(

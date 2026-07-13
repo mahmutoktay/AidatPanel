@@ -22,6 +22,8 @@ import '../features/auth/data/repositories/auth_repository_impl.dart'
     show AuthRepository;
 import '../features/auth/domain/entities/user_entity.dart';
 import '../features/auth/domain/entities/saved_login_hint.dart';
+import '../features/auth/domain/entities/manager_identifier_lookup.dart';
+import '../features/auth/domain/entities/forgot_password_result.dart';
 import '../features/buildings/data/repositories/building_repository.dart';
 import '../features/buildings/domain/entities/building_entity.dart';
 import '../features/buildings/domain/entities/collection_preset_entity.dart';
@@ -154,8 +156,28 @@ class MockAuthRepository implements AuthRepository {
   /// Tur 5 §10/6 — Backend her zaman 200 döner; mock da aynı davranışı
   /// gösterir, hiçbir kontrol yapmaz.
   @override
-  Future<void> forgotPassword(String email) async {
+  Future<ForgotPasswordResult> forgotPassword({
+    String? email,
+    String? phone,
+    String? channel,
+  }) async {
     await Future.delayed(_delay);
+    if (channel == 'sms') {
+      return const ForgotPasswordResult(
+        deliveredVia: 'sms',
+        smsFallbackAvailable: false,
+      );
+    }
+    if (email != null && email.isNotEmpty) {
+      return const ForgotPasswordResult(
+        deliveredVia: 'email',
+        smsFallbackAvailable: true,
+      );
+    }
+    return const ForgotPasswordResult(
+      deliveredVia: 'sms',
+      smsFallbackAvailable: false,
+    );
   }
 
   /// Mock kabul kodu: `ABCDEF` (her şey büyük). Diğer 6 karakter kodlar
@@ -173,6 +195,7 @@ class MockAuthRepository implements AuthRepository {
     String? phone,
     String? email,
     required String purpose,
+    Map<String, dynamic>? payload,
   }) async {
     await Future.delayed(_delay);
   }
@@ -205,6 +228,52 @@ class MockAuthRepository implements AuthRepository {
 
   @override
   Future<SavedLoginHint?> getSavedLoginHint(UserRole role) async => null;
+
+  @override
+  Future<void> checkIdentifier({
+    required String identifier,
+    required String purpose,
+  }) async {
+    await Future.delayed(_delay);
+  }
+
+  @override
+  Future<bool> checkResidentPhoneExists(String phone) async {
+    await Future.delayed(_delay);
+    return false;
+  }
+
+  @override
+  Future<ManagerIdentifierLookup> checkManagerIdentifierExists(
+    String identifier,
+  ) async {
+    await Future.delayed(_delay);
+    return const ManagerIdentifierLookup(
+      exists: true,
+      name: 'Dev Yönetici',
+    );
+  }
+
+  @override
+  Future<bool> verifyResidentJoinOtp({
+    required String phone,
+    required String code,
+    String? inviteCode,
+  }) async {
+    await Future.delayed(_delay);
+    return true;
+  }
+
+  @override
+  Future<UserEntity> completeResidentJoin({
+    required String phone,
+    required String name,
+    required String inviteCode,
+  }) async {
+    await Future.delayed(_delay);
+    _sessionUser = _devResident;
+    return _devResident;
+  }
 }
 
 /// Tur 5 §10/4-5 — `PUT /me/password` ve `DELETE /me` mock implementasyonu.

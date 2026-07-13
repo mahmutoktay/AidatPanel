@@ -87,7 +87,7 @@ Aşağıdaki değişikliklerden **herhangi biri** yapıldıysa ilgili dokümanla
 | Dosya İşleme | multer, sharp, pdfjs-dist, pdfkit | multer ^2.1.1, sharp ^0.33.5, pdfjs-dist ^4.0.379, pdfkit ^0.16.0 | Multipart upload, image resize, PDF OCR + PDF üretimi |
 | Validasyon | zod | ^3.23.8 | Request schema validation (route middleware) |
 | Loglama | pino, pino-pretty | pino ^9.3.2, pino-pretty ^11.2.2 | Structured JSON logging (console.* yerine) |
-| Test | jest, supertest | jest ^29.7.0, supertest ^7.0.0 | Backend unit test (~77 test, 18 suite — `npm test` ile doğrula) |
+| Test | jest, supertest | jest ^29.7.0, supertest ^7.0.0 | Backend unit test (~95+ test, 20+ suite — `npm test` ile doğrula) |
 | Deploy | PM2, nodemon | — | Process manager + dev watcher |
 
 ### 2.2 Mobile Stack (Flutter)

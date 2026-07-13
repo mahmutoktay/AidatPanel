@@ -88,7 +88,7 @@ class _ResidentAnnouncementsScreenState
       body: DashboardListScreenBody(
         list: RefreshIndicator(
           onRefresh: _reload,
-          color: AppColors.primary,
+          color: AppColors.brand,
           child: _buildList(context, state, announcements),
         ),
       ),

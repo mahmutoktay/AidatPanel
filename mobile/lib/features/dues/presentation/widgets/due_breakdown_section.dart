@@ -55,7 +55,7 @@ class _DueBreakdownSectionState extends State<DueBreakdownSection> {
                 Text(
                   t.breakdownDetails,
                   style: AppTypography.caption.copyWith(
-                    color: AppColors.primary,
+                    color: AppColors.brand,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -63,7 +63,7 @@ class _DueBreakdownSectionState extends State<DueBreakdownSection> {
                 ActionChevron(
                   direction: _expanded ? ChevronDirection.down : ChevronDirection.right,
                   size: 18,
-                  color: AppColors.primary,
+                  color: AppColors.brand,
                 ),
               ],
             ),

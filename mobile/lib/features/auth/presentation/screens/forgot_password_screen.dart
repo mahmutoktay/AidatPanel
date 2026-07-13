@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,11 +9,15 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/input_validators.dart';
+import '../../../../core/utils/phone_utils.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/auth_screen_shell.dart';
 import '../../../../shared/widgets/auth_form_styles.dart';
 import '../../../../shared/widgets/app_back_button.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
+import '../../domain/entities/forgot_password_result.dart';
+import '../onboarding/auth_onboarding_models.dart';
+import '../onboarding/widgets/onboarding_segment_tabs.dart';
 import '../providers/auth_provider.dart';
 
 /// Tur 5 / §10/6 — Şifremi Unuttum ekranı.
@@ -30,28 +35,53 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _contactController = TextEditingController();
+  AuthContactChannel _contact = AuthContactChannel.email;
   bool _submitting = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _contactController.dispose();
     super.dispose();
   }
 
-  String? _validateEmail(String? value) {
+  String? _validateContact(String? value) {
     final t = context.t;
-    final key = InputValidators.validateEmail(value);
-    if (key == null) return null;
-    switch (key) {
-      case 'email_required':
-        return t.validation.emailRequired;
-      case 'email_invalid':
-        return t.validation.emailInvalid;
-      case 'email_too_long':
-        return t.validation.emailTooLong;
+    if (_contact == AuthContactChannel.email) {
+      final key = InputValidators.validateEmail(value);
+      if (key == null) return null;
+      switch (key) {
+        case 'email_required':
+          return t.validation.emailRequired;
+        case 'email_invalid':
+          return t.validation.emailInvalid;
+        case 'email_too_long':
+          return t.validation.emailTooLong;
+        default:
+          return t.validation.emailRequired;
+      }
+    }
+
+    final raw = value?.trim() ?? '';
+    final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) {
+      return t.validation.phoneRequired;
+    }
+    if (PhoneUtils.normalizeTrPhone(digits) == null) {
+      return t.validation.phoneInvalid;
+    }
+    return null;
+  }
+
+  String _successMessage(ForgotPasswordResult result) {
+    final t = context.t;
+    switch (result.deliveredVia) {
+      case 'email':
+        return t.common.forgotPasswordSuccessEmail;
+      case 'sms':
+        return t.common.forgotPasswordSuccessSms;
       default:
-        return t.validation.emailRequired;
+        return t.common.forgotPasswordSuccess;
     }
   }
 
@@ -61,25 +91,38 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     setState(() => _submitting = true);
     final repo = ref.read(authRepositoryProvider);
-    final email = _emailController.text.trim();
+    final raw = _contactController.text.trim();
+
+    String? email;
+    String? phone;
+    if (_contact == AuthContactChannel.email) {
+      email = raw.toLowerCase();
+    } else {
+      phone = PhoneUtils.normalizeTrPhone(raw);
+    }
 
     try {
-      await repo.forgotPassword(email);
+      final result = await repo.forgotPassword(email: email, phone: phone);
       if (!mounted) return;
 
-      ref
-          .read(toastProvider.notifier)
-          .show(
-            context.t.common.forgotPasswordSuccess,
+      ref.read(toastProvider.notifier).show(
+            _successMessage(result),
             type: ToastType.success,
             duration: const Duration(seconds: 6),
           );
 
-      // Reset ekranına email ön-doldurulmuş şekilde geç.
-      context.push('/reset-password', extra: email);
+      context.push(
+        '/reset-password',
+        extra: ResetPasswordArgs(
+          identifier: raw,
+          email: email,
+          phone: phone,
+          deliveredVia: result.deliveredVia,
+          smsFallbackAvailable: result.smsFallbackAvailable,
+        ),
+      );
     } on ApiException catch (e) {
       if (!mounted) return;
-      // Backend her zaman 200 döner ama yine de güvenlik ağı.
       ref
           .read(toastProvider.notifier)
           .show(userFacingError(e), type: ToastType.error);
@@ -91,6 +134,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final t = context.t;
+    final isPhone = _contact == AuthContactChannel.phone;
 
     return AuthScreenShell(
       wrapInCard: false,
@@ -145,24 +189,57 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSizes.spacingXL),
-            TextFormField(
-              controller: _emailController,
+            const SizedBox(height: AppSizes.spacingL),
+            OnboardingSegmentTabs(
+              isSecondSelected: _contact == AuthContactChannel.email,
+              firstLabel: t.features.auth.phone,
+              secondLabel: t.features.auth.email,
+              onFirstTap: () {
+                if (_submitting) return;
+                setState(() {
+                  _contact = AuthContactChannel.phone;
+                  _contactController.clear();
+                });
+              },
+              onSecondTap: () {
+                if (_submitting) return;
+                setState(() {
+                  _contact = AuthContactChannel.email;
+                  _contactController.clear();
+                });
+              },
               enabled: !_submitting,
-              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: AppSizes.spacingM),
+            TextFormField(
+              controller: _contactController,
+              enabled: !_submitting,
+              keyboardType:
+                  isPhone ? TextInputType.phone : TextInputType.emailAddress,
               textInputAction: TextInputAction.done,
-              autofillHints: const [AutofillHints.email],
+              autofillHints: isPhone
+                  ? const [AutofillHints.telephoneNumber]
+                  : const [AutofillHints.email],
+              maxLength: isPhone ? 11 : null,
+              inputFormatters: isPhone
+                  ? [FilteringTextInputFormatter.digitsOnly]
+                  : null,
               onFieldSubmitted: (_) => _submit(),
               style: AppTypography.body1,
               decoration: AuthFormStyles.whiteField(
-                labelText: t.features.auth.email,
-                hintText: t.features.auth.emailHint,
-                prefixIcon: const Icon(
-                  Icons.email_outlined,
+                labelText: isPhone
+                    ? t.features.auth.phone
+                    : t.features.auth.email,
+                hintText: isPhone
+                    ? t.features.auth.onboarding.managerIdentifierHint
+                    : t.features.auth.emailHint,
+                counterText: '',
+                prefixIcon: Icon(
+                  isPhone ? Icons.phone_outlined : Icons.email_outlined,
                   size: AppSizes.iconSize,
                 ),
               ),
-              validator: _validateEmail,
+              validator: _validateContact,
             ),
             const SizedBox(height: AppSizes.spacingL),
             Row(
@@ -174,16 +251,36 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     child: OutlinedButton(
                       onPressed: _submitting
                           ? null
-                          : () => context.push(
+                          : () {
+                              final raw = _contactController.text.trim();
+                              String? email;
+                              String? phone;
+                              if (_contact == AuthContactChannel.email &&
+                                  raw.isNotEmpty) {
+                                email = raw.toLowerCase();
+                              } else if (raw.isNotEmpty) {
+                                phone = PhoneUtils.normalizeTrPhone(raw);
+                              }
+                              context.push(
                                 '/reset-password',
-                                extra: _emailController.text.trim(),
-                              ),
+                                extra: ResetPasswordArgs(
+                                  identifier: raw.isEmpty ? null : raw,
+                                  email: email,
+                                  phone: phone,
+                                ),
+                              );
+                            },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.inkDark,
                         backgroundColor: AppColors.surface,
-                        side: BorderSide(color: AppColors.lineLight, width: 1.5),
+                        side: BorderSide(
+                          color: AppColors.lineLight,
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppSizes.buttonRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppSizes.buttonRadius,
+                          ),
                         ),
                         textStyle: AppTypography.body1.copyWith(
                           fontWeight: FontWeight.w700,
@@ -200,12 +297,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     child: FilledButton(
                       onPressed: _submitting ? null : _submit,
                       child: _submitting
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: AppColors.onAction,
                               ),
                             )
                           : Text(t.common.sendResetCode),

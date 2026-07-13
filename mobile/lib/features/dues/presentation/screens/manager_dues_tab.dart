@@ -137,7 +137,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
 
     return RefreshIndicator(
       onRefresh: _reloadDues,
-      color: AppColors.primary,
+      color: AppColors.brand,
       child: CustomScrollView(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),

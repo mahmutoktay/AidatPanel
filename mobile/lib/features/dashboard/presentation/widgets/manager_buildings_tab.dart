@@ -108,7 +108,7 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      color: AppColors.primary,
+      color: AppColors.brand,
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [

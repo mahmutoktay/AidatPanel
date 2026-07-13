@@ -142,13 +142,13 @@ class InviteCodeResultView extends StatelessWidget {
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.12),
+                color: AppColors.brand.withValues(alpha: 0.12),
               ),
             ),
             child: SelectableText(
               code,
               style: AppTypography.h2.copyWith(
-                color: AppColors.primary,
+                color: AppColors.brand,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 3,
                 fontFamily: 'monospace',

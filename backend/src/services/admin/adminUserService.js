@@ -120,7 +120,7 @@ export async function adminResetPasswordService(adminId, userId, ipAddress) {
     throw new HttpError(404, "Aktif e-posta adresi olan kullanıcı bulunamadı.");
   }
 
-  await requestPasswordResetService(user.email);
+  await requestPasswordResetService({ email: user.email });
 
   await writeAdminAuditLog({
     adminId,

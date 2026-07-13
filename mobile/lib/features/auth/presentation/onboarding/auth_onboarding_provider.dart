@@ -82,6 +82,8 @@ class AuthOnboardingState {
   final bool stepForward;
   /// Davet linkinden (`?code=` / deep link) gelen kod; invite adımı atlanır.
   final bool inviteFromDeepLink;
+  /// Identifier lookup sonrası bilinen yönetici adı (kişiselleştirilmiş karşılama).
+  final String? lookedUpManagerName;
 
   const AuthOnboardingState({
     this.currentStepId = AuthOnboardingStepId.role,
@@ -105,6 +107,7 @@ class AuthOnboardingState {
     this.joinOtpVerified = false,
     this.stepForward = true,
     this.inviteFromDeepLink = false,
+    this.lookedUpManagerName,
   });
 
   int get currentStepIndex {
@@ -145,10 +148,12 @@ class AuthOnboardingState {
     bool? joinOtpVerified,
     bool? stepForward,
     bool? inviteFromDeepLink,
+    String? lookedUpManagerName,
     bool clearError = false,
     bool clearInviteLabel = false,
     bool clearPhone = false,
     bool clearEmail = false,
+    bool clearLookedUpManagerName = false,
   }) {
     return AuthOnboardingState(
       currentStepId: currentStepId ?? this.currentStepId,
@@ -172,6 +177,9 @@ class AuthOnboardingState {
       joinOtpVerified: joinOtpVerified ?? this.joinOtpVerified,
       stepForward: stepForward ?? this.stepForward,
       inviteFromDeepLink: inviteFromDeepLink ?? this.inviteFromDeepLink,
+      lookedUpManagerName: clearLookedUpManagerName
+          ? null
+          : (lookedUpManagerName ?? this.lookedUpManagerName),
     );
   }
 }
@@ -401,13 +409,20 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
   }
 
   /// Identifier kontrolü sonrası: kayıtlı yönetici girişi.
-  void applyManagerLoginFlow({bool keepCurrentStep = true}) {
+  void applyManagerLoginFlow({
+    bool keepCurrentStep = true,
+    String? lookedUpManagerName,
+  }) {
     final current = keepCurrentStep ? state.currentStepId : null;
+    final trimmed = lookedUpManagerName?.trim();
     state = state.copyWith(
       role: UserRole.manager,
       flow: AuthOnboardingFlow.login,
       isFirstTimeSetup: false,
       visibleSteps: List<AuthOnboardingStepId>.from(_managerPasswordLoginSteps),
+      lookedUpManagerName:
+          (trimmed != null && trimmed.isNotEmpty) ? trimmed : null,
+      clearLookedUpManagerName: trimmed == null || trimmed.isEmpty,
       clearError: true,
     );
     if (current != null && state.visibleSteps.contains(current)) {
@@ -425,6 +440,7 @@ class AuthOnboardingNotifier extends Notifier<AuthOnboardingState> {
       flow: AuthOnboardingFlow.register,
       isFirstTimeSetup: true,
       visibleSteps: List<AuthOnboardingStepId>.from(_managerPasswordRegisterSteps),
+      clearLookedUpManagerName: true,
       clearError: true,
     );
     if (current != null && state.visibleSteps.contains(current)) {

@@ -94,6 +94,8 @@ class _BuildingsExpandableFabState extends State<BuildingsExpandableFab>
       final only = actions.first;
       return FloatingActionButton.extended(
         onPressed: only.onTap,
+        backgroundColor: AppColors.actionButton,
+        foregroundColor: AppColors.actionButtonForeground,
         icon: Icon(only.icon),
         label: Text(only.label),
       );
@@ -128,6 +130,8 @@ class _BuildingsExpandableFabState extends State<BuildingsExpandableFab>
           ),
         FloatingActionButton.extended(
           onPressed: _toggle,
+          backgroundColor: AppColors.actionButton,
+          foregroundColor: AppColors.actionButtonForeground,
           icon: AnimatedRotation(
             turns: _open ? 0.125 : 0,
             duration: _duration,
@@ -164,7 +168,7 @@ class _MiniFabAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.actionButton,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [],
       ),
@@ -181,14 +185,18 @@ class _MiniFabAction extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(action.icon, color: AppColors.primary, size: 20),
+                Icon(
+                  action.icon,
+                  color: AppColors.actionButtonForeground,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   action.label,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
-                    color: AppColors.inkDark,
+                    color: AppColors.actionButtonForeground,
                   ),
                 ),
               ],

@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 
-/// Sakin ana sayfa mockup renkleri — mavi vurgu.
+import '../../../../../core/theme/app_colors.dart';
+
+/// Sakin ana sayfa vurgu renkleri — logo marka token’larına bağlı.
 abstract final class ResidentHomeColors {
-  static const blue = Color(0xFF2B6FF0);
-  static const blueDeep = Color(0xFF1A5FE8);
+  static Color get blue => AppColors.brand;
+  static Color get blueDeep => AppColors.brandSoft;
 
-  static const topOrange = Color(0xFFFFB020);
-  static const topRed = Color(0xFFEF5350);
-  static const topGreen = Color(0xFF43A047);
+  static Color get topOrange => AppColors.accent;
+  static Color get topRed => AppColors.statusRed;
+  static Color get topGreen => AppColors.statusGreen;
 
-  static const secondaryOrangeBg = Color(0xFFFFF3E0);
-  static const secondaryBlueBg = Color(0xFFE3F2FD);
+  static Color get secondaryOrangeBg =>
+      AppColors.isDark ? AppColors.fill : AppColors.paymentCta;
+  static Color get secondaryBlueBg =>
+      AppColors.isDark ? AppColors.fill : AppColors.statusBlueBg;
 }

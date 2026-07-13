@@ -145,7 +145,7 @@ class _OtpInputRowState extends State<OtpInputRow> {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSizes.inputRadius),
                     borderSide:
-                        BorderSide(color: AppColors.primary, width: 2),
+                        BorderSide(color: AppColors.brand, width: 2),
                   ),
                 ),
                 onChanged: (v) => _onChanged(i, v),

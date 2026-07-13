@@ -8,6 +8,7 @@ import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart'
     show AuthRepository, AuthRepositoryImpl;
 import '../../domain/entities/user_entity.dart';
+import '../../domain/entities/manager_identifier_lookup.dart';
 import '../../../profile/presentation/providers/profile_notifier.dart';
 import '../../../../core/utils/input_validators.dart';
 import '../../../../core/utils/phone_utils.dart';
@@ -153,21 +154,23 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   /// Yönetici e-posta/telefon kayıtlı mı? (`purpose: manager_identifier`).
-  Future<bool> checkManagerIdentifierExists(String rawIdentifier) async {
-    if (state.isLoading) return false;
+  Future<ManagerIdentifierLookup?> checkManagerIdentifierExists(
+    String rawIdentifier,
+  ) async {
+    if (state.isLoading) return null;
     final identifierError =
         InputValidators.validateLoginIdentifier(rawIdentifier);
     if (identifierError != null) {
       state = state.copyWith(error: _identifierErrorMessage(identifierError));
-      return false;
+      return null;
     }
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final exists = await _authRepository.checkManagerIdentifierExists(
+      final lookup = await _authRepository.checkManagerIdentifierExists(
         rawIdentifier.trim(),
       );
       state = state.copyWith(isLoading: false, clearError: true);
-      return exists;
+      return lookup;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
       rethrow;

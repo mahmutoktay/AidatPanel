@@ -70,16 +70,16 @@ class _RoleCard extends StatelessWidget {
     final double borderWidth;
 
     if (selected) {
-      bg = isDark ? Colors.white : AppColors.primary;
-      fg = isDark ? const Color(0xFF111111) : Colors.white;
+      bg = AppColors.action;
+      fg = AppColors.onAction;
       iconColor = fg;
       borderColor = Colors.transparent;
       borderWidth = 0;
     } else {
-      bg = isDark ? AppColors.darkCard : AppColors.surface;
-      fg = AppColors.textPrimary;
+      bg = isDark ? AppColors.fill : AppColors.surface;
+      fg = AppColors.ink;
       iconColor = AppColors.textSecondary;
-      borderColor = isDark ? Colors.white.withValues(alpha: 0.35) : AppColors.border;
+      borderColor = AppColors.border;
       borderWidth = 1.5;
     }
 
@@ -91,7 +91,7 @@ class _RoleCard extends StatelessWidget {
         color: bg,
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
         elevation: selected ? (isDark ? 0 : 2) : 0,
-        shadowColor: AppColors.primary.withValues(alpha: 0.2),
+        shadowColor: AppColors.brand.withValues(alpha: 0.2),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(AppSizes.cardRadius),

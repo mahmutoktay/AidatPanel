@@ -304,12 +304,12 @@ class _SavedIbanListTile extends StatelessWidget {
     final cardRadius = BorderRadius.circular(DashboardScreenStyle.cardRadius);
     final cardDecoration = BoxDecoration(
       color: selected
-          ? AppColors.primary.withValues(alpha: 0.08)
+          ? AppColors.brand.withValues(alpha: 0.08)
           : AppColors.surface,
       borderRadius: cardRadius,
       boxShadow: DashboardScreenStyle.cardShadow,
       border: selected
-          ? Border.all(color: AppColors.primary, width: 2)
+          ? Border.all(color: AppColors.brand, width: 2)
           : null,
     );
 
@@ -387,8 +387,8 @@ class _SavedIbanLeadingIcon extends StatelessWidget {
             ? (selected ? Icons.check_circle : Icons.radio_button_unchecked)
             : Icons.account_balance_outlined,
         color: selectionMode
-            ? (selected ? AppColors.primary : AppColors.textSecondary)
-            : AppColors.primary,
+            ? (selected ? AppColors.brand : AppColors.textSecondary)
+            : AppColors.brand,
         size: AppSizes.listRowIconSize,
       ),
     );

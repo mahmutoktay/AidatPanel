@@ -117,14 +117,14 @@ class _VacantApartmentCard extends StatelessWidget {
                   child: TextButton(
                     onPressed: onInvite,
                     style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primary,
+                      foregroundColor: AppColors.brand,
                       minimumSize: const Size(48, 48),
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                     ),
                     child: Text(
                       context.t.common.inviteResident,
                       style: AppTypography.body2.copyWith(
-                        color: AppColors.primary,
+                        color: AppColors.brand,
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                       ),
@@ -174,7 +174,7 @@ class _OccupiedResidentCard extends StatelessWidget {
         boxShadow: BuildingSummaryCard.cardShadow,
         border: showSelection && selected
             ? Border.all(
-                color: AppColors.primary.withValues(alpha: 0.85),
+                color: AppColors.brand.withValues(alpha: 0.85),
                 width: 1.5,
               )
             : null,
@@ -196,7 +196,7 @@ class _OccupiedResidentCard extends StatelessWidget {
                           ? Icons.check_box
                           : Icons.check_box_outline_blank,
                       color: selected
-                          ? AppColors.primary
+                          ? AppColors.brand
                           : AppColors.textSecondary,
                       size: 28,
                     ),

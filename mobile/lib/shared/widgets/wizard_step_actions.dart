@@ -63,19 +63,19 @@ class WizardStepActions extends StatelessWidget {
                   ),
                 ),
                 child: isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 24,
                         width: 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: AppColors.onAction,
                         ),
                       )
                     : Text(
                         primaryLabel,
                         style: AppTypography.body1.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: AppColors.onAction,
                         ),
                       ),
               ),

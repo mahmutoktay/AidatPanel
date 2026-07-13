@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/navigation/app_back_navigation.dart';
 import '../../../../core/navigation/auth_back_handler.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/auth_screen_shell.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -133,6 +133,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return AuthBackHandler(
+      exitHintMessage: context.t.common.pressBackAgainToExit,
+      onExitHint: (message) => ref
+          .read(toastProvider.notifier)
+          .show(
+            message,
+            type: ToastType.info,
+            duration: AppBackNavigation.exitGracePeriod,
+          ),
       child: AuthScreenShell(
         showBrandHeader: true,
         wrapInCard: false,
@@ -229,14 +237,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ? null
                     : () => _handleLogin(context),
                 child: authState.isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
+                    ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onAction))
                     : Text(context.t.features.auth.login),
               ),
             ),

@@ -271,7 +271,7 @@ class _PhoneInfoRow extends StatelessWidget {
         children: [
           Icon(
             Icons.phone_outlined,
-            color: AppColors.primary,
+            color: AppColors.brand,
             size: 22,
           ),
           const SizedBox(width: AppSizes.spacingM),

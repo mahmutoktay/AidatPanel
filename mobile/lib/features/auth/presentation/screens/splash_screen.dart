@@ -3,13 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/platform/system_navigator_bridge.dart';
+import '../../../../core/navigation/app_back_navigation.dart';
+import '../../../../core/navigation/auth_back_handler.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/auth_screen_shell.dart';
+import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../dekont/presentation/providers/share_intent_provider.dart';
 import '../../presentation/widgets/auth_brand_mark.dart';
 import '../../presentation/providers/auth_provider.dart';
@@ -138,8 +140,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       context.go('/login');
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: BorderSide(color: AppColors.primary, width: 1.5),
+                      foregroundColor: AppColors.brand,
+                      side: BorderSide(color: AppColors.brand, width: 1.5),
                       shape: RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(AppSizes.buttonRadius),
@@ -148,7 +150,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     child: Text(
                       context.t.features.auth.skipToLogin,
                       style: AppTypography.body2.copyWith(
-                        color: AppColors.primary,
+                        color: AppColors.brand,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -210,12 +212,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) async {
-        if (didPop) return;
-        await SystemNavigatorBridge.moveAppToBackground();
-      },
+    return AuthBackHandler(
+      exitHintMessage: context.t.common.pressBackAgainToExit,
+      onExitHint: (message) => ref
+          .read(toastProvider.notifier)
+          .show(
+            message,
+            type: ToastType.info,
+            duration: AppBackNavigation.exitGracePeriod,
+          ),
       child: AuthScreenShell(
         centerBody: true,
         wrapInCard: false,

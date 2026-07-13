@@ -130,7 +130,7 @@ class _InitialsContent extends StatelessWidget {
       child: Text(
         _initialsFromName(userName),
         style: AppTypography.body1.copyWith(
-          color: AppColors.primary,
+          color: AppColors.brand,
           fontWeight: FontWeight.w800,
           fontSize: size * 0.34,
         ),

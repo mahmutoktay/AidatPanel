@@ -30,7 +30,7 @@ class AuthProgressIndicator extends StatelessWidget {
               child: Container(
                 height: 2,
                 margin: const EdgeInsets.symmetric(horizontal: 2),
-                color: lineActive ? AppColors.primary : AppColors.border,
+                color: lineActive ? AppColors.action : AppColors.border,
               ),
             );
           }
@@ -61,9 +61,9 @@ class _StepDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fill = active ? AppColors.primary : AppColors.surface;
-    final border = isCurrent || active ? AppColors.primary : AppColors.border;
-    final textColor = active ? Colors.white : AppColors.textSecondary;
+    final fill = active ? AppColors.action : AppColors.surface;
+    final border = isCurrent || active ? AppColors.action : AppColors.border;
+    final textColor = active ? AppColors.onAction : AppColors.textSecondary;
 
     return Container(
       width: 32,

@@ -64,7 +64,7 @@ class SiteDetailScreen extends ConsumerWidget {
             ref.invalidate(siteDetailProvider(siteId));
             await ref.read(siteDetailProvider(siteId).future);
           },
-          color: AppColors.primary,
+          color: AppColors.brand,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: AppSizes.screenBodyScrollPadding.copyWith(
@@ -262,7 +262,7 @@ class _BlocksSectionHeader extends StatelessWidget {
             '/manager-dashboard/sites/$siteId/add-building',
           ),
           icon: const Icon(Icons.add_rounded),
-          color: AppColors.primary,
+          color: AppColors.brand,
           style: IconButton.styleFrom(
             minimumSize: const Size(40, 40),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -298,13 +298,13 @@ class _BlockTile extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: AppColors.brand.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   alignment: Alignment.center,
                   child: Icon(
                     Icons.view_module_outlined,
-                    color: AppColors.primary,
+                    color: AppColors.brand,
                     size: 22,
                   ),
                 ),

@@ -91,9 +91,19 @@ export const authSchemas = {
   },
 
   forgotPassword: {
-    body: z.object({
-      email: z.string().email("Geçerli bir email adresi giriniz"),
-    }),
+    body: z
+      .object({
+        email: z
+          .preprocess(
+            (v) => (v === "" || v === null || v === undefined ? undefined : v),
+            z.string().email("Geçerli bir email adresi giriniz").optional()
+          ),
+        phone: optionalPhone,
+        channel: z.enum(["email", "sms"]).optional(),
+      })
+      .refine((d) => d.email || d.phone, {
+        message: "E-posta veya telefon numarası gereklidir.",
+      }),
   },
 
   resetPassword: {

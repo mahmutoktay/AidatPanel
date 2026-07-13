@@ -66,7 +66,7 @@ class _ImageSourceTile extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(icon, size: 28, color: AppColors.primary),
+                Icon(icon, size: 28, color: AppColors.brand),
                 const SizedBox(width: AppSizes.spacingM),
                 Expanded(
                   child: Text(

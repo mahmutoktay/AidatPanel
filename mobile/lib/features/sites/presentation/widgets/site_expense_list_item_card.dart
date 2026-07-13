@@ -70,12 +70,12 @@ class SiteExpenseListItemCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
+                    color: AppColors.brand.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
                     _categoryIcon(expense.category),
-                    color: AppColors.primary,
+                    color: AppColors.brand,
                     size: 24,
                   ),
                 ),

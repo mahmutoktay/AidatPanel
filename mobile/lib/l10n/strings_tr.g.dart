@@ -424,12 +424,18 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get dangerZone => 'Tehlikeli Bölge';
 	@override String get forgotPassword => 'Şifremi Unuttum';
 	@override String get forgotPasswordTitle => 'Şifremi Unuttum';
-	@override String get forgotPasswordSubtitle => 'Kayıtlı e-posta adresinizi girin, size bir sıfırlama kodu gönderelim.';
-	@override String get forgotPasswordSuccess => 'Eğer bu e-posta sistemimizde kayıtlıysa, sıfırlama kodu gönderildi. Lütfen e-postanızı kontrol edin.';
+	@override String get forgotPasswordSubtitle => 'Kayıtlı e-posta veya telefonunuzu girin; sıfırlama kodunu size gönderelim.';
+	@override String get forgotPasswordSuccess => 'Kayıtlıysanız sıfırlama kodu gönderildi. Lütfen e-posta veya SMS kutunuzu kontrol edin.';
+	@override String get forgotPasswordSuccessEmail => 'Kayıtlıysanız sıfırlama kodu e-posta adresinize gönderildi.';
+	@override String get forgotPasswordSuccessSms => 'Kayıtlıysanız sıfırlama kodu SMS ile gönderildi.';
+	@override String get forgotPasswordSmsFallback => 'Kod gelmedi mi? SMS ile gönder';
+	@override String get forgotPasswordSmsFallbackSuccess => 'Sıfırlama kodu SMS ile gönderildi.';
 	@override String get sendResetCode => 'Kodu Gönder';
 	@override String get iHaveACode => 'Zaten kodum var';
 	@override String get resetPasswordTitle => 'Yeni Şifre Belirle';
-	@override String get resetPasswordSubtitle => 'E-postanıza gelen 6 haneli kodu ve yeni şifrenizi girin.';
+	@override String get resetPasswordSubtitle => 'Size gelen 6 karakterlik kodu ve yeni şifrenizi girin.';
+	@override String get resetPasswordSubtitleEmail => 'E-postanıza gelen 6 karakterlik kodu ve yeni şifrenizi girin.';
+	@override String get resetPasswordSubtitleSms => 'SMS ile gelen 6 karakterlik kodu ve yeni şifrenizi girin.';
 	@override String get resetCode => 'Sıfırlama Kodu';
 	@override String get resetCodeHint => 'ABC123';
 	@override String get resetCodeRequired => 'Sıfırlama kodu gerekli';
@@ -1495,6 +1501,8 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get apartmentWithFloor => 'Daire {number} · {floor}. Kat';
 	@override String get noOverdueApartments => 'Geciken ödeme bulunmuyor';
 	@override String get noChartData => 'Henüz yeterli veri yok';
+	@override String get noBuildingsEmptyMessage => 'Henüz bir binanız yok. Yönetime başlamak için ilk binanızı ekleyin.';
+	@override String get noBuildingsEmptyCta => 'Bina Ekle';
 	@override String get seeMoreOverdue => 'Daha fazlası (+{count})';
 	@override String get payNow => 'Şimdi Öde';
 	@override String get overduePaymentsBadge => '{count} gecikmiş ödeme';
@@ -1658,7 +1666,8 @@ class _Translations$features$auth$onboarding$tr implements Translations$features
 	@override String get managerExperienceSubtitle => 'Daha önce kayıt oldunuz mu?';
 	@override String get managerReturningOption => 'Daha önce kayıt olmuştum';
 	@override String get managerFirstTimeOption => 'Uygulamayı ilk defa kullanacağım';
-	@override String get managerNameTitle => 'İsminiz nedir?';
+	@override String get managerNameEyebrow => 'Hesabınızı oluşturuyoruz';
+	@override String get managerNameTitle => 'Sizi tanıyalım, isminiz nedir?';
 	@override String get managerNameSubtitle => 'Size nasıl hitap edelim?';
 	@override String get managerIdentifierTitle => 'E-posta veya telefonunuzu girin';
 	@override String get managerIdentifierSubtitle => 'Giriş bilgileriniz olarak kullanılacak.';
@@ -1668,6 +1677,9 @@ class _Translations$features$auth$onboarding$tr implements Translations$features
 	@override String get identifierRequired => 'E-posta veya telefon giriniz';
 	@override String get phoneInvalidElevenDigits => 'Telefon numarasını 0 ile başlayarak 11 hane giriniz';
 	@override String get managerLoginPasswordTitle => 'Şifrenizi girin';
+	@override String get managerLoginWelcomeTitle => 'Tekrar hoş geldiniz!';
+	@override String get managerLoginWelcomeNamedTitle => 'Tekrar hoş geldiniz, {name}!';
+	@override String get managerLoginWelcomeSubtitle => 'Devam etmek için şifrenizi girin';
 	@override String get managerRegisterPasswordTitle => 'Şifrenizi belirleyin';
 	@override String get managerRegisterPasswordSubtitle => 'En az 6 karakter; yalnızca harf ve rakam kullanın.';
 	@override String get managerCreateAccountButton => 'Hesabı Oluştur';
@@ -2335,12 +2347,18 @@ extension on TranslationsTr {
 			'common.dangerZone' => 'Tehlikeli Bölge',
 			'common.forgotPassword' => 'Şifremi Unuttum',
 			'common.forgotPasswordTitle' => 'Şifremi Unuttum',
-			'common.forgotPasswordSubtitle' => 'Kayıtlı e-posta adresinizi girin, size bir sıfırlama kodu gönderelim.',
-			'common.forgotPasswordSuccess' => 'Eğer bu e-posta sistemimizde kayıtlıysa, sıfırlama kodu gönderildi. Lütfen e-postanızı kontrol edin.',
+			'common.forgotPasswordSubtitle' => 'Kayıtlı e-posta veya telefonunuzu girin; sıfırlama kodunu size gönderelim.',
+			'common.forgotPasswordSuccess' => 'Kayıtlıysanız sıfırlama kodu gönderildi. Lütfen e-posta veya SMS kutunuzu kontrol edin.',
+			'common.forgotPasswordSuccessEmail' => 'Kayıtlıysanız sıfırlama kodu e-posta adresinize gönderildi.',
+			'common.forgotPasswordSuccessSms' => 'Kayıtlıysanız sıfırlama kodu SMS ile gönderildi.',
+			'common.forgotPasswordSmsFallback' => 'Kod gelmedi mi? SMS ile gönder',
+			'common.forgotPasswordSmsFallbackSuccess' => 'Sıfırlama kodu SMS ile gönderildi.',
 			'common.sendResetCode' => 'Kodu Gönder',
 			'common.iHaveACode' => 'Zaten kodum var',
 			'common.resetPasswordTitle' => 'Yeni Şifre Belirle',
-			'common.resetPasswordSubtitle' => 'E-postanıza gelen 6 haneli kodu ve yeni şifrenizi girin.',
+			'common.resetPasswordSubtitle' => 'Size gelen 6 karakterlik kodu ve yeni şifrenizi girin.',
+			'common.resetPasswordSubtitleEmail' => 'E-postanıza gelen 6 karakterlik kodu ve yeni şifrenizi girin.',
+			'common.resetPasswordSubtitleSms' => 'SMS ile gelen 6 karakterlik kodu ve yeni şifrenizi girin.',
 			'common.resetCode' => 'Sıfırlama Kodu',
 			'common.resetCodeHint' => 'ABC123',
 			'common.resetCodeRequired' => 'Sıfırlama kodu gerekli',
@@ -2422,14 +2440,14 @@ extension on TranslationsTr {
 			'common.errorKeys.invalidExpenseResponse' => 'Gider bilgisi okunamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.invalidSiteExpenseResponse' => 'Site gider bilgisi okunamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.unsupportedFileType' => 'Bu dosya türü desteklenmiyor.',
+			_ => null,
+		} ?? switch (path) {
 			'common.errorKeys.dekontUploadFailed' => 'Dekont yüklenemedi. Lütfen tekrar deneyin.',
 			'common.errorKeys.serverResponseUnreadable' => 'Sunucu yanıtı okunamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.dekontResponseMissing' => 'Dekont yanıtı eksik. Lütfen tekrar deneyin.',
 			'common.errorKeys.dekontResponseParseFailed' => 'Dekont yanıtı işlenemedi. Lütfen tekrar deneyin.',
 			'common.errorKeys.reportFileEmpty' => 'Rapor dosyası boş geldi. Lütfen tekrar deneyin.',
 			'common.errorKeys.downloadStarted' => 'İndirme başlatıldı...',
-			_ => null,
-		} ?? switch (path) {
 			'common.errorKeys.downloadSavedToGallery' => 'Görsel telefonunuzun Galerisine (AidatPanel albümüne) kaydedildi.',
 			'common.errorKeys.downloadSavedToDownloads' => 'Dekont, telefonunuzun İndirilenler (Downloads) klasörüne kaydedildi.',
 			'common.errorKeys.downloadFallbackShare' => 'Paylaşım ekranı açıldı, buradan Dosyalara Kaydet diyebilirsiniz.',
@@ -2682,7 +2700,8 @@ extension on TranslationsTr {
 			'features.auth.onboarding.managerExperienceSubtitle' => 'Daha önce kayıt oldunuz mu?',
 			'features.auth.onboarding.managerReturningOption' => 'Daha önce kayıt olmuştum',
 			'features.auth.onboarding.managerFirstTimeOption' => 'Uygulamayı ilk defa kullanacağım',
-			'features.auth.onboarding.managerNameTitle' => 'İsminiz nedir?',
+			'features.auth.onboarding.managerNameEyebrow' => 'Hesabınızı oluşturuyoruz',
+			'features.auth.onboarding.managerNameTitle' => 'Sizi tanıyalım, isminiz nedir?',
 			'features.auth.onboarding.managerNameSubtitle' => 'Size nasıl hitap edelim?',
 			'features.auth.onboarding.managerIdentifierTitle' => 'E-posta veya telefonunuzu girin',
 			'features.auth.onboarding.managerIdentifierSubtitle' => 'Giriş bilgileriniz olarak kullanılacak.',
@@ -2692,6 +2711,9 @@ extension on TranslationsTr {
 			'features.auth.onboarding.identifierRequired' => 'E-posta veya telefon giriniz',
 			'features.auth.onboarding.phoneInvalidElevenDigits' => 'Telefon numarasını 0 ile başlayarak 11 hane giriniz',
 			'features.auth.onboarding.managerLoginPasswordTitle' => 'Şifrenizi girin',
+			'features.auth.onboarding.managerLoginWelcomeTitle' => 'Tekrar hoş geldiniz!',
+			'features.auth.onboarding.managerLoginWelcomeNamedTitle' => 'Tekrar hoş geldiniz, {name}!',
+			'features.auth.onboarding.managerLoginWelcomeSubtitle' => 'Devam etmek için şifrenizi girin',
 			'features.auth.onboarding.managerRegisterPasswordTitle' => 'Şifrenizi belirleyin',
 			'features.auth.onboarding.managerRegisterPasswordSubtitle' => 'En az 6 karakter; yalnızca harf ve rakam kullanın.',
 			'features.auth.onboarding.managerCreateAccountButton' => 'Hesabı Oluştur',
@@ -2932,6 +2954,8 @@ extension on TranslationsTr {
 			'features.dekont.resident.statusDetailAwaitingApproval' => 'Yöneticinin onayı bekleniyor.',
 			'features.dekont.resident.statusDetailAwaitingIbanOk' => 'Alıcı bilgileri eşleşti. Yöneticinin onayı bekleniyor.',
 			'features.dekont.resident.statusDetailAwaitingIbanIssue' => 'Alıcı bilgileri net değil. Yöneticinin onayı bekleniyor.',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.resident.statusDetailApproved' => 'Ödemeniz onaylandı.',
 			'features.dekont.resident.statusDetailPartiallyApproved' => 'Ödemeniz kısmen onaylandı.',
 			'features.dekont.resident.statusDetailRejected' => 'Dekontunuz reddedildi.',
@@ -2942,8 +2966,6 @@ extension on TranslationsTr {
 			'features.dekont.resident.dueOverdueHint' => 'Bu aidatınız gecikmiş',
 			'features.dekont.manager.statusProcessing' => 'İşleniyor',
 			'features.dekont.manager.statusAwaitingApproval' => 'Onay bekliyor',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.manager.statusApproved' => 'Onaylandı',
 			'features.dekont.manager.statusPartiallyApproved' => 'Kısmen onaylandı',
 			'features.dekont.manager.statusRejected' => 'Reddedildi',
@@ -3352,6 +3374,8 @@ extension on TranslationsTr {
 			'features.dashboard.apartmentWithFloor' => 'Daire {number} · {floor}. Kat',
 			'features.dashboard.noOverdueApartments' => 'Geciken ödeme bulunmuyor',
 			'features.dashboard.noChartData' => 'Henüz yeterli veri yok',
+			'features.dashboard.noBuildingsEmptyMessage' => 'Henüz bir binanız yok. Yönetime başlamak için ilk binanızı ekleyin.',
+			'features.dashboard.noBuildingsEmptyCta' => 'Bina Ekle',
 			'features.dashboard.seeMoreOverdue' => 'Daha fazlası (+{count})',
 			'features.dashboard.payNow' => 'Şimdi Öde',
 			'features.dashboard.overduePaymentsBadge' => '{count} gecikmiş ödeme',
@@ -3444,6 +3468,8 @@ extension on TranslationsTr {
 			'legal.kvkkS1Body' => 'AidatPanel kapsamındaki kişisel veri işleme faaliyetleri için veri sorumlusu Vefa Yazılım’dır. KVKK taleplerinizi store@vefayazilim.com adresine veya uygulamada kayıtlı e-posta adresinizle iletebilirsiniz.',
 			'legal.kvkkS2Title' => 'İşlenen veri kategorileri',
 			'legal.kvkkS2Body' => 'Kimlik ve iletişim, müşteri işlem (aidat, ödeme, gider), görsel kayıt (dekont), işlem güvenliği (log, token) ve pazarlama/iletişim (bildirim izni) kategorilerinde veri işlenebilir.',
+			_ => null,
+		} ?? switch (path) {
 			'legal.kvkkS3Title' => 'İşleme amaçları ve hukuki sebepler',
 			'legal.kvkkS3Body' => 'Verileriniz; sözleşmenin kurulması ve ifası, hukuki yükümlülük, meşru menfaat ve açık rızanız (bildirimler gibi) kapsamında işlenir.',
 			'legal.kvkkS4Title' => 'Aktarım',
@@ -3456,8 +3482,6 @@ extension on TranslationsTr {
 			'legal.helpBody' => 'Sık sorulan sorular, adım adım rehberler ve destek kanalları yakında bu bölümde yer alacak. Uygulama desteği için: store@vefayazilim.com (Vefa Yazılım). Acil apartman işleri için yöneticiniz veya site yönetiminizle iletişime geçebilirsiniz.',
 			'db_context.user_entry' => 'Kayıt: {value}',
 			'db_context.building_name' => 'Bina: {value}',
-			_ => null,
-		} ?? switch (path) {
 			'db_context.apartment_label' => 'Daire: {value}',
 			'db_context.code_value' => 'Kod: {value}',
 			'db_context.expiry_date' => 'Son kullanma: {value}',

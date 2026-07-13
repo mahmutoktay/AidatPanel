@@ -150,7 +150,7 @@ class _ResidentActivityHistoryScreenState
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _refresh,
-                color: AppColors.primary,
+                color: AppColors.brand,
                 child: isLoading
                     ? ListView(
                         physics: const AlwaysScrollableScrollPhysics(),

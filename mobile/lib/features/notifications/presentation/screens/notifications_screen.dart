@@ -176,7 +176,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
         ),
         list: RefreshIndicator(
           onRefresh: _reload,
-          color: AppColors.primary,
+          color: AppColors.brand,
           child: _buildList(context, state, visible),
         ),
       ),

@@ -229,7 +229,7 @@ class _SessionsInfoCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: DashboardScreenStyle.whiteCard(
-        color: AppColors.primary.withValues(alpha: 0.04),
+        color: AppColors.brand.withValues(alpha: 0.04),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,13 +238,13 @@ class _SessionsInfoCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: AppColors.brand.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
             child: Icon(
               Icons.devices_rounded,
-              color: AppColors.primary,
+              color: AppColors.brand,
               size: 22,
             ),
           ),
@@ -292,7 +292,7 @@ class _SessionsEmptyCard extends StatelessWidget {
             alignment: Alignment.center,
             child: Icon(
               Icons.verified_user_outlined,
-              color: AppColors.primary,
+              color: AppColors.brand,
               size: 30,
             ),
           ),

@@ -153,7 +153,7 @@ class _PhoneInputRowState extends State<PhoneInputRow> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-          borderSide: BorderSide(color: AppColors.primary, width: 2),
+          borderSide: BorderSide(color: AppColors.brand, width: 2),
         ),
       ),
       onChanged: _notifyFromDisplay,

@@ -11,11 +11,15 @@ abstract final class DuesScreenStyle {
 
   static List<BoxShadow> get cardShadow => DashboardScreenStyle.cardShadow;
 
+  /// Kart yüzeyi — `AppColors.surface` ([DashboardScreenStyle.whiteCard]).
   static BoxDecoration whiteCard({Color? color}) => BoxDecoration(
         color: color ?? AppColors.surface,
         borderRadius: BorderRadius.circular(cardRadius),
         boxShadow: cardShadow,
       );
+
+  /// [whiteCard] ile aynı — semantik alias.
+  static BoxDecoration surfaceCard({Color? color}) => whiteCard(color: color);
 
   /// Toplam daire sayısına göre durum oranı (0.0–1.0).
   static double statusProgressRatio(int count, int totalUnits) {

@@ -49,7 +49,7 @@ class ExpenseListItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final date =
         '${expense.date.day}.${expense.date.month}.${expense.date.year}';
-    final categoryColor = AppColors.primary;
+    final categoryColor = AppColors.brand;
     final canSwipe = onEdit != null || onDelete != null;
 
     final card = Material(
@@ -128,7 +128,7 @@ class ExpenseListItemCard extends StatelessWidget {
                         Text(
                           '(OCR: ${expense.parsedAmount!.toStringAsFixed(2)} ₺)',
                           style: AppTypography.caption.copyWith(
-                            color: AppColors.primary,
+                            color: AppColors.brand,
                           ),
                         ),
                     ],

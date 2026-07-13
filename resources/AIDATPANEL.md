@@ -331,17 +331,27 @@ POST   /api/v1/auth/forgot-password
 POST   /api/v1/auth/reset-password
 ```
 
-**Yönetici identifier-öncelikli akış (mobil):**
-1. `POST /auth/check-identifier` `{ identifier: email|phone, purpose: "manager_identifier" }` → `{ exists: true|false }`
-   - E-posta başka rolde doluysa `409`
-2. Kayıtlıysa (`exists: true`) → `POST /auth/login` (şifre)
-3. Yeniyse (`exists: false`) → isim + şifre → `POST /auth/register` + `POST /auth/login`
+**Şifre sıfırlama (`POST /auth/forgot-password`):**
+- Body: `{ email? }` **veya** `{ phone? }` (en az biri); opsiyonel `channel: "email" | "sms"`
+- Kanal kuralı (SMS kotası tasarrufu):
+  1. Hesapta e-posta varsa → varsayılan **e-posta** (Resend)
+  2. Yalnızca telefon varsa → **SMS** (`sendSms`)
+  3. E-posta gönderildikten sonra kullanıcı kod alamıyorsa → `channel: "sms"` ile opt-in SMS (hesapta telefon şart)
+- Yanıt `data`: `{ deliveredVia: "email"|"sms"|null, smsFallbackAvailable: boolean }`
+  - Kullanıcı yoksa / kanal yoksa: `deliveredVia: null`, `smsFallbackAvailable: false` (enumeration koruması; HTTP her zaman 200)
+- SMS: saatlik en fazla 3 gönderim / kullanıcı; `PasswordResetToken` (6 karakter) — login OTP ile karışmaz
+- `POST /auth/reset-password`: `{ token, password }` (değişmedi)
 
 **Yönetici identifier-öncelikli akış (mobil):**
-1. `POST /auth/check-identifier` `{ identifier: email|phone, purpose: "manager_identifier" }` → `{ exists: true|false }`
+1. `POST /auth/check-identifier` `{ identifier: email|phone, purpose: "manager_identifier" }`
+   → `{ exists: false }` veya `{ exists: true, name: string|null }`
+   - `name`: kayıtlı yönetici adı (trim); boşsa `null` (kişiselleştirilmiş karşılama için)
+   - Telefon eşleşmesi kanonik 10 hane + legacy yazılışlar (`0…`, `90…`, `+90…`)
    - E-posta başka rolde doluysa `409`
 2. Kayıtlıysa (`exists: true`) → `POST /auth/login` (şifre)
 3. Yeniyse (`exists: false`) → isim + şifre → `POST /auth/register` + `POST /auth/login`
+   - `POST /auth/register` telefon/e-posta ile idempotent: aynı kimlik+şifre tekrarında (ağ retry) mevcut hesap başarı döner
+   - `POST /auth/login` aynı telefonda MANAGER+RESIDENT varsa şifre eşleşen hesabı seçer
 
 **Sakin telefon-öncelikli akış (mobil):**
 1. `POST /auth/check-identifier` `{ identifier: phone, purpose: "resident_phone" }` → `{ exists: true|false }`
@@ -896,41 +906,44 @@ AidatPanel kullanıcılarının önemli bir kısmı **50+ yaş** grubundadır (a
 
 ### Renk Paleti
 
-Kaynak: logo lacivert (`#082860`) + turuncu (`#F86000`) ile aşağıdaki slate/amber
-doküman paletinin harmanı. Uygulama token’ları:
-`mobile/lib/core/theme/app_color_palette.dart` (`light` / `dark`) → `AppColors`.
+Kaynak: logo lacivert (`#082860`) + turuncu (`#F86000`) — logo biraz daha önde;
+slate nötrler harmanlanır. Token’lar:
+`mobile/lib/core/theme/app_color_palette.dart` → `AppColors`.
+
+**Kural:** `ink` / gövde metni asla dolgu değildir. CTA dolgusu = `action`.
 
 ```dart
-// core/theme/app_color_palette.dart (özet)
+// Sabit marka
+brandNavy     = Color(0xFF082860); // Logo lacivert
+brandNavyLift = Color(0xFF0B2F6B); // UI lacivert
+brandOrange   = Color(0xFFF86000); // Logo turuncu
 
-// Marka (açık tema)
-primary       = Color(0xFF0B2F6B); // Logo + doküman lacivert harmanı
-primaryLight  = Color(0xFF2D5FA8); // Hover / pressed
-accent        = Color(0xFFF86000); // Logo turuncu — CTA / vurgu
+// Semantik — açık
+brand / primary = brandNavyLift;     // ikon, link, outline
+ink / textPrimary = Color(0xFF0F172A);
+action          = brandNavyLift;     // CTA / FAB
+onAction        = Color(0xFFFFFFFF);
+accent          = brandOrange;
+
+// Semantik — koyu
+brand / primary = Color(0xFF8BA3C7); // lacivert tint (marka hissi)
+ink / textPrimary = Color(0xFFE8EEF8);
+action          = brandOrange;       // CTA / FAB
+onAction        = Color(0xFFFFFFFF);
+accent          = brandOrange;
 
 // Semantik durum (tema bağımsız)
-success       = Color(0xFF16A34A); // Ödendi, tamamlandı
-error         = Color(0xFFDC2626); // Gecikmiş aidat, hata
-warning       = Color(0xFFF59E0B); // Beklemede (amber; accent’ten ayrı)
-info          = Color(0xFF2563EB); // Bilgi mesajları
+success = Color(0xFF16A34A);
+error   = Color(0xFFDC2626);
+warning = Color(0xFFF59E0B); // amber; accent’ten ayrı
+info    = Color(0xFF2563EB);
 
 // Nötrler — açık
-background    = Color(0xFFF8FAFC);
-surface       = Color(0xFFFFFFFF);
-dashboardBackground = Color(0xFFF3F5F9);
-border        = Color(0xFFE2E8F0);
-textPrimary   = Color(0xFF0F172A);
-textSecondary = Color(0xFF475569);
-textDisabled  = Color(0xFF94A3B8);
+background = #F8FAFC · surface = #FFFFFF · fill = #EEF2F7
+dashboardBackground = #F3F5F9 · border = #E2E8F0
 
-// Nötrler — koyu (lacivert-siyah yüzey)
-// dashboardBackground #0A101C · surface #121A2A · fill #1A2438
-// primary (ink) #E8EEF8 · actionButton = accent turuncu
-
-// Durum badge arka planları (açık ton)
-successBg     = Color(0xFFDCFCE7);
-errorBg       = Color(0xFFFEE2E2);
-warningBg     = Color(0xFFFEF3C7);
+// Nötrler — koyu (lacivert-siyah)
+dashboardBackground #0A101C · surface #121A2A · fill #1A2438 · border #2A3548
 ```
 
 ---

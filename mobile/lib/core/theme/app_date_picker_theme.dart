@@ -16,7 +16,7 @@ abstract final class AppDatePickerTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.dialogRadius),
         ),
-        headerBackgroundColor: palette.primary,
+        headerBackgroundColor: palette.brand,
         headerForegroundColor: palette.datePickerHeaderForeground,
         headerHeadlineStyle: AppTypography.h3.copyWith(
           color: palette.datePickerHeaderForeground,
@@ -37,11 +37,11 @@ abstract final class AppDatePickerTheme {
           color: palette.textPrimary,
           fontWeight: FontWeight.w600,
         ),
-        todayForegroundColor: WidgetStatePropertyAll(palette.primary),
+        todayForegroundColor: WidgetStatePropertyAll(palette.brand),
         todayBackgroundColor: WidgetStatePropertyAll(palette.fill),
         dayForegroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return palette.datePickerSelectedDayForeground;
+            return palette.onAction;
           }
           if (states.contains(WidgetState.disabled)) {
             return palette.textDisabled;
@@ -49,16 +49,16 @@ abstract final class AppDatePickerTheme {
           return palette.textPrimary;
         }),
         dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return palette.primary;
+          if (states.contains(WidgetState.selected)) return palette.action;
           return Colors.transparent;
         }),
         cancelButtonStyle: TextButton.styleFrom(
-          foregroundColor: palette.primary,
+          foregroundColor: palette.brand,
           textStyle: AppTypography.button,
           minimumSize: const Size(72, AppSizes.minTouchTarget),
         ),
         confirmButtonStyle: TextButton.styleFrom(
-          foregroundColor: palette.primary,
+          foregroundColor: palette.brand,
           textStyle: AppTypography.button,
           minimumSize: const Size(72, AppSizes.minTouchTarget),
         ),

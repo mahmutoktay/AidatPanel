@@ -124,7 +124,7 @@ class DekontListCard extends StatelessWidget {
                 Text(
                   dekont.parsedAmount!,
                   style: AppTypography.body2.copyWith(
-                    color: AppColors.primary,
+                    color: AppColors.brand,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

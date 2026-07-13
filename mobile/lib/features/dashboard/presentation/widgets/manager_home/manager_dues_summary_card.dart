@@ -101,7 +101,7 @@ class _ManagerDuesSummaryCardState extends ConsumerState<ManagerDuesSummaryCard>
               value: progress,
               minHeight: 5,
               backgroundColor: AppColors.lineLight,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.brand),
             ),
           ),
           if (_overdueCount > 0) ...[
@@ -195,8 +195,8 @@ class _CompactRemindButton extends StatelessWidget {
                 key: const ValueKey('idle'),
                 onPressed: onPressed,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.surface,
+                  backgroundColor: AppColors.action,
+                  foregroundColor: AppColors.onAction,
                   minimumSize: const Size(_width, _height),
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -208,7 +208,7 @@ class _CompactRemindButton extends StatelessWidget {
                 child: Text(
                   label,
                   style: AppTypography.caption.copyWith(
-                    color: AppColors.surface,
+                    color: AppColors.onAction,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                   ),

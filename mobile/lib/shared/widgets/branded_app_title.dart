@@ -14,15 +14,12 @@ class BrandedAppTitle extends StatelessWidget {
   final double fontSize;
   final TextAlign textAlign;
 
-  static const Color brandOrange = Color(0xFFF5A623);
-  static const Color brandNavy = Color(0xFF1B3568);
-
   static const _aidat = 'Aidat';
   static const _panel = 'Panel';
 
   @override
   Widget build(BuildContext context) {
-    final panelColor = AppColors.isDark ? Colors.white : brandNavy;
+    final panelColor = AppColors.isDark ? AppColors.ink : AppColors.brand;
     final style = GoogleFonts.nunito(
       fontSize: fontSize,
       fontWeight: FontWeight.w600,
@@ -36,7 +33,7 @@ class BrandedAppTitle extends StatelessWidget {
         children: [
           TextSpan(
             text: _aidat,
-            style: style.copyWith(color: brandOrange),
+            style: style.copyWith(color: AppColors.accent),
           ),
           TextSpan(
             text: _panel,

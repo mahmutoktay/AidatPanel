@@ -5,7 +5,7 @@ import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
 import 'dues_screen_style.dart';
 
-/// Aidatlar / Giderler segment — aktif sekme siyah dolgu + beyaz yazı.
+/// Aidatlar / Giderler / Mülkler segment — aktif sekme aksiyon rengi + kontrast yazı.
 class DuesSegmentToggle extends StatelessWidget {
   final List<String> segments;
   final int selectedIndex;
@@ -33,7 +33,11 @@ class DuesSegmentToggle extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: DuesScreenStyle.whiteCard(),
+      decoration: BoxDecoration(
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(DuesScreenStyle.cardRadius),
+        border: Border.all(color: AppColors.border),
+      ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final segmentWidth = constraints.maxWidth / segments.length;
@@ -53,7 +57,7 @@ class DuesSegmentToggle extends StatelessWidget {
                       width: segmentWidth,
                       height: controlHeight,
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: AppColors.actionButton,
                         borderRadius: BorderRadius.circular(
                           DuesScreenStyle.chipRadius,
                         ),
@@ -81,7 +85,7 @@ class DuesSegmentToggle extends StatelessWidget {
                                     curve: Curves.easeInOut,
                                     style: AppTypography.body2.copyWith(
                                       color: safeIndex == i
-                                          ? AppColors.surface
+                                          ? AppColors.actionButtonForeground
                                           : AppColors.textSecondary,
                                       fontWeight: FontWeight.w700,
                                       fontSize: 15,

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/navigation/app_back_navigation.dart';
 import '../../../../core/navigation/auth_back_handler.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -176,7 +177,8 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
 
   String _identifierForState(AuthOnboardingState ob) {
     if (ob.email != null && ob.email!.isNotEmpty) return ob.email!;
-    if (ob.phone != null && ob.phone!.isNotEmpty) return '0${ob.phone}';
+    // Kanonik 10 hane — başına 0 ekleme (çift 0 / normalize kayması önlenir).
+    if (ob.phone != null && ob.phone!.isNotEmpty) return ob.phone!;
     return _identifierController.text.trim();
   }
 
@@ -328,9 +330,10 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
     }
     onboarding.setIdentifierFromRaw(raw);
     try {
-      final exists = await auth.checkManagerIdentifierExists(raw);
-      if (exists) {
-        onboarding.applyManagerLoginFlow();
+      final lookup = await auth.checkManagerIdentifierExists(raw);
+      if (lookup == null) return;
+      if (lookup.exists) {
+        onboarding.applyManagerLoginFlow(lookedUpManagerName: lookup.name);
       } else {
         onboarding.applyManagerRegisterFlow();
       }
@@ -695,6 +698,16 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
         : AppSizes.screenBodyScrollPadding;
 
     return AuthBackHandler(
+      onStepBack: () =>
+          ref.read(authOnboardingProvider.notifier).goBack(),
+      exitHintMessage: context.t.common.pressBackAgainToExit,
+      onExitHint: (message) => ref
+          .read(toastProvider.notifier)
+          .show(
+            message,
+            type: ToastType.info,
+            duration: AppBackNavigation.exitGracePeriod,
+          ),
       child: AuthScreenShell(
         showBrandHeader: false,
         wrapInCard: false,
@@ -968,6 +981,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
           _nameController.text = ob.name!;
         }
         return OnboardingStepScaffold(
+          eyebrow: tOb.managerNameEyebrow,
           title: tOb.managerNameTitle,
           subtitle: tOb.managerNameSubtitle,
           body: TextField(
@@ -999,11 +1013,25 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
 
       case AuthOnboardingStepId.credentials:
         final isRegister = ob.flow == AuthOnboardingFlow.register;
+        final lookedUpName = ob.lookedUpManagerName?.trim();
+        final hasLookedUpName =
+            !isRegister && lookedUpName != null && lookedUpName.isNotEmpty;
+        final String loginTitle;
+        final String? loginSubtitle;
+        if (isRegister) {
+          loginTitle = tOb.managerRegisterPasswordTitle;
+          loginSubtitle = tOb.managerRegisterPasswordSubtitle;
+        } else if (hasLookedUpName) {
+          loginTitle = tOb.managerLoginWelcomeNamedTitle
+              .replaceAll('{name}', lookedUpName);
+          loginSubtitle = tOb.managerLoginWelcomeSubtitle;
+        } else {
+          loginTitle = tOb.managerLoginWelcomeTitle;
+          loginSubtitle = tOb.managerLoginWelcomeSubtitle;
+        }
         return OnboardingStepScaffold(
-          title: isRegister
-              ? tOb.managerRegisterPasswordTitle
-              : tOb.managerLoginPasswordTitle,
-          subtitle: isRegister ? tOb.managerRegisterPasswordSubtitle : null,
+          title: loginTitle,
+          subtitle: loginSubtitle,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -1652,7 +1680,7 @@ class _ResidentOtpResendRow extends StatelessWidget {
                   linkLabel,
                   style: AppTypography.body2.copyWith(
                     color: enabled
-                        ? AppColors.primary
+                        ? AppColors.brand
                         : AppColors.textSecondary,
                     fontWeight: FontWeight.w700,
                   ),

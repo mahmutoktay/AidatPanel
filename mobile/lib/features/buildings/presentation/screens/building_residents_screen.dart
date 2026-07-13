@@ -144,7 +144,7 @@ class _BuildingResidentsScreenState
                       Text(
                         '${ids.length}',
                         style: AppTypography.h3.copyWith(
-                          color: AppColors.primary,
+                          color: AppColors.brand,
                         ),
                       ),
                     ],
@@ -547,7 +547,7 @@ class _BuildingResidentsScreenState
             buildingId: widget.building.id,
           ),
           icon: const Icon(Icons.add_rounded),
-          color: AppColors.primary,
+          color: AppColors.brand,
           style: IconButton.styleFrom(
             minimumSize: const Size(40, 40),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,

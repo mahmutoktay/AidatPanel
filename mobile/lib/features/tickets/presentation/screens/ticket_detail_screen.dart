@@ -139,7 +139,7 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
         ),
         data: (ticket) => RefreshIndicator(
           onRefresh: _reload,
-          color: AppColors.primary,
+          color: AppColors.brand,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: AppSizes.screenBodyScrollPadding,

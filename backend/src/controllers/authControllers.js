@@ -81,11 +81,19 @@ export const logoutAllDevices = asyncHandler(async (req, res) => {
 });
 
 export const forgotPassword = asyncHandler(async (req, res) => {
-  await requestPasswordResetService(req.body.email);
+  const data = await requestPasswordResetService({
+    email: req.body.email,
+    phone: req.body.phone,
+    channel: req.body.channel,
+  });
   res.status(200).json({
     success: true,
     message:
-      "E-posta adresi sistemde kayıtlıysa şifre sıfırlama talimatları gönderildi.",
+      "Kayıtlıysanız şifre sıfırlama kodu gönderildi. Lütfen gelen kutunuzu veya SMS'lerinizi kontrol edin.",
+    data: {
+      deliveredVia: data?.deliveredVia ?? null,
+      smsFallbackAvailable: Boolean(data?.smsFallbackAvailable),
+    },
   });
 });
 

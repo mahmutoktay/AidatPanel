@@ -8,6 +8,8 @@ import '../../../../core/utils/jwt_utils.dart';
 import '../../../../core/utils/phone_utils.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/entities/saved_login_hint.dart';
+import '../../domain/entities/manager_identifier_lookup.dart';
+import '../../domain/entities/forgot_password_result.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/login_request.dart';
 import '../models/register_request.dart';
@@ -22,7 +24,9 @@ abstract class AuthRepository {
     required String purpose,
   });
   Future<bool> checkResidentPhoneExists(String phone);
-  Future<bool> checkManagerIdentifierExists(String identifier);
+  Future<ManagerIdentifierLookup> checkManagerIdentifierExists(
+    String identifier,
+  );
   Future<void> register(
     String? email,
     String password,
@@ -44,7 +48,11 @@ abstract class AuthRepository {
   /// Tur 5 / §10/6 — Şifremi unuttum akışı.
   /// Backend her zaman 200 döner; UI kullanıcıya "kod gönderildi" mesajı
   /// gösterip reset ekranına geçirir (enumeration leak korumalı).
-  Future<void> forgotPassword(String email);
+  Future<ForgotPasswordResult> forgotPassword({
+    String? email,
+    String? phone,
+    String? channel,
+  });
 
   /// 6 karakter token + yeni şifre. Geçersiz/expired token → ApiException.
   Future<void> resetPassword(String token, String password);
@@ -211,7 +219,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<bool> checkManagerIdentifierExists(String identifier) async {
+  Future<ManagerIdentifierLookup> checkManagerIdentifierExists(
+    String identifier,
+  ) async {
     try {
       return await _remoteDataSource.checkManagerIdentifierExists(
         PhoneUtils.normalizeLoginIdentifier(identifier),
@@ -315,9 +325,17 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> forgotPassword(String email) async {
+  Future<ForgotPasswordResult> forgotPassword({
+    String? email,
+    String? phone,
+    String? channel,
+  }) async {
     try {
-      await _remoteDataSource.forgotPassword(email: email);
+      return await _remoteDataSource.forgotPassword(
+        email: email,
+        phone: phone,
+        channel: channel,
+      );
     } on ApiException {
       rethrow;
     } catch (_) {

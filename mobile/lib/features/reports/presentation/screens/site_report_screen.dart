@@ -66,7 +66,7 @@ class _SiteReportScreenState extends ConsumerState<SiteReportScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(color: AppColors.primary),
+            CircularProgressIndicator(color: AppColors.brand),
             const SizedBox(height: 16),
             Text(context.t.features.reports.downloading),
           ],

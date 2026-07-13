@@ -16,14 +16,14 @@ class OnboardingInfoBanner extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
+        color: AppColors.brand.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppSizes.cardRadius),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.25)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline, color: AppColors.primary, size: 22),
+          Icon(Icons.info_outline, color: AppColors.brand, size: 22),
           const SizedBox(width: AppSizes.spacingS),
           Expanded(
             child: Text(

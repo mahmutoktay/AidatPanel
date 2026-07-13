@@ -5,6 +5,13 @@ import 'app_sizes.dart';
 
 /// Marka: logo lacivert + turuncu; nötrler aktif paletten.
 /// Tema değişiminde [applyPalette] çağrılır.
+///
+/// Token kuralları:
+/// - [ink] / [textPrimary] — gövde metni (dolgu değil)
+/// - [brand] / [primary] — ikon, link, outline
+/// - [action] / [actionButton] — CTA / FAB dolgusu
+/// - [onAction] / [actionButtonForeground] — CTA üstü
+/// - [accent] — logo turuncu vurgu
 class AppColors {
   static AppColorPalette _palette = AppColorPalette.light;
 
@@ -14,14 +21,26 @@ class AppColors {
 
   static bool get isDark => identical(_palette, AppColorPalette.dark);
 
-  // Ana marka — palet tabanlı
-  static Color get primary => _palette.primary;
-  static Color get primaryLight => _palette.primaryLight;
+  // Sabit logo kaynakları
+  static const Color brandNavy = AppColorPalette.brandNavy;
+  static const Color brandOrange = AppColorPalette.brandOrange;
+
+  // Semantik marka
+  static Color get brand => _palette.brand;
+  static Color get brandSoft => _palette.brandSoft;
+  static Color get ink => _palette.ink;
+  static Color get inkMuted => _palette.textSecondary;
+  static Color get action => _palette.action;
+  static Color get onAction => _palette.onAction;
+
+  /// Geriye dönük: marka rengi (dolgu için [action] tercih edin).
+  static Color get primary => _palette.brand;
+  static Color get primaryLight => _palette.brandSoft;
   static Color get accent => _palette.accent;
 
   /// Koyu kart / yükseltilmiş yüzey (onboarding, abonelik vurgusu).
   static Color get darkCard =>
-      isDark ? _palette.fill : const Color(0xFF0B2F6B);
+      isDark ? _palette.fill : AppColorPalette.brandNavyLift;
 
   static Color get paymentCta => _palette.paymentCta;
   static Color get paymentCtaForeground => _palette.paymentCtaForeground;
@@ -68,14 +87,13 @@ class AppColors {
   static Color get systemMuted => _palette.systemMuted;
 
   // Profil/ayarlar alias
-  static Color get ink => primary;
   static Color get muted => textSecondary;
   static Color get line => border;
 
   static Color get inkDark => _palette.inkDark;
 
-  static Color get actionButton => _palette.actionButton;
-  static Color get actionButtonForeground => _palette.actionButtonForeground;
+  static Color get actionButton => _palette.action;
+  static Color get actionButtonForeground => _palette.onAction;
   static Color get mutedText => _palette.mutedText;
 
   static const Color statusGreen = Color(0xFF2FB872);

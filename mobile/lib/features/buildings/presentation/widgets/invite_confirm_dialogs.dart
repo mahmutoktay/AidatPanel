@@ -55,7 +55,7 @@ class OccupiedApartmentConfirmDialog extends StatelessWidget {
         children: [
           PremiumSheetMetaRow(
             icon: Icons.person_outline_rounded,
-            iconColor: AppColors.primary,
+            iconColor: AppColors.brand,
             label: context.t.common.residentPrefix,
             value: apartment.residentName,
           ),

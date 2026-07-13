@@ -13,6 +13,7 @@ import {
 import {
   normalizeTrPhone,
   normalizeLoginIdentifier,
+  phoneLookupVariants,
 } from "../utils/normalizeTrPhone.js";
 
 /** Refresh token'ın SHA-256 özeti — DB'de saklanır, replay tespiti için. */
@@ -57,23 +58,68 @@ async function assertEmailAvailable(email) {
   }
 }
 
+/** Telefon — kanonik + legacy yazılışlarla çakışma kontrolü. */
 async function assertPhoneAvailable(phone, role) {
   if (!phone) return;
+  const variants = phoneLookupVariants(phone);
   const existing = await prisma.user.findFirst({
-    where: { phone, role, deletedAt: null },
+    where: { phone: { in: variants }, role, deletedAt: null },
   });
   if (existing) {
     throw new HttpError(409, "Bu telefon numarası zaten kullanılıyor.");
   }
 }
 
-async function findActiveUserByIdentifier(identifier) {
+/**
+ * Identifier ile aktif kullanıcı(lar).
+ * Telefon: aynı numara MANAGER+RESIDENT olabilir → aday listesi.
+ */
+async function findActiveUsersByIdentifier(identifier) {
   const normalized = normalizeLoginIdentifier(identifier);
   const isEmail = normalized.includes("@");
+  if (isEmail) {
+    const user = await prisma.user.findFirst({
+      where: { email: normalized, deletedAt: null },
+    });
+    return user ? [user] : [];
+  }
+
+  const phone = normalizeTrPhone(normalized);
+  if (phone) {
+    return prisma.user.findMany({
+      where: {
+        phone: { in: phoneLookupVariants(phone) },
+        deletedAt: null,
+      },
+    });
+  }
+
+  const user = await prisma.user.findFirst({
+    where: { phone: normalized, deletedAt: null },
+  });
+  return user ? [user] : [];
+}
+
+async function findActiveManagerByPhoneOrEmail(identifier) {
+  const normalized = normalizeLoginIdentifier(identifier);
+  const isEmail = normalized.includes("@");
+  if (isEmail) {
+    return prisma.user.findFirst({
+      where: { email: normalized, deletedAt: null, role: "MANAGER" },
+    });
+  }
+  const phone = normalizeTrPhone(normalized);
+  if (!phone) {
+    return prisma.user.findFirst({
+      where: { phone: normalized, deletedAt: null, role: "MANAGER" },
+    });
+  }
   return prisma.user.findFirst({
-    where: isEmail
-      ? { email: normalized, deletedAt: null }
-      : { phone: normalized, deletedAt: null },
+    where: {
+      phone: { in: phoneLookupVariants(phone) },
+      deletedAt: null,
+      role: "MANAGER",
+    },
   });
 }
 
@@ -99,13 +145,24 @@ export async function checkIdentifierService({ identifier, purpose }) {
     if (!isEmail && !phone) {
       throw new HttpError(400, "Geçerli bir telefon numarası giriniz.");
     }
-    const manager = await prisma.user.findFirst({
-      where: isEmail
-        ? { email: normalized, deletedAt: null, role: "MANAGER" }
-        : { phone, deletedAt: null, role: "MANAGER" },
-    });
+    const manager = isEmail
+      ? await prisma.user.findFirst({
+          where: { email: normalized, deletedAt: null, role: "MANAGER" },
+        })
+      : await prisma.user.findFirst({
+          where: {
+            phone: { in: phoneLookupVariants(phone) },
+            deletedAt: null,
+            role: "MANAGER",
+          },
+        });
     if (manager) {
-      return { exists: true };
+      const trimmedName =
+        typeof manager.name === "string" ? manager.name.trim() : "";
+      return {
+        exists: true,
+        name: trimmedName.length > 0 ? trimmedName : null,
+      };
     }
     if (isEmail) {
       await assertEmailAvailable(normalized);
@@ -117,17 +174,17 @@ export async function checkIdentifierService({ identifier, purpose }) {
     if (isEmail) {
       await assertEmailAvailable(normalized);
     } else {
-      await assertPhoneAvailable(normalized, "MANAGER");
+      const phone = normalizeTrPhone(normalized);
+      if (!phone) {
+        throw new HttpError(400, "Geçerli bir telefon numarası giriniz.");
+      }
+      await assertPhoneAvailable(phone, "MANAGER");
     }
     return { ok: true };
   }
 
   if (purpose === "manager_login") {
-    const user = await prisma.user.findFirst({
-      where: isEmail
-        ? { email: normalized, deletedAt: null, role: "MANAGER" }
-        : { phone: normalized, deletedAt: null, role: "MANAGER" },
-    });
+    const user = await findActiveManagerByPhoneOrEmail(normalized);
     if (!user) {
       throw new HttpError(
         404,
@@ -148,7 +205,11 @@ export async function checkIdentifierService({ identifier, purpose }) {
       throw new HttpError(400, "Geçerli bir telefon numarası giriniz.");
     }
     const user = await prisma.user.findFirst({
-      where: { phone, deletedAt: null, role: "RESIDENT" },
+      where: {
+        phone: { in: phoneLookupVariants(phone) },
+        deletedAt: null,
+        role: "RESIDENT",
+      },
     });
     return { exists: Boolean(user) };
   }
@@ -158,6 +219,9 @@ export async function checkIdentifierService({ identifier, purpose }) {
 
 /**
  * Yönetici kaydı — POST /auth/register
+ *
+ * Ağ timeout + istemci retry: aynı kimlik+şifreyle tekrar gelen istek
+ * mevcut hesabı doğrulayıp başarı döner (idempotent).
  */
 export async function registerService({ name, email, phone, password }) {
   const normalizedPhone = phone ? normalizeTrPhone(phone) : null;
@@ -167,19 +231,87 @@ export async function registerService({ name, email, phone, password }) {
   const normalizedEmail = email?.trim().toLowerCase() || null;
 
   assertMinContactRequired(normalizedEmail, normalizedPhone);
+
+  const existingManager = normalizedEmail
+    ? await prisma.user.findFirst({
+        where: { email: normalizedEmail, deletedAt: null, role: "MANAGER" },
+      })
+    : await prisma.user.findFirst({
+        where: {
+          phone: { in: phoneLookupVariants(normalizedPhone) },
+          deletedAt: null,
+          role: "MANAGER",
+        },
+      });
+
+  if (existingManager) {
+    if (await bcrypt.compare(password, existingManager.passwordHash)) {
+      return {
+        user: existingManager.id,
+        name: existingManager.name,
+        email: existingManager.email,
+        phone: existingManager.phone,
+        role: existingManager.role,
+        language: existingManager.language,
+        apartmentId: existingManager.apartmentId,
+        createdAt: existingManager.createdAt,
+        updatedAt: existingManager.updatedAt,
+      };
+    }
+    throw new HttpError(
+      409,
+      normalizedPhone
+        ? "Bu telefon numarası zaten kullanılıyor."
+        : "Bu email adresi zaten kullanılıyor."
+    );
+  }
+
+  // E-posta tüm roller arasında tekil.
   if (normalizedEmail) await assertEmailAvailable(normalizedEmail);
-  if (normalizedPhone) await assertPhoneAvailable(normalizedPhone, "MANAGER");
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email: normalizedEmail,
-      phone: normalizedPhone,
-      passwordHash: hashedPassword,
-      role: "MANAGER",
-    },
-  });
+  let user;
+  try {
+    user = await prisma.user.create({
+      data: {
+        name,
+        email: normalizedEmail,
+        phone: normalizedPhone,
+        passwordHash: hashedPassword,
+        role: "MANAGER",
+      },
+    });
+  } catch (err) {
+    if (err?.code === "P2002") {
+      const raced = normalizedEmail
+        ? await prisma.user.findFirst({
+            where: {
+              email: normalizedEmail,
+              deletedAt: null,
+              role: "MANAGER",
+            },
+          })
+        : await prisma.user.findFirst({
+            where: {
+              phone: { in: phoneLookupVariants(normalizedPhone) },
+              deletedAt: null,
+              role: "MANAGER",
+            },
+          });
+      if (raced && (await bcrypt.compare(password, raced.passwordHash))) {
+        user = raced;
+      } else {
+        throw new HttpError(
+          409,
+          normalizedPhone
+            ? "Bu telefon numarası zaten kullanılıyor."
+            : "Bu email adresi zaten kullanılıyor."
+        );
+      }
+    } else {
+      throw err;
+    }
+  }
 
   return {
     user: user.id,
@@ -200,14 +332,20 @@ export async function registerService({ name, email, phone, password }) {
 export async function loginService(body) {
   const { password } = body;
   const identifier = normalizeLoginIdentifier(body.identifier);
-  const user = await findActiveUserByIdentifier(identifier);
+  const candidates = await findActiveUsersByIdentifier(identifier);
 
-  if (!user) {
+  if (candidates.length === 0) {
     throw new HttpError(401, "Email/telefon veya şifre hatalı.");
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-  if (!isPasswordValid) {
+  let user = null;
+  for (const candidate of candidates) {
+    if (await bcrypt.compare(password, candidate.passwordHash)) {
+      user = candidate;
+      break;
+    }
+  }
+  if (!user) {
     throw new HttpError(401, "Email/telefon veya şifre hatalı.");
   }
 

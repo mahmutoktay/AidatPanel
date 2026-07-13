@@ -70,12 +70,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             const SizedBox(height: AppSizes.spacingS),
             _SettingsSurfaceCard(
               children: [
-                _SettingsTile(
-                  icon: Icons.lock_outline,
-                  title: context.t.common.changePassword,
-                  onTap: () => ChangePasswordBottomSheet.show(context),
-                ),
                 if (user?.role == UserRole.manager) ...[
+                  _SettingsTile(
+                    icon: Icons.lock_outline,
+                    title: context.t.common.changePassword,
+                    onTap: () => ChangePasswordBottomSheet.show(context),
+                  ),
                   _SettingsTile(
                     icon: Icons.account_balance_wallet_outlined,
                     title:

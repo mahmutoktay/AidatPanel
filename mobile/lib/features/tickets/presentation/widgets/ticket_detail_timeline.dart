@@ -50,7 +50,7 @@ class TicketDetailTimelineEntry extends StatelessWidget {
     final t = context.t.features.tickets;
     final dateStr = AppDateFormat.dateShort(update.createdAt);
     final isManagerUpdate = update.fromRole == 'MANAGER';
-    final themeColor = isManagerUpdate ? AppColors.primary : AppColors.success;
+    final themeColor = isManagerUpdate ? AppColors.brand : AppColors.success;
     final roleText = viewerIsResident
         ? (isManagerUpdate
             ? t.managerUpdateForResident

@@ -99,10 +99,10 @@ class ExpenseReceiptSection extends StatelessWidget {
           horizontal: AppSizes.spacingM,
         ),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.04),
+          color: AppColors.brand.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(DashboardScreenStyle.cardRadius),
           border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.25),
+            color: AppColors.brand.withValues(alpha: 0.25),
             width: 1.5,
           ),
         ),
@@ -111,12 +111,12 @@ class ExpenseReceiptSection extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: AppColors.brand.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.attach_file,
-                color: AppColors.primary,
+                color: AppColors.brand,
                 size: 24,
               ),
             ),
@@ -129,7 +129,7 @@ class ExpenseReceiptSection extends StatelessWidget {
                   Text(
                     t.receiptAdd,
                     style: AppTypography.body1.copyWith(
-                      color: AppColors.primary,
+                      color: AppColors.brand,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -174,7 +174,7 @@ class ExpenseReceiptSection extends StatelessWidget {
             else if (ext == 'pdf')
               _buildFileIcon(Icons.picture_as_pdf_outlined, Colors.red[700]!)
             else
-              _buildFileIcon(Icons.description_outlined, AppColors.primary),
+              _buildFileIcon(Icons.description_outlined, AppColors.brand),
             const SizedBox(width: AppSizes.spacingM),
             Expanded(
               child: Padding(
@@ -237,7 +237,7 @@ class ExpenseReceiptSection extends StatelessWidget {
           children: [
             _buildFileIcon(
               isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
-              isPdf ? Colors.red[700]! : AppColors.primary,
+              isPdf ? Colors.red[700]! : AppColors.brand,
             ),
             const SizedBox(width: AppSizes.spacingM),
             Expanded(
@@ -274,7 +274,7 @@ class ExpenseReceiptSection extends StatelessWidget {
                 icon: const Icon(Icons.sync, size: 16),
                 label: Text(context.t.features.expenses.receiptChange),
                 style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primary,
+                  foregroundColor: AppColors.brand,
                   minimumSize: const Size(60, 40),
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSizes.spacingS,
@@ -363,7 +363,7 @@ class ExpenseReceiptSection extends StatelessWidget {
                   icon: const Icon(Icons.add, size: 20),
                   label: Text(t.receiptAdd),
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primary,
+                    foregroundColor: AppColors.brand,
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSizes.spacingS,
                       vertical: AppSizes.spacingXS,

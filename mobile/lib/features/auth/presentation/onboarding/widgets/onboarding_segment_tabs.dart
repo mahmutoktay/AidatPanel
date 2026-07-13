@@ -69,7 +69,7 @@ class _Tab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? AppColors.primary : Colors.transparent,
+      color: selected ? AppColors.action : Colors.transparent,
       borderRadius: BorderRadius.circular(AppSizes.buttonRadius - 2),
       child: InkWell(
         onTap: onTap,
@@ -81,7 +81,7 @@ class _Tab extends StatelessWidget {
             label,
             style: AppTypography.body1.copyWith(
               fontWeight: FontWeight.w600,
-              color: selected ? Colors.white : AppColors.textSecondary,
+              color: selected ? AppColors.onAction : AppColors.textSecondary,
             ),
           ),
         ),

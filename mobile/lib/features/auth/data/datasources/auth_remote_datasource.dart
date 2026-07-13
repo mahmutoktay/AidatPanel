@@ -2,6 +2,8 @@ import '../../../../core/device/device_info_service.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/token_refresh_service.dart';
+import '../../domain/entities/manager_identifier_lookup.dart';
+import '../../domain/entities/forgot_password_result.dart';
 import '../models/login_request.dart';
 import '../models/login_response.dart';
 import '../models/register_request.dart';
@@ -19,8 +21,10 @@ abstract class AuthRemoteDataSource {
   /// `POST /auth/check-identifier` purpose=`resident_phone` → `data.exists`.
   Future<bool> checkResidentPhoneExists(String phone);
 
-  /// `POST /auth/check-identifier` purpose=`manager_identifier` → `data.exists`.
-  Future<bool> checkManagerIdentifierExists(String identifier);
+  /// `POST /auth/check-identifier` purpose=`manager_identifier`.
+  Future<ManagerIdentifierLookup> checkManagerIdentifierExists(
+    String identifier,
+  );
 
   Future<RegisterResponse> register(RegisterRequest request);
   Future<JoinResponse> join(JoinRequest request);
@@ -38,10 +42,14 @@ abstract class AuthRemoteDataSource {
   /// bu cihaza yeni access + refresh token döner.
   Future<TokenRefreshResult> logoutAllDevices();
 
-  /// Tur 5 / §10/6 — `POST /auth/forgot-password` body `{ email }`.
-  /// Backend her zaman 200 döner (enumeration leak yok); kod sadece kayıtlı
-  /// e-postalara Resend ile gönderilir.
-  Future<void> forgotPassword({required String email});
+  /// Tur 5 / §10/6 — `POST /auth/forgot-password`
+  /// Body: `{ email? }` veya `{ phone? }`, opsiyonel `channel: email|sms`.
+  /// Backend her zaman 200 döner (enumeration leak yok).
+  Future<ForgotPasswordResult> forgotPassword({
+    String? email,
+    String? phone,
+    String? channel,
+  });
 
   /// `POST /auth/reset-password` body `{ token, password }`.
   /// Token 6 karakter alfabesi `23456789ABCDEFGHJKLMNPQRSTUVWXYZ` (sunucu
@@ -132,7 +140,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<bool> checkManagerIdentifierExists(String identifier) async {
+  Future<ManagerIdentifierLookup> checkManagerIdentifierExists(
+    String identifier,
+  ) async {
     final response = await _dioClient.post(
       ApiConstants.checkIdentifier,
       data: {
@@ -141,7 +151,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       },
     );
     final data = response.data['data'] as Map<String, dynamic>?;
-    return data?['exists'] == true;
+    final exists = data?['exists'] == true;
+    final rawName = data?['name'];
+    final trimmed = rawName is String ? rawName.trim() : '';
+    return ManagerIdentifierLookup(
+      exists: exists,
+      name: trimmed.isEmpty ? null : trimmed,
+    );
   }
 
   @override
@@ -201,11 +217,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> forgotPassword({required String email}) async {
-    await _dioClient.post(
+  Future<ForgotPasswordResult> forgotPassword({
+    String? email,
+    String? phone,
+    String? channel,
+  }) async {
+    final body = <String, dynamic>{};
+    if (email != null && email.isNotEmpty) body['email'] = email;
+    if (phone != null && phone.isNotEmpty) body['phone'] = phone;
+    if (channel != null && channel.isNotEmpty) body['channel'] = channel;
+    final response = await _dioClient.post(
       ApiConstants.forgotPassword,
-      data: {'email': email},
+      data: body,
     );
+    final data = response.data['data'] as Map<String, dynamic>?;
+    return ForgotPasswordResult.fromJson(data);
   }
 
   @override

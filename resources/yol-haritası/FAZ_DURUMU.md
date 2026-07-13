@@ -310,6 +310,10 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 - [x] Sakin profil: e-posta gizli; telefon değişiminde SMS OTP (`resident_phone_change` + `otpCode`)
 - [x] Para birimi gösterimi ₺ (`currencyDisplay` / `AppCurrencyFormat.displaySymbol`); hatırlatmada kalan borç
 - [x] Sakin «Ödeme Yap» butonu yüksekliği 48dp (`buttonHeightSmall`)
+- [x] Yönetici auth karşılama: `check-identifier` → `name`; şifre adımı «Tekrar hoş geldiniz»; kayıt isim adımı eyebrow; Ana Sayfa 0 bina empty state + Bina Ekle
+- [x] `device_preview` kalıntısı doğrulandı — kodda yok (clean rebuild)
+- [x] Yönetici telefon kayıt: idempotent register + phone variant lookup; login çoklu rol; mobil auth yazma retry kapalı
+- [x] Şifre sıfırlama: e-posta öncelikli; phone-only → SMS; e-posta+telefon → opt-in SMS yedek (`deliveredVia` / `smsFallbackAvailable`)
 
 ---
 

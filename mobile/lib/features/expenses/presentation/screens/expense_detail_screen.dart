@@ -212,7 +212,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
             IconButton(
               onPressed: () => _loadFile(url),
               icon: const Icon(Icons.refresh),
-              color: AppColors.primary,
+              color: AppColors.brand,
             ),
           ],
         ),
@@ -228,7 +228,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
         children: [
           _buildFileIcon(
             isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
-            isPdf ? Colors.red[700]! : AppColors.primary,
+            isPdf ? Colors.red[700]! : AppColors.brand,
           ),
           const SizedBox(width: AppSizes.spacingM),
           Expanded(
@@ -262,7 +262,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                 ? () => _openReceiptPreview(context, expense, url)
                 : null,
             icon: const Icon(Icons.visibility_outlined),
-            color: AppColors.primary,
+            color: AppColors.brand,
             tooltip: t.viewReceipt,
             constraints: const BoxConstraints(
               minWidth: AppSizes.minTouchTarget,
@@ -272,7 +272,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
           IconButton(
             onPressed: bytes != null ? () => _shareFile(expense, url) : null,
             icon: const Icon(Icons.share_outlined),
-            color: AppColors.primary,
+            color: AppColors.brand,
             tooltip: context.t.features.dekont.shareFile,
             constraints: const BoxConstraints(
               minWidth: AppSizes.minTouchTarget,
@@ -328,7 +328,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: AppColors.brand.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(
                     DashboardScreenStyle.pillRadius,
                   ),
@@ -336,7 +336,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                 child: Text(
                   expense.category.label(context),
                   style: AppTypography.body2.copyWith(
-                    color: AppColors.primary,
+                    color: AppColors.brand,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

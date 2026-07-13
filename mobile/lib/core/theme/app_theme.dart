@@ -19,7 +19,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
-      primaryColor: palette.primary,
+      primaryColor: palette.action,
       scaffoldBackgroundColor: palette.dashboardBackground,
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
@@ -28,35 +28,35 @@ class AppTheme {
       splashFactory: NoSplash.splashFactory,
       colorScheme: isDark
           ? ColorScheme.dark(
-              primary: palette.primary,
-              onPrimary: palette.datePickerSelectedDayForeground,
+              primary: palette.action,
+              onPrimary: palette.onAction,
               secondary: palette.accent,
-              onSecondary: Colors.white,
-              tertiary: palette.primaryLight,
+              onSecondary: palette.onAction,
+              tertiary: palette.brandSoft,
               error: AppColors.error,
               surface: palette.surface,
-              onSurface: palette.textPrimary,
+              onSurface: palette.ink,
             )
           : ColorScheme.light(
-              primary: palette.primary,
-              onPrimary: Colors.white,
+              primary: palette.action,
+              onPrimary: palette.onAction,
               secondary: palette.accent,
-              onSecondary: Colors.white,
-              tertiary: palette.primaryLight,
+              onSecondary: palette.onAction,
+              tertiary: palette.brandSoft,
               error: AppColors.error,
               surface: palette.surface,
-              onSurface: palette.textPrimary,
+              onSurface: palette.ink,
             ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
-        foregroundColor: palette.textPrimary,
+        foregroundColor: palette.ink,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
         titleTextStyle:
-            AppTypography.h3.copyWith(color: palette.textPrimary),
-        iconTheme: IconThemeData(color: palette.textPrimary),
+            AppTypography.h3.copyWith(color: palette.ink),
+        iconTheme: IconThemeData(color: palette.ink),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: AppButtonStyles.elevatedPrimary(
@@ -66,21 +66,23 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: palette.actionButton,
-          foregroundColor: palette.actionButtonForeground,
+          backgroundColor: palette.action,
+          foregroundColor: palette.onAction,
           minimumSize: const Size(
             double.infinity,
             AppSizes.buttonHeightSecondary,
           ),
           shape: AppButtonStyles.shape,
           textStyle: AppTypography.button.copyWith(
-            color: palette.actionButtonForeground,
+            color: palette.onAction,
           ),
           elevation: 0,
           shadowColor: Colors.transparent,
         ),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: palette.action,
+        foregroundColor: palette.onAction,
         elevation: 0,
         focusElevation: 0,
         hoverElevation: 0,
@@ -89,6 +91,7 @@ class AppTheme {
         focusColor: Colors.transparent,
         hoverColor: Colors.transparent,
         splashColor: Colors.transparent,
+        extendedPadding: const EdgeInsets.symmetric(horizontal: 20),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: AppButtonStyles.outlinedPrimary(
@@ -104,7 +107,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: palette.primary,
+          foregroundColor: palette.brand,
           textStyle: AppTypography.button,
         ),
       ),
@@ -125,7 +128,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-          borderSide: BorderSide(color: palette.primary, width: 1.5),
+          borderSide: BorderSide(color: palette.brand, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.inputRadius),
@@ -139,20 +142,20 @@ class AppTheme {
       ),
       textTheme: TextTheme(
         displayLarge:
-            AppTypography.h1.copyWith(color: palette.textPrimary),
+            AppTypography.h1.copyWith(color: palette.ink),
         displayMedium:
-            AppTypography.h2.copyWith(color: palette.textPrimary),
+            AppTypography.h2.copyWith(color: palette.ink),
         displaySmall:
-            AppTypography.h3.copyWith(color: palette.textPrimary),
+            AppTypography.h3.copyWith(color: palette.ink),
         bodyLarge:
-            AppTypography.body1.copyWith(color: palette.textPrimary),
+            AppTypography.body1.copyWith(color: palette.ink),
         bodyMedium:
-            AppTypography.body2.copyWith(color: palette.textPrimary),
+            AppTypography.body2.copyWith(color: palette.ink),
         bodySmall: AppTypography.caption.copyWith(
           color: palette.textSecondary,
         ),
         labelLarge:
-            AppTypography.label.copyWith(color: palette.textPrimary),
+            AppTypography.label.copyWith(color: palette.ink),
       ),
       cardTheme: const CardThemeData(
         elevation: 0,
@@ -164,7 +167,7 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: palette.surface,
-        selectedItemColor: palette.primary,
+        selectedItemColor: palette.brand,
         unselectedItemColor: palette.textDisabled,
         elevation: 8,
         type: BottomNavigationBarType.fixed,
@@ -176,7 +179,7 @@ class AppTheme {
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return IconThemeData(
-              color: palette.primary,
+              color: palette.brand,
               size: AppSizes.iconSize,
             );
           }
@@ -188,7 +191,7 @@ class AppTheme {
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return AppTypography.caption.copyWith(
-              color: palette.primary,
+              color: palette.brand,
               fontWeight: FontWeight.w700,
             );
           }

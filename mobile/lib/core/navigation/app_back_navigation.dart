@@ -101,21 +101,46 @@ class AppBackNavigation {
     return false;
   }
 
-  /// Login vb. — stack varsa pop, yoksa arka plan.
-  static bool handleAuthBackPressed(BuildContext context) {
+  /// Login / onboarding / splash — önce adım geri veya pop; kökte çift geri.
+  ///
+  /// `true` = geri olayı işlendi (sistem pop'u engellendi).
+  static bool handleAuthBackPressed(
+    BuildContext context, {
+    bool Function()? onStepBack,
+    String? exitHintMessage,
+    void Function(String message)? onExitHint,
+  }) {
+    if (onStepBack != null && onStepBack()) {
+      resetExitTimer();
+      return true;
+    }
+
     final navigator = Navigator.of(context);
     if (navigator.canPop()) {
+      resetExitTimer();
       navigator.pop();
       return true;
     }
 
     final router = GoRouter.maybeOf(context);
     if (router != null && router.canPop()) {
+      resetExitTimer();
       router.pop();
       return true;
     }
 
-    unawaited(SystemNavigatorBridge.moveAppToBackground());
+    final now = DateTime.now();
+    if (_lastExitRequest != null &&
+        now.difference(_lastExitRequest!) <= exitGracePeriod) {
+      resetExitTimer();
+      unawaited(SystemNavigatorBridge.moveAppToBackground());
+      return true;
+    }
+
+    _lastExitRequest = now;
+    if (exitHintMessage != null && onExitHint != null) {
+      onExitHint(exitHintMessage);
+    }
     return true;
   }
 

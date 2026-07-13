@@ -124,7 +124,7 @@ class _DeleteApartmentDialogState extends ConsumerState<DeleteApartmentDialog> {
               children: [
                 Icon(
                   Icons.door_front_door_outlined,
-                  color: AppColors.primary,
+                  color: AppColors.brand,
                   size: 20,
                 ),
                 const SizedBox(width: AppSizes.spacingS),

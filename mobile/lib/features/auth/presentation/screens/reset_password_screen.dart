@@ -14,6 +14,7 @@ import '../../../../shared/widgets/auth_screen_shell.dart';
 import '../../../../shared/widgets/auth_form_styles.dart';
 import '../../../../shared/widgets/app_back_button.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
+import '../../domain/entities/forgot_password_result.dart';
 import '../providers/auth_provider.dart';
 
 /// Tur 5 / §10/6 — Şifre Sıfırlama ekranı.
@@ -21,10 +22,16 @@ import '../providers/auth_provider.dart';
 /// Backend kabul ettiği token alfabesi (Crockford Base32 türevi):
 /// `23456789ABCDEFGHJKLMNPQRSTUVWXYZ` (uzunluk 6, trim + büyük harfe çevirir).
 class ResetPasswordScreen extends ConsumerStatefulWidget {
-  /// İsteğe bağlı: forgot ekranından gelen email — bilgi amaçlı gösterilebilir.
+  final ResetPasswordArgs? args;
+
+  /// Geriye dönük: yalnızca e-posta string'i ile açılış.
   final String? prefilledEmail;
 
-  const ResetPasswordScreen({super.key, this.prefilledEmail});
+  const ResetPasswordScreen({
+    super.key,
+    this.args,
+    this.prefilledEmail,
+  });
 
   @override
   ConsumerState<ResetPasswordScreen> createState() =>
@@ -42,6 +49,23 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   bool _obscureNew = true;
   bool _obscureConfirm = true;
   bool _submitting = false;
+  bool _smsFallbackLoading = false;
+  late bool _smsFallbackAvailable;
+  late String? _deliveredVia;
+
+  ResetPasswordArgs get _args =>
+      widget.args ??
+      ResetPasswordArgs(
+        identifier: widget.prefilledEmail,
+        email: widget.prefilledEmail,
+      );
+
+  @override
+  void initState() {
+    super.initState();
+    _smsFallbackAvailable = _args.smsFallbackAvailable;
+    _deliveredVia = _args.deliveredVia;
+  }
 
   @override
   void dispose() {
@@ -49,6 +73,24 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     _newPwController.dispose();
     _confirmPwController.dispose();
     super.dispose();
+  }
+
+  String get _subtitle {
+    final t = context.t;
+    switch (_deliveredVia) {
+      case 'email':
+        return t.common.resetPasswordSubtitleEmail;
+      case 'sms':
+        return t.common.resetPasswordSubtitleSms;
+      default:
+        return t.common.resetPasswordSubtitle;
+    }
+  }
+
+  String? get _displayIdentifier {
+    final id = _args.identifier ?? widget.prefilledEmail;
+    if (id == null || id.isEmpty) return null;
+    return id;
   }
 
   String? _validateNewPassword(String? value) {
@@ -69,6 +111,46 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     }
   }
 
+  Future<void> _sendSmsFallback() async {
+    if (_smsFallbackLoading || _submitting || !_smsFallbackAvailable) return;
+
+    final email = _args.email;
+    final phone = _args.phone;
+    if ((email == null || email.isEmpty) && (phone == null || phone.isEmpty)) {
+      return;
+    }
+
+    setState(() => _smsFallbackLoading = true);
+    final repo = ref.read(authRepositoryProvider);
+
+    try {
+      final result = await repo.forgotPassword(
+        email: email,
+        phone: phone,
+        channel: 'sms',
+      );
+      if (!mounted) return;
+
+      setState(() {
+        _smsFallbackAvailable = result.smsFallbackAvailable;
+        _deliveredVia = result.deliveredVia ?? 'sms';
+      });
+
+      ref.read(toastProvider.notifier).show(
+            context.t.common.forgotPasswordSmsFallbackSuccess,
+            type: ToastType.success,
+            duration: const Duration(seconds: 5),
+          );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ref
+          .read(toastProvider.notifier)
+          .show(userFacingError(e), type: ToastType.error);
+    } finally {
+      if (mounted) setState(() => _smsFallbackLoading = false);
+    }
+  }
+
   Future<void> _submit() async {
     if (_submitting) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -83,9 +165,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       );
       if (!mounted) return;
 
-      ref
-          .read(toastProvider.notifier)
-          .show(
+      ref.read(toastProvider.notifier).show(
             context.t.common.resetPasswordSuccess,
             type: ToastType.success,
             duration: const Duration(seconds: 5),
@@ -93,9 +173,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       context.go('/login');
     } on ApiException catch (e) {
       if (!mounted) return;
-      ref
-          .read(toastProvider.notifier)
-          .show(
+      ref.read(toastProvider.notifier).show(
             userFacingError(e),
             type: ToastType.error,
             duration: const Duration(seconds: 6),
@@ -113,13 +191,15 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final t = context.t;
+    final busy = _submitting || _smsFallbackLoading;
+    final identifier = _displayIdentifier;
 
     return AuthScreenShell(
       wrapInCard: false,
       leading: Padding(
         padding: const EdgeInsets.only(left: 18, top: 16),
         child: AppBackButton(
-          enabled: !_submitting,
+          enabled: !busy,
           onPressed: () => context.pop(),
         ),
       ),
@@ -158,7 +238,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             ),
             const SizedBox(height: AppSizes.spacingS),
             Text(
-              t.common.resetPasswordSubtitle,
+              _subtitle,
               style: const TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 14,
@@ -167,11 +247,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            if (widget.prefilledEmail != null &&
-                widget.prefilledEmail!.isNotEmpty) ...[
+            if (identifier != null) ...[
               const SizedBox(height: AppSizes.spacingS),
               Text(
-                widget.prefilledEmail!,
+                identifier,
                 style: const TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 14,
@@ -184,7 +263,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             const SizedBox(height: AppSizes.spacingXL),
             TextFormField(
               controller: _codeController,
-              enabled: !_submitting,
+              enabled: !busy,
               textCapitalization: TextCapitalization.characters,
               textInputAction: TextInputAction.next,
               maxLength: 6,
@@ -221,10 +300,29 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 return null;
               },
             ),
+            if (_smsFallbackAvailable) ...[
+              const SizedBox(height: AppSizes.spacingS),
+              TextButton(
+                onPressed: busy ? null : _sendSmsFallback,
+                child: _smsFallbackLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(
+                        t.common.forgotPasswordSmsFallback,
+                        style: AppTypography.body1.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.action,
+                        ),
+                      ),
+              ),
+            ],
             const SizedBox(height: AppSizes.spacingM),
             TextFormField(
               controller: _newPwController,
-              enabled: !_submitting,
+              enabled: !busy,
               obscureText: _obscureNew,
               textInputAction: TextInputAction.next,
               autofillHints: const [AutofillHints.newPassword],
@@ -248,7 +346,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             const SizedBox(height: AppSizes.spacingM),
             TextFormField(
               controller: _confirmPwController,
-              enabled: !_submitting,
+              enabled: !busy,
               obscureText: _obscureConfirm,
               textInputAction: TextInputAction.done,
               onFieldSubmitted: (_) => _submit(),
@@ -286,14 +384,18 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   child: SizedBox(
                     height: AppSizes.buttonHeightSecondary,
                     child: OutlinedButton(
-                      onPressed: _submitting ? null : () => context.go('/login'),
+                      onPressed: busy ? null : () => context.go('/login'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.inkDark,
                         backgroundColor: AppColors.surface,
-                        side: BorderSide(color: AppColors.lineLight, width: 1.5),
+                        side: BorderSide(
+                          color: AppColors.lineLight,
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppSizes.buttonRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppSizes.buttonRadius,
+                          ),
                         ),
                         textStyle: AppTypography.body1.copyWith(
                           fontWeight: FontWeight.w700,
@@ -308,14 +410,14 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   child: SizedBox(
                     height: AppSizes.buttonHeightSecondary,
                     child: FilledButton(
-                      onPressed: _submitting ? null : _submit,
+                      onPressed: busy ? null : _submit,
                       child: _submitting
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: AppColors.onAction,
                               ),
                             )
                           : Text(t.common.resetPasswordSubmit),

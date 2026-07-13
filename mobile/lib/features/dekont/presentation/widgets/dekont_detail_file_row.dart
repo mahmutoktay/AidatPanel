@@ -43,7 +43,7 @@ class DekontDetailFileRow extends StatelessWidget {
     final effectiveSize = sizeBytes ?? dekont.sizeBytes;
     final uploadDate = AppDateFormat.dateTimeMedium(dekont.createdAt);
 
-    final iconColor = isPdf ? AppColors.statusRed : AppColors.primary;
+    final iconColor = isPdf ? AppColors.statusRed : AppColors.brand;
     final iconBg = isPdf ? AppColors.errorBg : AppColors.infoBg;
 
     return Column(
@@ -118,7 +118,7 @@ class DekontDetailFileRow extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.visibility_outlined),
-                color: AppColors.primary,
+                color: AppColors.brand,
                 tooltip: t.viewDekont,
                 constraints: const BoxConstraints(
                   minWidth: AppSizes.minTouchTarget,
@@ -128,7 +128,7 @@ class DekontDetailFileRow extends StatelessWidget {
               IconButton(
                 onPressed: loadingFile ? null : onShare,
                 icon: const Icon(Icons.share_outlined),
-                color: AppColors.primary,
+                color: AppColors.brand,
                 tooltip: t.shareFile,
                 constraints: const BoxConstraints(
                   minWidth: AppSizes.minTouchTarget,

@@ -237,7 +237,7 @@ class _ToastItemState extends State<_ToastItem>
       case ToastType.info:
         return AppColors.info;
       case ToastType.notification:
-        return AppColors.primary;
+        return AppColors.brand;
     }
   }
 

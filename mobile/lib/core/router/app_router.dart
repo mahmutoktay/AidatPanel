@@ -10,6 +10,7 @@ import 'app_route_guard.dart';
 import '../../features/auth/domain/entities/user_entity.dart' show UserRole;
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/onboarding/auth_onboarding_screen.dart';
+import '../../features/auth/domain/entities/forgot_password_result.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
@@ -398,7 +399,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/reset-password',
         name: 'reset_password',
         builder: (context, state) {
-          final email = state.extra is String ? state.extra as String : null;
+          final extra = state.extra;
+          if (extra is ResetPasswordArgs) {
+            return ResetPasswordScreen(args: extra);
+          }
+          final email = extra is String ? extra : null;
           return ResetPasswordScreen(prefilledEmail: email);
         },
       ),

@@ -108,7 +108,7 @@ class _ResidentHomeTabState extends ConsumerState<ResidentHomeTab> {
       color: AppColors.surface,
       child: RefreshIndicator(
         onRefresh: _refresh,
-        color: AppColors.primary,
+        color: AppColors.brand,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: AppSizes.screenBodyScrollPadding.copyWith(

@@ -40,8 +40,8 @@ class _BuildingsPainter extends CustomPainter {
   final Color backgroundColor;
 
   List<_BuildingSpec> get _buildings {
-    final primary = AppColors.primary;
-    final primaryLight = AppColors.primaryLight;
+    final primary = AppColors.brand;
+    final primaryLight = AppColors.brandSoft;
     final accent = AppColors.accent;
     final muted = AppColors.textSecondary;
 
@@ -163,8 +163,8 @@ class _BuildingsPainter extends CustomPainter {
   void _paintAmbientGlow(Canvas canvas, Size size) {
     final glowRect = Rect.fromLTWH(0, size.height * 0.3, size.width, size.height * 0.7);
     final glowColor = isDark
-        ? AppColors.primaryLight.withValues(alpha: 0.12)
-        : AppColors.primary.withValues(alpha: 0.08);
+        ? AppColors.brandSoft.withValues(alpha: 0.12)
+        : AppColors.brand.withValues(alpha: 0.08);
     final glowPaint = Paint()
       ..shader = RadialGradient(
         center: const Alignment(0, 1.1),

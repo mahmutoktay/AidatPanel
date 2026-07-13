@@ -83,7 +83,7 @@ class _ResidentDuesTabState extends ConsumerState<ResidentDuesTab>
       color: AppColors.dashboardBackground,
       child: RefreshIndicator(
         onRefresh: _refresh,
-        color: AppColors.primary,
+        color: AppColors.brand,
         child: ListView(
           controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),

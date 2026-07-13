@@ -67,7 +67,7 @@ class _RoleTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : AppColors.textSecondary;
+    final color = selected ? AppColors.brand : AppColors.textSecondary;
     return Semantics(
       button: true,
       selected: selected,
@@ -103,7 +103,7 @@ class _RoleTab extends StatelessWidget {
                       height: 3,
                       width: selected ? 40 : 0,
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: AppColors.brand,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),

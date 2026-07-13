@@ -52,7 +52,7 @@ class FormStepIndicator extends StatelessWidget {
                   height: 2,
                   margin: const EdgeInsets.only(bottom: 18),
                   color: lineActive
-                      ? AppColors.primary
+                      ? AppColors.action
                       : AppColors.borderColor.withValues(alpha: 0.35),
                 ),
               );
@@ -70,11 +70,11 @@ class FormStepIndicator extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: active ? AppColors.primary : AppColors.surface,
+                      color: active ? AppColors.action : AppColors.surface,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: active
-                            ? AppColors.primary
+                            ? AppColors.action
                             : AppColors.borderColor.withValues(alpha: 0.35),
                         width: 1.5,
                       ),
@@ -83,7 +83,7 @@ class FormStepIndicator extends StatelessWidget {
                     child: Icon(
                       completed ? Icons.check_rounded : step.icon,
                       size: 18,
-                      color: active ? Colors.white : AppColors.textSecondary,
+                      color: active ? AppColors.onAction : AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -91,7 +91,7 @@ class FormStepIndicator extends StatelessWidget {
                     step.label,
                     style: AppTypography.caption.copyWith(
                       color:
-                          active ? AppColors.primary : AppColors.textSecondary,
+                          active ? AppColors.brand : AppColors.textSecondary,
                       fontWeight: active ? FontWeight.w700 : FontWeight.w600,
                       fontSize: 12,
                     ),

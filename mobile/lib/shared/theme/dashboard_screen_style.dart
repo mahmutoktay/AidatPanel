@@ -19,11 +19,15 @@ abstract final class DashboardScreenStyle {
 
   static List<BoxShadow> get subtleShadow => [];
 
+  /// Kart yüzeyi — `AppColors.surface` (açıkta beyaz, koyuda lacivert-siyah).
   static BoxDecoration whiteCard({Color? color}) => BoxDecoration(
         color: color ?? AppColors.surface,
         borderRadius: BorderRadius.circular(cardRadius),
         boxShadow: cardShadow,
       );
+
+  /// [whiteCard] ile aynı — semantik alias.
+  static BoxDecoration surfaceCard({Color? color}) => whiteCard(color: color);
 
   static BoxDecoration statCard({Color? color}) => BoxDecoration(
         color: color ?? AppColors.background,

@@ -50,13 +50,13 @@ abstract final class AppButtonStyles {
 
   static ButtonStyle elevatedAccent({bool fullWidth = false}) => _filled(
         background: AppColors.accent,
-        foreground: Colors.white,
+        foreground: AppColors.onAction,
         fullWidth: fullWidth,
       );
 
   static ButtonStyle elevatedSuccess({bool fullWidth = false}) => _filled(
         background: AppColors.success,
-        foreground: Colors.white,
+        foreground: AppColors.onAction,
         fullWidth: fullWidth,
       );
 
@@ -68,7 +68,7 @@ abstract final class AppButtonStyles {
 
   static ButtonStyle elevatedInfo({bool fullWidth = false}) => _filled(
         background: AppColors.info,
-        foreground: Colors.white,
+        foreground: AppColors.onAction,
         fullWidth: fullWidth,
       );
 
@@ -95,10 +95,10 @@ abstract final class AppButtonStyles {
   }) {
     final p = palette ?? AppColorPalette.light;
     return OutlinedButton.styleFrom(
-      foregroundColor: p.primary,
+      foregroundColor: p.brand,
       backgroundColor: p.surface,
       side: BorderSide(
-        color: p.primary,
+        color: p.brand,
         width: AppSizes.cardBorderWidth,
       ),
       minimumSize: fullWidth
@@ -127,7 +127,7 @@ abstract final class AppButtonStyles {
 
   static ButtonStyle filledDanger({bool fullWidth = false}) => _filled(
         background: AppColors.error,
-        foreground: Colors.white,
+        foreground: AppColors.onAction,
         fullWidth: fullWidth,
       );
 }
