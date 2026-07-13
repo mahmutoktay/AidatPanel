@@ -566,6 +566,8 @@ class MockBuildingRepository implements BuildingRepository {
     required String matchIban,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   }) {
     final key = IbanUtils.normalize(matchIban);
@@ -573,6 +575,7 @@ class MockBuildingRepository implements BuildingRepository {
       (p) => IbanUtils.normalize(p.collectionIban) == key,
     );
     if (idx == -1) return false;
+    final previous = _extraPresets[idx];
     final iban = collectionIban != null && collectionIban.isNotEmpty
         ? IbanUtils.normalize(collectionIban)
         : key;
@@ -581,6 +584,11 @@ class MockBuildingRepository implements BuildingRepository {
       collectionAccountTitle: collectionAccountTitle?.trim().isEmpty ?? true
           ? null
           : collectionAccountTitle!.trim(),
+      collectionIbanLabel: updateIbanLabel
+          ? (collectionIbanLabel?.trim().isEmpty ?? true
+                ? null
+                : collectionIbanLabel!.trim())
+          : previous.collectionIbanLabel,
       paymentReferenceTemplate: paymentReferenceTemplate?.trim().isEmpty ?? true
           ? null
           : paymentReferenceTemplate!.trim(),
@@ -611,6 +619,7 @@ class MockBuildingRepository implements BuildingRepository {
     String? currency,
     String? collectionIban,
     String? collectionAccountTitle,
+    String? collectionIbanLabel,
     String? paymentReferenceTemplate,
   }) async {
     await Future.delayed(_delay);
@@ -673,6 +682,8 @@ class MockBuildingRepository implements BuildingRepository {
     required String id,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   }) async {
     await Future.delayed(_delay);
@@ -700,6 +711,7 @@ class MockBuildingRepository implements BuildingRepository {
   Future<CollectionPresetEntity> addCollectionPreset({
     required String collectionIban,
     String? collectionAccountTitle,
+    String? collectionIbanLabel,
     String? paymentReferenceTemplate,
   }) async {
     await Future.delayed(_delay);
@@ -715,6 +727,9 @@ class MockBuildingRepository implements BuildingRepository {
       collectionAccountTitle: collectionAccountTitle?.trim().isEmpty ?? true
           ? null
           : collectionAccountTitle!.trim(),
+      collectionIbanLabel: collectionIbanLabel?.trim().isEmpty ?? true
+          ? null
+          : collectionIbanLabel!.trim(),
       paymentReferenceTemplate: paymentReferenceTemplate?.trim().isEmpty ?? true
           ? null
           : paymentReferenceTemplate!.trim(),
@@ -789,6 +804,8 @@ class MockBuildingRepository implements BuildingRepository {
     required String matchIban,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   }) async {
     await Future.delayed(_delay);
@@ -802,6 +819,8 @@ class MockBuildingRepository implements BuildingRepository {
         id: _buildings[i].id,
         collectionIban: collectionIban,
         collectionAccountTitle: collectionAccountTitle,
+        collectionIbanLabel: collectionIbanLabel,
+        updateIbanLabel: updateIbanLabel,
         paymentReferenceTemplate: paymentReferenceTemplate,
       );
       _buildings[i] = updated;
@@ -813,6 +832,8 @@ class MockBuildingRepository implements BuildingRepository {
       matchIban: matchIban,
       collectionIban: collectionIban,
       collectionAccountTitle: collectionAccountTitle,
+      collectionIbanLabel: collectionIbanLabel,
+      updateIbanLabel: updateIbanLabel,
       paymentReferenceTemplate: paymentReferenceTemplate,
     )) {
       return 0;

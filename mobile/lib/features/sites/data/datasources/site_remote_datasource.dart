@@ -37,6 +37,8 @@ abstract class SiteRemoteDataSource {
     required String id,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   });
 
@@ -67,6 +69,7 @@ class SiteRemoteDataSourceImpl implements SiteRemoteDataSource {
   Map<String, dynamic>? _collectionBody({
     String? collectionIban,
     String? collectionAccountTitle,
+    String? collectionIbanLabel,
     String? paymentReferenceTemplate,
   }) {
     final body = <String, dynamic>{};
@@ -78,6 +81,10 @@ class SiteRemoteDataSourceImpl implements SiteRemoteDataSource {
     if (collectionAccountTitle != null) {
       final t = collectionAccountTitle.trim();
       body['collectionAccountTitle'] = t.isEmpty ? null : t;
+    }
+    if (collectionIbanLabel != null) {
+      final t = collectionIbanLabel.trim();
+      body['collectionIbanLabel'] = t.isEmpty ? null : t;
     }
     if (paymentReferenceTemplate != null) {
       final t = paymentReferenceTemplate.trim();
@@ -187,6 +194,8 @@ class SiteRemoteDataSourceImpl implements SiteRemoteDataSource {
     required String id,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   }) async {
     final body = <String, dynamic>{
@@ -202,6 +211,12 @@ class SiteRemoteDataSourceImpl implements SiteRemoteDataSource {
               ? null
               : paymentReferenceTemplate!.trim(),
     };
+    if (updateIbanLabel) {
+      body['collectionIbanLabel'] =
+          (collectionIbanLabel?.trim().isEmpty ?? true)
+              ? null
+              : collectionIbanLabel!.trim();
+    }
     final response = await _dioClient.patch(
       ApiConstants.siteCollection(id),
       data: body,

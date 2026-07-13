@@ -16,6 +16,7 @@ import '../../data/buildings_store.dart';
 import '../../domain/entities/saved_iban_item.dart';
 import '../providers/saved_ibans_provider.dart';
 import '../utils/collection_preset_display.dart';
+import '../utils/collection_usage_label.dart';
 import '../widgets/delete_saved_iban_dialog.dart';
 import '../widgets/saved_iban_add_sheet.dart';
 import '../widgets/saved_iban_edit_sheet.dart';
@@ -293,13 +294,19 @@ class _SavedIbanListTile extends StatelessWidget {
     final detailStyle = ProfileSettingsUi.fieldLabel.copyWith(
       height: 1.35,
     );
-    final details = CollectionPresetDisplay.detailLines(context, item.preset);
-    final buildingLabel = item.buildings.isEmpty
-        ? t.savedIbansNoBuildingMatch
-        : t.savedIbansBuildingNames.replaceAll(
-            '{names}',
-            item.buildings.map((b) => b.name).join(', '),
-          );
+    final details = CollectionPresetDisplay.detailLines(context, item.preset)
+        .where((line) {
+      // Kullanım özeti aşağıda eşleşen bina/site adlarından türetilir.
+      final summary = CollectionUsageLabel.usageSummaryForPreset(
+        context,
+        item.preset,
+      );
+      return summary == null || line != summary;
+    }).toList();
+
+    final usageSummary = CollectionUsageLabel.usageSummaryForItem(context, item);
+    final placeLines = CollectionUsageLabel.placeNameLines(context, item);
+    final noMatch = !item.hasUsages;
 
     final cardRadius = BorderRadius.circular(DashboardScreenStyle.cardRadius);
     final cardDecoration = BoxDecoration(
@@ -339,23 +346,44 @@ class _SavedIbanListTile extends StatelessWidget {
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        IbanUtils.formatDisplay(item.preset.collectionIban),
+                        item.preset.displayTitle,
                         style: ProfileSettingsUi.fieldValue.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                         maxLines: 1,
                       ),
                     ),
+                    if (item.preset.hasLabel)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          IbanUtils.formatDisplay(item.preset.collectionIban),
+                          style: detailStyle,
+                        ),
+                      ),
                     ...details.map(
                       (line) => Padding(
                         padding: const EdgeInsets.only(top: 6),
                         child: Text(line, style: detailStyle),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Text(buildingLabel, style: detailStyle),
-                    ),
+                    if (usageSummary != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(usageSummary, style: detailStyle),
+                      ),
+                    if (noMatch)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(t.savedIbansNoBuildingMatch, style: detailStyle),
+                      )
+                    else
+                      ...placeLines.map(
+                        (line) => Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(line, style: detailStyle),
+                        ),
+                      ),
                   ],
                 ),
               ),

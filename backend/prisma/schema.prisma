@@ -145,6 +145,7 @@ model Site {
 
   collectionIban           String?
   collectionAccountTitle   String?
+  collectionIbanLabel      String?
   paymentReferenceTemplate String?
   collectionVerifiedAt     DateTime?
 
@@ -180,6 +181,7 @@ model Building {
   // Tahsilat hesabı (dekont alıcı IBAN doğrulaması)
   collectionIban           String?
   collectionAccountTitle   String?
+  collectionIbanLabel      String?
   paymentReferenceTemplate String?
   collectionVerifiedAt     DateTime?
 

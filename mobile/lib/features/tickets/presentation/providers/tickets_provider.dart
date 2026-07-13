@@ -63,6 +63,7 @@ class TicketsNotifier extends Notifier<TicketsState> {
   bool _isCreating = false;
   bool _isResidentList = true;
   String? _buildingId;
+  List<String>? _scopedBuildingIds;
 
   @override
   TicketsState build() => const TicketsState();
@@ -72,6 +73,7 @@ class TicketsNotifier extends Notifier<TicketsState> {
     if (!effectiveRefresh && !state.canLoadMore) return;
     _isResidentList = true;
     _buildingId = null;
+    _scopedBuildingIds = null;
     state = state.copyWith(
       isLoading: effectiveRefresh,
       isLoadingMore: !effectiveRefresh,
@@ -110,6 +112,7 @@ class TicketsNotifier extends Notifier<TicketsState> {
     if (!effectiveRefresh && !state.canLoadMore) return;
     _isResidentList = false;
     _buildingId = buildingId;
+    _scopedBuildingIds = null;
     state = state.copyWith(
       isLoading: effectiveRefresh,
       isLoadingMore: !effectiveRefresh,
@@ -140,9 +143,69 @@ class TicketsNotifier extends Notifier<TicketsState> {
     }
   }
 
+  /// Birden fazla bina için talepleri birleştirir (Tüm Binalar / site kapsamı).
+  /// Sayfalama yoktur; `paginated: false` ile çekilir.
+  Future<void> loadScopedBuildingTickets(
+    List<String> buildingIds, {
+    bool refresh = true,
+  }) async {
+    final ids = buildingIds.where((id) => id.isNotEmpty).toList(growable: false);
+    if (ids.isEmpty) return;
+    if (ids.length == 1) {
+      return loadBuildingTickets(ids.first, refresh: refresh);
+    }
+
+    final scopeKey = ids.join(',');
+    final previousKey = _scopedBuildingIds?.join(',');
+    final effectiveRefresh =
+        refresh || _isResidentList || previousKey != scopeKey;
+    if (!effectiveRefresh) return;
+
+    _isResidentList = false;
+    _buildingId = null;
+    _scopedBuildingIds = ids;
+    state = state.copyWith(
+      isLoading: true,
+      isLoadingMore: false,
+      clearError: true,
+      clearNextCursor: true,
+    );
+
+    try {
+      final merged = <TicketEntity>[];
+      for (final id in ids) {
+        try {
+          final result = await _repository.getBuildingTickets(
+            id,
+            paginated: false,
+          );
+          merged.addAll(result.items);
+        } catch (_) {
+          // Tek bina hatası diğerlerini etkilemez.
+        }
+      }
+      merged.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      state = state.copyWith(
+        isLoading: false,
+        isLoadingMore: false,
+        tickets: merged,
+        clearNextCursor: true,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        isLoadingMore: false,
+        error: userFacingError(e),
+      );
+    }
+  }
+
   Future<void> loadMore() {
     if (_isResidentList) {
       return loadMyTickets(refresh: false);
+    }
+    if (_scopedBuildingIds != null && _scopedBuildingIds!.length > 1) {
+      return Future.value();
     }
     final id = _buildingId;
     if (id == null || id.isEmpty) return Future.value();

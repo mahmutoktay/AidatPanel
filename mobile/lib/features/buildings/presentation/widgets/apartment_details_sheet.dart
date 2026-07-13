@@ -95,49 +95,54 @@ class _VacantApartmentSheet extends StatelessWidget {
           height: 1.35,
         ),
       ),
-      actions: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSizes.spacingL,
-          AppSizes.spacingS,
-          AppSizes.spacingL,
-          AppSizes.spacingL,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: AppSizes.buttonHeightPrimary,
-              child: ElevatedButton.icon(
-                onPressed: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
-                  pageContext,
-                  context,
-                  () => pageContext.push(
-                    '/manager-dashboard/invite-code'
-                    '?buildingId=${apt.buildingId}&apartmentId=${apt.id}',
-                  ),
-                ),
-                icon: const Icon(Icons.person_add_outlined),
-                label: Text(context.t.common.inviteResident),
-              ),
-            ),
-            const SizedBox(height: AppSizes.spacingS),
-            SizedBox(
-              height: AppSizes.buttonHeightSecondary,
-              child: OutlinedButton.icon(
-                onPressed: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
-                  pageContext,
-                  context,
-                  () => DeleteApartmentDialog.show(
+      actions: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSizes.spacingL,
+            AppSizes.spacingS,
+            AppSizes.spacingL,
+            AppSizes.spacingL,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: AppSizes.buttonHeightPrimary,
+                child: ElevatedButton.icon(
+                  onPressed: () =>
+                      ApartmentDetailsSheet._afterApartmentSheetClosed(
                     pageContext,
-                    apartment: apt,
+                    context,
+                    () => pageContext.push(
+                      '/manager-dashboard/invite-code'
+                      '?buildingId=${apt.buildingId}&apartmentId=${apt.id}',
+                    ),
                   ),
+                  icon: const Icon(Icons.person_add_outlined),
+                  label: Text(context.t.common.inviteResident),
                 ),
-                icon: const Icon(Icons.delete_outline),
-                label: Text(context.t.common.deleteApartment),
               ),
-            ),
-          ],
+              const SizedBox(height: AppSizes.spacingS),
+              SizedBox(
+                height: AppSizes.buttonHeightSecondary,
+                child: OutlinedButton.icon(
+                  onPressed: () =>
+                      ApartmentDetailsSheet._afterApartmentSheetClosed(
+                    pageContext,
+                    context,
+                    () => DeleteApartmentDialog.show(
+                      pageContext,
+                      apartment: apt,
+                    ),
+                  ),
+                  icon: const Icon(Icons.delete_outline),
+                  label: Text(context.t.common.deleteApartment),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

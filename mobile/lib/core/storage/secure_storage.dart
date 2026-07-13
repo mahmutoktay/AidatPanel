@@ -100,6 +100,7 @@ class SecureStorage {
     final profilePhotos = await getProfilePhotosMap();
     final localPresets = await readRaw(AppConstants.localCollectionPresetsKey);
     final loginHints = await readRaw(AppConstants.loginHintsKey);
+    final onboardingCompleted = await isOnboardingCompleted();
     await _storage.deleteAll();
     if (language != null) await saveLanguage(language);
     if (theme != null) await saveTheme(theme);
@@ -112,6 +113,21 @@ class SecureStorage {
     if (loginHints != null && loginHints.isNotEmpty) {
       await writeRaw(AppConstants.loginHintsKey, loginHints);
     }
+    if (onboardingCompleted) {
+      await markOnboardingCompleted();
+    }
+  }
+
+  Future<bool> isOnboardingCompleted() async {
+    final raw = await _storage.read(key: AppConstants.onboardingCompletedKey);
+    return raw == '1' || raw == 'true';
+  }
+
+  Future<void> markOnboardingCompleted() async {
+    await _storage.write(
+      key: AppConstants.onboardingCompletedKey,
+      value: '1',
+    );
   }
 
   Future<String?> readRaw(String key) => _storage.read(key: key);

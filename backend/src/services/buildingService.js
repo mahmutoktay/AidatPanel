@@ -1,5 +1,6 @@
 import { prisma } from "../config/db.js";
 import { isValidTrIban, normalizeIban } from "../utils/iban.js";
+import { normalizeCollectionIbanLabel } from "../utils/trIbanBank.js";
 import { HttpError } from "../utils/httpError.js";
 import { assertManagerOwnsBuilding } from "../utils/access.js";
 import { assertCanAddBuilding } from "./buildingQuotaService.js";
@@ -24,6 +25,7 @@ export function collectionFieldsFromBody(body) {
     if (body.collectionIban === null || body.collectionIban === "") {
       data.collectionIban = null;
       data.collectionVerifiedAt = null;
+      data.collectionIbanLabel = null;
     } else {
       const iban = normalizeIban(body.collectionIban);
       if (!isValidTrIban(iban)) {
@@ -36,6 +38,12 @@ export function collectionFieldsFromBody(body) {
 
   if (body.collectionAccountTitle !== undefined) {
     data.collectionAccountTitle = body.collectionAccountTitle;
+  }
+
+  if (body.collectionIbanLabel !== undefined) {
+    data.collectionIbanLabel = normalizeCollectionIbanLabel(
+      body.collectionIbanLabel
+    );
   }
 
   if (body.paymentReferenceTemplate !== undefined) {
@@ -65,6 +73,7 @@ export const createBuildingService = async ({
   addressExtra = null,
   collectionIban,
   collectionAccountTitle,
+  collectionIbanLabel,
   paymentReferenceTemplate,
   inheritFromSite = false,
   siteDefaults = null,
@@ -80,6 +89,7 @@ export const createBuildingService = async ({
   let effectiveCollection = {
     collectionIban,
     collectionAccountTitle,
+    collectionIbanLabel,
     paymentReferenceTemplate,
   };
 
@@ -93,6 +103,8 @@ export const createBuildingService = async ({
       effectiveCollection.collectionIban = siteDefaults.collectionIban;
       effectiveCollection.collectionAccountTitle =
         collectionAccountTitle ?? siteDefaults.collectionAccountTitle;
+      effectiveCollection.collectionIbanLabel =
+        collectionIbanLabel ?? siteDefaults.collectionIbanLabel;
       effectiveCollection.paymentReferenceTemplate =
         paymentReferenceTemplate ?? siteDefaults.paymentReferenceTemplate;
     }
@@ -405,6 +417,7 @@ export const getCollectionPresetsService = async (managerId) => {
     select: {
       collectionIban: true,
       collectionAccountTitle: true,
+      collectionIbanLabel: true,
       paymentReferenceTemplate: true,
       updatedAt: true,
     },
@@ -419,6 +432,7 @@ export const getCollectionPresetsService = async (managerId) => {
     select: {
       collectionIban: true,
       collectionAccountTitle: true,
+      collectionIbanLabel: true,
       paymentReferenceTemplate: true,
       updatedAt: true,
     },
@@ -427,28 +441,49 @@ export const getCollectionPresetsService = async (managerId) => {
 
   const byKey = new Map();
 
-  for (const b of [...buildings, ...sites]) {
+  const upsertPreset = (row, { isSite }) => {
     const key = [
-      b.collectionIban,
-      b.collectionAccountTitle ?? "",
-      b.paymentReferenceTemplate ?? "",
+      row.collectionIban,
+      row.collectionAccountTitle ?? "",
+      row.paymentReferenceTemplate ?? "",
     ].join("\0");
 
     const existing = byKey.get(key);
     if (!existing) {
       byKey.set(key, {
-        collectionIban: b.collectionIban,
-        collectionAccountTitle: b.collectionAccountTitle,
-        paymentReferenceTemplate: b.paymentReferenceTemplate,
-        lastUsedAt: b.updatedAt,
-        buildingCount: 1,
+        collectionIban: row.collectionIban,
+        collectionAccountTitle: row.collectionAccountTitle,
+        collectionIbanLabel: row.collectionIbanLabel ?? null,
+        paymentReferenceTemplate: row.paymentReferenceTemplate,
+        lastUsedAt: row.updatedAt,
+        buildingCount: isSite ? 0 : 1,
+        siteCount: isSite ? 1 : 0,
       });
+      return;
+    }
+
+    if (isSite) {
+      existing.siteCount += 1;
     } else {
       existing.buildingCount += 1;
-      if (b.updatedAt > existing.lastUsedAt) {
-        existing.lastUsedAt = b.updatedAt;
-      }
     }
+    if (row.updatedAt > existing.lastUsedAt) {
+      existing.lastUsedAt = row.updatedAt;
+    }
+    if (
+      !existing.collectionIbanLabel &&
+      row.collectionIbanLabel != null &&
+      String(row.collectionIbanLabel).trim() !== ""
+    ) {
+      existing.collectionIbanLabel = row.collectionIbanLabel;
+    }
+  };
+
+  for (const b of buildings) {
+    upsertPreset(b, { isSite: false });
+  }
+  for (const s of sites) {
+    upsertPreset(s, { isSite: true });
   }
 
   return [...byKey.values()].sort(

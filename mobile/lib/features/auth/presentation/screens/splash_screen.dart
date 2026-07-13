@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/navigation/app_back_navigation.dart';
 import '../../../../core/navigation/auth_back_handler.dart';
+import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -94,7 +95,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     }
 
     if (!mounted) return;
-    _navigateBasedOnAuth();
+    await _navigateBasedOnAuth();
   }
 
   void _resetNavigationForFreshEntry() {
@@ -180,7 +181,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
   }
 
-  void _navigateBasedOnAuth() {
+  Future<void> _navigateBasedOnAuth() async {
     final authState = ref.read(authStateProvider);
     if (authState.isAuthenticated && authState.user != null) {
       // ── Share Intent: Cold start'ta bekleyen dosya var mı? ──
@@ -200,7 +201,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         context.go('/resident-dashboard');
       }
     } else {
+      await _navigateUnauthenticated();
+    }
+  }
+
+  Future<void> _navigateUnauthenticated() async {
+    final completed = await SecureStorage().isOnboardingCompleted();
+    if (!mounted) return;
+    if (completed) {
       context.go('/login');
+    } else {
+      context.go('/welcome');
     }
   }
 

@@ -12,6 +12,7 @@ import '../../../../shared/widgets/app_confirm_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../domain/entities/saved_iban_item.dart';
+import '../utils/collection_usage_label.dart';
 
 class DeleteSavedIbanDialog extends ConsumerStatefulWidget {
   final List<SavedIbanItem> items;
@@ -37,8 +38,8 @@ class DeleteSavedIbanDialog extends ConsumerStatefulWidget {
 class _DeleteSavedIbanDialogState extends ConsumerState<DeleteSavedIbanDialog> {
   bool _deleting = false;
 
-  int get _linkedBuildingCount =>
-      widget.items.fold<int>(0, (sum, i) => sum + i.buildings.length);
+  int get _linkedUsageCount =>
+      CollectionUsageLabel.totalUsageCount(widget.items);
 
   Future<void> _delete() async {
     setState(() => _deleting = true);
@@ -93,6 +94,9 @@ class _DeleteSavedIbanDialogState extends ConsumerState<DeleteSavedIbanDialog> {
     final bulk = widget.items.length > 1;
     final screenH = MediaQuery.sizeOf(context).height;
     final listMaxHeight = (screenH * 0.32).clamp(120.0, 280.0);
+    final showMultiUsageWarning = _linkedUsageCount > 1;
+    final placeNames =
+        CollectionUsageLabel.flatPlaceNamesForItems(widget.items);
 
     return AlertDialog(
       shape: RoundedRectangleBorder(
@@ -119,12 +123,12 @@ class _DeleteSavedIbanDialogState extends ConsumerState<DeleteSavedIbanDialog> {
                 color: AppColors.textSecondary,
               ),
             ),
-            if (_linkedBuildingCount > 0) ...[
+            if (showMultiUsageWarning && placeNames.isNotEmpty) ...[
               const SizedBox(height: AppSizes.spacingS),
               Text(
-                t.savedIbansDeleteBuildingWarning.replaceAll(
-                  '{count}',
-                  '$_linkedBuildingCount',
+                t.savedIbansDeleteMultiUsageWarning.replaceAll(
+                  '{names}',
+                  placeNames,
                 ),
                 style: AppTypography.body2.copyWith(
                   color: AppColors.error,

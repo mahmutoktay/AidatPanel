@@ -12,8 +12,7 @@ import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/sites_store.dart';
 import '../../domain/entities/site_entity.dart';
 
-/// Site silmek için tip-to-confirm bottom sheet'i.
-/// Kullanıcı, site adını aynen yazana kadar "Sil" butonu pasiftir.
+/// Site silmek için tip-to-confirm bottom sheet.
 class DeleteSiteDialog extends ConsumerStatefulWidget {
   final SiteEntity site;
 
@@ -32,8 +31,7 @@ class DeleteSiteDialog extends ConsumerStatefulWidget {
   }
 
   @override
-  ConsumerState<DeleteSiteDialog> createState() =>
-      _DeleteSiteDialogState();
+  ConsumerState<DeleteSiteDialog> createState() => _DeleteSiteDialogState();
 }
 
 class _DeleteSiteDialogState extends ConsumerState<DeleteSiteDialog> {
@@ -72,7 +70,7 @@ class _DeleteSiteDialogState extends ConsumerState<DeleteSiteDialog> {
       if (!mounted) return;
       Navigator.of(context).pop(true);
       ref.read(toastProvider.notifier).show(
-            context.t.common.buildingDeleted,
+            context.t.common.siteDeleted,
             type: ToastType.success,
           );
     } on ApiException catch (e) {
@@ -87,7 +85,7 @@ class _DeleteSiteDialogState extends ConsumerState<DeleteSiteDialog> {
       if (!mounted) return;
       setState(() => _deleting = false);
       ref.read(toastProvider.notifier).show(
-            context.t.common.buildingDeleteFailed,
+            context.t.common.siteDeleteFailed,
             type: ToastType.error,
           );
     }
@@ -102,59 +100,19 @@ class _DeleteSiteDialogState extends ConsumerState<DeleteSiteDialog> {
     return PopScope(
       canPop: !_deleting,
       child: PremiumBottomSheetScaffold(
+        title: t.common.deleteSite,
         scrollable: true,
-        header: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSizes.spacingL,
-            AppSizes.spacingM,
-            AppSizes.spacingL,
-            AppSizes.spacingS,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: ProfileSettingsUi.danger.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.warning_amber_rounded,
-                  color: ProfileSettingsUi.danger,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t.common.deleteBuilding,
-                      style: ProfileSettingsUi.title,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      t.common.deleteBuildingHeader,
-                      style: ProfileSettingsUi.handle.copyWith(fontSize: 13),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
         body: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              t.common.deleteBuildingTypeHint,
+              t.common.deleteSiteHeader,
+              style: ProfileSettingsUi.handle.copyWith(fontSize: 14),
+            ),
+            const SizedBox(height: AppSizes.spacingL),
+            Text(
+              t.common.deleteSiteTypeHint,
               style: ProfileSettingsUi.fieldLabelUppercase,
             ),
             const SizedBox(height: AppSizes.spacingS),
@@ -165,7 +123,7 @@ class _DeleteSiteDialogState extends ConsumerState<DeleteSiteDialog> {
             const SizedBox(height: AppSizes.spacingM),
             MinimalTextField(
               controller: _controller,
-              label: t.common.deleteBuilding,
+              label: t.common.deleteSiteTypeFieldLabel,
               hint: phrase,
               icon: Icons.edit_note_rounded,
               enabled: !_deleting,
@@ -174,7 +132,7 @@ class _DeleteSiteDialogState extends ConsumerState<DeleteSiteDialog> {
             if (_attempted && !_matches) ...[
               const SizedBox(height: AppSizes.spacingXS),
               Text(
-                context.t.common.buildingNameMismatch,
+                context.t.common.siteNameMismatch,
                 style: ProfileSettingsUi.fieldLabel.copyWith(
                   color: ProfileSettingsUi.danger,
                   fontSize: 12,
@@ -189,8 +147,10 @@ class _DeleteSiteDialogState extends ConsumerState<DeleteSiteDialog> {
           primaryLoading: _deleting,
           primaryEnabled: canSubmit,
           dangerPrimary: true,
+          icon: Icons.delete_outline,
           secondaryLabel: t.common.cancelBtn,
-          onSecondary: _deleting ? null : () => Navigator.of(context).pop(false),
+          onSecondary:
+              _deleting ? null : () => Navigator.of(context).pop(false),
           secondaryEnabled: !_deleting,
         ),
       ),
@@ -198,7 +158,6 @@ class _DeleteSiteDialogState extends ConsumerState<DeleteSiteDialog> {
   }
 }
 
-/// Doğrulama cümlesini/site adını gösteren — tıklanınca input'a yazan — kompakt kırmızı kart.
 class _PhrasePreview extends StatelessWidget {
   final String phrase;
   final VoidCallback? onTap;

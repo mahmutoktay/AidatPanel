@@ -1,7 +1,7 @@
 # AidatPanel — Yol Haritası ve Faz Durumu
 
 **Tek kaynak:** Fazlar, checklist, onaylar ve eksikler (Mobil + Backend).  
-**Güncelleme:** 2026-06-22 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
+**Güncelleme:** 2026-07-14 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
 
 **AI asistanlar** her oturumda bu dosyayı okur; yalnızca **AKTİF** fazda kod yazar (`CLAUDE.md` faz kapısı).
 
@@ -314,6 +314,7 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 - [x] `device_preview` kalıntısı doğrulandı — kodda yok (clean rebuild)
 - [x] Yönetici telefon kayıt: idempotent register + phone variant lookup; login çoklu rol; mobil auth yazma retry kapalı
 - [x] Şifre sıfırlama: e-posta öncelikli; phone-only → SMS; e-posta+telefon → opt-in SMS yedek (`deliveredVia` / `smsFallbackAvailable`)
+- [x] İlk kurulum welcome (5 sayfalık PageView, `/welcome`); SecureStorage `onboarding_completed`; gradyanlı CustomPaint illüstrasyonlar
 
 ---
 
@@ -378,12 +379,14 @@ Site → bina hiyerarşisi; tekil binalar korunur. Site silinince alt binalar ca
 - [x] `InviteCodeScreen`: site → bina → daire akışı (site’li binalar için)
 - [x] Davet paylaşım metni: site adı + bina/blok
 - [x] Saved IBAN matcher: site varsayılan IBAN dahil (backend collection presets)
+- [x] Kayıtlı IBAN UI: siteCount ayrımı, kullanım etiketleri (bina+site), havale açıklaması hint düzeltmesi, çoklu kullanım silme uyarısı (2026-07-14)
 - [x] Abonelik ekranı: bina kullanım özeti (`usage.buildings`)
+- [x] IBAN takma adı (`collectionIbanLabel`): Ayarlar’da opsiyonel; wizard’da ipucu; dekont eşleşince boşsa IBAN banka kodundan otomatik isim
 
 ### E2E & dokümantasyon
 
 - [ ] Canlı E2E: site oluştur → blok ekle → ortak gider → aidat breakdown → site PDF
-- [x] `resources/AIDATPANEL.md` API + şema güncellemesi (özet)
+- [x] `resources/AIDATPANEL.md` API + şema güncellemesi (2026-07-14: User/Dekont/Admin/env/subscription/IBAN label senkron)
 - [ ] Furkan onayı → `ONAY: Furkan ✅`
 
 ---
@@ -407,7 +410,7 @@ Site → bina hiyerarşisi; tekil binalar korunur. Site silinince alt binalar ca
 | 13 | OCR performans iyileştirmesi | Backend | ⏳ | Worker thread kısmen; kuyruk var |
 | 14 | Aidat yaşam döngüsü | Backend | ✅ | bulk + OVERDUE job |
 | 15 | `authService` refactor | Backend | ✅ | FAZ 5 |
-| 16 | Backend unit test (Jest) | Backend | ✅ | 53 test (13 suite) |
+| 16 | Backend unit test (Jest) | Backend | ✅ | ~95+ test (`npm test` ile doğrula) |
 | 17 | VPS deploy scriptleri | Backend | ✅ | `deploy.ps1` / `deploy.sh` |
 | 18 | console.* → Pino structured logging | Backend | ✅ | Tüm runtime dosyaları |
 | 19 | Health check endpoint (`GET /health`) | Backend | ✅ | DB connectivity check |

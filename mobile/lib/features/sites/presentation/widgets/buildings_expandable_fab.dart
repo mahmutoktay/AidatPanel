@@ -9,18 +9,20 @@ import '../../../../l10n/strings.g.dart';
 class BuildingsExpandableFab extends StatefulWidget {
   final bool showSiteAction;
   final bool showBuildingAction;
+  final ValueChanged<bool>? onOpenChanged;
 
   const BuildingsExpandableFab({
     super.key,
     this.showSiteAction = true,
     this.showBuildingAction = true,
+    this.onOpenChanged,
   });
 
   @override
-  State<BuildingsExpandableFab> createState() => _BuildingsExpandableFabState();
+  State<BuildingsExpandableFab> createState() => BuildingsExpandableFabState();
 }
 
-class _BuildingsExpandableFabState extends State<BuildingsExpandableFab>
+class BuildingsExpandableFabState extends State<BuildingsExpandableFab>
     with SingleTickerProviderStateMixin {
   static const _duration = Duration(milliseconds: 200);
   static const _curve = Curves.easeInOut;
@@ -28,6 +30,8 @@ class _BuildingsExpandableFabState extends State<BuildingsExpandableFab>
   late final AnimationController _controller;
   late final Animation<double> _expandAnimation;
   bool _open = false;
+
+  bool get isOpen => _open;
 
   @override
   void initState() {
@@ -48,17 +52,26 @@ class _BuildingsExpandableFabState extends State<BuildingsExpandableFab>
     super.dispose();
   }
 
+  void close() {
+    if (!_open) return;
+    setState(() => _open = false);
+    _controller.reverse();
+    widget.onOpenChanged?.call(false);
+  }
+
   void _toggle() {
-    setState(() => _open = !_open);
-    if (_open) {
+    final next = !_open;
+    setState(() => _open = next);
+    if (next) {
       _controller.forward();
     } else {
       _controller.reverse();
     }
+    widget.onOpenChanged?.call(next);
   }
 
   void _closeAndNavigate(VoidCallback action) {
-    if (_open) _toggle();
+    close();
     action();
   }
 

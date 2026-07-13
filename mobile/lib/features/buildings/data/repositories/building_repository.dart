@@ -16,6 +16,7 @@ abstract class BuildingRepository {
     String? currency,
     String? collectionIban,
     String? collectionAccountTitle,
+    String? collectionIbanLabel,
     String? paymentReferenceTemplate,
   });
   Future<BuildingEntity> updateBuilding({
@@ -28,21 +29,26 @@ abstract class BuildingRepository {
     required String id,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   });
 
-  /// [matchIban] ile eşleşen tüm binaların tahsilat alanlarını günceller.
-  /// Bina yoksa yalnızca cihazdaki kayıtlı IBAN seti güncellenir (0 döner).
+  /// [matchIban] ile eşleşen tüm bina ve sitelerin tahsilat alanlarını günceller.
+  /// Eşleşme yoksa yalnızca cihazdaki kayıtlı IBAN seti güncellenir (0 döner).
   Future<int> patchBuildingsMatchingCollection({
     required String matchIban,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   });
 
   Future<CollectionPresetEntity> addCollectionPreset({
     required String collectionIban,
     String? collectionAccountTitle,
+    String? collectionIbanLabel,
     String? paymentReferenceTemplate,
   });
 

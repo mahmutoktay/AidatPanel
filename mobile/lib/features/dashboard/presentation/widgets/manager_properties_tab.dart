@@ -24,6 +24,13 @@ class ManagerPropertiesTab extends ConsumerStatefulWidget {
 
 class _ManagerPropertiesTabState extends ConsumerState<ManagerPropertiesTab> {
   PropertyType _selectedType = PropertyType.buildings;
+  final GlobalKey<BuildingsExpandableFabState> _fabKey =
+      GlobalKey<BuildingsExpandableFabState>();
+  bool _fabOpen = false;
+
+  void _closeFab() {
+    _fabKey.currentState?.close();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,30 +48,59 @@ class _ManagerPropertiesTabState extends ConsumerState<ManagerPropertiesTab> {
               ),
               child: PropertyTypeSegmentedTab(
                 selectedType: _selectedType,
-                onChanged: (type) => setState(() => _selectedType = type),
+                onChanged: (type) {
+                  _closeFab();
+                  setState(() => _selectedType = type);
+                },
               ),
             ),
             Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                switchInCurve: Curves.easeInOut,
-                switchOutCurve: Curves.easeInOut,
-                child: _selectedType == PropertyType.sites
-                    ? ManagerSitesTab(
-                        key: const ValueKey(PropertyType.sites),
-                      )
-                    : ManagerBuildingsTab(
-                        key: const ValueKey(PropertyType.buildings),
-                        buildingsAsync: widget.standaloneBuildingsAsync,
-                      ),
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (_fabOpen &&
+                      (notification is ScrollStartNotification ||
+                          notification is ScrollUpdateNotification)) {
+                    _closeFab();
+                  }
+                  return false;
+                },
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  switchInCurve: Curves.easeInOut,
+                  switchOutCurve: Curves.easeInOut,
+                  child: _selectedType == PropertyType.sites
+                      ? ManagerSitesTab(
+                          key: const ValueKey(PropertyType.sites),
+                        )
+                      : ManagerBuildingsTab(
+                          key: const ValueKey(PropertyType.buildings),
+                          buildingsAsync: widget.standaloneBuildingsAsync,
+                        ),
+                ),
               ),
             ),
           ],
         ),
+        if (_fabOpen)
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: _closeFab,
+              onVerticalDragStart: (_) => _closeFab(),
+              onHorizontalDragStart: (_) => _closeFab(),
+            ),
+          ),
         Positioned(
           right: AppSizes.spacingL,
           bottom: AppSizes.spacingL,
-          child: const BuildingsExpandableFab(),
+          child: BuildingsExpandableFab(
+            key: _fabKey,
+            onOpenChanged: (open) {
+              if (_fabOpen != open) {
+                setState(() => _fabOpen = open);
+              }
+            },
+          ),
         ),
       ],
     );

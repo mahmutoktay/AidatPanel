@@ -13,7 +13,9 @@ import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/sliding_segmented_control.dart';
 import '../../../dashboard/domain/entities/dashboard_filter_scope.dart';
+import '../../../dashboard/presentation/providers/dashboard_filter_scope_provider.dart';
 import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
+import '../../../dashboard/presentation/utils/manager_dashboard_mapper.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/manager_open_tickets_count_provider.dart';
 import '../providers/tickets_provider.dart';
@@ -66,41 +68,66 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     super.dispose();
   }
 
-  /// Talepler yalnızca tek bina ile çalışır; Tümü/Site → somut binaya düşürülür.
-  DashboardFilterScope _normalizeToBuildingScope(
+  /// Varsayılan açılış: anasayfada hatırlanan bina (Tümü/Site → somut bina).
+  DashboardFilterScope _defaultOpeningScope(
     DashboardFilterScope scope,
     List<BuildingEntity> buildings,
   ) {
-    return normalizeToBuildingScope(scope, buildings);
+    if (scope.isBuilding &&
+        scope.buildingId != null &&
+        buildings.any((b) => b.id == scope.buildingId)) {
+      return scope;
+    }
+
+    final remembered = ref.read(dashboardFilterScopeProvider);
+    if (remembered.isBuilding &&
+        remembered.buildingId != null &&
+        buildings.any((b) => b.id == remembered.buildingId)) {
+      return remembered;
+    }
+
+    return normalizeToBuildingScope(
+      remembered.isAll ? scope : remembered,
+      buildings,
+    );
+  }
+
+  List<String> _scopedBuildingIds(List<BuildingEntity> buildings) {
+    return ManagerDashboardMapper.filterBuildingsByScope(
+      buildings,
+      siteId: _filterScope.siteId,
+      buildingId: _filterScope.buildingId,
+    ).map((b) => b.id).toList(growable: false);
   }
 
   Future<void> _bootstrap() async {
     final buildings = ref.read(buildingsStoreProvider).value ?? [];
     if (buildings.isEmpty) return;
-    final normalized = _normalizeToBuildingScope(_filterScope, buildings);
-    if (normalized != _filterScope) {
-      setState(() => _filterScope = normalized);
+    final resolved = _defaultOpeningScope(_filterScope, buildings);
+    if (resolved != _filterScope) {
+      setState(() => _filterScope = resolved);
     }
-    await _loadCurrentBuilding();
+    await _loadCurrentScope();
   }
 
-  Future<void> _loadCurrentBuilding() async {
-    final id = _filterScope.buildingId;
-    if (id == null || id.isEmpty) return;
-    await ref.read(ticketsNotifierProvider.notifier).loadBuildingTickets(id);
+  Future<void> _loadCurrentScope() async {
+    final buildings = ref.read(buildingsStoreProvider).value ?? [];
+    final ids = _scopedBuildingIds(buildings);
+    if (ids.isEmpty) return;
+    await ref
+        .read(ticketsNotifierProvider.notifier)
+        .loadScopedBuildingTickets(ids);
   }
 
   void _onScopeChanged(DashboardFilterScope scope) {
-    final buildings = ref.read(buildingsStoreProvider).value ?? [];
-    final normalized = _normalizeToBuildingScope(scope, buildings);
-    setState(() => _filterScope = normalized);
-    unawaited(_loadCurrentBuilding());
+    setState(() => _filterScope = scope);
+    unawaited(_loadCurrentScope());
   }
 
   Future<void> _openTicket(String ticketId) async {
     await context.push('/tickets/$ticketId');
     if (mounted) {
-      await _loadCurrentBuilding();
+      await _loadCurrentScope();
       ref.invalidate(managerOpenTicketsCountProvider);
     }
   }
@@ -140,8 +167,11 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
     final state = ref.watch(ticketsNotifierProvider);
     final t = context.t.features.tickets;
     final filtered = _filteredTickets(state.tickets);
-    final buildingId = _filterScope.buildingId;
-    final canFilter = buildingId != null && buildingId.isNotEmpty;
+    final canFilter = buildings.isNotEmpty;
+    final showBuildingName = !_filterScope.isBuilding;
+    final buildingNames = {
+      for (final b in buildings) b.id: b.name,
+    };
 
     return DashboardSecondaryScaffold(
       title: t.managerTitle,
@@ -154,10 +184,8 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                 children: [
                   DashboardBuildingSelector(
                     buildings: buildings,
-                    scope: _filterScope.isBuilding
-                        ? _filterScope
-                        : _normalizeToBuildingScope(_filterScope, buildings),
-                    includeAllOption: false,
+                    scope: _filterScope,
+                    includeAllOption: true,
                     onScopeChanged: _onScopeChanged,
                   ),
                   const SizedBox(height: AppSizes.spacingM),
@@ -171,7 +199,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                 ],
               ),
         list: RefreshIndicator(
-          onRefresh: _loadCurrentBuilding,
+          onRefresh: _loadCurrentScope,
           child: buildings.isEmpty
               ? ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -199,7 +227,13 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                     ),
                   ],
                 )
-              : _buildList(context, state, filtered),
+              : _buildList(
+                  context,
+                  state,
+                  filtered,
+                  showBuildingName: showBuildingName,
+                  buildingNames: buildingNames,
+                ),
         ),
       ),
     );
@@ -208,8 +242,10 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
   Widget _buildList(
     BuildContext context,
     TicketsState state,
-    List<TicketEntity> tickets,
-  ) {
+    List<TicketEntity> tickets, {
+    required bool showBuildingName,
+    required Map<String, String> buildingNames,
+  }) {
     final t = context.t.features.tickets;
     if (state.isLoading && state.tickets.isEmpty) {
       return ListView(
@@ -234,7 +270,7 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                   Text(state.error ?? t.loadError, textAlign: TextAlign.center),
                   const SizedBox(height: AppSizes.spacingM),
                   FilledButton(
-                    onPressed: _loadCurrentBuilding,
+                    onPressed: _loadCurrentScope,
                     child: Text(context.t.common.tryAgain),
                   ),
                 ],
@@ -271,10 +307,14 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
           );
         }
         final ticket = tickets[i];
+        final buildingName = showBuildingName && ticket.buildingId != null
+            ? buildingNames[ticket.buildingId]
+            : null;
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
           child: TicketListCard(
             ticket: ticket,
+            subtitlePrefix: buildingName,
             onTap: () => _openTicket(ticket.id),
           ),
         );

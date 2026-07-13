@@ -21,6 +21,8 @@ import '../../../dues/domain/entities/due_entity.dart';
 import '../../../dues/presentation/providers/dues_provider.dart';
 import '../../../dues/presentation/widgets/due_detail_sheet.dart';
 import '../../../notifications/presentation/widgets/announcement_form_sheet.dart';
+import '../../../sites/data/sites_store.dart';
+import '../../../sites/domain/entities/site_entity.dart';
 import '../providers/dashboard_filter_scope_provider.dart';
 import '../../domain/entities/dashboard_filter_scope.dart';
 import '../../domain/entities/manager_dashboard_entities.dart';
@@ -59,10 +61,44 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
     return values.where((v) => v.hasError).length;
   }
 
+  /// Seçili binada hiç sakin yoksa davet kartı için binayı döner.
+  BuildingEntity? _inviteNudgeBuilding(
+    List<BuildingEntity> buildings,
+    DashboardFilterScope scope,
+  ) {
+    if (!scope.isBuilding || scope.buildingId == null) return null;
+    for (final building in buildings) {
+      if (building.id != scope.buildingId) continue;
+      if (building.totalApartments > 0 && building.occupiedApartments == 0) {
+        return building;
+      }
+      return null;
+    }
+    return null;
+  }
+
+  /// Seçili site altında hiç bina yoksa blok ekleme kartı için site id döner.
+  String? _emptySiteNudgeId(
+    List<BuildingEntity> buildings,
+    List<SiteEntity> sites,
+    DashboardFilterScope scope,
+  ) {
+    if (!scope.isSite || scope.siteId == null) return null;
+    final siteId = scope.siteId!;
+    final siteExists = sites.any((site) => site.id == siteId);
+    if (!siteExists) return null;
+    final hasBlocks = buildings.any((building) => building.siteId == siteId);
+    if (hasBlocks) return null;
+    return siteId;
+  }
+
   @override
   Widget build(BuildContext context) {
     final filterScope = ref.watch(dashboardFilterScopeProvider);
     final buildings = widget.buildingsAsync.value ?? const <BuildingEntity>[];
+    final sites = ref.watch(sitesStoreProvider).value ?? const <SiteEntity>[];
+    final hasProperties = buildings.isNotEmpty || sites.isNotEmpty;
+    final emptySiteId = _emptySiteNudgeId(buildings, sites, filterScope);
     final scopedBuildings = ManagerDashboardMapper.filterBuildingsByScope(
       buildings,
       siteId: filterScope.siteId,
@@ -165,7 +201,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (buildings.isNotEmpty) ...[
+              if (hasProperties) ...[
                 DashboardBuildingSelector(
                   buildings: buildings,
                   scope: filterScope,
@@ -188,10 +224,32 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
               if (totalErrorCount > 0)
                 _DataWarningBanner(errorCount: totalErrorCount),
               if (totalErrorCount > 0) const SizedBox(height: AppSizes.spacingS),
-              if (buildings.isEmpty)
+              if (!hasProperties)
                 _NoBuildingsEmptyState(
                   onAddBuilding: () =>
                       context.push('/manager-dashboard/add-building'),
+                  onAddSite: () =>
+                      context.push('/manager-dashboard/add-site'),
+                )
+              else if (emptySiteId != null)
+                _NoBlocksInviteCard(
+                  onAddBuilding: () => context.push(
+                    '/manager-dashboard/sites/$emptySiteId/add-building',
+                  ),
+                )
+              else if (_inviteNudgeBuilding(buildings, filterScope)
+                  case final BuildingEntity emptyBuilding)
+                _NoResidentsInviteCard(
+                  onInvite: () => context.push(
+                    '/manager-dashboard/buildings/${emptyBuilding.id}',
+                  ),
+                )
+              else if (buildings.isEmpty)
+                _NoBuildingsEmptyState(
+                  onAddBuilding: () =>
+                      context.push('/manager-dashboard/add-building'),
+                  onAddSite: () =>
+                      context.push('/manager-dashboard/add-site'),
                 )
               else
                 ManagerDuesSummaryCard(
@@ -389,8 +447,12 @@ class _DataWarningBanner extends StatelessWidget {
 /// Hiç bina yokken özet kart yerine gösterilen boş durum.
 class _NoBuildingsEmptyState extends StatelessWidget {
   final VoidCallback onAddBuilding;
+  final VoidCallback onAddSite;
 
-  const _NoBuildingsEmptyState({required this.onAddBuilding});
+  const _NoBuildingsEmptyState({
+    required this.onAddBuilding,
+    required this.onAddSite,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -409,10 +471,105 @@ class _NoBuildingsEmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSizes.spacingM),
-          ElevatedButton(
-            onPressed: onAddBuilding,
-            style: AppButtonStyles.elevatedPrimary(fullWidth: true),
-            child: Text(t.noBuildingsEmptyCta),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: AppSizes.buttonHeightSecondary,
+                  child: OutlinedButton(
+                    onPressed: onAddSite,
+                    child: Text(t.noBuildingsEmptyCtaSite),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSizes.spacingS),
+              Expanded(
+                child: SizedBox(
+                  height: AppSizes.buttonHeightSecondary,
+                  child: ElevatedButton(
+                    onPressed: onAddBuilding,
+                    style: AppButtonStyles.elevatedPrimary(fullWidth: true),
+                    child: Text(t.noBuildingsEmptyCta),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Seçili binada sakin yokken gösterilen samimi davet kartı.
+class _NoResidentsInviteCard extends StatelessWidget {
+  final VoidCallback onInvite;
+
+  const _NoResidentsInviteCard({required this.onInvite});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t.features.dashboard;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            t.noResidentsInviteMessage,
+            textAlign: TextAlign.center,
+            style: AppTypography.body1.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          SizedBox(
+            height: AppSizes.buttonHeightSecondary,
+            child: ElevatedButton.icon(
+              onPressed: onInvite,
+              style: AppButtonStyles.elevatedPrimary(fullWidth: true),
+              icon: const Icon(Icons.person_add_outlined),
+              label: Text(t.noResidentsInviteCta),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Seçili sitede bina yokken gösterilen samimi blok ekleme kartı.
+class _NoBlocksInviteCard extends StatelessWidget {
+  final VoidCallback onAddBuilding;
+
+  const _NoBlocksInviteCard({required this.onAddBuilding});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t.features.dashboard;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            t.noBlocksInviteMessage,
+            textAlign: TextAlign.center,
+            style: AppTypography.body1.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingM),
+          SizedBox(
+            height: AppSizes.buttonHeightSecondary,
+            child: ElevatedButton.icon(
+              onPressed: onAddBuilding,
+              style: AppButtonStyles.elevatedPrimary(fullWidth: true),
+              icon: const Icon(Icons.apartment_outlined),
+              label: Text(t.noBlocksInviteCta),
+            ),
           ),
         ],
       ),

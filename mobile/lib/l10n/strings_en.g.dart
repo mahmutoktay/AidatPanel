@@ -956,6 +956,27 @@ class Translations$common$en {
 	/// en: 'What you typed does not match the building name.'
 	String get buildingNameMismatch => 'What you typed does not match the building name.';
 
+	/// en: 'Delete Site'
+	String get deleteSite => 'Delete Site';
+
+	/// en: 'Site deleted'
+	String get siteDeleted => 'Site deleted';
+
+	/// en: 'Could not delete site'
+	String get siteDeleteFailed => 'Could not delete site';
+
+	/// en: 'This action cannot be undone. Blocks under the site are also affected.'
+	String get deleteSiteHeader => 'This action cannot be undone. Blocks under the site are also affected.';
+
+	/// en: 'To confirm, type the site name below exactly:'
+	String get deleteSiteTypeHint => 'To confirm, type the site name below exactly:';
+
+	/// en: 'Site name'
+	String get deleteSiteTypeFieldLabel => 'Site name';
+
+	/// en: 'What you typed does not match the site name.'
+	String get siteNameMismatch => 'What you typed does not match the site name.';
+
 	/// en: 'Edit Apartment'
 	String get editApartment => 'Edit Apartment';
 
@@ -1321,6 +1342,7 @@ class Translations$features$en {
 	late final Translations$features$dashboard$en dashboard = Translations$features$dashboard$en._(_root);
 	late final Translations$features$dues$en dues = Translations$features$dues$en._(_root);
 	late final Translations$features$faz2$en faz2 = Translations$features$faz2$en._(_root);
+	late final Translations$features$welcome$en welcome = Translations$features$welcome$en._(_root);
 }
 
 // Path: legal
@@ -3947,11 +3969,11 @@ class Translations$features$dashboard$en {
 	/// en: 'Open'
 	String get ticketOpen => 'Open';
 
-	/// en: 'In Progress'
-	String get ticketInProgress => 'In Progress';
+	/// en: 'Approved'
+	String get ticketInProgress => 'Approved';
 
-	/// en: 'Resolved'
-	String get ticketResolved => 'Resolved';
+	/// en: 'Done'
+	String get ticketResolved => 'Done';
 
 	/// en: 'Apartments with Overdue Payments'
 	String get overdueApartments => 'Apartments with Overdue Payments';
@@ -4004,11 +4026,26 @@ class Translations$features$dashboard$en {
 	/// en: 'Not enough data yet'
 	String get noChartData => 'Not enough data yet';
 
-	/// en: 'You don't have a building yet. Add your first building to start managing.'
-	String get noBuildingsEmptyMessage => 'You don\'t have a building yet. Add your first building to start managing.';
+	/// en: 'You don't have a site or building yet. Add your first one to start managing.'
+	String get noBuildingsEmptyMessage => 'You don\'t have a site or building yet. Add your first one to start managing.';
 
 	/// en: 'Add Building'
 	String get noBuildingsEmptyCta => 'Add Building';
+
+	/// en: 'Add Site'
+	String get noBuildingsEmptyCtaSite => 'Add Site';
+
+	/// en: 'No residents have been assigned to the apartments in this building yet. Invite residents to get started.'
+	String get noResidentsInviteMessage => 'No residents have been assigned to the apartments in this building yet. Invite residents to get started.';
+
+	/// en: 'Invite New Resident'
+	String get noResidentsInviteCta => 'Invite New Resident';
+
+	/// en: 'This site has no buildings yet. Add the first block to get started.'
+	String get noBlocksInviteMessage => 'This site has no buildings yet. Add the first block to get started.';
+
+	/// en: 'Add Building to Site'
+	String get noBlocksInviteCta => 'Add Building to Site';
 
 	/// en: 'See more (+{count})'
 	String get seeMoreOverdue => 'See more (+{count})';
@@ -4028,8 +4065,8 @@ class Translations$features$dashboard$en {
 	/// en: 'Your {month} {year} dues'
 	String get residentFeaturedDuePeriod => 'Your {month} {year} dues';
 
-	/// en: 'Pay your dues here.'
-	String get residentDebtAndPaySubtitle => 'Pay your dues here.';
+	/// en: 'View and pay your dues here.'
+	String get residentDebtAndPaySubtitle => 'View and pay your dues here.';
 
 	/// en: 'Dues Status'
 	String get duesStatusAction => 'Dues Status';
@@ -4112,6 +4149,69 @@ class Translations$features$faz2$en {
 	String get announcement => 'Announce';
 }
 
+// Path: features.welcome
+class Translations$features$welcome$en {
+	Translations$features$welcome$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Skip'
+	String get skip => 'Skip';
+
+	/// en: 'Next'
+	String get next => 'Next';
+
+	/// en: 'Get started'
+	String get start => 'Get started';
+
+	/// en: 'Skip introduction'
+	String get skipSemantics => 'Skip introduction';
+
+	/// en: 'Next page'
+	String get nextSemantics => 'Next page';
+
+	/// en: 'Finish introduction and continue'
+	String get startSemantics => 'Finish introduction and continue';
+
+	/// en: 'Introduction page {current} of {total}'
+	String get pageSemantics => 'Introduction page {current} of {total}';
+
+	/// en: 'Page {current} of {total}'
+	String get dotsSemantics => 'Page {current} of {total}';
+
+	/// en: 'Welcome to AidatPanel'
+	String get page1Title => 'Welcome to AidatPanel';
+
+	/// en: 'Manage your building or complex from your phone. Setup takes just a few minutes.'
+	String get page1Body => 'Manage your building or complex from your phone. Setup takes just a few minutes.';
+
+	/// en: 'One account, full control'
+	String get page2Title => 'One account, full control';
+
+	/// en: 'Whether you manage a single building or a multi-block complex — all from the same account and screen.'
+	String get page2Body => 'Whether you manage a single building or a multi-block complex — all from the same account and screen.';
+
+	/// en: 'Upload a receipt, we handle the rest'
+	String get page3Title => 'Upload a receipt, we handle the rest';
+
+	/// en: 'Residents upload receipts; the system reads amount and date. You just review and approve.'
+	String get page3Body => 'Residents upload receipts; the system reads amount and date. You just review and approve.';
+
+	/// en: 'Everyone stays in the loop'
+	String get page4Title => 'Everyone stays in the loop';
+
+	/// en: 'Payments, announcements, and request updates reach everyone with instant notifications.'
+	String get page4Body => 'Payments, announcements, and request updates reach everyone with instant notifications.';
+
+	/// en: 'Clear and organized'
+	String get page5Title => 'Clear and organized';
+
+	/// en: 'Expenses stay on record and requests live in one place. Everyone knows where things stand.'
+	String get page5Body => 'Expenses stay on record and requests live in one place. Everyone knows where things stand.';
+}
+
 // Path: features.buildings.collection
 class Translations$features$buildings$collection$en {
 	Translations$features$buildings$collection$en._(this._root);
@@ -4171,6 +4271,12 @@ class Translations$features$buildings$collection$en {
 	/// en: 'Used in {count} buildings'
 	String get detailUsedInBuildings => 'Used in {count} buildings';
 
+	/// en: 'Used in {count} sites'
+	String get detailUsedInSites => 'Used in {count} sites';
+
+	/// en: 'Used in {buildingCount} buildings, {siteCount} sites'
+	String get detailUsedInBuildingsAndSites => 'Used in {buildingCount} buildings, {siteCount} sites';
+
 	/// en: 'IBAN'
 	String get ibanLabel => 'IBAN';
 
@@ -4183,6 +4289,15 @@ class Translations$features$buildings$collection$en {
 	/// en: 'You entered account title or reference; enter a valid IBAN'
 	String get ibanRequiredIfOtherFilled => 'You entered account title or reference; enter a valid IBAN';
 
+	/// en: 'IBAN name'
+	String get ibanNameLabel => 'IBAN name';
+
+	/// en: 'e.g. My Ziraat account, Kuveyt Turk IBAN'
+	String get ibanNameHint => 'e.g. My Ziraat account, Kuveyt Turk IBAN';
+
+	/// en: 'You can name your IBAN later from Settings > My saved IBANs.'
+	String get ibanNameLaterHint => 'You can name your IBAN later from Settings > My saved IBANs.';
+
 	/// en: 'Recipient name'
 	String get accountTitleLabel => 'Recipient name';
 
@@ -4192,8 +4307,11 @@ class Translations$features$buildings$collection$en {
 	/// en: 'Payment reference'
 	String get referenceTemplateLabel => 'Payment reference';
 
-	/// en: 'e.g. Apt 5'
-	String get referenceTemplateHint => 'e.g. Apt 5';
+	/// en: 'e.g. Dues payment'
+	String get referenceTemplateHint => 'e.g. Dues payment';
+
+	/// en: 'This reference is shown the same way to all your residents'
+	String get referenceTemplateHelper => 'This reference is shown the same way to all your residents';
 
 	/// en: 'No saved collection details yet'
 	String get presetsEmpty => 'No saved collection details yet';
@@ -4219,23 +4337,26 @@ class Translations$features$buildings$collection$en {
 	/// en: 'No saved IBAN yet. You can add collection details when creating a building.'
 	String get savedIbansEmpty => 'No saved IBAN yet. You can add collection details when creating a building.';
 
-	/// en: 'No building linked to this set'
-	String get savedIbansNoBuildingMatch => 'No building linked to this set';
+	/// en: 'No building or site linked to this set'
+	String get savedIbansNoBuildingMatch => 'No building or site linked to this set';
 
 	/// en: 'Buildings: {names}'
 	String get savedIbansBuildingNames => 'Buildings: {names}';
 
-	/// en: 'Collection updated for {count} building(s)'
-	String get savedIbansUpdateSuccess => 'Collection updated for {count} building(s)';
+	/// en: 'Sites: {names}'
+	String get savedIbansSiteNames => 'Sites: {names}';
 
-	/// en: 'Will update: {names}'
-	String get savedIbansUpdateHint => 'Will update: {names}';
+	/// en: 'Collection updated for {count} place(s)'
+	String get savedIbansUpdateSuccess => 'Collection updated for {count} place(s)';
+
+	/// en: 'Places to update: {names}'
+	String get savedIbansUpdateHint => 'Places to update: {names}';
 
 	/// en: 'Edit IBAN'
 	String get editSavedIbanTitle => 'Edit IBAN';
 
-	/// en: 'This set is not linked to a building yet. Changes are stored in your saved list only.'
-	String get savedIbansOrphanHint => 'This set is not linked to a building yet. Changes are stored in your saved list only.';
+	/// en: 'This set is not linked to a building or site yet. Changes are stored in your saved list only.'
+	String get savedIbansOrphanHint => 'This set is not linked to a building or site yet. Changes are stored in your saved list only.';
 
 	/// en: 'Add IBAN'
 	String get savedIbansAddTitle => 'Add IBAN';
@@ -4270,8 +4391,11 @@ class Translations$features$buildings$collection$en {
 	/// en: '{count} saved IBAN(s) will be deleted.'
 	String get savedIbansDeleteBulkMessage => '{count} saved IBAN(s) will be deleted.';
 
-	/// en: 'Collection details will also be cleared on {count} building(s).'
-	String get savedIbansDeleteBuildingWarning => 'Collection details will also be cleared on {count} building(s).';
+	/// en: 'Collection details will also be cleared on {count} place(s).'
+	String get savedIbansDeleteBuildingWarning => 'Collection details will also be cleared on {count} place(s).';
+
+	/// en: 'This IBAN is used here: {names}. Deleting it will clear collection details for those places. This cannot be undone.'
+	String get savedIbansDeleteMultiUsageWarning => 'This IBAN is used here: {names}. Deleting it will clear collection details for those places. This cannot be undone.';
 
 	/// en: 'IBAN deleted'
 	String get savedIbansDeleteSuccess => 'IBAN deleted';
@@ -5383,6 +5507,13 @@ extension on Translations {
 			'common.deleteBuildingTypeHint' => 'To confirm, type the building name below exactly:',
 			'common.deleteBuildingTypeFieldLabel' => 'Building name',
 			'common.buildingNameMismatch' => 'What you typed does not match the building name.',
+			'common.deleteSite' => 'Delete Site',
+			'common.siteDeleted' => 'Site deleted',
+			'common.siteDeleteFailed' => 'Could not delete site',
+			'common.deleteSiteHeader' => 'This action cannot be undone. Blocks under the site are also affected.',
+			'common.deleteSiteTypeHint' => 'To confirm, type the site name below exactly:',
+			'common.deleteSiteTypeFieldLabel' => 'Site name',
+			'common.siteNameMismatch' => 'What you typed does not match the site name.',
 			'common.editApartment' => 'Edit Apartment',
 			'common.deleteApartment' => 'Delete Apartment',
 			'common.addApartment' => 'Add Apartment',
@@ -5549,6 +5680,8 @@ extension on Translations {
 			'common.errorKeys.siteBuildingCreateFailed' => 'Could not add the block. Please try again.',
 			'common.errorKeys.siteExpensesFetchFailed' => 'Could not load site expenses. Please try again.',
 			'common.errorKeys.siteExpenseSummaryFetchFailed' => 'Could not load the site expense summary. Please try again.',
+			_ => null,
+		} ?? switch (path) {
 			'common.errorKeys.siteExpenseCreateFailed' => 'Could not add the site expense. Please try again.',
 			'common.errorKeys.siteExpenseUpdateFailed' => 'Could not update the site expense. Please try again.',
 			'common.errorKeys.siteExpenseDeleteFailed' => 'Could not delete the site expense. Please try again.',
@@ -5556,8 +5689,6 @@ extension on Translations {
 			'common.errorKeys.invalidExpenseResponse' => 'Could not read expense information. Please try again.',
 			'common.errorKeys.invalidSiteExpenseResponse' => 'Could not read site expense information. Please try again.',
 			'common.errorKeys.unsupportedFileType' => 'This file type is not supported.',
-			_ => null,
-		} ?? switch (path) {
 			'common.errorKeys.dekontUploadFailed' => 'Could not upload the receipt. Please try again.',
 			'common.errorKeys.serverResponseUnreadable' => 'Could not read the server response. Please try again.',
 			'common.errorKeys.dekontResponseMissing' => 'The receipt response is incomplete. Please try again.',
@@ -5631,14 +5762,20 @@ extension on Translations {
 			'features.buildings.collection.detailReferenceAidat' => 'Transfer reference: Dues (apt. no added automatically)',
 			'features.buildings.collection.detailReferenceHavale' => 'Transfer reference: Apartment number on transfer',
 			'features.buildings.collection.detailUsedInBuildings' => 'Used in {count} buildings',
+			'features.buildings.collection.detailUsedInSites' => 'Used in {count} sites',
+			'features.buildings.collection.detailUsedInBuildingsAndSites' => 'Used in {buildingCount} buildings, {siteCount} sites',
 			'features.buildings.collection.ibanLabel' => 'IBAN',
 			'features.buildings.collection.ibanHint' => 'TR33 0006 1005 1978 6457 8413 26',
 			'features.buildings.collection.ibanInvalid' => 'Enter a valid Turkish IBAN (TR + 24 digits)',
 			'features.buildings.collection.ibanRequiredIfOtherFilled' => 'You entered account title or reference; enter a valid IBAN',
+			'features.buildings.collection.ibanNameLabel' => 'IBAN name',
+			'features.buildings.collection.ibanNameHint' => 'e.g. My Ziraat account, Kuveyt Turk IBAN',
+			'features.buildings.collection.ibanNameLaterHint' => 'You can name your IBAN later from Settings > My saved IBANs.',
 			'features.buildings.collection.accountTitleLabel' => 'Recipient name',
 			'features.buildings.collection.accountTitleHint' => 'e.g. Ahmet Yilmaz or Building Management',
 			'features.buildings.collection.referenceTemplateLabel' => 'Payment reference',
-			'features.buildings.collection.referenceTemplateHint' => 'e.g. Apt 5',
+			'features.buildings.collection.referenceTemplateHint' => 'e.g. Dues payment',
+			'features.buildings.collection.referenceTemplateHelper' => 'This reference is shown the same way to all your residents',
 			'features.buildings.collection.presetsEmpty' => 'No saved collection details yet',
 			'features.buildings.collection.presetsLoadFailed' => 'Could not load suggestions',
 			'features.buildings.collection.presetBuildingCount' => '{count} buildings',
@@ -5647,12 +5784,13 @@ extension on Translations {
 			'features.buildings.collection.saveSuccess' => 'Collection details saved',
 			'features.buildings.collection.savedIbansTitle' => 'My saved IBANs',
 			'features.buildings.collection.savedIbansEmpty' => 'No saved IBAN yet. You can add collection details when creating a building.',
-			'features.buildings.collection.savedIbansNoBuildingMatch' => 'No building linked to this set',
+			'features.buildings.collection.savedIbansNoBuildingMatch' => 'No building or site linked to this set',
 			'features.buildings.collection.savedIbansBuildingNames' => 'Buildings: {names}',
-			'features.buildings.collection.savedIbansUpdateSuccess' => 'Collection updated for {count} building(s)',
-			'features.buildings.collection.savedIbansUpdateHint' => 'Will update: {names}',
+			'features.buildings.collection.savedIbansSiteNames' => 'Sites: {names}',
+			'features.buildings.collection.savedIbansUpdateSuccess' => 'Collection updated for {count} place(s)',
+			'features.buildings.collection.savedIbansUpdateHint' => 'Places to update: {names}',
 			'features.buildings.collection.editSavedIbanTitle' => 'Edit IBAN',
-			'features.buildings.collection.savedIbansOrphanHint' => 'This set is not linked to a building yet. Changes are stored in your saved list only.',
+			'features.buildings.collection.savedIbansOrphanHint' => 'This set is not linked to a building or site yet. Changes are stored in your saved list only.',
 			'features.buildings.collection.savedIbansAddTitle' => 'Add IBAN',
 			'features.buildings.collection.savedIbansAddHint' => 'You can reuse these details when adding a building or editing collection settings.',
 			'features.buildings.collection.savedIbansAddSuccess' => 'IBAN saved',
@@ -5664,7 +5802,8 @@ extension on Translations {
 			'features.buildings.collection.savedIbansDeleteMessage' => 'This saved IBAN will be removed from your list.',
 			'features.buildings.collection.savedIbansDeleteBulkTitle' => 'Delete selected IBANs?',
 			'features.buildings.collection.savedIbansDeleteBulkMessage' => '{count} saved IBAN(s) will be deleted.',
-			'features.buildings.collection.savedIbansDeleteBuildingWarning' => 'Collection details will also be cleared on {count} building(s).',
+			'features.buildings.collection.savedIbansDeleteBuildingWarning' => 'Collection details will also be cleared on {count} place(s).',
+			'features.buildings.collection.savedIbansDeleteMultiUsageWarning' => 'This IBAN is used here: {names}. Deleting it will clear collection details for those places. This cannot be undone.',
 			'features.buildings.collection.savedIbansDeleteSuccess' => 'IBAN deleted',
 			'features.buildings.collection.savedIbansDeleteBulkSuccess' => '{count} IBAN(s) deleted',
 			'features.buildings.collection.ibanNotConfigured' => 'Collection IBAN not configured',
@@ -6055,6 +6194,8 @@ extension on Translations {
 			'features.dekont.breakdownTotal' => 'Total',
 			'features.dekont.emptyTitle' => 'No receipts yet',
 			'features.dekont.emptySubtitleResident' => 'You don\'t have any receipts yet. You can use the upload button on the top right to add a new receipt.',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.emptySubtitleManager' => 'There are no receipts uploaded by users.',
 			'features.dekont.filterAll' => 'All',
 			'features.dekont.filterPending' => 'Under review',
@@ -6070,8 +6211,6 @@ extension on Translations {
 			'features.dekont.resident.statusDetailAwaitingApproval' => 'Waiting for the manager\'s approval.',
 			'features.dekont.resident.statusDetailAwaitingIbanOk' => 'Recipient details matched. Waiting for the manager\'s approval.',
 			'features.dekont.resident.statusDetailAwaitingIbanIssue' => 'Recipient details unclear. Waiting for the manager\'s approval.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.resident.statusDetailApproved' => 'Your payment was approved.',
 			'features.dekont.resident.statusDetailPartiallyApproved' => 'Your payment was partially approved.',
 			'features.dekont.resident.statusDetailRejected' => 'Your receipt was rejected.',
@@ -6471,8 +6610,8 @@ extension on Translations {
 			'features.dashboard.totalExpense' => 'Total Expenses',
 			'features.dashboard.ticketStatusTitle' => 'Request Status',
 			'features.dashboard.ticketOpen' => 'Open',
-			'features.dashboard.ticketInProgress' => 'In Progress',
-			'features.dashboard.ticketResolved' => 'Resolved',
+			'features.dashboard.ticketInProgress' => 'Approved',
+			'features.dashboard.ticketResolved' => 'Done',
 			'features.dashboard.overdueApartments' => 'Apartments with Overdue Payments',
 			'features.dashboard.apartmentCountBadge' => '{count} apartments',
 			'features.dashboard.legendPaid' => 'Paid',
@@ -6490,15 +6629,20 @@ extension on Translations {
 			'features.dashboard.apartmentWithFloor' => 'Apt. {number} · Floor {floor}',
 			'features.dashboard.noOverdueApartments' => 'No overdue payments',
 			'features.dashboard.noChartData' => 'Not enough data yet',
-			'features.dashboard.noBuildingsEmptyMessage' => 'You don\'t have a building yet. Add your first building to start managing.',
+			'features.dashboard.noBuildingsEmptyMessage' => 'You don\'t have a site or building yet. Add your first one to start managing.',
 			'features.dashboard.noBuildingsEmptyCta' => 'Add Building',
+			'features.dashboard.noBuildingsEmptyCtaSite' => 'Add Site',
+			'features.dashboard.noResidentsInviteMessage' => 'No residents have been assigned to the apartments in this building yet. Invite residents to get started.',
+			'features.dashboard.noResidentsInviteCta' => 'Invite New Resident',
+			'features.dashboard.noBlocksInviteMessage' => 'This site has no buildings yet. Add the first block to get started.',
+			'features.dashboard.noBlocksInviteCta' => 'Add Building to Site',
 			'features.dashboard.seeMoreOverdue' => 'See more (+{count})',
 			'features.dashboard.payNow' => 'Pay Now',
 			'features.dashboard.overduePaymentsBadge' => '{count} overdue payment(s)',
 			'features.dashboard.residentOverduePaymentsBadge' => '{count} of your dues are overdue',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} dues',
 			'features.dashboard.residentFeaturedDuePeriod' => 'Your {month} {year} dues',
-			'features.dashboard.residentDebtAndPaySubtitle' => 'Pay your dues here.',
+			'features.dashboard.residentDebtAndPaySubtitle' => 'View and pay your dues here.',
 			'features.dashboard.duesStatusAction' => 'Dues Status',
 			'features.dashboard.overdueDuesBadge' => '{count} overdue dues',
 			'features.dashboard.dataWarningBanner' => '{count} sections failed to load. Pull down to retry.',
@@ -6561,6 +6705,26 @@ extension on Translations {
 			'features.faz2.tickets' => 'Requests',
 			'features.faz2.expenses' => 'Expenses',
 			'features.faz2.announcement' => 'Announce',
+			'features.welcome.skip' => 'Skip',
+			'features.welcome.next' => 'Next',
+			'features.welcome.start' => 'Get started',
+			_ => null,
+		} ?? switch (path) {
+			'features.welcome.skipSemantics' => 'Skip introduction',
+			'features.welcome.nextSemantics' => 'Next page',
+			'features.welcome.startSemantics' => 'Finish introduction and continue',
+			'features.welcome.pageSemantics' => 'Introduction page {current} of {total}',
+			'features.welcome.dotsSemantics' => 'Page {current} of {total}',
+			'features.welcome.page1Title' => 'Welcome to AidatPanel',
+			'features.welcome.page1Body' => 'Manage your building or complex from your phone. Setup takes just a few minutes.',
+			'features.welcome.page2Title' => 'One account, full control',
+			'features.welcome.page2Body' => 'Whether you manage a single building or a multi-block complex — all from the same account and screen.',
+			'features.welcome.page3Title' => 'Upload a receipt, we handle the rest',
+			'features.welcome.page3Body' => 'Residents upload receipts; the system reads amount and date. You just review and approve.',
+			'features.welcome.page4Title' => 'Everyone stays in the loop',
+			'features.welcome.page4Body' => 'Payments, announcements, and request updates reach everyone with instant notifications.',
+			'features.welcome.page5Title' => 'Clear and organized',
+			'features.welcome.page5Body' => 'Expenses stay on record and requests live in one place. Everyone knows where things stand.',
 			'legal.companyName' => 'Vefa Yazılım',
 			'legal.contactEmail' => 'store@vefayazilim.com',
 			'legal.contactBlock' => 'Data controller: Vefa Yazılım\nEmail: store@vefayazilim.com',
@@ -6584,8 +6748,6 @@ extension on Translations {
 			'legal.kvkkS1Body' => 'The data controller for AidatPanel is Vefa Yazılım. You may submit KVKK requests to store@vefayazilim.com or using your registered email in the app.',
 			'legal.kvkkS2Title' => 'Data categories',
 			'legal.kvkkS2Body' => 'Categories may include identity and contact, customer transaction (dues, payments, expenses), visual records (receipts), security (logs, tokens), and communication (notification consent).',
-			_ => null,
-		} ?? switch (path) {
 			'legal.kvkkS3Title' => 'Purposes and legal bases',
 			'legal.kvkkS3Body' => 'Processing is based on contract performance, legal obligation, legitimate interest, and your explicit consent where required (e.g. notifications).',
 			'legal.kvkkS4Title' => 'Transfers',

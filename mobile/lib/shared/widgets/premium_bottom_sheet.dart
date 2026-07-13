@@ -84,6 +84,10 @@ class PremiumBottomSheetScaffold extends StatelessWidget {
       );
     }
 
+    // actions varsa alt SafeArea'yı ona bırak — aksi halde toolbar altında
+    // boşluk + gölge oluşur.
+    final hasActions = actions != null;
+
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
       decoration: BoxDecoration(
@@ -95,7 +99,10 @@ class PremiumBottomSheetScaffold extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        minimum: const EdgeInsets.only(bottom: AppSizes.spacingS),
+        bottom: !hasActions,
+        minimum: hasActions
+            ? EdgeInsets.zero
+            : const EdgeInsets.only(bottom: AppSizes.spacingS),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -240,46 +247,49 @@ class PremiumSheetActions extends StatelessWidget {
 
     final hasSecondary = secondaryLabel != null;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSizes.spacingL,
-        AppSizes.spacingS,
-        AppSizes.spacingL,
-        AppSizes.spacingL,
-      ),
-      child: hasSecondary
-          ? Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: AppSizes.buttonHeightSecondary,
-                    child: OutlinedButton(
-                      onPressed: secondaryEnabled ? onSecondary : null,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.inkDark,
-                        side: ProfileSettingsUi.cardBorderSide,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            ProfileSettingsUi.primaryButtonRadius,
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSizes.spacingL,
+          AppSizes.spacingS,
+          AppSizes.spacingL,
+          AppSizes.spacingL,
+        ),
+        child: hasSecondary
+            ? Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: AppSizes.buttonHeightSecondary,
+                      child: OutlinedButton(
+                        onPressed: secondaryEnabled ? onSecondary : null,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.inkDark,
+                          side: ProfileSettingsUi.cardBorderSide,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ProfileSettingsUi.primaryButtonRadius,
+                            ),
+                          ),
+                          textStyle: ProfileSettingsUi.fieldValue.copyWith(
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
-                        textStyle: ProfileSettingsUi.fieldValue.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                        child: Text(secondaryLabel!),
                       ),
-                      child: Text(secondaryLabel!),
                     ),
                   ),
-                ),
-                const SizedBox(width: AppSizes.spacingS),
-                Expanded(child: primaryButton),
-              ],
-            )
-          : SizedBox(
-              width: double.infinity,
-              child: primaryButton,
-            ),
+                  const SizedBox(width: AppSizes.spacingS),
+                  Expanded(child: primaryButton),
+                ],
+              )
+            : SizedBox(
+                width: double.infinity,
+                child: primaryButton,
+              ),
+      ),
     );
   }
 }

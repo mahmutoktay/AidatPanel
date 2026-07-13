@@ -11,6 +11,7 @@ import '../../../../core/utils/phone_utils.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/form_step_actions.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/profile_avatar.dart';
 import '../../../../shared/widgets/profile_avatar_actions.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
@@ -229,12 +230,10 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
   Future<String?> _showPasswordDialog(BuildContext context) async {
     final t = context.t;
     final controller = TextEditingController();
-    bool obscure = true;
 
     return showDialog<String>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
+      builder: (context) => AlertDialog(
           backgroundColor: ProfileSettingsUi.background,
           title: Text(
             t.features.profile.securityVerificationTitle,
@@ -248,28 +247,11 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                 style: ProfileSettingsUi.fieldValue,
               ),
               const SizedBox(height: 16),
-              TextField(
+              MinimalPasswordField(
                 controller: controller,
-                obscureText: obscure,
-                autofocus: true,
-                cursorColor: ProfileSettingsUi.ink,
-                decoration: InputDecoration(
-                  labelText: t.features.auth.password,
-                  labelStyle: ProfileSettingsUi.fieldLabel,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      obscure ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () => setState(() => obscure = !obscure),
-                    color: ProfileSettingsUi.muted,
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      color: ProfileSettingsUi.ink,
-                      width: 1.4,
-                    ),
-                  ),
-                ),
+                label: t.features.auth.password,
+                enabled: true,
+                autofillHints: const [AutofillHints.password],
               ),
             ],
           ),
@@ -277,7 +259,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                t.common.cancel,
+                t.common.cancelBtn,
                 style: TextStyle(color: ProfileSettingsUi.muted),
               ),
             ),
@@ -288,7 +270,6 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 

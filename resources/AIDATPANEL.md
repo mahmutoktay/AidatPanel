@@ -1,15 +1,19 @@
 # AidatPanel — Claude Code Master Reference
 
+> **Güncelleme:** 2026-07-14 · Canonical şema: `backend/prisma/schema.prisma` · Faz durumu: `resources/yol-haritası/FAZ_DURUMU.md`  
+> Bu dosya API sözleşmesi, veri modeli ve deployment özetidir. Drift olursa kod / Prisma kaynak kabul edilir.
+
 ## 📌 Proje Özeti
 
-**AidatPanel**, Türk apartman ve site yöneticileri için geliştirilmiş bir mobil aidat yönetim platformudur. Yöneticiler birden fazla apartmanı tek hesaptan yönetebilir. Sakinler kendi aidat durumlarını görüntüleyebilir ve arıza/talep bildirimi yapabilir.
+**AidatPanel**, Türk apartman ve site yöneticileri için geliştirilmiş bir mobil aidat yönetim platformudur. Yöneticiler site + tekil bina hiyerarşisini tek hesaptan yönetir; sakinler kendi aidat, gider, dekont ve ticket süreçlerini kullanır.
 
-- **Domain:** aidatpanel.com (Cloudflare üzerinde)
-- **Platform:** iOS + Android (Flutter)
-- **Backend:** Node.js, aynı Contabo VPS (OkulOptik ile ortak sunucu)
-- **Veritabanı:** PostgreSQL
-- **Web:** Sadece tanıtım/landing sayfası (mobil uygulama indirme yönlendirmeli)
-- **Dil:** Türkçe + İngilizce (i18n hazır)
+- **Domain:** aidatpanel.com (Cloudflare)
+- **Platform:** iOS + Android (Flutter) — sürüm `0.6.8+2000000009`
+- **Backend:** Node.js + Express (Contabo VPS, PM2: `aidapanel-api`)
+- **Veritabanı:** PostgreSQL (Prisma 7)
+- **Web:** Statik landing (`web/`); admin panel API: `/api/v1/admin`
+- **Dil:** TR + EN (Slang i18n)
+- **Abonelik:** RevenueCat (`aidatpanel_monthly` / `aidatpanel_annual`) — kota: **toplam bina sayısı**
 
 ---
 
@@ -17,28 +21,28 @@
 
 ```
 aidatpanel/
-├── web/                  # Landing page (statik HTML/CSS/JS)
-│   ├── index.html
-│   ├── assets/
-│   └── ...
+├── web/                  # Landing page (statik)
 ├── mobile/               # Flutter uygulaması
 │   ├── lib/
-│   ├── android/
-│   ├── ios/
-│   ├── pubspec.yaml
-│   └── ...
-└── backend/              # Node.js API
+│   │   ├── core/         # theme, router, network, notifications
+│   │   ├── features/     # auth, dashboard, sites, buildings, …
+│   │   ├── l10n/         # Slang TR/EN
+│   │   └── shared/
+│   └── pubspec.yaml
+└── backend/
     ├── src/
-    │   ├── routes/
+    │   ├── routes/       # Express route mount'ları
     │   ├── controllers/
-    │   ├── models/
-    │   ├── middleware/
-    │   ├── services/
+    │   ├── services/     # iş kuralları (SRP)
+    │   ├── middlewares/
+    │   ├── validators/   # Zod
+    │   ├── realtime/     # WebSocket hub
+    │   ├── jobs/         # OVERDUE / auto-generate
     │   └── utils/
     ├── prisma/
     │   └── schema.prisma
+    ├── scripts/          # deploy.sh / deploy.ps1
     ├── .env.example
-    ├── package.json
     └── index.js
 ```
 
@@ -47,158 +51,242 @@ aidatpanel/
 ## 🖥️ Backend
 
 ### Stack
-- **Runtime:** Node.js 20+
-- **Framework:** Express.js
-- **ORM:** Prisma
-- **Veritabanı:** PostgreSQL
-- **Auth:** JWT (access token 15dk, refresh token 30 gün)
-- **Email:** Resend (noreply@aidatpanel.com)
-- **Push Notification:** Firebase Admin SDK (FCM)
-- **SMS/WhatsApp:** Twilio (veya Netgsm Türkiye alternatifi)
-- **Abonelik Doğrulama:** RevenueCat REST API (App Store + Google Play receipt validation)
-- **Deployment:** PM2, aynı Contabo VPS
-- **Subdomain:** api.aidatpanel.com (CloudPanel üzerinde reverse proxy)
+- **Runtime:** Node.js 20+ (ES Modules)
+- **Framework:** Express.js 5
+- **ORM:** Prisma 7 (`@prisma/adapter-pg` / Neon adapter)
+- **Auth:** JWT — access ~15dk (`JWT_SECRET`), refresh ~30gün (`REFRESH_TOKEN_SECRET`) + `refreshTokenVersion` / `UserSession` SHA-256 replay koruması
+- **Email:** Resend (şifre sıfırlama)
+- **Push:** Firebase Admin SDK (FCM)
+- **SMS:** Twilio Verify / Twilio SMS / NetGsm (`SMS_PROVIDER`)
+- **Abonelik:** RevenueCat webhook + mobil SDK
+- **Realtime:** `ws` — `WSS /api/v1/realtime?token=ACCESS_JWT`
+- **Deploy:** PM2 · `api.aidatpanel.com` (CloudPanel reverse proxy, port 4200)
 
-### Ortam Değişkenleri (.env)
+### Ortam Değişkenleri (özet — tam liste: `backend/.env.example`)
 
 ```env
 PORT=4200
-DATABASE_URL=postgresql://aidatpanel:PASSWORD@localhost:5432/aidatpanel
-JWT_SECRET=...
-JWT_REFRESH_SECRET=...
+NODE_ENV=development|production
+DATABASE_URL=postgresql://...
+
+JWT_SECRET=...                         # min 32 karakter
+REFRESH_TOKEN_SECRET=...               # eski ad JWT_REFRESH_SECRET DEĞİL
+JWT_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_IN=30d
+
+# Opsiyonel
+ALLOWED_ORIGINS=https://admin.aidatpanel.com,...
 RESEND_API_KEY=...
-FIREBASE_SERVICE_ACCOUNT_JSON=...
+RESEND_FROM_EMAIL=...
+FIREBASE_SERVICE_ACCOUNT_JSON=...      # veya FIREBASE_SERVICE_ACCOUNT_PATH
+FIREBASE_PROJECT_ID=aidatpanel
+REALTIME_WS_ENABLED=true
+
+# SMS
+SMS_PROVIDER=auto|twilio|netgsm
 TWILIO_ACCOUNT_SID=...
 TWILIO_AUTH_TOKEN=...
-TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
-TWILIO_SMS_FROM=+1...
+TWILIO_PHONE_FROM=...
+TWILIO_VERIFY_SERVICE_SID=...          # doluysa OTP Verify ile gider
+NETGSM_USER=...
+NETGSM_PASS=...
+NETGSM_HEADER=AIDATPANEL
+
+# Dekont / OCR / listeler
+DEKONT_MAX_BYTES=10485760
+DEKONT_UPLOAD_DIR=./uploads/dekonts
+DEKONT_AMOUNT_TOLERANCE=0.05
+DEKONT_AI_AUTO_THRESHOLD=0.85
+DEKONT_AUTO_APPLY_PAYMENT=false
+DEKONT_OCR_MIN_CONFIDENCE=0.6
+DEKONT_PIPELINE_MAX_RETRIES=1
+# DEKONT_PIPELINE_CONCURRENCY=1
+# DEKONT_OCR_IN_WORKER=true
+
 REVENUECAT_API_KEY=...
 REVENUECAT_WEBHOOK_SECRET=...
+
+# Admin panel (mobil JWT ile paylaşılmaz)
+ADMIN_JWT_SECRET=...
+# ADMIN_JWT_EXPIRES_IN=15m
+# ADMIN_REFRESH_EXPIRES_IN=8h
+# ADMIN_ALLOWED_IPS=...
 ```
+
+**Sağlık:** `GET /health` → DB `SELECT 1` (API prefix dışı).
 
 ---
 
-## 🗄️ Veritabanı Şeması (Prisma)
+## 🗄️ Veritabanı Şeması (Prisma — 2026-07-14)
+
+Aşağıdaki özet canlı `schema.prisma` ile hizalıdır. Index / relation detayı için kaynak dosyaya bakın.
 
 ```prisma
 model User {
-  id            String        @id @default(uuid())
-  email         String        @unique
-  passwordHash  String
-  name          String
-  phone         String?
-  role          UserRole      @default(RESIDENT)
-  fcmToken      String?
-  language      String        @default("tr")
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  // Yönetici ilişkileri
-  managedBuildings  Building[]     @relation("BuildingManager")
-
-  // Sakin ilişkileri
-  apartment     Apartment?    @relation(fields: [apartmentId], references: [id])
-  apartmentId   String?
-
-  // Ortak
-  notifications Notification[]
-  tickets       Ticket[]
-  subscription  Subscription?
+  id                  String    @id @default(uuid())
+  email               String?   @unique          // sakinlerde opsiyonel
+  passwordHash        String
+  name                String
+  phone               String?
+  role                UserRole  @default(RESIDENT)
+  fcmToken            String?
+  language            String    @default("tr")
+  refreshTokenVersion Int       @default(0)     // logout / logout-all
+  deletedAt           DateTime?                 // KVKK soft-delete
+  profilePicture      String?
+  apartmentId         String?   @unique         // RESIDENT one-to-one
+  managedBuildings    Building[] @relation("BuildingManager")
+  managedSites        Site[]     @relation("SiteManager")
+  sessions            UserSession[]
+  uploadedDekonts     Dekont[]
+  reviewedDekonts     Dekont[]   @relation("DekontReviewer")
+  // ... notifications, tickets, subscription, promoGrants, passwordResetTokens
+  @@unique([phone, role])
 }
 
-enum UserRole {
-  MANAGER
-  RESIDENT
+model UserSession {
+  id            String    @id @default(uuid())
+  userId        String
+  deviceLabel   String
+  platform      String
+  lastTokenHash String?   // refresh SHA-256 — replay tespiti
+  createdAt     DateTime  @default(now())
+  lastSeenAt    DateTime  @default(now())
+  revokedAt     DateTime?
 }
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model PhoneOtpToken {
+  id        String    @id @default(uuid())
+  phone     String?
+  email     String?
+  purpose   String    // resident_login | resident_join | resident_phone_change | manager_*
+  tokenHash String    @unique
+  payload   Json?
+  expiresAt DateTime
+  usedAt    DateTime?
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
+}
+
+enum UserRole { MANAGER RESIDENT }
 
 model Subscription {
-  id                  String    @id @default(uuid())
-  userId              String    @unique
-  user                User      @relation(fields: [userId], references: [id])
-  status              SubscriptionStatus
-  plan                String    // "monthly" | "annual"
-  platform            String    // "ios" | "android"
-  revenuecatId        String?
-  currentPeriodStart  DateTime
-  currentPeriodEnd    DateTime
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id                 String             @id @default(uuid())
+  userId             String             @unique
+  status             SubscriptionStatus
+  plan               String             // "monthly" | "annual"
+  platform           String             // "ios" | "android"
+  revenuecatId       String?
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 }
 
-enum SubscriptionStatus {
-  ACTIVE
-  EXPIRED
-  CANCELLED
-  TRIAL
-}
+enum SubscriptionStatus { ACTIVE EXPIRED CANCELLED TRIAL }
 
 model Site {
-  id                        String        @id @default(uuid())
-  name                      String
-  address                   String
-  city                      String
-  managerId                 String
-  manager                   User          @relation("SiteManager", fields: [managerId], references: [id])
-  dueAmount                 Decimal?      @db.Decimal(12, 2)
-  dueDay                    Int?
-  currency                  String        @default("TRY")
-  collectionIban            String?
-  collectionAccountTitle    String?
-  paymentReferenceTemplate  String?
-  buildings                 Building[]
-  expenses                  SiteExpense[]
-  createdAt                 DateTime      @default(now())
-  updatedAt                 DateTime      @updatedAt
-}
-
-model SiteExpense {
-  id          String   @id @default(uuid())
-  siteId      String
-  site        Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  title       String
-  amount      Decimal  @db.Decimal(12, 2)
-  expenseDate DateTime
-  category    String?
-  note        String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                       String   @id @default(uuid())
+  name                     String
+  address                  String
+  city                     String
+  district                 String?
+  managerId                String
+  dueAmount                Decimal? @db.Decimal(10, 2)
+  dueDay                   Int      @default(1)
+  currency                 String   @default("TRY")
+  collectionIban           String?
+  collectionAccountTitle   String?
+  collectionIbanLabel      String?  // yönetici takma adı (ör. "Ziraat IBAN'ım")
+  paymentReferenceTemplate String?
+  collectionVerifiedAt     DateTime?
+  buildings                Building[]
+  siteExpenses             SiteExpense[]
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 }
 
 model Building {
-  id          String      @id @default(uuid())
-  name        String
-  address     String
-  city        String
-  managerId   String
-  manager     User        @relation("BuildingManager", fields: [managerId], references: [id])
-  siteId      String?
-  site        Site?       @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  blockLabel  String?
-  addressExtra String?
-  apartments  Apartment[]
-  expenses    Expense[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                 String   @id @default(uuid())
+  name               String
+  address            String
+  city               String
+  district           String?
+  totalFloors        Int?
+  apartmentsPerFloor Int?
+  managerId          String
+  siteId             String?  // null = tekil bina; dolu → site altı blok
+  blockLabel         String?  // site altı için zorunlu (API)
+  addressExtra       String?
+  dueAmount          Decimal? @db.Decimal(10, 2)
+  dueDay             Int      @default(1)
+  currency           String   @default("TRY")
+  collectionIban           String?
+  collectionAccountTitle   String?
+  collectionIbanLabel      String?
+  paymentReferenceTemplate String?
+  collectionVerifiedAt     DateTime?
+  apartments         Apartment[]
+  expenses           Expense[]
+  dekonts            Dekont[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model SiteExpense {
+  id              String          @id @default(uuid())
+  siteId          String
+  title           String
+  amount          Decimal?        @db.Decimal(10, 2)
+  category        ExpenseCategory
+  date            DateTime
+  targetMonth     Int
+  targetYear      Int
+  perUnitAmount   Decimal?        @db.Decimal(10, 2)
+  splitGroupId    String?
+  sourceExpenseId String?
+  note            String?
+  receiptUrl      String?
+  storedPaths     Json?           @default("[]")
+  // OCR alanları (Expense ile uyumlu)
+  rawText         String?
+  parsedJson      Json?
+  parsedAmount    Decimal?        @db.Decimal(12, 2)
+  transactionDate DateTime?
+  aiConfidence    Float?
+  ocrReceiptsJson Json?
+  carryforwards   DueExpenseCarryforward[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
 
 model Apartment {
-  id           String    @id @default(uuid())
-  number       String    // "B-12", "3A" vb.
-  floor        Int?
-  buildingId   String
-  building     Building  @relation(fields: [buildingId], references: [id])
-  residents    User[]
-  dues         Due[]
-  inviteCodes  InviteCode[]
-  tickets      Ticket[]
-  createdAt    DateTime  @default(now())
+  id          String @id @default(uuid())
+  number      String
+  floor       Int?
+  buildingId  String
+  resident    User?          // one-to-one
+  dues        Due[]
+  inviteCodes InviteCode[]
+  tickets     Ticket[]
+  dekonts     Dekont[]
+  expenseCarryforwards DueExpenseCarryforward[]
+  createdAt   DateTime @default(now())
 }
 
 model InviteCode {
   id          String    @id @default(uuid())
-  code        String    @unique  // Örn: "AP3-B12-X7K9"
+  code        String    @unique
   apartmentId String
-  apartment   Apartment @relation(fields: [apartmentId], references: [id])
   usedAt      DateTime?
   usedBy      String?
   expiresAt   DateTime
@@ -206,113 +294,277 @@ model InviteCode {
 }
 
 model Due {
-  id          String    @id @default(uuid())
-  apartmentId String
-  apartment   Apartment @relation(fields: [apartmentId], references: [id])
-  amount      Decimal   @db.Decimal(10, 2)
-  currency    String    @default("TRY")
-  month       Int       // 1-12
-  year        Int
-  status      DueStatus @default(PENDING)
-  paidAt      DateTime?
-  note        String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id                   String    @id @default(uuid())
+  apartmentId          String
+  amount               Decimal   @db.Decimal(10, 2)
+  currency             String    @default("TRY")
+  month                Int
+  year                 Int
+  dueDate              DateTime
+  status               DueStatus @default(PENDING)
+  paidAt               DateTime?
+  overdueDays          Int?      @default(0)
+  residentNameSnapshot String?
+  note                 String?
+  payments             DuePayment[]
+  dekontAllocations    DekontDueAllocation[]
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 }
 
-enum DueStatus {
-  PENDING
-  PAID
-  OVERDUE
-  WAIVED
+enum DueStatus { PENDING PAID OVERDUE WAIVED }
+
+model DuePayment {
+  id        String   @id @default(uuid())
+  dueId     String
+  dekontId  String?  // null = manuel "ödendi"
+  amount    Decimal  @db.Decimal(12, 2)
+  paidAt    DateTime
+  currency  String   @default("TRY")
+  note      String?
+  createdAt DateTime @default(now())
 }
 
 model Expense {
-  id          String    @id @default(uuid())
-  buildingId  String
-  building    Building  @relation(fields: [buildingId], references: [id])
-  title       String
-  amount      Decimal   @db.Decimal(10, 2)
-  category    ExpenseCategory
-  date        DateTime
-  note        String?
-  receiptUrl  String?
-  createdAt   DateTime  @default(now())
+  id              String          @id @default(uuid())
+  buildingId      String
+  title           String
+  amount          Decimal?        @db.Decimal(10, 2)
+  category        ExpenseCategory
+  date            DateTime
+  targetMonth     Int
+  targetYear      Int
+  perUnitAmount   Decimal?        @db.Decimal(10, 2)
+  splitGroupId    String?
+  sourceExpenseId String?
+  note            String?
+  receiptUrl      String?         // @deprecated → storedPaths
+  storedPaths     Json?           @default("[]")
+  rawText         String?
+  parsedJson      Json?
+  parsedAmount    Decimal?        @db.Decimal(12, 2)
+  transactionDate DateTime?
+  aiConfidence    Float?
+  ocrReceiptsJson Json?
+  carryforwards   DueExpenseCarryforward[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model DueExpenseCarryforward {
+  id            String  @id @default(uuid())
+  expenseId     String?
+  siteExpenseId String?
+  apartmentId   String
+  fromMonth     Int
+  fromYear      Int
+  toMonth       Int
+  toYear        Int
+  amount        Decimal @db.Decimal(10, 2)
+  createdAt     DateTime @default(now())
+  @@unique([expenseId, apartmentId])
+  @@unique([siteExpenseId, apartmentId])
 }
 
 enum ExpenseCategory {
-  CLEANING
-  ELEVATOR
-  ELECTRICITY
-  WATER
-  INSURANCE
-  REPAIR
-  GARDEN
-  OTHER
+  CLEANING ELEVATOR ELECTRICITY WATER INSURANCE REPAIR GARDEN OTHER
 }
 
 model Ticket {
-  id          String      @id @default(uuid())
-  apartmentId String
-  apartment   Apartment   @relation(fields: [apartmentId], references: [id])
-  userId      String
-  user        User        @relation(fields: [userId], references: [id])
-  title       String
-  description String
-  category    TicketCategory
-  status      TicketStatus @default(OPEN)
-  updates     TicketUpdate[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id             String         @id @default(uuid())
+  apartmentId    String
+  userId         String
+  title          String
+  description    String
+  category       TicketCategory
+  status         TicketStatus   @default(OPEN)
+  attachmentPath String?        // → yanıtta attachmentUrl
+  updates        TicketUpdate[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
-enum TicketCategory {
-  COMPLAINT
-  REQUEST
-  MALFUNCTION
-  OTHER
-}
-
-enum TicketStatus {
-  OPEN
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-}
+enum TicketCategory { COMPLAINT REQUEST MALFUNCTION OTHER }
+enum TicketStatus { OPEN IN_PROGRESS RESOLVED CLOSED }
 
 model TicketUpdate {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   ticketId  String
-  ticket    Ticket  @relation(fields: [ticketId], references: [id])
   message   String
   fromRole  UserRole
   createdAt DateTime @default(now())
 }
 
 model Notification {
-  id        String    @id @default(uuid())
+  id        String           @id @default(uuid())
   userId    String
-  user      User      @relation(fields: [userId], references: [id])
+  code      String           // i18n anahtarı
+  params    Json?
   title     String
   body      String
   type      NotificationType
-  isRead    Boolean   @default(false)
+  isRead    Boolean          @default(false)
   data      Json?
-  createdAt DateTime  @default(now())
+  createdAt DateTime         @default(now())
 }
 
 enum NotificationType {
-  DUE_REMINDER
-  DUE_PAID
-  TICKET_UPDATE
-  ANNOUNCEMENT
-  SYSTEM
+  DUE_REMINDER DUE_PAID TICKET_CREATED TICKET_UPDATE
+  ANNOUNCEMENT SYSTEM
+  DEKONT_RECEIVED DEKONT_MATCHED DEKONT_PAYMENT_APPLIED DEKONT_NEEDS_REVIEW
+  EXPENSE_ADDED
+}
+
+enum DekontStatus {
+  RECEIVED EXTRACTING EXTRACT_FAILED PARSED PARSE_LOW_CONFIDENCE
+  MATCHING MATCHED MATCH_AMBIGUOUS UNMATCHED
+  PAYMENT_APPLIED PAYMENT_PARTIAL REJECTED RECIPIENT_MISMATCH NEEDS_MANAGER_REVIEW
+}
+
+enum DekontSource { RESIDENT_UPLOAD MANAGER_UPLOAD }
+
+model Dekont {
+  id                String       @id @default(uuid())
+  buildingId        String
+  apartmentId       String?
+  uploadedById      String
+  dueId             String?
+  status            DekontStatus @default(RECEIVED)
+  source            DekontSource
+  storedPath        String
+  originalFilename  String
+  mimeType          String
+  sizeBytes         Int
+  rawText           String?
+  parsedJson        Json?
+  parserProfile     String?
+  parseError        String?
+  recipientVerified Boolean?
+  verificationJson  Json?
+  fileHash          String?
+  referenceNumber   String?
+  senderIban        String?
+  receiverIban      String?
+  parsedAmount      Decimal?     @db.Decimal(12, 2)
+  transactionDate   DateTime?
+  aiConfidence      Float?
+  reviewedById      String?
+  reviewedAt        DateTime?
+  reviewNote        String?
+  rejectionReason   String?
+  payments          DuePayment[]
+  dueAllocations    DekontDueAllocation[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  @@unique([buildingId, referenceNumber])
+  @@unique([buildingId, fileHash])
+}
+
+model DekontDueAllocation {
+  id              String   @id @default(uuid())
+  dekontId        String
+  dueId           String
+  allocatedAmount Decimal? @db.Decimal(12, 2)
+  createdAt       DateTime @default(now())
+  @@unique([dekontId, dueId])
+}
+
+// --- Admin paneli (mobil User tablosundan ayrı) ---
+enum AdminRole { SUPER_ADMIN SUPPORT }
+
+model AdminUser {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         AdminRole @default(SUPPORT)
+  isActive     Boolean   @default(true)
+  fcmToken     String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model AdminAuditLog {
+  id         String   @id @default(uuid())
+  adminId    String
+  action     String
+  targetType String?
+  targetId   String?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+}
+
+enum PromoType { FREE_PERIOD DISCOUNT_PERCENT }
+
+model PromoGrant {
+  id              String    @id @default(uuid())
+  userId          String
+  grantedById     String
+  type            PromoType
+  plan            String?
+  durationDays    Int?
+  discountPercent Int?
+  reason          String
+  expiresAt       DateTime?
+  createdAt       DateTime  @default(now())
+}
+
+model UserActivityDaily {
+  id          String   @id @default(uuid())
+  date        DateTime @db.Date
+  role        UserRole
+  activeUsers Int
+  createdAt   DateTime @default(now())
+  @@unique([date, role])
+}
+
+model AdminNotification {
+  id        String   @id @default(uuid())
+  adminId   String?
+  title     String
+  body      String
+  type      String   @default("SYSTEM")
+  isRead    Boolean  @default(false)
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+model DbBackup {
+  id                     String    @id @default(uuid())
+  filename               String
+  sizeBytes              BigInt?
+  status                 String    @default("PENDING")
+  createdById            String
+  errorMessage           String?
+  downloadTokenHash      String?
+  downloadTokenExpiresAt DateTime?
+  createdAt              DateTime  @default(now())
+  completedAt            DateTime?
 }
 ```
+
+### Effective config (Site → Building)
+Site altı binalarda aidat / IBAN / adres boşsa site varsayılanına düşer (`resolveEffectiveBuildingConfig`). Dekont doğrulama ve sakin `payment-collection` **effective IBAN** kullanır.
+
+### IBAN takma adı (`collectionIbanLabel`)
+- Yönetici Site/Bina collection alanlarında opsiyonel takma ad (max 40 karakter).
+- `GET /buildings/collection-presets` yanıtında döner (kayıtlı IBAN listesi / matcher).
+- Preset yanıtı: `buildingCount` (bu seti kullanan bina sayısı) + `siteCount` (bu seti kullanan site sayısı; binası olmasa da site varsayılan IBAN sayılır).
+- Dekont alıcı IBAN eşleşince etiketi boş olan aynı manager + aynı IBAN kayıtlarına TR banka kodundan otomatik isim yazılır: `"{banka} IBAN'ım"` (`collectionIbanLabelService` + `trIbanBank.js`). Dolu etiketlere dokunulmaz.
 
 ---
 
 ## 🔌 API Endpoint'leri
+
+Yanıt sözleşmesi: `{ "success": true|false, "message": "...", "data": ... }`
+
+### Sistem
+```
+GET    /health                              # DB connectivity (prefix dışı)
+WSS    /api/v1/realtime?token=ACCESS_JWT
+```
 
 ### Auth (`/api/v1/auth`)
 ```
@@ -335,32 +587,21 @@ POST   /api/v1/auth/reset-password
 - Body: `{ email? }` **veya** `{ phone? }` (en az biri); opsiyonel `channel: "email" | "sms"`
 - Kanal kuralı (SMS kotası tasarrufu):
   1. Hesapta e-posta varsa → varsayılan **e-posta** (Resend)
-  2. Yalnızca telefon varsa → **SMS** (`sendSms`)
-  3. E-posta gönderildikten sonra kullanıcı kod alamıyorsa → `channel: "sms"` ile opt-in SMS (hesapta telefon şart)
+  2. Yalnızca telefon varsa → **SMS**
+  3. E-posta gönderildikten sonra kod alamıyorsa → `channel: "sms"` opt-in (hesapta telefon şart)
 - Yanıt `data`: `{ deliveredVia: "email"|"sms"|null, smsFallbackAvailable: boolean }`
-  - Kullanıcı yoksa / kanal yoksa: `deliveredVia: null`, `smsFallbackAvailable: false` (enumeration koruması; HTTP her zaman 200)
-- SMS: saatlik en fazla 3 gönderim / kullanıcı; `PasswordResetToken` (6 karakter) — login OTP ile karışmaz
-- `POST /auth/reset-password`: `{ token, password }` (değişmedi)
+- `POST /auth/reset-password`: `{ token, password }`
 
 **Yönetici identifier-öncelikli akış (mobil):**
-1. `POST /auth/check-identifier` `{ identifier: email|phone, purpose: "manager_identifier" }`
-   → `{ exists: false }` veya `{ exists: true, name: string|null }`
-   - `name`: kayıtlı yönetici adı (trim); boşsa `null` (kişiselleştirilmiş karşılama için)
-   - Telefon eşleşmesi kanonik 10 hane + legacy yazılışlar (`0…`, `90…`, `+90…`)
-   - E-posta başka rolde doluysa `409`
-2. Kayıtlıysa (`exists: true`) → `POST /auth/login` (şifre)
-3. Yeniyse (`exists: false`) → isim + şifre → `POST /auth/register` + `POST /auth/login`
-   - `POST /auth/register` telefon/e-posta ile idempotent: aynı kimlik+şifre tekrarında (ağ retry) mevcut hesap başarı döner
-   - `POST /auth/login` aynı telefonda MANAGER+RESIDENT varsa şifre eşleşen hesabı seçer
+1. `POST /auth/check-identifier` `{ identifier, purpose: "manager_identifier" }` → `{ exists, name? }`
+2. Kayıtlıysa → `POST /auth/login`; yeniyse isim+şifre → `register` + `login`
+3. Telefon eşleşmesi kanonik 10 hane + legacy yazılışlar; aynı telefonda MANAGER+RESIDENT varsa şifre eşleşen hesap seçilir
 
 **Sakin telefon-öncelikli akış (mobil):**
-1. `POST /auth/check-identifier` `{ identifier: phone, purpose: "resident_phone" }` → `{ exists: true|false }`
-2. Kayıtlıysa `otp/send` + `otp/verify` (`resident_login`) → JWT
-3. Yeniyse `otp/send` + `otp/verify` (`resident_join`, davet kodu opsiyonel) → `{ requireName: true }`
-4. İsim + davet kodu → `otp/complete-resident-join` → JWT
-   Davet linki (`https://aidatpanel.com/join?code=...` / `aidatpanel://join?code=...`) ile gelindiyse kod arka planda tutulur; kullanıcıdan tekrar sorulmaz.
+1. `check-identifier` (`resident_phone`) → OTP login veya join
+2. Yeni sakin: isim + davet kodu → `otp/complete-resident-join`
+3. Deep link: `https://aidatpanel.com/join?code=...` / `aidatpanel://join?code=...`
 
-**Davet linki:** Yönetici paylaşım mesajı `https://aidatpanel.com/join?code=AP3-...` içerir. Uygulama yoksa web landing; varsa deep link ile sakin telefon ekranı açılır.
 ### Buildings (Yönetici)
 ```
 GET    /api/v1/buildings                    # ?standalone=true → site altı olmayan binalar
@@ -368,10 +609,12 @@ POST   /api/v1/buildings
 GET    /api/v1/buildings/:id
 PUT    /api/v1/buildings/:id
 DELETE /api/v1/buildings/:id
-PATCH  /api/v1/buildings/:id/collection    # Tahsilat IBAN
-GET    /api/v1/buildings/collection-presets  # Bina + site IBAN önerileri
+PATCH  /api/v1/buildings/:id/collection     # collectionIban?, collectionAccountTitle?, collectionIbanLabel?, paymentReferenceTemplate?
+GET    /api/v1/buildings/collection-presets # bina + site IBAN önerileri (+ label, buildingCount, siteCount)
+GET    /api/v1/buildings/:id/dashboard-summary
+POST   /api/v1/buildings/dashboard-summary/batch
 GET    /api/v1/buildings/:id/dekonts
-POST   /api/v1/buildings/:id/announcements   # body: { body } — başlık sistemde "Duyuru" olarak üretilir
+POST   /api/v1/buildings/:id/announcements  # body: { body } — başlık sistemde "Duyuru"
 ```
 
 ### Sites (Yönetici — FAZ 8)
@@ -380,18 +623,18 @@ GET    /api/v1/sites
 POST   /api/v1/sites
 GET    /api/v1/sites/:id
 PUT    /api/v1/sites/:id
-DELETE /api/v1/sites/:id                     # Alt binalar cascade silinir
-PATCH  /api/v1/sites/:id/collection
+DELETE /api/v1/sites/:id                    # alt binalar cascade
+PATCH  /api/v1/sites/:id/collection         # collectionIban?, collectionAccountTitle?, collectionIbanLabel?, paymentReferenceTemplate?
 GET    /api/v1/sites/:id/buildings
-POST   /api/v1/sites/:id/buildings         # blockLabel zorunlu; name opsiyonel
+POST   /api/v1/sites/:id/buildings          # blockLabel zorunlu; name opsiyonel
 GET    /api/v1/sites/:id/expenses
 POST   /api/v1/sites/:id/expenses
 PUT    /api/v1/sites/:id/expenses/:expenseId
 DELETE /api/v1/sites/:id/expenses/:expenseId
-GET    /api/v1/sites/:id/reports           # PDF (type=monthly|annual)
+GET    /api/v1/sites/:id/reports            # PDF type=monthly|annual
 ```
 
-**Kota:** Abonelik `usage.buildings` / `limits.buildings` — toplam bina sayısı (site içi bloklar dahil; site başlığı kotaya dahil değil).
+**Kota:** `GET /me/subscription` → `usage.buildings` / `limits.buildings` (toplam bina; site başlığı sayılmaz).
 
 ### Apartments (Yönetici)
 ```
@@ -406,52 +649,51 @@ POST   /api/v1/apartments/:apartmentId/invite-code
 ### Dues (Aidat)
 ```
 GET    /api/v1/buildings/:id/dues
-POST   /api/v1/buildings/:id/dues/bulk      # Eksik aidatları oluştur
+GET    /api/v1/buildings/:id/dues/transactions
+POST   /api/v1/buildings/:id/dues/bulk
 POST   /api/v1/buildings/:id/dues/remind
 PATCH  /api/v1/buildings/:id/dues/:dueId/status
 PATCH  /api/v1/buildings/:id/due-amount
-GET    /api/v1/me/dues                      # Sakin
+GET    /api/v1/me/dues
 ```
 
-Aidat yanıt alanları (computed): `paidAmount` (DuePayment toplamı), `remainingAmount` (`amount - paidAmount`).
-Kısmi ödeme sonrası aidat `PENDING`/`OVERDUE` kalır; `remainingAmount <= tolerans` olunca `PAID`.
-Manuel `PATCH .../status { status: "PAID" }` kalan tutar kadar `DuePayment` (dekontId=null) oluşturur.
+Computed: `paidAmount` (DuePayment toplamı), `remainingAmount`. Kısmi ödemede `PENDING`/`OVERDUE` kalır; tolerans içinde `PAID`. Manuel `PAID` → `DuePayment` (dekontId=null).
 
 ### Expenses (Gider)
 ```
 GET    /api/v1/buildings/:id/expenses
 POST   /api/v1/buildings/:id/expenses
 GET    /api/v1/buildings/:id/expenses/summary
-GET    /api/v1/buildings/:id/reports          # PDF (type=monthly|annual)
+GET    /api/v1/buildings/:id/reports        # PDF type=monthly|annual
 PUT    /api/v1/expenses/:id
 DELETE /api/v1/expenses/:id
-POST   /api/v1/expenses/:id/proof           # Makbuz upload (multipart)
+POST   /api/v1/expenses/:id/proof           # makbuz upload (multipart)
 GET    /api/v1/expenses/:id/file
-GET    /api/v1/me/expenses                  # Sakin (okuma)
+GET    /api/v1/expenses/:id/file/:filename
+GET    /api/v1/me/expenses
 ```
+
+Gider → aidat: `targetMonth/Year`, `perUnitAmount`, `DueExpenseCarryforward` (site gideri için `siteExpenseId`).
 
 ### Tickets
 ```
 GET    /api/v1/buildings/:id/tickets
 GET    /api/v1/tickets/:id
 POST   /api/v1/apartments/:apartmentId/tickets
-POST   /api/v1/tickets/:id/attachment   # multipart file (JPG/PNG, max 5MB) — sakin, OPEN talep
+POST   /api/v1/tickets/:id/attachment       # JPG/PNG, max 5MB — sakin, OPEN
 POST   /api/v1/tickets/:id/updates
 PATCH  /api/v1/tickets/:id/status
 GET    /api/v1/me/tickets
-# Ticket.attachmentPath → yanıtta attachmentUrl: /uploads/tickets/{filename}
 ```
 
-**TicketStatus geçişleri** (`PATCH .../status`, yalnızca MANAGER):
+**TicketStatus geçişleri** (yalnızca MANAGER):
 
-| Mevcut | İzin verilen sonraki | UI anlamı |
-|--------|----------------------|-----------|
+| Mevcut | İzin verilen | UI |
+|--------|--------------|-----|
 | `OPEN` | `IN_PROGRESS`, `CLOSED` | Açık → Onaylandı / Reddedildi |
 | `IN_PROGRESS` | `RESOLVED`, `OPEN` | Onaylandı → Yapıldı / Geri Al |
 | `RESOLVED` | `IN_PROGRESS` | Yapıldı → Geri Al |
 | `CLOSED` | `OPEN` | Reddedildi → Geri Al |
-
-Enum değerleri değişmez; mobil etiketler: Açık / Onaylandı / Yapıldı / Reddedildi.
 
 ### Dekont
 ```
@@ -463,14 +705,11 @@ GET    /api/v1/me/dekonts
 GET    /api/v1/me/payment-collection
 ```
 
-`GET /dekonts/:id` yanıtına `buildingName` eklenir (site altı bloklarda `Site · Blok`, aksi halde bina adı). Yönetici detay UI’da `Bina · Daire N · Yükleyen` tek satır bağlamı için kullanılır.
-
-`GET /dekonts/:id` yanıtına `buildingName` eklenir (site altı bloklarda `Site · Blok`, aksi halde bina adı). Yönetici detay UI’da `Bina · Daire N · Yükleyen` tek satır bağlamı için kullanılır.
-
-Upload (multipart): `file` + `dueId` (tek) ve/veya `dueIds` (JSON dizi). Çoklu aidat `DekontDueAllocation` ile saklanır.
-Onay (`APPROVE`): OCR tutarı seçili aidatlara FIFO dağıtılır; her dilim bir `DuePayment`. Tüm hedefler kapanırsa `PAYMENT_APPLIED`, aksi halde `PAYMENT_PARTIAL`.
-Review body: `{ decision, note?, dueId?, dueIds?, amount? }`.
-`amount` (opsiyonel): OCR `parsedAmount` yoksa zorunlu; varsa OCR tutarı kullanılır. Uygulanan tutar `min(amount|parsedAmount, kalan borç)` ile sınırlanır — tutarsız onayda kalan borcun tamamı otomatik kapanmaz.
+- `GET /dekonts/:id` → `buildingName` (site altı: `Site · Blok`)
+- Upload: `file` + `dueId` ve/veya `dueIds` → `DekontDueAllocation`
+- Onay (`APPROVE`): OCR tutarı FIFO → her dilim `DuePayment`; hepsi kapanırsa `PAYMENT_APPLIED`, aksi `PAYMENT_PARTIAL`
+- Review body: `{ decision, note?, dueId?, dueIds?, amount? }`
+- Pipeline: storage → OCR → verification (IBAN) → business rules → payment → FCM; eşleşmede boş `collectionIbanLabel` otomatik doldurulabilir
 
 ### Notifications
 ```
@@ -478,419 +717,261 @@ GET    /api/v1/notifications
 GET    /api/v1/notifications/unread-count
 PATCH  /api/v1/notifications/:id/read
 PATCH  /api/v1/notifications/read-all
-PUT    /api/v1/me/fcm-token
 ```
 
 ### Profile (`/api/v1/me`)
 ```
 GET    /api/v1/me
-PUT    /api/v1/me               # name, email?, phone?, language; yönetici email/phone → currentPassword; sakin phone → otpCode (SMS)
+PUT    /api/v1/me                 # name, email?, phone?, language; yönetici email/phone → currentPassword; sakin phone → otpCode
 PUT    /api/v1/me/password
 PUT    /api/v1/me/language
-DELETE /api/v1/me               # KVKK hesap kapatma
+DELETE /api/v1/me                 # KVKK hesap kapatma (deletedAt)
+PUT    /api/v1/me/fcm-token
+GET    /api/v1/me/sessions
+DELETE /api/v1/me/sessions/:sessionId
+POST   /api/v1/me/profile-picture          # multipart
+DELETE /api/v1/me/profile-picture
+GET    /api/v1/me/profile-picture-file
+GET    /api/v1/me/subscription             # MANAGER — usage.buildings + limits
+GET    /api/v1/me/payment-collection       # RESIDENT
+GET    /api/v1/me/dues | /expenses | /tickets | /dekonts
 ```
 
-### Realtime
+### Subscription
 ```
-WSS    /api/v1/realtime?token=ACCESS_JWT
+GET    /api/v1/me/subscription
+POST   /api/v1/subscription/webhook/revenuecat   # Bearer REVENUECAT_WEBHOOK_SECRET
 ```
 
-### Ertelenen / yok
+### Admin (`/api/v1/admin` — ayrı `AdminUser` JWT)
 ```
-GET    /api/v1/me/subscription                # FAZ 6
-POST   /api/v1/subscription/webhook/revenuecat # FAZ 6
+POST   /api/v1/admin/auth/login
+POST   /api/v1/admin/auth/refresh
+POST   /api/v1/admin/auth/logout
+GET    /api/v1/admin/auth/me
+
+GET    /api/v1/admin/dashboard/kpis|alerts|insights|segments
+GET    /api/v1/admin/hierarchy/managers
+GET    /api/v1/admin/hierarchy/managers/:id
+GET    /api/v1/admin/hierarchy/buildings/:id
+GET    /api/v1/admin/hierarchy/apartments/:id
+
+GET    /api/v1/admin/users
+GET    /api/v1/admin/users/:id
+POST   /api/v1/admin/users/:id/reset-password
+POST   /api/v1/admin/users/:id/close-account      # SUPER_ADMIN
+
+GET    /api/v1/admin/subscriptions
+POST   /api/v1/admin/subscriptions/grant
+POST   /api/v1/admin/subscriptions/:userId/grant
+GET    /api/v1/admin/promos
+POST   /api/v1/admin/promos
+
+GET    /api/v1/admin/dekonts/summary
+GET    /api/v1/admin/dekonts
+GET    /api/v1/admin/residents
+GET    /api/v1/admin/residents/:id/payment-habits
+GET    /api/v1/admin/analytics/active-users
+
+GET    /api/v1/admin/notifications
+PATCH  /api/v1/admin/notifications/:id/read
+POST   /api/v1/admin/notifications/broadcast
+POST   /api/v1/admin/notifications/preview
+GET    /api/v1/admin/audit-logs
+
+POST   /api/v1/admin/backups/create               # SUPER_ADMIN
+GET    /api/v1/admin/backups
+POST   /api/v1/admin/backups/:id/download-token
+GET    /api/v1/admin/backups/:id/download
 ```
 
 ---
 
 ## 📱 Flutter Uygulaması
 
-### pubspec.yaml — Temel Paketler
+### Sürüm / paketler (`pubspec.yaml` — 0.6.8+2000000009)
 
 ```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  
-  # State Management
-  flutter_riverpod: ^2.5.0
-  riverpod_annotation: ^2.3.0
-  
-  # Navigation
-  go_router: ^13.0.0
-  
-  # Network
-  dio: ^5.4.0
-  flutter_secure_storage: ^9.0.0
-  
-  # i18n
-  flutter_localizations:
-    sdk: flutter
-  intl: ^0.19.0
-  
-  # Firebase
-  firebase_core: ^3.0.0
-  firebase_messaging: ^15.0.0
-  
-  # In-App Purchase (RevenueCat)
-  purchases_flutter: ^7.0.0
-  
-  # UI
-  cached_network_image: ^3.3.0
-  shimmer: ^3.0.0
-  
-  # Utils
-  equatable: ^2.0.5
-  json_annotation: ^4.8.1
-  freezed_annotation: ^2.4.0
+environment:
+  sdk: ^3.11.5
 
-dev_dependencies:
-  build_runner: ^2.4.0
-  riverpod_generator: ^2.3.0
-  freezed: ^2.4.0
-  json_serializable: ^6.7.0
+dependencies:
+  flutter_riverpod: ^3.3.1          # Notifier / NotifierProvider (CodeGen yok)
+  go_router: ^17.3.0
+  dio: ^5.4.0
+  flutter_secure_storage: ^10.3.1
+  web_socket_channel: ^3.0.2
+  slang: ^4.15.0
+  slang_flutter: ^4.15.0
+  firebase_core: ^4.10.0
+  firebase_messaging: ^16.3.0
+  firebase_analytics: ^12.0.0
+  firebase_crashlytics: ^5.0.0
+  flutter_local_notifications: ^22.0.1
+  permission_handler: ^12.0.3
+  purchases_flutter: ^10.2.3
+  google_fonts: ^8.1.0
+  fl_chart: ^1.2.0
+  pdfx: ^2.9.2
+  # + equatable, image_picker, file_picker, share_plus, app_links, gal, …
 ```
 
-### Flutter Klasör Yapısı
+### Klasör yapısı
 
 ```
 mobile/lib/
-├── main.dart
-├── firebase_options.dart
-├── core/
-│   ├── constants/
-│   │   ├── api_constants.dart      # Base URL, endpoint'ler
-│   │   └── app_constants.dart
-│   ├── theme/
-│   │   ├── app_theme.dart
-│   │   ├── app_colors.dart
-│   │   └── app_typography.dart
-│   ├── router/
-│   │   └── app_router.dart         # GoRouter tanımları
-│   ├── network/
-│   │   ├── dio_client.dart         # Interceptor'lar, token refresh
-│   │   └── api_exception.dart
-│   ├── storage/
-│   │   └── secure_storage.dart     # JWT token saklama
-│   └── utils/
-│       ├── date_utils.dart
-│       └── currency_utils.dart
-├── l10n/
-│   ├── strings_tr.i18n.json        # Türkçe (Slang)
-│   └── strings_en.i18n.json        # İngilizce
+├── main.dart / main_dev.dart       # flavor: prod / dev
+├── core/                           # constants, theme, router, network, storage, notifications
+├── l10n/                           # strings_tr / strings_en (Slang)
 ├── features/
-│   ├── auth/                       # Referans Clean Architecture implementasyonu
-│   │   ├── data/ | domain/ | presentation/
-│   │   └── presentation/screens/
-│   │       ├── login_screen.dart
-│   │       ├── sign_up_screen.dart # Birleşik kayıt (sakin davet kodu + yönetici)
-│   │       ├── splash_screen.dart
-│   │       ├── forgot_password_screen.dart
-│   │       └── reset_password_screen.dart
-│   ├── dashboard/
-│   │   └── presentation/screens/
-│   │       ├── manager_dashboard_screen.dart
-│   │       └── resident_dashboard_screen.dart
+│   ├── auth/
+│   ├── dashboard/                  # ManagerPropertiesTab: Siteler | Binalar
+│   ├── sites/                      # FAZ 8
 │   ├── buildings/
-│   │   ├── data/
-│   │   ├── domain/
-│   │   └── presentation/
 │   ├── apartments/
 │   ├── dues/
 │   ├── expenses/
 │   ├── tickets/
 │   ├── notifications/
+│   ├── profile/
 │   ├── reports/
+│   ├── dekont/
 │   └── subscription/
-│       └── presentation/
-│           └── paywall_screen.dart  # RevenueCat paywall
-└── shared/
-    └── widgets/
-        ├── password_field.dart
-        ├── empty_state_widget.dart
-        ├── friendly_error_screen.dart
-        ├── tint_dashboard_tile.dart
-        ├── toast_overlay.dart
-        └── settings_tab.dart
+└── shared/widgets/
 ```
 
-**GoRouter (özet):** `/login`, `/sign-up`, `/register` ve `/join` → `SignUpScreen` (alias); `/manager-dashboard`, `/resident-dashboard`; `/notifications`; `/manager/tickets`, `/manager/expenses`; `/tickets/create`, `/tickets/:id`. Gider ve duyuru formları **bottom sheet** (`ExpenseFormSheet`, `AnnouncementFormSheet`) — ayrı tam ekran route yok.
+**Katman:** `domain` (entity/repo interface) → `data` (model/datasource/repo impl) → `presentation` (Riverpod Notifier). Datasource → `response.data['data']`.
+
+**GoRouter (özet):** `/login`, `/sign-up`, `/manager-dashboard`, `/resident-dashboard`; site/bina CRUD; dekont; `/notifications`; ticket create/detail. Deep link: `aidatpanel://join?code=`.
+
+**Flavors:** `flutter run -t lib/main_dev.dart --flavor dev` · prod: `-t lib/main.dart --flavor prod --dart-define=REVENUECAT_ANDROID_KEY=...`
 
 ---
 
 ## 👥 Kullanıcı Rolleri ve Yetkiler
 
-### MANAGER (Yönetici)
+### MANAGER
+- Site + bina (blok) CRUD; kota: toplam bina
+- Daire / davet kodu; aidat bulk + durum; gider + site ortak gideri
+- Collection IBAN (+ takma ad); dekont inceleme / onay
+- PDF rapor (bina + site); duyuru; ticket yönetimi
+- Abonelik yoksa / kota dolunca: yeni bina ekleme vb. kilitlenir (mevcut veriler okunur)
 
-**Abonelik aktifken:**
-- Birden fazla apartman oluşturma ve yönetme
-- Daire ekleme/düzenleme/silme
-- Her daire için davet kodu üretme (tek kullanımlık, 7 gün geçerli)
-- Aylık aidat oluşturma (toplu — tüm dairelere otomatik)
-- Aidat ödendi/ödenmedi işaretleme
-- Gider kaydı (kategorili)
-- Aylık PDF rapor alma
-- Arıza/talep takibi ve güncelleme
-- FCM push bildirimi gönderme (tüm sakinlere duyuru)
-
-**Abonelik dolduğunda (kilitlenen özellikler):**
-- Yeni apartman/daire ekleme
-- Yeni aidat oluşturma
-- PDF rapor alma
-- Toplu bildirim gönderme
-
-*(Mevcut veriler okunabilir, sakinler etkilenmez)*
-
-### RESIDENT (Sakin)
-
-**Her zaman erişebilir (abonelikten bağımsız):**
-- Kendi aylık aidat durumu (PENDING/PAID/OVERDUE)
-- Aidat geçmişi (tüm aylar)
-- Arıza/talep oluşturma ve takip etme
-- Bildirimlerini görme
-- Uygulama dilini değiştirme
+### RESIDENT
+- Kendi aidat / ledger breakdown; gider listesi (okuma)
+- Dekont yükleme; payment-collection (IBAN + açıklama)
+- Ticket oluşturma + ek; bildirimler; dil; profil (telefon OTP ile değişir)
 
 ---
 
 ## 🔑 Sakin Onboarding Akışı
 
 ```
-1. Yönetici → Daire detayından "Davet Kodu Üret" butonuna basar
-2. Backend → Benzersiz 12 karakterlik kod üretir (Örn: "APB3-K7X9-M2")
-   - Koda daire ID'si bağlıdır
-   - 7 gün geçerlilik süresi
-   - Tek kullanımlık (kullanıldıktan sonra geçersiz)
-3. Yönetici kodu sakine iletir (WhatsApp/kağıt/sözlü)
-4. Sakin uygulamayı indirir → "Davet Koduyla Katıl" ekranını seçer
-5. Kodu girer → Backend kodu doğrular, hangi daire/bina olduğunu döner
-6. Sakin adını, emailini ve şifresini belirler → Kayıt tamamlanır
-7. Kullanıcı direkt olarak sakin dashboard'una yönlendirilir
+1. Yönetici → daire → davet kodu (tek kullanımlık, süreli)
+2. Paylaşım: https://aidatpanel.com/join?code=... (deep link ile app açılır)
+3. Sakin → telefon → OTP (resident_join | resident_login)
+4. Yeni sakin → isim + davet kodu (linkten geldiyse kod sorulmaz)
+5. complete-resident-join → JWT → sakin dashboard
 ```
 
 ---
 
 ## 🔔 Bildirim Sistemi
 
-Uygulama **açıkken** WebSocket ile anlık rozet/toast; **kapalıyken** FCM tray; **yedek** olarak seyrek HTTP poll.
-
-### Katmanlar
+Uygulama **açıkken** WebSocket; **kapalıyken** FCM; **yedek** HTTP poll.
 
 ```text
 Olay → notificationService (DB)
      → notificationDeliveryService
-           ├─ realtimeHub → WebSocket aboneleri
-           └─ FCM push (pushService.js)
+           ├─ realtimeHub → WebSocket
+           └─ FCM (pushService.js)
 
 Mobil → NotificationDeliveryCoordinator
-           ├─ WebSocketNotificationRealtimeSource  (açık app)
-           ├─ FcmNotificationRealtimeSource         (tray + ön plan)
-           └─ PollingNotificationRealtimeSource     (yedek)
+           ├─ WebSocketNotificationRealtimeSource
+           ├─ FcmNotificationRealtimeSource
+           └─ PollingNotificationRealtimeSource
 ```
 
-### Backend
-
-| Dosya | Rol |
-|-------|-----|
-| `src/constants/realtimeEvents.js` | Olay adları + payload |
-| `src/realtime/realtimeHub.js` | publish/subscribe |
-| `src/realtime/wsGateway.js` | `ws` + JWT `?token=` |
-| `src/utils/verifyAccessToken.js` | WS auth |
+| Backend | Rol |
+|---------|-----|
+| `src/realtime/realtimeHub.js` + `wsGateway.js` | Hub + JWT WS |
 | `src/services/notificationDeliveryService.js` | Hub + FCM |
-| `src/services/pushService.js` | Firebase Admin SDK |
-| `GET /notifications/unread-count` | Hafif rozet |
+| `GET /notifications/unread-count` | Rozet |
 
-**Env:** `REALTIME_WS_ENABLED=true`, `FIREBASE_SERVICE_ACCOUNT_JSON`
-
-**WebSocket:** `wss://api.aidatpanel.com/api/v1/realtime?token=ACCESS_JWT`
-
-Sunucu → istemci örnek payload:
-
-```json
-{
-  "event": "notification.created",
-  "notificationId": "uuid",
-  "type": "TICKET_UPDATE",
-  "title": "...",
-  "body": "...",
-  "data": { "ticketId": "...", "route": "/resident-dashboard" }
-}
-```
-
-### Mobil
-
-| Dosya | Rol |
-|-------|-----|
-| `core/notifications/realtime/notification_delivery_config.dart` | `webSocketEnabled` |
-| `core/notifications/realtime/websocket_notification_realtime_source.dart` | `web_socket_channel` |
-| `core/notifications/realtime/notification_delivery_coordinator.dart` | Orchestrator |
-| `core/constants/api_constants.dart` | `realtimeWebSocketUri()` |
-
-### FCM test (canlı)
-
-- `main.dart` kullanın (`main_dev.dart` mock — push çalışmaz)
-- Logcat: `[FCM] PUT /me/fcm-token başarılı`, `[realtime] WebSocket bağlandı`
-- Yönetici + sakin testinde **farklı hesap** kullanın
-- Android 13+: bildirim izni; Play Store imzalı build veya debug + gerçek cihaz
-
-### Canlı deploy notları
-
-1. Backend: `REALTIME_WS_ENABLED=true`, Firebase JSON, `npx prisma migrate deploy`, `pm2 restart aidapanel-api`
-2. Nginx: `/api/v1/realtime` için WebSocket upgrade (`Upgrade`, `Connection "upgrade"`)
-3. Deploy otomasyonu: `backend/scripts/deploy.ps1` (bkz. Deployment bölümü)
+**Env:** `REALTIME_WS_ENABLED=true`, Firebase credential  
+**WS:** `wss://api.aidatpanel.com/api/v1/realtime?token=ACCESS_JWT`  
+Nginx: `Upgrade` / `Connection "upgrade"`. Deploy: `backend/scripts/deploy.sh` / `deploy.ps1` · PM2: `aidapanel-api`.
 
 ---
 
 ## 💳 Abonelik Sistemi (RevenueCat)
 
-### Neden RevenueCat?
-- App Store (iOS) ve Google Play (Android) aboneliklerini tek API'dan yönetir
-- Receipt validation backend'i üstlenir
-- Webhook ile anlık abonelik olayları alınır
-
-### Abonelik Planları (App Store Connect + Play Console'da tanımlanacak)
-
-| Plan | ID | Fiyat (önerilen) |
-|------|-------|---------|
+| Plan | Product ID | Fiyat (önerilen) |
+|------|------------|------------------|
 | Aylık | `aidatpanel_monthly` | ₺99/ay |
 | Yıllık | `aidatpanel_annual` | ₺799/yıl |
 
-### Webhook Olayları (RevenueCat → Backend)
-
-```javascript
-// POST /api/subscription/webhook/revenuecat
-const events = {
-  'INITIAL_PURCHASE': () => activateSubscription(),
-  'RENEWAL': () => extendSubscription(),
-  'CANCELLATION': () => markCancelled(),
-  'EXPIRATION': () => expireSubscription(),
-  'BILLING_ISSUE': () => notifyBillingIssue(),
-};
-```
-
-### Flutter'da RevenueCat Entegrasyonu
-
-```dart
-// main.dart içinde
-await Purchases.setLogLevel(LogLevel.debug);
-PurchasesConfiguration configuration;
-if (Platform.isAndroid) {
-  configuration = PurchasesConfiguration(androidApiKey);
-} else {
-  configuration = PurchasesConfiguration(iosApiKey);
-}
-await Purchases.configure(configuration);
-```
+Webhook: `POST /api/v1/subscription/webhook/revenuecat` — `INITIAL_PURCHASE`, `RENEWAL`, `CANCELLATION`, `EXPIRATION`, `BILLING_ISSUE`.  
+Mobil: `purchases_flutter` + `--dart-define=REVENUECAT_ANDROID_KEY=...`.  
+Yönetici kota: `GET /me/subscription` → `usage.buildings` / `limits.buildings`.
 
 ---
 
 ## 🌐 Web (Landing Page)
 
-**Amaç:** Sadece tanıtım. Uygulama indirmeye yönlendirme.
-
-**İçerik:**
-- Hero: Uygulama adı, tagline, App Store + Google Play butonları
-- Özellikler bölümü (3-4 madde)
-- Ekran görüntüleri (mockup)
-- Fiyatlandırma (aylık/yıllık)
-- SSS
-- İletişim / Destek emaili
-- Gizlilik politikası ve KVKK metni (yasal zorunluluk)
-
-**Teknoloji:** Saf HTML + CSS + minimal JS (framework yok)
-
-**Deployment:** CloudPanel üzerinden aidatpanel.com domain'ine bağlı statik site
+Statik HTML/CSS/JS — uygulama indirme, SSS, KVKK. Domain: `aidatpanel.com`. Admin UI ayrı origin olabilir (`admin.aidatpanel.com` → `/api/v1/admin`).
 
 ---
 
 ## 🚀 Deployment
 
-### Backend (VPS — CloudPanel)
-
 | Öğe | Değer |
 |-----|-------|
-| Domain | `api.aidatpanel.com` |
+| API | `api.aidatpanel.com` → port 4200 |
 | Sunucu yolu | `/home/aidatpanel-api/htdocs/api.aidatpanel.com` |
-| PM2 süreç adı | `aidapanel-api` (t harfi yok) |
-| Deploy script | `backend/scripts/deploy.ps1` |
-
-**Yerel makineden deploy:**
-
-```powershell
-powershell -ExecutionPolicy Bypass -File backend/scripts/deploy.ps1
-```
-
-İlk kurulum: `backend/scripts/deploy.config.example.json` → `deploy.local.json` (gitignore).
-
-**Sunucuda manuel restart:**
+| PM2 | `aidapanel-api` |
+| Script | `backend/scripts/deploy.sh` / `deploy.ps1` |
+| Config | `deploy.config.example.json` → `deploy.local.json` (gitignore) |
 
 ```bash
-source ~/.nvm/nvm.sh
-cd /home/aidatpanel-api/htdocs/api.aidatpanel.com
-git pull   # veya deploy.ps1 ile sync
-npm ci --omit=dev
-npx prisma migrate deploy
-pm2 restart aidapanel-api
+# Yerel deploy (zorunlu kural: backend değişince)
+bash backend/scripts/deploy.sh
+# Sunucuda: npm ci --omit=dev && npx prisma migrate deploy && pm2 restart aidapanel-api
 ```
 
-### Subdomain Yapısı
+`.env`, `uploads/dekonts/`, Firebase JSON **üzerine yazılmaz**.
 
 | Subdomain | Hedef |
 |-----------|-------|
-| `aidatpanel.com` | Web landing page |
-| `api.aidatpanel.com` | Node.js backend (port 4200) |
-
-### Veritabanı
-
-```bash
-# PostgreSQL kullanıcı ve veritabanı oluşturma
-createuser aidatpanel --pwprompt
-createdb aidatpanel --owner=aidatpanel
-
-# Prisma migration
-npx prisma migrate deploy
-```
+| `aidatpanel.com` | Landing |
+| `api.aidatpanel.com` | API + WS |
 
 ---
 
-## 🏗️ MVP Geliştirme Önceliği
+## 🗺️ Roadmap
 
-### Faz 1 — Çekirdek (MVP)
-- [ ] Auth (register, login, JWT, davet kodu ile katılım)
-- [ ] Bina ve daire CRUD
-- [ ] Davet kodu sistemi
-- [ ] Aylık aidat oluşturma (toplu) ve durum güncelleme
-- [ ] Sakin: kendi aidat durumunu görme
-- [ ] FCM push notification altyapısı
-- [ ] RevenueCat abonelik entegrasyonu (iOS + Android)
-- [ ] Landing page (web)
+**Tek kaynak:** `resources/yol-haritası/FAZ_DURUMU.md`
 
-### Faz 2 — Tamamlama
-- [ ] Gider kaydı ve kategorileme
-- [ ] Arıza/talep sistemi (Ticket)
-- [ ] Yönetici → Sakin bildirim gönderme
-- [ ] WhatsApp aidat hatırlatma
-- [ ] PDF rapor (aylık özet)
-- [ ] i18n (TR/EN)
-
-### Faz 3 — Büyüme
-- [ ] Online ödeme entegrasyonu (İyzico/PayTR)
-- [ ] Çoklu yönetici (personel atama)
-- [ ] Aidat geçmişi grafiği / istatistik dashboard
-- [ ] Belge paylaşımı (yönetim kararları, toplantı tutanakları)
+| Faz | Konu | Durum |
+|-----|------|-------|
+| 0–6 | Foundation → Subscription | ✅ Onaylı |
+| 7 | v1.0.0 lansman | ▶ Aktif |
+| 8 | Site yönetimi | ▶ Aktif (E2E + Furkan onayı bekliyor) |
+| 9+ | Online ödeme, multi-manager, trend grafikleri | Planlı |
 
 ---
 
-## ⚙️ Teknik Kararlar ve Gerekçeleri
+## ⚙️ Teknik Kararlar
 
 | Karar | Seçim | Gerekçe |
 |-------|-------|---------|
-| State management | Riverpod | OkulOptik'te zaten biliniyor |
-| Navigation | GoRouter | Flutter best practice, deep link desteği |
-| ORM | Prisma | Type-safe, migration yönetimi kolay |
-| Abonelik | RevenueCat | iOS + Android tek entegrasyon |
-| Push | Firebase FCM | Cross-platform standart |
-| WhatsApp | Twilio | Sandbox ile hızlı test, Türkiye desteği var |
-| i18n | Flutter ARB | Flutter native çözüm |
+| State | Riverpod 3 Notifier | CodeGen yok; referans: auth/dues |
+| Navigation | GoRouter | Deep link |
+| ORM | Prisma | Migration + type-safe |
+| i18n | Slang (TR/EN JSON) | Type-safe; UI'da hardcoded string yasak |
+| Abonelik | RevenueCat | iOS+Android |
+| Push | FCM + WS | Tray + anlık |
+| SMS | Twilio / NetGsm | OTP |
 
 ---
 
@@ -1161,6 +1242,12 @@ const Curve kAnimCurve = Curves.easeInOut;
 // - Hero animasyonları (göz yanıltıcı)
 // - Bounce/elastic eğriler
 // - 300ms+ süren geçişler
+
+// İZİN / NOT:
+// - Statik CustomPaint illüstrasyonlarda ui.Gradient (linear/radial) serbest.
+// - İlk kurulum: splash sonrası `/welcome` (5 sayfalık PageView); tamamlanınca
+//   SecureStorage `onboarding_completed` = true → `/login` (rol seçimi).
+//   Gradyan sabitleri: `core/theme/illustration_gradients.dart`.
 ```
 
 ---

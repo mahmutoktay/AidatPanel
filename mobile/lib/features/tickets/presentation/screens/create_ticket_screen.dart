@@ -15,6 +15,7 @@ import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/form_step_actions.dart';
 import '../../../../shared/widgets/image_source_sheet.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/ticket_entity.dart';
@@ -103,12 +104,16 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
                 bottom: AppSizes.spacingXL,
               ),
               children: [
-                _LabeledField(
+                MinimalTextField(
                   controller: _descriptionController,
                   label: t.fieldDescription,
                   hint: t.fieldDescriptionHint,
+                  icon: Icons.notes_outlined,
+                  required: true,
                   maxLines: 6,
                   maxLength: 2000,
+                  textCapitalization: TextCapitalization.sentences,
+                  enabled: !_submitting,
                   validator: (v) {
                     final raw = v?.trim() ?? '';
                     if (raw.isEmpty) return context.t.common.fieldRequired;
@@ -197,49 +202,6 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
     if (errorKey == null || errorKey.isEmpty) return t.createFailed;
     if (errorKey == 'service_unavailable') return t.createServiceUnavailable;
     return t.createFailed;
-  }
-}
-
-class _LabeledField extends StatelessWidget {
-  const _LabeledField({
-    required this.controller,
-    required this.label,
-    required this.hint,
-    this.maxLines = 1,
-    this.maxLength,
-    this.validator,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final String hint;
-  final int maxLines;
-  final int? maxLength;
-  final String? Function(String?)? validator;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          label,
-          style: AppTypography.body2.copyWith(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: AppSizes.spacingXS),
-        TextFormField(
-          controller: controller,
-          maxLines: maxLines,
-          maxLength: maxLength,
-          validator: validator,
-          textCapitalization: TextCapitalization.sentences,
-          decoration: InputDecoration(
-            hintText: hint,
-            counterText: maxLength != null ? null : '',
-          ),
-        ),
-      ],
-    );
   }
 }
 

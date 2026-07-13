@@ -2,7 +2,7 @@
 
 *Target LLM: Autonomous AI Agent (Implementation-capable)*
 *Source Material: `FAZ_DURUMU.md` (tek kaynak), `AIDATPANEL.md`, `backend/README.md`, Codebase Analysis*
-*Son güncelleme: 2026-07-07*
+*Son güncelleme: 2026-07-14*
 
 ---
 

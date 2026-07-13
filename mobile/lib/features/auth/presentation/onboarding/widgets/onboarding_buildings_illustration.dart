@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/illustration_gradients.dart';
 
 /// Adım 1 alt dekor — marka renkleriyle bütünleşen gradient bina silüeti.
 class OnboardingBuildingsIllustration extends StatelessWidget {
@@ -39,22 +40,12 @@ class _BuildingsPainter extends CustomPainter {
   final bool isDark;
   final Color backgroundColor;
 
-  List<_BuildingSpec> get _buildings {
-    final primary = AppColors.brand;
-    final primaryLight = AppColors.brandSoft;
-    final accent = AppColors.accent;
-    final muted = AppColors.textSecondary;
-
-    if (isDark) {
-      return [
+  List<_BuildingSpec> get _buildings => [
         _BuildingSpec(
           width: 72,
           height: 112,
           leftOffset: 0.10,
-          gradient: [
-            primaryLight.withValues(alpha: 0.55),
-            primary.withValues(alpha: 0.85),
-          ],
+          gradient: IllustrationGradients.buildingBlueFor(isDark),
           windowRows: 3,
           windowCols: 2,
         ),
@@ -62,10 +53,7 @@ class _BuildingsPainter extends CustomPainter {
           width: 84,
           height: 158,
           leftOffset: 0.26,
-          gradient: [
-            primaryLight.withValues(alpha: 0.75),
-            primary,
-          ],
+          gradient: IllustrationGradients.buildingBlueFor(isDark),
           windowRows: 4,
           windowCols: 2,
         ),
@@ -73,10 +61,7 @@ class _BuildingsPainter extends CustomPainter {
           width: 66,
           height: 98,
           leftOffset: 0.48,
-          gradient: [
-            accent.withValues(alpha: 0.65),
-            accent.withValues(alpha: 0.95),
-          ],
+          gradient: IllustrationGradients.buildingAmberFor(isDark),
           windowRows: 2,
           windowCols: 2,
         ),
@@ -84,63 +69,11 @@ class _BuildingsPainter extends CustomPainter {
           width: 76,
           height: 138,
           leftOffset: 0.64,
-          gradient: [
-            muted.withValues(alpha: 0.45),
-            muted.withValues(alpha: 0.75),
-          ],
+          gradient: IllustrationGradients.buildingGrayFor(isDark),
           windowRows: 3,
           windowCols: 2,
         ),
       ];
-    }
-
-    return [
-      _BuildingSpec(
-        width: 72,
-        height: 112,
-        leftOffset: 0.10,
-        gradient: [
-          primaryLight.withValues(alpha: 0.55),
-          primary,
-        ],
-        windowRows: 3,
-        windowCols: 2,
-      ),
-      _BuildingSpec(
-        width: 84,
-        height: 158,
-        leftOffset: 0.26,
-        gradient: [
-          primary.withValues(alpha: 0.72),
-          primary,
-        ],
-        windowRows: 4,
-        windowCols: 2,
-      ),
-      _BuildingSpec(
-        width: 66,
-        height: 98,
-        leftOffset: 0.48,
-        gradient: [
-          accent.withValues(alpha: 0.75),
-          accent,
-        ],
-        windowRows: 2,
-        windowCols: 2,
-      ),
-      _BuildingSpec(
-        width: 76,
-        height: 138,
-        leftOffset: 0.64,
-        gradient: [
-          primaryLight.withValues(alpha: 0.35),
-          muted.withValues(alpha: 0.65),
-        ],
-        windowRows: 3,
-        windowCols: 2,
-      ),
-    ];
-  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -219,11 +152,7 @@ class _BuildingsPainter extends CustomPainter {
     const radius = Radius.circular(8);
 
     final bodyPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: spec.gradient,
-      ).createShader(rect);
+      ..shader = IllustrationGradients.verticalBody(rect, spec.gradient);
 
     final rrect = RRect.fromRectAndRadius(rect, radius);
     canvas.drawRRect(rrect, bodyPaint);

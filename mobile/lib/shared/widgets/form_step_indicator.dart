@@ -13,7 +13,8 @@ class FormStepDescriptor {
 }
 
 /// Çok adımlı form wizard'ları için yatay adım göstergesi.
-class FormStepIndicator extends StatelessWidget {
+/// Aktif adım ekran dışındaysa otomatik görünür alana kaydırılır.
+class FormStepIndicator extends StatefulWidget {
   final List<FormStepDescriptor> steps;
   final int currentStep;
 
@@ -24,8 +25,51 @@ class FormStepIndicator extends StatelessWidget {
   });
 
   @override
+  State<FormStepIndicator> createState() => _FormStepIndicatorState();
+}
+
+class _FormStepIndicatorState extends State<FormStepIndicator> {
+  static const _scrollDuration = Duration(milliseconds: 200);
+  static const _scrollCurve = Curves.easeInOut;
+
+  late List<GlobalKey> _stepKeys;
+
+  @override
+  void initState() {
+    super.initState();
+    _stepKeys = List.generate(widget.steps.length, (_) => GlobalKey());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _ensureCurrentVisible());
+  }
+
+  @override
+  void didUpdateWidget(FormStepIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.steps.length != widget.steps.length) {
+      _stepKeys = List.generate(widget.steps.length, (_) => GlobalKey());
+    }
+    if (oldWidget.currentStep != widget.currentStep ||
+        oldWidget.steps.length != widget.steps.length) {
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _ensureCurrentVisible());
+    }
+  }
+
+  void _ensureCurrentVisible() {
+    if (!mounted || widget.steps.isEmpty) return;
+    final index = widget.currentStep.clamp(0, widget.steps.length - 1);
+    final ctx = _stepKeys[index].currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      alignment: 0.5,
+      duration: _scrollDuration,
+      curve: _scrollCurve,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (steps.isEmpty) return const SizedBox.shrink();
+    if (widget.steps.isEmpty) return const SizedBox.shrink();
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -43,9 +87,9 @@ class FormStepIndicator extends StatelessWidget {
         decoration: DashboardScreenStyle.whiteCard(),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: List.generate(steps.length * 2 - 1, (i) {
+          children: List.generate(widget.steps.length * 2 - 1, (i) {
             if (i.isOdd) {
-              final lineActive = currentStep >= (i ~/ 2) + 1;
+              final lineActive = widget.currentStep >= (i ~/ 2) + 1;
               return SizedBox(
                 width: 20,
                 child: Container(
@@ -58,10 +102,11 @@ class FormStepIndicator extends StatelessWidget {
               );
             }
             final stepIndex = i ~/ 2;
-            final active = currentStep >= stepIndex;
-            final completed = currentStep > stepIndex;
-            final step = steps[stepIndex];
+            final active = widget.currentStep >= stepIndex;
+            final completed = widget.currentStep > stepIndex;
+            final step = widget.steps[stepIndex];
             return SizedBox(
+              key: _stepKeys[stepIndex],
               width: 72,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -83,15 +128,17 @@ class FormStepIndicator extends StatelessWidget {
                     child: Icon(
                       completed ? Icons.check_rounded : step.icon,
                       size: 18,
-                      color: active ? AppColors.onAction : AppColors.textSecondary,
+                      color:
+                          active ? AppColors.onAction : AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     step.label,
                     style: AppTypography.caption.copyWith(
-                      color:
-                          active ? AppColors.brand : AppColors.textSecondary,
+                      color: active
+                          ? AppColors.brand
+                          : AppColors.textSecondary,
                       fontWeight: active ? FontWeight.w700 : FontWeight.w600,
                       fontSize: 12,
                     ),

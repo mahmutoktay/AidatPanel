@@ -33,6 +33,7 @@ class _SavedIbanAddSheetState extends ConsumerState<SavedIbanAddSheet> {
   final _ibanController = TextEditingController();
   final _accountTitleController = TextEditingController();
   final _referenceTemplateController = TextEditingController();
+  final _labelController = TextEditingController();
   bool _saving = false;
 
   @override
@@ -40,6 +41,7 @@ class _SavedIbanAddSheetState extends ConsumerState<SavedIbanAddSheet> {
     _ibanController.dispose();
     _accountTitleController.dispose();
     _referenceTemplateController.dispose();
+    _labelController.dispose();
     super.dispose();
   }
 
@@ -55,6 +57,7 @@ class _SavedIbanAddSheetState extends ConsumerState<SavedIbanAddSheet> {
       await ref.read(buildingRepositoryProvider).addCollectionPreset(
             collectionIban: ibanRaw,
             collectionAccountTitle: _accountTitleController.text.trim(),
+            collectionIbanLabel: _labelController.text.trim(),
             paymentReferenceTemplate: _referenceTemplateController.text.trim(),
           );
       ref.invalidate(collectionPresetsProvider);
@@ -108,6 +111,7 @@ class _SavedIbanAddSheetState extends ConsumerState<SavedIbanAddSheet> {
               ibanController: _ibanController,
               accountTitleController: _accountTitleController,
               referenceTemplateController: _referenceTemplateController,
+              labelController: _labelController,
               manualOnly: true,
             ),
           ],

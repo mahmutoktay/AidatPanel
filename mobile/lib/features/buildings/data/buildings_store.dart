@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/app_providers.dart';
 import '../../../core/utils/user_error_message.dart';
+import '../../sites/data/sites_store.dart';
 import '../domain/entities/building_entity.dart';
 import '../domain/entities/collection_preset_entity.dart';
 import 'datasources/building_remote_datasource.dart';
@@ -24,6 +25,7 @@ final buildingRepositoryProvider = Provider<BuildingRepository>((ref) {
   return BuildingRepositoryImpl(
     remoteDataSource: ref.watch(buildingRemoteDataSourceProvider),
     localPresetsStore: ref.watch(localCollectionPresetsStoreProvider),
+    siteRemoteDataSource: ref.watch(siteRemoteDataSourceProvider),
   );
 });
 

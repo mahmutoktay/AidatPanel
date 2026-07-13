@@ -51,6 +51,7 @@ class MinimalTextField extends StatefulWidget {
   final TextInputAction? textInputAction;
   final bool autofocus;
   final FocusNode? focusNode;
+  final int? maxLength;
 
   /// Yan yana alanlarda etiket hizası için minimum satır sayısı (varsayılan 1).
   final int labelMinLines;
@@ -74,6 +75,7 @@ class MinimalTextField extends StatefulWidget {
     this.textInputAction,
     this.autofocus = false,
     this.focusNode,
+    this.maxLength,
     this.labelMinLines = 1,
   });
 
@@ -179,6 +181,7 @@ class _MinimalTextFieldState extends State<MinimalTextField> {
                   enabled: widget.enabled,
                   autofocus: widget.autofocus,
                   maxLines: widget.maxLines,
+                  maxLength: widget.maxLength,
                   keyboardType: widget.keyboardType,
                   inputFormatters: widget.inputFormatters,
                   validator: widget.validator,
@@ -198,6 +201,7 @@ class _MinimalTextFieldState extends State<MinimalTextField> {
                     focusedErrorBorder: InputBorder.none,
                     hintText: widget.hint,
                     hintStyle: ProfileSettingsUi.fieldPlaceholder,
+                    counterText: widget.maxLength != null ? null : '',
                     errorStyle: ProfileSettingsUi.fieldLabel.copyWith(
                       color: ProfileSettingsUi.danger,
                       fontSize: 12,
@@ -222,6 +226,194 @@ class _MinimalTextFieldState extends State<MinimalTextField> {
       );
     }
     return field;
+  }
+}
+
+/// Şifre alanı — [MinimalTextField] ile aynı görünüm, görünürlük anahtarı içerir.
+class MinimalPasswordField extends StatefulWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? hint;
+  final IconData icon;
+  final bool required;
+  final bool enabled;
+  final String? Function(String?)? validator;
+  final ValueChanged<String>? onChanged;
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
+  final VoidCallback? onFieldSubmitted;
+  final Widget? passwordCriteria;
+  final Iterable<String>? autofillHints;
+
+  const MinimalPasswordField({
+    super.key,
+    required this.controller,
+    required this.label,
+    this.hint,
+    this.icon = Icons.lock_outline_rounded,
+    this.required = false,
+    this.enabled = true,
+    this.validator,
+    this.onChanged,
+    this.focusNode,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.passwordCriteria,
+    this.autofillHints,
+  });
+
+  @override
+  State<MinimalPasswordField> createState() => _MinimalPasswordFieldState();
+}
+
+class _MinimalPasswordFieldState extends State<MinimalPasswordField> {
+  late final FocusNode _internalFocusNode;
+  bool _hasFocus = false;
+  bool _obscureText = true;
+
+  FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _internalFocusNode = FocusNode();
+    _focusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_onFocusChange);
+    if (widget.focusNode == null) {
+      _internalFocusNode.dispose();
+    }
+    super.dispose();
+  }
+
+  void _onFocusChange() {
+    setState(() => _hasFocus = _focusNode.hasFocus);
+  }
+
+  String get _displayLabel => widget.required
+      ? '${widget.label.toUpperCase()} *'
+      : widget.label.toUpperCase();
+
+  @override
+  Widget build(BuildContext context) {
+    final focused = _hasFocus && widget.enabled;
+    final iconColor = focused
+        ? ProfileSettingsUi.ink
+        : ProfileSettingsUi.muted;
+
+    final field = AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
+      decoration: BoxDecoration(
+        color: ProfileSettingsUi.background,
+        borderRadius: BorderRadius.circular(ProfileSettingsUi.fieldRadius),
+        border: Border.all(
+          color: focused ? ProfileSettingsUi.ink : Colors.transparent,
+          width: ProfileSettingsUi.fieldFocusBorderWidth,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingM,
+        vertical: AppSizes.spacingS,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(
+            widget.icon,
+            size: ProfileSettingsUi.fieldIconSize,
+            color: widget.enabled ? iconColor : ProfileSettingsUi.muted,
+          ),
+          const SizedBox(width: AppSizes.spacingS),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _displayLabel,
+                  style: ProfileSettingsUi.fieldLabelUppercase,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                TextFormField(
+                  controller: widget.controller,
+                  focusNode: _focusNode,
+                  enabled: widget.enabled,
+                  obscureText: _obscureText,
+                  validator: widget.validator,
+                  onChanged: widget.onChanged,
+                  textInputAction: widget.textInputAction,
+                  autofillHints: widget.autofillHints,
+                  onFieldSubmitted: (_) => widget.onFieldSubmitted?.call(),
+                  style: ProfileSettingsUi.fieldValue,
+                  cursorColor: ProfileSettingsUi.ink,
+                  decoration: InputDecoration(
+                    filled: false,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    focusedErrorBorder: InputBorder.none,
+                    hintText: widget.hint,
+                    hintStyle: ProfileSettingsUi.fieldPlaceholder,
+                    errorStyle: ProfileSettingsUi.fieldLabel.copyWith(
+                      color: ProfileSettingsUi.danger,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSizes.spacingXS),
+          IconButton(
+            onPressed: widget.enabled
+                ? () => setState(() => _obscureText = !_obscureText)
+                : null,
+            icon: Icon(
+              _obscureText
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              size: 20,
+              color: ProfileSettingsUi.muted,
+            ),
+            constraints: const BoxConstraints(
+              minWidth: AppSizes.minTouchTarget,
+              minHeight: AppSizes.minTouchTarget,
+            ),
+            padding: EdgeInsets.zero,
+          ),
+        ],
+      ),
+    );
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (!widget.enabled)
+          Opacity(
+            opacity: ProfileSettingsUi.fieldDisabledOpacity,
+            child: field,
+          )
+        else
+          field,
+        if (widget.passwordCriteria != null) ...[
+          const SizedBox(height: AppSizes.spacingS),
+          widget.passwordCriteria!,
+        ],
+      ],
+    );
+
+    return content;
   }
 }
 

@@ -214,13 +214,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 height: 52,
                 margin: const EdgeInsets.only(top: AppSizes.spacingS),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFDEDEC),
+                  color: AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(
+                child: Icon(
                   Icons.lock_reset_rounded,
-                  color: Color(0xFFE15B4D),
+                  color: AppColors.error,
                   size: 24,
                 ),
               ),
@@ -228,22 +228,18 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             const SizedBox(height: AppSizes.spacingL),
             Text(
               t.common.resetPasswordTitle,
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 24,
+              style: AppTypography.h2.copyWith(
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF15140F),
+                color: AppColors.inkDark,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSizes.spacingS),
             Text(
               _subtitle,
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 14,
+              style: AppTypography.body2.copyWith(
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF6B6757),
+                color: AppColors.mutedText,
               ),
               textAlign: TextAlign.center,
             ),
@@ -251,11 +247,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               const SizedBox(height: AppSizes.spacingS),
               Text(
                 identifier,
-                style: const TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 14,
+                style: AppTypography.body2.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF15140F),
+                  color: AppColors.inkDark,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -274,12 +268,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   ),
                 ),
               ],
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 20,
+              style: AppTypography.h3.copyWith(
                 letterSpacing: 6,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF15140F),
+                color: AppColors.inkDark,
               ),
               textAlign: TextAlign.center,
               decoration: AuthFormStyles.whiteField(

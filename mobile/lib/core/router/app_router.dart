@@ -14,6 +14,7 @@ import '../../features/auth/domain/entities/forgot_password_result.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/auth/presentation/welcome/welcome_onboarding_screen.dart';
 import '../../features/dashboard/presentation/screens/manager_dashboard_screen.dart';
 import '../../features/dashboard/presentation/screens/manager_overdue_apartments_screen.dart';
 import '../../features/dashboard/presentation/screens/resident_activity_history_screen.dart';
@@ -346,6 +347,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 },
           );
         },
+      ),
+      GoRoute(
+        path: '/welcome',
+        name: 'welcome',
+        builder: (context, state) => const WelcomeOnboardingScreen(),
       ),
       GoRoute(
         path: '/login',

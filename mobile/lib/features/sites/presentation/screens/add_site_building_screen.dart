@@ -377,6 +377,7 @@ class _AddSiteBuildingScreenState extends ConsumerState<AddSiteBuildingScreen> {
                 accountTitleController: _collectionAccountTitleController,
                 referenceTemplateController:
                     _collectionReferenceTemplateController,
+                showNameLaterHint: true,
               ),
             ],
           ],

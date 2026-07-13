@@ -10,6 +10,7 @@ class SiteModel {
   final String? currency;
   final String? collectionIban;
   final String? collectionAccountTitle;
+  final String? collectionIbanLabel;
   final String? paymentReferenceTemplate;
   final int? buildingCount;
   final int? totalApartments;
@@ -29,6 +30,7 @@ class SiteModel {
     this.currency,
     this.collectionIban,
     this.collectionAccountTitle,
+    this.collectionIbanLabel,
     this.paymentReferenceTemplate,
     this.buildingCount,
     this.totalApartments,
@@ -50,6 +52,7 @@ class SiteModel {
       currency: json['currency'] as String?,
       collectionIban: json['collectionIban'] as String?,
       collectionAccountTitle: json['collectionAccountTitle'] as String?,
+      collectionIbanLabel: json['collectionIbanLabel'] as String?,
       paymentReferenceTemplate: json['paymentReferenceTemplate'] as String?,
       buildingCount: (json['buildingCount'] as num?)?.toInt(),
       totalApartments: (json['totalApartments'] as num?)?.toInt(),
@@ -72,6 +75,7 @@ class SiteModel {
       currency: currency ?? 'TRY',
       collectionIban: collectionIban,
       collectionAccountTitle: collectionAccountTitle,
+      collectionIbanLabel: collectionIbanLabel,
       paymentReferenceTemplate: paymentReferenceTemplate,
       buildingCount: buildingCount ?? 0,
       totalApartments: totalApartments ?? 0,

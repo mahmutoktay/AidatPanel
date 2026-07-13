@@ -30,7 +30,7 @@ class DetailBottomToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 8,
+      elevation: 0,
       color: AppColors.surface,
       child: SafeArea(
         top: false,

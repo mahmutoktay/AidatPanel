@@ -36,6 +36,8 @@ abstract class SiteRepository {
     required String id,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   });
 

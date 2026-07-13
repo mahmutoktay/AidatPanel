@@ -12,9 +12,10 @@ import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../domain/entities/saved_iban_item.dart';
+import '../utils/collection_usage_label.dart';
 import 'building_collection_fields.dart';
 
-/// Kayıtlı IBAN düzenleme — eşleşen tüm binalara `PATCH .../collection`.
+/// Kayıtlı IBAN düzenleme — eşleşen tüm bina ve sitelere `PATCH .../collection`.
 class SavedIbanEditSheet extends ConsumerStatefulWidget {
   final SavedIbanItem item;
 
@@ -39,6 +40,7 @@ class _SavedIbanEditSheetState extends ConsumerState<SavedIbanEditSheet> {
   late final TextEditingController _ibanController;
   late final TextEditingController _accountTitleController;
   late final TextEditingController _referenceTemplateController;
+  late final TextEditingController _labelController;
   bool _saving = false;
 
   @override
@@ -52,6 +54,8 @@ class _SavedIbanEditSheetState extends ConsumerState<SavedIbanEditSheet> {
         TextEditingController(text: p.collectionAccountTitle ?? '');
     _referenceTemplateController =
         TextEditingController(text: p.paymentReferenceTemplate ?? '');
+    _labelController =
+        TextEditingController(text: p.collectionIbanLabel ?? '');
   }
 
   @override
@@ -59,6 +63,7 @@ class _SavedIbanEditSheetState extends ConsumerState<SavedIbanEditSheet> {
     _ibanController.dispose();
     _accountTitleController.dispose();
     _referenceTemplateController.dispose();
+    _labelController.dispose();
     super.dispose();
   }
 
@@ -74,6 +79,7 @@ class _SavedIbanEditSheetState extends ConsumerState<SavedIbanEditSheet> {
       final iban = ibanRaw.isEmpty ? '' : IbanUtils.normalize(ibanRaw);
       final title = _accountTitleController.text.trim();
       final template = _referenceTemplateController.text.trim();
+      final label = _labelController.text.trim();
 
       final count = await ref
           .read(buildingRepositoryProvider)
@@ -81,6 +87,8 @@ class _SavedIbanEditSheetState extends ConsumerState<SavedIbanEditSheet> {
             matchIban: widget.item.ibanKey,
             collectionIban: iban,
             collectionAccountTitle: title,
+            collectionIbanLabel: label,
+            updateIbanLabel: true,
             paymentReferenceTemplate: template,
           );
       await ref.read(buildingsStoreProvider.notifier).refreshBuildings();
@@ -114,8 +122,7 @@ class _SavedIbanEditSheetState extends ConsumerState<SavedIbanEditSheet> {
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.buildings.collection;
-    final buildingNames =
-        widget.item.buildings.map((b) => b.name).join(', ');
+    final placeNames = CollectionUsageLabel.flatPlaceNames(widget.item);
 
     return Form(
       key: _formKey,
@@ -128,8 +135,8 @@ class _SavedIbanEditSheetState extends ConsumerState<SavedIbanEditSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              buildingNames.isNotEmpty
-                  ? t.savedIbansUpdateHint.replaceAll('{names}', buildingNames)
+              placeNames != null
+                  ? t.savedIbansUpdateHint.replaceAll('{names}', placeNames)
                   : t.savedIbansOrphanHint,
               style: AppTypography.body1.copyWith(
                 color: AppColors.mutedText,
@@ -141,6 +148,7 @@ class _SavedIbanEditSheetState extends ConsumerState<SavedIbanEditSheet> {
               ibanController: _ibanController,
               accountTitleController: _accountTitleController,
               referenceTemplateController: _referenceTemplateController,
+              labelController: _labelController,
               manualOnly: true,
             ),
           ],

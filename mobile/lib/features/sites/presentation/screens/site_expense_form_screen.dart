@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/month_labels.dart';
 import '../../../../l10n/strings.g.dart';
@@ -11,6 +10,7 @@ import '../../../../shared/widgets/app_date_field.dart';
 import '../../../../shared/widgets/app_select_field.dart';
 import '../../../../shared/widgets/dashboard_secondary_scaffold.dart';
 import '../../../../shared/widgets/form_step_actions.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../expenses/domain/entities/expense_entity.dart';
 import '../../../expenses/presentation/utils/expense_labels.dart';
@@ -87,38 +87,31 @@ class _SiteExpenseFormScreenState extends ConsumerState<SiteExpenseFormScreen> {
         child: ListView(
           padding: AppSizes.screenBodyScrollPadding,
           children: [
-            TextFormField(
+            MinimalTextField(
               controller: _titleController,
-              decoration: InputDecoration(
-                labelText: expensesT.fieldTitle,
-                filled: true,
-                fillColor: AppColors.fill,
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(ProfileSettingsUi.radiusMd),
-                  borderSide: BorderSide.none,
-                ),
-              ),
+              label: expensesT.fieldTitle,
+              icon: Icons.title_outlined,
+              required: true,
+              enabled: !_submitting,
               validator: (v) => (v == null || v.trim().isEmpty)
                   ? context.t.common.fieldRequired
                   : null,
             ),
-            const SizedBox(height: AppSizes.spacingFieldSpacing),
-            TextFormField(
+            const SizedBox(height: AppSizes.spacingM),
+            MinimalTextField(
               controller: _amountController,
-              decoration: InputDecoration(
-                labelText: expensesT.fieldAmount,
-                suffixText: '₺',
-                filled: true,
-                fillColor: AppColors.fill,
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(ProfileSettingsUi.radiusMd),
-                  borderSide: BorderSide.none,
-                ),
-              ),
+              label: expensesT.fieldAmount,
+              icon: Icons.payments_outlined,
+              required: true,
+              enabled: !_submitting,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              suffix: Text(
+                '₺',
+                style: ProfileSettingsUi.fieldValue.copyWith(
+                  color: ProfileSettingsUi.muted,
+                ),
+              ),
               validator: (v) {
                 final n = double.tryParse(v?.trim() ?? '');
                 if (n == null || n <= 0) {
@@ -127,7 +120,7 @@ class _SiteExpenseFormScreenState extends ConsumerState<SiteExpenseFormScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: AppSizes.spacingFieldSpacing),
+            const SizedBox(height: AppSizes.spacingM),
             AppSelectField<ExpenseCategory>(
               label: expensesT.fieldCategory,
               value: _category,
@@ -143,14 +136,14 @@ class _SiteExpenseFormScreenState extends ConsumerState<SiteExpenseFormScreen> {
                 if (v != null) setState(() => _category = v);
               },
             ),
-            const SizedBox(height: AppSizes.spacingFieldSpacing),
+            const SizedBox(height: AppSizes.spacingM),
             AppDateField(
               label: expensesT.fieldDate,
               value: _date,
               onChanged: (d) => setState(() => _date = d),
             ),
             if (!_isEdit) ...[
-              const SizedBox(height: AppSizes.spacingFieldSpacing),
+              const SizedBox(height: AppSizes.spacingM),
               AppSelectField<int>(
                 label: expensesT.targetMonthLabel,
                 value: _targetMonth,
@@ -165,7 +158,7 @@ class _SiteExpenseFormScreenState extends ConsumerState<SiteExpenseFormScreen> {
                   if (v != null) setState(() => _targetMonth = v);
                 },
               ),
-              const SizedBox(height: AppSizes.spacingFieldSpacing),
+              const SizedBox(height: AppSizes.spacingM),
               AppSelectField<int>(
                 label: expensesT.fieldYear,
                 value: _targetYear,
@@ -177,20 +170,13 @@ class _SiteExpenseFormScreenState extends ConsumerState<SiteExpenseFormScreen> {
                 },
               ),
             ],
-            const SizedBox(height: AppSizes.spacingFieldSpacing),
-            TextFormField(
+            const SizedBox(height: AppSizes.spacingM),
+            MinimalTextField(
               controller: _noteController,
-              decoration: InputDecoration(
-                labelText: expensesT.fieldNote,
-                filled: true,
-                fillColor: AppColors.fill,
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(ProfileSettingsUi.radiusMd),
-                  borderSide: BorderSide.none,
-                ),
-              ),
+              label: expensesT.fieldNote,
+              icon: Icons.notes_outlined,
               maxLines: 3,
+              enabled: !_submitting,
             ),
             FormStepActions(
               primaryLabel: _isEdit ? context.t.common.save : t.addExpense,

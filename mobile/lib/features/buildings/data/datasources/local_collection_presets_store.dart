@@ -63,6 +63,7 @@ class LocalCollectionPresetsStore {
     return CollectionPresetEntity(
       collectionIban: (json['collectionIban'] ?? '') as String,
       collectionAccountTitle: json['collectionAccountTitle'] as String?,
+      collectionIbanLabel: json['collectionIbanLabel'] as String?,
       paymentReferenceTemplate: json['paymentReferenceTemplate'] as String?,
       lastUsedAt: lastUsedAt,
       buildingCount: 0,
@@ -72,6 +73,7 @@ class LocalCollectionPresetsStore {
   Map<String, dynamic> _toJson(CollectionPresetEntity preset) => {
         'collectionIban': preset.collectionIban,
         'collectionAccountTitle': preset.collectionAccountTitle,
+        'collectionIbanLabel': preset.collectionIbanLabel,
         'paymentReferenceTemplate': preset.paymentReferenceTemplate,
         'lastUsedAt': preset.lastUsedAt?.toIso8601String(),
       };

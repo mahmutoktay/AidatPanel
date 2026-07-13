@@ -147,8 +147,7 @@ class _BuildingPickerSheetState extends State<BuildingPickerSheet> {
     final bySite = _buildingsBySiteId;
     final groups = <_SiteGroup>[];
     for (final site in widget.sites) {
-      final buildings = bySite[site.id];
-      if (buildings == null || buildings.isEmpty) continue;
+      final buildings = bySite[site.id] ?? const <BuildingEntity>[];
       groups.add(_SiteGroup(site: site, buildings: buildings));
     }
     groups.sort((a, b) => a.site.name.compareTo(b.site.name));
@@ -185,6 +184,12 @@ class _BuildingPickerSheetState extends State<BuildingPickerSheet> {
     final visible = <_SiteGroup>[];
     for (final group in _siteGroups) {
       final siteHit = _siteMatches(group.site);
+      if (group.buildings.isEmpty) {
+        if (siteHit) {
+          visible.add(_SiteGroup(site: group.site, buildings: const []));
+        }
+        continue;
+      }
       final matchedBuildings = group.buildings
           .where((b) => siteHit || _buildingMatches(b))
           .toList(growable: false);
@@ -240,7 +245,8 @@ class _BuildingPickerSheetState extends State<BuildingPickerSheet> {
         widget.includeAllOption && _query.trim().isEmpty;
 
     final hasHierarchyContent = _useHierarchy &&
-        (_visibleSiteGroups.isNotEmpty || _visibleStandaloneBuildings.isNotEmpty);
+        (_visibleSiteGroups.isNotEmpty ||
+            _visibleStandaloneBuildings.isNotEmpty);
     final hasFlatContent = !_useHierarchy && _flatFilteredBuildings.isNotEmpty;
     final isEmpty = !showAllOption && !hasHierarchyContent && !hasFlatContent;
 
@@ -309,7 +315,8 @@ class _BuildingPickerSheetState extends State<BuildingPickerSheet> {
   }
 
   Widget _buildSiteGroup(_SiteGroup group) {
-    final expanded = _isSiteExpanded(group.site.id);
+    final hasBuildings = group.buildings.isNotEmpty;
+    final expanded = hasBuildings && _isSiteExpanded(group.site.id);
     final siteSelected = _isSiteSelected(group.site.id);
     final buildingCountLabel = context.t.features.sites.buildingCount
         .replaceAll('{count}', '${group.buildings.length}');
@@ -340,7 +347,11 @@ class _BuildingPickerSheetState extends State<BuildingPickerSheet> {
                 children: [
                   Expanded(
                     child: InkWell(
-                      onTap: () => _toggleSiteExpanded(group.site.id),
+                      onTap: hasBuildings
+                          ? () => _toggleSiteExpanded(group.site.id)
+                          : () => Navigator.of(context).pop(
+                                BuildingPickerResult.site(group.site.id),
+                              ),
                       borderRadius: BorderRadius.horizontal(
                         left: Radius.circular(AppSizes.cardRadius),
                       ),
@@ -369,43 +380,47 @@ class _BuildingPickerSheetState extends State<BuildingPickerSheet> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: AnimatedRotation(
-                      turns: expanded ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInOut,
-                      child: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: AppColors.mutedText,
+                  if (hasBuildings)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: AnimatedRotation(
+                        turns: expanded ? 0.5 : 0,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeInOut,
+                        child: Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: AppColors.mutedText,
+                        ),
                       ),
-                    ),
-                  ),
+                    )
+                  else
+                    const SizedBox(width: 8),
                 ],
               ),
             ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              alignment: Alignment.topCenter,
-              child: expanded
-                  ? Column(
-                      children: [
-                        Divider(height: 1, color: AppColors.lineLight),
-                        ...group.buildings.map(
-                          (building) => _IndentedBuildingTile(
-                            building: building,
-                            site: group.site,
-                            selected: _isBuildingSelected(building.id),
-                            onTap: () => Navigator.of(context).pop(
-                              BuildingPickerResult.building(building.id),
+            if (hasBuildings)
+              AnimatedSize(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                alignment: Alignment.topCenter,
+                child: expanded
+                    ? Column(
+                        children: [
+                          Divider(height: 1, color: AppColors.lineLight),
+                          ...group.buildings.map(
+                            (building) => _IndentedBuildingTile(
+                              building: building,
+                              site: group.site,
+                              selected: _isBuildingSelected(building.id),
+                              onTap: () => Navigator.of(context).pop(
+                                BuildingPickerResult.building(building.id),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    )
-                  : const SizedBox.shrink(),
-            ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
+              ),
           ],
         ),
       ),

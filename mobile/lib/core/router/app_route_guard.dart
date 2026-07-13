@@ -17,6 +17,7 @@ class AppRouteGuard {
         loc == '/join' ||
         loc == '/forgot-password' ||
         loc == '/reset-password' ||
+        loc == '/welcome' ||
         loc == '/';
 
     if (!authState.isAuthenticated && !isAuthRoute) {

@@ -25,6 +25,7 @@ export async function createSiteService(data, managerId) {
   const collectionData = collectionFieldsFromBody({
     collectionIban: data.collectionIban,
     collectionAccountTitle: data.collectionAccountTitle,
+    collectionIbanLabel: data.collectionIbanLabel,
     paymentReferenceTemplate: data.paymentReferenceTemplate,
   });
 
@@ -223,6 +224,7 @@ export async function createSiteBuildingService(siteId, managerId, body) {
     addressExtra: body.addressExtra ?? null,
     collectionIban: body.collectionIban ?? undefined,
     collectionAccountTitle: body.collectionAccountTitle ?? undefined,
+    collectionIbanLabel: body.collectionIbanLabel ?? undefined,
     paymentReferenceTemplate: body.paymentReferenceTemplate ?? undefined,
     inheritFromSite: true,
     siteDefaults: site,

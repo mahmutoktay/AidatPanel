@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/iban_utils.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
@@ -13,6 +14,7 @@ import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../data/buildings_store.dart';
 import '../../domain/entities/collection_preset_entity.dart';
 import '../utils/collection_preset_display.dart';
+import '../utils/collection_usage_label.dart';
 
 enum _IbanEntryMode { saved, manual }
 
@@ -35,15 +37,23 @@ class BuildingCollectionFields extends ConsumerStatefulWidget {
   final TextEditingController accountTitleController;
   final TextEditingController referenceTemplateController;
 
+  /// Ayarlar → Kayıtlı IBAN ekle/düzenle: opsiyonel takma ad.
+  final TextEditingController? labelController;
+
   /// Ayarlar düzenleme: segment / kayıtlı liste gösterme.
   final bool manualOnly;
+
+  /// Bina/site wizard: Ayarlar'dan isim verilebilir ipucu.
+  final bool showNameLaterHint;
 
   const BuildingCollectionFields({
     super.key,
     required this.ibanController,
     required this.accountTitleController,
     required this.referenceTemplateController,
+    this.labelController,
     this.manualOnly = false,
+    this.showNameLaterHint = false,
   });
 
   @override
@@ -80,6 +90,7 @@ class _BuildingCollectionFieldsState
         preset.collectionAccountTitle ?? '';
     widget.referenceTemplateController.text =
         preset.paymentReferenceTemplate ?? '';
+    widget.labelController?.text = preset.collectionIbanLabel ?? '';
     setState(() => _selectedPresetIban = iban);
   }
 
@@ -87,6 +98,7 @@ class _BuildingCollectionFieldsState
     widget.ibanController.clear();
     widget.accountTitleController.clear();
     widget.referenceTemplateController.clear();
+    widget.labelController?.clear();
     _selectedPresetIban = null;
   }
 
@@ -172,12 +184,26 @@ class _BuildingCollectionFieldsState
     });
 
     if (widget.manualOnly) {
-      return _ManualCollectionFields(
-        ibanController: widget.ibanController,
-        accountTitleController: widget.accountTitleController,
-        referenceTemplateController: widget.referenceTemplateController,
-        validateIban: _validateIban,
-        onChanged: () {},
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _ManualCollectionFields(
+            ibanController: widget.ibanController,
+            accountTitleController: widget.accountTitleController,
+            referenceTemplateController: widget.referenceTemplateController,
+            labelController: widget.labelController,
+            showLabelField: widget.labelController != null,
+            validateIban: _validateIban,
+            onChanged: () {},
+          ),
+          if (widget.showNameLaterHint) ...[
+            const SizedBox(height: AppSizes.spacingS),
+            Text(
+              t.ibanNameLaterHint,
+              style: ProfileSettingsUi.handle.copyWith(fontSize: 14),
+            ),
+          ],
+        ],
       );
     }
 
@@ -234,7 +260,7 @@ class _BuildingCollectionFieldsState
                   MinimalPickerField(
                     label: t.pickSavedIban,
                     value: selectedPreset != null
-                        ? IbanUtils.formatDisplay(selectedPreset.collectionIban)
+                        ? selectedPreset.displayTitle
                         : null,
                     hint: t.pickSavedIban,
                     icon: Icons.account_balance_outlined,
@@ -249,13 +275,27 @@ class _BuildingCollectionFieldsState
             },
           )
         else
-          _ManualCollectionFields(
-            ibanController: widget.ibanController,
-            accountTitleController: widget.accountTitleController,
-            referenceTemplateController: widget.referenceTemplateController,
-            validateIban: _validateIban,
-            onChanged: () => setState(() => _selectedPresetIban = null),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ManualCollectionFields(
+                ibanController: widget.ibanController,
+                accountTitleController: widget.accountTitleController,
+                referenceTemplateController: widget.referenceTemplateController,
+                labelController: widget.labelController,
+                showLabelField: false,
+                validateIban: _validateIban,
+                onChanged: () => setState(() => _selectedPresetIban = null),
+              ),
+            ],
           ),
+        if (widget.showNameLaterHint) ...[
+          const SizedBox(height: AppSizes.spacingS),
+          Text(
+            t.ibanNameLaterHint,
+            style: ProfileSettingsUi.handle.copyWith(fontSize: 14),
+          ),
+        ],
       ],
     );
   }
@@ -277,6 +317,17 @@ class _SelectedPresetCompactSummary extends StatelessWidget {
         value: IbanUtils.formatDisplay(preset.collectionIban),
       ),
     ];
+    if (preset.hasLabel) {
+      rows.insert(
+        0,
+        PremiumInfoRow(
+          icon: Icons.label_outline_rounded,
+          iconColor: AppColors.brand,
+          label: context.t.features.buildings.collection.ibanNameLabel,
+          value: preset.collectionIbanLabel!.trim(),
+        ),
+      );
+    }
     if (accountTitle != null && accountTitle.isNotEmpty) {
       rows.add(
         PremiumInfoRow(
@@ -332,7 +383,8 @@ class _CollectionPresetPickerSheetState
     return widget.presets.where((p) {
       final iban = IbanUtils.formatDisplay(p.collectionIban).toLowerCase();
       final title = (p.collectionAccountTitle ?? '').toLowerCase();
-      return iban.contains(q) || title.contains(q);
+      final label = (p.collectionIbanLabel ?? '').toLowerCase();
+      return iban.contains(q) || title.contains(q) || label.contains(q);
     }).toList();
   }
 
@@ -458,7 +510,6 @@ class _PresetSelectTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.t.features.buildings.collection;
     final detailRows = CollectionPresetDisplay.inlineDetailRows(context, preset);
 
     return Material(
@@ -494,12 +545,19 @@ class _PresetSelectTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      IbanUtils.formatDisplay(preset.collectionIban),
+                      preset.displayTitle,
                       style: ProfileSettingsUi.fieldValue.copyWith(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+                    if (preset.hasLabel) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        IbanUtils.formatDisplay(preset.collectionIban),
+                        style: ProfileSettingsUi.handle.copyWith(fontSize: 13),
+                      ),
+                    ],
                     for (final row in detailRows) ...[
                       const SizedBox(height: 6),
                       RichText(
@@ -518,7 +576,7 @@ class _PresetSelectTile extends StatelessWidget {
                         ),
                       ),
                     ],
-                    if (preset.buildingCount > 1) ...[
+                    if (preset.buildingCount + preset.siteCount > 1) ...[
                       const SizedBox(height: AppSizes.spacingXS),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -541,10 +599,11 @@ class _PresetSelectTile extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              t.detailUsedInBuildings.replaceAll(
-                                '{count}',
-                                '${preset.buildingCount}',
-                              ),
+                              CollectionUsageLabel.usageSummaryForPreset(
+                                    context,
+                                    preset,
+                                  ) ??
+                                  '',
                               style: ProfileSettingsUi.fieldLabel.copyWith(
                                 color: AppColors.statusGreen,
                                 fontWeight: FontWeight.w700,
@@ -570,6 +629,8 @@ class _ManualCollectionFields extends StatelessWidget {
   final TextEditingController ibanController;
   final TextEditingController accountTitleController;
   final TextEditingController referenceTemplateController;
+  final TextEditingController? labelController;
+  final bool showLabelField;
   final String? Function(String?) validateIban;
   final VoidCallback onChanged;
 
@@ -577,6 +638,8 @@ class _ManualCollectionFields extends StatelessWidget {
     required this.ibanController,
     required this.accountTitleController,
     required this.referenceTemplateController,
+    this.labelController,
+    this.showLabelField = false,
     required this.validateIban,
     required this.onChanged,
   });
@@ -588,6 +651,20 @@ class _ManualCollectionFields extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (showLabelField && labelController != null) ...[
+          MinimalTextField(
+            controller: labelController!,
+            label: t.ibanNameLabel,
+            hint: t.ibanNameHint,
+            icon: Icons.label_outline_rounded,
+            textInputAction: TextInputAction.next,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(40),
+            ],
+            onChanged: (_) => onChanged(),
+          ),
+          const SizedBox(height: AppSizes.spacingFieldSpacing),
+        ],
         MinimalTextField(
           controller: ibanController,
           label: t.ibanLabel,
@@ -618,6 +695,14 @@ class _ManualCollectionFields extends StatelessWidget {
           icon: Icons.format_list_bulleted,
           maxLines: 2,
           onChanged: (_) => onChanged(),
+        ),
+        const SizedBox(height: AppSizes.spacingXS),
+        Text(
+          t.referenceTemplateHelper,
+          style: AppTypography.body2.copyWith(
+            color: AppColors.mutedText,
+            fontSize: 14,
+          ),
         ),
       ],
     );

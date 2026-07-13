@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../domain/entities/collection_preset_entity.dart';
 import '../../../../l10n/strings.g.dart';
+import 'collection_usage_label.dart';
 
 /// Kayıtlı IBAN kartlarında `{{number}}` gibi şablonları kullanıcı dilinde gösterir.
 /// API'ye giden `paymentReferenceTemplate` değişmez.
@@ -25,10 +26,9 @@ class CollectionPresetDisplay {
       lines.add(reference);
     }
 
-    if (preset.buildingCount > 1) {
-      lines.add(
-        t.detailUsedInBuildings.replaceAll('{count}', '${preset.buildingCount}'),
-      );
+    final usage = CollectionUsageLabel.usageSummaryForPreset(context, preset);
+    if (usage != null) {
+      lines.add(usage);
     }
 
     return lines;

@@ -18,6 +18,7 @@ abstract class BuildingRemoteDataSource {
     String? currency,
     String? collectionIban,
     String? collectionAccountTitle,
+    String? collectionIbanLabel,
     String? paymentReferenceTemplate,
   });
   Future<BuildingModel> updateBuilding({
@@ -30,6 +31,8 @@ abstract class BuildingRemoteDataSource {
     required String id,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   });
   Future<void> deleteBuilding(String id);
@@ -44,6 +47,7 @@ class BuildingRemoteDataSourceImpl implements BuildingRemoteDataSource {
   Map<String, dynamic>? _collectionBody({
     String? collectionIban,
     String? collectionAccountTitle,
+    String? collectionIbanLabel,
     String? paymentReferenceTemplate,
   }) {
     final body = <String, dynamic>{};
@@ -55,6 +59,10 @@ class BuildingRemoteDataSourceImpl implements BuildingRemoteDataSource {
     if (collectionAccountTitle != null) {
       final t = collectionAccountTitle.trim();
       body['collectionAccountTitle'] = t.isEmpty ? null : t;
+    }
+    if (collectionIbanLabel != null) {
+      final t = collectionIbanLabel.trim();
+      body['collectionIbanLabel'] = t.isEmpty ? null : t;
     }
     if (paymentReferenceTemplate != null) {
       final t = paymentReferenceTemplate.trim();
@@ -106,6 +114,7 @@ class BuildingRemoteDataSourceImpl implements BuildingRemoteDataSource {
     String? currency,
     String? collectionIban,
     String? collectionAccountTitle,
+    String? collectionIbanLabel,
     String? paymentReferenceTemplate,
   }) async {
     final body = <String, dynamic>{
@@ -121,6 +130,7 @@ class BuildingRemoteDataSourceImpl implements BuildingRemoteDataSource {
     final collection = _collectionBody(
       collectionIban: collectionIban,
       collectionAccountTitle: collectionAccountTitle,
+      collectionIbanLabel: collectionIbanLabel,
       paymentReferenceTemplate: paymentReferenceTemplate,
     );
     if (collection != null) body.addAll(collection);
@@ -153,6 +163,8 @@ class BuildingRemoteDataSourceImpl implements BuildingRemoteDataSource {
     required String id,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   }) async {
     final body = <String, dynamic>{
@@ -168,6 +180,12 @@ class BuildingRemoteDataSourceImpl implements BuildingRemoteDataSource {
               ? null
               : paymentReferenceTemplate!.trim(),
     };
+    if (updateIbanLabel) {
+      body['collectionIbanLabel'] =
+          (collectionIbanLabel?.trim().isEmpty ?? true)
+              ? null
+              : collectionIbanLabel!.trim();
+    }
     final response = await _dioClient.patch(
       ApiConstants.buildingCollection(id),
       data: body,

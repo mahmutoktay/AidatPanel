@@ -1,5 +1,6 @@
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/iban_utils.dart';
+import '../../../sites/data/datasources/site_remote_datasource.dart';
 import '../../domain/entities/building_entity.dart';
 import '../../domain/entities/collection_preset_entity.dart';
 import '../../domain/entities/saved_iban_delete_result.dart';
@@ -11,11 +12,14 @@ class BuildingRepositoryImpl implements BuildingRepository {
   BuildingRepositoryImpl({
     required BuildingRemoteDataSource remoteDataSource,
     required LocalCollectionPresetsStore localPresetsStore,
+    required SiteRemoteDataSource siteRemoteDataSource,
   }) : _remoteDataSource = remoteDataSource,
-       _localPresetsStore = localPresetsStore;
+       _localPresetsStore = localPresetsStore,
+       _siteRemoteDataSource = siteRemoteDataSource;
 
   final BuildingRemoteDataSource _remoteDataSource;
   final LocalCollectionPresetsStore _localPresetsStore;
+  final SiteRemoteDataSource _siteRemoteDataSource;
 
   Future<List<CollectionPresetEntity>> _mergedPresets() async {
     final server = await _remoteDataSource.fetchCollectionPresets();
@@ -75,6 +79,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
     String? currency,
     String? collectionIban,
     String? collectionAccountTitle,
+    String? collectionIbanLabel,
     String? paymentReferenceTemplate,
   }) async {
     try {
@@ -89,6 +94,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
         currency: currency,
         collectionIban: collectionIban,
         collectionAccountTitle: collectionAccountTitle,
+        collectionIbanLabel: collectionIbanLabel,
         paymentReferenceTemplate: paymentReferenceTemplate,
       );
       await _dropLocalPresetIfOnServer(collectionIban);
@@ -127,6 +133,8 @@ class BuildingRepositoryImpl implements BuildingRepository {
     required String id,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   }) async {
     try {
@@ -134,6 +142,8 @@ class BuildingRepositoryImpl implements BuildingRepository {
         id: id,
         collectionIban: collectionIban,
         collectionAccountTitle: collectionAccountTitle,
+        collectionIbanLabel: collectionIbanLabel,
+        updateIbanLabel: updateIbanLabel,
         paymentReferenceTemplate: paymentReferenceTemplate,
       );
       await _dropLocalPresetIfOnServer(collectionIban);
@@ -150,33 +160,54 @@ class BuildingRepositoryImpl implements BuildingRepository {
     required String matchIban,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   }) async {
     try {
       final key = IbanUtils.normalize(matchIban);
       final buildings = await fetchBuildings();
-      final matched = buildings
+      final matchedBuildings = buildings
           .where((b) => IbanUtils.normalize(b.collectionIban ?? '') == key)
           .toList();
 
-      if (matched.isEmpty) {
+      final sites = await _siteRemoteDataSource.fetchSites();
+      final matchedSites = sites
+          .where((s) => IbanUtils.normalize(s.collectionIban ?? '') == key)
+          .toList();
+
+      if (matchedBuildings.isEmpty && matchedSites.isEmpty) {
         return _updateLocalOrphanPreset(
           matchIban: key,
           collectionIban: collectionIban,
           collectionAccountTitle: collectionAccountTitle,
+          collectionIbanLabel: collectionIbanLabel,
+          updateIbanLabel: updateIbanLabel,
           paymentReferenceTemplate: paymentReferenceTemplate,
         );
       }
 
-      for (final b in matched) {
+      for (final b in matchedBuildings) {
         await patchBuildingCollection(
           id: b.id,
           collectionIban: collectionIban,
           collectionAccountTitle: collectionAccountTitle,
+          collectionIbanLabel: collectionIbanLabel,
+          updateIbanLabel: updateIbanLabel,
           paymentReferenceTemplate: paymentReferenceTemplate,
         );
       }
-      return matched.length;
+      for (final s in matchedSites) {
+        await _siteRemoteDataSource.patchSiteCollection(
+          id: s.id,
+          collectionIban: collectionIban,
+          collectionAccountTitle: collectionAccountTitle,
+          collectionIbanLabel: collectionIbanLabel,
+          updateIbanLabel: updateIbanLabel,
+          paymentReferenceTemplate: paymentReferenceTemplate,
+        );
+      }
+      return matchedBuildings.length + matchedSites.length;
     } on ApiException {
       rethrow;
     } catch (e) {
@@ -188,6 +219,8 @@ class BuildingRepositoryImpl implements BuildingRepository {
     required String matchIban,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   }) async {
     final local = await _localPresetsStore.load();
@@ -201,6 +234,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
       );
     }
 
+    final previous = existing.first;
     final iban = (collectionIban == null || collectionIban.isEmpty)
         ? ''
         : IbanUtils.normalize(collectionIban);
@@ -210,6 +244,11 @@ class BuildingRepositoryImpl implements BuildingRepository {
 
     await _localPresetsStore.remove(matchIban);
     if (iban.isNotEmpty) {
+      final label = updateIbanLabel
+          ? ((collectionIbanLabel?.trim().isEmpty ?? true)
+              ? null
+              : collectionIbanLabel!.trim())
+          : previous.collectionIbanLabel;
       await _localPresetsStore.upsert(
         CollectionPresetEntity(
           collectionIban: iban,
@@ -217,6 +256,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
               (collectionAccountTitle?.trim().isEmpty ?? true)
               ? null
               : collectionAccountTitle!.trim(),
+          collectionIbanLabel: label,
           paymentReferenceTemplate:
               (paymentReferenceTemplate?.trim().isEmpty ?? true)
               ? null
@@ -233,6 +273,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
   Future<CollectionPresetEntity> addCollectionPreset({
     required String collectionIban,
     String? collectionAccountTitle,
+    String? collectionIbanLabel,
     String? paymentReferenceTemplate,
   }) async {
     try {
@@ -250,6 +291,9 @@ class BuildingRepositoryImpl implements BuildingRepository {
         collectionAccountTitle: (collectionAccountTitle?.trim().isEmpty ?? true)
             ? null
             : collectionAccountTitle!.trim(),
+        collectionIbanLabel: (collectionIbanLabel?.trim().isEmpty ?? true)
+            ? null
+            : collectionIbanLabel!.trim(),
         paymentReferenceTemplate:
             (paymentReferenceTemplate?.trim().isEmpty ?? true)
             ? null
@@ -280,6 +324,22 @@ class BuildingRepositoryImpl implements BuildingRepository {
           id: b.id,
           collectionIban: '',
           collectionAccountTitle: '',
+          collectionIbanLabel: '',
+          updateIbanLabel: true,
+          paymentReferenceTemplate: '',
+        );
+        buildingsCleared++;
+      }
+
+      final sites = await _siteRemoteDataSource.fetchSites();
+      for (final s in sites) {
+        if (IbanUtils.normalize(s.collectionIban ?? '') != key) continue;
+        await _siteRemoteDataSource.patchSiteCollection(
+          id: s.id,
+          collectionIban: '',
+          collectionAccountTitle: '',
+          collectionIbanLabel: '',
+          updateIbanLabel: true,
           paymentReferenceTemplate: '',
         );
         buildingsCleared++;

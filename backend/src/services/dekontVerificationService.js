@@ -12,7 +12,10 @@ import { extractDekontTextForPipeline } from "./dekontOcrRunner.js";
 import { evaluateDekontBusinessRules } from "./dekontBusinessRulesService.js";
 import { applyDekontPayment } from "./dekontPaymentService.js";
 import { enqueueDekontPipeline } from "./dekontPipelineQueue.js";
+import { maybeAutoFillCollectionIbanLabel } from "./collectionIbanLabelService.js";
 import { dekontLog, dekontLogError } from "../utils/dekontDebug.js";
+import { resolveEffectiveBuildingConfig } from "./buildingConfigService.js";
+import { normalizeIban } from "../utils/iban.js";
 
 /** OCR öncesi event loop'a nefes — eşzamanlı HTTP istekleri işlenebilsin */
 function yieldEventLoop() {
@@ -140,6 +143,25 @@ export async function runVerificationPipeline(dekontId, attempt = 1, options = {
         verificationJson: { rules, pipelineAttempt: attempt },
       },
     });
+
+    if (rules.recipientOk === true) {
+      try {
+        const effective = await resolveEffectiveBuildingConfig(dekont.building);
+        const matchedIban = normalizeIban(effective.effectiveCollectionIban);
+        if (matchedIban) {
+          await maybeAutoFillCollectionIbanLabel({
+            managerId: dekont.building.managerId,
+            collectionIban: matchedIban,
+          });
+        }
+      } catch (labelErr) {
+        logger.error({
+          type: "collection_iban_label_auto_fill_failed",
+          dekontId,
+          err: labelErr?.message,
+        });
+      }
+    }
 
     const autoApplied = await tryAutoApplyPayment(
       dekontId,

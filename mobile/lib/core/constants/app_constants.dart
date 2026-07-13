@@ -24,6 +24,9 @@ class AppConstants {
   /// Rol başına son giriş bilgisi (çıkışta silinmez).
   static const String loginHintsKey = 'login_hints_v1';
 
+  /// İlk kurulum welcome / tanıtım tamamlandı (çıkışta silinmez).
+  static const String onboardingCompletedKey = 'onboarding_completed';
+
   /// Kullanıcı başına tek seferlik bildirim izni açıklama diyaloğu.
   static String notificationPermissionPromptKey(String userId) =>
       'notification_permission_prompt_seen_$userId';

@@ -7,7 +7,7 @@ class PasswordField extends StatelessWidget {
   final TextEditingController controller;
   final bool obscureText;
   final VoidCallback onToggleVisibility;
-  final String? labelText;
+  final String labelText;
   final String? hintText;
   final bool enabled;
   final Function(String)? onChanged;
@@ -25,7 +25,7 @@ class PasswordField extends StatelessWidget {
     required this.controller,
     required this.obscureText,
     required this.onToggleVisibility,
-    this.labelText,
+    required this.labelText,
     this.hintText,
     this.enabled = true,
     this.onChanged,
@@ -63,7 +63,7 @@ class PasswordField extends StatelessWidget {
   InputDecoration _buildDecoration() {
     if (whiteBackground) {
       return AuthFormStyles.whiteField(
-        labelText: labelText ?? 'Şifre',
+        labelText: labelText,
         hintText: hintText ?? '••••••••',
         prefixIcon: const Icon(Icons.lock_outlined),
         suffixIcon: IconButton(
@@ -75,7 +75,7 @@ class PasswordField extends StatelessWidget {
     }
 
     return InputDecoration(
-      labelText: labelText ?? 'Şifre',
+      labelText: labelText,
       hintText: hintText ?? '••••••••',
       prefixIcon: const Icon(Icons.lock_outlined),
       suffixIcon: IconButton(

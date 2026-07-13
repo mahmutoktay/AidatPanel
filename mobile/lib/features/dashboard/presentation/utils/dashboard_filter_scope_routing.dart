@@ -51,7 +51,8 @@ String dueTransactionsPath(DashboardFilterScope scope) {
   return '/manager-dashboard/due-transactions${_scopeQuery(scope)}';
 }
 
-/// Ana Sayfa scope'unu Talepler ekranına kodlar (bina zorunlu).
+/// Ana Sayfa scope'unu Talepler ekranına kodlar.
+/// Varsayılan açılış anasayfada hatırlanan binadır; ekranda "Tüm Binalar" da seçilebilir.
 String ticketsPath(
   DashboardFilterScope scope, [
   List<BuildingEntity> buildings = const [],

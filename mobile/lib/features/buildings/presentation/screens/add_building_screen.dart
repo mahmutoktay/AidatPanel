@@ -6,8 +6,11 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/locations/location_models.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
+import '../../../../features/dashboard/domain/entities/dashboard_filter_scope.dart';
+import '../../../../features/dashboard/presentation/providers/dashboard_filter_scope_provider.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/providers/navigation_provider.dart';
 import '../../../../shared/widgets/form_step_indicator.dart';
 import '../../../../shared/widgets/form_wizard_scaffold.dart';
 import '../../../../shared/widgets/location_picker_fields.dart';
@@ -245,7 +248,11 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
             context.t.common.buildingAddedSuccess,
             type: ToastType.success,
           );
-      context.pop();
+      ref.read(dashboardFilterScopeProvider.notifier).update(
+            DashboardFilterScope.building(id),
+          );
+      ref.read(managerTabIndexProvider.notifier).update(0);
+      context.go('/manager-dashboard');
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -404,6 +411,7 @@ class _AddBuildingScreenState extends ConsumerState<AddBuildingScreen> {
           ibanController: _collectionIbanController,
           accountTitleController: _collectionAccountTitleController,
           referenceTemplateController: _collectionReferenceTemplateController,
+          showNameLaterHint: true,
         );
       default:
         return const SizedBox.shrink();

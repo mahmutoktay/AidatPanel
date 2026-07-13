@@ -13,6 +13,7 @@ class SiteEntity extends Equatable {
   final String currency;
   final String? collectionIban;
   final String? collectionAccountTitle;
+  final String? collectionIbanLabel;
   final String? paymentReferenceTemplate;
   final int buildingCount;
   final int totalApartments;
@@ -32,6 +33,7 @@ class SiteEntity extends Equatable {
     this.currency = 'TRY',
     this.collectionIban,
     this.collectionAccountTitle,
+    this.collectionIbanLabel,
     this.paymentReferenceTemplate,
     this.buildingCount = 0,
     this.totalApartments = 0,
@@ -62,6 +64,7 @@ class SiteEntity extends Equatable {
     String? currency,
     String? collectionIban,
     String? collectionAccountTitle,
+    String? collectionIbanLabel,
     String? paymentReferenceTemplate,
     int? buildingCount,
     int? totalApartments,
@@ -82,6 +85,7 @@ class SiteEntity extends Equatable {
       collectionIban: collectionIban ?? this.collectionIban,
       collectionAccountTitle:
           collectionAccountTitle ?? this.collectionAccountTitle,
+      collectionIbanLabel: collectionIbanLabel ?? this.collectionIbanLabel,
       paymentReferenceTemplate:
           paymentReferenceTemplate ?? this.paymentReferenceTemplate,
       buildingCount: buildingCount ?? this.buildingCount,
@@ -105,6 +109,7 @@ class SiteEntity extends Equatable {
         currency,
         collectionIban,
         collectionAccountTitle,
+        collectionIbanLabel,
         paymentReferenceTemplate,
         buildingCount,
         totalApartments,

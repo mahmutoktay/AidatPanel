@@ -21,6 +21,7 @@ export const createBuilding = asyncHandler(async (req, res) => {
     currency,
     collectionIban,
     collectionAccountTitle,
+    collectionIbanLabel,
     paymentReferenceTemplate,
   } = req.body;
 
@@ -38,6 +39,7 @@ export const createBuilding = asyncHandler(async (req, res) => {
     managerId,
     collectionIban,
     collectionAccountTitle,
+    collectionIbanLabel,
     paymentReferenceTemplate,
   });
 

@@ -41,6 +41,7 @@ export const buildingSchemas = {
         .optional(),
       collectionIban: optionalIban,
       collectionAccountTitle: z.string().max(200).optional().nullable(),
+      collectionIbanLabel: z.string().max(40).optional().nullable(),
       paymentReferenceTemplate: z.string().max(100).optional().nullable(),
     }),
   },
@@ -88,12 +89,14 @@ export const buildingSchemas = {
       .object({
         collectionIban: optionalIban,
         collectionAccountTitle: z.string().max(200).optional().nullable(),
+        collectionIbanLabel: z.string().max(40).optional().nullable(),
         paymentReferenceTemplate: z.string().max(100).optional().nullable(),
       })
       .refine(
         (data) =>
           data.collectionIban !== undefined ||
           data.collectionAccountTitle !== undefined ||
+          data.collectionIbanLabel !== undefined ||
           data.paymentReferenceTemplate !== undefined,
         { message: "En az bir alan güncellenmelidir." }
       ),

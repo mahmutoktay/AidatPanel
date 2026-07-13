@@ -146,7 +146,7 @@ class _PhoneChangeOtpSheetBodyState
         primaryLabel: t.phoneOtpConfirm,
         onPrimary: _code.length == 6 && !_submitting ? _submit : null,
         primaryLoading: _sending || _submitting,
-        secondaryLabel: context.t.common.cancel,
+          secondaryLabel: context.t.common.cancelBtn,
         onSecondary: () => Navigator.of(context).pop(),
       ),
     );

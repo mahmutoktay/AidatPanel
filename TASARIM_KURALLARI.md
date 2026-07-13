@@ -89,13 +89,23 @@ modül için önce PLAN MODUNDA çalış, planı incele, sonra uygula.
   tik ikonu), buton genişliği SABİT kalır, geçiş yumuşak animasyonla olur, belirli 
   bir süre sonra otomatik eski haline döner.
 
+## 14. Hint/Placeholder Metinleri Bağlama Uygun Olmalı
+- Form alanlarındaki örnek/hint metinleri (placeholder), o alanın gerçek 
+  kullanım bağlamına uygun olmalı. Örneğin bir alan tüm kullanıcılar için 
+  ortak/sabit bir değer alacaksa, hint kişiye özel bir örnek İÇERMEMELİ 
+  (örn. 'Daire 5' gibi tek bir sakine özel bir örnek, paylaşılan/sabit bir 
+  alan için yanıltıcıdır).
+- Yeni bir form alanı eklenirken veya mevcut biri düzenlenirken, hint 
+  metninin alanın gerçek davranışını (sabit mi, kişiye özel mi, şablon mu) 
+  doğru yansıttığı kontrol edilmeli.
+
 ---
 
 ## KULLANIM TALİMATI (Cursor için)
 Bu dosyayı okuduktan sonra:
 1. Bana hangi modülü/ekranı incelemem gerektiğini söyle (örn. "Binalar sekmesi", 
    "Sakinler modalleri", "Aidatlar sekmesi").
-2. O modüldeki İLGİLİ dosyaları bul ve yukarıdaki 13 kuraldan hangilerinin ihlal 
+2. O modüldeki İLGİLİ dosyaları bul ve yukarıdaki 14 kuraldan hangilerinin ihlal 
    edildiğini listele (kod değişikliği YAPMADAN önce).
 3. Her ihlal için: hangi dosya, hangi satır/bileşen, hangi kural, önerilen düzeltme.
 4. Onay aldıktan sonra uygula, modül tamamlanınca bir sonraki modüle geç.

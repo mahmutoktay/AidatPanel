@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -15,13 +15,8 @@ import '../providers/profile_provider.dart';
 
 /// Hesap kapatma onay sheet'i (KVKK soft delete).
 ///
-/// Backend `DELETE /me` davranışı:
-///   - 200: Soft delete + PII maskelendi + refreshTokenVersion++
-///   - 409: Yöneticide bina var → "Önce binaları sil/devret"
-///
-/// Tasarım: sade bottom sheet — ChangePasswordBottomSheet ile aynı dil.
-/// Doğrulama cümlesi input'un üzerinde tek satır olarak gösterilir;
-/// dokununca input'a yazılır (hızlı onay).
+/// Tasarım: ChangePasswordBottomSheet ile aynı Minimal + Premium dil.
+/// Doğrulama cümlesine dokununca input'a yazılır.
 class DeleteAccountSheet extends ConsumerStatefulWidget {
   const DeleteAccountSheet({super.key});
 
@@ -107,56 +102,16 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
     return PopScope(
       canPop: !_deleting,
       child: PremiumBottomSheetScaffold(
+        title: t.common.deleteAccount,
         scrollable: true,
-        header: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSizes.spacingL,
-            AppSizes.spacingM,
-            AppSizes.spacingL,
-            AppSizes.spacingS,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: ProfileSettingsUi.danger.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.warning_amber_rounded,
-                  color: ProfileSettingsUi.danger,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t.common.deleteAccount,
-                      style: ProfileSettingsUi.title,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      t.common.deleteAccountTitle,
-                      style: ProfileSettingsUi.handle.copyWith(fontSize: 13),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(
+              t.common.deleteAccountTitle,
+              style: ProfileSettingsUi.handle.copyWith(fontSize: 14),
+            ),
+            const SizedBox(height: AppSizes.spacingM),
             Text(
               t.common.deleteAccountWarning,
               style: ProfileSettingsUi.handle.copyWith(
@@ -175,49 +130,14 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
               onTap: _deleting ? null : () => _fillPhrase(phrase),
             ),
             const SizedBox(height: AppSizes.spacingM),
-            TextField(
+            MinimalTextField(
               controller: _controller,
+              label: t.common.deleteAccountConfirmButton,
+              hint: phrase,
+              icon: Icons.edit_note_rounded,
               enabled: !_deleting,
               textCapitalization: TextCapitalization.characters,
               onChanged: (_) => setState(() {}),
-              style: ProfileSettingsUi.fieldValue.copyWith(letterSpacing: 1),
-              cursorColor: ProfileSettingsUi.ink,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.surface,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 17,
-                ),
-                hintText: phrase,
-                hintStyle: ProfileSettingsUi.handle,
-                prefixIcon: Icon(
-                  Icons.edit_note_rounded,
-                  color: ProfileSettingsUi.muted,
-                  size: 22,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(
-                    ProfileSettingsUi.fieldRadius,
-                  ),
-                  borderSide: ProfileSettingsUi.cardBorderSide,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(
-                    ProfileSettingsUi.fieldRadius,
-                  ),
-                  borderSide: ProfileSettingsUi.cardBorderSide,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(
-                    ProfileSettingsUi.fieldRadius,
-                  ),
-                  borderSide: BorderSide(
-                    color: ProfileSettingsUi.ink,
-                    width: ProfileSettingsUi.fieldFocusBorderWidth,
-                  ),
-                ),
-              ),
             ),
           ],
         ),
@@ -227,8 +147,10 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
           primaryLoading: _deleting,
           primaryEnabled: canSubmit,
           dangerPrimary: true,
+          icon: Icons.person_off_outlined,
           secondaryLabel: t.common.cancelBtn,
-          onSecondary: _deleting ? null : () => Navigator.of(context).pop(false),
+          onSecondary:
+              _deleting ? null : () => Navigator.of(context).pop(false),
           secondaryEnabled: !_deleting,
         ),
       ),
@@ -236,7 +158,6 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
   }
 }
 
-/// Doğrulama cümlesini gösteren — tıklanınca input'a yazan — kompakt kart.
 class _PhrasePreview extends StatelessWidget {
   final String phrase;
   final VoidCallback? onTap;
@@ -251,26 +172,31 @@ class _PhrasePreview extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(ProfileSettingsUi.fieldRadius),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: SelectableText(
-                  phrase,
-                  style: ProfileSettingsUi.fieldValue.copyWith(
-                    color: ProfileSettingsUi.danger,
-                    letterSpacing: 1.4,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: AppSizes.minTouchTarget,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SelectableText(
+                    phrase,
+                    style: ProfileSettingsUi.fieldValue.copyWith(
+                      color: ProfileSettingsUi.danger,
+                      letterSpacing: 1.4,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Icon(
-                Icons.touch_app_outlined,
-                size: 20,
-                color: ProfileSettingsUi.danger,
-              ),
-            ],
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.touch_app_outlined,
+                  size: 20,
+                  color: ProfileSettingsUi.danger,
+                ),
+              ],
+            ),
           ),
         ),
       ),

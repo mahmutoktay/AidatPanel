@@ -12,10 +12,7 @@ import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/buildings_store.dart';
 import '../../domain/entities/building_entity.dart';
 
-/// Bina silmek için tip-to-confirm bottom sheet'i.
-/// Kullanıcı, bina adını aynen yazana kadar "Sil" butonu pasiftir.
-/// Belge §5: DELETE /buildings/:id; FK varsa 400 döner, mesajı
-/// kullanıcı dostu Türkçeye çeviriyoruz.
+/// Bina silmek için tip-to-confirm bottom sheet.
 class DeleteBuildingDialog extends ConsumerStatefulWidget {
   final BuildingEntity building;
 
@@ -104,57 +101,17 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
     return PopScope(
       canPop: !_deleting,
       child: PremiumBottomSheetScaffold(
+        title: t.common.deleteBuilding,
         scrollable: true,
-        header: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSizes.spacingL,
-            AppSizes.spacingM,
-            AppSizes.spacingL,
-            AppSizes.spacingS,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: ProfileSettingsUi.danger.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.warning_amber_rounded,
-                  color: ProfileSettingsUi.danger,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t.common.deleteBuilding,
-                      style: ProfileSettingsUi.title,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      t.common.deleteBuildingHeader,
-                      style: ProfileSettingsUi.handle.copyWith(fontSize: 13),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
         body: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(
+              t.common.deleteBuildingHeader,
+              style: ProfileSettingsUi.handle.copyWith(fontSize: 14),
+            ),
+            const SizedBox(height: AppSizes.spacingL),
             Text(
               t.common.deleteBuildingTypeHint,
               style: ProfileSettingsUi.fieldLabelUppercase,
@@ -167,7 +124,7 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
             const SizedBox(height: AppSizes.spacingM),
             MinimalTextField(
               controller: _controller,
-              label: t.common.deleteBuilding,
+              label: t.common.deleteBuildingTypeFieldLabel,
               hint: phrase,
               icon: Icons.edit_note_rounded,
               enabled: !_deleting,
@@ -191,8 +148,10 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
           primaryLoading: _deleting,
           primaryEnabled: canSubmit,
           dangerPrimary: true,
+          icon: Icons.delete_outline,
           secondaryLabel: t.common.cancelBtn,
-          onSecondary: _deleting ? null : () => Navigator.of(context).pop(false),
+          onSecondary:
+              _deleting ? null : () => Navigator.of(context).pop(false),
           secondaryEnabled: !_deleting,
         ),
       ),
@@ -200,7 +159,6 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
   }
 }
 
-/// Doğrulama cümlesini/bina adını gösteren — tıklanınca input'a yazan — kompakt kırmızı kart.
 class _PhrasePreview extends StatelessWidget {
   final String phrase;
   final VoidCallback? onTap;

@@ -352,6 +352,13 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get deleteBuildingTypeHint => 'Onaylamak için aşağıya bina adını aynen yazın:';
 	@override String get deleteBuildingTypeFieldLabel => 'Bina adı';
 	@override String get buildingNameMismatch => 'Yazdığınız metin bina adıyla aynı değil.';
+	@override String get deleteSite => 'Siteyi Sil';
+	@override String get siteDeleted => 'Site silindi';
+	@override String get siteDeleteFailed => 'Site silinemedi';
+	@override String get deleteSiteHeader => 'Bu işlem geri alınamaz. Site altındaki bloklar da etkilenir.';
+	@override String get deleteSiteTypeHint => 'Onaylamak için aşağıya site adını aynen yazın:';
+	@override String get deleteSiteTypeFieldLabel => 'Site adı';
+	@override String get siteNameMismatch => 'Yazdığınız metin site adıyla aynı değil.';
 	@override String get editApartment => 'Daireyi Düzenle';
 	@override String get deleteApartment => 'Daireyi Sil';
 	@override String get addApartment => 'Daire Ekle';
@@ -496,6 +503,7 @@ class _Translations$features$tr implements Translations$features$en {
 	@override late final _Translations$features$dashboard$tr dashboard = _Translations$features$dashboard$tr._(_root);
 	@override late final _Translations$features$dues$tr dues = _Translations$features$dues$tr._(_root);
 	@override late final _Translations$features$faz2$tr faz2 = _Translations$features$faz2$tr._(_root);
+	@override late final _Translations$features$welcome$tr welcome = _Translations$features$welcome$tr._(_root);
 }
 
 // Path: legal
@@ -980,7 +988,7 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	@override String get quickReplyTemplatesTitle => 'Hızlı yanıt şablonları';
 	@override String get confirmChanges => 'Onayla';
 	@override String get residentInfoTitle => 'Sakin bilgileri';
-	@override String get defaultResidentName => 'Daire sakin';
+	@override String get defaultResidentName => 'Daire sakini';
 	@override String get apartmentNumberTag => 'Daire {number}';
 	@override String get apartmentInfoMissing => 'Daire bilgisi yok';
 	@override String get managerNoteOptional => 'Yönetici notu (opsiyonel)';
@@ -1482,8 +1490,8 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get totalExpense => 'Toplam Gider';
 	@override String get ticketStatusTitle => 'Talep Durumu';
 	@override String get ticketOpen => 'Açık';
-	@override String get ticketInProgress => 'İşlemde';
-	@override String get ticketResolved => 'Çözüldü';
+	@override String get ticketInProgress => 'Onaylandı';
+	@override String get ticketResolved => 'Yapıldı';
 	@override String get overdueApartments => 'Ödemesi Geciken Daireler';
 	@override String get apartmentCountBadge => '{count} daire';
 	@override String get legendPaid => 'Ödendi';
@@ -1501,15 +1509,20 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get apartmentWithFloor => 'Daire {number} · {floor}. Kat';
 	@override String get noOverdueApartments => 'Geciken ödeme bulunmuyor';
 	@override String get noChartData => 'Henüz yeterli veri yok';
-	@override String get noBuildingsEmptyMessage => 'Henüz bir binanız yok. Yönetime başlamak için ilk binanızı ekleyin.';
+	@override String get noBuildingsEmptyMessage => 'Henüz site veya binanız yok. Yönetime başlamak için ilkini ekleyin.';
 	@override String get noBuildingsEmptyCta => 'Bina Ekle';
+	@override String get noBuildingsEmptyCtaSite => 'Site Ekle';
+	@override String get noResidentsInviteMessage => 'Bu binadaki dairelere henüz kimse atanmamış. Sakinleri davet ederek yönetime başlayabilirsiniz.';
+	@override String get noResidentsInviteCta => 'Yeni Sakin Davet Et';
+	@override String get noBlocksInviteMessage => 'Bu sitede henüz bina yok. İlk bloğu ekleyerek yönetime başlayabilirsiniz.';
+	@override String get noBlocksInviteCta => 'Siteye Bina Ekle';
 	@override String get seeMoreOverdue => 'Daha fazlası (+{count})';
 	@override String get payNow => 'Şimdi Öde';
 	@override String get overduePaymentsBadge => '{count} gecikmiş ödeme';
 	@override String get residentOverduePaymentsBadge => '{count} aidatınız gecikmiş';
 	@override String get featuredDuePeriod => '{month} {year} aidatı';
 	@override String get residentFeaturedDuePeriod => '{month} {year} aidatınız';
-	@override String get residentDebtAndPaySubtitle => 'Ödeme yaparak ödeyin.';
+	@override String get residentDebtAndPaySubtitle => 'Aidat borcunuzu buradan görüntüleyip ödeyebilirsiniz.';
 	@override String get duesStatusAction => 'Aidat Durumu';
 	@override String get overdueDuesBadge => '{count} gecikmiş aidat';
 	@override String get dataWarningBanner => '{count} bölüm yüklenemedi. Çekerek yeniden dene.';
@@ -1552,6 +1565,33 @@ class _Translations$features$faz2$tr implements Translations$features$faz2$en {
 	@override String get announcement => 'Duyuru';
 }
 
+// Path: features.welcome
+class _Translations$features$welcome$tr implements Translations$features$welcome$en {
+	_Translations$features$welcome$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get skip => 'Geç';
+	@override String get next => 'İleri';
+	@override String get start => 'Başla';
+	@override String get skipSemantics => 'Tanıtımı geç';
+	@override String get nextSemantics => 'Sonraki sayfa';
+	@override String get startSemantics => 'Tanıtımı bitir ve devam et';
+	@override String get pageSemantics => 'Tanıtım sayfası {current} / {total}';
+	@override String get dotsSemantics => 'Sayfa {current} / {total}';
+	@override String get page1Title => 'AidatPanel\'e Hoş Geldiniz';
+	@override String get page1Body => 'Apartmanınızı veya sitenizi cebinizden yönetin. Kurulum sadece birkaç dakika sürer.';
+	@override String get page2Title => 'Tek Hesap, Sınırsız Kontrol';
+	@override String get page2Body => 'Tek bir binayı da yönetseniz, birden fazla bloklu bir siteyi de — hepsi aynı hesaptan, aynı ekrandan.';
+	@override String get page3Title => 'Dekont Yükleyin, Gerisini Bırakın';
+	@override String get page3Body => 'Sakinleriniz dekontu yükler, sistem tutarı ve tarihi otomatik okur. Siz sadece göz atıp onaylarsınız.';
+	@override String get page4Title => 'Herkes Anında Haberdar Olsun';
+	@override String get page4Body => 'Ödeme, duyuru ve talep güncellemeleri anlık bildirimle herkese ulaşır, kimse geride kalmaz.';
+	@override String get page5Title => 'Şeffaf ve Düzenli';
+	@override String get page5Body => 'Giderler kayıt altında, talepler tek ekrandan takip edilir. Herkes nerede olduğunuzu bilir.';
+}
+
 // Path: features.buildings.collection
 class _Translations$features$buildings$collection$tr implements Translations$features$buildings$collection$en {
 	_Translations$features$buildings$collection$tr._(this._root);
@@ -1576,14 +1616,20 @@ class _Translations$features$buildings$collection$tr implements Translations$fea
 	@override String get detailReferenceAidat => 'Havale açıklaması: Aidat (daire no otomatik)';
 	@override String get detailReferenceHavale => 'Havale açıklaması: Daire numarası ile havale';
 	@override String get detailUsedInBuildings => '{count} binada kullanılıyor';
+	@override String get detailUsedInSites => '{count} sitede kullanılıyor';
+	@override String get detailUsedInBuildingsAndSites => '{buildingCount} bina, {siteCount} sitede kullanılıyor';
 	@override String get ibanLabel => 'IBAN';
 	@override String get ibanHint => 'TR33 0006 1005 1978 6457 8413 26';
 	@override String get ibanInvalid => 'Geçerli bir Türkiye IBAN girin (TR + 24 rakam)';
 	@override String get ibanRequiredIfOtherFilled => 'Alıcı veya açıklama girdiniz; geçerli IBAN girin';
+	@override String get ibanNameLabel => 'IBAN adı';
+	@override String get ibanNameHint => 'Örn: Ziraat hesabım, Kuveyt Türk IBAN\'ım';
+	@override String get ibanNameLaterHint => 'IBAN\'ınıza daha sonra Ayarlar > Kayıtlı IBAN\'larım bölümünden isim verebilirsiniz.';
 	@override String get accountTitleLabel => 'Alıcı Adı';
 	@override String get accountTitleHint => 'Örn: Ahmet Yılmaz veya Site Yönetimi';
 	@override String get referenceTemplateLabel => 'Havale açıklaması';
-	@override String get referenceTemplateHint => 'Örn: Daire 5';
+	@override String get referenceTemplateHint => 'Örn: Aidat Ödemesi';
+	@override String get referenceTemplateHelper => 'Bu açıklama tüm sakinlerinize aynı şekilde gösterilir';
 	@override String get presetsEmpty => 'Henüz kayıtlı tahsilat bilgisi yok';
 	@override String get presetsLoadFailed => 'Öneriler yüklenemedi';
 	@override String get presetBuildingCount => '{count} bina';
@@ -1592,12 +1638,13 @@ class _Translations$features$buildings$collection$tr implements Translations$fea
 	@override String get saveSuccess => 'Tahsilat bilgileri kaydedildi';
 	@override String get savedIbansTitle => 'Kayıtlı IBAN\'larım';
 	@override String get savedIbansEmpty => 'Henüz kayıtlı IBAN yok. Bina eklerken tahsilat bilgisi tanımlayabilirsiniz.';
-	@override String get savedIbansNoBuildingMatch => 'Bu sete bağlı bina bulunamadı';
+	@override String get savedIbansNoBuildingMatch => 'Bu sete bağlı bina veya site bulunamadı';
 	@override String get savedIbansBuildingNames => 'Binalar: {names}';
-	@override String get savedIbansUpdateSuccess => '{count} bina için tahsilat bilgisi güncellendi';
-	@override String get savedIbansUpdateHint => 'Güncellenecek binalar: {names}';
+	@override String get savedIbansSiteNames => 'Siteler: {names}';
+	@override String get savedIbansUpdateSuccess => '{count} yer için tahsilat bilgisi güncellendi';
+	@override String get savedIbansUpdateHint => 'Güncellenecek yerler: {names}';
 	@override String get editSavedIbanTitle => 'IBAN düzenle';
-	@override String get savedIbansOrphanHint => 'Henüz bir binaya atanmamış kayıtlı set. Değişiklik yalnızca bu listede saklanır.';
+	@override String get savedIbansOrphanHint => 'Henüz bir bina veya siteye atanmamış kayıtlı set. Değişiklik yalnızca bu listede saklanır.';
 	@override String get savedIbansAddTitle => 'Yeni IBAN ekle';
 	@override String get savedIbansAddHint => 'Bu bilgileri bina eklerken veya tahsilat ayarlarında kullanabilirsiniz.';
 	@override String get savedIbansAddSuccess => 'IBAN kaydedildi';
@@ -1609,7 +1656,8 @@ class _Translations$features$buildings$collection$tr implements Translations$fea
 	@override String get savedIbansDeleteMessage => 'Bu kayıtlı IBAN listeden kaldırılacak.';
 	@override String get savedIbansDeleteBulkTitle => 'Seçilen IBAN\'lar silinsin mi?';
 	@override String get savedIbansDeleteBulkMessage => '{count} kayıtlı IBAN silinecek.';
-	@override String get savedIbansDeleteBuildingWarning => '{count} binanın tahsilat bilgisi de temizlenecek.';
+	@override String get savedIbansDeleteBuildingWarning => '{count} yerin tahsilat bilgisi de temizlenecek.';
+	@override String get savedIbansDeleteMultiUsageWarning => 'Bu IBAN şurada kullanılıyor: {names}. Silerseniz bunların tahsilat bilgisi boşalacak. Bu işlem geri alınamaz.';
 	@override String get savedIbansDeleteSuccess => 'IBAN silindi';
 	@override String get savedIbansDeleteBulkSuccess => '{count} IBAN silindi';
 	@override String get ibanNotConfigured => 'Tahsilat IBAN tanımlı değil';
@@ -2267,6 +2315,13 @@ extension on TranslationsTr {
 			'common.deleteBuildingTypeHint' => 'Onaylamak için aşağıya bina adını aynen yazın:',
 			'common.deleteBuildingTypeFieldLabel' => 'Bina adı',
 			'common.buildingNameMismatch' => 'Yazdığınız metin bina adıyla aynı değil.',
+			'common.deleteSite' => 'Siteyi Sil',
+			'common.siteDeleted' => 'Site silindi',
+			'common.siteDeleteFailed' => 'Site silinemedi',
+			'common.deleteSiteHeader' => 'Bu işlem geri alınamaz. Site altındaki bloklar da etkilenir.',
+			'common.deleteSiteTypeHint' => 'Onaylamak için aşağıya site adını aynen yazın:',
+			'common.deleteSiteTypeFieldLabel' => 'Site adı',
+			'common.siteNameMismatch' => 'Yazdığınız metin site adıyla aynı değil.',
 			'common.editApartment' => 'Daireyi Düzenle',
 			'common.deleteApartment' => 'Daireyi Sil',
 			'common.addApartment' => 'Daire Ekle',
@@ -2433,6 +2488,8 @@ extension on TranslationsTr {
 			'common.errorKeys.siteBuildingCreateFailed' => 'Blok eklenemedi. Lütfen tekrar deneyin.',
 			'common.errorKeys.siteExpensesFetchFailed' => 'Site giderleri yüklenemedi. Lütfen tekrar deneyin.',
 			'common.errorKeys.siteExpenseSummaryFetchFailed' => 'Site gider özeti yüklenemedi. Lütfen tekrar deneyin.',
+			_ => null,
+		} ?? switch (path) {
 			'common.errorKeys.siteExpenseCreateFailed' => 'Site gideri eklenemedi. Lütfen tekrar deneyin.',
 			'common.errorKeys.siteExpenseUpdateFailed' => 'Site gideri güncellenemedi. Lütfen tekrar deneyin.',
 			'common.errorKeys.siteExpenseDeleteFailed' => 'Site gideri silinemedi. Lütfen tekrar deneyin.',
@@ -2440,8 +2497,6 @@ extension on TranslationsTr {
 			'common.errorKeys.invalidExpenseResponse' => 'Gider bilgisi okunamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.invalidSiteExpenseResponse' => 'Site gider bilgisi okunamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.unsupportedFileType' => 'Bu dosya türü desteklenmiyor.',
-			_ => null,
-		} ?? switch (path) {
 			'common.errorKeys.dekontUploadFailed' => 'Dekont yüklenemedi. Lütfen tekrar deneyin.',
 			'common.errorKeys.serverResponseUnreadable' => 'Sunucu yanıtı okunamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.dekontResponseMissing' => 'Dekont yanıtı eksik. Lütfen tekrar deneyin.',
@@ -2515,14 +2570,20 @@ extension on TranslationsTr {
 			'features.buildings.collection.detailReferenceAidat' => 'Havale açıklaması: Aidat (daire no otomatik)',
 			'features.buildings.collection.detailReferenceHavale' => 'Havale açıklaması: Daire numarası ile havale',
 			'features.buildings.collection.detailUsedInBuildings' => '{count} binada kullanılıyor',
+			'features.buildings.collection.detailUsedInSites' => '{count} sitede kullanılıyor',
+			'features.buildings.collection.detailUsedInBuildingsAndSites' => '{buildingCount} bina, {siteCount} sitede kullanılıyor',
 			'features.buildings.collection.ibanLabel' => 'IBAN',
 			'features.buildings.collection.ibanHint' => 'TR33 0006 1005 1978 6457 8413 26',
 			'features.buildings.collection.ibanInvalid' => 'Geçerli bir Türkiye IBAN girin (TR + 24 rakam)',
 			'features.buildings.collection.ibanRequiredIfOtherFilled' => 'Alıcı veya açıklama girdiniz; geçerli IBAN girin',
+			'features.buildings.collection.ibanNameLabel' => 'IBAN adı',
+			'features.buildings.collection.ibanNameHint' => 'Örn: Ziraat hesabım, Kuveyt Türk IBAN\'ım',
+			'features.buildings.collection.ibanNameLaterHint' => 'IBAN\'ınıza daha sonra Ayarlar > Kayıtlı IBAN\'larım bölümünden isim verebilirsiniz.',
 			'features.buildings.collection.accountTitleLabel' => 'Alıcı Adı',
 			'features.buildings.collection.accountTitleHint' => 'Örn: Ahmet Yılmaz veya Site Yönetimi',
 			'features.buildings.collection.referenceTemplateLabel' => 'Havale açıklaması',
-			'features.buildings.collection.referenceTemplateHint' => 'Örn: Daire 5',
+			'features.buildings.collection.referenceTemplateHint' => 'Örn: Aidat Ödemesi',
+			'features.buildings.collection.referenceTemplateHelper' => 'Bu açıklama tüm sakinlerinize aynı şekilde gösterilir',
 			'features.buildings.collection.presetsEmpty' => 'Henüz kayıtlı tahsilat bilgisi yok',
 			'features.buildings.collection.presetsLoadFailed' => 'Öneriler yüklenemedi',
 			'features.buildings.collection.presetBuildingCount' => '{count} bina',
@@ -2531,12 +2592,13 @@ extension on TranslationsTr {
 			'features.buildings.collection.saveSuccess' => 'Tahsilat bilgileri kaydedildi',
 			'features.buildings.collection.savedIbansTitle' => 'Kayıtlı IBAN\'larım',
 			'features.buildings.collection.savedIbansEmpty' => 'Henüz kayıtlı IBAN yok. Bina eklerken tahsilat bilgisi tanımlayabilirsiniz.',
-			'features.buildings.collection.savedIbansNoBuildingMatch' => 'Bu sete bağlı bina bulunamadı',
+			'features.buildings.collection.savedIbansNoBuildingMatch' => 'Bu sete bağlı bina veya site bulunamadı',
 			'features.buildings.collection.savedIbansBuildingNames' => 'Binalar: {names}',
-			'features.buildings.collection.savedIbansUpdateSuccess' => '{count} bina için tahsilat bilgisi güncellendi',
-			'features.buildings.collection.savedIbansUpdateHint' => 'Güncellenecek binalar: {names}',
+			'features.buildings.collection.savedIbansSiteNames' => 'Siteler: {names}',
+			'features.buildings.collection.savedIbansUpdateSuccess' => '{count} yer için tahsilat bilgisi güncellendi',
+			'features.buildings.collection.savedIbansUpdateHint' => 'Güncellenecek yerler: {names}',
 			'features.buildings.collection.editSavedIbanTitle' => 'IBAN düzenle',
-			'features.buildings.collection.savedIbansOrphanHint' => 'Henüz bir binaya atanmamış kayıtlı set. Değişiklik yalnızca bu listede saklanır.',
+			'features.buildings.collection.savedIbansOrphanHint' => 'Henüz bir bina veya siteye atanmamış kayıtlı set. Değişiklik yalnızca bu listede saklanır.',
 			'features.buildings.collection.savedIbansAddTitle' => 'Yeni IBAN ekle',
 			'features.buildings.collection.savedIbansAddHint' => 'Bu bilgileri bina eklerken veya tahsilat ayarlarında kullanabilirsiniz.',
 			'features.buildings.collection.savedIbansAddSuccess' => 'IBAN kaydedildi',
@@ -2548,7 +2610,8 @@ extension on TranslationsTr {
 			'features.buildings.collection.savedIbansDeleteMessage' => 'Bu kayıtlı IBAN listeden kaldırılacak.',
 			'features.buildings.collection.savedIbansDeleteBulkTitle' => 'Seçilen IBAN\'lar silinsin mi?',
 			'features.buildings.collection.savedIbansDeleteBulkMessage' => '{count} kayıtlı IBAN silinecek.',
-			'features.buildings.collection.savedIbansDeleteBuildingWarning' => '{count} binanın tahsilat bilgisi de temizlenecek.',
+			'features.buildings.collection.savedIbansDeleteBuildingWarning' => '{count} yerin tahsilat bilgisi de temizlenecek.',
+			'features.buildings.collection.savedIbansDeleteMultiUsageWarning' => 'Bu IBAN şurada kullanılıyor: {names}. Silerseniz bunların tahsilat bilgisi boşalacak. Bu işlem geri alınamaz.',
 			'features.buildings.collection.savedIbansDeleteSuccess' => 'IBAN silindi',
 			'features.buildings.collection.savedIbansDeleteBulkSuccess' => '{count} IBAN silindi',
 			'features.buildings.collection.ibanNotConfigured' => 'Tahsilat IBAN tanımlı değil',
@@ -2866,7 +2929,7 @@ extension on TranslationsTr {
 			'features.tickets.quickReplyTemplatesTitle' => 'Hızlı yanıt şablonları',
 			'features.tickets.confirmChanges' => 'Onayla',
 			'features.tickets.residentInfoTitle' => 'Sakin bilgileri',
-			'features.tickets.defaultResidentName' => 'Daire sakin',
+			'features.tickets.defaultResidentName' => 'Daire sakini',
 			'features.tickets.apartmentNumberTag' => 'Daire {number}',
 			'features.tickets.apartmentInfoMissing' => 'Daire bilgisi yok',
 			'features.tickets.managerNoteOptional' => 'Yönetici notu (opsiyonel)',
@@ -2939,6 +3002,8 @@ extension on TranslationsTr {
 			'features.dekont.breakdownTotal' => 'Toplam',
 			'features.dekont.emptyTitle' => 'Henüz dekont yok',
 			'features.dekont.emptySubtitleResident' => 'Henüz bir dekontunuz bulunmuyor. Yeni dekont eklemek için sağ üst köşedeki yükleme butonunu kullanabilirsiniz.',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.emptySubtitleManager' => 'Kullanıcılar tarafından yüklenmiş herhangi bir dekont bulunmamaktadır.',
 			'features.dekont.filterAll' => 'Tümü',
 			'features.dekont.filterPending' => 'İncelemede',
@@ -2954,8 +3019,6 @@ extension on TranslationsTr {
 			'features.dekont.resident.statusDetailAwaitingApproval' => 'Yöneticinin onayı bekleniyor.',
 			'features.dekont.resident.statusDetailAwaitingIbanOk' => 'Alıcı bilgileri eşleşti. Yöneticinin onayı bekleniyor.',
 			'features.dekont.resident.statusDetailAwaitingIbanIssue' => 'Alıcı bilgileri net değil. Yöneticinin onayı bekleniyor.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.resident.statusDetailApproved' => 'Ödemeniz onaylandı.',
 			'features.dekont.resident.statusDetailPartiallyApproved' => 'Ödemeniz kısmen onaylandı.',
 			'features.dekont.resident.statusDetailRejected' => 'Dekontunuz reddedildi.',
@@ -3355,8 +3418,8 @@ extension on TranslationsTr {
 			'features.dashboard.totalExpense' => 'Toplam Gider',
 			'features.dashboard.ticketStatusTitle' => 'Talep Durumu',
 			'features.dashboard.ticketOpen' => 'Açık',
-			'features.dashboard.ticketInProgress' => 'İşlemde',
-			'features.dashboard.ticketResolved' => 'Çözüldü',
+			'features.dashboard.ticketInProgress' => 'Onaylandı',
+			'features.dashboard.ticketResolved' => 'Yapıldı',
 			'features.dashboard.overdueApartments' => 'Ödemesi Geciken Daireler',
 			'features.dashboard.apartmentCountBadge' => '{count} daire',
 			'features.dashboard.legendPaid' => 'Ödendi',
@@ -3374,15 +3437,20 @@ extension on TranslationsTr {
 			'features.dashboard.apartmentWithFloor' => 'Daire {number} · {floor}. Kat',
 			'features.dashboard.noOverdueApartments' => 'Geciken ödeme bulunmuyor',
 			'features.dashboard.noChartData' => 'Henüz yeterli veri yok',
-			'features.dashboard.noBuildingsEmptyMessage' => 'Henüz bir binanız yok. Yönetime başlamak için ilk binanızı ekleyin.',
+			'features.dashboard.noBuildingsEmptyMessage' => 'Henüz site veya binanız yok. Yönetime başlamak için ilkini ekleyin.',
 			'features.dashboard.noBuildingsEmptyCta' => 'Bina Ekle',
+			'features.dashboard.noBuildingsEmptyCtaSite' => 'Site Ekle',
+			'features.dashboard.noResidentsInviteMessage' => 'Bu binadaki dairelere henüz kimse atanmamış. Sakinleri davet ederek yönetime başlayabilirsiniz.',
+			'features.dashboard.noResidentsInviteCta' => 'Yeni Sakin Davet Et',
+			'features.dashboard.noBlocksInviteMessage' => 'Bu sitede henüz bina yok. İlk bloğu ekleyerek yönetime başlayabilirsiniz.',
+			'features.dashboard.noBlocksInviteCta' => 'Siteye Bina Ekle',
 			'features.dashboard.seeMoreOverdue' => 'Daha fazlası (+{count})',
 			'features.dashboard.payNow' => 'Şimdi Öde',
 			'features.dashboard.overduePaymentsBadge' => '{count} gecikmiş ödeme',
 			'features.dashboard.residentOverduePaymentsBadge' => '{count} aidatınız gecikmiş',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} aidatı',
 			'features.dashboard.residentFeaturedDuePeriod' => '{month} {year} aidatınız',
-			'features.dashboard.residentDebtAndPaySubtitle' => 'Ödeme yaparak ödeyin.',
+			'features.dashboard.residentDebtAndPaySubtitle' => 'Aidat borcunuzu buradan görüntüleyip ödeyebilirsiniz.',
 			'features.dashboard.duesStatusAction' => 'Aidat Durumu',
 			'features.dashboard.overdueDuesBadge' => '{count} gecikmiş aidat',
 			'features.dashboard.dataWarningBanner' => '{count} bölüm yüklenemedi. Çekerek yeniden dene.',
@@ -3445,6 +3513,26 @@ extension on TranslationsTr {
 			'features.faz2.tickets' => 'Talepler',
 			'features.faz2.expenses' => 'Giderler',
 			'features.faz2.announcement' => 'Duyuru',
+			'features.welcome.skip' => 'Geç',
+			'features.welcome.next' => 'İleri',
+			'features.welcome.start' => 'Başla',
+			_ => null,
+		} ?? switch (path) {
+			'features.welcome.skipSemantics' => 'Tanıtımı geç',
+			'features.welcome.nextSemantics' => 'Sonraki sayfa',
+			'features.welcome.startSemantics' => 'Tanıtımı bitir ve devam et',
+			'features.welcome.pageSemantics' => 'Tanıtım sayfası {current} / {total}',
+			'features.welcome.dotsSemantics' => 'Sayfa {current} / {total}',
+			'features.welcome.page1Title' => 'AidatPanel\'e Hoş Geldiniz',
+			'features.welcome.page1Body' => 'Apartmanınızı veya sitenizi cebinizden yönetin. Kurulum sadece birkaç dakika sürer.',
+			'features.welcome.page2Title' => 'Tek Hesap, Sınırsız Kontrol',
+			'features.welcome.page2Body' => 'Tek bir binayı da yönetseniz, birden fazla bloklu bir siteyi de — hepsi aynı hesaptan, aynı ekrandan.',
+			'features.welcome.page3Title' => 'Dekont Yükleyin, Gerisini Bırakın',
+			'features.welcome.page3Body' => 'Sakinleriniz dekontu yükler, sistem tutarı ve tarihi otomatik okur. Siz sadece göz atıp onaylarsınız.',
+			'features.welcome.page4Title' => 'Herkes Anında Haberdar Olsun',
+			'features.welcome.page4Body' => 'Ödeme, duyuru ve talep güncellemeleri anlık bildirimle herkese ulaşır, kimse geride kalmaz.',
+			'features.welcome.page5Title' => 'Şeffaf ve Düzenli',
+			'features.welcome.page5Body' => 'Giderler kayıt altında, talepler tek ekrandan takip edilir. Herkes nerede olduğunuzu bilir.',
 			'legal.companyName' => 'Vefa Yazılım',
 			'legal.contactEmail' => 'store@vefayazilim.com',
 			'legal.contactBlock' => 'Veri sorumlusu: Vefa Yazılım\nE-posta: store@vefayazilim.com',
@@ -3468,8 +3556,6 @@ extension on TranslationsTr {
 			'legal.kvkkS1Body' => 'AidatPanel kapsamındaki kişisel veri işleme faaliyetleri için veri sorumlusu Vefa Yazılım’dır. KVKK taleplerinizi store@vefayazilim.com adresine veya uygulamada kayıtlı e-posta adresinizle iletebilirsiniz.',
 			'legal.kvkkS2Title' => 'İşlenen veri kategorileri',
 			'legal.kvkkS2Body' => 'Kimlik ve iletişim, müşteri işlem (aidat, ödeme, gider), görsel kayıt (dekont), işlem güvenliği (log, token) ve pazarlama/iletişim (bildirim izni) kategorilerinde veri işlenebilir.',
-			_ => null,
-		} ?? switch (path) {
 			'legal.kvkkS3Title' => 'İşleme amaçları ve hukuki sebepler',
 			'legal.kvkkS3Body' => 'Verileriniz; sözleşmenin kurulması ve ifası, hukuki yükümlülük, meşru menfaat ve açık rızanız (bildirimler gibi) kapsamında işlenir.',
 			'legal.kvkkS4Title' => 'Aktarım',

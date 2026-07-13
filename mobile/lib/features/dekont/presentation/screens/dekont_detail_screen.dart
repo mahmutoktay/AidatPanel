@@ -604,39 +604,42 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
           _ResidentSelectedDuesInfo(dekont: widget.dekont),
         ],
       ),
-      actions: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSizes.spacingL,
-          AppSizes.spacingS,
-          AppSizes.spacingL,
-          AppSizes.spacingM,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _pendingDecision != null
-                    ? null
-                    : () => _submit(DekontReviewDecision.reject),
-                style: ProfileSettingsUi.dangerOutlinedButton,
-                child: _pendingDecision == DekontReviewDecision.reject
-                    ? const _ReviewButtonSpinner()
-                    : Text(t.reject),
+      actions: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSizes.spacingL,
+            AppSizes.spacingS,
+            AppSizes.spacingL,
+            AppSizes.spacingM,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _pendingDecision != null
+                      ? null
+                      : () => _submit(DekontReviewDecision.reject),
+                  style: ProfileSettingsUi.dangerOutlinedButton,
+                  child: _pendingDecision == DekontReviewDecision.reject
+                      ? const _ReviewButtonSpinner()
+                      : Text(t.reject),
+                ),
               ),
-            ),
-            const SizedBox(width: AppSizes.spacingS),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: _pendingDecision != null
-                    ? null
-                    : () => _submit(DekontReviewDecision.approve),
-                style: AppButtonStyles.elevatedSuccess(fullWidth: true),
-                child: _pendingDecision == DekontReviewDecision.approve
-                    ? const _ReviewButtonSpinner(color: Colors.white)
-                    : Text(t.approve),
+              const SizedBox(width: AppSizes.spacingS),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _pendingDecision != null
+                      ? null
+                      : () => _submit(DekontReviewDecision.approve),
+                  style: AppButtonStyles.elevatedSuccess(fullWidth: true),
+                  child: _pendingDecision == DekontReviewDecision.approve
+                      ? const _ReviewButtonSpinner(color: Colors.white)
+                      : Text(t.approve),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

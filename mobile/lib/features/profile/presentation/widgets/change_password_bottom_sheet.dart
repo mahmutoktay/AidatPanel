@@ -3,170 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/utils/input_validators.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../../shared/widgets/password_criterion.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 
-/// PasswordField Reusable Widget
-class PasswordField extends StatefulWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? hintText;
-  final String? Function(String?)? validator;
-  final bool enabled;
-  final FocusNode? focusNode;
-  final TextInputAction textInputAction;
-  final ValueChanged<String>? onChanged;
-  final VoidCallback? onFieldSubmitted;
-  final Widget? passwordCriteria;
-
-  const PasswordField({
-    super.key,
-    required this.controller,
-    required this.label,
-    this.hintText,
-    this.validator,
-    this.enabled = true,
-    this.focusNode,
-    this.textInputAction = TextInputAction.next,
-    this.onChanged,
-    this.onFieldSubmitted,
-    this.passwordCriteria,
-  });
-
-  @override
-  State<PasswordField> createState() => _PasswordFieldState();
-}
-
-class _PasswordFieldState extends State<PasswordField> {
-  late FocusNode _focusNode;
-  bool _obscureText = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = widget.focusNode ?? FocusNode();
-  }
-
-  @override
-  void dispose() {
-    if (widget.focusNode == null) {
-      _focusNode.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.label.toUpperCase(),
-          style: const TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 12.5,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF9A9686),
-            letterSpacing: 1.1,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: widget.controller,
-          obscureText: _obscureText,
-          enabled: widget.enabled,
-          focusNode: _focusNode,
-          textInputAction: widget.textInputAction,
-          onChanged: widget.onChanged,
-          onFieldSubmitted: (_) {
-            if (widget.onFieldSubmitted != null) {
-              widget.onFieldSubmitted!();
-            }
-          },
-          style: const TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF15140F),
-          ),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.surface,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
-            prefixIcon: const Icon(
-              Icons.lock_outline_rounded,
-              color: Color(0xFF9A9686),
-              size: 20,
-            ),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                color: const Color(0xFF9A9686),
-                size: 20,
-              ),
-              onPressed: () {
-                setState(() {
-                  _obscureText = !_obscureText;
-                });
-              },
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFE7E4DA), width: 1.5),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFF15140F), width: 1.5),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFE15B4D), width: 1.5),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFE15B4D), width: 1.5),
-            ),
-            errorStyle: const TextStyle(
-              color: Color(0xFFE15B4D),
-              fontSize: 12,
-            ),
-          ),
-          validator: widget.validator,
-        ),
-        if (widget.hintText != null) ...[
-          const SizedBox(height: 6),
-          Text(
-            widget.hintText!,
-            style: const TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 11.5,
-              color: Color(0xFF9A9686),
-            ),
-          ),
-        ],
-        if (widget.passwordCriteria != null) ...[
-          const SizedBox(height: 8),
-          widget.passwordCriteria!,
-        ],
-      ],
-    );
-  }
-}
-
-/// Redesigned ChangePasswordBottomSheet
+/// Şifre değiştirme formu — güncel MinimalForm + PremiumSheet dilinde.
 class ChangePasswordBottomSheet extends ConsumerStatefulWidget {
   const ChangePasswordBottomSheet({super.key});
 
@@ -303,138 +152,60 @@ class _ChangePasswordBottomSheetState
     }
   }
 
+  Widget _passwordCriteria() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        PasswordCriterion(
+          text: context.t.features.auth.minLength,
+          isMet: _hasMinLength,
+        ),
+        PasswordCriterion(
+          text: context.t.features.auth.hasUpperCase,
+          isMet: _hasUpperCase,
+        ),
+        PasswordCriterion(
+          text: context.t.features.auth.hasLowerCase,
+          isMet: _hasLowerCase,
+        ),
+        PasswordCriterion(
+          text: context.t.features.auth.hasNumber,
+          isMet: _hasNumber,
+        ),
+        PasswordCriterion(
+          text: context.t.features.auth.hasSpecialChar,
+          isMet: _hasSpecialChar,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = context.t;
-
-    final newPasswordText = _newPwController.text;
-    final int strength = newPasswordText.isEmpty
-        ? -1
-        : InputValidators.getPasswordStrength(newPasswordText);
-
-    final String strengthLabel;
-    final Color strengthBg;
-    final Color strengthText;
-    final Color strengthDot;
-
-    if (strength == -1) {
-      strengthLabel = t.common.passwordStrengthUnspecified;
-      strengthBg = const Color(0xFFEAE8E0);
-      strengthText = const Color(0xFF9A9686);
-      strengthDot = const Color(0xFFB0AC9D);
-    } else if (strength <= 2) {
-      strengthLabel = t.common.passwordStrengthWeak;
-      strengthBg = const Color(0xFFFDEDEC);
-      strengthText = const Color(0xFFE15B4D);
-      strengthDot = const Color(0xFFE15B4D);
-    } else if (strength <= 4) {
-      strengthLabel = t.common.passwordStrengthMedium;
-      strengthBg = const Color(0xFFFEF9E7);
-      strengthText = const Color(0xFF92400E);
-      strengthDot = const Color(0xFFF2A93D);
-    } else {
-      strengthLabel = t.common.passwordStrengthStrong;
-      strengthBg = const Color(0xFFF6F8F3);
-      strengthText = const Color(0xFF16A34A);
-      strengthDot = const Color(0xFF4ADE80);
-    }
 
     return PopScope(
       canPop: !_submitting,
       child: Form(
         key: _formKey,
         child: PremiumBottomSheetScaffold(
+          title: t.common.changePasswordTitle,
           scrollable: true,
-          header: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSizes.spacingL,
-              AppSizes.spacingM,
-              AppSizes.spacingL,
-              AppSizes.spacingS,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: ProfileSettingsUi.danger.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.lock_outline_rounded,
-                    color: ProfileSettingsUi.danger,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        t.common.changePasswordTitle,
-                        style: ProfileSettingsUi.title,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        t.common.changePasswordSubtitle,
-                        style: ProfileSettingsUi.handle.copyWith(fontSize: 13),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: strengthBg,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: strengthDot,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        t.common.passwordStrengthLabel.replaceAll(
-                          '{level}',
-                          strengthLabel,
-                        ),
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: strengthText,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              Text(
+                t.common.changePasswordSubtitle,
+                style: ProfileSettingsUi.handle.copyWith(fontSize: 14),
               ),
               const SizedBox(height: AppSizes.spacingL),
-              PasswordField(
+              MinimalPasswordField(
                 controller: _currentPwController,
                 label: t.common.currentPassword,
+                required: true,
                 enabled: !_submitting,
                 textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.password],
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return t.common.currentPasswordRequired;
@@ -442,49 +213,28 @@ class _ChangePasswordBottomSheetState
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
-              PasswordField(
+              const SizedBox(height: AppSizes.spacingM),
+              MinimalPasswordField(
                 controller: _newPwController,
                 focusNode: _newPwFocusNode,
                 label: t.common.newPassword,
-                hintText: t.common.newPasswordHint,
+                hint: t.common.newPasswordHint,
+                required: true,
                 enabled: !_submitting,
                 textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.newPassword],
                 validator: _validateNewPassword,
-                passwordCriteria: _newPwFocusNode.hasFocus
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          PasswordCriterion(
-                            text: context.t.features.auth.minLength,
-                            isMet: _hasMinLength,
-                          ),
-                          PasswordCriterion(
-                            text: context.t.features.auth.hasUpperCase,
-                            isMet: _hasUpperCase,
-                          ),
-                          PasswordCriterion(
-                            text: context.t.features.auth.hasLowerCase,
-                            isMet: _hasLowerCase,
-                          ),
-                          PasswordCriterion(
-                            text: context.t.features.auth.hasNumber,
-                            isMet: _hasNumber,
-                          ),
-                          PasswordCriterion(
-                            text: context.t.features.auth.hasSpecialChar,
-                            isMet: _hasSpecialChar,
-                          ),
-                        ],
-                      )
-                    : null,
+                passwordCriteria:
+                    _newPwFocusNode.hasFocus ? _passwordCriteria() : null,
               ),
-              const SizedBox(height: 20),
-              PasswordField(
+              const SizedBox(height: AppSizes.spacingM),
+              MinimalPasswordField(
                 controller: _confirmPwController,
                 label: t.common.newPasswordConfirm,
+                required: true,
                 enabled: !_submitting,
                 textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.newPassword],
                 onFieldSubmitted: _submit,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -502,8 +252,10 @@ class _ChangePasswordBottomSheetState
             primaryLabel: t.common.changePasswordTitle,
             onPrimary: _submitting ? null : _submit,
             primaryLoading: _submitting,
+            icon: Icons.lock_reset_outlined,
             secondaryLabel: t.common.cancelBtn,
-            onSecondary: _submitting ? null : () => Navigator.of(context).pop(),
+            onSecondary:
+                _submitting ? null : () => Navigator.of(context).pop(),
             secondaryEnabled: !_submitting,
           ),
         ),

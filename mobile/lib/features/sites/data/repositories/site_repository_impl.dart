@@ -145,6 +145,8 @@ class SiteRepositoryImpl implements SiteRepository {
     required String id,
     required String? collectionIban,
     required String? collectionAccountTitle,
+    String? collectionIbanLabel,
+    bool updateIbanLabel = false,
     required String? paymentReferenceTemplate,
   }) async {
     try {
@@ -152,6 +154,8 @@ class SiteRepositoryImpl implements SiteRepository {
         id: id,
         collectionIban: collectionIban,
         collectionAccountTitle: collectionAccountTitle,
+        collectionIbanLabel: collectionIbanLabel,
+        updateIbanLabel: updateIbanLabel,
         paymentReferenceTemplate: paymentReferenceTemplate,
       );
       return model.toEntity();
