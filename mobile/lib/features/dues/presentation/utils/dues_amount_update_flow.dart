@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
-import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
+import '../../../buildings/presentation/providers/buildings_cache_refresh.dart';
 import '../providers/dues_cache_refresh.dart';
 import '../providers/dues_provider.dart';
 import '../widgets/dues_quick_amount_card.dart';
@@ -110,7 +110,7 @@ Future<void> _submitBuildingDueAmountUpdate({
     if (context.mounted) {
       Navigator.of(context).maybePop();
     }
-    await ref.read(buildingsStoreProvider.notifier).refreshBuildings();
+    await syncManagerBuildingLists(ref);
     if (!context.mounted) return;
     await invalidateDuesRelatedCaches(ref);
   }

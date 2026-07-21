@@ -18,8 +18,8 @@ abstract class AuthRemoteDataSource {
     required String purpose,
   });
 
-  /// `POST /auth/check-identifier` purpose=`resident_phone` → `data.exists`.
-  Future<bool> checkResidentPhoneExists(String phone);
+  /// `POST /auth/check-identifier` purpose=`resident_phone` → `{ exists, name? }`.
+  Future<ManagerIdentifierLookup> checkResidentPhoneExists(String phone);
 
   /// `POST /auth/check-identifier` purpose=`manager_identifier`.
   Future<ManagerIdentifierLookup> checkManagerIdentifierExists(
@@ -77,6 +77,14 @@ abstract class AuthRemoteDataSource {
     String? inviteCode,
   });
 
+  /// `POST /auth/firebase-phone` — sakin telefon doğrulama (JWT veya requireName/verified).
+  Future<Map<String, dynamic>> verifyFirebasePhone({
+    required String idToken,
+    required String purpose,
+    String? name,
+    String? inviteCode,
+  });
+
   Future<String> validateInviteCode(String inviteCode);
 
   Future<bool> verifyResidentJoinOtp({
@@ -127,7 +135,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<bool> checkResidentPhoneExists(String phone) async {
+  Future<ManagerIdentifierLookup> checkResidentPhoneExists(String phone) async {
     final response = await _dioClient.post(
       ApiConstants.checkIdentifier,
       data: {
@@ -136,7 +144,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       },
     );
     final data = response.data['data'] as Map<String, dynamic>?;
-    return data?['exists'] == true;
+    final exists = data?['exists'] == true;
+    final rawName = data?['name'];
+    final trimmed = rawName is String ? rawName.trim() : '';
+    return ManagerIdentifierLookup(
+      exists: exists,
+      name: trimmed.isEmpty ? null : trimmed,
+    );
   }
 
   @override
@@ -290,6 +304,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       },
     );
     return LoginResponse.fromJson(response.data['data']);
+  }
+
+  @override
+  Future<Map<String, dynamic>> verifyFirebasePhone({
+    required String idToken,
+    required String purpose,
+    String? name,
+    String? inviteCode,
+  }) async {
+    final device = await DeviceInfoService.currentDeviceMeta();
+    final response = await _dioClient.post(
+      ApiConstants.firebasePhone,
+      data: {
+        'idToken': idToken,
+        'purpose': purpose,
+        if (name != null && name.isNotEmpty) 'name': name,
+        if (inviteCode != null && inviteCode.isNotEmpty) 'inviteCode': inviteCode,
+        ...device.toJson(),
+      },
+    );
+    final data = response.data['data'];
+    if (data is Map<String, dynamic>) return data;
+    return <String, dynamic>{};
   }
 
   @override

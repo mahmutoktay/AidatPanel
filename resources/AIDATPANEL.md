@@ -8,7 +8,7 @@
 **AidatPanel**, Türk apartman ve site yöneticileri için geliştirilmiş bir mobil aidat yönetim platformudur. Yöneticiler site + tekil bina hiyerarşisini tek hesaptan yönetir; sakinler kendi aidat, gider, dekont ve ticket süreçlerini kullanır.
 
 - **Domain:** aidatpanel.com (Cloudflare)
-- **Platform:** iOS + Android (Flutter) — sürüm `0.6.8+2000000009`
+- **Platform:** iOS + Android (Flutter) — sürüm `0.6.10+2000000013`
 - **Backend:** Node.js + Express (Contabo VPS, PM2: `aidapanel-api`)
 - **Veritabanı:** PostgreSQL (Prisma 7)
 - **Web:** Statik landing (`web/`); admin panel API: `/api/v1/admin`
@@ -57,7 +57,8 @@ aidatpanel/
 - **Auth:** JWT — access ~15dk (`JWT_SECRET`), refresh ~30gün (`REFRESH_TOKEN_SECRET`) + `refreshTokenVersion` / `UserSession` SHA-256 replay koruması
 - **Email:** Resend (şifre sıfırlama)
 - **Push:** Firebase Admin SDK (FCM)
-- **SMS:** Twilio Verify / Twilio SMS / NetGsm (`SMS_PROVIDER`)
+- **Sakin telefon doğrulama:** Firebase Auth Phone (mobil SMS → `idToken` → `POST /auth/firebase-phone`)
+- **SMS (şifre sıfırlama / yönetici e-posta dışı):** Twilio Verify / Twilio SMS / NetGsm (`SMS_PROVIDER`) — sakin OTP için kullanılmaz
 - **Abonelik:** RevenueCat webhook + mobil SDK
 - **Realtime:** `ws` — `WSS /api/v1/realtime?token=ACCESS_JWT`
 - **Deploy:** PM2 · `api.aidatpanel.com` (CloudPanel reverse proxy, port 4200)
@@ -82,12 +83,13 @@ FIREBASE_SERVICE_ACCOUNT_JSON=...      # veya FIREBASE_SERVICE_ACCOUNT_PATH
 FIREBASE_PROJECT_ID=aidatpanel
 REALTIME_WS_ENABLED=true
 
-# SMS
+# SMS — şifre sıfırlama ve (legacy) yönetici telefon OTP
+# Sakin telefon doğrulama Firebase Auth Phone ile yapılır; bu env'ler sakin OTP için zorunlu değil.
 SMS_PROVIDER=auto|twilio|netgsm
 TWILIO_ACCOUNT_SID=...
 TWILIO_AUTH_TOKEN=...
 TWILIO_PHONE_FROM=...
-TWILIO_VERIFY_SERVICE_SID=...          # doluysa OTP Verify ile gider
+TWILIO_VERIFY_SERVICE_SID=...          # doluysa legacy OTP Verify ile gider
 NETGSM_USER=...
 NETGSM_PASS=...
 NETGSM_HEADER=AIDATPANEL
@@ -128,6 +130,7 @@ model User {
   passwordHash        String
   name                String
   phone               String?
+  firebaseUid         String?   @unique         // Firebase Auth Phone uid
   role                UserRole  @default(RESIDENT)
   fcmToken            String?
   language            String    @default("tr")
@@ -576,12 +579,21 @@ POST   /api/v1/auth/logout            # FCM token temizler
 POST   /api/v1/auth/logout-all-devices
 POST   /api/v1/auth/join              # Legacy: email+şifre + davet kodu
 POST   /api/v1/auth/invite/validate   # Public: { inviteCode } → { valid, label }
-POST   /api/v1/auth/otp/send          # purpose: resident_login | resident_join | resident_phone_change | manager_*
-POST   /api/v1/auth/otp/verify
-POST   /api/v1/auth/otp/complete-resident-join  # phone + name + inviteCode (OTP sonrası)
+POST   /api/v1/auth/otp/send          # e-posta OTP (manager_*); sakin telefon → 410 (Firebase kullanın)
+POST   /api/v1/auth/otp/verify        # e-posta OTP; sakin telefon → 410
+POST   /api/v1/auth/firebase-phone    # sakin: idToken + purpose (resident_login|resident_join|resident_phone_change)
+POST   /api/v1/auth/otp/complete-resident-join  # phone + name + inviteCode (Firebase doğrulama sonrası)
 POST   /api/v1/auth/forgot-password
 POST   /api/v1/auth/reset-password
 ```
+
+**Sakin Firebase Phone (`POST /auth/firebase-phone`):**
+- Body: `{ idToken, purpose: "resident_login"|"resident_join"|"resident_phone_change", name?, inviteCode?, deviceLabel?, platform? }`
+- Mobil Firebase Auth Phone ile SMS doğrular → `idToken` alır → backend `admin.auth().verifyIdToken` → AidatPanel JWT
+- `resident_login` → `{ accessToken, refreshToken, user }`
+- `resident_join` (isim yok) → `{ requireName: true }` (pending `PhoneOtpToken`)
+- `resident_phone_change` → `{ verified: true }` (pending; `PUT /me` telefon ile tüketir)
+- `User.firebaseUid` ilk başarılı doğrulamada bağlanır
 
 **Şifre sıfırlama (`POST /auth/forgot-password`):**
 - Body: `{ email? }` **veya** `{ phone? }` (en az biri); opsiyonel `channel: "email" | "sms"`
@@ -598,9 +610,10 @@ POST   /api/v1/auth/reset-password
 3. Telefon eşleşmesi kanonik 10 hane + legacy yazılışlar; aynı telefonda MANAGER+RESIDENT varsa şifre eşleşen hesap seçilir
 
 **Sakin telefon-öncelikli akış (mobil):**
-1. `check-identifier` (`resident_phone`) → OTP login veya join
-2. Yeni sakin: isim + davet kodu → `otp/complete-resident-join`
-3. Deep link: `https://aidatpanel.com/join?code=...` / `aidatpanel://join?code=...`
+1. `check-identifier` (`resident_phone`) → `{ exists, name? }` → Firebase Phone Auth SMS
+2. SMS kodu → Firebase `idToken` → `POST /auth/firebase-phone` (login JWT veya join `requireName`)
+3. Yeni sakin: isim + davet kodu → `otp/complete-resident-join`
+4. Deep link: `https://aidatpanel.com/join?code=...` / `aidatpanel://join?code=...`
 
 ### Buildings (Yönetici)
 ```
@@ -789,7 +802,7 @@ GET    /api/v1/admin/backups/:id/download
 
 ## 📱 Flutter Uygulaması
 
-### Sürüm / paketler (`pubspec.yaml` — 0.6.8+2000000009)
+### Sürüm / paketler (`pubspec.yaml` — 0.6.10+2000000013)
 
 ```yaml
 environment:
@@ -804,6 +817,7 @@ dependencies:
   slang: ^4.15.0
   slang_flutter: ^4.15.0
   firebase_core: ^4.10.0
+  firebase_auth: ^6.5.6
   firebase_messaging: ^16.3.0
   firebase_analytics: ^12.0.0
   firebase_crashlytics: ^5.0.0
@@ -971,7 +985,8 @@ bash backend/scripts/deploy.sh
 | i18n | Slang (TR/EN JSON) | Type-safe; UI'da hardcoded string yasak |
 | Abonelik | RevenueCat | iOS+Android |
 | Push | FCM + WS | Tray + anlık |
-| SMS | Twilio / NetGsm | OTP |
+| Sakin telefon OTP | Firebase Auth Phone | SMS + idToken |
+| SMS (şifre sıfırlama) | Twilio / NetGsm | Yönetici şifre reset |
 
 ---
 

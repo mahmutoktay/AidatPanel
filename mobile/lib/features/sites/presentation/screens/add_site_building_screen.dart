@@ -14,6 +14,7 @@ import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/number_grid_selector.dart';
 import '../../../../shared/widgets/show_due_day_picker.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
+import '../../../buildings/presentation/providers/buildings_cache_refresh.dart';
 import '../../../buildings/presentation/widgets/building_collection_fields.dart';
 import '../../data/sites_store.dart';
 
@@ -210,6 +211,8 @@ class _AddSiteBuildingScreenState extends ConsumerState<AddSiteBuildingScreen> {
       if (!mounted) return;
       ref.invalidate(siteDetailProvider(widget.siteId));
       ref.invalidate(siteBuildingsProvider(widget.siteId));
+      await syncAfterSiteBuildingMutation(ref);
+      if (!mounted) return;
       ref.read(toastProvider.notifier).show(
             context.t.features.sites.blockCreated,
             type: ToastType.success,

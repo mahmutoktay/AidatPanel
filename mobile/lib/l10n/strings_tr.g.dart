@@ -713,6 +713,14 @@ class _Translations$common$errorKeys$tr implements Translations$common$errorKeys
 	@override String get siteExpenseUpdateFailed => 'Site gideri güncellenemedi. Lütfen tekrar deneyin.';
 	@override String get siteExpenseDeleteFailed => 'Site gideri silinemedi. Lütfen tekrar deneyin.';
 	@override String get subscriptionFetchFailed => 'Abonelik bilgisi alınamadı. Lütfen tekrar deneyin.';
+	@override String get firebasePhoneInvalid => 'Geçerli bir telefon numarası giriniz.';
+	@override String get firebasePhoneTooMany => 'Çok fazla deneme yaptınız. Lütfen biraz sonra tekrar deneyin.';
+	@override String get firebasePhoneTimeout => 'Doğrulama zaman aşımına uğradı. Lütfen yeni kod isteyin.';
+	@override String get firebasePhoneSessionExpired => 'Doğrulama oturumu sona erdi. Lütfen yeni kod isteyin.';
+	@override String get firebasePhoneCodeInvalid => 'Kod yanlış. Tekrar deneyin.';
+	@override String get firebasePhoneFailed => 'Telefon doğrulaması tamamlanamadı. Lütfen tekrar deneyin.';
+	@override String get firebasePhoneAppVerify => 'Uygulama doğrulaması başarısız. Debug SHA-1 Firebase Console\'a eklenmeli veya Console test numarası kullanılmalı.';
+	@override String get firebasePhoneNotEnabled => 'Telefon ile giriş Firebase Console\'da açık değil.';
 	@override String get invalidExpenseResponse => 'Gider bilgisi okunamadı. Lütfen tekrar deneyin.';
 	@override String get invalidSiteExpenseResponse => 'Site gider bilgisi okunamadı. Lütfen tekrar deneyin.';
 	@override String get unsupportedFileType => 'Bu dosya türü desteklenmiyor.';
@@ -850,7 +858,9 @@ class _Translations$features$auth$tr implements Translations$features$auth$en {
 	@override String get errorOccurred => 'Bir hata oluştu';
 	@override String get registrationSuccess => 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.';
 	@override String get loginSuccess => 'Hoş geldiniz!';
+	@override String get loginSuccessNamed => 'Hoş geldiniz, {name}!';
 	@override String get loginSuccessWelcomeBack => 'Tekrar hoş geldiniz!';
+	@override String get loginSuccessWelcomeBackNamed => 'Tekrar hoş geldiniz, {name}!';
 	@override String get appTitle => 'AidatPanel';
 	@override String get appSubtitle => 'Apartman Yönetim Sistemi';
 	@override String get splashConnectionError => 'Sunucuya bağlanılamadı';
@@ -1471,7 +1481,7 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 
 	// Translations
 	@override String get allBuildings => 'Tüm Binalar';
-	@override String get properties => 'Mülkler';
+	@override String get properties => 'Binalar';
 	@override String get selectBuilding => 'Bina seç';
 	@override String get searchBuildings => 'Bina adı veya adres ara';
 	@override String get buildingPickerTapHint => 'Dokunarak bina arayın ve seçin';
@@ -1756,7 +1766,7 @@ class _Translations$features$auth$onboarding$tr implements Translations$features
 	@override String get step3PasswordTitle => 'Şifrenizi yazın';
 	@override String get step3RegisterPasswordTitle => 'Şifrenizi belirleyin';
 	@override String get step3SecureVerify => 'Güvenli doğrulama ile hesabınızı koruyoruz.';
-	@override String get step3DevOtpHint => 'SMS gelmezse bilgisayarda backend terminalinde otp_dev satırına bakın.';
+	@override String get step3DevOtpHint => 'Test numarası kullanıyorsanız Firebase Console\'daki test kodunu girin.';
 	@override String get step4InviteTitle => 'Davet Kodunuzu Giriniz';
 	@override String get step4InviteSubtitle => 'Yöneticinizin size verdiği kodu buraya girin.';
 	@override String get step4InviteHint => 'Davet kodunuzu yönetimden veya yöneticinizden alabilirsiniz.';
@@ -1798,6 +1808,9 @@ class _Translations$features$auth$onboarding$tr implements Translations$features
 	@override String get phoneOtpDisabledHint => 'Telefon ile giriş yakında. Şimdilik e-posta ile devam edebilirsiniz.';
 	@override String get residentLoginTitle => 'Sakin Girişi';
 	@override String get residentLoginSubtitle => 'Bilgilerinizi girerek devam edin.';
+	@override String get residentLoginWelcomeTitle => 'Tekrar hoş geldiniz!';
+	@override String get residentLoginWelcomeNamedTitle => 'Tekrar hoş geldiniz, {name}!';
+	@override String get residentLoginWelcomeSubtitle => 'Devam etmek için doğrulama kodunu girin';
 	@override String get residentSendCodeButton => 'Kod Gönder';
 	@override String get residentPhoneVerifyNote => 'Telefon numaranız doğrulanarak kod gönderilecektir.';
 	@override String get residentOtpSubtitle => 'Telefonunuza gelen 6 haneli kodu girin.';
@@ -2494,6 +2507,14 @@ extension on TranslationsTr {
 			'common.errorKeys.siteExpenseUpdateFailed' => 'Site gideri güncellenemedi. Lütfen tekrar deneyin.',
 			'common.errorKeys.siteExpenseDeleteFailed' => 'Site gideri silinemedi. Lütfen tekrar deneyin.',
 			'common.errorKeys.subscriptionFetchFailed' => 'Abonelik bilgisi alınamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.firebasePhoneInvalid' => 'Geçerli bir telefon numarası giriniz.',
+			'common.errorKeys.firebasePhoneTooMany' => 'Çok fazla deneme yaptınız. Lütfen biraz sonra tekrar deneyin.',
+			'common.errorKeys.firebasePhoneTimeout' => 'Doğrulama zaman aşımına uğradı. Lütfen yeni kod isteyin.',
+			'common.errorKeys.firebasePhoneSessionExpired' => 'Doğrulama oturumu sona erdi. Lütfen yeni kod isteyin.',
+			'common.errorKeys.firebasePhoneCodeInvalid' => 'Kod yanlış. Tekrar deneyin.',
+			'common.errorKeys.firebasePhoneFailed' => 'Telefon doğrulaması tamamlanamadı. Lütfen tekrar deneyin.',
+			'common.errorKeys.firebasePhoneAppVerify' => 'Uygulama doğrulaması başarısız. Debug SHA-1 Firebase Console\'a eklenmeli veya Console test numarası kullanılmalı.',
+			'common.errorKeys.firebasePhoneNotEnabled' => 'Telefon ile giriş Firebase Console\'da açık değil.',
 			'common.errorKeys.invalidExpenseResponse' => 'Gider bilgisi okunamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.invalidSiteExpenseResponse' => 'Site gider bilgisi okunamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.unsupportedFileType' => 'Bu dosya türü desteklenmiyor.',
@@ -2696,7 +2717,9 @@ extension on TranslationsTr {
 			'features.auth.errorOccurred' => 'Bir hata oluştu',
 			'features.auth.registrationSuccess' => 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.',
 			'features.auth.loginSuccess' => 'Hoş geldiniz!',
+			'features.auth.loginSuccessNamed' => 'Hoş geldiniz, {name}!',
 			'features.auth.loginSuccessWelcomeBack' => 'Tekrar hoş geldiniz!',
+			'features.auth.loginSuccessWelcomeBackNamed' => 'Tekrar hoş geldiniz, {name}!',
 			'features.auth.appTitle' => 'AidatPanel',
 			'features.auth.appSubtitle' => 'Apartman Yönetim Sistemi',
 			'features.auth.splashConnectionError' => 'Sunucuya bağlanılamadı',
@@ -2805,7 +2828,7 @@ extension on TranslationsTr {
 			'features.auth.onboarding.step3PasswordTitle' => 'Şifrenizi yazın',
 			'features.auth.onboarding.step3RegisterPasswordTitle' => 'Şifrenizi belirleyin',
 			'features.auth.onboarding.step3SecureVerify' => 'Güvenli doğrulama ile hesabınızı koruyoruz.',
-			'features.auth.onboarding.step3DevOtpHint' => 'SMS gelmezse bilgisayarda backend terminalinde otp_dev satırına bakın.',
+			'features.auth.onboarding.step3DevOtpHint' => 'Test numarası kullanıyorsanız Firebase Console\'daki test kodunu girin.',
 			'features.auth.onboarding.step4InviteTitle' => 'Davet Kodunuzu Giriniz',
 			'features.auth.onboarding.step4InviteSubtitle' => 'Yöneticinizin size verdiği kodu buraya girin.',
 			'features.auth.onboarding.step4InviteHint' => 'Davet kodunuzu yönetimden veya yöneticinizden alabilirsiniz.',
@@ -2847,6 +2870,9 @@ extension on TranslationsTr {
 			'features.auth.onboarding.phoneOtpDisabledHint' => 'Telefon ile giriş yakında. Şimdilik e-posta ile devam edebilirsiniz.',
 			'features.auth.onboarding.residentLoginTitle' => 'Sakin Girişi',
 			'features.auth.onboarding.residentLoginSubtitle' => 'Bilgilerinizi girerek devam edin.',
+			'features.auth.onboarding.residentLoginWelcomeTitle' => 'Tekrar hoş geldiniz!',
+			'features.auth.onboarding.residentLoginWelcomeNamedTitle' => 'Tekrar hoş geldiniz, {name}!',
+			'features.auth.onboarding.residentLoginWelcomeSubtitle' => 'Devam etmek için doğrulama kodunu girin',
 			'features.auth.onboarding.residentSendCodeButton' => 'Kod Gönder',
 			'features.auth.onboarding.residentPhoneVerifyNote' => 'Telefon numaranız doğrulanarak kod gönderilecektir.',
 			'features.auth.onboarding.residentOtpSubtitle' => 'Telefonunuza gelen 6 haneli kodu girin.',
@@ -2989,6 +3015,8 @@ extension on TranslationsTr {
 			'features.dekont.reviewApplyAmount' => 'Uygulanacak tutar: {amount}',
 			'features.dekont.reviewRemainingAmount' => 'Onay sonrası kalan: {amount}',
 			'features.dekont.errorReviewStatus' => 'Bu dekont şu an onaylanamaz veya reddedilemez. Biraz sonra tekrar deneyin.',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.errorNoFileSelected' => 'Lütfen önce bir dekont dosyası seçin.',
 			'features.dekont.errorNoDueSelected' => 'Lütfen en az bir aidat seçin.',
 			'features.dekont.fileTooLarge' => 'Dosya en fazla 10 MB olabilir',
@@ -3002,8 +3030,6 @@ extension on TranslationsTr {
 			'features.dekont.breakdownTotal' => 'Toplam',
 			'features.dekont.emptyTitle' => 'Henüz dekont yok',
 			'features.dekont.emptySubtitleResident' => 'Henüz bir dekontunuz bulunmuyor. Yeni dekont eklemek için sağ üst köşedeki yükleme butonunu kullanabilirsiniz.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.emptySubtitleManager' => 'Kullanıcılar tarafından yüklenmiş herhangi bir dekont bulunmamaktadır.',
 			'features.dekont.filterAll' => 'Tümü',
 			'features.dekont.filterPending' => 'İncelemede',
@@ -3399,7 +3425,7 @@ extension on TranslationsTr {
 			'features.reports.shareFailed' => 'Rapor paylaşılamadı. Lütfen tekrar deneyin.',
 			'features.reports.failed' => 'Rapor oluşturulamadı. Lütfen tekrar deneyin.',
 			'features.dashboard.allBuildings' => 'Tüm Binalar',
-			'features.dashboard.properties' => 'Mülkler',
+			'features.dashboard.properties' => 'Binalar',
 			'features.dashboard.selectBuilding' => 'Bina seç',
 			'features.dashboard.searchBuildings' => 'Bina adı veya adres ara',
 			'features.dashboard.buildingPickerTapHint' => 'Dokunarak bina arayın ve seçin',
@@ -3503,6 +3529,8 @@ extension on TranslationsTr {
 			'features.dues.transactions.sourceManual' => 'Elden',
 			'features.dues.transactions.statusApproved' => 'Onaylı',
 			'features.dues.transactions.statusPending' => 'Beklemede',
+			_ => null,
+		} ?? switch (path) {
 			'features.dues.transactions.statusRejected' => 'Reddedildi',
 			'features.dues.transactions.unknownApartment' => 'Daire bilgisi yok',
 			'features.dues.transactions.residentPaidByManual' => 'Aidatı elden ödediniz',
@@ -3516,8 +3544,6 @@ extension on TranslationsTr {
 			'features.welcome.skip' => 'Geç',
 			'features.welcome.next' => 'İleri',
 			'features.welcome.start' => 'Başla',
-			_ => null,
-		} ?? switch (path) {
 			'features.welcome.skipSemantics' => 'Tanıtımı geç',
 			'features.welcome.nextSemantics' => 'Sonraki sayfa',
 			'features.welcome.startSemantics' => 'Tanıtımı bitir ve devam et',

@@ -211,7 +211,15 @@ export async function checkIdentifierService({ identifier, purpose }) {
         role: "RESIDENT",
       },
     });
-    return { exists: Boolean(user) };
+    if (user) {
+      const trimmedName =
+        typeof user.name === "string" ? user.name.trim() : "";
+      return {
+        exists: true,
+        name: trimmedName.length > 0 ? trimmedName : null,
+      };
+    }
+    return { exists: false };
   }
 
   throw new HttpError(400, "Geçersiz istek.");

@@ -1863,6 +1863,30 @@ class Translations$common$errorKeys$en {
 	/// en: 'Could not load subscription information. Please try again.'
 	String get subscriptionFetchFailed => 'Could not load subscription information. Please try again.';
 
+	/// en: 'Please enter a valid phone number.'
+	String get firebasePhoneInvalid => 'Please enter a valid phone number.';
+
+	/// en: 'Too many attempts. Please try again later.'
+	String get firebasePhoneTooMany => 'Too many attempts. Please try again later.';
+
+	/// en: 'Verification timed out. Please request a new code.'
+	String get firebasePhoneTimeout => 'Verification timed out. Please request a new code.';
+
+	/// en: 'Verification session expired. Please request a new code.'
+	String get firebasePhoneSessionExpired => 'Verification session expired. Please request a new code.';
+
+	/// en: 'Incorrect code. Please try again.'
+	String get firebasePhoneCodeInvalid => 'Incorrect code. Please try again.';
+
+	/// en: 'Phone verification failed. Please try again.'
+	String get firebasePhoneFailed => 'Phone verification failed. Please try again.';
+
+	/// en: 'App verification failed. Add the debug SHA-1 in Firebase Console or use a Console test phone number.'
+	String get firebasePhoneAppVerify => 'App verification failed. Add the debug SHA-1 in Firebase Console or use a Console test phone number.';
+
+	/// en: 'Phone sign-in is not enabled in Firebase Console.'
+	String get firebasePhoneNotEnabled => 'Phone sign-in is not enabled in Firebase Console.';
+
 	/// en: 'Could not read expense information. Please try again.'
 	String get invalidExpenseResponse => 'Could not read expense information. Please try again.';
 
@@ -2217,8 +2241,14 @@ class Translations$features$auth$en {
 	/// en: 'Welcome!'
 	String get loginSuccess => 'Welcome!';
 
+	/// en: 'Welcome, {name}!'
+	String get loginSuccessNamed => 'Welcome, {name}!';
+
 	/// en: 'Welcome back!'
 	String get loginSuccessWelcomeBack => 'Welcome back!';
+
+	/// en: 'Welcome back, {name}!'
+	String get loginSuccessWelcomeBackNamed => 'Welcome back, {name}!';
 
 	/// en: 'AidatPanel'
 	String get appTitle => 'AidatPanel';
@@ -3912,8 +3942,8 @@ class Translations$features$dashboard$en {
 	/// en: 'All Buildings'
 	String get allBuildings => 'All Buildings';
 
-	/// en: 'Properties'
-	String get properties => 'Properties';
+	/// en: 'Buildings'
+	String get properties => 'Buildings';
 
 	/// en: 'Select building'
 	String get selectBuilding => 'Select building';
@@ -4655,8 +4685,8 @@ class Translations$features$auth$onboarding$en {
 	/// en: 'We protect your account with secure verification.'
 	String get step3SecureVerify => 'We protect your account with secure verification.';
 
-	/// en: 'If SMS does not arrive, check the backend terminal for the otp_dev line.'
-	String get step3DevOtpHint => 'If SMS does not arrive, check the backend terminal for the otp_dev line.';
+	/// en: 'If using a test number, enter the code from Firebase Console.'
+	String get step3DevOtpHint => 'If using a test number, enter the code from Firebase Console.';
 
 	/// en: 'Enter Your Invite Code'
 	String get step4InviteTitle => 'Enter Your Invite Code';
@@ -4780,6 +4810,15 @@ class Translations$features$auth$onboarding$en {
 
 	/// en: 'Enter your details to continue.'
 	String get residentLoginSubtitle => 'Enter your details to continue.';
+
+	/// en: 'Welcome back!'
+	String get residentLoginWelcomeTitle => 'Welcome back!';
+
+	/// en: 'Welcome back, {name}!'
+	String get residentLoginWelcomeNamedTitle => 'Welcome back, {name}!';
+
+	/// en: 'Enter the verification code to continue'
+	String get residentLoginWelcomeSubtitle => 'Enter the verification code to continue';
 
 	/// en: 'Send Code'
 	String get residentSendCodeButton => 'Send Code';
@@ -5686,6 +5725,14 @@ extension on Translations {
 			'common.errorKeys.siteExpenseUpdateFailed' => 'Could not update the site expense. Please try again.',
 			'common.errorKeys.siteExpenseDeleteFailed' => 'Could not delete the site expense. Please try again.',
 			'common.errorKeys.subscriptionFetchFailed' => 'Could not load subscription information. Please try again.',
+			'common.errorKeys.firebasePhoneInvalid' => 'Please enter a valid phone number.',
+			'common.errorKeys.firebasePhoneTooMany' => 'Too many attempts. Please try again later.',
+			'common.errorKeys.firebasePhoneTimeout' => 'Verification timed out. Please request a new code.',
+			'common.errorKeys.firebasePhoneSessionExpired' => 'Verification session expired. Please request a new code.',
+			'common.errorKeys.firebasePhoneCodeInvalid' => 'Incorrect code. Please try again.',
+			'common.errorKeys.firebasePhoneFailed' => 'Phone verification failed. Please try again.',
+			'common.errorKeys.firebasePhoneAppVerify' => 'App verification failed. Add the debug SHA-1 in Firebase Console or use a Console test phone number.',
+			'common.errorKeys.firebasePhoneNotEnabled' => 'Phone sign-in is not enabled in Firebase Console.',
 			'common.errorKeys.invalidExpenseResponse' => 'Could not read expense information. Please try again.',
 			'common.errorKeys.invalidSiteExpenseResponse' => 'Could not read site expense information. Please try again.',
 			'common.errorKeys.unsupportedFileType' => 'This file type is not supported.',
@@ -5888,7 +5935,9 @@ extension on Translations {
 			'features.auth.errorOccurred' => 'An error occurred',
 			'features.auth.registrationSuccess' => 'Account created. You can now log in.',
 			'features.auth.loginSuccess' => 'Welcome!',
+			'features.auth.loginSuccessNamed' => 'Welcome, {name}!',
 			'features.auth.loginSuccessWelcomeBack' => 'Welcome back!',
+			'features.auth.loginSuccessWelcomeBackNamed' => 'Welcome back, {name}!',
 			'features.auth.appTitle' => 'AidatPanel',
 			'features.auth.appSubtitle' => 'Apartment Management System',
 			'features.auth.splashConnectionError' => 'Could not connect to server',
@@ -5997,7 +6046,7 @@ extension on Translations {
 			'features.auth.onboarding.step3PasswordTitle' => 'Enter your password',
 			'features.auth.onboarding.step3RegisterPasswordTitle' => 'Create your password',
 			'features.auth.onboarding.step3SecureVerify' => 'We protect your account with secure verification.',
-			'features.auth.onboarding.step3DevOtpHint' => 'If SMS does not arrive, check the backend terminal for the otp_dev line.',
+			'features.auth.onboarding.step3DevOtpHint' => 'If using a test number, enter the code from Firebase Console.',
 			'features.auth.onboarding.step4InviteTitle' => 'Enter Your Invite Code',
 			'features.auth.onboarding.step4InviteSubtitle' => 'Enter the code from your manager.',
 			'features.auth.onboarding.step4InviteHint' => 'You can get your invite code from management or your manager.',
@@ -6039,6 +6088,9 @@ extension on Translations {
 			'features.auth.onboarding.phoneOtpDisabledHint' => 'Phone sign-in coming soon. You can use email for now.',
 			'features.auth.onboarding.residentLoginTitle' => 'Resident Sign In',
 			'features.auth.onboarding.residentLoginSubtitle' => 'Enter your details to continue.',
+			'features.auth.onboarding.residentLoginWelcomeTitle' => 'Welcome back!',
+			'features.auth.onboarding.residentLoginWelcomeNamedTitle' => 'Welcome back, {name}!',
+			'features.auth.onboarding.residentLoginWelcomeSubtitle' => 'Enter the verification code to continue',
 			'features.auth.onboarding.residentSendCodeButton' => 'Send Code',
 			'features.auth.onboarding.residentPhoneVerifyNote' => 'A verification code will be sent to your phone number.',
 			'features.auth.onboarding.residentOtpSubtitle' => 'Enter the 6-digit code sent to your phone.',
@@ -6181,6 +6233,8 @@ extension on Translations {
 			'features.dekont.reviewApplyAmount' => 'Amount to apply: {amount}',
 			'features.dekont.reviewRemainingAmount' => 'Remaining after approval: {amount}',
 			'features.dekont.errorReviewStatus' => 'This receipt cannot be approved or rejected right now. Try again later.',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.errorNoFileSelected' => 'Please select a receipt file first.',
 			'features.dekont.errorNoDueSelected' => 'Please select at least one due.',
 			'features.dekont.fileTooLarge' => 'File must be 10 MB or smaller',
@@ -6194,8 +6248,6 @@ extension on Translations {
 			'features.dekont.breakdownTotal' => 'Total',
 			'features.dekont.emptyTitle' => 'No receipts yet',
 			'features.dekont.emptySubtitleResident' => 'You don\'t have any receipts yet. You can use the upload button on the top right to add a new receipt.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.emptySubtitleManager' => 'There are no receipts uploaded by users.',
 			'features.dekont.filterAll' => 'All',
 			'features.dekont.filterPending' => 'Under review',
@@ -6591,7 +6643,7 @@ extension on Translations {
 			'features.reports.shareFailed' => 'Could not share the report. Please try again.',
 			'features.reports.failed' => 'Could not generate the report. Please try again.',
 			'features.dashboard.allBuildings' => 'All Buildings',
-			'features.dashboard.properties' => 'Properties',
+			'features.dashboard.properties' => 'Buildings',
 			'features.dashboard.selectBuilding' => 'Select building',
 			'features.dashboard.searchBuildings' => 'Search by name or address',
 			'features.dashboard.buildingPickerTapHint' => 'Tap to search and select a building',
@@ -6695,6 +6747,8 @@ extension on Translations {
 			'features.dues.transactions.sourceManual' => 'Manual',
 			'features.dues.transactions.statusApproved' => 'Approved',
 			'features.dues.transactions.statusPending' => 'Pending',
+			_ => null,
+		} ?? switch (path) {
 			'features.dues.transactions.statusRejected' => 'Rejected',
 			'features.dues.transactions.unknownApartment' => 'No apartment info',
 			'features.dues.transactions.residentPaidByManual' => 'You paid your due in person',
@@ -6708,8 +6762,6 @@ extension on Translations {
 			'features.welcome.skip' => 'Skip',
 			'features.welcome.next' => 'Next',
 			'features.welcome.start' => 'Get started',
-			_ => null,
-		} ?? switch (path) {
 			'features.welcome.skipSemantics' => 'Skip introduction',
 			'features.welcome.nextSemantics' => 'Next page',
 			'features.welcome.startSemantics' => 'Finish introduction and continue',

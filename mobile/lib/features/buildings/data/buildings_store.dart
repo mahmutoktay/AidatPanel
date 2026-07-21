@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/app_providers.dart';
@@ -65,6 +67,54 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
     }
   }
 
+  /// Yerel listeyi loading flicker olmadan günceller (kardeş store senkronu).
+  void applyLocalList(List<BuildingEntity> buildings) {
+    state = AsyncValue.data(buildings);
+  }
+
+  /// Ana liste mutasyonunu Binalar sekmesinin `standalone` store'una yansıtır.
+  void _mirrorStandalone({
+    BuildingEntity? upsert,
+    String? removeId,
+  }) {
+    if (this is StandaloneBuildingsNotifier) return;
+
+    final standaloneNotifier =
+        ref.read(standaloneBuildingsStoreProvider.notifier);
+    final current =
+        ref.read(standaloneBuildingsStoreProvider).asData?.value;
+    if (current == null) {
+      unawaited(standaloneNotifier.refreshBuildings());
+      return;
+    }
+
+    if (removeId != null) {
+      standaloneNotifier.applyLocalList(
+        current.where((b) => b.id != removeId).toList(growable: false),
+      );
+      return;
+    }
+
+    if (upsert == null) return;
+
+    // Site altı bloklar Binalar sekmesinde gösterilmez.
+    if (upsert.siteId != null) {
+      standaloneNotifier.applyLocalList(
+        current.where((b) => b.id != upsert.id).toList(growable: false),
+      );
+      return;
+    }
+
+    final index = current.indexWhere((b) => b.id == upsert.id);
+    if (index < 0) {
+      standaloneNotifier.applyLocalList([...current, upsert]);
+      return;
+    }
+    final next = List<BuildingEntity>.of(current);
+    next[index] = upsert;
+    standaloneNotifier.applyLocalList(next);
+  }
+
   Future<String?> addBuilding({
     required String name,
     required String address,
@@ -96,6 +146,7 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
       );
       final current = state.hasValue ? (state.value ?? <BuildingEntity>[]) : <BuildingEntity>[];
       state = AsyncValue.data([...current, building]);
+      _mirrorStandalone(upsert: building);
       return building.id;
     } catch (e, st) {
       state = AsyncValue.error(wrapAsyncStateError(e), st);
@@ -111,6 +162,7 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
     state = AsyncValue.data(
       current.where((b) => b.id != buildingId).toList(),
     );
+    _mirrorStandalone(removeId: buildingId);
   }
 
   Future<void> updateBuilding({
@@ -129,6 +181,7 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
     state = AsyncValue.data(
       current.map((b) => b.id == id ? updated : b).toList(),
     );
+    _mirrorStandalone(upsert: updated);
   }
 
   Future<void> patchBuildingCollection({
@@ -147,6 +200,7 @@ class BuildingsNotifier extends AsyncNotifier<List<BuildingEntity>> {
     state = AsyncValue.data(
       current.map((b) => b.id == id ? updated : b).toList(),
     );
+    _mirrorStandalone(upsert: updated);
   }
 }
 

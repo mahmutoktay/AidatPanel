@@ -8,6 +8,7 @@ import '../../features/dekont/presentation/providers/dekont_provider.dart';
 import '../../features/dues/presentation/providers/dues_provider.dart';
 import '../../features/expenses/presentation/providers/expenses_provider.dart';
 import '../../features/notifications/presentation/providers/notifications_provider.dart';
+import '../../features/sites/data/sites_store.dart';
 import '../../features/subscription/presentation/providers/subscription_provider.dart';
 import '../../features/tickets/presentation/providers/tickets_provider.dart';
 import '../../features/dekont/presentation/providers/share_intent_provider.dart';
@@ -23,6 +24,9 @@ void invalidateAllCachedProviders(WidgetRef ref) {
   ref.invalidate(buildingsStoreProvider);
   ref.invalidate(standaloneBuildingsStoreProvider);
   ref.invalidate(collectionPresetsProvider);
+
+  // Siteler
+  ref.invalidate(sitesStoreProvider);
 
   // Aidatlar
   ref.invalidate(duesNotifierProvider);

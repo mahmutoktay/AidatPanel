@@ -193,8 +193,19 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
   void _goDashboard(UserEntity user) {
     final isReturning = ref.read(authStateProvider).isReturningUser;
     final authT = context.t.features.auth;
+    final displayName = user.name.trim();
+    final String toastMessage;
+    if (displayName.isNotEmpty) {
+      toastMessage = isReturning
+          ? authT.loginSuccessWelcomeBackNamed
+              .replaceAll('{name}', displayName)
+          : authT.loginSuccessNamed.replaceAll('{name}', displayName);
+    } else {
+      toastMessage =
+          isReturning ? authT.loginSuccessWelcomeBack : authT.loginSuccess;
+    }
     ref.read(toastProvider.notifier).show(
-          isReturning ? authT.loginSuccessWelcomeBack : authT.loginSuccess,
+          toastMessage,
           type: ToastType.success,
           duration: const Duration(seconds: 4),
         );
@@ -333,7 +344,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       final lookup = await auth.checkManagerIdentifierExists(raw);
       if (lookup == null) return;
       if (lookup.exists) {
-        onboarding.applyManagerLoginFlow(lookedUpManagerName: lookup.name);
+        onboarding.applyManagerLoginFlow(lookedUpDisplayName: lookup.name);
       } else {
         onboarding.applyManagerRegisterFlow();
       }
@@ -413,20 +424,16 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       final phone = PhoneUtils.normalizeTrPhone(raw)!;
       onboarding.setContactValue(phone);
       try {
-        final exists = await auth.checkResidentPhoneExists(phone);
-        if (exists) {
-          onboarding.applyResidentLoginFlow();
-          await auth.sendOtp(phone: phone, purpose: 'resident_login');
+        final lookup = await auth.checkResidentPhoneExists(phone);
+        if (lookup == null) return;
+        if (lookup.exists) {
+          onboarding.applyResidentLoginFlow(
+            lookedUpDisplayName: lookup.name,
+          );
+          await auth.startResidentFirebasePhone(phone);
         } else {
           onboarding.applyResidentJoinFlow();
-          final invite = ref.read(authOnboardingProvider).inviteCode;
-          await auth.sendOtp(
-            phone: phone,
-            purpose: 'resident_join',
-            payload: invite != null && invite.isNotEmpty
-                ? {'inviteCode': invite}
-                : null,
-          );
+          await auth.startResidentFirebasePhone(phone);
         }
         onboarding.markOtpSent();
         _startOtpTimer();
@@ -498,8 +505,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       }
       if (_isResidentJoin(ob)) {
         try {
-          final requireName = await auth.verifyResidentJoinOtp(
-            phone: phone!,
+          final requireName = await auth.verifyResidentJoinFirebaseOtp(
             code: code,
             inviteCode: ob.inviteCode,
           );
@@ -512,11 +518,8 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       }
       if (_isResidentLogin(ob)) {
         try {
-          final user = await auth.verifyOtpAndAuthenticate(
-            phone: phone,
-            email: email,
+          final user = await auth.verifyResidentLoginFirebaseOtp(
             code: code,
-            purpose: 'resident_login',
             ref: ref,
           );
           _goDashboard(user);
@@ -1013,7 +1016,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
 
       case AuthOnboardingStepId.credentials:
         final isRegister = ob.flow == AuthOnboardingFlow.register;
-        final lookedUpName = ob.lookedUpManagerName?.trim();
+        final lookedUpName = ob.lookedUpDisplayName?.trim();
         final hasLookedUpName =
             !isRegister && lookedUpName != null && lookedUpName.isNotEmpty;
         final String loginTitle;
@@ -1193,14 +1196,29 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       case AuthOnboardingStepId.verification:
         if (_usesOtpChannel(ob)) {
           if (_isResidentOtpFlow(ob)) {
-            final otpSubtitle = ob.phone != null
-                ? tOb.step3OtpSubtitlePhone.replaceAll(
-                    '{phone}',
-                    PhoneUtils.maskDisplay(ob.phone!),
-                  )
-                : tOb.residentOtpSubtitle;
+            final lookedUpName = ob.lookedUpDisplayName?.trim();
+            final isReturningLogin = _isResidentLogin(ob);
+            final hasLookedUpName =
+                lookedUpName != null && lookedUpName.isNotEmpty;
+            final String otpTitle;
+            final String otpSubtitle;
+            if (isReturningLogin) {
+              otpTitle = hasLookedUpName
+                  ? tOb.residentLoginWelcomeNamedTitle
+                      .replaceAll('{name}', lookedUpName)
+                  : tOb.residentLoginWelcomeTitle;
+              otpSubtitle = tOb.residentLoginWelcomeSubtitle;
+            } else {
+              otpTitle = tOb.step3OtpTitle;
+              otpSubtitle = ob.phone != null
+                  ? tOb.step3OtpSubtitlePhone.replaceAll(
+                      '{phone}',
+                      PhoneUtils.maskDisplay(ob.phone!),
+                    )
+                  : tOb.residentOtpSubtitle;
+            }
             return OnboardingStepScaffold(
-              title: tOb.step3OtpTitle,
+              title: otpTitle,
               subtitle: otpSubtitle,
               body: Column(
                 children: [
@@ -1623,16 +1641,22 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
     final email = ob.email;
     if (phone == null && email == null) return;
     try {
-      await ref.read(authStateProvider.notifier).sendOtp(
-            phone: phone,
-            email: email,
-            purpose: _otpPurpose(ob),
-            payload: _isResidentJoin(ob) &&
-                    ob.inviteCode != null &&
-                    ob.inviteCode!.isNotEmpty
-                ? {'inviteCode': ob.inviteCode}
-                : null,
-          );
+      if (_isResidentOtpFlow(ob) && phone != null) {
+        await ref
+            .read(authStateProvider.notifier)
+            .resendResidentFirebasePhone(phone);
+      } else {
+        await ref.read(authStateProvider.notifier).sendOtp(
+              phone: phone,
+              email: email,
+              purpose: _otpPurpose(ob),
+              payload: _isResidentJoin(ob) &&
+                      ob.inviteCode != null &&
+                      ob.inviteCode!.isNotEmpty
+                  ? {'inviteCode': ob.inviteCode}
+                  : null,
+            );
+      }
       onboarding.markOtpSent();
       _startOtpTimer();
     } catch (_) {}

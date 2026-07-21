@@ -1,79 +1,20 @@
-# AidatPanel ProGuard Rules
-# NOT: release buildType'ta isMinifyEnabled=false iken bu dosya uygulanmaz.
-# Minify açılınca PluginRegistrant reflection + flutter_local_notifications için zorunlu.
+# AidatPanel ProGuard / R8 rules (release minify + shrink)
+#
+# İlkeler:
+# - Blanket keep (io.flutter.**, com.google.firebase.**, vb.) YOK — skor düşürür.
+# - Dart-only (Riverpod, freezed, Dio) kuralları YOK — Android bytecode'da karşılığı yok.
+# - PluginRegistrant.kt içindeki Class.forName(...) hedefleri sınıf + public ctor ile korunur.
+# - Kütüphane AAR consumer-rules / proguard-rules (jni, purchases_flutter, file_picker) zaten birleşir.
 
-# Flutter
--keep class io.flutter.app.** { *; }
--keep class io.flutter.plugin.** { *; }
--keep class io.flutter.util.** { *; }
--keep class io.flutter.view.** { *; }
--keep class io.flutter.** { *; }
--keep class io.flutter.plugins.** { *; }
+# --- Crash okunabilirliği (obfuscation skorunu düşürmez) ---
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
 
-# Dio ve Network
--keep class com.google.gson.** { *; }
--keep class retrofit2.** { *; }
--dontwarn retrofit2.**
--keepattributes Signature
--keepattributes Exceptions
+# Play R8: koruma kuralları dışındaki sınıfları üst pakete taşıyarak DEX'i sıkıştır.
+-repackageclasses
 
-# JSON Serialization (freezed, json_serializable)
--keepclassmembers class * {
-  @com.google.gson.annotations.SerializedName <fields>;
-}
-
-# Firebase
--keep class com.google.firebase.** { *; }
--dontwarn com.google.firebase.**
-
-# flutter_local_notifications (arka plan isolate / release)
--keep class com.dexterous.flutterlocalnotifications.** { *; }
-
-# Secure Storage
--keep class com.it_nomads.fluttersecurestorage.** { *; }
-
-# package_info_plus / share_plus (PluginRegistrant reflection — R8 release)
--keep class dev.fluttercommunity.plus.packageinfo.PackageInfoPlugin { *; }
--keep class dev.fluttercommunity.plus.share.SharePlusPlugin { *; }
--keep class dev.fluttercommunity.plus.packageinfo.** { *; }
--keep class dev.fluttercommunity.plus.share.** { *; }
-
-# JNI (path_provider_android vb.)
--keep class com.github.dart_lang.jni.** { *; }
--keep class com.github.dart_lang.jni_flutter.** { *; }
-
-# pdfx (dekont PDF önizleme)
--keep class io.scer.pdfx.** { *; }
-
-# Riverpod
--keep class flutter_riverpod.** { *; }
--keepclassmembers class * {
-    flutter_riverpod.** *;
-}
-
-# RevenueCat (Purchases Flutter)
--keep class com.revenuecat.purchases.** { *; }
--keep class com.revenuecat.purchases_flutter.** { *; }
-
-# Dio Cookie Manager (varsa)
--dontwarn okhttp3.**
--dontwarn okio.**
--dontwarn javax.annotation.**
-
-# Generics
--keepattributes Signature
--keepattributes *Annotation*
--keepattributes EnclosingMethod
--keepattributes InnerClasses
--keepattributes SourceFile
--keepattributes LineNumberTable
-
-# Prevent R8 from leaving data object members always null
--keepclassmembers,allowobfuscation class * {
-  @com.google.gson.annotations.SerializedName <fields>;
-}
-
-# Flutter Play Core (deferred components) - R8 fix
+# --- Flutter Play Core (deferred components; runtime'da yoksa dontwarn yeter) ---
 -dontwarn com.google.android.play.core.splitcompat.SplitCompatApplication
 -dontwarn com.google.android.play.core.splitinstall.SplitInstallException
 -dontwarn com.google.android.play.core.splitinstall.SplitInstallManager
@@ -86,6 +27,22 @@
 -dontwarn com.google.android.play.core.tasks.OnSuccessListener
 -dontwarn com.google.android.play.core.tasks.Task
 
-# Keep Flutter Play Store components
--keep class io.flutter.embedding.android.FlutterPlayStoreSplitApplication { *; }
--keep class io.flutter.embedding.engine.deferredcomponents.PlayStoreDeferredComponentManager { *; }
+# --- PluginRegistrant.kt: reflection ile yüklenen eklenti sınıfları ---
+# Yalnızca sınıf adı + public no-arg ctor; paket-geneli keep yok.
+-keep class dev.fluttercommunity.plus.packageinfo.PackageInfoPlugin { <init>(); }
+-keep class com.kasem.receive_sharing_intent.ReceiveSharingIntentPlugin { <init>(); }
+-keep class dev.fluttercommunity.plus.share.SharePlusPlugin { <init>(); }
+-keep class studio.midoridesign.gal.GalPlugin { <init>(); }
+-keep class com.llfbandit.app_links.AppLinksPlugin { <init>(); }
+-keep class com.revenuecat.purchases_flutter.PurchasesFlutterPlugin { <init>(); }
+-keep class io.flutter.plugins.firebase.crashlytics.FlutterFirebaseCrashlyticsPlugin { <init>(); }
+-keep class io.flutter.plugins.firebase.analytics.FlutterFirebaseAnalyticsPlugin { <init>(); }
+-keep class io.flutter.plugins.firebase.auth.FlutterFirebaseAuthPlugin { <init>(); }
+-keep class dev.fluttercommunity.plus.device_info.DeviceInfoPlusPlugin { <init>(); }
+-keep class com.tekartik.sqflite.SqflitePlugin { <init>(); }
+-keep class io.flutter.plugins.urllauncher.UrlLauncherPlugin { <init>(); }
+
+# flutter_local_notifications — arka plan/receiver (consumer rules yoksa yedek)
+-keep class com.dexterous.flutterlocalnotifications.FlutterLocalNotificationsPlugin { *; }
+-keep class com.dexterous.flutterlocalnotifications.**Receiver { *; }
+-keep class com.dexterous.flutterlocalnotifications.**Service { *; }

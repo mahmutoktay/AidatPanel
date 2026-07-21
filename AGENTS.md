@@ -2,7 +2,7 @@
 
 *Target LLM: Autonomous AI Agent (Implementation-capable)*
 *Source Material: `FAZ_DURUMU.md` (tek kaynak), `AIDATPANEL.md`, `backend/README.md`, Codebase Analysis*
-*Son güncelleme: 2026-07-14*
+*Son güncelleme: 2026-07-22*
 
 ---
 
@@ -63,7 +63,7 @@ Aşağıdaki değişikliklerden **herhangi biri** yapıldıysa ilgili dokümanla
 - **Abonelik Sistemi:** RevenueCat ile yönetilen aylık/yıllık abonelik. `aidatpanel_monthly` (₺99/ay) ve `aidatpanel_annual` (₺799/yıl). Kota: **toplam bina sayısı** (site altı bloklar dahil).
 - **Topoloji:**
   - **Backend:** Node.js + Express RESTful API + WebSocket Realtime servisi.
-  - **Mobile:** Flutter uygulaması (iOS & Android). Güncel sürüm: `0.6.8+2000000009` (`pubspec.yaml`).
+ - **Mobile:** Flutter uygulaması (iOS & Android). Güncel sürüm: `0.6.11+2000000014` (`pubspec.yaml`).
   - **Web:** Statik landing page (yardımcı araç, uygulamanın ana parçası değil).
   - **İletişim:** REST (JSON `{success, message, data}`) + WebSocket (`wss://api.aidatpanel.com/api/v1/realtime?token=JWT`) + FCM Push Notifications.
   - **Domain:** `aidatpanel.com` (Cloudflare). API: `api.aidatpanel.com` (Contabo VPS / CloudPanel reverse proxy, PM2 ile yönetiliyor).
@@ -100,7 +100,7 @@ Aşağıdaki değişikliklerden **herhangi biri** yapıldıysa ilgili dokümanla
 | Network | dio, web_socket_channel | dio ^5.4.0, ws_channel ^3.0.2 | HTTP/HTTPS + WebSocket istemcisi |
 | Güvenlik | flutter_secure_storage | ^10.3.1 | JWT token saklama (SecureStorage, SharedPreferences yasak) |
 | i18n | slang + slang_flutter | ^4.15.0 | Type-safe TR/EN çeviri sistemi (Slang JSON) |
-| Firebase | firebase_core, firebase_messaging, firebase_analytics, firebase_crashlytics | firebase_core ^4.10.0, messaging ^16.3.0, analytics ^12.0.0, crashlytics ^5.0.0 | FCM push, analytics, crash reporting |
+| Firebase | firebase_core, **firebase_auth** (sakin Phone Auth), firebase_messaging, firebase_analytics, firebase_crashlytics | firebase_core ^4.10.0, auth ^6.5.6, messaging ^16.3.0, analytics ^12.0.0, crashlytics ^5.0.0 | FCM push, sakin telefon doğrulama, analytics, crash reporting |
 | Bildirim (yerel) | flutter_local_notifications, permission_handler | ^22.0.1, ^12.0.3 | Ön plan bildirim + izin yönetimi |
 | Abonelik | purchases_flutter | ^10.2.3 | RevenueCat SDK entegrasyonu |
 | UI/Utils | equatable, freezed, json_serializable, google_fonts, fl_chart, pdfx, cached_network_image, share_plus, image_picker, file_picker, intl, path_provider, crypto, receive_sharing_intent, gal, image, url_launcher, package_info_plus, device_info_plus | — | Entity modeling, grafik, PDF, dosya işleme, dekont paylaşımı |
@@ -160,7 +160,7 @@ mobile/lib/
 │   └── notifications/         # FCM + WebSocket + Polling coordinator
 ├── l10n/                      # Slang TR/EN i18n JSON dosyaları
 ├── features/                  # Feature-first yapı (referans: auth/)
-│   ├── auth/                  # Giriş, kayıt, OTP, onboarding (sakin: telefon→OTP→login|isim+davet; deep link `aidatpanel://join?code=`)
+│   ├── auth/                  # Giriş, kayıt, OTP, onboarding (sakin: telefon→Firebase Phone Auth→login|isim+davet; deep link `aidatpanel://join?code=`)
 │   ├── dashboard/             # Manager + Resident dashboard; ManagerPropertiesTab (Siteler|Binalar)
 │   ├── sites/                 # Site CRUD, site gideri, site raporu (FAZ 8)
 │   ├── buildings/             # Bina CRUD, davet kodu, IBAN
@@ -312,7 +312,7 @@ Abonelik kotası: buildingQuotaService → toplam bina sayısı (tekil + site al
 | RevenueCat | iOS/Android in-app subscription, receipt validation, webhook |
 | Firebase Admin SDK | FCM push notification gönderimi |
 | Resend | İşlemsel e-postalar (şifre sıfırlama) |
-| Twilio / NetGsm | SMS ve WhatsApp bildirimleri |
+| Twilio / NetGsm | Şifre sıfırlama SMS (sakin telefon OTP Firebase Auth Phone) |
 | Cloudflare | DNS + CDN (aidatpanel.com) |
 | CloudPanel | Reverse proxy + SSL (api.aidatpanel.com → VPS port 4200) |
 | Contabo VPS | Sunucu alanı (`aidapanel-api` PM2 süreci) |
@@ -453,6 +453,8 @@ Backend'den dönen her yanıt şu formatta olmalıdır:
 3. Çıktı: mobile/build/app/outputs/bundle/prodRelease/app-prod-release.aab
 - NOT: Sürüm adı (ör. 0.6.x) sadece kullanıcı açıkça isterse değişir; build code her AAB'de artar.
 - RevenueCat anahtarı olmadan satın alma devre dışı kalır.
+- prodRelease: AGP 8.13.2; R8 minify + optimized resource shrink + class repackaging açık (`proguard-rules.pro`); mapping → build/app/outputs/mapping/prodRelease/mapping.txt (Crashlytics upload görevi + Play deobfuscation).
+- Dart obfuscation ayrı/opsiyonel: --obfuscate --split-debug-info=build/debug-info
 ```
 
 ### 6.7 Veritabanı Şema Kısıtları

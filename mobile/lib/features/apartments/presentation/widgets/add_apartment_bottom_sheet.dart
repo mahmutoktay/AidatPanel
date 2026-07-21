@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/providers/list_cache_refresh.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -60,6 +61,7 @@ class _AddApartmentBottomSheetState extends ConsumerState<AddApartmentBottomShee
       await ref
           .read(apartmentsStoreProvider(widget.buildingId).notifier)
           .addApartment(number: number, floor: _floor);
+      await invalidateApartmentOccupancyCaches(ref);
       if (!mounted) return;
       Navigator.of(context).pop();
       ref.read(toastProvider.notifier).show(

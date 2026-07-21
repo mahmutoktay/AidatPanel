@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/providers/list_cache_refresh.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -12,7 +13,6 @@ import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/ticket_entity.dart';
-import '../providers/manager_open_tickets_count_provider.dart';
 import '../providers/tickets_provider.dart';
 import '../widgets/ticket_detail_content_card.dart';
 import '../widgets/ticket_detail_manager_actions.dart';
@@ -52,7 +52,7 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
             status: toStatus,
           );
       ref.invalidate(ticketDetailProvider(ticketId));
-      ref.invalidate(managerOpenTicketsCountProvider);
+      invalidateTicketsRelatedCaches(ref);
 
       if (!mounted) return;
 

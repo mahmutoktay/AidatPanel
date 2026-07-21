@@ -18,6 +18,8 @@ class FcmScope extends ConsumerStatefulWidget {
 }
 
 class _FcmScopeState extends ConsumerState<FcmScope> with WidgetsBindingObserver {
+  NotificationDeliveryCoordinator? _coordinator;
+
   @override
   void initState() {
     super.initState();
@@ -28,14 +30,18 @@ class _FcmScopeState extends ConsumerState<FcmScope> with WidgetsBindingObserver
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    ref.read(notificationDeliveryCoordinatorProvider).detach();
+    // dispose içinde ref.read güvenli değil — coordinator alanı kullan.
+    _coordinator?.detach();
+    _coordinator = null;
     super.dispose();
   }
 
   Future<void> _bootstrap() async {
     final coordinator = ref.read(notificationDeliveryCoordinatorProvider);
+    _coordinator = coordinator;
     coordinator.attach(ref);
     await coordinator.start();
+    if (!mounted) return;
     if (ref.read(authStateProvider).isAuthenticated) {
       await coordinator.onAuthenticated(force: true);
     }
@@ -67,6 +73,7 @@ class _FcmScopeState extends ConsumerState<FcmScope> with WidgetsBindingObserver
   Widget build(BuildContext context) {
     ref.listen<AuthState>(authStateProvider, (previous, next) {
       final coordinator = ref.read(notificationDeliveryCoordinatorProvider);
+      _coordinator = coordinator;
       if (next.isAuthenticated && next.user != null) {
         final wasAuth = previous?.isAuthenticated ?? false;
         if (!wasAuth || previous?.user?.id != next.user?.id) {

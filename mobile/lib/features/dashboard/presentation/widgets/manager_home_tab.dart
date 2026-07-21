@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/providers/manager_home_caches.dart';
 import '../../../../core/utils/app_intl_locale.dart';
 import '../../../../core/utils/app_currency_format.dart';
+import '../../../buildings/presentation/providers/buildings_cache_refresh.dart';
 import '../../../dues/presentation/utils/dues_ui_helpers.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/notifications/notification_toast.dart';
@@ -226,30 +228,32 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
               if (totalErrorCount > 0) const SizedBox(height: AppSizes.spacingS),
               if (!hasProperties)
                 _NoBuildingsEmptyState(
-                  onAddBuilding: () =>
-                      context.push('/manager-dashboard/add-building'),
+                  onAddBuilding: () => _openAndRefreshBuildings(
+                    '/manager-dashboard/add-building',
+                  ),
                   onAddSite: () =>
-                      context.push('/manager-dashboard/add-site'),
+                      _openAndRefreshBuildings('/manager-dashboard/add-site'),
                 )
               else if (emptySiteId != null)
                 _NoBlocksInviteCard(
-                  onAddBuilding: () => context.push(
+                  onAddBuilding: () => _openAndRefreshBuildings(
                     '/manager-dashboard/sites/$emptySiteId/add-building',
                   ),
                 )
               else if (_inviteNudgeBuilding(buildings, filterScope)
                   case final BuildingEntity emptyBuilding)
                 _NoResidentsInviteCard(
-                  onInvite: () => context.push(
+                  onInvite: () => _openAndRefreshBuildings(
                     '/manager-dashboard/buildings/${emptyBuilding.id}',
                   ),
                 )
               else if (buildings.isEmpty)
                 _NoBuildingsEmptyState(
-                  onAddBuilding: () =>
-                      context.push('/manager-dashboard/add-building'),
+                  onAddBuilding: () => _openAndRefreshBuildings(
+                    '/manager-dashboard/add-building',
+                  ),
                   onAddSite: () =>
-                      context.push('/manager-dashboard/add-site'),
+                      _openAndRefreshBuildings('/manager-dashboard/add-site'),
                 )
               else
                 ManagerDuesSummaryCard(
@@ -313,8 +317,11 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
     );
   }
 
-  void _openOverdueDuesList(DashboardFilterScope scope) {
-    context.push(overdueApartmentsPath(scope));
+  Future<void> _openOverdueDuesList(DashboardFilterScope scope) async {
+    await context.push(overdueApartmentsPath(scope));
+    if (!mounted) return;
+    ref.invalidate(allBuildingsDuesProvider);
+    invalidateManagerHomeCaches(ref);
   }
 
   Future<void> _openOverdueDueDetail(
@@ -336,12 +343,22 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
       currencySymbol: currencySymbol,
       onCollectPayment: null,
     );
+    if (!mounted) return;
+    ref.invalidate(allBuildingsDuesProvider);
+  }
+
+  Future<void> _openAndRefreshBuildings(String route) async {
+    await context.push(route);
+    if (!mounted) return;
+    await syncManagerBuildingLists(ref);
+    invalidateManagerHomeCaches(ref);
   }
 
   Future<void> _openAndInvalidate(String route) async {
     await context.push(route);
     if (!mounted) return;
     final filterScope = ref.read(dashboardFilterScopeProvider);
+    invalidateManagerHomeCaches(ref);
     ref.invalidate(managerTicketStatusStatsForScopeProvider(filterScope));
     ref.invalidate(managerMonthExpensesCountForScopeProvider(filterScope));
     ref.invalidate(managerMonthExpenseTotalForScopeProvider(filterScope));

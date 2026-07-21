@@ -80,6 +80,7 @@ class _EditSiteBottomSheetState extends ConsumerState<EditSiteBottomSheet> {
             address: payloadAddress,
             city: payloadCity,
           );
+      ref.invalidate(siteDetailProvider(original.id));
       if (!mounted) return;
       Navigator.of(context).pop();
       ref.read(toastProvider.notifier).show(

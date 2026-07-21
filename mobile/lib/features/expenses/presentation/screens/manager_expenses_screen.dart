@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/providers/list_cache_refresh.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -110,7 +111,10 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
       '/manager-dashboard/expenses/form?buildingId=${Uri.encodeComponent(id)}',
       extra: expense,
     );
-    if (ok == true && mounted) unawaited(_loadCurrentBuilding());
+    if (ok == true && mounted) {
+      unawaited(invalidateExpensesRelatedCaches(ref));
+      unawaited(_loadCurrentBuilding());
+    }
   }
 
   Future<void> _confirmDelete(ExpenseEntity expense) async {
@@ -141,6 +145,7 @@ class _ManagerExpensesScreenState extends ConsumerState<ManagerExpensesScreen> {
         .delete(expense.id);
     if (!mounted) return;
     if (ok) {
+      unawaited(invalidateExpensesRelatedCaches(ref));
       ref
           .read(toastProvider.notifier)
           .show(t.deleteSuccess, type: ToastType.success);

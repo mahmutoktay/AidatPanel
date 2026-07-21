@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/providers/list_cache_refresh.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
@@ -68,6 +69,7 @@ class _DeleteBuildingDialogState extends ConsumerState<DeleteBuildingDialog> {
       await ref.read(buildingsStoreProvider.notifier).removeBuilding(
             widget.building.id,
           );
+      await invalidatePropertyInventoryCaches(ref);
       if (!mounted) return;
       Navigator.of(context).pop(true);
       ref.read(toastProvider.notifier).show(

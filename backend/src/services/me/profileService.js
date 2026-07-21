@@ -44,14 +44,21 @@ export async function updateProfileService(
 
   if (isResident) {
     if (isPhoneChanged) {
-      if (!otpCode) {
-        throw new HttpError(
-          400,
-          "Telefon numaranızı değiştirmek için SMS doğrulama kodu gereklidir."
-        );
-      }
       await assertPhoneAvailableForUser(userId, phone, user.role);
-      await consumePhoneChangeOtp({ phone: newPhone, code: otpCode });
+      const consumed = await consumePhoneChangeOtp({
+        phone: newPhone,
+        code: otpCode,
+      });
+      if (consumed.firebaseUid) {
+        try {
+          await prisma.user.update({
+            where: { id: userId },
+            data: { firebaseUid: consumed.firebaseUid },
+          });
+        } catch {
+          // Unique çakışmasında telefon güncellemesi yine de devam eder.
+        }
+      }
     }
   } else {
     await assertCurrentPasswordForSensitiveChange(user, {

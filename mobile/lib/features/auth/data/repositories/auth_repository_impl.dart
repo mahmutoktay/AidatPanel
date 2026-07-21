@@ -12,6 +12,7 @@ import '../../domain/entities/manager_identifier_lookup.dart';
 import '../../domain/entities/forgot_password_result.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/login_request.dart';
+import '../models/login_response.dart';
 import '../models/register_request.dart';
 import '../models/join_request.dart';
 import '../models/user_data.dart';
@@ -23,7 +24,7 @@ abstract class AuthRepository {
     required String identifier,
     required String purpose,
   });
-  Future<bool> checkResidentPhoneExists(String phone);
+  Future<ManagerIdentifierLookup> checkResidentPhoneExists(String phone);
   Future<ManagerIdentifierLookup> checkManagerIdentifierExists(
     String identifier,
   );
@@ -85,6 +86,22 @@ abstract class AuthRepository {
     String? name,
     String? password,
     String? inviteCode,
+  });
+
+  /// Firebase idToken ile sakin giriş — JWT + user döner.
+  Future<UserEntity> verifyFirebasePhoneLogin({
+    required String idToken,
+  });
+
+  /// Firebase idToken ile sakin join OTP adımı — `requireName` true döner.
+  Future<bool> verifyFirebasePhoneJoin({
+    required String idToken,
+    String? inviteCode,
+  });
+
+  /// Firebase idToken ile profil telefon değişimi doğrulaması.
+  Future<void> verifyFirebasePhoneChange({
+    required String idToken,
   });
 
   Future<String> validateInvite(String inviteCode);
@@ -208,7 +225,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<bool> checkResidentPhoneExists(String phone) async {
+  Future<ManagerIdentifierLookup> checkResidentPhoneExists(String phone) async {
     try {
       return await _remoteDataSource.checkResidentPhoneExists(phone);
     } on ApiException {
@@ -480,6 +497,66 @@ class AuthRepositoryImpl implements AuthRepository {
       final user = response.user.toEntity();
       await _saveLoginHintForUser(user);
       return user;
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'otp_verify_failed');
+    }
+  }
+
+  @override
+  Future<UserEntity> verifyFirebasePhoneLogin({
+    required String idToken,
+  }) async {
+    try {
+      final data = await _remoteDataSource.verifyFirebasePhone(
+        idToken: idToken,
+        purpose: 'resident_login',
+      );
+      final response = LoginResponse.fromJson(data);
+      await _persistTokens(response.accessToken, response.refreshToken);
+      await _secureStorage.saveUser(jsonEncode(response.user.toJson()));
+      final user = response.user.toEntity();
+      await _saveLoginHintForUser(user);
+      return user;
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'otp_verify_failed');
+    }
+  }
+
+  @override
+  Future<bool> verifyFirebasePhoneJoin({
+    required String idToken,
+    String? inviteCode,
+  }) async {
+    try {
+      final data = await _remoteDataSource.verifyFirebasePhone(
+        idToken: idToken,
+        purpose: 'resident_join',
+        inviteCode: inviteCode,
+      );
+      return data['requireName'] == true;
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'otp_verify_failed');
+    }
+  }
+
+  @override
+  Future<void> verifyFirebasePhoneChange({
+    required String idToken,
+  }) async {
+    try {
+      final data = await _remoteDataSource.verifyFirebasePhone(
+        idToken: idToken,
+        purpose: 'resident_phone_change',
+      );
+      if (data['verified'] != true) {
+        throw ApiException(message: 'otp_verify_failed');
+      }
     } on ApiException {
       rethrow;
     } catch (_) {

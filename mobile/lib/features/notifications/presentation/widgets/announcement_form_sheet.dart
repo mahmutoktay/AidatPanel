@@ -15,6 +15,7 @@ import '../../../buildings/data/buildings_store.dart';
 import '../../../buildings/domain/entities/building_entity.dart';
 import '../../../dashboard/presentation/providers/dashboard_filter_scope_provider.dart';
 import '../../../sites/data/sites_store.dart';
+import '../../../dashboard/presentation/providers/manager_home_counts_provider.dart';
 import '../providers/notifications_provider.dart';
 
 /// Yönetici duyuru formu → `POST /buildings/:id/announcements` (B5).
@@ -280,6 +281,7 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
     setState(() => _submitting = false);
 
     if (okCount == targetIds.length) {
+      ref.invalidate(managerMonthAnnouncementsCountProvider);
       ref.read(toastProvider.notifier).show(
             _allBuildings && targetIds.length > 1
                 ? t.sendSuccessAll
@@ -291,6 +293,7 @@ class _AnnouncementFormSheetState extends ConsumerState<AnnouncementFormSheet> {
     }
 
     if (okCount > 0) {
+      ref.invalidate(managerMonthAnnouncementsCountProvider);
       ref.read(toastProvider.notifier).show(
             t.sendPartialFailed
                 .replaceAll('{ok}', '$okCount')

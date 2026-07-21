@@ -102,10 +102,11 @@ class _DueTransactionsScreenState extends ConsumerState<DueTransactionsScreen> {
     unawaited(_loadForCurrentScope());
   }
 
-  void _openTransaction(DueTransactionEntity transaction) {
-    if (transaction.dekontId != null) {
-      context.push('/dekonts/${transaction.dekontId}');
-    }
+  Future<void> _openTransaction(DueTransactionEntity transaction) async {
+    if (transaction.dekontId == null) return;
+    await context.push('/dekonts/${transaction.dekontId}');
+    if (!mounted) return;
+    await _loadForCurrentScope();
   }
 
   @override

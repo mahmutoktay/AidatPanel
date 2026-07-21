@@ -264,6 +264,22 @@ String? _mapErrorKey(Translations t, String raw) {
       return e.siteExpenseDeleteFailed;
     case 'subscription_fetch_failed':
       return e.subscriptionFetchFailed;
+    case 'firebase_phone_invalid':
+      return e.firebasePhoneInvalid;
+    case 'firebase_phone_too_many':
+      return e.firebasePhoneTooMany;
+    case 'firebase_phone_timeout':
+      return e.firebasePhoneTimeout;
+    case 'firebase_phone_session_expired':
+      return e.firebasePhoneSessionExpired;
+    case 'firebase_phone_code_invalid':
+      return e.firebasePhoneCodeInvalid;
+    case 'firebase_phone_failed':
+      return e.firebasePhoneFailed;
+    case 'firebase_phone_app_verify':
+      return e.firebasePhoneAppVerify;
+    case 'firebase_phone_not_enabled':
+      return e.firebasePhoneNotEnabled;
     case 'invalid_expense_response':
       return e.invalidExpenseResponse;
     case 'invalid_site_expense_response':

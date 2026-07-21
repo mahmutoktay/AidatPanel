@@ -5,6 +5,7 @@ import '../../../../core/subscription/revenue_cat_service.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../shared/providers/navigation_provider.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
+import '../../data/datasources/firebase_phone_auth_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart'
     show AuthRepository, AuthRepositoryImpl;
 import '../../domain/entities/user_entity.dart';
@@ -19,6 +20,11 @@ export '../../../../core/providers/app_providers.dart'
 
 final authRemoteDataSourceProvider = Provider((ref) {
   return AuthRemoteDataSourceImpl(dioClient: ref.watch(dioClientProvider));
+});
+
+final firebasePhoneAuthDataSourceProvider =
+    Provider<FirebasePhoneAuthDataSource>((ref) {
+  return FirebasePhoneAuthDataSourceImpl();
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -89,6 +95,8 @@ class AuthState {
 
 class AuthNotifier extends Notifier<AuthState> {
   AuthRepository get _authRepository => ref.read(authRepositoryProvider);
+  FirebasePhoneAuthDataSource get _firebasePhone =>
+      ref.read(firebasePhoneAuthDataSourceProvider);
 
   @override
   AuthState build() {
@@ -177,14 +185,14 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  /// Sakin telefonu kayıtlı mı? (`purpose: resident_phone`).
-  Future<bool> checkResidentPhoneExists(String phone) async {
-    if (state.isLoading) return false;
+  /// Sakin telefonu kayıtlı mı? (`purpose: resident_phone` → `{ exists, name? }`).
+  Future<ManagerIdentifierLookup?> checkResidentPhoneExists(String phone) async {
+    if (state.isLoading) return null;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final exists = await _authRepository.checkResidentPhoneExists(phone);
+      final lookup = await _authRepository.checkResidentPhoneExists(phone);
       state = state.copyWith(isLoading: false, clearError: true);
-      return exists;
+      return lookup;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
       rethrow;
@@ -341,6 +349,32 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Sakin telefon — Firebase Phone Auth SMS başlatır.
+  Future<void> startResidentFirebasePhone(String phone10) async {
+    if (state.isLoading) return;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      await _firebasePhone.startPhoneVerification(phone10);
+      state = state.copyWith(isLoading: false, clearError: true);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  /// Sakin telefon — Firebase SMS yeniden gönder.
+  Future<void> resendResidentFirebasePhone(String phone10) async {
+    if (state.isLoading) return;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      await _firebasePhone.resendPhoneVerification(phone10);
+      state = state.copyWith(isLoading: false, clearError: true);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
   Future<bool> verifyResidentJoinOtp({
     required String phone,
     required String code,
@@ -356,6 +390,72 @@ class AuthNotifier extends Notifier<AuthState> {
       );
       state = state.copyWith(isLoading: false, clearError: true);
       return requireName;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  /// Firebase SMS kodu → idToken → backend join doğrulama.
+  Future<bool> verifyResidentJoinFirebaseOtp({
+    required String code,
+    String? inviteCode,
+  }) async {
+    if (state.isLoading) return false;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final idToken = await _firebasePhone.confirmSmsCode(code);
+      final requireName = await _authRepository.verifyFirebasePhoneJoin(
+        idToken: idToken,
+        inviteCode: inviteCode,
+      );
+      state = state.copyWith(isLoading: false, clearError: true);
+      return requireName;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  /// Firebase SMS kodu → idToken → sakin giriş.
+  Future<UserEntity> verifyResidentLoginFirebaseOtp({
+    required String code,
+    required WidgetRef ref,
+  }) async {
+    if (state.isLoading) return Future.error('loading');
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final idToken = await _firebasePhone.confirmSmsCode(code);
+      final user = await _authRepository.verifyFirebasePhoneLogin(
+        idToken: idToken,
+      );
+      resetManagerTabIndex(ref);
+      resetResidentTabIndex(ref);
+      await _onAuthenticated(ref, user);
+      state = state.copyWith(
+        isLoading: false,
+        user: user,
+        isAuthenticated: true,
+        isReturningUser: true,
+        clearError: true,
+      );
+      return user;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
+  /// Profil telefon değişimi — Firebase kod → backend pending doğrulama.
+  Future<void> verifyResidentPhoneChangeFirebaseOtp({
+    required String code,
+  }) async {
+    if (state.isLoading) return;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final idToken = await _firebasePhone.confirmSmsCode(code);
+      await _authRepository.verifyFirebasePhoneChange(idToken: idToken);
+      state = state.copyWith(isLoading: false, clearError: true);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: userFacingError(e));
       rethrow;

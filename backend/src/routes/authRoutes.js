@@ -10,6 +10,7 @@ import {
   resetPassword,
   sendOtp,
   verifyOtp,
+  verifyFirebasePhone,
   completeResidentJoin,
   validateInvite,
   checkIdentifier,
@@ -40,6 +41,12 @@ router.post("/refresh", validate(authSchemas.refreshToken), refreshToken);
 router.post("/join", validate(authSchemas.join), join);
 router.post("/otp/send", otpLimiter, validate(authSchemas.otpSend), sendOtp);
 router.post("/otp/verify", otpLimiter, validate(authSchemas.otpVerify), verifyOtp);
+router.post(
+  "/firebase-phone",
+  otpLimiter,
+  validate(authSchemas.firebasePhone),
+  verifyFirebasePhone
+);
 router.post(
   "/otp/complete-resident-join",
   otpLimiter,

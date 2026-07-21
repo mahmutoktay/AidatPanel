@@ -209,17 +209,23 @@ class _ManagerBuildingsTabState extends ConsumerState<ManagerBuildingsTab> {
 
   Future<void> _onRefresh() async {
     await Future.wait([
-      ref.read(standaloneBuildingsStoreProvider.notifier).loadBuildings(),
+      ref.read(buildingsStoreProvider.notifier).loadBuildings(),
       ref.refresh(allBuildingsDuesProvider.future),
     ]);
   }
 
   void _onRetryBuildings() {
-    ref.read(standaloneBuildingsStoreProvider.notifier).loadBuildings();
+    ref.read(buildingsStoreProvider.notifier).loadBuildings();
   }
 
-  void _onBuildingTapped(BuildingEntity building) {
-    context.push('/manager-dashboard/buildings/${building.id}');
+  Future<void> _onBuildingTapped(BuildingEntity building) async {
+    await context.push('/manager-dashboard/buildings/${building.id}');
+    if (!mounted) return;
+    // Daire/sakin değişiklikleri sonrası doluluk ve aidat özeti güncel kalsın.
+    await Future.wait([
+      ref.read(buildingsStoreProvider.notifier).refreshBuildings(),
+      ref.refresh(allBuildingsDuesProvider.future),
+    ]);
   }
 }
 

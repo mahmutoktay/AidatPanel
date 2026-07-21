@@ -9,6 +9,7 @@ import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
 import '../../../buildings/presentation/utils/apartment_ui_utils.dart';
 import '../../domain/entities/due_entity.dart';
+import '../providers/dues_cache_refresh.dart';
 import '../providers/dues_provider.dart';
 import '../utils/dues_ui_helpers.dart';
 
@@ -54,8 +55,10 @@ Future<bool> collectDuePayment({
   if (!context.mounted || choice == null) return false;
 
   if (choice == 'dekont') {
-    context.push('/manager-dashboard/dekonts');
-    return false;
+    await context.push('/manager-dashboard/dekonts');
+    if (!context.mounted) return false;
+    await invalidateDuesRelatedCaches(ref);
+    return true;
   }
 
   final apartmentLabel = ApartmentUiUtils.formatApartmentLabel(

@@ -80,8 +80,6 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
     });
 
     final buildingsAsync = ref.watch(buildingsStoreProvider);
-    final standaloneBuildingsAsync =
-        ref.watch(standaloneBuildingsStoreProvider);
     final userName =
         ref.watch(authStateProvider.select((state) => state.user?.name)) ??
         context.t.common.user;
@@ -145,7 +143,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
                         .loadBuildings(),
                   ),
                   ManagerPropertiesTab(
-                    standaloneBuildingsAsync: standaloneBuildingsAsync,
+                    buildingsAsync: buildingsAsync,
                   ),
                   const ManagerDuesTab(),
                   const SettingsTab(),

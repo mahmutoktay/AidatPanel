@@ -205,7 +205,11 @@ class _MyDekontsScreenState extends ConsumerState<MyDekontsScreen> {
           child: DekontListCard(
             dekont: d,
             forResident: true,
-            onTap: () => context.push('/dekonts/${d.id}'),
+            onTap: () async {
+              await context.push('/dekonts/${d.id}');
+              if (!mounted) return;
+              await _load();
+            },
           ),
         );
       },

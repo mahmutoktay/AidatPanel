@@ -112,12 +112,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           next.user != null &&
           !(previous?.isAuthenticated ?? false)) {
         final authT = context.t.features.auth;
+        final displayName = next.user!.name.trim();
+        final String toastMessage;
+        if (displayName.isNotEmpty) {
+          toastMessage = next.isReturningUser
+              ? authT.loginSuccessWelcomeBackNamed
+                  .replaceAll('{name}', displayName)
+              : authT.loginSuccessNamed.replaceAll('{name}', displayName);
+        } else {
+          toastMessage = next.isReturningUser
+              ? authT.loginSuccessWelcomeBack
+              : authT.loginSuccess;
+        }
         ref
             .read(toastProvider.notifier)
             .show(
-              next.isReturningUser
-                  ? authT.loginSuccessWelcomeBack
-                  : authT.loginSuccess,
+              toastMessage,
               type: ToastType.success,
               duration: const Duration(seconds: 4),
             );

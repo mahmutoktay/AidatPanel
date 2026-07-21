@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resource shrinker: splash + bildirim ikonunu koru. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/launch_background,@drawable/ic_launcher_foreground,@drawable/ic_stat_notification,@color/ic_launcher_background,@mipmap/ic_launcher" />

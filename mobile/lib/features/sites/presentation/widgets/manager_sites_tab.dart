@@ -23,6 +23,12 @@ class ManagerSitesTab extends ConsumerStatefulWidget {
 class _ManagerSitesTabState extends ConsumerState<ManagerSitesTab> {
   String _searchQuery = '';
 
+  Future<void> _openSiteDetail(String siteId) async {
+    await context.push('/manager-dashboard/sites/$siteId');
+    if (!mounted) return;
+    await ref.read(sitesStoreProvider.notifier).refreshSites();
+  }
+
   List<SiteEntity> _filterBySearch(List<SiteEntity> sites, String query) {
     final normalized = query.trim().toLowerCase();
     if (normalized.isEmpty) return sites;
@@ -142,9 +148,7 @@ class _ManagerSitesTabState extends ConsumerState<ManagerSitesTab> {
                   final site = visibleSites[index];
                   return SiteListCard(
                     site: site,
-                    onTap: () => context.push(
-                      '/manager-dashboard/sites/${site.id}',
-                    ),
+                    onTap: () => _openSiteDetail(site.id),
                   );
                 },
               ),

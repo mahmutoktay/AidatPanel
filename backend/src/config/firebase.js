@@ -147,3 +147,11 @@ export function getMessaging() {
   }
   return admin.messaging();
 }
+
+/** @returns {import("firebase-admin/auth").Auth | null} */
+export function getAuth() {
+  if (!initialized) {
+    return null;
+  }
+  return admin.auth();
+}

@@ -10,6 +10,7 @@ import {
 import {
   sendOtpService,
   verifyOtpService,
+  verifyFirebasePhoneService,
   validateInvitePublicService,
   completeResidentJoinService,
 } from "../services/otpService.js";
@@ -121,6 +122,23 @@ export const verifyOtp = asyncHandler(async (req, res) => {
     data?.requireName === true
       ? "Telefon numaranız doğrulandı."
       : purposeSuccessMessage(req.body.purpose);
+  res.status(200).json({
+    success: true,
+    message,
+    data,
+  });
+});
+
+export const verifyFirebasePhone = asyncHandler(async (req, res) => {
+  const data = await verifyFirebasePhoneService(req.body);
+  let message = "Giriş başarılı.";
+  if (data?.requireName === true) {
+    message = "Telefon numaranız doğrulandı.";
+  } else if (data?.verified === true) {
+    message = "Telefon numaranız doğrulandı.";
+  } else if (req.body.purpose === "resident_join") {
+    message = "Hesabınız oluşturuldu.";
+  }
   res.status(200).json({
     success: true,
     message,

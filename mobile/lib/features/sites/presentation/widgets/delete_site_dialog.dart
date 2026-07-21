@@ -8,6 +8,7 @@ import '../../../../features/profile/presentation/theme/profile_settings_ui.dart
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/premium_bottom_sheet.dart';
+import '../../../../core/providers/list_cache_refresh.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../data/sites_store.dart';
 import '../../domain/entities/site_entity.dart';
@@ -67,6 +68,7 @@ class _DeleteSiteDialogState extends ConsumerState<DeleteSiteDialog> {
       await ref.read(sitesStoreProvider.notifier).removeSite(
             widget.site.id,
           );
+      await invalidatePropertyInventoryCaches(ref);
       if (!mounted) return;
       Navigator.of(context).pop(true);
       ref.read(toastProvider.notifier).show(

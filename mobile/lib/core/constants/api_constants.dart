@@ -63,6 +63,7 @@ class ApiConstants {
   static const String join = '$apiVersion/auth/join';
   static const String otpSend = '$apiVersion/auth/otp/send';
   static const String otpVerify = '$apiVersion/auth/otp/verify';
+  static const String firebasePhone = '$apiVersion/auth/firebase-phone';
   static const String otpCompleteResidentJoin =
       '$apiVersion/auth/otp/complete-resident-join';
   static const String inviteValidate = '$apiVersion/auth/invite/validate';

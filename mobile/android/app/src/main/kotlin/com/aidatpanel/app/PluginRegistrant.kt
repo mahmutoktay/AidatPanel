@@ -54,6 +54,12 @@ object PluginRegistrant {
 
         flutterEngine.plugins.add(FlutterFirebaseMessagingPlugin())
 
+        addPluginReflective(
+            flutterEngine,
+            "io.flutter.plugins.firebase.auth.FlutterFirebaseAuthPlugin",
+            "firebase_auth",
+        )
+
         flutterEngine.plugins.add(FlutterLocalNotificationsPlugin())
 
         flutterEngine.plugins.add(FlutterAndroidLifecyclePlugin())

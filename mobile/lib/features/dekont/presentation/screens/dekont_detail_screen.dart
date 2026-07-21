@@ -24,7 +24,7 @@ import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dashboard/presentation/utils/dashboard_filter_scope_routing.dart';
-import '../../../dues/presentation/providers/dues_cache_refresh.dart';
+import '../../../../core/providers/list_cache_refresh.dart';
 import '../../data/dekont_preview_cache.dart';
 import '../../domain/entities/dekont_entity.dart';
 import '../../domain/entities/dekont_status.dart';
@@ -206,8 +206,8 @@ class _DekontDetailScreenState extends ConsumerState<DekontDetailScreen>
     if (ok != true || !mounted) return;
 
     ref.invalidate(dekontDetailProvider(widget.dekontId));
-    // Aidat oran çubukları / ledger / işlem geçmişi — sheet kapandıktan sonra.
-    unawaited(invalidateDuesRelatedCaches(ref));
+    // Aidat + ana sayfa bekleyen dekont sayaçları.
+    unawaited(invalidateDekontRelatedCaches(ref));
     if (dekont.buildingId.isNotEmpty) {
       unawaited(
         ref.read(managerDekontsNotifierProvider.notifier).loadBuilding(

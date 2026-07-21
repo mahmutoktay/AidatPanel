@@ -1,4 +1,4 @@
-/// `POST /auth/check-identifier` purpose=`manager_identifier` sonucu.
+/// `POST /auth/check-identifier` sonucu (`manager_identifier` | `resident_phone`).
 class ManagerIdentifierLookup {
   const ManagerIdentifierLookup({
     required this.exists,

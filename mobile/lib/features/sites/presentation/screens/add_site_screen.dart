@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/locations/location_models.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
+import '../../../../core/providers/list_cache_refresh.dart';
 import '../../../../features/dashboard/domain/entities/dashboard_filter_scope.dart';
 import '../../../../features/dashboard/presentation/providers/dashboard_filter_scope_provider.dart';
 import '../../../../features/profile/presentation/theme/profile_settings_ui.dart';
@@ -18,6 +19,7 @@ import '../../../../shared/widgets/minimal_form_widgets.dart';
 import '../../../../shared/widgets/show_due_day_picker.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../buildings/presentation/widgets/building_collection_fields.dart';
+import '../../../dashboard/presentation/widgets/property_type_segmented_tab.dart';
 import '../../data/sites_store.dart';
 
 class AddSiteScreen extends ConsumerStatefulWidget {
@@ -221,7 +223,11 @@ class _AddSiteScreenState extends ConsumerState<AddSiteScreen> {
       ref.read(dashboardFilterScopeProvider.notifier).update(
             DashboardFilterScope.site(id),
           );
-      ref.read(managerTabIndexProvider.notifier).update(0);
+      // Mülkler → Siteler — yeni site listede hemen görünsün.
+      invalidateSubscriptionQuota(ref);
+      invalidateManagerHomeCaches(ref);
+      ref.read(propertyTypeProvider.notifier).update(PropertyType.sites);
+      ref.read(managerTabIndexProvider.notifier).update(1);
       context.go('/manager-dashboard');
     } finally {
       if (mounted) setState(() => _submitting = false);

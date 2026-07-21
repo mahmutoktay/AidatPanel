@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -39,12 +37,27 @@ class SiteDetailScreen extends ConsumerWidget {
       fallbackRoute: '/manager-dashboard',
       bottomNavigationBar: detailAsync.maybeWhen(
         data: (detail) => SiteDetailBottomToolbar(
-          onDelete: () =>
-              unawaited(DeleteSiteDialog.show(context, site: detail.site)),
-          onEdit: () => EditSiteBottomSheet.show(context, site: detail.site),
-          onExpenses: () => context.push(
-            '/manager-dashboard/sites/$siteId/expenses',
-          ),
+          onDelete: () async {
+            final deleted = await DeleteSiteDialog.show(
+              context,
+              site: detail.site,
+            );
+            if (deleted == true && context.mounted) {
+              context.go('/manager-dashboard');
+            }
+          },
+          onEdit: () async {
+            await EditSiteBottomSheet.show(context, site: detail.site);
+            if (!context.mounted) return;
+            ref.invalidate(siteDetailProvider(siteId));
+          },
+          onExpenses: () async {
+            await context.push(
+              '/manager-dashboard/sites/$siteId/expenses',
+            );
+            if (!context.mounted) return;
+            ref.invalidate(siteDetailProvider(siteId));
+          },
           onReport: () => _showReportSheet(context, siteId, detail.site.name),
         ),
         orElse: () => null,

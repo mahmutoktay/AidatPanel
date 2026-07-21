@@ -34,9 +34,16 @@ class PhoneUtils {
         '${phone10.substring(6, 8)} ${phone10.substring(8)}';
   }
 
-  /// Maskeli: `5XX XXX XX XX`
+  /// Maskeli: `5XX *** ** XX`
   static String maskDisplay(String phone10) {
     if (phone10.length != 10) return '***';
     return '${phone10.substring(0, 3)} *** ** ${phone10.substring(8)}';
+  }
+
+  /// Firebase Phone Auth E.164: `+905xxxxxxxxx`
+  static String? toE164Tr(String? phone10) {
+    final normalized = normalizeTrPhone(phone10);
+    if (normalized == null) return null;
+    return '+90$normalized';
   }
 }

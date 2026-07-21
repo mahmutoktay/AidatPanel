@@ -16,6 +16,8 @@ Future<void> openNotificationList(BuildContext context, WidgetRef ref) async {
   await ref.read(notificationsNotifierProvider.notifier).load(refresh: true);
   if (!context.mounted) return;
   await context.push('/notifications');
+  if (!context.mounted) return;
+  await ref.read(notificationsNotifierProvider.notifier).load(refresh: true);
 }
 
 /// Badge + zil ikonu gövdesi (her iki buton için ortak).

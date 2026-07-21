@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/providers/list_cache_refresh.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -168,6 +169,7 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
           );
       if (!mounted) return;
       if (ok) {
+        invalidateTicketsRelatedCaches(ref);
         ref.read(toastProvider.notifier).show(
               context.t.features.tickets.createSuccess,
               type: ToastType.success,

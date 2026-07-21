@@ -10,11 +10,13 @@ import 'property_type_segmented_tab.dart';
 
 /// Siteler | Binalar geçişi için premium seçici.
 class ManagerPropertiesTab extends ConsumerStatefulWidget {
-  final AsyncValue<List<BuildingEntity>> standaloneBuildingsAsync;
+  /// Tüm binalar; Binalar sekmesi `siteId == null` ile tekil olanları süzülür.
+  /// `buildingsStoreProvider` ile aynı kaynak — mutasyon sonrası otomatik güncellenir.
+  final AsyncValue<List<BuildingEntity>> buildingsAsync;
 
   const ManagerPropertiesTab({
     super.key,
-    required this.standaloneBuildingsAsync,
+    required this.buildingsAsync,
   });
 
   @override
@@ -23,7 +25,6 @@ class ManagerPropertiesTab extends ConsumerStatefulWidget {
 }
 
 class _ManagerPropertiesTabState extends ConsumerState<ManagerPropertiesTab> {
-  PropertyType _selectedType = PropertyType.buildings;
   final GlobalKey<BuildingsExpandableFabState> _fabKey =
       GlobalKey<BuildingsExpandableFabState>();
   bool _fabOpen = false;
@@ -34,6 +35,8 @@ class _ManagerPropertiesTabState extends ConsumerState<ManagerPropertiesTab> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedType = ref.watch(propertyTypeProvider);
+
     return Stack(
       children: [
         Column(
@@ -47,11 +50,7 @@ class _ManagerPropertiesTabState extends ConsumerState<ManagerPropertiesTab> {
                 AppSizes.spacingS,
               ),
               child: PropertyTypeSegmentedTab(
-                selectedType: _selectedType,
-                onChanged: (type) {
-                  _closeFab();
-                  setState(() => _selectedType = type);
-                },
+                onChanged: (_) => _closeFab(),
               ),
             ),
             Expanded(
@@ -68,13 +67,13 @@ class _ManagerPropertiesTabState extends ConsumerState<ManagerPropertiesTab> {
                   duration: const Duration(milliseconds: 200),
                   switchInCurve: Curves.easeInOut,
                   switchOutCurve: Curves.easeInOut,
-                  child: _selectedType == PropertyType.sites
-                      ? ManagerSitesTab(
-                          key: const ValueKey(PropertyType.sites),
+                  child: selectedType == PropertyType.sites
+                      ? const ManagerSitesTab(
+                          key: ValueKey(PropertyType.sites),
                         )
                       : ManagerBuildingsTab(
                           key: const ValueKey(PropertyType.buildings),
-                          buildingsAsync: widget.standaloneBuildingsAsync,
+                          buildingsAsync: widget.buildingsAsync,
                         ),
                 ),
               ),

@@ -37,6 +37,7 @@ import 'features/expenses/presentation/providers/expenses_provider.dart';
 import 'features/notifications/presentation/providers/notifications_provider.dart';
 import 'features/apartments/data/apartments_store.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
+import 'features/auth/data/datasources/mock_firebase_phone_auth_datasource.dart';
 import 'features/buildings/data/buildings_store.dart';
 import 'features/dues/presentation/providers/dues_provider.dart';
 import 'features/profile/presentation/providers/profile_provider.dart';
@@ -74,6 +75,9 @@ void main() async {
     ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(mockAuth),
+        firebasePhoneAuthDataSourceProvider.overrideWithValue(
+          MockFirebasePhoneAuthDataSource(),
+        ),
         buildingRepositoryProvider.overrideWithValue(mockBuildings),
         apartmentRepositoryProvider.overrideWithValue(mockApartments),
         duesRepositoryProvider.overrideWithValue(mockDues),

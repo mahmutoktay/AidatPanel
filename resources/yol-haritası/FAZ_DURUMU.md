@@ -1,7 +1,7 @@
 # AidatPanel — Yol Haritası ve Faz Durumu
 
 **Tek kaynak:** Fazlar, checklist, onaylar ve eksikler (Mobil + Backend).  
-**Güncelleme:** 2026-07-14 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
+**Güncelleme:** 2026-07-22 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
 
 **AI asistanlar** her oturumda bu dosyayı okur; yalnızca **AKTİF** fazda kod yazar (`CLAUDE.md` faz kapısı).
 
@@ -293,13 +293,28 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 - [x] Firebase Analytics & Crashlytics
 - [ ] v1.0.0 release tag
 
+### Android R8 / minify (2026-07-18)
+
+Play Console «Optimizasyon ekleme / kod karartma» için `prodRelease` R8 açıldı (`0.6.9+2000000012`).
+
+- [x] `isMinifyEnabled` + `isShrinkResources` (yalnızca release; debug kapalı)
+- [x] `proguard-rules.pro` daraltıldı — reflection `PluginRegistrant` sınıfları + Crashlytics satır bilgisi; blanket Flutter/Firebase/Gson keep kaldırıldı
+- [x] AGP 8.13.2 + `android.r8.optimizedResourceShrinking=true` — kod/kaynak analizi tek R8 hattında
+- [x] `-repackageclasses` — koruma dışı sınıflar DEX sıkıştırması için yeniden paketleniyor
+- [x] `google-services` 4.4.2 (Crashlytics mapping upload için 4.4.1+)
+- [x] Splash: adaptive `mipmap/ic_launcher` bitmap src düzeltildi + `res/raw/keep.xml`
+- [x] Artefakt: AAB ~70 MB (önce ~73 MB), `mapping.txt` → `build/app/outputs/mapping/prodRelease/`
+- [x] Emülatör smoke: soğuk açılış, yeniden başlatma, deep link, share intent; Firebase/FCM init; `ClassNotFound` / FATAL yok
+- [ ] Fiziksel cihaz + hesaplı regresyon (OTP, dekont/PDF, RevenueCat satın alma) — Play submit öncesi
+- [ ] Play Console’a AAB yükle → App bundle explorer’da «Deobfuscation file» / R8 skorunu doğrula
+
 ### Lansman öncesi UX / akış temizliği (2026-07-11)
 
 - [x] Aidat breakdown UI bağlandı (`DueDetailSheet`, `MakePaymentScreen`, sakin ledger detay)
 - [x] Sakin gider listesi (`ResidentExpensesScreen` + `/resident-dashboard/expenses` + quick actions)
 - [x] Giderler / Dekontlar: «Tüm Binalar» kaldırıldı (tickets normalize pattern + deep-link resolve)
 - [x] Çapraz role route guard (`/manager-dashboard` ↔ `/resident-dashboard`)
-- [x] Yönetici nav etiketi: «Mülkler» (Siteler | Binalar)
+- [x] Yönetici nav etiketi: «Binalar» (Siteler | Binalar segmenti; eski «Mülkler» kaldırıldı — 0.6.11)
 - [x] Kritik tipografi (ledger, bildirim chip, ticket timeline → min 16sp)
 - [x] Gider listesi 500: `Expense.rawText` vb. OCR kolonları migration eksikti → `20260711220000_expense_ocr_fields` deploy
 - [x] Sakin Hızlı İşlemler: 2×2 ayrık renkli kartlar (Aidat / Talepler / Giderler / Duyurular) + `ResidentAnnouncementsScreen`
@@ -307,14 +322,18 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 - [x] Yönetici auth: deneyim adımı kaldırıldı; e-posta/telefon → `manager_identifier` exists dallanması (giriş veya isim+şifre kayıt)
 - [x] Profil/talep: Kamera|Galeri seçici; talep `attachmentPath` + `POST /tickets/:id/attachment`
 - [x] Bildirim: liste gövdesi kısaltılmıyor; tıklamada önce sheet (başlık+metin); ilgili kayıt sheet butonuyla
-- [x] Sakin profil: e-posta gizli; telefon değişiminde SMS OTP (`resident_phone_change` + `otpCode`)
+- [x] Sakin profil: e-posta gizli; telefon değişiminde Firebase Phone Auth (`resident_phone_change` + `POST /auth/firebase-phone`)
+- [x] Sakin SMS girişi: Twilio/NetGsm → Firebase Auth Phone (`POST /auth/firebase-phone`, `User.firebaseUid`)
 - [x] Para birimi gösterimi ₺ (`currencyDisplay` / `AppCurrencyFormat.displaySymbol`); hatırlatmada kalan borç
 - [x] Sakin «Ödeme Yap» butonu yüksekliği 48dp (`buttonHeightSmall`)
 - [x] Yönetici auth karşılama: `check-identifier` → `name`; şifre adımı «Tekrar hoş geldiniz»; kayıt isim adımı eyebrow; Ana Sayfa 0 bina empty state + Bina Ekle
+- [x] Sakin auth karşılama paritesi: `resident_phone` → `{ exists, name? }`; OTP adımı «Tekrar hoş geldiniz»; giriş toast isimli (`loginSuccessNamed` / `WelcomeBackNamed`)
 - [x] `device_preview` kalıntısı doğrulandı — kodda yok (clean rebuild)
 - [x] Yönetici telefon kayıt: idempotent register + phone variant lookup; login çoklu rol; mobil auth yazma retry kapalı
 - [x] Şifre sıfırlama: e-posta öncelikli; phone-only → SMS; e-posta+telefon → opt-in SMS yedek (`deliveredVia` / `smsFallbackAvailable`)
 - [x] İlk kurulum welcome (5 sayfalık PageView, `/welcome`); SecureStorage `onboarding_completed`; gradyanlı CustomPaint illüstrasyonlar
+- [x] Liste otomatik yenileme: bina/site mutasyonu sonrası Mülkler sekmesi + dual-store senkron (`buildings_cache_refresh`); detaydan dönüşte refresh; oluşturunca doğru segment (Siteler|Binalar)
+- [x] Uygulama geneli liste senkronu: `list_cache_refresh` / `manager_home_caches` — gider, site gideri, dekont, talep, daire/sakin, silme, aidat tutarı, duyuru, bildirim badge; detaydan dönüşte reload
 
 ---
 

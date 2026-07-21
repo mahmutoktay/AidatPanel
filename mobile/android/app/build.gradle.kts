@@ -73,16 +73,26 @@ android {
     }
 
     buildTypes {
-        release {
-            signingConfig = signingConfigs.getByName(
-                if (keystorePropertiesFile.exists()) "release" else "debug",
-            )
-
-            // Release çökme (R8 + reflection): minify kapalı. APK ve appbundle aynı release tipi.
-            // Minify tekrar açılacaksa proguard-rules.pro + check_plugin_registrant + cihaz smoke zorunlu.
-            // Obfuscation notu: flutter build appbundle --release --obfuscate --split-debug-info=build/debug-info
+        debug {
+            // Debug'da R8 kapalı — obfuscation debug'ı zorlaştırır.
             isMinifyEnabled = false
             isShrinkResources = false
+        }
+        release {
+            // Yayın AAB için release keystore zorunlu (debug fallback yok).
+            require(keystorePropertiesFile.exists()) {
+                "Release build için android/key.properties gerekli."
+            }
+            signingConfig = signingConfigs.getByName("release")
+
+            // R8 minify + resource shrink (Play Console optimizasyon / kod karartma).
+            // Dart obfuscation ayrı: flutter build ... --obfuscate --split-debug-info=build/debug-info
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

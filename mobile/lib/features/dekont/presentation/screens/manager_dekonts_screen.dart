@@ -284,7 +284,11 @@ class _ManagerDekontsScreenState extends ConsumerState<ManagerDekontsScreen> {
             dekont: d,
             apartmentLabel: apt,
             uploaderLabel: uploader,
-            onTap: () => context.push('/dekonts/${d.id}'),
+            onTap: () async {
+              await context.push('/dekonts/${d.id}');
+              if (!mounted) return;
+              await _loadCurrentBuilding();
+            },
           ),
         );
       },

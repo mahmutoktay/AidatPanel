@@ -1,5 +1,6 @@
 import '../../../buildings/presentation/providers/apartment_dues_history_provider.dart';
 import '../../../buildings/presentation/providers/apartment_payment_history_provider.dart';
+import '../../../../core/providers/manager_home_caches.dart';
 import 'due_payment_detail_provider.dart';
 import 'due_transactions_provider.dart';
 import 'dues_provider.dart';
@@ -14,6 +15,9 @@ Future<void> invalidateDuesRelatedCaches(dynamic ref) async {
   ref.invalidate(apartmentPaymentHistoryProvider);
   ref.invalidate(duePaymentDetailProvider);
   ref.invalidate(dueTransactionsNotifierProvider);
+
+  // Ana sayfa özetleri (oran çubuğu, gecikmiş, bekleyen dekont) da güncellensin.
+  invalidateManagerHomeCaches(ref);
 
   final futures = <Future<void>>[
     ref.read(duesNotifierProvider.notifier).refreshLoadedDues(),

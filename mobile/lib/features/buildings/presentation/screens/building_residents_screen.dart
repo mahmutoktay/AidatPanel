@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/providers/list_cache_refresh.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -18,6 +19,7 @@ import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../apartments/data/apartments_store.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
 import '../../../apartments/presentation/widgets/add_apartment_bottom_sheet.dart';
+import '../../data/buildings_store.dart';
 import '../../domain/entities/building_entity.dart';
 
 import '../../../dues/presentation/providers/dues_provider.dart';
@@ -50,6 +52,16 @@ class _BuildingResidentsScreenState
     extends ConsumerState<BuildingResidentsScreen> {
   bool _selectionMode = false;
   final Set<String> _selectedApartmentIds = <String>{};
+
+  /// Store'daki güncel bina (düzenleme sonrası başlık/aidat bayat kalmasın).
+  BuildingEntity get _resolvedBuilding {
+    final list = ref.watch(buildingsStoreProvider).value;
+    if (list == null) return widget.building;
+    for (final b in list) {
+      if (b.id == widget.building.id) return b;
+    }
+    return widget.building;
+  }
 
   void _exitSelectionMode() {
     setState(() {
@@ -276,6 +288,7 @@ class _BuildingResidentsScreenState
       for (final id in ids) {
         await notifier.removeResidentFromApartment(id);
       }
+      await invalidateApartmentOccupancyCaches(ref);
       if (mounted) {
         Navigator.of(context).pop();
         _exitSelectionMode();
@@ -347,18 +360,24 @@ class _BuildingResidentsScreenState
           : BuildingDetailBottomToolbar(
               onEdit: () => EditBuildingBottomSheet.show(
                 context,
-                building: widget.building,
+                building: _resolvedBuilding,
               ),
-              onDelete: () =>
-                  DeleteBuildingDialog.show(context, building: widget.building),
+              onDelete: () async {
+                final deleted = await DeleteBuildingDialog.show(
+                  context,
+                  building: _resolvedBuilding,
+                );
+                if (!context.mounted || deleted != true) return;
+                context.go('/manager-dashboard');
+              },
               onReport: () => ReportDownloadSheet.show(
                 context,
-                building: widget.building,
+                building: _resolvedBuilding,
               ),
               onDueSettings: () => showBuildingDueAmountUpdateSheet(
                 context,
                 ref,
-                widget.building,
+                _resolvedBuilding,
               ),
               onMultiSelect: () {
                 if (!hasOccupied) {
@@ -433,7 +452,7 @@ class _BuildingResidentsScreenState
               );
             } else {
               return apt.copyWith(
-                monthlyDues: widget.building.dueAmount ?? 0.0,
+                monthlyDues: _resolvedBuilding.dueAmount ?? 0.0,
                 paymentStatus: PaymentStatus.pending,
               );
             }
@@ -463,7 +482,7 @@ class _BuildingResidentsScreenState
                       : 3 + enrichedResidents.length,
                   itemBuilder: (context, index) {
                     if (index == 0) {
-                      return _buildHeader(widget.building);
+                      return _buildHeader(_resolvedBuilding);
                     }
                     if (index == 1) {
                       return const SizedBox(height: AppSizes.spacingL);

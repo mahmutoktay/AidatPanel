@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/providers/list_cache_refresh.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/user_error_message.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -45,6 +46,7 @@ class _DeleteApartmentDialogState extends ConsumerState<DeleteApartmentDialog> {
       await ref
           .read(apartmentsStoreProvider(widget.apartment.buildingId).notifier)
           .removeApartment(widget.apartment.id);
+      await invalidateApartmentOccupancyCaches(ref);
       if (!mounted) return;
       Navigator.of(context).pop(true);
       ref.read(toastProvider.notifier).show(

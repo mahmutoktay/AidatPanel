@@ -193,4 +193,28 @@ export const authSchemas = {
       ),
     }),
   },
+
+  firebasePhone: {
+    body: z.object({
+      idToken: z
+        .string()
+        .min(1, "Firebase doğrulama jetonu gereklidir")
+        .max(4096, "Firebase doğrulama jetonu geçersiz"),
+      purpose: z.enum([
+        "resident_login",
+        "resident_join",
+        "resident_phone_change",
+      ]),
+      name: z.string().min(2).max(50).optional(),
+      inviteCode: z
+        .preprocess(
+          (v) =>
+            typeof v === "string"
+              ? v.trim().toUpperCase().replace(/\s+/g, "")
+              : v,
+          z.string().min(1).max(20).optional()
+        ),
+      ...deviceMetaFields,
+    }),
+  },
 };

@@ -10,6 +10,7 @@ import {
   startTwilioVerification,
 } from "./sms/twilioVerifyProvider.js";
 import { sendOtpEmail } from "./email/resendEmail.js";
+import { verifyFirebasePhoneIdToken } from "./firebasePhoneAuthService.js";
 import { validateInviteCode, normalizeInviteCode } from "./inviteCodeService.js";
 import { ensureApartmentDuesService } from "./dueBulkService.js";
 import { createSession } from "./sessionService.js";
@@ -17,6 +18,8 @@ import { generateAccessToken, generateRefreshToken } from "../utils/generateToke
 import { logger } from "../config/logger.js";
 
 const OTP_TTL_MS = 5 * 60 * 1000;
+/** Join isim adımı için Firebase doğrulama kaydı biraz daha uzun tutulur. */
+const FIREBASE_JOIN_TTL_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 3;
 
 const LOGIN_PURPOSES = new Set([
@@ -29,6 +32,25 @@ const REGISTER_PURPOSES = new Set([
 ]);
 /** Profil telefon güncelleme — OTP, yeni numaraya gider; JWT üretmez. */
 const PHONE_CHANGE_PURPOSES = new Set(["resident_phone_change"]);
+
+/** Sakin telefon doğrulaması yalnızca Firebase Auth Phone üzerinden. */
+const RESIDENT_PHONE_FIREBASE_PURPOSES = new Set([
+  "resident_login",
+  "resident_join",
+  "resident_phone_change",
+]);
+
+const FIREBASE_PHONE_UPDATE_MESSAGE =
+  "Telefon doğrulama güncellendi. Lütfen uygulamayı son sürüme yükseltin.";
+
+function assertResidentPhoneNotViaLegacyOtp(contact, purpose) {
+  if (
+    contact.channel === "phone" &&
+    RESIDENT_PHONE_FIREBASE_PURPOSES.has(purpose)
+  ) {
+    throw new HttpError(410, FIREBASE_PHONE_UPDATE_MESSAGE);
+  }
+}
 
 function hashOtp(code) {
   return crypto.createHash("sha256").update(String(code).trim(), "utf8").digest("hex");
@@ -132,6 +154,8 @@ export async function sendOtpService({ phone, email, purpose, payload }) {
   if (!allPurposes.has(purpose)) {
     throw new HttpError(400, "Geçersiz doğrulama isteği.");
   }
+
+  assertResidentPhoneNotViaLegacyOtp(contact, purpose);
 
   if (LOGIN_PURPOSES.has(purpose)) {
     const role = purpose.startsWith("manager") ? "MANAGER" : "RESIDENT";
@@ -348,6 +372,8 @@ export async function verifyOtpService(body) {
   const { code, purpose } = body;
   const contact = resolveOtpContact({ phone: body.phone, email: body.email });
 
+  assertResidentPhoneNotViaLegacyOtp(contact, purpose);
+
   if (!code || String(code).trim().length !== 6) {
     throw new HttpError(400, "Doğrulama kodu 6 haneli olmalıdır.");
   }
@@ -455,15 +481,13 @@ export async function verifyOtpService(body) {
 
 /**
  * Profil telefon güncellemesi — geçerli OTP'yi doğrular ve tüketir.
+ * Firebase Phone Auth sonrası `payload.firebaseVerified` kaydı kod gerektirmez.
  * `PUT /me` içinde sakin telefon değişiminde çağrılır.
  */
 export async function consumePhoneChangeOtp({ phone, code }) {
   const contact = resolveOtpContact({ phone });
   if (!contact.phone) {
     throw new HttpError(400, "Geçerli bir telefon numarası giriniz.");
-  }
-  if (!code || String(code).trim().length !== 6) {
-    throw new HttpError(400, "Doğrulama kodu 6 haneli olmalıdır.");
   }
 
   const purpose = "resident_phone_change";
@@ -478,17 +502,37 @@ export async function consumePhoneChangeOtp({ phone, code }) {
   });
 
   if (!record) {
-    throw new HttpError(400, "Kod süresi dolmuş veya geçersiz. Yeni kod isteyin.");
+    throw new HttpError(
+      400,
+      "Telefon doğrulaması bulunamadı veya süresi dolmuş. Yeni doğrulama yapın."
+    );
+  }
+
+  const payload =
+    record.payload && typeof record.payload === "object" ? record.payload : {};
+  const firebaseVerified = payload.firebaseVerified === true;
+
+  if (firebaseVerified) {
+    await prisma.phoneOtpToken.update({
+      where: { id: record.id },
+      data: { usedAt: new Date() },
+    });
+    return {
+      phone: contact.phone,
+      firebaseUid:
+        typeof payload.firebaseUid === "string" ? payload.firebaseUid : null,
+    };
+  }
+
+  if (!code || String(code).trim().length !== 6) {
+    throw new HttpError(400, "Doğrulama kodu 6 haneli olmalıdır.");
   }
 
   if (record.attempts >= MAX_ATTEMPTS) {
     throw new HttpError(429, "Çok fazla deneme yaptınız. Yeni kod isteyin.");
   }
 
-  const twilioVerify =
-    record.payload &&
-    typeof record.payload === "object" &&
-    record.payload.twilioVerify === true;
+  const twilioVerify = payload.twilioVerify === true;
 
   if (twilioVerify) {
     const check = await checkTwilioVerification(contact.phone, code);
@@ -515,7 +559,123 @@ export async function consumePhoneChangeOtp({ phone, code }) {
     data: { usedAt: new Date() },
   });
 
-  return { phone: contact.phone };
+  return { phone: contact.phone, firebaseUid: null };
+}
+
+/**
+ * POST /auth/firebase-phone — Firebase Phone Auth idToken ile sakin doğrulama.
+ */
+export async function verifyFirebasePhoneService(body) {
+  const { idToken, purpose } = body;
+  if (!RESIDENT_PHONE_FIREBASE_PURPOSES.has(purpose)) {
+    throw new HttpError(400, "Geçersiz doğrulama isteği.");
+  }
+
+  const { firebaseUid, phone10 } = await verifyFirebasePhoneIdToken(idToken);
+  const contact = { phone: phone10, email: null, channel: "phone" };
+
+  if (purpose === "resident_login") {
+    const user = await prisma.user.findFirst({
+      where: { phone: phone10, role: "RESIDENT", deletedAt: null },
+    });
+    if (!user) {
+      throw new HttpError(
+        404,
+        "Bu telefon numarasıyla kayıtlı hesap bulunamadı."
+      );
+    }
+    await linkFirebaseUidIfNeeded(user, firebaseUid);
+    return loginWithOtp(contact, purpose, body);
+  }
+
+  if (purpose === "resident_join") {
+    const existing = await prisma.user.findFirst({
+      where: { phone: phone10, role: "RESIDENT", deletedAt: null },
+    });
+    if (existing) {
+      throw new HttpError(409, "Bu telefon numarası zaten kullanılıyor.");
+    }
+
+    const inviteCode = body.inviteCode
+      ? normalizeInviteCode(body.inviteCode)
+      : null;
+    const name = body.name?.trim();
+
+    await purgeExpiredOtps(contact, purpose);
+
+    if (!name || name.length < 2) {
+      if (inviteCode) {
+        await validateInviteCode(inviteCode);
+      }
+      await prisma.phoneOtpToken.create({
+        data: {
+          phone: phone10,
+          purpose,
+          tokenHash: hashOtp(`firebase:${firebaseUid}:${crypto.randomUUID()}`),
+          payload: {
+            firebaseVerified: true,
+            firebaseUid,
+            joinOtpConfirmed: true,
+            ...(inviteCode ? { inviteCode } : {}),
+          },
+          expiresAt: new Date(Date.now() + FIREBASE_JOIN_TTL_MS),
+        },
+      });
+      return { requireName: true };
+    }
+
+    if (!inviteCode) {
+      throw new HttpError(400, "Davet kodu gereklidir.");
+    }
+
+    const result = await joinResidentWithOtp(
+      contact,
+      body,
+      { inviteCode, firebaseUid }
+    );
+    return result;
+  }
+
+  if (purpose === "resident_phone_change") {
+    const existing = await prisma.user.findFirst({
+      where: { phone: phone10, role: "RESIDENT", deletedAt: null },
+      select: { id: true },
+    });
+    if (existing) {
+      throw new HttpError(409, "Bu telefon numarası zaten kullanılıyor.");
+    }
+
+    await purgeExpiredOtps(contact, purpose);
+    await prisma.phoneOtpToken.create({
+      data: {
+        phone: phone10,
+        purpose,
+        tokenHash: hashOtp(`firebase:${firebaseUid}:${crypto.randomUUID()}`),
+        payload: { firebaseVerified: true, firebaseUid },
+        expiresAt: new Date(Date.now() + OTP_TTL_MS),
+      },
+    });
+    return { verified: true };
+  }
+
+  throw new HttpError(400, "Geçersiz doğrulama isteği.");
+}
+
+async function linkFirebaseUidIfNeeded(user, firebaseUid) {
+  if (!firebaseUid || user.firebaseUid === firebaseUid) return;
+  try {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { firebaseUid },
+    });
+  } catch (err) {
+    // Başka hesapta aynı uid varsa sessizce geç — telefon eşleşmesi yeterli.
+    logger.warn({
+      type: "firebase_uid_link_skipped",
+      userId: user.id,
+      error: err?.message,
+    });
+  }
 }
 
 /**
@@ -564,7 +724,7 @@ export async function completeResidentJoinService({ phone, name, inviteCode }) {
 
 async function loginWithOtp(contact, purpose, body) {
   const role = purpose.startsWith("manager") ? "MANAGER" : "RESIDENT";
-  const user = await prisma.user.findFirst({
+  let user = await prisma.user.findFirst({
     where: { ...contactWhere(contact), role, deletedAt: null },
   });
   if (!user) {
@@ -675,6 +835,10 @@ async function joinResidentWithOtp(contact, body, storedPayload) {
 
   const randomSecret = crypto.randomBytes(32).toString("hex");
   const passwordHash = await bcrypt.hash(randomSecret, 10);
+  const firebaseUid =
+    typeof payload.firebaseUid === "string" && payload.firebaseUid.trim()
+      ? payload.firebaseUid.trim()
+      : undefined;
 
   const user = await prisma.$transaction(async (tx) => {
     const created = await tx.user.create({
@@ -685,6 +849,7 @@ async function joinResidentWithOtp(contact, body, storedPayload) {
         passwordHash,
         role: "RESIDENT",
         apartmentId: inviteCodeData.apartmentId,
+        ...(firebaseUid ? { firebaseUid } : {}),
       },
     });
 

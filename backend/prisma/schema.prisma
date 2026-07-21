@@ -17,6 +17,8 @@ model User {
   passwordHash String
   name         String
   phone        String?
+  /// Firebase Auth Phone uid — sakin telefon doğrulamasında bağlanır.
+  firebaseUid  String?  @unique
   role         UserRole @default(RESIDENT)
   fcmToken     String?
   language     String   @default("tr")

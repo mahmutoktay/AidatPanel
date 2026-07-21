@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -12,16 +11,16 @@ import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/presentation/onboarding/widgets/otp_input_row.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
-/// Sakin telefon değişimi — yeni numaraya SMS kodu doğrulama sheet'i.
+/// Sakin telefon değişimi — Firebase Phone Auth ile yeni numarayı doğrular.
+/// Başarıda `true` döner; iptalde null.
 class PhoneChangeOtpSheet {
   PhoneChangeOtpSheet._();
 
-  /// Doğrulanan 6 haneli kodu döner; iptalde null.
-  static Future<String?> show(
+  static Future<bool?> show(
     BuildContext context, {
     required String phone10,
   }) {
-    return PremiumBottomSheetScaffold.show<String>(
+    return PremiumBottomSheetScaffold.show<bool>(
       context: context,
       isDismissible: true,
       builder: (ctx) => _PhoneChangeOtpSheetBody(phone10: phone10),
@@ -56,10 +55,9 @@ class _PhoneChangeOtpSheetBodyState
     if (_sending) return;
     setState(() => _sending = true);
     try {
-      await ref.read(authStateProvider.notifier).sendOtp(
-            phone: widget.phone10,
-            purpose: 'resident_phone_change',
-          );
+      await ref
+          .read(authStateProvider.notifier)
+          .startResidentFirebasePhone(widget.phone10);
       if (!mounted) return;
       setState(() {
         _resendSeconds = 60;
@@ -84,10 +82,22 @@ class _PhoneChangeOtpSheetBodyState
     });
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_code.length != 6 || _submitting) return;
     setState(() => _submitting = true);
-    Navigator.of(context).pop(_code);
+    try {
+      await ref
+          .read(authStateProvider.notifier)
+          .verifyResidentPhoneChangeFirebaseOtp(code: _code);
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      final msg = ref.read(authStateProvider).error ??
+          context.t.features.auth.onboarding.otpInvalid;
+      ref.read(toastProvider.notifier).show(msg, type: ToastType.error);
+    }
   }
 
   @override
@@ -117,19 +127,32 @@ class _PhoneChangeOtpSheetBodyState
             onChanged: (v) => setState(() => _code = v),
             onCompleted: (_) => _submit(),
           ),
-          if (ApiConstants.isLocalBackend) ...[
-            const SizedBox(height: AppSizes.spacingS),
-            Text(
-              tAuth.step3DevOtpHint,
-              style: AppTypography.caption.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
           const SizedBox(height: AppSizes.spacingM),
           TextButton(
-            onPressed: (_resendSeconds > 0 || _sending) ? null : _sendOtp,
+            onPressed: (_resendSeconds > 0 || _sending)
+                ? null
+                : () async {
+                    setState(() => _sending = true);
+                    try {
+                      await ref
+                          .read(authStateProvider.notifier)
+                          .resendResidentFirebasePhone(widget.phone10);
+                      if (!mounted) return;
+                      setState(() {
+                        _resendSeconds = 60;
+                        _sending = false;
+                      });
+                      _tickResend();
+                    } catch (_) {
+                      if (!mounted) return;
+                      setState(() => _sending = false);
+                      final msg = ref.read(authStateProvider).error ??
+                          t.phoneOtpSendFailed;
+                      ref
+                          .read(toastProvider.notifier)
+                          .show(msg, type: ToastType.error);
+                    }
+                  },
             child: Text(
               _resendSeconds > 0
                   ? tAuth.step3ResendOtp.replaceAll(
@@ -146,7 +169,7 @@ class _PhoneChangeOtpSheetBodyState
         primaryLabel: t.phoneOtpConfirm,
         onPrimary: _code.length == 6 && !_submitting ? _submit : null,
         primaryLoading: _sending || _submitting,
-          secondaryLabel: context.t.common.cancelBtn,
+        secondaryLabel: context.t.common.cancelBtn,
         onSecondary: () => Navigator.of(context).pop(),
       ),
     );

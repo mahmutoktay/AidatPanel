@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/providers/list_cache_refresh.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/utils/month_labels.dart';
 import '../../../../l10n/strings.g.dart';
@@ -214,7 +215,7 @@ class _SiteExpenseFormScreenState extends ConsumerState<SiteExpenseFormScreen> {
                 siteT.expenseUpdated,
                 type: ToastType.success,
               );
-          context.pop(true);
+          await _finishSuccess();
         }
         return;
       }
@@ -271,7 +272,7 @@ class _SiteExpenseFormScreenState extends ConsumerState<SiteExpenseFormScreen> {
                   siteT.expenseCreated,
                   type: ToastType.success,
                 );
-            context.pop(true);
+            await _finishSuccess();
           }
         }
         return;
@@ -282,10 +283,16 @@ class _SiteExpenseFormScreenState extends ConsumerState<SiteExpenseFormScreen> {
               siteT.expenseCreated,
               type: ToastType.success,
             );
-        context.pop(true);
+        await _finishSuccess();
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
+  }
+
+  Future<void> _finishSuccess() async {
+    await invalidateSiteExpensesRelatedCaches(ref, siteId: widget.siteId);
+    if (!mounted) return;
+    context.pop(true);
   }
 }

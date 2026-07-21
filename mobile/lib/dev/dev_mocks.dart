@@ -221,6 +221,31 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<UserEntity> verifyFirebasePhoneLogin({
+    required String idToken,
+  }) async {
+    await Future.delayed(_delay);
+    _sessionUser = _devResident;
+    return _devResident;
+  }
+
+  @override
+  Future<bool> verifyFirebasePhoneJoin({
+    required String idToken,
+    String? inviteCode,
+  }) async {
+    await Future.delayed(_delay);
+    return true;
+  }
+
+  @override
+  Future<void> verifyFirebasePhoneChange({
+    required String idToken,
+  }) async {
+    await Future.delayed(_delay);
+  }
+
+  @override
   Future<String> validateInvite(String inviteCode) async {
     await Future.delayed(_delay);
     return 'Dev Site';
@@ -238,9 +263,9 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<bool> checkResidentPhoneExists(String phone) async {
+  Future<ManagerIdentifierLookup> checkResidentPhoneExists(String phone) async {
     await Future.delayed(_delay);
-    return false;
+    return const ManagerIdentifierLookup(exists: false);
   }
 
   @override

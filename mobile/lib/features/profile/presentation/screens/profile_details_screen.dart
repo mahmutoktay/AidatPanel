@@ -195,8 +195,11 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
 
     String? otpCode;
     if (isPhoneChanged) {
-      otpCode = await PhoneChangeOtpSheet.show(context, phone10: newPhone);
-      if (otpCode == null || otpCode.length != 6) return;
+      final verified =
+          await PhoneChangeOtpSheet.show(context, phone10: newPhone);
+      if (verified != true) return;
+      // Firebase doğrulama backend'de pending token oluşturdu; otpCode gerekmez.
+      otpCode = null;
     }
 
     final ok = await ref.read(profileNotifierProvider.notifier).saveProfile(

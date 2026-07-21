@@ -19,6 +19,7 @@ $symbolByPlugin = @{
     "device_info_plus"              = "device_info.DeviceInfoPlusPlugin"
     "file_picker"                   = "FilePickerPlugin"
     "firebase_analytics"            = "firebase.analytics.FlutterFirebaseAnalyticsPlugin"
+    "firebase_auth"                 = "firebase.auth.FlutterFirebaseAuthPlugin"
     "firebase_core"                 = "FlutterFirebaseCorePlugin"
     "firebase_crashlytics"          = "firebase.crashlytics.FlutterFirebaseCrashlyticsPlugin"
     "firebase_messaging"            = "FlutterFirebaseMessagingPlugin"
