@@ -26,10 +26,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'iOS Firebase henüz yapılandırılmadı — Console’da iOS app ekleyip '
-          'flutterfire configure --project=aidatpanel --platforms=ios çalıştırın.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -58,5 +55,13 @@ class DefaultFirebaseOptions {
     messagingSenderId: '959446516084',
     projectId: 'aidatpanel',
     storageBucket: 'aidatpanel.firebasestorage.app',
+  );
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyBqiv3Xt0Yy8tXJ0uX-HFS2LNS4eI4U3VQ',
+    appId: '1:959446516084:ios:90cb13358c309e68ee2c21',
+    messagingSenderId: '959446516084',
+    projectId: 'aidatpanel',
+    storageBucket: 'aidatpanel.firebasestorage.app',
+    iosBundleId: 'com.aidatpanel.mobile',
   );
 }

@@ -38,7 +38,7 @@ Future<bool> requestNotificationPermissions({
     if (!status.isGranted && kDebugMode) {
       debugPrint(
         '[FCM] Bildirim izni yok — kapalıyken sistem tray push gelmez. '
-        'Ayarlar → Aidat Paneli → Bildirimler.',
+        'Ayarlar → AidatPanel → Bildirimler.',
       );
     }
     return status.isGranted;

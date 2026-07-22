@@ -48,11 +48,11 @@ android {
         create("dev") {
             dimension = "env"
             applicationIdSuffix = ".dev"
-            resValue("string", "app_name", "Aidat Paneli Dev")
+            resValue("string", "app_name", "AidatPanel Dev")
         }
         create("prod") {
             dimension = "env"
-            resValue("string", "app_name", "Aidat Paneli")
+            resValue("string", "app_name", "AidatPanel")
         }
     }
 

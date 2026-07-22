@@ -63,7 +63,7 @@ Aşağıdaki değişikliklerden **herhangi biri** yapıldıysa ilgili dokümanla
 - **Abonelik Sistemi:** RevenueCat ile yönetilen aylık/yıllık abonelik. `aidatpanel_monthly` (₺99/ay) ve `aidatpanel_annual` (₺799/yıl). Kota: **toplam bina sayısı** (site altı bloklar dahil).
 - **Topoloji:**
   - **Backend:** Node.js + Express RESTful API + WebSocket Realtime servisi.
- - **Mobile:** Flutter uygulaması (iOS & Android). Güncel sürüm: `0.6.11+2000000014` (`pubspec.yaml`).
+ - **Mobile:** Flutter uygulaması (iOS & Android). Güncel sürüm: `0.6.12+2000000015` (`pubspec.yaml`).
   - **Web:** Statik landing page (yardımcı araç, uygulamanın ana parçası değil).
   - **İletişim:** REST (JSON `{success, message, data}`) + WebSocket (`wss://api.aidatpanel.com/api/v1/realtime?token=JWT`) + FCM Push Notifications.
   - **Domain:** `aidatpanel.com` (Cloudflare). API: `api.aidatpanel.com` (Contabo VPS / CloudPanel reverse proxy, PM2 ile yönetiliyor).
