@@ -56,7 +56,6 @@ class DefaultFirebaseOptions {
     projectId: 'aidatpanel',
     storageBucket: 'aidatpanel.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBqiv3Xt0Yy8tXJ0uX-HFS2LNS4eI4U3VQ',
     appId: '1:959446516084:ios:90cb13358c309e68ee2c21',

@@ -238,6 +238,7 @@ class FirebasePhoneAuthDataSourceImpl implements FirebasePhoneAuthDataSource {
       case 'captcha-check-failed':
       case 'web-context-cancelled':
       case 'invalid-app-credential':
+      case 'missing-recaptcha-token':
         return ApiException(message: 'firebase_phone_app_verify');
       case 'operation-not-allowed':
         return ApiException(message: 'firebase_phone_not_enabled');
