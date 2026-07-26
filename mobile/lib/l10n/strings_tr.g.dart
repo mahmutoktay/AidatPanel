@@ -719,7 +719,7 @@ class _Translations$common$errorKeys$tr implements Translations$common$errorKeys
 	@override String get firebasePhoneSessionExpired => 'Doğrulama oturumu sona erdi. Lütfen yeni kod isteyin.';
 	@override String get firebasePhoneCodeInvalid => 'Kod yanlış. Tekrar deneyin.';
 	@override String get firebasePhoneFailed => 'Telefon doğrulaması tamamlanamadı. Lütfen tekrar deneyin.';
-	@override String get firebasePhoneAppVerify => 'Uygulama doğrulaması başarısız. Debug SHA-1 Firebase Console\'a eklenmeli veya Console test numarası kullanılmalı.';
+	@override String get firebasePhoneAppVerify => 'Uygulama doğrulaması tamamlanamadı. Tarayıcıdaki kontrolü bitirin; sorun sürerse uygulamayı güncelleyin.';
 	@override String get firebasePhoneNotEnabled => 'Telefon ile giriş Firebase Console\'da açık değil.';
 	@override String get invalidExpenseResponse => 'Gider bilgisi okunamadı. Lütfen tekrar deneyin.';
 	@override String get invalidSiteExpenseResponse => 'Site gider bilgisi okunamadı. Lütfen tekrar deneyin.';
@@ -2513,7 +2513,7 @@ extension on TranslationsTr {
 			'common.errorKeys.firebasePhoneSessionExpired' => 'Doğrulama oturumu sona erdi. Lütfen yeni kod isteyin.',
 			'common.errorKeys.firebasePhoneCodeInvalid' => 'Kod yanlış. Tekrar deneyin.',
 			'common.errorKeys.firebasePhoneFailed' => 'Telefon doğrulaması tamamlanamadı. Lütfen tekrar deneyin.',
-			'common.errorKeys.firebasePhoneAppVerify' => 'Uygulama doğrulaması başarısız. Debug SHA-1 Firebase Console\'a eklenmeli veya Console test numarası kullanılmalı.',
+			'common.errorKeys.firebasePhoneAppVerify' => 'Uygulama doğrulaması tamamlanamadı. Tarayıcıdaki kontrolü bitirin; sorun sürerse uygulamayı güncelleyin.',
 			'common.errorKeys.firebasePhoneNotEnabled' => 'Telefon ile giriş Firebase Console\'da açık değil.',
 			'common.errorKeys.invalidExpenseResponse' => 'Gider bilgisi okunamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.invalidSiteExpenseResponse' => 'Site gider bilgisi okunamadı. Lütfen tekrar deneyin.',

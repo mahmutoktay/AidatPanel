@@ -292,6 +292,7 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 - [ ] Landing page güncelleme
 - [x] Firebase Analytics & Crashlytics
 - [ ] v1.0.0 release tag
+- [x] Phone Auth: `taskAffinity=""` kaldırıldı (flutterfire#17737) — Play AAB `0.6.13+2000000019`
 
 ### Android R8 / minify (2026-07-18)
 
@@ -324,6 +325,7 @@ Play Console «Optimizasyon ekleme / kod karartma» için `prodRelease` R8 açı
 - [x] Bildirim: liste gövdesi kısaltılmıyor; tıklamada önce sheet (başlık+metin); ilgili kayıt sheet butonuyla
 - [x] Sakin profil: e-posta gizli; telefon değişiminde Firebase Phone Auth (`resident_phone_change` + `POST /auth/firebase-phone`)
 - [x] Sakin SMS girişi: Twilio/NetGsm → Firebase Auth Phone (`POST /auth/firebase-phone`, `User.firebaseUid`)
+- [x] reCAPTCHA Enterprise Flutter SDK (`recaptcha_enterprise_flutter` 18.9.1) — Identity Platform SMS defense (`AUDIT`); `Recaptcha.fetchClient` + `FirebaseAuth.initializeRecaptchaConfig` + Phone Auth warm-up
 - [x] Para birimi gösterimi ₺ (`currencyDisplay` / `AppCurrencyFormat.displaySymbol`); hatırlatmada kalan borç
 - [x] Sakin «Ödeme Yap» butonu yüksekliği 48dp (`buttonHeightSmall`)
 - [x] Yönetici auth karşılama: `check-identifier` → `name`; şifre adımı «Tekrar hoş geldiniz»; kayıt isim adımı eyebrow; Ana Sayfa 0 bina empty state + Bina Ekle

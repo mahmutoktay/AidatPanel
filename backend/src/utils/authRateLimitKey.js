@@ -17,6 +17,18 @@ export function authRouteKey(req) {
   const path = req.path || "";
   const body = req.body ?? {};
 
+  if (path === "/check-identifier") {
+    const raw = body.identifier;
+    if (typeof raw === "string" && raw.includes("@")) {
+      const email = normalizeAuthKeyPart(raw);
+      if (email) return `check-id:email:${email}`;
+    }
+    const phone = normalizeTrPhone(raw);
+    if (phone) return `check-id:phone:${phone}`;
+    const id = normalizeAuthKeyPart(raw);
+    if (id) return `check-id:${id}`;
+  }
+
   if (path === "/login") {
     const raw = body.identifier;
     const id = raw?.includes("@")

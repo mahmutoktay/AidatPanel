@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../firebase_options.dart';
+import '../security/recaptcha_enterprise_service.dart';
 import 'fcm_platform.dart';
 import 'local_notification_service.dart';
 
@@ -39,6 +40,8 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// Production (`main.dart`) için Firebase + arka plan handler.
 Future<void> initFirebase() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Phone Auth SMS defense — native reCAPTCHA Enterprise SDK link + Auth config.
+  await RecaptchaEnterpriseService.initialize();
   await LocalNotificationService.instance.initialize();
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   if (kDebugMode && isFcmSupported && (Platform.isAndroid || Platform.isIOS)) {

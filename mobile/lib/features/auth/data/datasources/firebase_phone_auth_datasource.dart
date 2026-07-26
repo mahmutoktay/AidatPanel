@@ -1,10 +1,51 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/security/recaptcha_enterprise_service.dart';
 import '../../../../core/utils/phone_utils.dart';
+
+void _phoneAuthLog(String message) {
+  // Release + USB: flutter run / adb logcat'te görünsün.
+  // ignore: avoid_print
+  print('[FirebasePhone] $message');
+  developer.log(message, name: 'FirebasePhone');
+}
+
+Future<void> _reportPhoneAuthFailure(
+  String stage,
+  Object error, {
+  StackTrace? stack,
+}) async {
+  _phoneAuthLog('$stage: $error');
+  try {
+    if (error is FirebaseAuthException) {
+      await FirebaseCrashlytics.instance.setCustomKey(
+        'firebase_phone_code',
+        error.code,
+      );
+      await FirebaseCrashlytics.instance.setCustomKey(
+        'firebase_phone_message',
+        (error.message ?? '').substring(
+          0,
+          (error.message?.length ?? 0).clamp(0, 200),
+        ),
+      );
+    }
+    await FirebaseCrashlytics.instance.recordError(
+      error,
+      stack ?? StackTrace.current,
+      reason: 'FirebasePhone:$stage',
+      fatal: false,
+    );
+  } catch (_) {
+    // Crashlytics yoksa (test) sessiz geç.
+  }
+}
 
 /// Firebase Auth Phone — SMS gönderimi ve kod doğrulama sözleşmesi.
 abstract class FirebasePhoneAuthDataSource {
@@ -77,6 +118,7 @@ class FirebasePhoneAuthDataSourceImpl implements FirebasePhoneAuthDataSource {
     }
 
     await _ensureTestingSettings();
+    await RecaptchaEnterpriseService.warmUpForPhoneAuth();
 
     final resendToken = isResend ? _forceResendingToken : null;
     _verificationId = null;
@@ -88,11 +130,7 @@ class FirebasePhoneAuthDataSourceImpl implements FirebasePhoneAuthDataSource {
     final completer = Completer<void>();
     _startCompleter = completer;
 
-    if (kDebugMode) {
-      debugPrint(
-        '[FirebasePhone] verifyPhoneNumber start e164=$e164 resend=$isResend',
-      );
-    }
+    _phoneAuthLog('verifyPhoneNumber start resend=$isResend');
 
     try {
       await _auth.verifyPhoneNumber(
@@ -108,9 +146,7 @@ class FirebasePhoneAuthDataSourceImpl implements FirebasePhoneAuthDataSource {
             }
             _autoIdToken = token;
             await _auth.signOut();
-            if (kDebugMode) {
-              debugPrint('[FirebasePhone] auto-verify tamam, idToken alındı');
-            }
+            _phoneAuthLog('auto-verify tamam, idToken alındı');
             if (!completer.isCompleted) completer.complete();
           } catch (e) {
             if (!completer.isCompleted) {
@@ -119,12 +155,9 @@ class FirebasePhoneAuthDataSourceImpl implements FirebasePhoneAuthDataSource {
           }
         },
         verificationFailed: (FirebaseAuthException e) {
-          if (kDebugMode) {
-            debugPrint(
-              '[FirebasePhone] verificationFailed code=${e.code} '
-              'message=${e.message}',
-            );
-          }
+          unawaited(
+            _reportPhoneAuthFailure('verificationFailed', e),
+          );
           if (!completer.isCompleted) {
             completer.completeError(_mapFirebaseAuthException(e));
           }
@@ -132,34 +165,30 @@ class FirebasePhoneAuthDataSourceImpl implements FirebasePhoneAuthDataSource {
         codeSent: (String verificationId, int? forceResendingToken) {
           _verificationId = verificationId;
           _forceResendingToken = forceResendingToken;
-          if (kDebugMode) {
-            debugPrint(
-              '[FirebasePhone] codeSent verificationId=$verificationId',
-            );
-          }
+          _phoneAuthLog('codeSent');
           if (!completer.isCompleted) completer.complete();
         },
         codeAutoRetrievalTimeout: (String verificationId) {
           _verificationId = verificationId;
-          if (kDebugMode) {
-            debugPrint(
-              '[FirebasePhone] codeAutoRetrievalTimeout id=$verificationId',
-            );
-          }
+          _phoneAuthLog('codeAutoRetrievalTimeout');
         },
       );
       await completer.future.timeout(
         const Duration(seconds: 100),
         onTimeout: () {
+          unawaited(
+            _reportPhoneAuthFailure(
+              'timeout',
+              ApiException(message: 'firebase_phone_timeout'),
+            ),
+          );
           throw ApiException(message: 'firebase_phone_timeout');
         },
       );
     } on ApiException {
       rethrow;
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('[FirebasePhone] startPhoneVerification catch: $e');
-      }
+    } catch (e, st) {
+      unawaited(_reportPhoneAuthFailure('startCatch', e, stack: st));
       throw _mapError(e);
     } finally {
       if (identical(_startCompleter, completer)) {
@@ -201,13 +230,8 @@ class FirebasePhoneAuthDataSourceImpl implements FirebasePhoneAuthDataSource {
       return token;
     } on ApiException {
       rethrow;
-    } on FirebaseAuthException catch (e) {
-      if (kDebugMode) {
-        debugPrint(
-          '[FirebasePhone] confirmSmsCode failed code=${e.code} '
-          'message=${e.message}',
-        );
-      }
+    } on FirebaseAuthException catch (e, st) {
+      unawaited(_reportPhoneAuthFailure('confirmSmsCode', e, stack: st));
       throw _mapFirebaseAuthException(e);
     } catch (e) {
       throw _mapError(e);

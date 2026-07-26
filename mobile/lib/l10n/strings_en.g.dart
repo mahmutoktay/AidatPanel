@@ -1881,8 +1881,8 @@ class Translations$common$errorKeys$en {
 	/// en: 'Phone verification failed. Please try again.'
 	String get firebasePhoneFailed => 'Phone verification failed. Please try again.';
 
-	/// en: 'App verification failed. Add the debug SHA-1 in Firebase Console or use a Console test phone number.'
-	String get firebasePhoneAppVerify => 'App verification failed. Add the debug SHA-1 in Firebase Console or use a Console test phone number.';
+	/// en: 'App verification could not finish. Complete the browser check; if it persists, update the app.'
+	String get firebasePhoneAppVerify => 'App verification could not finish. Complete the browser check; if it persists, update the app.';
 
 	/// en: 'Phone sign-in is not enabled in Firebase Console.'
 	String get firebasePhoneNotEnabled => 'Phone sign-in is not enabled in Firebase Console.';
@@ -5731,7 +5731,7 @@ extension on Translations {
 			'common.errorKeys.firebasePhoneSessionExpired' => 'Verification session expired. Please request a new code.',
 			'common.errorKeys.firebasePhoneCodeInvalid' => 'Incorrect code. Please try again.',
 			'common.errorKeys.firebasePhoneFailed' => 'Phone verification failed. Please try again.',
-			'common.errorKeys.firebasePhoneAppVerify' => 'App verification failed. Add the debug SHA-1 in Firebase Console or use a Console test phone number.',
+			'common.errorKeys.firebasePhoneAppVerify' => 'App verification could not finish. Complete the browser check; if it persists, update the app.',
 			'common.errorKeys.firebasePhoneNotEnabled' => 'Phone sign-in is not enabled in Firebase Console.',
 			'common.errorKeys.invalidExpenseResponse' => 'Could not read expense information. Please try again.',
 			'common.errorKeys.invalidSiteExpenseResponse' => 'Could not read site expense information. Please try again.',

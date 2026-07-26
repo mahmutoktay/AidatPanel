@@ -530,7 +530,7 @@
       "firebasePhoneSessionExpired": "Verification session expired. Please request a new code.",
       "firebasePhoneCodeInvalid": "Incorrect code. Please try again.",
       "firebasePhoneFailed": "Phone verification failed. Please try again.",
-      "firebasePhoneAppVerify": "App verification failed. Add the debug SHA-1 in Firebase Console or use a Console test phone number.",
+      "firebasePhoneAppVerify": "App verification could not finish. Complete the browser check; if it persists, update the app.",
       "firebasePhoneNotEnabled": "Phone sign-in is not enabled in Firebase Console.",
       "invalidExpenseResponse": "Could not read expense information. Please try again.",
       "invalidSiteExpenseResponse": "Could not read site expense information. Please try again.",

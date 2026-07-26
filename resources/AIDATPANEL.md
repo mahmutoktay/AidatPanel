@@ -57,7 +57,7 @@ aidatpanel/
 - **Auth:** JWT — access ~15dk (`JWT_SECRET`), refresh ~30gün (`REFRESH_TOKEN_SECRET`) + `refreshTokenVersion` / `UserSession` SHA-256 replay koruması
 - **Email:** Resend (şifre sıfırlama)
 - **Push:** Firebase Admin SDK (FCM)
-- **Sakin telefon doğrulama:** Firebase Auth Phone (mobil SMS → `idToken` → `POST /auth/firebase-phone`)
+- **Sakin telefon doğrulama:** Firebase Auth Phone + reCAPTCHA Enterprise (`recaptcha_enterprise_flutter` 18.9.1; mobil SMS → `idToken` → `POST /auth/firebase-phone`). USB/`flutter run` sideload’da Play Integrity çalışmaz → tarayıcı reCAPTCHA açılır; `MainActivity`’de `android:taskAffinity=""` olmamalı (aksi halde `about:blank`, SMS gitmez — flutterfire#17737).
 - **SMS (şifre sıfırlama / yönetici e-posta dışı):** Twilio Verify / Twilio SMS / NetGsm (`SMS_PROVIDER`) — sakin OTP için kullanılmaz
 - **Abonelik:** RevenueCat webhook + mobil SDK
 - **Realtime:** `ws` — `WSS /api/v1/realtime?token=ACCESS_JWT`
@@ -574,6 +574,7 @@ WSS    /api/v1/realtime?token=ACCESS_JWT
 POST   /api/v1/auth/register
 POST   /api/v1/auth/login             # body: identifier (email veya telefon) + password
 POST   /api/v1/auth/check-identifier  # purpose: manager_identifier | manager_register | manager_login | resident_phone
+                                      # Rate: authLimiter (hesap/telefon key; başarılı istek sayılmaz). strictLimiter YOK.
 POST   /api/v1/auth/refresh
 POST   /api/v1/auth/logout            # FCM token temizler
 POST   /api/v1/auth/logout-all-devices
@@ -818,6 +819,7 @@ dependencies:
   slang_flutter: ^4.15.0
   firebase_core: ^4.10.0
   firebase_auth: ^6.5.6
+  recaptcha_enterprise_flutter: 18.9.1  # Phone Auth SMS defense (Identity Platform)
   firebase_messaging: ^16.3.0
   firebase_analytics: ^12.0.0
   firebase_crashlytics: ^5.0.0

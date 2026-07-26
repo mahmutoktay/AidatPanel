@@ -38,6 +38,7 @@
 -keep class io.flutter.plugins.firebase.crashlytics.FlutterFirebaseCrashlyticsPlugin { <init>(); }
 -keep class io.flutter.plugins.firebase.analytics.FlutterFirebaseAnalyticsPlugin { <init>(); }
 -keep class io.flutter.plugins.firebase.auth.FlutterFirebaseAuthPlugin { <init>(); }
+-keep class com.google.flutter.recaptcha.RecaptchaEnterprisePlugin { <init>(); }
 -keep class dev.fluttercommunity.plus.device_info.DeviceInfoPlusPlugin { <init>(); }
 -keep class com.tekartik.sqflite.SqflitePlugin { <init>(); }
 -keep class io.flutter.plugins.urllauncher.UrlLauncherPlugin { <init>(); }

@@ -28,10 +28,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -56,6 +53,7 @@ class DefaultFirebaseOptions {
     projectId: 'aidatpanel',
     storageBucket: 'aidatpanel.firebasestorage.app',
   );
+
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBqiv3Xt0Yy8tXJ0uX-HFS2LNS4eI4U3VQ',
     appId: '1:959446516084:ios:90cb13358c309e68ee2c21',
@@ -64,4 +62,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'aidatpanel.firebasestorage.app',
     iosBundleId: 'com.aidatpanel.mobile',
   );
+
 }

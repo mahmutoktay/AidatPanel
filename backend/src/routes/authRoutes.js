@@ -31,9 +31,11 @@ router.use(authLimiter);
 // Auth endpoint'leri
 router.post("/register", validate(authSchemas.register), register);
 router.post("/login", validate(authSchemas.login), login);
+// check-identifier: yalnızca authLimiter (router.use).
+// strictLimiter (10/saat/IP) burada olmamalı — sakin her girişte çağırır;
+// aynı Wi‑Fi'daki daireler + test denemeleri herkesi 1 saat kilitler.
 router.post(
   "/check-identifier",
-  strictLimiter,
   validate(authSchemas.checkIdentifier),
   checkIdentifier
 );

@@ -19,11 +19,12 @@
         android:allowBackup="false"
         android:networkSecurityConfig="@xml/network_security_config"
         android:usesCleartextTraffic="false">
+        <!-- taskAffinity="" KULLANILMAZ: Firebase Phone Auth reCAPTCHA dönüşünü
+             about:blank'te bırakır (flutterfire#17737). -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
@@ -110,6 +111,10 @@
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
+        </intent>
+        <!-- Android 11+ package visibility: Phone Auth reCAPTCHA Custom Tabs -->
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
         </intent>
     </queries>
 </manifest>

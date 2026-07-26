@@ -7,6 +7,7 @@
  * Ortam değişkenleri ile override:
  * - API_RATE_LIMIT_MAX
  * - AUTH_RATE_LIMIT_MAX
+ * - OTP_RATE_LIMIT_MAX
  * - DEKONT_UPLOAD_RATE_MAX
  * - DEKONT_UPLOAD_RATE_WINDOW_MS
  */
@@ -32,7 +33,7 @@ export const API_MAX_REQUESTS = 600;
 export const AUTH_WINDOW_MS = 15 * 60 * 1000;
 
 /** Auth endpoint'leri için maksimum istek (pencere başına) — brute-force koruması */
-export const AUTH_MAX_REQUESTS = 5;
+export const AUTH_MAX_REQUESTS = 30;
 
 // =============================================================================
 // Dekont Upload Limiter
@@ -52,7 +53,7 @@ export const DEKONT_UPLOAD_MAX_REQUESTS = 50;
 export const STRICT_WINDOW_MS = 60 * 60 * 1000;
 
 /** Strict limiter için maksimum istek (IP başına, saatlik) */
-export const STRICT_MAX_REQUESTS = 3;
+export const STRICT_MAX_REQUESTS = 10;
 
 // =============================================================================
 // OTP Limiter
@@ -62,4 +63,4 @@ export const STRICT_MAX_REQUESTS = 3;
 export const OTP_WINDOW_MS = 15 * 60 * 1000;
 
 /** OTP için maksimum istek (telefon başına, pencere başına) */
-export const OTP_MAX_REQUESTS = 5;
+export const OTP_MAX_REQUESTS = 20;

@@ -63,7 +63,7 @@ Aşağıdaki değişikliklerden **herhangi biri** yapıldıysa ilgili dokümanla
 - **Abonelik Sistemi:** RevenueCat ile yönetilen aylık/yıllık abonelik. `aidatpanel_monthly` (₺99/ay) ve `aidatpanel_annual` (₺799/yıl). Kota: **toplam bina sayısı** (site altı bloklar dahil).
 - **Topoloji:**
   - **Backend:** Node.js + Express RESTful API + WebSocket Realtime servisi.
- - **Mobile:** Flutter uygulaması (iOS & Android). Güncel sürüm: `0.6.13+2000000017` (`pubspec.yaml`).
+ - **Mobile:** Flutter uygulaması (iOS & Android). Güncel sürüm: `0.6.13+2000000019` (`pubspec.yaml`).
   - **Web:** Statik landing page (yardımcı araç, uygulamanın ana parçası değil).
   - **İletişim:** REST (JSON `{success, message, data}`) + WebSocket (`wss://api.aidatpanel.com/api/v1/realtime?token=JWT`) + FCM Push Notifications.
   - **Domain:** `aidatpanel.com` (Cloudflare). API: `api.aidatpanel.com` (Contabo VPS / CloudPanel reverse proxy, PM2 ile yönetiliyor).
@@ -100,7 +100,7 @@ Aşağıdaki değişikliklerden **herhangi biri** yapıldıysa ilgili dokümanla
 | Network | dio, web_socket_channel | dio ^5.4.0, ws_channel ^3.0.2 | HTTP/HTTPS + WebSocket istemcisi |
 | Güvenlik | flutter_secure_storage | ^10.3.1 | JWT token saklama (SecureStorage, SharedPreferences yasak) |
 | i18n | slang + slang_flutter | ^4.15.0 | Type-safe TR/EN çeviri sistemi (Slang JSON) |
-| Firebase | firebase_core, **firebase_auth** (sakin Phone Auth), firebase_messaging, firebase_analytics, firebase_crashlytics | firebase_core ^4.10.0, auth ^6.5.6, messaging ^16.3.0, analytics ^12.0.0, crashlytics ^5.0.0 | FCM push, sakin telefon doğrulama, analytics, crash reporting |
+| Firebase | firebase_core, **firebase_auth** (sakin Phone Auth), **recaptcha_enterprise_flutter** 18.9.1 (SMS defense), firebase_messaging, firebase_analytics, firebase_crashlytics | firebase_core ^4.10.0, auth ^6.5.6, recaptcha 18.9.1, messaging ^16.3.0, analytics ^12.0.0, crashlytics ^5.0.0 | FCM push, sakin telefon doğrulama + reCAPTCHA Enterprise, analytics, crash reporting |
 | Bildirim (yerel) | flutter_local_notifications, permission_handler | ^22.0.1, ^12.0.3 | Ön plan bildirim + izin yönetimi |
 | Abonelik | purchases_flutter | ^10.2.3 | RevenueCat SDK entegrasyonu |
 | UI/Utils | equatable, freezed, json_serializable, google_fonts, fl_chart, pdfx, cached_network_image, share_plus, image_picker, file_picker, intl, path_provider, crypto, receive_sharing_intent, gal, image, url_launcher, package_info_plus, device_info_plus | — | Entity modeling, grafik, PDF, dosya işleme, dekont paylaşımı |
@@ -453,6 +453,7 @@ Backend'den dönen her yanıt şu formatta olmalıdır:
 3. Çıktı: mobile/build/app/outputs/bundle/prodRelease/app-prod-release.aab
 - NOT: Sürüm adı (ör. 0.6.x) sadece kullanıcı açıkça isterse değişir; build code her AAB'de artar.
 - RevenueCat anahtarı olmadan satın alma devre dışı kalır.
+- Phone Auth reCAPTCHA site key'leri varsayılan olarak Identity Platform ile gömülü; override: `--dart-define=RECAPTCHA_ANDROID_SITE_KEY=...` / `RECAPTCHA_IOS_SITE_KEY=...`.
 - prodRelease: AGP 8.13.2; R8 minify + optimized resource shrink + class repackaging açık (`proguard-rules.pro`); mapping → build/app/outputs/mapping/prodRelease/mapping.txt (Crashlytics upload görevi + Play deobfuscation).
 - Dart obfuscation ayrı/opsiyonel: --obfuscate --split-debug-info=build/debug-info
 ```

@@ -530,7 +530,7 @@
       "firebasePhoneSessionExpired": "Doğrulama oturumu sona erdi. Lütfen yeni kod isteyin.",
       "firebasePhoneCodeInvalid": "Kod yanlış. Tekrar deneyin.",
       "firebasePhoneFailed": "Telefon doğrulaması tamamlanamadı. Lütfen tekrar deneyin.",
-      "firebasePhoneAppVerify": "Uygulama doğrulaması başarısız. Debug SHA-1 Firebase Console'a eklenmeli veya Console test numarası kullanılmalı.",
+      "firebasePhoneAppVerify": "Uygulama doğrulaması tamamlanamadı. Tarayıcıdaki kontrolü bitirin; sorun sürerse uygulamayı güncelleyin.",
       "firebasePhoneNotEnabled": "Telefon ile giriş Firebase Console'da açık değil.",
       "invalidExpenseResponse": "Gider bilgisi okunamadı. Lütfen tekrar deneyin.",
       "invalidSiteExpenseResponse": "Site gider bilgisi okunamadı. Lütfen tekrar deneyin.",
