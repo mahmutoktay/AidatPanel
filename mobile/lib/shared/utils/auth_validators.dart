@@ -15,10 +15,11 @@ class AuthValidators {
 
   // Davet kodu regex'i backend üretimi ile birebir hizalı tutulur.
   // Backend `POST /api/v1/apartments/:apartmentId/invite-code` ucu kodu
-  // `AP` + 1 hex + `-` + 3 hex + `-` + 4 hex (örn. `AP3-B12-A9F0`) olarak
-  // üretir; `POST /auth/join` gövdesinde `inviteCode` için trim + uppercase +
-  // iç boşluk silme uygular. Client da aynı normalizasyonu uyguladığı için
-  // hex dışı alfabe (ör. X, K, Y) kabul edilmez.
+  // sabit `AP` öneki + 1 hex + `-` + 3 hex + `-` + 4 hex (örn. `APB-794-11FF`)
+  // olarak üretir. `P` önekin parçasıdır (hex değildir); hex dışı diğer
+  // harfler (G–Z) kodda yer almaz.
+  // `POST /auth/join` gövdesinde `inviteCode` için trim + uppercase +
+  // iç boşluk silme uygulanır. Client da aynı normalizasyonu uygular.
   static final RegExp _inviteCodeRegex = RegExp(
     r'^AP[0-9A-F]-[0-9A-F]{3}-[0-9A-F]{4}$',
   );

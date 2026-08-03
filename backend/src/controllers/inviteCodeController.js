@@ -7,7 +7,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
  */
 const generateUniqueCode = async (maxRetries = 3) => {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    // 8 hex → AP + 1 | 3 | 4 = AP3-B12-X7K9 (3+3+4; mobil / sözleşme ile uyumlu)
+    // 8 hex → sabit `AP` öneki + 1|3|4 hex (örn. APB-794-11FF). `P` önekin parçasıdır, hex değildir.
     const raw = crypto.randomBytes(4).toString("hex").toUpperCase();
     const formattedCode = `AP${raw.slice(0, 1)}-${raw.slice(1, 4)}-${raw.slice(4, 8)}`;
 

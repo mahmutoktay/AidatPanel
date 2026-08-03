@@ -12,7 +12,16 @@
           "package_name": "com.aidatpanel.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "959446516084-vkcekf357himq6neh1dbh1pon30jtnbk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aidatpanel.app",
+            "certificate_hash": "33b0d71b6aff306da9fa14f4a607959c6c017941"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAgEt62ycxpyGd9HY8XzzInr12J8COx088"

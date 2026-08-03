@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -53,14 +50,22 @@ class DefaultFirebaseOptions {
     projectId: 'aidatpanel',
     storageBucket: 'aidatpanel.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBqiv3Xt0Yy8tXJ0uX-HFS2LNS4eI4U3VQ',
     appId: '1:959446516084:ios:90cb13358c309e68ee2c21',
     messagingSenderId: '959446516084',
     projectId: 'aidatpanel',
     storageBucket: 'aidatpanel.firebasestorage.app',
+    androidClientId: '959446516084-vkcekf357himq6neh1dbh1pon30jtnbk.apps.googleusercontent.com',
     iosBundleId: 'com.aidatpanel.mobile',
   );
-
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDBcJTfnIZJLIKSeqGChQuMR1Y6niT7WNE',
+    appId: '1:959446516084:web:4ba0c95100ab361cee2c21',
+    messagingSenderId: '959446516084',
+    projectId: 'aidatpanel',
+    authDomain: 'aidatpanel.firebaseapp.com',
+    storageBucket: 'aidatpanel.firebasestorage.app',
+    measurementId: 'G-0YFRVZ0W2K',
+  );
 }

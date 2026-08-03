@@ -107,10 +107,17 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
     return KeyEventResult.ignored;
   }
 
+  /// Kod biçimi `AP` + hex (örn. `APB-794-11FF`).
+  /// Sabit önekteki `P` hex değildir; filtre yalnızca `0-9A-F` olsaydı
+  /// elle girişte `P` reddedilirdi. Deep link bu alandan geçmez.
+  static final RegExp _allowedChars = RegExp(r'[0-9A-FpP]');
+  static final RegExp _stripDisallowed = RegExp(r'[^0-9A-FP]');
+
+  String _sanitize(String raw) =>
+      raw.toUpperCase().replaceAll(_stripDisallowed, '');
+
   void _applyRaw(String raw, {bool notify = true}) {
-    final cleaned = raw
-        .toUpperCase()
-        .replaceAll(RegExp(r'[^0-9A-F]'), '');
+    final cleaned = _sanitize(raw);
     var offset = 0;
     for (var i = 0; i < 3; i++) {
       final len = _lengths[i];
@@ -123,7 +130,7 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
   }
 
   void _onChanged(int index, String value) {
-    final upper = value.toUpperCase().replaceAll(RegExp(r'[^0-9A-F]'), '');
+    final upper = _sanitize(value);
     if (upper.length > _lengths[index]) {
       // Yapıştırma veya fazla karakter — tüm satıra dağıt.
       final before = _controllers
@@ -183,7 +190,8 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
                 letterSpacing: 1.2,
               ),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9A-Fa-f]')),
+                // `AP` öneki + hex; `P` sabit önekte zorunlu (bkz. _sanitize).
+                FilteringTextInputFormatter.allow(_allowedChars),
                 LengthLimitingTextInputFormatter(_lengths[i]),
                 _UpperCaseTextFormatter(),
               ],

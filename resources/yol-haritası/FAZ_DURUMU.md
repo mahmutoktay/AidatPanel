@@ -292,7 +292,7 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 - [ ] Landing page güncelleme
 - [x] Firebase Analytics & Crashlytics
 - [ ] v1.0.0 release tag
-- [x] Phone Auth: `taskAffinity=""` kaldırıldı (flutterfire#17737) — Play AAB `0.6.13+2000000019`
+- [x] Phone Auth: `taskAffinity=""` kaldırıldı (flutterfire#17737) — Play AAB `0.6.13+2000000020`
 
 ### Android R8 / minify (2026-07-18)
 
