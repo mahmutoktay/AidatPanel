@@ -532,6 +532,7 @@
       "firebasePhoneFailed": "Telefon doğrulaması tamamlanamadı. Lütfen tekrar deneyin.",
       "firebasePhoneAppVerify": "Uygulama doğrulaması tamamlanamadı. Tarayıcıdaki kontrolü bitirin; sorun sürerse uygulamayı güncelleyin.",
       "firebasePhoneNotEnabled": "Telefon ile giriş Firebase Console'da açık değil.",
+      "firebasePhoneCarrierBlocked": "Bu operatör hattına doğrulama SMS'i şu an gönderilemiyor. Başka bir hattınız varsa onu deneyin veya biraz sonra tekrar deneyin.",
       "invalidExpenseResponse": "Gider bilgisi okunamadı. Lütfen tekrar deneyin.",
       "invalidSiteExpenseResponse": "Site gider bilgisi okunamadı. Lütfen tekrar deneyin.",
       "unsupportedFileType": "Bu dosya türü desteklenmiyor.",

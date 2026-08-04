@@ -244,6 +244,12 @@ class FirebasePhoneAuthDataSourceImpl implements FirebasePhoneAuthDataSource {
   }
 
   ApiException _mapFirebaseAuthException(FirebaseAuthException e) {
+    // Google SMS toll fraud / düşük başarı oranı → Error code 39
+    // (Türkiye'de özellikle Vodafone hatlarında görülür).
+    if (_isTollFraudCarrierBlock(e)) {
+      return ApiException(message: 'firebase_phone_carrier_blocked');
+    }
+
     switch (e.code) {
       case 'invalid-phone-number':
         return ApiException(message: 'firebase_phone_invalid');
@@ -269,6 +275,15 @@ class FirebasePhoneAuthDataSourceImpl implements FirebasePhoneAuthDataSource {
       default:
         return ApiException(message: 'firebase_phone_failed');
     }
+  }
+
+  /// Firebase/Google: Error code 39 — carrier/region SMS route blocked.
+  bool _isTollFraudCarrierBlock(FirebaseAuthException e) {
+    final blob = '${e.code} ${e.message ?? ''}'.toLowerCase();
+    return blob.contains('error-code:-39') ||
+        blob.contains('error code: 39') ||
+        blob.contains('error code:39') ||
+        RegExp(r'\berror[- ]?code[:\s]*-?39\b').hasMatch(blob);
   }
 
   Object _mapError(Object e) {

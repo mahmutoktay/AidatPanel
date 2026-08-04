@@ -721,6 +721,7 @@ class _Translations$common$errorKeys$tr implements Translations$common$errorKeys
 	@override String get firebasePhoneFailed => 'Telefon doğrulaması tamamlanamadı. Lütfen tekrar deneyin.';
 	@override String get firebasePhoneAppVerify => 'Uygulama doğrulaması tamamlanamadı. Tarayıcıdaki kontrolü bitirin; sorun sürerse uygulamayı güncelleyin.';
 	@override String get firebasePhoneNotEnabled => 'Telefon ile giriş Firebase Console\'da açık değil.';
+	@override String get firebasePhoneCarrierBlocked => 'Bu operatör hattına doğrulama SMS\'i şu an gönderilemiyor. Başka bir hattınız varsa onu deneyin veya biraz sonra tekrar deneyin.';
 	@override String get invalidExpenseResponse => 'Gider bilgisi okunamadı. Lütfen tekrar deneyin.';
 	@override String get invalidSiteExpenseResponse => 'Site gider bilgisi okunamadı. Lütfen tekrar deneyin.';
 	@override String get unsupportedFileType => 'Bu dosya türü desteklenmiyor.';
@@ -2515,6 +2516,7 @@ extension on TranslationsTr {
 			'common.errorKeys.firebasePhoneFailed' => 'Telefon doğrulaması tamamlanamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.firebasePhoneAppVerify' => 'Uygulama doğrulaması tamamlanamadı. Tarayıcıdaki kontrolü bitirin; sorun sürerse uygulamayı güncelleyin.',
 			'common.errorKeys.firebasePhoneNotEnabled' => 'Telefon ile giriş Firebase Console\'da açık değil.',
+			'common.errorKeys.firebasePhoneCarrierBlocked' => 'Bu operatör hattına doğrulama SMS\'i şu an gönderilemiyor. Başka bir hattınız varsa onu deneyin veya biraz sonra tekrar deneyin.',
 			'common.errorKeys.invalidExpenseResponse' => 'Gider bilgisi okunamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.invalidSiteExpenseResponse' => 'Site gider bilgisi okunamadı. Lütfen tekrar deneyin.',
 			'common.errorKeys.unsupportedFileType' => 'Bu dosya türü desteklenmiyor.',
@@ -3014,9 +3016,9 @@ extension on TranslationsTr {
 			'features.dekont.reviewAmountRequiredHint' => 'Bu dekonttan tutar okunamadı. Kalan borcun tamamını kapatmak istemiyorsanız tutarı elle girin.',
 			'features.dekont.reviewApplyAmount' => 'Uygulanacak tutar: {amount}',
 			'features.dekont.reviewRemainingAmount' => 'Onay sonrası kalan: {amount}',
-			'features.dekont.errorReviewStatus' => 'Bu dekont şu an onaylanamaz veya reddedilemez. Biraz sonra tekrar deneyin.',
 			_ => null,
 		} ?? switch (path) {
+			'features.dekont.errorReviewStatus' => 'Bu dekont şu an onaylanamaz veya reddedilemez. Biraz sonra tekrar deneyin.',
 			'features.dekont.errorNoFileSelected' => 'Lütfen önce bir dekont dosyası seçin.',
 			'features.dekont.errorNoDueSelected' => 'Lütfen en az bir aidat seçin.',
 			'features.dekont.fileTooLarge' => 'Dosya en fazla 10 MB olabilir',
@@ -3528,9 +3530,9 @@ extension on TranslationsTr {
 			'features.dues.transactions.sourceReceipt' => 'Dekont',
 			'features.dues.transactions.sourceManual' => 'Elden',
 			'features.dues.transactions.statusApproved' => 'Onaylı',
-			'features.dues.transactions.statusPending' => 'Beklemede',
 			_ => null,
 		} ?? switch (path) {
+			'features.dues.transactions.statusPending' => 'Beklemede',
 			'features.dues.transactions.statusRejected' => 'Reddedildi',
 			'features.dues.transactions.unknownApartment' => 'Daire bilgisi yok',
 			'features.dues.transactions.residentPaidByManual' => 'Aidatı elden ödediniz',

@@ -532,6 +532,7 @@
       "firebasePhoneFailed": "Phone verification failed. Please try again.",
       "firebasePhoneAppVerify": "App verification could not finish. Complete the browser check; if it persists, update the app.",
       "firebasePhoneNotEnabled": "Phone sign-in is not enabled in Firebase Console.",
+      "firebasePhoneCarrierBlocked": "Verification SMS cannot be sent to this carrier right now. Try another number or try again later.",
       "invalidExpenseResponse": "Could not read expense information. Please try again.",
       "invalidSiteExpenseResponse": "Could not read site expense information. Please try again.",
       "unsupportedFileType": "This file type is not supported.",

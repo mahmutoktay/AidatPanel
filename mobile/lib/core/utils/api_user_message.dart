@@ -280,6 +280,8 @@ String? _mapErrorKey(Translations t, String raw) {
       return e.firebasePhoneAppVerify;
     case 'firebase_phone_not_enabled':
       return e.firebasePhoneNotEnabled;
+    case 'firebase_phone_carrier_blocked':
+      return e.firebasePhoneCarrierBlocked;
     case 'invalid_expense_response':
       return e.invalidExpenseResponse;
     case 'invalid_site_expense_response':

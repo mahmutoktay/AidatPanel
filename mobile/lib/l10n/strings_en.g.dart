@@ -1887,6 +1887,9 @@ class Translations$common$errorKeys$en {
 	/// en: 'Phone sign-in is not enabled in Firebase Console.'
 	String get firebasePhoneNotEnabled => 'Phone sign-in is not enabled in Firebase Console.';
 
+	/// en: 'Verification SMS cannot be sent to this carrier right now. Try another number or try again later.'
+	String get firebasePhoneCarrierBlocked => 'Verification SMS cannot be sent to this carrier right now. Try another number or try again later.';
+
 	/// en: 'Could not read expense information. Please try again.'
 	String get invalidExpenseResponse => 'Could not read expense information. Please try again.';
 
@@ -5733,6 +5736,7 @@ extension on Translations {
 			'common.errorKeys.firebasePhoneFailed' => 'Phone verification failed. Please try again.',
 			'common.errorKeys.firebasePhoneAppVerify' => 'App verification could not finish. Complete the browser check; if it persists, update the app.',
 			'common.errorKeys.firebasePhoneNotEnabled' => 'Phone sign-in is not enabled in Firebase Console.',
+			'common.errorKeys.firebasePhoneCarrierBlocked' => 'Verification SMS cannot be sent to this carrier right now. Try another number or try again later.',
 			'common.errorKeys.invalidExpenseResponse' => 'Could not read expense information. Please try again.',
 			'common.errorKeys.invalidSiteExpenseResponse' => 'Could not read site expense information. Please try again.',
 			'common.errorKeys.unsupportedFileType' => 'This file type is not supported.',
@@ -6232,9 +6236,9 @@ extension on Translations {
 			'features.dekont.reviewAmountRequiredHint' => 'No amount was read from this receipt. Enter the amount manually — do not approve without an amount or the remaining balance will not be applied correctly.',
 			'features.dekont.reviewApplyAmount' => 'Amount to apply: {amount}',
 			'features.dekont.reviewRemainingAmount' => 'Remaining after approval: {amount}',
-			'features.dekont.errorReviewStatus' => 'This receipt cannot be approved or rejected right now. Try again later.',
 			_ => null,
 		} ?? switch (path) {
+			'features.dekont.errorReviewStatus' => 'This receipt cannot be approved or rejected right now. Try again later.',
 			'features.dekont.errorNoFileSelected' => 'Please select a receipt file first.',
 			'features.dekont.errorNoDueSelected' => 'Please select at least one due.',
 			'features.dekont.fileTooLarge' => 'File must be 10 MB or smaller',
@@ -6746,9 +6750,9 @@ extension on Translations {
 			'features.dues.transactions.sourceReceipt' => 'Receipt',
 			'features.dues.transactions.sourceManual' => 'Manual',
 			'features.dues.transactions.statusApproved' => 'Approved',
-			'features.dues.transactions.statusPending' => 'Pending',
 			_ => null,
 		} ?? switch (path) {
+			'features.dues.transactions.statusPending' => 'Pending',
 			'features.dues.transactions.statusRejected' => 'Rejected',
 			'features.dues.transactions.unknownApartment' => 'No apartment info',
 			'features.dues.transactions.residentPaidByManual' => 'You paid your due in person',
