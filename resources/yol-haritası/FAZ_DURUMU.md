@@ -1,7 +1,7 @@
 # AidatPanel — Yol Haritası ve Faz Durumu
 
 **Tek kaynak:** Fazlar, checklist, onaylar ve eksikler (Mobil + Backend).  
-**Güncelleme:** 2026-07-22 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
+**Güncelleme:** 2026-08-05 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
 
 **AI asistanlar** her oturumda bu dosyayı okur; yalnızca **AKTİF** fazda kod yazar (`CLAUDE.md` faz kapısı).
 
@@ -292,7 +292,7 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 - [ ] Landing page güncelleme
 - [x] Firebase Analytics & Crashlytics
 - [ ] v1.0.0 release tag
-- [x] Phone Auth: `taskAffinity=""` kaldırıldı (flutterfire#17737) — Play AAB `0.6.13+2000000020`
+- [x] Phone Auth: `taskAffinity=""` kaldırıldı (flutterfire#17737) — Play AAB `0.6.13+2000000021`
 
 ### Android R8 / minify (2026-07-18)
 
@@ -306,7 +306,8 @@ Play Console «Optimizasyon ekleme / kod karartma» için `prodRelease` R8 açı
 - [x] Splash: adaptive `mipmap/ic_launcher` bitmap src düzeltildi + `res/raw/keep.xml`
 - [x] Artefakt: AAB ~70 MB (önce ~73 MB), `mapping.txt` → `build/app/outputs/mapping/prodRelease/`
 - [x] Emülatör smoke: soğuk açılış, yeniden başlatma, deep link, share intent; Firebase/FCM init; `ClassNotFound` / FATAL yok
-- [ ] Fiziksel cihaz + hesaplı regresyon (OTP, dekont/PDF, RevenueCat satın alma) — Play submit öncesi
+- [x] Fiziksel cihaz OTP (Play Store): Turkcell / Türk Telekom / Vodafone — sakin Firebase Phone Auth SMS E2E (2026-08-05)
+- [ ] Fiziksel cihaz + hesaplı regresyon (dekont/PDF, RevenueCat satın alma) — Play submit öncesi
 - [ ] Play Console’a AAB yükle → App bundle explorer’da «Deobfuscation file» / R8 skorunu doğrula
 
 ### Lansman öncesi UX / akış temizliği (2026-07-11)
@@ -326,7 +327,8 @@ Play Console «Optimizasyon ekleme / kod karartma» için `prodRelease` R8 açı
 - [x] Sakin profil: e-posta gizli; telefon değişiminde Firebase Phone Auth (`resident_phone_change` + `POST /auth/firebase-phone`)
 - [x] Sakin SMS girişi: Twilio/NetGsm → Firebase Auth Phone (`POST /auth/firebase-phone`, `User.firebaseUid`)
 - [x] reCAPTCHA Enterprise Flutter SDK (`recaptcha_enterprise_flutter` 18.9.1) — Identity Platform SMS defense (`AUDIT`); `Recaptcha.fetchClient` + `FirebaseAuth.initializeRecaptchaConfig` + Phone Auth warm-up
-- [ ] Phone Auth: Vodafone TR Error 39 (toll fraud rota) — `useSmsTollFraudProtection=true` + AUDIT; operatör mesajı (`firebase_phone_carrier_blocked`)
+- [x] Phone Auth SMS: Identity Platform `useSmsTollFraudProtection=true` + `phoneEnforcementState=AUDIT` + `smsRegionConfig` TR allowlist; Vodafone Error 39 dahil tüm TR operatörler E2E OK (2026-08-05); istemci `firebase_phone_carrier_blocked` (Error 39) — AAB `0.6.13+2000000021`
+- [x] Davet kodu elle giriş: `InviteCodeInputRow` `AP` öneki + hex (`0-9A-FP`); yalnızca hex filtresi `P`’yi engelliyordu — düzeltildi (örn. `APB-794-11FF`)
 - [x] Para birimi gösterimi ₺ (`currencyDisplay` / `AppCurrencyFormat.displaySymbol`); hatırlatmada kalan borç
 - [x] Sakin «Ödeme Yap» butonu yüksekliği 48dp (`buttonHeightSmall`)
 - [x] Yönetici auth karşılama: `check-identifier` → `name`; şifre adımı «Tekrar hoş geldiniz»; kayıt isim adımı eyebrow; Ana Sayfa 0 bina empty state + Bina Ekle

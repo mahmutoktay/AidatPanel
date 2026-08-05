@@ -4631,8 +4631,8 @@ class Translations$features$auth$onboarding$en {
 	/// en: 'Your phone number'
 	String get residentPhoneTitle => 'Your phone number';
 
-	/// en: 'We will send you a one-time sign-in code.'
-	String get residentPhoneSubtitle => 'We will send you a one-time sign-in code.';
+	/// en: 'We will send you a one-time sign-in password.'
+	String get residentPhoneSubtitle => 'We will send you a one-time sign-in password.';
 
 	/// en: 'Country code +90 is fixed. Enter your number as (5XX) XXX XX XX.'
 	String get residentPhoneNote => 'Country code +90 is fixed. Enter your number as (5XX) XXX XX XX.';
@@ -4688,8 +4688,14 @@ class Translations$features$auth$onboarding$en {
 	/// en: 'We protect your account with secure verification.'
 	String get step3SecureVerify => 'We protect your account with secure verification.';
 
-	/// en: 'If using a test number, enter the code from Firebase Console.'
-	String get step3DevOtpHint => 'If using a test number, enter the code from Firebase Console.';
+	/// en: 'If using a test number, enter the one-time password from Firebase Console.'
+	String get step3DevOtpHint => 'If using a test number, enter the one-time password from Firebase Console.';
+
+	/// en: 'Your one-time password'
+	String get residentOtpTitle => 'Your one-time password';
+
+	/// en: 'Enter the 6-digit one-time password sent to {phone}.'
+	String get residentOtpSubtitlePhone => 'Enter the 6-digit one-time password sent to {phone}.';
 
 	/// en: 'Enter Your Invite Code'
 	String get step4InviteTitle => 'Enter Your Invite Code';
@@ -4790,11 +4796,11 @@ class Translations$features$auth$onboarding$en {
 	/// en: 'Track your dues and payments from here.'
 	String get step6ResidentSubtitle => 'Track your dues and payments from here.';
 
-	/// en: 'Wrong code. Try again.'
-	String get otpInvalid => 'Wrong code. Try again.';
+	/// en: 'Wrong one-time password. Try again.'
+	String get otpInvalid => 'Wrong one-time password. Try again.';
 
-	/// en: 'Code expired. Request a new one.'
-	String get otpExpired => 'Code expired. Request a new one.';
+	/// en: 'One-time password expired. Request a new one.'
+	String get otpExpired => 'One-time password expired. Request a new one.';
 
 	/// en: 'Enter a valid phone number (5XX XXX XX XX).'
 	String get phoneInvalid => 'Enter a valid phone number (5XX XXX XX XX).';
@@ -4802,8 +4808,8 @@ class Translations$features$auth$onboarding$en {
 	/// en: 'Invite code is invalid or expired.'
 	String get inviteInvalid => 'Invite code is invalid or expired.';
 
-	/// en: 'Could not send code. Please try again.'
-	String get otpSendFailed => 'Could not send code. Please try again.';
+	/// en: 'Could not send the one-time password. Please try again.'
+	String get otpSendFailed => 'Could not send the one-time password. Please try again.';
 
 	/// en: 'Phone sign-in coming soon. You can use email for now.'
 	String get phoneOtpDisabledHint => 'Phone sign-in coming soon. You can use email for now.';
@@ -4820,23 +4826,26 @@ class Translations$features$auth$onboarding$en {
 	/// en: 'Welcome back, {name}!'
 	String get residentLoginWelcomeNamedTitle => 'Welcome back, {name}!';
 
-	/// en: 'Enter the verification code to continue'
-	String get residentLoginWelcomeSubtitle => 'Enter the verification code to continue';
+	/// en: 'Enter your one-time password to continue'
+	String get residentLoginWelcomeSubtitle => 'Enter your one-time password to continue';
 
-	/// en: 'Send Code'
-	String get residentSendCodeButton => 'Send Code';
+	/// en: 'Send Password'
+	String get residentSendCodeButton => 'Send Password';
 
-	/// en: 'A verification code will be sent to your phone number.'
-	String get residentPhoneVerifyNote => 'A verification code will be sent to your phone number.';
+	/// en: 'A one-time password will be sent to your phone number.'
+	String get residentPhoneVerifyNote => 'A one-time password will be sent to your phone number.';
 
-	/// en: 'Enter the 6-digit code sent to your phone.'
-	String get residentOtpSubtitle => 'Enter the 6-digit code sent to your phone.';
+	/// en: 'Enter the 6-digit one-time password sent to your phone.'
+	String get residentOtpSubtitle => 'Enter the 6-digit one-time password sent to your phone.';
 
-	/// en: 'Didn't get the code?'
-	String get residentResendPrompt => 'Didn\'t get the code?';
+	/// en: 'Didn't get the password?'
+	String get residentResendPrompt => 'Didn\'t get the password?';
 
-	/// en: 'Resend'
-	String get residentResendLink => 'Resend';
+	/// en: 'Resend password'
+	String get residentResendLink => 'Resend password';
+
+	/// en: 'Resend password ({time})'
+	String get residentResendOtp => 'Resend password ({time})';
 
 	/// en: 'Please enter the invitation code you received from your manager to continue.'
 	String get residentInviteSubtitle => 'Please enter the invitation code you received from your manager to continue.';
@@ -6031,7 +6040,7 @@ extension on Translations {
 			'features.auth.onboarding.residentReturningOption' => 'I have signed in before',
 			'features.auth.onboarding.residentInviteOption' => 'I have an invite code',
 			'features.auth.onboarding.residentPhoneTitle' => 'Your phone number',
-			'features.auth.onboarding.residentPhoneSubtitle' => 'We will send you a one-time sign-in code.',
+			'features.auth.onboarding.residentPhoneSubtitle' => 'We will send you a one-time sign-in password.',
 			'features.auth.onboarding.residentPhoneNote' => 'Country code +90 is fixed. Enter your number as (5XX) XXX XX XX.',
 			'features.auth.onboarding.residentWelcomeTitle' => 'What is your name?',
 			'features.auth.onboarding.residentWelcomeSubtitle' => 'Your phone is verified. How should we address you?',
@@ -6050,7 +6059,9 @@ extension on Translations {
 			'features.auth.onboarding.step3PasswordTitle' => 'Enter your password',
 			'features.auth.onboarding.step3RegisterPasswordTitle' => 'Create your password',
 			'features.auth.onboarding.step3SecureVerify' => 'We protect your account with secure verification.',
-			'features.auth.onboarding.step3DevOtpHint' => 'If using a test number, enter the code from Firebase Console.',
+			'features.auth.onboarding.step3DevOtpHint' => 'If using a test number, enter the one-time password from Firebase Console.',
+			'features.auth.onboarding.residentOtpTitle' => 'Your one-time password',
+			'features.auth.onboarding.residentOtpSubtitlePhone' => 'Enter the 6-digit one-time password sent to {phone}.',
 			'features.auth.onboarding.step4InviteTitle' => 'Enter Your Invite Code',
 			'features.auth.onboarding.step4InviteSubtitle' => 'Enter the code from your manager.',
 			'features.auth.onboarding.step4InviteHint' => 'You can get your invite code from management or your manager.',
@@ -6084,22 +6095,23 @@ extension on Translations {
 			'features.auth.onboarding.step6ManagerSubtitle' => 'Welcome to the manager panel! You can now start managing your site and serving your residents better.',
 			'features.auth.onboarding.step6ResidentTitle' => 'Sign-in complete',
 			'features.auth.onboarding.step6ResidentSubtitle' => 'Track your dues and payments from here.',
-			'features.auth.onboarding.otpInvalid' => 'Wrong code. Try again.',
-			'features.auth.onboarding.otpExpired' => 'Code expired. Request a new one.',
+			'features.auth.onboarding.otpInvalid' => 'Wrong one-time password. Try again.',
+			'features.auth.onboarding.otpExpired' => 'One-time password expired. Request a new one.',
 			'features.auth.onboarding.phoneInvalid' => 'Enter a valid phone number (5XX XXX XX XX).',
 			'features.auth.onboarding.inviteInvalid' => 'Invite code is invalid or expired.',
-			'features.auth.onboarding.otpSendFailed' => 'Could not send code. Please try again.',
+			'features.auth.onboarding.otpSendFailed' => 'Could not send the one-time password. Please try again.',
 			'features.auth.onboarding.phoneOtpDisabledHint' => 'Phone sign-in coming soon. You can use email for now.',
 			'features.auth.onboarding.residentLoginTitle' => 'Resident Sign In',
 			'features.auth.onboarding.residentLoginSubtitle' => 'Enter your details to continue.',
 			'features.auth.onboarding.residentLoginWelcomeTitle' => 'Welcome back!',
 			'features.auth.onboarding.residentLoginWelcomeNamedTitle' => 'Welcome back, {name}!',
-			'features.auth.onboarding.residentLoginWelcomeSubtitle' => 'Enter the verification code to continue',
-			'features.auth.onboarding.residentSendCodeButton' => 'Send Code',
-			'features.auth.onboarding.residentPhoneVerifyNote' => 'A verification code will be sent to your phone number.',
-			'features.auth.onboarding.residentOtpSubtitle' => 'Enter the 6-digit code sent to your phone.',
-			'features.auth.onboarding.residentResendPrompt' => 'Didn\'t get the code?',
-			'features.auth.onboarding.residentResendLink' => 'Resend',
+			'features.auth.onboarding.residentLoginWelcomeSubtitle' => 'Enter your one-time password to continue',
+			'features.auth.onboarding.residentSendCodeButton' => 'Send Password',
+			'features.auth.onboarding.residentPhoneVerifyNote' => 'A one-time password will be sent to your phone number.',
+			'features.auth.onboarding.residentOtpSubtitle' => 'Enter the 6-digit one-time password sent to your phone.',
+			'features.auth.onboarding.residentResendPrompt' => 'Didn\'t get the password?',
+			'features.auth.onboarding.residentResendLink' => 'Resend password',
+			'features.auth.onboarding.residentResendOtp' => 'Resend password ({time})',
 			'features.auth.onboarding.residentInviteSubtitle' => 'Please enter the invitation code you received from your manager to continue.',
 			'features.auth.onboarding.residentJoinButton' => 'Join Apartment',
 			'features.auth.onboarding.residentInviteCodeLabel' => 'Invitation Code',
@@ -6233,11 +6245,11 @@ extension on Translations {
 			'features.dekont.errorReviewNeedDue' => 'Select a due to approve.',
 			'features.dekont.errorReviewNeedAmount' => 'Receipt amount could not be read. Enter the amount to approve.',
 			'features.dekont.reviewAmountLabel' => 'Amount to approve (₺)',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.reviewAmountRequiredHint' => 'No amount was read from this receipt. Enter the amount manually — do not approve without an amount or the remaining balance will not be applied correctly.',
 			'features.dekont.reviewApplyAmount' => 'Amount to apply: {amount}',
 			'features.dekont.reviewRemainingAmount' => 'Remaining after approval: {amount}',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.errorReviewStatus' => 'This receipt cannot be approved or rejected right now. Try again later.',
 			'features.dekont.errorNoFileSelected' => 'Please select a receipt file first.',
 			'features.dekont.errorNoDueSelected' => 'Please select at least one due.',
@@ -6747,11 +6759,11 @@ extension on Translations {
 			'features.dues.transactions.emptySubtitle' => 'Receipt approvals and manual payments appear here.',
 			'features.dues.transactions.residentEmptyTitle' => 'No transactions yet',
 			'features.dues.transactions.residentEmptySubtitle' => 'Your payments and receipts will appear here.',
+			_ => null,
+		} ?? switch (path) {
 			'features.dues.transactions.sourceReceipt' => 'Receipt',
 			'features.dues.transactions.sourceManual' => 'Manual',
 			'features.dues.transactions.statusApproved' => 'Approved',
-			_ => null,
-		} ?? switch (path) {
 			'features.dues.transactions.statusPending' => 'Pending',
 			'features.dues.transactions.statusRejected' => 'Rejected',
 			'features.dues.transactions.unknownApartment' => 'No apartment info',

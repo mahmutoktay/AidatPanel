@@ -2,7 +2,7 @@
 
 *Target LLM: Autonomous AI Agent (Implementation-capable)*
 *Source Material: `FAZ_DURUMU.md` (tek kaynak), `AIDATPANEL.md`, `backend/README.md`, Codebase Analysis*
-*Son güncelleme: 2026-07-22*
+*Son güncelleme: 2026-08-05*
 
 ---
 
@@ -100,7 +100,7 @@ Aşağıdaki değişikliklerden **herhangi biri** yapıldıysa ilgili dokümanla
 | Network | dio, web_socket_channel | dio ^5.4.0, ws_channel ^3.0.2 | HTTP/HTTPS + WebSocket istemcisi |
 | Güvenlik | flutter_secure_storage | ^10.3.1 | JWT token saklama (SecureStorage, SharedPreferences yasak) |
 | i18n | slang + slang_flutter | ^4.15.0 | Type-safe TR/EN çeviri sistemi (Slang JSON) |
-| Firebase | firebase_core, **firebase_auth** (sakin Phone Auth), **recaptcha_enterprise_flutter** 18.9.1 (SMS defense), firebase_messaging, firebase_analytics, firebase_crashlytics | firebase_core ^4.10.0, auth ^6.5.6, recaptcha 18.9.1, messaging ^16.3.0, analytics ^12.0.0, crashlytics ^5.0.0 | FCM push, sakin telefon doğrulama + reCAPTCHA Enterprise, analytics, crash reporting |
+| Firebase | firebase_core, **firebase_auth** (sakin Phone Auth), **recaptcha_enterprise_flutter** 18.9.1 (SMS defense), firebase_messaging, firebase_analytics, firebase_crashlytics | firebase_core ^4.10.0, auth ^6.5.6, recaptcha 18.9.1, messaging ^16.3.0, analytics ^12.0.0, crashlytics ^5.0.0 | FCM push, sakin telefon doğrulama + reCAPTCHA Enterprise (Identity Platform `useSmsTollFraudProtection` + `AUDIT`; TR operatör E2E), analytics, crash reporting |
 | Bildirim (yerel) | flutter_local_notifications, permission_handler | ^22.0.1, ^12.0.3 | Ön plan bildirim + izin yönetimi |
 | Abonelik | purchases_flutter | ^10.2.3 | RevenueCat SDK entegrasyonu |
 | UI/Utils | equatable, freezed, json_serializable, google_fonts, fl_chart, pdfx, cached_network_image, share_plus, image_picker, file_picker, intl, path_provider, crypto, receive_sharing_intent, gal, image, url_launcher, package_info_plus, device_info_plus | — | Entity modeling, grafik, PDF, dosya işleme, dekont paylaşımı |
@@ -160,7 +160,7 @@ mobile/lib/
 │   └── notifications/         # FCM + WebSocket + Polling coordinator
 ├── l10n/                      # Slang TR/EN i18n JSON dosyaları
 ├── features/                  # Feature-first yapı (referans: auth/)
-│   ├── auth/                  # Giriş, kayıt, OTP, onboarding (sakin: telefon→Firebase Phone Auth→login|isim+davet; deep link `aidatpanel://join?code=`)
+│   ├── auth/                  # Giriş, kayıt, OTP, onboarding (sakin: telefon→Firebase Phone Auth→login|isim+davet; davet kodu `AP`+hex `InviteCodeInputRow`; deep link `aidatpanel://join?code=`)
 │   ├── dashboard/             # Manager + Resident dashboard; ManagerPropertiesTab (Siteler|Binalar)
 │   ├── sites/                 # Site CRUD, site gideri, site raporu (FAZ 8)
 │   ├── buildings/             # Bina CRUD, davet kodu, IBAN

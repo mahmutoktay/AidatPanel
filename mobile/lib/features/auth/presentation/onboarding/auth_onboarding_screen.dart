@@ -1209,9 +1209,9 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
                   : tOb.residentLoginWelcomeTitle;
               otpSubtitle = tOb.residentLoginWelcomeSubtitle;
             } else {
-              otpTitle = tOb.step3OtpTitle;
+              otpTitle = tOb.residentOtpTitle;
               otpSubtitle = ob.phone != null
-                  ? tOb.step3OtpSubtitlePhone.replaceAll(
+                  ? tOb.residentOtpSubtitlePhone.replaceAll(
                       '{phone}',
                       PhoneUtils.maskDisplay(ob.phone!),
                     )
@@ -1241,7 +1241,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
                   _ResidentOtpResendRow(
                     prompt: tOb.residentResendPrompt,
                     linkLabel: ob.otpResendSeconds > 0
-                        ? tOb.step3ResendOtp.replaceAll(
+                        ? tOb.residentResendOtp.replaceAll(
                             '{time}',
                             _formatOtpResendTime(ob.otpResendSeconds),
                           )
@@ -1257,7 +1257,12 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
               ob.role == UserRole.manager;
           final isResidentJoin = _isResidentJoin(ob);
           final otpSubtitle = isResidentJoin
-              ? tOb.residentOtpSubtitle
+              ? (ob.phone != null
+                  ? tOb.residentOtpSubtitlePhone.replaceAll(
+                      '{phone}',
+                      PhoneUtils.maskDisplay(ob.phone!),
+                    )
+                  : tOb.residentOtpSubtitle)
               : ob.phone != null
                   ? tOb.step3OtpSubtitlePhone.replaceAll(
                       '{phone}',
@@ -1270,7 +1275,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
                         )
                       : tOb.step3OtpSubtitle;
           return AuthStepScaffold(
-            title: tOb.step3OtpTitle,
+            title: isResidentJoin ? tOb.residentOtpTitle : tOb.step3OtpTitle,
             subtitle: otpSubtitle,
             primaryLabel: tOb.continueButton,
             isLoading: isLoading,
@@ -1329,7 +1334,7 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
                 ? _ResidentOtpResendRow(
                     prompt: tOb.residentResendPrompt,
                     linkLabel: ob.otpResendSeconds > 0
-                        ? tOb.step3ResendOtp.replaceAll(
+                        ? tOb.residentResendOtp.replaceAll(
                             '{time}',
                             _formatOtpResendTime(ob.otpResendSeconds),
                           )

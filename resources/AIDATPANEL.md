@@ -57,7 +57,7 @@ aidatpanel/
 - **Auth:** JWT — access ~15dk (`JWT_SECRET`), refresh ~30gün (`REFRESH_TOKEN_SECRET`) + `refreshTokenVersion` / `UserSession` SHA-256 replay koruması
 - **Email:** Resend (şifre sıfırlama)
 - **Push:** Firebase Admin SDK (FCM)
-- **Sakin telefon doğrulama:** Firebase Auth Phone + reCAPTCHA Enterprise (`recaptcha_enterprise_flutter` 18.9.1; mobil SMS → `idToken` → `POST /auth/firebase-phone`). USB/`flutter run` sideload’da Play Integrity çalışmaz → tarayıcı reCAPTCHA açılır; `MainActivity`’de `android:taskAffinity=""` olmamalı (aksi halde `about:blank`, SMS gitmez — flutterfire#17737).
+- **Sakin telefon doğrulama:** Firebase Auth Phone + reCAPTCHA Enterprise (`recaptcha_enterprise_flutter` 18.9.1; mobil SMS → `idToken` → `POST /auth/firebase-phone`). Identity Platform: `useSmsTollFraudProtection=true`, `phoneEnforcementState=AUDIT`, `smsRegionConfig` TR allowlist (Vodafone Error 39 / toll-fraud rota bloğunu önler). USB/`flutter run` sideload’da Play Integrity çalışmaz → tarayıcı reCAPTCHA açılır; `MainActivity`’de `android:taskAffinity=""` olmamalı (aksi halde `about:blank`, SMS gitmez — flutterfire#17737). İstemci Error 39 → `firebase_phone_carrier_blocked`.
 - **SMS (şifre sıfırlama / yönetici e-posta dışı):** Twilio Verify / Twilio SMS / NetGsm (`SMS_PROVIDER`) — sakin OTP için kullanılmaz
 - **Abonelik:** RevenueCat webhook + mobil SDK
 - **Realtime:** `ws` — `WSS /api/v1/realtime?token=ACCESS_JWT`
@@ -591,6 +591,8 @@ POST   /api/v1/auth/reset-password
 **Sakin Firebase Phone (`POST /auth/firebase-phone`):**
 - Body: `{ idToken, purpose: "resident_login"|"resident_join"|"resident_phone_change", name?, inviteCode?, deviceLabel?, platform? }`
 - Mobil Firebase Auth Phone ile SMS doğrular → `idToken` alır → backend `admin.auth().verifyIdToken` → AidatPanel JWT
+- Console (Identity Platform `projects/*/config` → `recaptchaConfig`): `useSmsTollFraudProtection=true`, `phoneEnforcementState=AUDIT`, `tollFraudManagedRules` (ör. `startScore=0.8`); `smsRegionConfig.allowlistOnly.allowedRegions=["TR"]`
+- Play Store E2E (2026-08-05): Turkcell / Türk Telekom / Vodafone SMS OK
 - `resident_login` → `{ accessToken, refreshToken, user }`
 - `resident_join` (isim yok) → `{ requireName: true }` (pending `PhoneOtpToken`)
 - `resident_phone_change` → `{ verified: true }` (pending; `PUT /me` telefon ile tüketir)
@@ -659,6 +661,8 @@ DELETE /api/v1/buildings/:buildingId/apartments/:id
 DELETE /api/v1/buildings/:buildingId/apartments/:id/resident
 POST   /api/v1/apartments/:apartmentId/invite-code
 ```
+
+**Davet kodu formatı:** `AP` + 1 hex + `-` + 3 hex + `-` + 4 hex (örn. `APB-794-11FF`). Backend `crypto.randomBytes(4).toString("hex")` üretir; sabit önekteki `P` hex değildir. Mobil `InviteCodeInputRow` girişte `0-9A-FP` kabul eder (`G–Z` reddedilir). Deep link `aidatpanel://join?code=` / `https://aidatpanel.com/join?code=` kodu doğrudan state’e yazar.
 
 ### Dues (Aidat)
 ```
@@ -987,7 +991,7 @@ bash backend/scripts/deploy.sh
 | i18n | Slang (TR/EN JSON) | Type-safe; UI'da hardcoded string yasak |
 | Abonelik | RevenueCat | iOS+Android |
 | Push | FCM + WS | Tray + anlık |
-| Sakin telefon OTP | Firebase Auth Phone | SMS + idToken |
+| Sakin telefon OTP | Firebase Auth Phone | SMS + idToken; Identity Platform SMS toll fraud (`AUDIT`) + TR region; Error 39 → `firebase_phone_carrier_blocked` |
 | SMS (şifre sıfırlama) | Twilio / NetGsm | Yönetici şifre reset |
 
 ---

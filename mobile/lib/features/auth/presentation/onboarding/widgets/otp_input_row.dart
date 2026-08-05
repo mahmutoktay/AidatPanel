@@ -5,7 +5,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
 import '../../../../../core/theme/app_typography.dart';
 
-/// 6 haneli OTP girişi — esnek hücre genişliği, backspace ile önceki hücreye geçiş.
+/// 6 haneli OTP girişi — dikdörtgen hücreler, border + gölge, backspace desteği.
 class OtpInputRow extends StatefulWidget {
   const OtpInputRow({
     super.key,
@@ -24,6 +24,8 @@ class OtpInputRow extends StatefulWidget {
 
 class _OtpInputRowState extends State<OtpInputRow> {
   static const _length = 6;
+  /// Daha dikdörtgen görünüm için köşe yarıçapı (genel inputRadius=12'den düşük).
+  static const _cellRadius = 8.0;
   late final List<TextEditingController> _controllers;
   late final List<FocusNode> _focusNodes;
 
@@ -34,8 +36,13 @@ class _OtpInputRowState extends State<OtpInputRow> {
     _focusNodes = List.generate(_length, (_) {
       final node = FocusNode();
       node.onKeyEvent = _onKeyEvent;
+      node.addListener(_onFocusChanged);
       return node;
     });
+  }
+
+  void _onFocusChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -44,6 +51,7 @@ class _OtpInputRowState extends State<OtpInputRow> {
       c.dispose();
     }
     for (final f in _focusNodes) {
+      f.removeListener(_onFocusChanged);
       f.dispose();
     }
     super.dispose();
@@ -111,16 +119,38 @@ class _OtpInputRowState extends State<OtpInputRow> {
       builder: (context, constraints) {
         final gap = AppSizes.spacingXS;
         final totalGaps = gap * (_length - 1);
+        // Genişlik yüksekliğin biraz altında → dikey dikdörtgen hücreler
         final cellWidth =
-            ((constraints.maxWidth - totalGaps) / _length).clamp(40.0, 56.0);
-        final fontSize = cellWidth >= 48 ? 22.0 : 18.0;
+            ((constraints.maxWidth - totalGaps) / _length).clamp(40.0, 52.0);
+        final cellHeight = 60.0;
+        final fontSize = cellWidth >= 46 ? 22.0 : 18.0;
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(_length, (i) {
-            return SizedBox(
+            final focused = _focusNodes[i].hasFocus;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              curve: Curves.easeInOut,
               width: cellWidth,
-              height: 56,
+              height: cellHeight,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(_cellRadius),
+                border: Border.all(
+                  color: focused ? AppColors.brand : AppColors.border,
+                  width: focused ? 2 : 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: focused
+                        ? AppColors.brand.withValues(alpha: 0.18)
+                        : AppColors.ink.withValues(alpha: 0.08),
+                    blurRadius: focused ? 8 : 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: TextField(
                 controller: _controllers[i],
                 focusNode: _focusNodes[i],
@@ -133,20 +163,18 @@ class _OtpInputRowState extends State<OtpInputRow> {
                   fontSize: fontSize,
                   height: 1.1,
                   fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
                 ),
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   counterText: '',
                   contentPadding: EdgeInsets.zero,
                   isDense: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                    borderSide:
-                        BorderSide(color: AppColors.brand, width: 2),
-                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  filled: false,
                 ),
                 onChanged: (v) => _onChanged(i, v),
               ),
