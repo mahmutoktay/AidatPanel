@@ -1222,6 +1222,8 @@ BottomNavigationBarItem(
 
 **Kural:** Dashboard, sync, toggle, payload, cache gibi teknik terimler UI'da asla görünmemeli.
 
+**Toast / anlık bildirim:** Kısa tek cümle; başarıda «başarıyla» kalıbı kullanılır; hata mesajlarında teknik jargon yok (Firebase Console, API, Downloads vb.).
+
 ---
 
 ### Geri Dönülemez İşlemler — Onay Dialog'u

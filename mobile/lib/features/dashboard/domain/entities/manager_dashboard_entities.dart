@@ -133,6 +133,10 @@ class ManagerDuesAmountSummary extends Equatable {
   double get collectionProgress =>
       expectedAmount <= 0 ? 0 : collectedAmount / expectedAmount;
 
+  /// Tahsilat kartı gösterilsin mi? Boş özet (0 / 0 ₺) anlamsızdır.
+  bool get hasCollectionData =>
+      expectedAmount > 0 || collectedAmount > 0;
+
   static const empty = ManagerDuesAmountSummary(
     collectedAmount: 0,
     expectedAmount: 0,

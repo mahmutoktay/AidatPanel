@@ -255,7 +255,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
                   onAddSite: () =>
                       _openAndRefreshBuildings('/manager-dashboard/add-site'),
                 )
-              else
+              else if (duesAmountSummary.hasCollectionData)
                 ManagerDuesSummaryCard(
                   summary: duesAmountSummary,
                   currency: expenseCurrency,

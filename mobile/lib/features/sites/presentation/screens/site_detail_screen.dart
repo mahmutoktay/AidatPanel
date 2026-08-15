@@ -86,18 +86,24 @@ class SiteDetailScreen extends ConsumerWidget {
             children: [
               _SiteIdentityCard(site: detail.site),
               const SizedBox(height: AppSizes.spacingM),
-              ManagerDuesSummaryCard(
-                summary: ManagerDuesAmountSummary(
-                  collectedAmount: detail.aggregation.collectedAmount,
-                  expectedAmount: detail.aggregation.expectedAmount,
-                  overdueCount: detail.site.overdueCount,
+              if (detail.aggregation.collectedAmount > 0 ||
+                  detail.aggregation.expectedAmount > 0)
+                ManagerDuesSummaryCard(
+                  summary: ManagerDuesAmountSummary(
+                    collectedAmount: detail.aggregation.collectedAmount,
+                    expectedAmount: detail.aggregation.expectedAmount,
+                    overdueCount: detail.site.overdueCount,
+                  ),
+                  currency: detail.aggregation.currency,
+                  remindDueIdsByBuilding: remindDueIdsByBuilding.isEmpty
+                      ? null
+                      : remindDueIdsByBuilding,
                 ),
-                currency: detail.aggregation.currency,
-                remindDueIdsByBuilding: remindDueIdsByBuilding.isEmpty
-                    ? null
-                    : remindDueIdsByBuilding,
-              ),
-              const SizedBox(height: AppSizes.spacingL),
+              if (detail.aggregation.collectedAmount > 0 ||
+                  detail.aggregation.expectedAmount > 0)
+                const SizedBox(height: AppSizes.spacingL)
+              else
+                const SizedBox(height: AppSizes.spacingM),
               _BlocksSectionHeader(
                 siteId: siteId,
                 buildingCount: detail.buildings.length,

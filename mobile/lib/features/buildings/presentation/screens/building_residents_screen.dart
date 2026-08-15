@@ -20,6 +20,7 @@ import '../../../apartments/data/apartments_store.dart';
 import '../../../apartments/domain/entities/apartment_entity.dart';
 import '../../../apartments/presentation/widgets/add_apartment_bottom_sheet.dart';
 import '../../data/buildings_store.dart';
+import '../../data/invite_code_store.dart';
 import '../../domain/entities/building_entity.dart';
 
 import '../../../dues/presentation/providers/dues_provider.dart';
@@ -482,7 +483,10 @@ class _BuildingResidentsScreenState
                       : 3 + enrichedResidents.length,
                   itemBuilder: (context, index) {
                     if (index == 0) {
-                      return _buildHeader(_resolvedBuilding);
+                      return _buildHeader(
+                        _resolvedBuilding,
+                        apartments: residents,
+                      );
                     }
                     if (index == 1) {
                       return const SizedBox(height: AppSizes.spacingL);
@@ -504,6 +508,11 @@ class _BuildingResidentsScreenState
 
                     final residentIndex = index - 3;
                     final apt = enrichedResidents[residentIndex];
+                    final activeInvite =
+                        ref.watch(inviteCodeStoreProvider)[apt.id];
+                    final hasPendingInvite = !apt.isOccupied &&
+                        activeInvite != null &&
+                        !activeInvite.isExpired;
                     return BuildingResidentCard(
                       apt: apt,
                       selectionMode: _selectionMode,
@@ -511,6 +520,7 @@ class _BuildingResidentsScreenState
                       onToggleSelection: _toggleApartmentSelection,
                       onShowDetails: () =>
                           ApartmentDetailsSheet.show(context, apt: apt),
+                      hasPendingInvite: hasPendingInvite,
                       onInvite: apt.isOccupied
                           ? null
                           : () => context.push(
@@ -576,7 +586,10 @@ class _BuildingResidentsScreenState
     );
   }
 
-  Widget _buildHeader(BuildingEntity building) {
+  Widget _buildHeader(
+    BuildingEntity building, {
+    required List<ApartmentEntity> apartments,
+  }) {
     final allDues = ref.watch(allBuildingsDuesProvider).value ?? const {};
     final item = BuildingListItemModel.fromEntity(
       building: building,
@@ -595,11 +608,32 @@ class _BuildingResidentsScreenState
       buildingIds: {building.id},
     );
 
+    final activeCodes = ref.watch(inviteCodeStoreProvider);
+    var pendingInviteCount = 0;
+    var vacantApartmentCount = 0;
+    for (final apt in apartments) {
+      if (apt.isOccupied) continue;
+      vacantApartmentCount++;
+      final invite = activeCodes[apt.id];
+      if (invite != null && !invite.isExpired) {
+        pendingInviteCount++;
+      }
+    }
+
     return BuildingDetailOverview(
       item: item,
       summary: summary,
       currency: building.currency,
       remindDueIdsByBuilding: overdueDueIdsByBuilding,
+      occupiedApartments: building.occupiedApartments,
+      vacantApartmentCount: vacantApartmentCount,
+      pendingInviteCount: pendingInviteCount,
+      onInviteResidents: vacantApartmentCount == 0
+          ? null
+          : () => context.push(
+                '/manager-dashboard/invite-code'
+                '?buildingId=${building.id}',
+              ),
     );
   }
 

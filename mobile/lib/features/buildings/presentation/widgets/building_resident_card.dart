@@ -16,6 +16,7 @@ class BuildingResidentCard extends StatelessWidget {
   final ValueChanged<ApartmentEntity> onToggleSelection;
   final VoidCallback onShowDetails;
   final VoidCallback? onInvite;
+  final bool hasPendingInvite;
 
   const BuildingResidentCard({
     super.key,
@@ -25,6 +26,7 @@ class BuildingResidentCard extends StatelessWidget {
     required this.onToggleSelection,
     required this.onShowDetails,
     this.onInvite,
+    this.hasPendingInvite = false,
   });
 
   @override
@@ -36,6 +38,7 @@ class BuildingResidentCard extends StatelessWidget {
         apt: apt,
         onTap: onShowDetails,
         onInvite: onInvite,
+        hasPendingInvite: hasPendingInvite,
       );
     }
 
@@ -54,17 +57,22 @@ class _VacantApartmentCard extends StatelessWidget {
     required this.apt,
     required this.onTap,
     this.onInvite,
+    this.hasPendingInvite = false,
   });
 
   final ApartmentEntity apt;
   final VoidCallback onTap;
   final VoidCallback? onInvite;
+  final bool hasPendingInvite;
 
   @override
   Widget build(BuildContext context) {
     final apartmentLabel =
         ApartmentUiUtils.formatApartmentLabel(context, apt.apartmentNumber);
     const tileRadius = BorderRadius.all(Radius.circular(20));
+    final statusLabel = hasPendingInvite
+        ? context.t.common.pendingInviteStatus
+        : context.t.common.emptyApartment;
 
     return Material(
       color: Colors.transparent,
@@ -100,9 +108,11 @@ class _VacantApartmentCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      context.t.common.emptyApartment,
+                      statusLabel,
                       style: AppTypography.body2.copyWith(
-                        color: AppColors.mutedText,
+                        color: hasPendingInvite
+                            ? AppColors.statusBlue
+                            : AppColors.mutedText,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -122,7 +132,9 @@ class _VacantApartmentCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                     ),
                     child: Text(
-                      context.t.common.inviteResident,
+                      hasPendingInvite
+                          ? context.t.common.viewInvite
+                          : context.t.common.inviteResident,
                       style: AppTypography.body2.copyWith(
                         color: AppColors.brand,
                         fontWeight: FontWeight.w700,
