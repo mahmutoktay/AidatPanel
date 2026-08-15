@@ -4,8 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gizlilik Politikası | AidatPanel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta name="description" content="AidatPanel gizlilik politikası: kişisel verilerinizin nasıl işlendiği, saklandığı ve korunduğu.">
+    <link rel="canonical" href="https://aidatpanel.com/gizlilik.html">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('aidatpanel-theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3.1">
     <style>
         body { padding-top: 50px; }
         .legal-container { max-width: 800px; margin: 0 auto; padding: 40px; background: var(--white); border-radius: 16px; border: 1px solid var(--border-light); }
@@ -14,6 +27,7 @@
         p, li { color: var(--text-sec); font-size: 18px; line-height: 1.8; }
         .back-link { display: inline-block; margin-bottom: 20px; color: var(--accent); text-decoration: none; font-weight: 700; font-size: 18px; }
         .back-link:hover { text-decoration: underline; }
+        .meta { color: var(--text-sec); font-size: 15px; margin-bottom: 24px; }
     </style>
 </head>
 <body>
@@ -21,25 +35,31 @@
         <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
         <div class="legal-container">
             <h1>Gizlilik Politikası</h1>
-            <p>Bu Gizlilik Politikası, AidatPanel mobil uygulaması ve web sitesini kullandığınızda toplanan bilgilerin nasıl kullanıldığını ve korunduğunu açıklar.</p>
+            <p class="meta">Son güncelleme: Ağustos 2026 · Veri sorumlusu: Vefa Yazılım · İletişim: <a href="mailto:store@vefayazilim.com">store@vefayazilim.com</a></p>
+            <p>Bu metin, Vefa Yazılım tarafından sunulan AidatPanel mobil uygulaması ve web sitesini kullanırken kişisel verilerinizin nasıl işlendiğini açıklar. Uygulamayı kullanmaya devam ederek bu politikayı okuduğunuzu kabul etmiş sayılırsınız.</p>
             
-            <h2>1. Toplanan Bilgiler</h2>
-            <p>Hizmetlerimizi sunabilmek için sizden isim, e-posta adresi, telefon numarası ve bina yönetim bilgileri gibi veriler talep edebiliriz.</p>
+            <h2>1. Veri sorumlusu</h2>
+            <p>AidatPanel hizmeti kapsamında kişisel verileriniz, veri sorumlusu Vefa Yazılım tarafından 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) ve ilgili mevzuata uygun olarak işlenir. Talepleriniz için: store@vefayazilim.com</p>
 
-            <h2>2. Bilgilerin Kullanımı</h2>
-            <p>Topladığımız bilgileri şu şekilde kullanırız:</p>
-            <ul>
-                <li>Hesabınızı oluşturmak ve doğrulamak,</li>
-                <li>Aidat ve harcama bildirimlerini iletmek,</li>
-                <li>Uygulama deneyiminizi iyileştirmek ve teknik destek sağlamak.</li>
-            </ul>
+            <h2>2. Toplanan veriler</h2>
+            <p>Hesap bilgileri (ad, e-posta, telefon, dil tercihi), apartman ve daire ilişkisi, aidat ve ödeme kayıtları, destek talepleri, duyuru ve bildirim tercihleri, dekont ve makbuz görselleri (yüklediğinizde), cihaz bildirim anahtarı (FCM) ve güvenli oturum bilgileri (şifrelenmiş token) işlenebilir. Sakin girişi için telefon numarası ve SMS doğrulama (Firebase Authentication) kullanılabilir.</p>
 
-            <h2>3. Veri Güvenliği</h2>
-            <p>Verilerinizin güvenliğini sağlamak için endüstri standardı şifreleme yöntemleri ve güvenlik önlemleri kullanıyoruz. Verileriniz izinsiz erişime karşı korunmaktadır.</p>
+            <h2>3. İşleme amaçları</h2>
+            <p>Verileriniz; aidat ve gider yönetimi, tahsilat ve dekont süreçleri, apartman içi iletişim ve duyurular, kimlik doğrulama, abonelik ve faturalama (Google Play / App Store / RevenueCat), hizmet güvenliği, yasal yükümlülükler ve size bildirim göndermek amacıyla işlenir.</p>
 
-            <h2>4. Çerezler (Cookies)</h2>
+            <h2>4. Saklama ve güvenlik</h2>
+            <p>Veriler güvenli sunucularda saklanır; iletişim HTTPS ile şifrelenir. Oturum bilgileri cihazınızda güvenli depolamada tutulur. Yasal zorunluluklar dışında veriler, hizmet ilişkisi süresince ve mevzuattaki süreler boyunca muhafaza edilir.</p>
+
+            <h2>5. Paylaşım</h2>
+            <p>Kişisel verileriniz üçüncü taraflara satılmaz. Yalnızca hizmetin sunulması için gerekli altyapı sağlayıcıları (barındırma, bildirim, abonelik doğrulama, SMS doğrulama vb.) ve kanunen yetkili kurumlarla, mevzuata uygun şekilde paylaşılabilir.</p>
+
+            <h2>6. Haklarınız</h2>
+            <p>KVKK kapsamında verilerinize erişme, düzeltme, silme, işlemeyi kısıtlama ve itiraz etme haklarına sahipsiniz. Hesap kapatma (soft delete) uygulama ayarlarından yapılabilir; yasal saklama gerektiren kayıtlar anonimleştirilerek tutulabilir. Başvurularınızı store@vefayazilim.com adresine iletebilirsiniz.</p>
+
+            <h2>7. Çerezler</h2>
             <p>Web sitemiz, kullanıcı deneyimini analiz etmek ve tercihlerinizi hatırlamak amacıyla çerezler kullanabilir.</p>
         </div>
     </div>
+<script src="js/theme.js" defer></script>
 </body>
 </html>

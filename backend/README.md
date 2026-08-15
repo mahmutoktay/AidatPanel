@@ -28,6 +28,16 @@ API: `http://127.0.0.1:4200/api/v1`
 npm test   # unit testler (dueGeneration, trDueDate, authRateLimitKey)
 ```
 
+### Tanıtım / Play Store demo verisi
+
+Canlı (veya tünellenmiş) DB’de yönetici hesabına site/blok/gider/talep doldurur. Varsayılan tünel portu `5433`.
+
+```bash
+# SSH tüneli: uzak 5432 → yerel 5433 açık olmalı
+DEMO_MANAGER_EMAIL=abdullahaslan061212@gmail.com npm run seed:showcase
+# Sıfırdan: DEMO_FORCE=1 npm run seed:showcase
+```
+
 ---
 
 ## Proje yapısı (özet)

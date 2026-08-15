@@ -81,8 +81,11 @@ describe("buildingQuotaService", () => {
     });
   });
 
-  test("assertCanAddBuilding passes when limit is null", async () => {
-    prisma.subscription.findUnique.mockResolvedValue({ status: "ACTIVE" });
+  test("assertCanAddBuilding passes for Business (sınırsız)", async () => {
+    prisma.subscription.findUnique.mockResolvedValue({
+      status: "ACTIVE",
+      plan: "business_monthly",
+    });
     prisma.building.count.mockResolvedValue(99);
     await expect(assertCanAddBuilding("mgr-1")).resolves.toBeUndefined();
   });

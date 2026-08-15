@@ -13,7 +13,7 @@
 - **Veritabanı:** PostgreSQL (Prisma 7)
 - **Web:** Statik landing (`web/`); admin panel API: `/api/v1/admin`
 - **Dil:** TR + EN (Slang i18n)
-- **Abonelik:** RevenueCat (`aidatpanel_monthly` / `aidatpanel_annual`) — kota: **toplam bina sayısı**
+- **Abonelik:** RevenueCat — Temel (`aidatpanel_monthly` ₺200 / `aidatpanel_annual` ₺2000, ≤20 bina) ve Business (`aidatpanel_business_monthly` ₺400 / `aidatpanel_business_annual` ₺4000, sınırsız). Kota: **toplam bina sayısı** (site altı bloklar dahil). Aboneliksiz: okuma var, yeni bina yok.
 
 ---
 
@@ -926,20 +926,44 @@ Nginx: `Upgrade` / `Connection "upgrade"`. Deploy: `backend/scripts/deploy.sh` /
 
 ## 💳 Abonelik Sistemi (RevenueCat)
 
-| Plan | Product ID | Fiyat (önerilen) |
-|------|------------|------------------|
-| Aylık | `aidatpanel_monthly` | ₺99/ay |
-| Yıllık | `aidatpanel_annual` | ₺799/yıl |
+| Plan | Product ID | Fiyat | Bina kotası |
+|------|------------|-------|-------------|
+| Temel aylık | `aidatpanel_monthly` | ₺200/ay | 20 |
+| Temel yıllık | `aidatpanel_annual` | ₺2000/yıl | 20 |
+| Business aylık | `aidatpanel_business_monthly` | ₺400/ay | sınırsız |
+| Business yıllık | `aidatpanel_business_annual` | ₺4000/yıl | sınırsız |
 
-Webhook: `POST /api/v1/subscription/webhook/revenuecat` — `INITIAL_PURCHASE`, `RENEWAL`, `CANCELLATION`, `EXPIRATION`, `BILLING_ISSUE`.  
-Mobil: `purchases_flutter` + `--dart-define=REVENUECAT_ANDROID_KEY=...`.  
-Yönetici kota: `GET /me/subscription` → `usage.buildings` / `limits.buildings`.
+- Abonelik yok / süresi dolmuş: mevcut veri okunur; **yeni bina/blok eklenemez** (`limits.buildings = 0`).
+- Plan değerleri (DB/webhook): `monthly` \| `annual` \| `business_monthly` \| `business_annual`.
+- Webhook: `POST /api/v1/subscription/webhook/revenuecat` — `INITIAL_PURCHASE`, `RENEWAL`, `PRODUCT_CHANGE`, `CANCELLATION`, `EXPIRATION`, `BILLING_ISSUE`.
+- Admin hediyesi (`platform: admin_grant` / `PromoGrant`) yalnızca AidatPanel DB’de yaşar; Google Play abonelik listesinde görünmez (beklenen).
+- Mağaza satın alma webhook’u mevcut kaydı ezerken: `currentPeriodEnd = max(mevcut, mağaza)`; hediye dönemi bitmeden daha yüksek plan (ör. Business) korunur; mağaza expire/cancel iken saklanan hediye bitişi ilerideyse status `ACTIVE` kalır.
+- Mobil: `purchases_flutter` + `--dart-define=REVENUECAT_ANDROID_KEY=...` (iOS: `REVENUECAT_IOS_KEY`).
+- Yönetici kota: `GET /me/subscription` → `usage.buildings` / `limits.buildings` (`null` = sınırsız).
+
+### Play / mağaza one-pager (FAZ 7)
+
+| Öğe | Değer |
+|-----|-------|
+| Package (Android) | `com.aidatpanel.app` |
+| Bundle (iOS) | `com.aidatpanel.mobile` (App Store yakında) |
+| Privacy URL | `https://aidatpanel.com/gizlilik.html` |
+| Support e-posta | `store@vefayazilim.com` |
+| Play listing | `https://play.google.com/store/apps/details?id=com.aidatpanel.app` |
+| Mapping (R8) | `mobile/build/app/outputs/mapping/prodRelease/mapping.txt` |
+| AAB | `mobile/build/app/outputs/bundle/prodRelease/app-prod-release.aab` |
+
+**İnsan (Console):** Play’de 4 abonelik ürününün fiyatlarını güncelleyin / Business ürünlerini oluşturun; RevenueCat offering’e ekleyin; AAB + deobfuscation dosyasını yükleyin.
 
 ---
 
 ## 🌐 Web (Landing Page)
 
 Statik HTML/CSS/JS — uygulama indirme, SSS, KVKK. Domain: `aidatpanel.com`. Admin UI ayrı origin olabilir (`admin.aidatpanel.com` → `/api/v1/admin`).
+
+- **Marka:** lacivert `#082860`, turuncu `#F86000`; logo `web/assets/app_logo.png`
+- **Akış:** sorun odaklı hero + telefon mockup → yönetici sorun/çözüm → 3 adım → güven → SSS
+- **SEO:** meta/OG/Twitter, canonical, JSON-LD (`Organization` + `SoftwareApplication`), `robots.txt`, `sitemap.xml`
 
 ---
 
@@ -948,23 +972,32 @@ Statik HTML/CSS/JS — uygulama indirme, SSS, KVKK. Domain: `aidatpanel.com`. Ad
 | Öğe | Değer |
 |-----|-------|
 | API | `api.aidatpanel.com` → port 4200 |
-| Sunucu yolu | `/home/aidatpanel-api/htdocs/api.aidatpanel.com` |
-| PM2 | `aidapanel-api` |
-| Script | `backend/scripts/deploy.sh` / `deploy.ps1` |
-| Config | `deploy.config.example.json` → `deploy.local.json` (gitignore) |
+| API yolu | `/home/aidatpanel-api/htdocs/api.aidatpanel.com` |
+| API PM2 | `aidapanel-api` |
+| API script | `bash backend/scripts/deploy.sh` |
+| Landing | `aidatpanel.com` → `/home/aidatpanel/htdocs/aidatpanel.com` |
+| Landing script | `bash web/scripts/deploy.sh` (`.well-known` varsayılan hariç) |
+| Admin UI | `admin.aidatpanel.com` → `/home/aidatpanel-admin/htdocs/admin.aidatpanel.com` |
+| Admin PM2 | `aidat-admin` (kullanıcı `aidatpanel-admin`, port 4300) |
+| Admin script | `bash adminpanel/scripts/deploy.sh` |
+| Config | Her site: `*/scripts/deploy.config.example.json` → `deploy.local.json` (gitignore) |
 
 ```bash
-# Yerel deploy (zorunlu kural: backend değişince)
+# Backend değişince
 bash backend/scripts/deploy.sh
-# Sunucuda: npm ci --omit=dev && npx prisma migrate deploy && pm2 restart aidapanel-api
+# Landing (web/) değişince
+bash web/scripts/deploy.sh
+# Admin panel değişince
+bash adminpanel/scripts/deploy.sh
 ```
 
-`.env`, `uploads/dekonts/`, Firebase JSON **üzerine yazılmaz**.
+`.env`, `uploads/dekonts/`, Firebase JSON **üzerine yazılmaz**. Landing `.well-known` bilinçli güncelleme: `bash web/scripts/deploy.sh --include-well-known`.
 
 | Subdomain | Hedef |
 |-----------|-------|
 | `aidatpanel.com` | Landing |
 | `api.aidatpanel.com` | API + WS |
+| `admin.aidatpanel.com` | Admin panel UI |
 
 ---
 

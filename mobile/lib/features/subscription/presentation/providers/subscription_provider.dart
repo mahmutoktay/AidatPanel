@@ -127,6 +127,12 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
   Future<void> purchaseAnnual() =>
       _purchase(SubscriptionConstants.annualProductId);
 
+  Future<void> purchaseBusinessMonthly() =>
+      _purchase(SubscriptionConstants.businessMonthlyProductId);
+
+  Future<void> purchaseBusinessAnnual() =>
+      _purchase(SubscriptionConstants.businessAnnualProductId);
+
   Future<void> _purchase(String productId) async {
     if (state.isPurchasing) return;
     if (!RevenueCatService.isConfigured) {

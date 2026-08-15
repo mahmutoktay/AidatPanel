@@ -1,7 +1,6 @@
 (function () {
   var PLAY_STORE =
     'https://play.google.com/store/apps/details?id=com.aidatpanel.app';
-  var APP_STORE = 'https://apps.apple.com/tr/app/aidatpanel/id000000000';
   var JOIN_BASE = 'https://aidatpanel.com/join';
   var INVITE_CODE_RE = /^AP[0-9A-F]-[0-9A-F]{3}-[0-9A-F]{4}$/;
 
@@ -50,6 +49,6 @@
     }
   });
 
-  document.getElementById('play-store').href = PLAY_STORE;
-  document.getElementById('app-store').href = APP_STORE;
+  var playStore = document.getElementById('play-store');
+  if (playStore) playStore.href = PLAY_STORE;
 })();

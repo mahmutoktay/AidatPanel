@@ -1,7 +1,7 @@
 # AidatPanel — Yol Haritası ve Faz Durumu
 
 **Tek kaynak:** Fazlar, checklist, onaylar ve eksikler (Mobil + Backend).  
-**Güncelleme:** 2026-08-05 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
+**Güncelleme:** 2026-08-09 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
 
 **AI asistanlar** her oturumda bu dosyayı okur; yalnızca **AKTİF** fazda kod yazar (`CLAUDE.md` faz kapısı).
 
@@ -286,13 +286,16 @@ flutter build appbundle --release --flavor prod -t lib/main.dart --dart-define=R
 
 ## ▶ FAZ 7 — v1.0.0 Lansman (AKTİF)
 
-**Hedef:** ~2026-07-14
+**Hedef:** ~2026-07-14 · **Güncelleme:** 2026-08-09
 
-- [ ] App Store & Google Play submit
-- [ ] Landing page güncelleme
+- [ ] App Store & Google Play submit *(Android-first: Play; iOS «Yakında»)*
+- [x] Landing page güncelleme *(AidatPro ilhamı: yönetici/sakin paneli, istatistik şeridi, uzun fayda bölümleri + tema kalıcılığı — `web/` deploy 2026-08-09)*
 - [x] Firebase Analytics & Crashlytics
-- [ ] v1.0.0 release tag
-- [x] Phone Auth: `taskAffinity=""` kaldırıldı (flutterfire#17737) — Play AAB `0.6.13+2000000021`
+- [ ] v1.0.0 release tag *(pubspec hâlâ `0.6.13+2000000022`; 1.0.0 bump + git tag yalnızca kullanıcı onayı)*
+- [x] Phone Auth: `taskAffinity=""` kaldırıldı (flutterfire#17737)
+- [x] Abonelik modeli: Temel ≤20 bina (₺200/₺2000) + Business sınırsız (₺400/₺4000); kota enforce + paywall 4 SKU (2026-08-09)
+- [x] Mobil abonelik ekranı: Temel/Business karşılaştırma kartları, hediye (`admin_grant`) bandı, kota/CTA (2026-08-09)
+- [x] Play Store / tanıtım videosu için canlı demo veri seed (`backend/scripts/seed-showcase-demo.js` → Abdullah hesabı; Business promo 90 gün; 2026-08-09)
 
 ### Android R8 / minify (2026-07-18)
 
@@ -304,11 +307,30 @@ Play Console «Optimizasyon ekleme / kod karartma» için `prodRelease` R8 açı
 - [x] `-repackageclasses` — koruma dışı sınıflar DEX sıkıştırması için yeniden paketleniyor
 - [x] `google-services` 4.4.2 (Crashlytics mapping upload için 4.4.1+)
 - [x] Splash: adaptive `mipmap/ic_launcher` bitmap src düzeltildi + `res/raw/keep.xml`
-- [x] Artefakt: AAB ~70 MB (önce ~73 MB), `mapping.txt` → `build/app/outputs/mapping/prodRelease/`
+- [ ] Artefakt: lansman AAB + `mapping.txt` *(şimdiki sürüm `0.6.13+2000000022`; 1.0.0 AAB kullanıcı onayı ile)*
 - [x] Emülatör smoke: soğuk açılış, yeniden başlatma, deep link, share intent; Firebase/FCM init; `ClassNotFound` / FATAL yok
 - [x] Fiziksel cihaz OTP (Play Store): Turkcell / Türk Telekom / Vodafone — sakin Firebase Phone Auth SMS E2E (2026-08-05)
-- [ ] Fiziksel cihaz + hesaplı regresyon (dekont/PDF, RevenueCat satın alma) — Play submit öncesi
+- [ ] Fiziksel cihaz + hesaplı regresyon (dekont/PDF, RevenueCat Temel/Business) — Play submit öncesi *(script aşağıda + `resources/yol-haritası/checklist.md`)*
 - [ ] Play Console’a AAB yükle → App bundle explorer’da «Deobfuscation file» / R8 skorunu doğrula
+
+### İnsan — Play + RevenueCat (kod tamam; Console sizde)
+
+1. Play abonelikler: `aidatpanel_monthly` → ₺200, `aidatpanel_annual` → ₺2000
+2. Yeni ürünler: `aidatpanel_business_monthly` ₺400, `aidatpanel_business_annual` ₺4000
+3. RevenueCat offering’e 4 paket; webhook product_id → plan eşlemesi backend’de hazır
+4. AAB + `mapping.txt` yükle *(1.0.0 sürüm adına geçmeden önce kullanıcı onayı; mevcut `0.6.13+2000000022`)*
+5. Deep link: `web/.well-known/assetlinks.json` SHA-256 doldur (release keystore)
+6. `aidatpanel.com` web: `bash web/scripts/deploy.sh` (`.well-known` uzak SHA korunur)
+
+### Fiziksel regresyon scripti (Play submit öncesi)
+
+1. Yönetici hesabı **aboneliksiz** → yeni bina / site bloğu → 403 / paywall mesajı; mevcut listeler okunur
+2. Temel aylık satın al → `GET /me/subscription` ACTIVE, `plan=monthly`, `limits.buildings=20`
+3. 19 bina varsa 20. ekle OK; 21. → kota dolu + Business yükselt ipucu
+4. Business aylık/yıllık yükselt → sınırsız; 21+ bina OK
+5. Sakin: dekont yükle → durum geçişleri; yönetici inceleme
+6. Yönetici: bina + site PDF indir/paylaş
+7. Cold start, FCM tray, davet `aidatpanel.com/join?code=`
 
 ### Lansman öncesi UX / akış temizliği (2026-07-11)
 
@@ -425,7 +447,7 @@ Site → bina hiyerarşisi; tekil binalar korunur. Site silinince alt binalar ca
 | 4 | Pagination | Fullstack | ✅ | 4 liste + notifications |
 | 5 | Bina kartı dolu daire `0/N` | Backend | ✅ | `occupiedApartments` |
 | 6 | Profil / Dil / Şifre uçları | Fullstack | ✅ | FAZ 4 |
-| 7 | RevenueCat satın alma + webhook | Fullstack | 🟡 | FAZ 6 — webhook + SDK; E2E bekliyor |
+| 7 | RevenueCat satın alma + webhook | Fullstack | 🟡 | FAZ 6 webhook+SDK; Temel/Business kota 2026-08-09; Play/RC Console + E2E insan; admin hediye ↔ mağaza: `mergeStoreSubscriptionUpdate` (max bitiş + plan koruma, 2026-08-09) |
 | 8 | Gider makbuz `/proof` | Backend | ✅ | FAZ 2 kalıntısı |
 | 9 | Reports (aylık/yıllık PDF) | Fullstack | ✅ | E2E onaylandı |
 | 10 | `logout` FCM token temizliği | Backend | ✅ | FAZ 4 |

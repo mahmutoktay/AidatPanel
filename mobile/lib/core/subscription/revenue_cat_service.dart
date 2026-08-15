@@ -44,7 +44,6 @@ abstract final class RevenueCatService {
     try {
       await Purchases.logIn(userId);
     } catch (e, st) {
-      // Abonelik SDK hatası oturum açmayı engellememeli.
       if (kDebugMode) {
         debugPrint('[RevenueCat] logIn başarısız: $e\n$st');
       }
@@ -55,27 +54,12 @@ abstract final class RevenueCatService {
     if (!isConfigured) return;
     try {
       await Purchases.logOut();
-    } catch (_) {
-      // Zaten anonim kullanıcı olabilir.
-    }
+    } catch (_) {}
   }
-
-  static bool matchesMonthly(String productId) =>
-      productId == SubscriptionConstants.monthlyProductId ||
-      productId.startsWith('${SubscriptionConstants.monthlyProductId}:') ||
-      productId.toLowerCase().contains('month');
-
-  static bool matchesAnnual(String productId) =>
-      productId == SubscriptionConstants.annualProductId ||
-      productId.startsWith('${SubscriptionConstants.annualProductId}:') ||
-      productId.toLowerCase().contains('annual') ||
-      productId.toLowerCase().contains('year');
 
   static bool _storeIdMatches(String storeId, String productId) {
     if (storeId == productId) return true;
     if (storeId.startsWith('$productId:')) return true;
-    if (matchesMonthly(productId) && matchesMonthly(storeId)) return true;
-    if (matchesAnnual(productId) && matchesAnnual(storeId)) return true;
     return false;
   }
 
@@ -96,7 +80,16 @@ abstract final class RevenueCatService {
     return current;
   }
 
-  /// Mağaza fiyatları — offerings üzerinden aylık/yıllık paket.
+  static Package? _findPackageInOffering(Offering offering, String productId) {
+    for (final package in offering.availablePackages) {
+      if (_storeIdMatches(package.storeProduct.identifier, productId)) {
+        return package;
+      }
+    }
+    return null;
+  }
+
+  /// Mağaza fiyatları — Temel + Business, aylık/yıllık.
   static Future<SubscriptionStorePrices> fetchStorePrices() async {
     if (!isConfigured) return SubscriptionStorePrices.empty;
 
@@ -105,37 +98,49 @@ abstract final class RevenueCatService {
       final offering = _resolveOffering(offerings);
       if (offering == null) return SubscriptionStorePrices.empty;
 
-      Package? monthlyPackage;
-      Package? annualPackage;
-
-      if (offering.monthly != null) {
-        monthlyPackage = offering.monthly;
-      }
-      if (offering.annual != null) {
-        annualPackage = offering.annual;
-      }
+      StoreProduct? monthly;
+      StoreProduct? annual;
+      StoreProduct? businessMonthly;
+      StoreProduct? businessAnnual;
 
       for (final package in offering.availablePackages) {
         final id = package.storeProduct.identifier;
-        if (monthlyPackage == null &&
+        final product = package.storeProduct;
+        if (monthly == null &&
             _storeIdMatches(id, SubscriptionConstants.monthlyProductId)) {
-          monthlyPackage = package;
-        }
-        if (annualPackage == null &&
+          monthly = product;
+        } else if (annual == null &&
             _storeIdMatches(id, SubscriptionConstants.annualProductId)) {
-          annualPackage = package;
+          annual = product;
+        } else if (businessMonthly == null &&
+            _storeIdMatches(
+              id,
+              SubscriptionConstants.businessMonthlyProductId,
+            )) {
+          businessMonthly = product;
+        } else if (businessAnnual == null &&
+            _storeIdMatches(
+              id,
+              SubscriptionConstants.businessAnnualProductId,
+            )) {
+          businessAnnual = product;
         }
       }
 
-      final monthlyProduct = monthlyPackage?.storeProduct;
-      final annualProduct = annualPackage?.storeProduct;
-
       return SubscriptionStorePrices(
-        monthlyPriceString: monthlyProduct?.priceString,
-        annualPriceString: annualProduct?.priceString,
-        monthlyPrice: monthlyProduct?.price,
-        annualPrice: annualProduct?.price,
-        currencyCode: monthlyProduct?.currencyCode ?? annualProduct?.currencyCode,
+        monthlyPriceString: monthly?.priceString,
+        annualPriceString: annual?.priceString,
+        businessMonthlyPriceString: businessMonthly?.priceString,
+        businessAnnualPriceString: businessAnnual?.priceString,
+        monthlyPrice: monthly?.price,
+        annualPrice: annual?.price,
+        businessMonthlyPrice: businessMonthly?.price,
+        businessAnnualPrice: businessAnnual?.price,
+        currencyCode:
+            monthly?.currencyCode ??
+            annual?.currencyCode ??
+            businessMonthly?.currencyCode ??
+            businessAnnual?.currencyCode,
       );
     } catch (e, st) {
       if (kDebugMode) {
@@ -150,36 +155,13 @@ abstract final class RevenueCatService {
     final offerings = await Purchases.getOfferings();
     final offering = _resolveOffering(offerings);
     if (offering == null) return null;
-
-    if (matchesMonthly(productId) && offering.monthly != null) {
-      return offering.monthly;
-    }
-    if (matchesAnnual(productId) && offering.annual != null) {
-      return offering.annual;
-    }
-
-    for (final package in offering.availablePackages) {
-      if (_storeIdMatches(package.storeProduct.identifier, productId)) {
-        return package;
-      }
-    }
-    return null;
-  }
-
-  static List<String> _productIdCandidates(String productId) {
-    final ids = <String>{productId};
-    if (matchesMonthly(productId)) {
-      ids.add(SubscriptionConstants.monthlyProductId);
-    }
-    if (matchesAnnual(productId)) {
-      ids.add(SubscriptionConstants.annualProductId);
-    }
-    return ids.toList();
+    return _findPackageInOffering(offering, productId);
   }
 
   static Future<void> _purchaseStoreProduct(StoreProduct product) async {
     if (Platform.isAndroid) {
-      final option = product.defaultOption ??
+      final option =
+          product.defaultOption ??
           (product.subscriptionOptions != null &&
                   product.subscriptionOptions!.isNotEmpty
               ? product.subscriptionOptions!.first
@@ -203,7 +185,7 @@ abstract final class RevenueCatService {
       return;
     }
 
-    final products = await Purchases.getProducts(_productIdCandidates(productId));
+    final products = await Purchases.getProducts([productId]);
     if (products.isEmpty) {
       throw StateError('purchase_product_not_found');
     }
@@ -223,8 +205,12 @@ class SubscriptionStorePrices {
   const SubscriptionStorePrices({
     this.monthlyPriceString,
     this.annualPriceString,
+    this.businessMonthlyPriceString,
+    this.businessAnnualPriceString,
     this.monthlyPrice,
     this.annualPrice,
+    this.businessMonthlyPrice,
+    this.businessAnnualPrice,
     this.currencyCode,
   });
 
@@ -232,24 +218,41 @@ class SubscriptionStorePrices {
 
   final String? monthlyPriceString;
   final String? annualPriceString;
+  final String? businessMonthlyPriceString;
+  final String? businessAnnualPriceString;
   final double? monthlyPrice;
   final double? annualPrice;
+  final double? businessMonthlyPrice;
+  final double? businessAnnualPrice;
   final String? currencyCode;
 
   bool get hasAnyPrice =>
-      monthlyPriceString != null || annualPriceString != null;
+      monthlyPriceString != null ||
+      annualPriceString != null ||
+      businessMonthlyPriceString != null ||
+      businessAnnualPriceString != null;
 
-  /// Yıllık plan için aylık×12 karşılaştırma tutarı.
   double? get annualEquivalentAmount {
     if (monthlyPrice == null) return null;
     return monthlyPrice! * 12;
   }
 
-  /// Yıllık planda tasarruf (pozitif ise).
   double? get savingsAmount {
     final equivalent = annualEquivalentAmount;
     if (equivalent == null || annualPrice == null) return null;
     final savings = equivalent - annualPrice!;
+    return savings > 0 ? savings : null;
+  }
+
+  double? get businessAnnualEquivalentAmount {
+    if (businessMonthlyPrice == null) return null;
+    return businessMonthlyPrice! * 12;
+  }
+
+  double? get businessSavingsAmount {
+    final equivalent = businessAnnualEquivalentAmount;
+    if (equivalent == null || businessAnnualPrice == null) return null;
+    final savings = equivalent - businessAnnualPrice!;
     return savings > 0 ? savings : null;
   }
 }

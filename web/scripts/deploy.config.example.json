@@ -1,0 +1,11 @@
+{
+  "host": "SUNUCU_IP veya api.aidatpanel.com",
+  "user": "root",
+  "port": 22,
+  "sshKeyPath": "/home/abdullah/.ssh/id_ed25519",
+  "remotePath": "/home/aidatpanel/htdocs/aidatpanel.com",
+  "remoteOwner": "aidatpanel:aidatpanel",
+  "healthUrl": "https://aidatpanel.com/",
+  "method": "sync",
+  "excludeWellKnown": true
+}

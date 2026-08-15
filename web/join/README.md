@@ -24,11 +24,13 @@ web/
    ```bash
    keytool -list -v -keystore YOUR_RELEASE_KEY.jks -alias YOUR_ALIAS
    ```
-   `REPLACE_WITH_RELEASE_KEY_SHA256` değerini güncelleyin.
+   `sha256_cert_fingerprints` içindeki boş değeri güncelleyin.
 
-2. **iOS `web/.well-known/apple-app-site-association`:** `REPLACE_WITH_TEAM_ID` → Apple Developer Team ID.
+2. **iOS `web/.well-known/apple-app-site-association`:** `REPLACE_WITH_TEAM_ID` → Apple Developer Team ID (iOS lansmanında).
 
-3. **App Store:** `join/index.html` ve `join.js` içindeki App Store URL’sini gerçek uygulama sayfasıyla güncelleyin (ana sayfadaki `index.html` ile aynı tutun).
+3. **App Store:** iOS yayını hazır olunca `index.html`, `join/index.html` ve CTA’ları gerçek App Store URL’siyle güncelleyin (şu an «Yakında»).
+
+4. **Google Play:** `com.aidatpanel.app` mağaza sayfası canlı olmalıdır.
 
 ## Sunucu (CloudPanel / Nginx)
 

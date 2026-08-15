@@ -222,11 +222,21 @@ List<RouteBase> _managerDashboardChildRoutes(Ref ref) => [
     name: 'manager_subscription',
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) => SubscriptionScreen(
-      onBuyMonthly: () {
+      onBuyBasicMonthly: () {
         ref.read(subscriptionNotifierProvider.notifier).purchaseMonthly();
       },
-      onBuyYearly: () {
+      onBuyBasicAnnual: () {
         ref.read(subscriptionNotifierProvider.notifier).purchaseAnnual();
+      },
+      onBuyBusinessMonthly: () {
+        ref
+            .read(subscriptionNotifierProvider.notifier)
+            .purchaseBusinessMonthly();
+      },
+      onBuyBusinessAnnual: () {
+        ref
+            .read(subscriptionNotifierProvider.notifier)
+            .purchaseBusinessAnnual();
       },
     ),
   ),

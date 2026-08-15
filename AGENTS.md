@@ -2,7 +2,7 @@
 
 *Target LLM: Autonomous AI Agent (Implementation-capable)*
 *Source Material: `FAZ_DURUMU.md` (tek kaynak), `AIDATPANEL.md`, `backend/README.md`, Codebase Analysis*
-*Son güncelleme: 2026-08-05*
+*Son güncelleme: 2026-08-09*
 
 ---
 
@@ -39,7 +39,7 @@ Aşağıdaki değişikliklerden **herhangi biri** yapıldıysa ilgili dokümanla
 | Yeni `mobile/lib/features/` modülü | `AGENTS.md` §3.2, `FAZ_DURUMU.md` |
 | Paket versiyonu (`pubspec.yaml` / `package.json`) | `AGENTS.md` §2 |
 | Yeni env değişkeni | `backend/.env.example`, `AIDATPANEL.md` |
-| Deploy / PM2 / sunucu yolu değişikliği | `AGENTS.md` §6.2, `AIDATPANEL.md`, `deploy.config.example.json` |
+| Deploy / PM2 / sunucu yolu değişikliği | `AGENTS.md` §6.2, `AIDATPANEL.md`, ilgili `*/scripts/deploy.config.example.json` |
 | Mimari pattern değişikliği | `AGENTS.md` §3, referans implementasyon §6.9 |
 | Test sayısı anlamlı değişti (`npm test`) | `AGENTS.md` §2.1, `FAZ_DURUMU.md` teknik borç tablosu |
 
@@ -60,10 +60,10 @@ Aşağıdaki değişikliklerden **herhangi biri** yapıldıysa ilgili dokümanla
 - **Proje Amacı:** Türk apartman/site yöneticileri için mobil aidat yönetim platformu. Aidat, gider, tahsilat (dekont/OCR) ve arıza bildirim (ticket) süreçlerini dijitalleştirir. Multi-tenant desteklidir.
 - **Hedef Kitle:** 50+ yaş apartman yöneticileri ve sakinleri. Tüm UI/UX kararları bu kullanıcı kitlesine uyarlanmıştır.
 - **Kullanıcı Rolleri (RBAC):** `MANAGER` (Yönetici - abonelik kısıtlamalarına tabi) ve `RESIDENT` (Sakin - sadece kendi dairesi).
-- **Abonelik Sistemi:** RevenueCat ile yönetilen aylık/yıllık abonelik. `aidatpanel_monthly` (₺99/ay) ve `aidatpanel_annual` (₺799/yıl). Kota: **toplam bina sayısı** (site altı bloklar dahil).
+- **Abonelik Sistemi:** RevenueCat — Temel (`aidatpanel_monthly` ₺200/ay, `aidatpanel_annual` ₺2000/yıl, ≤20 bina) ve Business (`aidatpanel_business_monthly` ₺400/ay, `aidatpanel_business_annual` ₺4000/yıl, sınırsız). Kota: **toplam bina sayısı** (site altı bloklar dahil). Abonelik yoksa mevcut veri okunur; yeni bina eklenemez.
 - **Topoloji:**
   - **Backend:** Node.js + Express RESTful API + WebSocket Realtime servisi.
- - **Mobile:** Flutter uygulaması (iOS & Android). Güncel sürüm: `0.6.13+2000000019` (`pubspec.yaml`).
+ - **Mobile:** Flutter uygulaması (iOS & Android). Güncel sürüm: `0.6.13+2000000022` (`pubspec.yaml`). *(1.0.0 AAB/sürüm adı: kullanıcı açıkça söyleyene kadar yok)*
   - **Web:** Statik landing page (yardımcı araç, uygulamanın ana parçası değil).
   - **İletişim:** REST (JSON `{success, message, data}`) + WebSocket (`wss://api.aidatpanel.com/api/v1/realtime?token=JWT`) + FCM Push Notifications.
   - **Domain:** `aidatpanel.com` (Cloudflare). API: `api.aidatpanel.com` (Contabo VPS / CloudPanel reverse proxy, PM2 ile yönetiliyor).
@@ -329,10 +329,12 @@ Abonelik kotası: buildingQuotaService → toplam bina sayısı (tekil + site al
 
 | Görev | Durum |
 |-------|-------|
-| App Store & Google Play submit | Bekliyor |
-| Landing page güncelleme | Bekliyor |
+| App Store & Google Play submit | Bekliyor (Android-first) |
+| Landing page güncelleme | ✅ Premium redesign (`web/` marka token + SEO) + `bash web/scripts/deploy.sh` |
 | Firebase Analytics & Crashlytics | ✅ Tamamlandı |
-| v1.0.0 release tag | Bekliyor |
+| Abonelik Temel/Business + kota | ✅ Backend + mobil paywall |
+| AAB 1.0.0 üretimi / Play yükleme | Bekliyor (sürüm adı `0.6.13`; 1.0.0’a geçiş kullanıcı onayı) |
+| v1.0.0 release tag | Bekliyor (git tag insan; önce sürüm bump) |
 
 #### FAZ 8 — Site Yönetimi (▶ AKTİF, hedef ~2026-08)
 
@@ -385,18 +387,52 @@ Site → bina hiyerarşisi; tekil binalar korunur. Backend ve mobil implementasy
 6. Bu koşullar sağlanmadan sonraki faza geçilemez. İstisna YOK.
 ```
 
-### 6.2 Backend Deploy Kuralı (ZORUNLU)
+### 6.2 Deploy Kuralları (ZORUNLU)
+
+Oturumda ilgili klasör değiştiyse, kullanıcı «deploy etme» demese bile oturum bitmeden deploy yapılır.
+
+#### Backend (`backend/`)
 
 ```
 - backend/ klasöründe HANGİ DOSYA değiştirilirse değiştirilsin deploy ZORUNLU.
-- Kullanıcı "deploy etme" demediği durumlarda bile oturum bitmeden deploy yap.
-- Komut: bash backend/scripts/deploy.sh (Git Bash) veya powershell -ExecutionPolicy Bypass -File backend/scripts/deploy.ps1
+- Komut: bash backend/scripts/deploy.sh
 - PM2 süreç adı: aidapanel-api (t harfi yok, aidatpanel-api DEĞİL)
 - Prisma schema değişikliği → npx prisma migrate deploy çalıştırılır.
 - .env, uploads/dekonts/, Firebase JSON DOSYALARI ASLA ÜZERİNE YAZILMAZ.
+- Config: backend/scripts/deploy.config.example.json → deploy.local.json (gitignore)
 - Deploy sonrası yanıtın EN ALTINA dipnot ekle:
   > **Sunucu:** Değişiklikler api.aidatpanel.com üzerine yüklendi, aidapanel-api yeniden başlatıldı ve doğrulandı.
 ```
+
+#### Landing / web (`web/`)
+
+```
+- web/ (landing, join, fiyat, gizlilik, KVKK, style, assets, blog) değişince deploy ZORUNLU.
+- Komut: bash web/scripts/deploy.sh
+- Uzak yol: /home/aidatpanel/htdocs/aidatpanel.com (aidatpanel.com)
+- SSH: deploy.local.json (ör. root + /home/abdullah/.ssh/id_ed25519)
+- .well-known varsayılan HARİÇ tutulur (uzak assetlinks SHA-256 korunur).
+  Bilinçli güncelleme: bash web/scripts/deploy.sh --include-well-known
+- .zip / Arşiv dosyaları yüklenmez.
+- Deploy sonrası dipnot:
+  > **Sunucu:** Landing aidatpanel.com üzerine yüklendi ve doğrulandı.
+```
+
+#### Admin panel (`adminpanel/`)
+
+```
+- adminpanel/ değişince deploy ZORUNLU (UI / EJS / public / routes).
+- Komut: bash adminpanel/scripts/deploy.sh
+- Uzak yol: /home/aidatpanel-admin/htdocs/admin.aidatpanel.com
+- PM2: kullanıcı aidatpanel-admin, süreç adı aidat-admin (port 4300)
+- .env ASLA üzerine yazılmaz; node_modules lokal gönderilmez (sunucuda npm ci).
+- Config: adminpanel/scripts/deploy.config.example.json → deploy.local.json
+- Log: bash adminpanel/scripts/deploy.sh --logs
+- Deploy sonrası dipnot:
+  > **Sunucu:** Admin panel admin.aidatpanel.com üzerine yüklendi, aidat-admin yeniden başlatıldı ve doğrulandı.
+```
+
+**Not:** Backend admin API (`backend/src/.../admin`) değişince hem `backend/scripts/deploy.sh` hem (UI etkileniyorsa) `adminpanel/scripts/deploy.sh` gerekir.
 
 ### 6.3 API Response Contract
 

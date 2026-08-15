@@ -3729,14 +3729,14 @@ class Translations$features$subscription$en {
 	/// en: 'Managed buildings: {used} / {limit}'
 	String get buildingUsageWithLimit => 'Managed buildings: {used} / {limit}';
 
-	/// en: 'Dues tracking'
-	String get featureDuesTracking => 'Dues tracking';
+	/// en: 'Dues and collections in one place'
+	String get featureDuesTracking => 'Dues and collections in one place';
 
-	/// en: 'Advanced reports'
-	String get featureAdvancedReports => 'Advanced reports';
+	/// en: 'Instant PDF reports'
+	String get featureAdvancedReports => 'Instant PDF reports';
 
-	/// en: 'Priority support'
-	String get featurePrioritySupport => 'Priority support';
+	/// en: 'Priority support line'
+	String get featurePrioritySupport => 'Priority support line';
 
 	/// en: 'Trial period active'
 	String get trialActive => 'Trial period active';
@@ -3816,6 +3816,9 @@ class Translations$features$subscription$en {
 	/// en: '50+ Buildings (Custom)'
 	String get plan50Plus => '50+ Buildings (Custom)';
 
+	/// en: 'Business'
+	String get planBusiness => 'Business';
+
 	/// en: 'Coming Soon'
 	String get comingSoon => 'Coming Soon';
 
@@ -3840,8 +3843,35 @@ class Translations$features$subscription$en {
 	/// en: 'Unlimited Building Management'
 	String get feature50Plus => 'Unlimited Building Management';
 
+	/// en: 'Full control for up to 20 buildings'
+	String get featureBasicUpTo20 => 'Full control for up to 20 buildings';
+
+	/// en: 'Unlimited buildings · unlimited sites'
+	String get featureBusinessUnlimited => 'Unlimited buildings · unlimited sites';
+
 	/// en: 'Dedicated Account Manager'
 	String get featureCustomSupport => 'Dedicated Account Manager';
+
+	/// en: 'Managed buildings: {used} · ∞'
+	String get buildingUsageUnlimited => 'Managed buildings: {used} · ∞';
+
+	/// en: '{used} / ∞'
+	String get buildingUsageUnlimitedShort => '{used} / ∞';
+
+	/// en: 'Managed buildings: {used} · Subscription required'
+	String get buildingUsageNeedSubscription => 'Managed buildings: {used} · Subscription required';
+
+	/// en: 'Without a subscription you can view existing data; subscribe to Basic or Business to add buildings.'
+	String get noSubCannotAddBuilding => 'Without a subscription you can view existing data; subscribe to Basic or Business to add buildings.';
+
+	/// en: 'Basic plan quota is full. Upgrade to Business for more buildings.'
+	String get upgradeToBusinessHint => 'Basic plan quota is full. Upgrade to Business for more buildings.';
+
+	/// en: 'Subscribe to Business monthly'
+	String get purchaseBusinessMonthlyCta => 'Subscribe to Business monthly';
+
+	/// en: 'Subscribe to Business annually'
+	String get purchaseBusinessAnnualCta => 'Subscribe to Business annually';
 
 	/// en: 'Monthly'
 	String get toggleMonthly => 'Monthly';
@@ -3855,17 +3885,83 @@ class Translations$features$subscription$en {
 	/// en: 'Building Usage'
 	String get buildingProgress => 'Building Usage';
 
-	/// en: 'Basic Plan'
-	String get planBasic => 'Basic Plan';
+	/// en: 'Basic'
+	String get planBasic => 'Basic';
 
-	/// en: 'Manage 1 Building'
-	String get featureBasicBuildings => 'Manage 1 Building';
+	/// en: 'Up to 20 buildings'
+	String get featureBasicBuildings => 'Up to 20 buildings';
 
 	/// en: 'Basic Reports'
 	String get featureBasicReports => 'Basic Reports';
 
 	/// en: 'Lifetime'
 	String get statusUnlimited => 'Lifetime';
+
+	/// en: 'Basic or Business — pick by your total building count.'
+	String get compareIntro => 'Basic or Business — pick by your total building count.';
+
+	/// en: 'For small and mid-size portfolios'
+	String get planBasicSubtitle => 'For small and mid-size portfolios';
+
+	/// en: 'For growing portfolios'
+	String get planBusinessSubtitle => 'For growing portfolios';
+
+	/// en: 'Sites and blocks included'
+	String get featureSitesIncluded => 'Sites and blocks included';
+
+	/// en: 'Upload receipts — we read them'
+	String get featureDekontOcr => 'Upload receipts — we read them';
+
+	/// en: 'PDF reports in one tap'
+	String get featurePdfReports => 'PDF reports in one tap';
+
+	/// en: '₺199.99'
+	String get priceFallbackBasicMonthly => '₺199.99';
+
+	/// en: '₺1,999.99'
+	String get priceFallbackBasicAnnual => '₺1,999.99';
+
+	/// en: '₺399.99'
+	String get priceFallbackBusinessMonthly => '₺399.99';
+
+	/// en: '₺3,999.99'
+	String get priceFallbackBusinessAnnual => '₺3,999.99';
+
+	/// en: 'Recommended'
+	String get recommendedBadge => 'Recommended';
+
+	/// en: 'Your current plan'
+	String get ctaCurrentPlan => 'Your current plan';
+
+	/// en: 'Subscribe'
+	String get ctaSubscribe => 'Subscribe';
+
+	/// en: 'Upgrade to Business'
+	String get ctaUpgrade => 'Upgrade to Business';
+
+	/// en: 'You are already on Business'
+	String get ctaAlreadyBusiness => 'You are already on Business';
+
+	/// en: 'Complimentary subscription active'
+	String get giftBannerTitle => 'Complimentary subscription active';
+
+	/// en: 'Free access until {date}. If you purchase, your complimentary period is kept.'
+	String get giftBannerBody => 'Free access until {date}. If you purchase, your complimentary period is kept.';
+
+	/// en: 'Gift'
+	String get sourceGift => 'Gift';
+
+	/// en: 'Store'
+	String get sourceStore => 'Store';
+
+	/// en: 'Valid until'
+	String get validUntilLabel => 'Valid until';
+
+	/// en: 'Better value with annual billing'
+	String get annualSaveHint => 'Better value with annual billing';
+
+	/// en: 'You are nearing your building quota. Continue unlimited with Business.'
+	String get quotaNearHint => 'You are nearing your building quota. Continue unlimited with Business.';
 }
 
 // Path: features.reports
@@ -6593,9 +6689,9 @@ extension on Translations {
 			'features.subscription.featureUnlimitedUnits' => 'Unlimited units',
 			'features.subscription.buildingUsageSummary' => 'Managed buildings: {used}',
 			'features.subscription.buildingUsageWithLimit' => 'Managed buildings: {used} / {limit}',
-			'features.subscription.featureDuesTracking' => 'Dues tracking',
-			'features.subscription.featureAdvancedReports' => 'Advanced reports',
-			'features.subscription.featurePrioritySupport' => 'Priority support',
+			'features.subscription.featureDuesTracking' => 'Dues and collections in one place',
+			'features.subscription.featureAdvancedReports' => 'Instant PDF reports',
+			'features.subscription.featurePrioritySupport' => 'Priority support line',
 			'features.subscription.trialActive' => 'Trial period active',
 			'features.subscription.subscriptionActive' => 'Subscription active',
 			'features.subscription.subscriptionCancelled' => 'Subscription cancelled',
@@ -6622,6 +6718,7 @@ extension on Translations {
 			'features.subscription.plan5To20' => '5-20 Buildings Plan',
 			'features.subscription.plan20To50' => '20-50 Buildings Plan',
 			'features.subscription.plan50Plus' => '50+ Buildings (Custom)',
+			'features.subscription.planBusiness' => 'Business',
 			'features.subscription.comingSoon' => 'Coming Soon',
 			'features.subscription.contactUs' => 'Contact Us',
 			'features.subscription.contactUsDesc' => 'Contact us for custom pricing.',
@@ -6630,15 +6727,46 @@ extension on Translations {
 			'features.subscription.feature5To20' => 'Manage 5-20 Buildings',
 			'features.subscription.feature20To50' => 'Manage 20-50 Buildings',
 			'features.subscription.feature50Plus' => 'Unlimited Building Management',
+			'features.subscription.featureBasicUpTo20' => 'Full control for up to 20 buildings',
+			'features.subscription.featureBusinessUnlimited' => 'Unlimited buildings · unlimited sites',
 			'features.subscription.featureCustomSupport' => 'Dedicated Account Manager',
+			'features.subscription.buildingUsageUnlimited' => 'Managed buildings: {used} · ∞',
+			'features.subscription.buildingUsageUnlimitedShort' => '{used} / ∞',
+			'features.subscription.buildingUsageNeedSubscription' => 'Managed buildings: {used} · Subscription required',
+			'features.subscription.noSubCannotAddBuilding' => 'Without a subscription you can view existing data; subscribe to Basic or Business to add buildings.',
+			'features.subscription.upgradeToBusinessHint' => 'Basic plan quota is full. Upgrade to Business for more buildings.',
+			'features.subscription.purchaseBusinessMonthlyCta' => 'Subscribe to Business monthly',
+			'features.subscription.purchaseBusinessAnnualCta' => 'Subscribe to Business annually',
 			'features.subscription.toggleMonthly' => 'Monthly',
 			'features.subscription.toggleAnnual' => 'Annual',
 			'features.subscription.currentPlanBadge' => 'Your Current Plan',
 			'features.subscription.buildingProgress' => 'Building Usage',
-			'features.subscription.planBasic' => 'Basic Plan',
-			'features.subscription.featureBasicBuildings' => 'Manage 1 Building',
+			'features.subscription.planBasic' => 'Basic',
+			'features.subscription.featureBasicBuildings' => 'Up to 20 buildings',
 			'features.subscription.featureBasicReports' => 'Basic Reports',
 			'features.subscription.statusUnlimited' => 'Lifetime',
+			'features.subscription.compareIntro' => 'Basic or Business — pick by your total building count.',
+			'features.subscription.planBasicSubtitle' => 'For small and mid-size portfolios',
+			'features.subscription.planBusinessSubtitle' => 'For growing portfolios',
+			'features.subscription.featureSitesIncluded' => 'Sites and blocks included',
+			'features.subscription.featureDekontOcr' => 'Upload receipts — we read them',
+			'features.subscription.featurePdfReports' => 'PDF reports in one tap',
+			'features.subscription.priceFallbackBasicMonthly' => '₺199.99',
+			'features.subscription.priceFallbackBasicAnnual' => '₺1,999.99',
+			'features.subscription.priceFallbackBusinessMonthly' => '₺399.99',
+			'features.subscription.priceFallbackBusinessAnnual' => '₺3,999.99',
+			'features.subscription.recommendedBadge' => 'Recommended',
+			'features.subscription.ctaCurrentPlan' => 'Your current plan',
+			'features.subscription.ctaSubscribe' => 'Subscribe',
+			'features.subscription.ctaUpgrade' => 'Upgrade to Business',
+			'features.subscription.ctaAlreadyBusiness' => 'You are already on Business',
+			'features.subscription.giftBannerTitle' => 'Complimentary subscription active',
+			'features.subscription.giftBannerBody' => 'Free access until {date}. If you purchase, your complimentary period is kept.',
+			'features.subscription.sourceGift' => 'Gift',
+			'features.subscription.sourceStore' => 'Store',
+			'features.subscription.validUntilLabel' => 'Valid until',
+			'features.subscription.annualSaveHint' => 'Better value with annual billing',
+			'features.subscription.quotaNearHint' => 'You are nearing your building quota. Continue unlimited with Business.',
 			'features.reports.menuDownload' => 'Download report',
 			'features.reports.sheetTitle' => 'PDF report',
 			'features.reports.reportTypeLabel' => 'Report type',
@@ -6727,6 +6855,8 @@ extension on Translations {
 			'features.dashboard.activityHistory.emptyTitle' => 'No activity in this period',
 			'features.dashboard.activityHistory.emptySubtitle' => 'No payments or announcements in the range you selected.',
 			'features.dues.detailTitle' => 'Due Details',
+			_ => null,
+		} ?? switch (path) {
 			'features.dues.collectPayment' => 'Collect Payment',
 			'features.dues.collectPaymentConfirmTitle' => 'Record cash payment?',
 			'features.dues.collectPaymentConfirmBody' => '{apartment} — remaining {amount} for {period} will be marked as paid.',
@@ -6759,8 +6889,6 @@ extension on Translations {
 			'features.dues.transactions.emptySubtitle' => 'Receipt approvals and manual payments appear here.',
 			'features.dues.transactions.residentEmptyTitle' => 'No transactions yet',
 			'features.dues.transactions.residentEmptySubtitle' => 'Your payments and receipts will appear here.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dues.transactions.sourceReceipt' => 'Receipt',
 			'features.dues.transactions.sourceManual' => 'Manual',
 			'features.dues.transactions.statusApproved' => 'Approved',

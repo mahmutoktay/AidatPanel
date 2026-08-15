@@ -6,14 +6,27 @@
   <title>Davet | AidatPanel</title>
   <meta name="description" content="AidatPanel davet bağlantısı ile apartmanınıza katılın." />
   <meta name="robots" content="noindex" />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png" />
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('aidatpanel-theme') === 'dark') {
+          document.documentElement.classList.add('dark-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css?v=3.1" />
   <link rel="stylesheet" href="join.css" />
 </head>
 <body class="join-page">
   <header>
     <nav class="container nav-bar join-nav">
-      <a href="../index.html" class="logo" aria-label="AidatPanel ana sayfa">Aidat<span>Panel</span></a>
+      <a href="../index.html" class="brand" aria-label="AidatPanel ana sayfa">
+        <img src="../assets/app_logo.png" alt="" class="brand-logo" width="40" height="40" />
+        <span class="logo">Aidat<span>Panel</span></span>
+      </a>
     </nav>
   </header>
 
@@ -38,15 +51,10 @@
       <section class="join-stores" aria-label="Uygulama mağazaları">
         <p class="join-code-label" style="margin-bottom: 0;">Henüz yüklü değilse indirin</p>
         <div class="store-buttons">
-          <a
-            id="app-store"
-            href="https://apps.apple.com/tr/app/aidatpanel/id000000000"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="store-link"
-          >
-            <img src="../assets/apple-icon.png" alt="App Store'dan indirin" class="store-img" width="180" height="54" />
-          </a>
+          <span class="store-link store-soon" aria-label="App Store yakında">
+            <img src="../assets/apple-icon.png" alt="App Store yakında" class="store-img store-img-disabled" width="180" height="54" />
+            <span class="store-soon-badge">Yakında</span>
+          </span>
           <a
             id="play-store"
             href="https://play.google.com/store/apps/details?id=com.aidatpanel.app"
@@ -77,5 +85,6 @@
   </footer>
 
   <script src="join.js"></script>
+  <script src="../js/theme.js" defer></script>
 </body>
 </html>

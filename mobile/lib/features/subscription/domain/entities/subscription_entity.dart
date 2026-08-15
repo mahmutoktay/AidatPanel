@@ -24,6 +24,8 @@ class SubscriptionEntity extends Equatable {
   final String? id;
   final SubscriptionStatus status;
   final String plan;
+  /// Backend: `ios` | `android` | `admin_grant`
+  final String? platform;
   final DateTime? currentPeriodEnd;
   final SubscriptionUsageEntity? usage;
   final SubscriptionLimitsEntity? limits;
@@ -32,6 +34,7 @@ class SubscriptionEntity extends Equatable {
     this.id,
     required this.status,
     required this.plan,
+    this.platform,
     this.currentPeriodEnd,
     this.usage,
     this.limits,
@@ -39,7 +42,23 @@ class SubscriptionEntity extends Equatable {
 
   bool get hasRecord => id != null || status != SubscriptionStatus.unknown;
 
+  bool get isEntitled =>
+      status == SubscriptionStatus.active || status == SubscriptionStatus.trial;
+
+  bool get isAdminGrant =>
+      (platform ?? '').toLowerCase() == 'admin_grant';
+
+  bool get isBusinessPlan {
+    final p = plan.toLowerCase();
+    return p.contains('business');
+  }
+
+  bool get isAnnualPlan {
+    final p = plan.toLowerCase();
+    return p.contains('annual') || p.contains('year');
+  }
+
   @override
   List<Object?> get props =>
-      [id, status, plan, currentPeriodEnd, usage, limits];
+      [id, status, plan, platform, currentPeriodEnd, usage, limits];
 }

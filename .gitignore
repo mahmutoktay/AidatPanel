@@ -15,3 +15,7 @@ plans/
 
 # Dependencies
 node_modules/
+
+# Deploy secrets (per site)
+web/scripts/deploy.local.json
+adminpanel/scripts/deploy.local.json

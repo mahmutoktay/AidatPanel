@@ -5,6 +5,7 @@ import {
   mapEventToStatus,
   mapProductIdToPlan,
   mapStoreToPlatform,
+  mergeStoreSubscriptionUpdate,
   parseWebhookPeriodDates,
 } from "../utils/revenueCatWebhook.js";
 
@@ -87,24 +88,29 @@ export async function processRevenueCatWebhook(payload) {
     event.id ??
     null;
 
+  const existing = await prisma.subscription.findUnique({ where: { userId } });
+  const merged = mergeStoreSubscriptionUpdate(existing, {
+    status,
+    plan,
+    platform,
+    revenuecatId,
+    currentPeriodStart,
+    currentPeriodEnd,
+  });
+
   await prisma.subscription.upsert({
     where: { userId },
     create: {
       userId,
-      status,
-      plan,
-      platform,
-      revenuecatId,
-      currentPeriodStart,
-      currentPeriodEnd,
+      ...merged,
     },
     update: {
-      status,
-      plan,
-      platform,
-      revenuecatId,
-      currentPeriodStart,
-      currentPeriodEnd,
+      status: merged.status,
+      plan: merged.plan,
+      platform: merged.platform,
+      revenuecatId: merged.revenuecatId,
+      currentPeriodStart: merged.currentPeriodStart,
+      currentPeriodEnd: merged.currentPeriodEnd,
     },
   });
 
@@ -112,7 +118,7 @@ export async function processRevenueCatWebhook(payload) {
     handled: true,
     type: eventType,
     userId,
-    status,
-    plan,
+    status: merged.status,
+    plan: merged.plan,
   };
 }

@@ -4,73 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planlar ve Fiyatlandırma | AidatPanel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2.0">
+    <meta name="description" content="AidatPanel Temel ve Business planları: 20 binaya kadar veya sınırsız. Abonelik Google Play üzerinden uygulamadan alınır.">
+    <link rel="canonical" href="https://aidatpanel.com/fiyatlandirma.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="tr_TR">
+    <meta property="og:url" content="https://aidatpanel.com/fiyatlandirma.html">
+    <meta property="og:title" content="Planlar ve Fiyatlandırma | AidatPanel">
+    <meta property="og:description" content="Temel ve Business planları. Abonelik Google Play üzerinden alınır.">
+    <meta property="og:image" content="https://aidatpanel.com/assets/og-image.png">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('aidatpanel-theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3.1">
     <style>
         body { padding-top: 50px; }
         .pricing-header { text-align: center; margin-bottom: 50px; }
         .pricing-header h1 { color: var(--primary); font-size: 42px; }
-        
+        .pricing-header p { color: var(--text-sec); font-size: 18px; max-width: 640px; margin: 12px auto 0; }
         .back-nav { margin-bottom: 20px; }
         .back-nav a { color: var(--accent); text-decoration: none; font-weight: 700; font-size: 18px; }
+        .pricing-note { text-align: center; color: var(--text-sec); font-size: 16px; margin: 40px auto 80px; max-width: 560px; }
     </style>
 </head>
 <body>
     <div class="container">
         <nav class="back-nav">
+            <a href="index.html" class="brand" style="margin-bottom: 12px;">
+                <img src="assets/app_logo.png" alt="" class="brand-logo" width="36" height="36">
+                <span class="logo">Aidat<span>Panel</span></span>
+            </a>
             <a href="index.html">← Ana Sayfaya Dön</a>
         </nav>
 
         <div class="pricing-header">
-            <h1>Size En Uygun Planı Seçin</h1>
-            <p>İhtiyaçlarınıza göre özelleştirilmiş şeffaf fiyatlandırma.</p>
+            <h1>Temel ve Business Planlar</h1>
+            <p>Abonelik Google Play üzerinden uygulamadan alınır. Kota: toplam bina sayısı (site altı bloklar dahil).</p>
         </div>
 
 <div class="pricing-cards-wrapper">
     
     <div class="plan-card">
-        <h3>Ücretsiz</h3>
-        <div class="price">0₺ <span>/ ömür boyu</span></div>
-        <p>Temel yönetim ihtiyaçları için.</p>
+        <h3>Temel</h3>
+        <div class="price">200₺ <span>/ ay</span></div>
+        <p>20 binaya kadar yönetim.</p>
         <ul class="plan-features">
-            <li><span class="check">✔</span> 5 Daireye Kadar Yönetim</li>
-            <li><span class="check">✔</span> Temel Aidat Takibi</li>
-            <li><span class="check">✔</span> Arıza / Talep Bildirimi</li>
-            <li class="disabled"><span class="cross">✘</span> PDF Rapor Alma</li>
-            <li class="disabled"><span class="cross">✘</span> Toplu Bildirim Gönderme</li>
+            <li><span class="check">✔</span> 20 binaya kadar (bloklar dahil)</li>
+            <li><span class="check">✔</span> Aidat, gider, dekont, talep</li>
+            <li><span class="check">✔</span> Aylık / yıllık PDF rapor</li>
+            <li><span class="check">✔</span> Push bildirimler</li>
+            <li><span class="check">✔</span> Yıllık: 2000₺ (2 ay bizden)</li>
         </ul>
-        <a href="https://wa.me/905441941443?text=Ücretsiz%20plan%20hakkında%20bilgi%20almak%20istiyorum" class="btn btn-outline" style="width: 100%;">Hemen Başla</a>
-    </div>
-
-    <div class="plan-card">
-        <h3>Premium Aylık</h3>
-        <div class="price">99₺ <span>/ ay</span></div>
-        <p>Kısa vadeli profesyonel çözüm.</p>
-        <ul class="plan-features">
-            <li><span class="check">✔</span> Sınırsız Daire ve Apartman</li>
-            <li><span class="check">✔</span> Tek Tuşla Toplu Aidat</li>
-            <li><span class="check">✔</span> Aylık PDF Raporları</li>
-            <li><span class="check">✔</span> Sakinlere Push Bildirim</li>
-            <li><span class="check">✔</span> Öncelikli WhatsApp Destek</li>
-        </ul>
-        <a href="https://wa.me/905441941443?text=Aylık%20Premium%20plan%20satın%20almak%20istiyorum" class="btn btn-outline" style="width: 100%;">Satın Al</a>
+        <a href="https://play.google.com/store/apps/details?id=com.aidatpanel.app" class="btn btn-outline" style="width: 100%;" target="_blank" rel="noopener noreferrer">Uygulamadan abone ol</a>
     </div>
 
     <div class="plan-card premium">
-        <span class="badge" style="top: -15px;">En Avantajlı Seçenek</span>
-        <h3>Premium Yıllık</h3>
-        <div class="price">799₺ <span>/ yıl</span></div>
-        <p>Yıllık ödeyin, %33 tasarruf edin!</p>
+        <span class="badge" style="top: -15px;">Sınırsız bina</span>
+        <h3>Business</h3>
+        <div class="price">400₺ <span>/ ay</span></div>
+        <p>20’den fazla bina yönetenler için.</p>
         <ul class="plan-features">
-            <li><span class="check">✔</span> <b>Tüm Premium Özellikler</b></li>
-            <li><span class="check">✔</span> Sınırsız Daire ve Apartman</li>
-            <li><span class="check">✔</span> Tek Tuşla Toplu Aidat</li>
-            <li><span class="check">✔</span> Aylık PDF Raporları</li>
-            <li><span class="check">✔</span> Sakinlere Push Bildirim</li>
+            <li><span class="check">✔</span> <b>Sınırsız bina</b></li>
+            <li><span class="check">✔</span> Temel plandaki tüm özellikler</li>
+            <li><span class="check">✔</span> Site ortak gider dağılımı</li>
+            <li><span class="check">✔</span> Öncelikli destek</li>
+            <li><span class="check">✔</span> Yıllık: 4000₺ (2 ay bizden)</li>
         </ul>
-        <a href="https://wa.me/905441941443?text=Yıllık%20Premium%20(799₺)%20paketini%20satın%20almak%20istiyorum" class="btn btn-accent" style="width: 100%;">Yıllık Avantajı Yakala</a>
+        <a href="https://play.google.com/store/apps/details?id=com.aidatpanel.app" class="btn btn-accent" style="width: 100%;" target="_blank" rel="noopener noreferrer">Uygulamadan abone ol</a>
     </div>
 
-</div>  
+</div>
+
+<p class="pricing-note">Fiyatlara KDV dahil değildir. Abonelik iptali mağaza hesabınız üzerinden yapılır. Destek: <a href="mailto:store@vefayazilim.com">store@vefayazilim.com</a></p>
+</div>
+<script src="js/theme.js" defer></script>
 </body>
 </html>

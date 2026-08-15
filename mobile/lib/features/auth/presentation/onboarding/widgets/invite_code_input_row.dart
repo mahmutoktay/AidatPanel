@@ -183,11 +183,19 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
               textAlign: TextAlign.center,
               textAlignVertical: TextAlignVertical.center,
               textCapitalization: TextCapitalization.characters,
+              cursorHeight: 18,
               style: AppTypography.h3.copyWith(
                 fontSize: 18,
-                height: 1.1,
+                height: 1.0,
+                leadingDistribution: TextLeadingDistribution.even,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.2,
+              ),
+              strutStyle: const StrutStyle(
+                fontSize: 18,
+                height: 1.0,
+                forceStrutHeight: true,
+                leadingDistribution: TextLeadingDistribution.even,
               ),
               inputFormatters: [
                 // `AP` öneki + hex; `P` sabit önekte zorunlu (bkz. _sanitize).
@@ -197,14 +205,20 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
               ],
               decoration: InputDecoration(
                 counterText: '',
-                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                isCollapsed: false,
                 isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 16,
+                ),
                 hintText: i == 0
                     ? 'AP3'
                     : i == 1
                         ? 'B12'
                         : 'A9F0',
                 hintStyle: AppTypography.body2.copyWith(
+                  height: 1.0,
+                  leadingDistribution: TextLeadingDistribution.even,
                   color: AppColors.textSecondary.withValues(alpha: 0.45),
                   letterSpacing: 1,
                 ),
@@ -223,12 +237,16 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
 
         Widget dash() => SizedBox(
               width: dashWidth,
-              child: Text(
-                '-',
-                textAlign: TextAlign.center,
-                style: AppTypography.h3.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w700,
+              height: 56,
+              child: Center(
+                child: Text(
+                  '-',
+                  textAlign: TextAlign.center,
+                  style: AppTypography.h3.copyWith(
+                    height: 1.0,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             );

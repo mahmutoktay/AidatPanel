@@ -94,7 +94,8 @@
   margin: 0 0 16px;
 }
 
-.join-nav .logo {
+.join-nav .logo,
+.join-nav .brand {
   text-decoration: none;
 }
 

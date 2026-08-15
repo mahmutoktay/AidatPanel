@@ -65,9 +65,13 @@ PostgreSQL (AdminUser, AdminAuditLog, PromoGrant, UserActivityDaily, DbBackup, �
 
 ## 8. Deploy
 
-- **API:** `backend/scripts/deploy.sh` (admin route'ları dahil)
-- **UI:** PM2 `aidatpanel-admin`, port 4300, CloudPanel → `admin.aidatpanel.com`
-- **Env:** `ADMIN_JWT_SECRET`, `ADMIN_API_BASE`, `ADMIN_BACKUP_DIR`
+- **API:** `bash backend/scripts/deploy.sh` (admin route'ları dahil; PM2 `aidapanel-api`)
+- **UI:** `bash adminpanel/scripts/deploy.sh` → `/home/aidatpanel-admin/htdocs/admin.aidatpanel.com`
+  - PM2 süreç: `aidat-admin` (kullanıcı `aidatpanel-admin`, port 4300)
+  - Config: `adminpanel/scripts/deploy.config.example.json` → `deploy.local.json`
+  - `.env` üzerine yazılmaz; log: `bash adminpanel/scripts/deploy.sh --logs`
+- **Env:** `ADMIN_JWT_SECRET`, `ADMIN_API_BASE`, `ADMIN_BACKUP_DIR`, `ADMIN_PORT`
+- AI kuralı: `AGENTS.md` §6.2 — `adminpanel/` değişince deploy zorunlu
 
 ## 9. Kapsam Dışı (v1)
 

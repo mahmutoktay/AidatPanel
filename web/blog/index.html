@@ -3,11 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog | AidatPanel - Apartman Yönetim Rehberi</title>
+    <title>Blog | AidatPanel — Apartman Yönetim Rehberi</title>
     <meta name="description" content="Apartman ve site yönetimi hakkında ipuçları, aidat takip yöntemleri ve güncel mevzuat bilgileri.">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="canonical" href="https://aidatpanel.com/blog/">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="tr_TR">
+    <meta property="og:url" content="https://aidatpanel.com/blog/">
+    <meta property="og:title" content="Blog | AidatPanel">
+    <meta property="og:description" content="Apartman ve site yönetimi hakkında ipuçları ve aidat takip yöntemleri.">
+    <meta property="og:image" content="https://aidatpanel.com/assets/og-image.png">
+    <link rel="icon" type="image/png" href="../assets/favicon.png">
+    <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('aidatpanel-theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../style.css?v=3.1">
     <style>
         .blog-header { text-align: center; padding: 60px 20px; background: linear-gradient(135deg, var(--light-bg) 0%, var(--bg) 100%); border-bottom: 1px solid var(--border-light); }
         .blog-header h1 { color: var(--primary); font-size: 42px; margin-bottom: 16px; }
@@ -15,7 +33,7 @@
         
         .blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; padding: 60px 0; }
         
-        .blog-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 16px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
+        .blog-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 22px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
         .blog-card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); border-color: var(--accent); }
         
         .blog-image { width: 100%; height: 200px; background-color: var(--light-bg); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 48px; border-bottom: 1px solid var(--border-light); }
@@ -30,14 +48,17 @@
         .read-more i { margin-left: 8px; transition: transform 0.3s ease; }
         .read-more:hover i { transform: translateX(5px); }
 
-        body.dark-mode .blog-card { background-color: #1E293B; border-color: #334155; }
-        body.dark-mode .blog-image { background-color: #0F172A; }
+        html.dark-mode .blog-card { background-color: #1E293B; border-color: #334155; }
+        html.dark-mode .blog-image { background-color: #0F172A; }
     </style>
 </head>
 <body>
     <header>
         <nav class="container nav-bar">
-            <a href="../index.html" class="logo" style="text-decoration: none;">Aidat<span>Panel</span></a>
+            <a href="../index.html" class="brand" aria-label="AidatPanel ana sayfa">
+                <img src="../assets/app_logo.png" alt="" class="brand-logo" width="40" height="40">
+                <span class="logo">Aidat<span>Panel</span></span>
+            </a>
             
             <div class="nav-right">
                 <a href="../fiyatlandirma.html" class="btn btn-accent btn-sm">Planlar</a>
@@ -102,21 +123,6 @@
         </div>
     </footer>
 
-    <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-        const icon = themeToggle.querySelector('i');
-
-        themeToggle.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            if (body.classList.contains('dark-mode')) {
-                icon.classList.replace('fa-moon', 'fa-sun');
-                icon.style.color = '#F59E0B';
-            } else {
-                icon.classList.replace('fa-sun', 'fa-moon');
-                icon.style.color = '';
-            }
-        });
-    </script>
+    <script src="../js/theme.js" defer></script>
 </body>
 </html>

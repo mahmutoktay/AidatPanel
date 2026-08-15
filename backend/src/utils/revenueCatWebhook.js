@@ -1,10 +1,90 @@
-import { SUBSCRIPTION_PRODUCT_IDS } from "../constants/subscriptionConstants.js";
+import {
+  SUBSCRIPTION_PRODUCT_IDS,
+  isBusinessPlan,
+} from "../constants/subscriptionConstants.js";
+
+/** Plan önceliği: Business yıllık > Business aylık > Temel yıllık > Temel aylık */
+export function planRank(plan) {
+  if (isBusinessPlan(plan)) {
+    return String(plan).includes("annual") ? 4 : 3;
+  }
+  return plan === "annual" ? 2 : 1;
+}
 
 /**
- * RevenueCat product_id → plan ("monthly" | "annual").
+ * Mağaza (RevenueCat) güncellemesini mevcut kayıtla birleştirir.
+ * Admin hediyesi yalnızca DB’de yaşar; webhook üzerine yazarken:
+ * - currentPeriodEnd = max(mevcut, mağaza)
+ * - Hediye dönemi devam ederken daha yüksek plan korunur
+ * - Mağaza EXPIRATION/CANCELLED iken saklanan hediye bitişi ilerideyse ACTIVE kalır
+ *
+ * @param {object|null} existing Prisma Subscription veya null
+ * @param {object} incoming Webhook’tan türetilmiş alanlar
+ * @param {Date} [now]
+ */
+export function mergeStoreSubscriptionUpdate(existing, incoming, now = new Date()) {
+  if (!existing) {
+    return { ...incoming };
+  }
+
+  const existingEnd = new Date(existing.currentPeriodEnd);
+  const incomingEnd = new Date(incoming.currentPeriodEnd);
+  const currentPeriodEnd =
+    existingEnd.getTime() > incomingEnd.getTime() ? existingEnd : incomingEnd;
+
+  const giftPeriodRemaining = existingEnd.getTime() > now.getTime();
+  let plan = incoming.plan;
+  if (
+    giftPeriodRemaining &&
+    planRank(existing.plan) > planRank(incoming.plan)
+  ) {
+    plan = existing.plan;
+  }
+
+  let status = incoming.status;
+  if (
+    (incoming.status === "EXPIRED" || incoming.status === "CANCELLED") &&
+    currentPeriodEnd.getTime() > now.getTime() &&
+    existingEnd.getTime() > incomingEnd.getTime()
+  ) {
+    status = "ACTIVE";
+  }
+
+  return {
+    status,
+    plan,
+    platform: incoming.platform,
+    revenuecatId: incoming.revenuecatId ?? existing.revenuecatId ?? null,
+    currentPeriodStart: incoming.currentPeriodStart,
+    currentPeriodEnd,
+  };
+}
+
+/**
+ * RevenueCat product_id → plan.
+ * Business ürünleri Temel annual eşlemesinden ÖNCE kontrol edilmeli
+ * (`business_annual` içinde "annual" geçer).
  */
 export function mapProductIdToPlan(productId) {
   const id = String(productId ?? "").toLowerCase();
+
+  if (
+    id === SUBSCRIPTION_PRODUCT_IDS.businessAnnual ||
+    id === "aidatpanel_business_annual" ||
+    (id.includes("business") &&
+      (id.includes("annual") || id.includes("yearly")))
+  ) {
+    return "business_annual";
+  }
+
+  if (
+    id === SUBSCRIPTION_PRODUCT_IDS.businessMonthly ||
+    id === "aidatpanel_business_monthly" ||
+    (id.includes("business") && id.includes("monthly"))
+  ) {
+    return "business_monthly";
+  }
+
   if (
     id === SUBSCRIPTION_PRODUCT_IDS.annual ||
     id.includes("annual") ||
@@ -12,6 +92,7 @@ export function mapProductIdToPlan(productId) {
   ) {
     return "annual";
   }
+
   return "monthly";
 }
 

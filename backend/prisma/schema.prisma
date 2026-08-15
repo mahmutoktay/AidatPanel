@@ -111,7 +111,7 @@ model Subscription {
   userId             String             @unique
   user               User               @relation(fields: [userId], references: [id])
   status             SubscriptionStatus
-  plan               String // "monthly" | "annual"
+  plan               String // "monthly" | "annual" | "business_monthly" | "business_annual"
   platform           String // "ios" | "android"
   revenuecatId       String?
   currentPeriodStart DateTime

@@ -4,6 +4,7 @@ class SubscriptionModel {
   final String? id;
   final String status;
   final String plan;
+  final String? platform;
   final DateTime? currentPeriodEnd;
   final int? usageBuildings;
   final int? limitBuildings;
@@ -12,6 +13,7 @@ class SubscriptionModel {
     this.id,
     required this.status,
     required this.plan,
+    this.platform,
     this.currentPeriodEnd,
     this.usageBuildings,
     this.limitBuildings,
@@ -40,6 +42,7 @@ class SubscriptionModel {
       id: json['id'] as String?,
       status: (json['status'] as String? ?? '').toUpperCase(),
       plan: json['plan'] as String? ?? '',
+      platform: json['platform'] as String?,
       currentPeriodEnd: end,
       usageBuildings: usageBuildings,
       limitBuildings: limitBuildings,
@@ -69,6 +72,7 @@ class SubscriptionModel {
       id: id,
       status: mapped,
       plan: plan,
+      platform: platform,
       currentPeriodEnd: currentPeriodEnd,
       usage: usageBuildings != null
           ? SubscriptionUsageEntity(buildings: usageBuildings!)

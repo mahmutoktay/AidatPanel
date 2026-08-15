@@ -31,7 +31,9 @@ export const adminSchemas = {
   grantSubscription: {
     body: z.object({
       durationDays: z.coerce.number().int().min(1).max(730),
-      plan: z.enum(["monthly", "annual"]).optional(),
+      plan: z
+        .enum(["monthly", "annual", "business_monthly", "business_annual"])
+        .optional(),
       reason: z.string().min(3),
     }),
   },
@@ -53,7 +55,9 @@ export const adminSchemas = {
     body: z.object({
       contact: z.string().min(3),
       durationDays: z.coerce.number().int().min(1).max(730),
-      plan: z.enum(["monthly", "annual"]).optional(),
+      plan: z
+        .enum(["monthly", "annual", "business_monthly", "business_annual"])
+        .optional(),
       reason: z.string().min(3),
     }),
   },
