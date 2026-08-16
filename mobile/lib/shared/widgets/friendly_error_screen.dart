@@ -18,40 +18,41 @@ class FriendlyErrorScreen extends StatelessWidget {
 
   const FriendlyErrorScreen({super.key, required this.details});
 
-  _ErrorCopy _copy(BuildContext context) {
+  /// ErrorWidget ağacında [TranslationProvider] olmayabilir; global `t` kullan.
+  _ErrorCopy _copy() {
     final ex = details.exception;
-    final t = context.t.common.friendlyError;
+    final copy = t.common.friendlyError;
     if (ex is NetworkException) {
       return _ErrorCopy(
         icon: Icons.wifi_off_rounded,
-        title: t.networkTitle,
-        message: t.networkMessage,
+        title: copy.networkTitle,
+        message: copy.networkMessage,
       );
     }
     if (ex is UnauthorizedException) {
       return _ErrorCopy(
         icon: Icons.lock_outline_rounded,
-        title: t.unauthorizedTitle,
-        message: t.unauthorizedMessage,
+        title: copy.unauthorizedTitle,
+        message: copy.unauthorizedMessage,
       );
     }
     if (ex is ServerException) {
       return _ErrorCopy(
         icon: Icons.cloud_off_rounded,
-        title: t.serverTitle,
-        message: t.serverMessage,
+        title: copy.serverTitle,
+        message: copy.serverMessage,
       );
     }
     return _ErrorCopy(
       icon: Icons.error_outline,
-      title: t.genericTitle,
-      message: t.genericMessage,
+      title: copy.genericTitle,
+      message: copy.genericMessage,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final copy = _copy(context);
+    final copy = _copy();
     return Material(
       color: AppColors.surface,
       child: SafeArea(
@@ -101,7 +102,7 @@ class FriendlyErrorScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.t.common.friendlyError.debugOnlyLabel,
+                        t.common.friendlyError.debugOnlyLabel,
                         style: AppTypography.caption.copyWith(
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,

@@ -26,7 +26,7 @@ class DuesPeriodFilterRow extends StatelessWidget {
   final ValueChanged<int?> onYearChanged;
   final bool enabled;
 
-  static const double _height = AppSizes.minTouchTarget;
+  static const double _height = AppSizes.minTouchTargetComfort;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +34,7 @@ class DuesPeriodFilterRow extends StatelessWidget {
     return SizedBox(
       height: _height,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: _PeriodChip(
@@ -136,7 +137,7 @@ class _PeriodChip extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
             child: Row(
               children: [
                 Expanded(
@@ -149,14 +150,14 @@ class _PeriodChip extends StatelessWidget {
                           ? AppColors.textPrimary
                           : AppColors.mutedText.withValues(alpha: 0.6),
                       fontWeight: FontWeight.w700,
-                      fontSize: 14,
+                      fontSize: 16,
                       height: 1.2,
                     ),
                   ),
                 ),
                 Icon(
                   Icons.keyboard_arrow_down_rounded,
-                  size: 20,
+                  size: 22,
                   color: enabled
                       ? AppColors.textSecondary
                       : AppColors.mutedText.withValues(alpha: 0.5),

@@ -4,7 +4,7 @@ import { parseTrAmount } from "../utils/parseTrAmount.js";
 const TR_IBAN_INLINE =
   /TR\s*\d{2}(?:\s*\d{4}){0,6}\s*\d{0,4}/gi;
 
-/** pdftotext / OCR satır kırıklıklarını düzelt */
+/** pdftotext / OCR / pdfjs satır kırıklıklarını düzelt */
 export function preprocessReceiptText(rawText) {
   let text = String(rawText ?? "");
   // VakıfBank: IBAN iki satıra bölünür
@@ -13,7 +13,27 @@ export function preprocessReceiptText(rawText) {
     (_, head, tail) => `${head} ${tail}`
   );
   text = text.replace(/[ \t]+/g, " ");
+  // pdfjs: "05 - 08 - 2026" / "B8M2P - B - 2026…" → tireleri birleştir
+  text = text.replace(/(\d{1,2})\s*-\s*(\d{1,2})\s*-\s*(\d{2,4})/g, "$1-$2-$3");
+  text = text.replace(/([A-Z0-9])\s+-\s+([A-Z0-9])/gi, "$1-$2");
+  // OCR: "BelgeNo" / "Alıcı !" gibi bozulmalar
+  text = text.replace(/Belge\s*No/gi, "Belge No");
+  text = text.replace(/Alıcı\s*[!:|]\s*/gi, "Alıcı : ");
   return text;
+}
+
+function profileMatches(profile, text) {
+  if (typeof profile.detect === "function") return Boolean(profile.detect(text));
+  return profile.detect.test(text);
+}
+
+/** pdfjs tek satır metninde sonraki alana kadar alıcı adı */
+function captureLabeledReceiverName(text) {
+  const m = /Alıcı\s*:\s*(?!Banka\b)(.+?)(?=\s+(?:Gönderilen\s+IBAN|Alıcı\s+Banka|İşlem\s+Yeri|Açıklama|Tutar|Belge\s+No|İşlem\s+Ref)\s*:|$)/i.exec(
+    text
+  );
+  if (!m) return null;
+  return m[1].replace(/\s+/g, " ").trim() || null;
 }
 
 function firstCapture(text, regex) {
@@ -79,9 +99,12 @@ function buildParsed({ bankCode, receiverIban, amount, referenceNumber, transact
 export const BANK_PROFILES = [
   {
     code: "KUVEYT_TURK",
-    detect: /kuveytturk\.com|Kuveyt Türk Katılım Bankası/i,
+    // Logo "KUVEYTTÜRK", domain, ünvan — OCR bozulmalarına toleranslı
+    detect: /kuveytturk|KUVEYTT[ÜU]RK|Kuveyt\s*T[üu]rk/i,
     parse(text) {
+      // 2026 e-Dekont (Giden): "Gönderilen IBAN"; eski: "Alıcı IBAN" / "Alınan IBAN"
       const receiverIban =
+        captureIban(text, /Gönderilen IBAN\s*:\s*(TR[\d\s]+)/i) ??
         captureIban(text, /Alıcı IBAN\s*:\s*(TR[\d\s]+)/i) ??
         captureIban(text, /Alınan IBAN\s*:\s*(TR[\d\s]+)/i);
       const amount = parseTrAmount(
@@ -90,7 +113,7 @@ export const BANK_PROFILES = [
       const referenceNumber =
         firstCapture(text, /Belge No\s*:\s*([A-Z0-9-]+)/i) ??
         firstCapture(text, /İşlem Ref\s*:\s*([A-Z0-9-]+)/i);
-      const receiverName = firstCapture(text, /Alıcı\s*:\s*([^\n]+)/i);
+      const receiverName = captureLabeledReceiverName(text);
       return buildParsed({
         bankCode: "KUVEYT_TURK",
         receiverIban,
@@ -198,7 +221,16 @@ export const BANK_PROFILES = [
   },
   {
     code: "VAKIFBANK",
-    detect: /vakifbank\.com\.tr|VAKIFBANK|Türkiye Vakıflar Bankası/i,
+    // "Alıcı Banka: Türkiye Vakıflar Bankası" başka bankanın giden dekontunda geçer — yok say
+    detect(text) {
+      if (/vakifbank\.com\.tr|\bVAKIFBANK\b/i.test(text)) return true;
+      if (!/Türkiye Vakıflar Bankası/i.test(text)) return false;
+      const withoutRecipientBank = String(text).replace(
+        /Alıcı\s*Banka\s*:\s*[^:\n]*?(?=\s+(?:İşlem\s*Yeri|Açıklama|Tutar|Belge|Gönderen|Müşteri)\s*:|$)/gi,
+        ""
+      );
+      return /Türkiye Vakıflar Bankası/i.test(withoutRecipientBank);
+    },
     parse(text) {
       let receiverIban = captureIban(
         text,
@@ -322,22 +354,23 @@ function parseGenericTr(text) {
   );
   const referenceNumber = firstCapture(
     text,
-    /(?:Sorgu|Referans|FAST REF)(?:\s*No|\s*Numarası)?\s*:\s*(\d{6,16})/i
+    /(?:Sorgu|Referans|FAST REF|Belge No|İşlem Ref)(?:\s*No|\s*Numarası)?\s*:\s*([A-Z0-9-]{6,24}|\d{6,16})/i
   );
 
   return buildParsed({
     bankCode: "GENERIC_TR",
-    receiverIban,
+    receiverIban:
+      captureIban(text, /Gönderilen IBAN\s*:\s*(TR[\d\s]+)/i) ?? receiverIban,
     amount,
     referenceNumber,
     transactionDate: parseDateFromText(text),
-    receiverName: null,
+    receiverName: captureLabeledReceiverName(text),
   });
 }
 
 export function parseReceiptText(rawText) {
   const text = preprocessReceiptText(rawText);
-  const profile = BANK_PROFILES.find((p) => p.detect.test(text));
+  const profile = BANK_PROFILES.find((p) => profileMatches(p, text));
   if (profile) {
     return profile.parse(text);
   }

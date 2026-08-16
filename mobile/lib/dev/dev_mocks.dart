@@ -13,11 +13,12 @@
 /// gerçekçi görünsün diye.
 library;
 
+import 'dart:typed_data';
+
 import '../core/network/api_exception.dart';
 import '../core/network/paginated_list_result.dart';
 import '../features/apartments/data/repositories/apartment_repository.dart';
 import '../features/apartments/domain/entities/apartment_entity.dart';
-import '../features/apartments/domain/entities/resident_info.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart'
     show AuthRepository;
 import '../features/auth/domain/entities/user_entity.dart';
@@ -31,6 +32,7 @@ import '../features/buildings/domain/entities/saved_iban_delete_result.dart';
 import '../core/utils/iban_utils.dart';
 import '../features/dues/domain/entities/due_entity.dart';
 import '../features/dues/domain/entities/due_remind_result.dart';
+import '../features/dues/domain/entities/due_transaction_entity.dart';
 import '../features/dues/domain/repositories/dues_repository.dart';
 import '../features/profile/domain/repositories/profile_repository.dart';
 import '../features/subscription/domain/entities/subscription_entity.dart';
@@ -38,6 +40,7 @@ import '../features/subscription/domain/repositories/subscription_repository.dar
 import '../features/tickets/domain/entities/ticket_entity.dart';
 import '../features/tickets/domain/entities/ticket_update_entity.dart';
 import '../features/tickets/domain/repositories/ticket_repository.dart';
+import 'dev_showcase_seed.dart';
 
 /// Tek bir tetikleyici noktada her mock'u sıfırlamak için.
 class MockState {
@@ -52,9 +55,6 @@ const _delay = Duration(milliseconds: 200);
 
 // Dev preview seed data: kullanıcı tarafından/backend tarafından gelen örnek veri gibi
 // davranır; uygulama UI metni olmadığı için i18n anahtarına bağlanmaz.
-const _mockTicketElevatorNoiseTitle = 'Asansör gürültüsü';
-const _mockTicketElevatorNoiseDescription =
-    'Gece geç saatlerde asansör ses yapıyor.';
 
 class MockAuthRepository implements AuthRepository {
   /// null = çıkış yapılmış; splash login ekranına gider.
@@ -62,21 +62,23 @@ class MockAuthRepository implements AuthRepository {
 
   static final UserEntity _devManager = UserEntity(
     id: 'dev_manager_1',
-    email: 'dev@aidatpanel.com',
-    name: 'Dev Yönetici',
-    phone: '5551112233',
+    email: 'yonetici@aidatpanel.dev',
+    name: 'Ahmet Yılmaz',
+    phone: '5321002030',
     role: UserRole.manager,
     language: 'tr',
   );
 
+  /// Showcase sakin: Lale daire 8 — bu ay OVERDUE (screenshot borç kartı için).
+  /// Daire 1–7 seed'de paid; 8–10 overdue.
   static final UserEntity _devResident = UserEntity(
-    id: 'dev_resident_1',
-    email: 'resident@dev',
-    name: 'Dev Sakin',
-    phone: '5559998877',
+    id: 'r_lale_8',
+    email: 'cem@aidatpanel.dev',
+    name: 'Cem Aydın',
+    phone: '5550303008',
     role: UserRole.resident,
     language: 'tr',
-    apartmentId: 'a1_1',
+    apartmentId: 'lale_a8',
   );
 
   @override
@@ -353,6 +355,9 @@ class MockProfileRepository implements ProfileRepository {
     String? email,
     String? phone,
     String? currentPassword,
+    String? otpCode,
+    bool includeEmail = true,
+    bool includePhone = true,
   }) async {
     await Future.delayed(_delay);
     final user = MockAuthRepository.sessionUser;
@@ -448,9 +453,9 @@ class MockSubscriptionRepository implements SubscriptionRepository {
   Future<SubscriptionEntity?> getMySubscription() async {
     await Future.delayed(_delay);
     return const SubscriptionEntity(
-      id: 'sub_dev_1',
-      status: SubscriptionStatus.trial,
-      plan: 'monthly',
+      id: 'sub_dev_business',
+      status: SubscriptionStatus.active,
+      plan: 'aidatpanel_business_monthly',
       currentPeriodEnd: null,
     );
   }
@@ -461,47 +466,23 @@ class MockBuildingRepository implements BuildingRepository {
   /// FK kontrolü yapabilmek için referans tutuyoruz.
   final MockApartmentRepository apartments;
 
-  final List<BuildingEntity> _buildings = [
-    const BuildingEntity(
-      id: 'b1',
-      name: 'Çamlık Apartmanı',
-      address: 'Atatürk Cad. No:42',
-      city: 'İstanbul',
-      totalApartments: 12,
-      occupiedApartments: 0,
-      totalMonthlyDues: 7200,
-      collectedDues: 0,
-      dueAmount: 600,
-      dueDay: 5,
-      currency: 'TRY',
-      collectionIban: 'TR640001000009000021995841',
-      collectionAccountTitle: 'Çamlık Apartmanı',
-      paymentReferenceTemplate: '{{number}} nolu daire aidat',
-    ),
-    const BuildingEntity(
-      id: 'b2',
-      name: 'Yıldız Sitesi A Blok',
-      address: 'Bağdat Cad. No:117',
-      city: 'İstanbul',
-      totalApartments: 8,
-      occupiedApartments: 0,
-      totalMonthlyDues: 6000,
-      collectedDues: 0,
-      dueAmount: 750,
-      dueDay: 1,
-      currency: 'TRY',
-      collectionIban: 'TR320001009000001234567890',
-      collectionAccountTitle: 'Yıldız Sitesi A Blok',
-      paymentReferenceTemplate: 'Aidat Daire {{number}}',
-    ),
-  ];
+  final List<BuildingEntity> _buildings = List.of(buildShowcaseBuildings());
 
-  MockBuildingRepository(this.apartments);
+  MockBuildingRepository(this.apartments) {
+    // Showcase daireleri apartment repo'ya yükle.
+    final seeded = buildShowcaseApartments();
+    for (final entry in seeded.entries) {
+      apartments.replaceSeed(entry.key, entry.value);
+    }
+  }
 
   @override
   Future<List<BuildingEntity>> fetchBuildings({bool standalone = false}) async {
     await Future.delayed(_delay);
-    return List.unmodifiable(_buildings);
+    final list = standalone
+        ? _buildings.where((b) => b.siteId == null)
+        : _buildings;
+    return List.unmodifiable(list);
   }
 
   /// Bina atanmamış örnek setler (bina ekle formu + ayarlar düzenleme).
@@ -884,85 +865,14 @@ class MockBuildingRepository implements BuildingRepository {
 
 class MockApartmentRepository implements ApartmentRepository {
   /// Bina başına mock daire listesi.
-  final Map<String, List<ApartmentEntity>> _byBuilding = {
-    'b1': [
-      const ApartmentEntity(
-        id: 'a1_1',
-        buildingId: 'b1',
-        apartmentNumber: '1A',
-        floor: 1,
-        resident: ResidentInfo(
-          id: 'r1',
-          name: 'Ayşe Yılmaz',
-          email: 'ayse@example.com',
-          phone: '+905551112201',
-          role: 'RESIDENT',
-        ),
-        monthlyDues: 600,
-        paymentStatus: PaymentStatus.paid,
-      ),
-      const ApartmentEntity(
-        id: 'a1_2',
-        buildingId: 'b1',
-        apartmentNumber: '1B',
-        floor: 1,
-        resident: ResidentInfo(
-          id: 'r2',
-          name: 'Mehmet Demir',
-          email: 'mehmet@example.com',
-          role: 'RESIDENT',
-        ),
-        monthlyDues: 600,
-        paymentStatus: PaymentStatus.pending,
-      ),
-      ApartmentEntity(
-        id: 'a1_3',
-        buildingId: 'b1',
-        apartmentNumber: '2A',
-        floor: 2,
-        monthlyDues: 600,
-        paymentStatus: PaymentStatus.pending,
-      ),
-      ApartmentEntity(
-        id: 'a1_4',
-        buildingId: 'b1',
-        apartmentNumber: '2B',
-        floor: 2,
-        monthlyDues: 600,
-        paymentStatus: PaymentStatus.pending,
-      ),
-    ],
-    'b2': [
-      const ApartmentEntity(
-        id: 'a2_1',
-        buildingId: 'b2',
-        apartmentNumber: '1',
-        floor: 1,
-        resident: ResidentInfo(
-          id: 'r3',
-          name: 'Zeynep Kaya',
-          email: 'zeynep@example.com',
-          phone: '+905551112202',
-          role: 'RESIDENT',
-        ),
-        monthlyDues: 750,
-        paymentStatus: PaymentStatus.overdue,
-      ),
-      ApartmentEntity(
-        id: 'a2_2',
-        buildingId: 'b2',
-        apartmentNumber: '2',
-        floor: 2,
-        monthlyDues: 750,
-        paymentStatus: PaymentStatus.pending,
-      ),
-    ],
-  };
+  final Map<String, List<ApartmentEntity>> _byBuilding = {};
 
-  /// Backend tarafında `createBuildingService` daireleri tek transaction
-  /// içinde seed ediyor. Dev preview'de bunu MockBuildingRepository
-  /// tetikler — apartmentsPerFloor 26'yı geçerse harf sarsa rolu ile
-  /// (A..Z, AA..AZ) backend ile birebir aynı şemayı kullanırız.
+  /// Showcase seed'ini yazmak için (MockBuildingRepository ctor).
+  void replaceSeed(String buildingId, List<ApartmentEntity> apartments) {
+    _byBuilding[buildingId] = List.of(apartments);
+  }
+
+  /// Backend `createBuildingService` ile aynı: 1'den başlayan sıralı kapı no.
   void _seedForBuilding({
     required String buildingId,
     required int totalFloors,
@@ -971,20 +881,19 @@ class MockApartmentRepository implements ApartmentRepository {
   }) {
     if (totalFloors <= 0 || apartmentsPerFloor <= 0) return;
     final list = <ApartmentEntity>[];
+    var unitNumber = 1;
     for (var floor = 1; floor <= totalFloors; floor++) {
       for (var unit = 0; unit < apartmentsPerFloor; unit++) {
-        final letter = unit < 26
-            ? String.fromCharCode(65 + unit)
-            : '${String.fromCharCode(65 + (unit ~/ 26) - 1)}${String.fromCharCode(65 + unit % 26)}';
         list.add(
           ApartmentEntity(
             id: MockState.nextId('a'),
             buildingId: buildingId,
-            apartmentNumber: '$floor$letter',
+            apartmentNumber: '$unitNumber',
             floor: floor,
             monthlyDues: monthlyDues,
           ),
         );
+        unitNumber += 1;
       }
     }
     _byBuilding[buildingId] = list;
@@ -1099,157 +1008,16 @@ class MockDuesRepository implements DuesRepository {
   /// Bina başına in-memory dues listesi. Update senaryolarında bu listede
   /// status değiştirebilmek için final var olarak tutuyoruz.
   late final Map<String, List<DueEntity>> _byBuilding;
+  late final Map<String, List<DueTransactionEntity>> _transactions;
 
   MockDuesRepository() {
-    _byBuilding = {'b1': _generateB1Dues(), 'b2': _generateB2Dues()};
-  }
-
-  /// Aylık aidat üretici — verilen dairenin son `monthsBack` ay için
-  /// statü kalıbına göre due üretir. Statü kalıbı bir liste olarak
-  /// gelir; index 0 en yeni ay.
-  List<DueEntity> _generateForApartment({
-    required String buildingId,
-    required String apartmentId,
-    required String apartmentNumber,
-    required double amount,
-    required List<DueStatus> pattern, // index 0 = bu ay (en yeni)
-    ResidentInfo? resident,
-    int? apartmentFloor,
-  }) {
-    final now = DateTime.now();
-    final list = <DueEntity>[];
-    for (var i = 0; i < pattern.length; i++) {
-      final dt = DateTime(now.year, now.month - i, 1);
-      final status = pattern[i];
-      // Backend tipik olarak ayın 5'ini due day yapıyor (b1) veya 1'i (b2)
-      final dueDay = buildingId == 'b1' ? 5 : 1;
-      final dueDate = DateTime(dt.year, dt.month, dueDay);
-      final overdueDays = status == DueStatus.overdue
-          ? now.difference(dueDate).inDays
-          : 0;
-      final paidAt = status == DueStatus.paid
-          ? DateTime(dt.year, dt.month, dueDay + 2)
-          : null;
-      list.add(
-        DueEntity(
-          id: '${apartmentId}_${dt.year}_${dt.month}',
-          apartmentId: apartmentId,
-          apartmentNumber: apartmentNumber,
-          apartmentFloor: apartmentFloor,
-          resident: resident,
-          amount: amount,
-          currency: 'TRY',
-          month: dt.month,
-          year: dt.year,
-          dueDate: dueDate,
-          status: status,
-          paidAt: paidAt,
-          overdueDays: overdueDays > 0 ? overdueDays : 0,
-          createdAt: DateTime(dt.year, dt.month, 1),
-          updatedAt: paidAt ?? DateTime(dt.year, dt.month, 1),
-        ),
-      );
-    }
-    return list;
-  }
-
-  /// b1 — Çamlık Apartmanı (4 daire, ₺600/ay)
-  /// - 1A (Ayşe — sakinli, düzenli ödeyici): hep PAID
-  /// - 1B (Mehmet — sakinli, son 2 ay PENDING): 4 PAID + 2 PENDING
-  /// - 2A (boş): hep PENDING
-  /// - 2B (boş): hep PENDING
-  /// Toplam: 24 due, 10 PAID, 14 PENDING → collection rate ~%41.6
-  List<DueEntity> _generateB1Dues() {
-    return [
-      ..._generateForApartment(
-        buildingId: 'b1',
-        apartmentId: 'a1_1',
-        apartmentNumber: '1A',
-        amount: 600,
-        apartmentFloor: 1,
-        resident: const ResidentInfo(
-          id: 'r1',
-          name: 'Ayşe Yılmaz',
-          email: 'ayse@example.com',
-          phone: '+905551112201',
-          role: 'RESIDENT',
-        ),
-        pattern: List.filled(6, DueStatus.paid),
-      ),
-      ..._generateForApartment(
-        buildingId: 'b1',
-        apartmentId: 'a1_2',
-        apartmentNumber: '1B',
-        amount: 600,
-        apartmentFloor: 1,
-        resident: const ResidentInfo(
-          id: 'r2',
-          name: 'Mehmet Demir',
-          email: 'mehmet@example.com',
-          role: 'RESIDENT',
-        ),
-        pattern: const [
-          DueStatus.pending, // bu ay
-          DueStatus.pending, // 1 ay önce
-          DueStatus.paid,
-          DueStatus.paid,
-          DueStatus.paid,
-          DueStatus.paid,
-        ],
-      ),
-      ..._generateForApartment(
-        buildingId: 'b1',
-        apartmentId: 'a1_3',
-        apartmentNumber: '2A',
-        amount: 600,
-        pattern: List.filled(6, DueStatus.pending),
-      ),
-      ..._generateForApartment(
-        buildingId: 'b1',
-        apartmentId: 'a1_4',
-        apartmentNumber: '2B',
-        amount: 600,
-        pattern: List.filled(6, DueStatus.pending),
-      ),
-    ];
-  }
-
-  /// b2 — Yıldız Sitesi A Blok (2 daire, ₺750/ay)
-  /// - 1 (Zeynep — sakinli, son 2 ay OVERDUE): 4 PAID + 2 OVERDUE
-  /// - 2 (boş): hep PENDING
-  /// Toplam: 12 due, 4 PAID, 2 OVERDUE, 6 PENDING → collection rate ~%33.3
-  List<DueEntity> _generateB2Dues() {
-    return [
-      ..._generateForApartment(
-        buildingId: 'b2',
-        apartmentId: 'a2_1',
-        apartmentNumber: '1',
-        amount: 750,
-        apartmentFloor: 1,
-        resident: const ResidentInfo(
-          id: 'r3',
-          name: 'Zeynep Kaya',
-          email: 'zeynep@example.com',
-          phone: '+905551112202',
-          role: 'RESIDENT',
-        ),
-        pattern: const [
-          DueStatus.overdue, // bu ay
-          DueStatus.overdue, // 1 ay önce
-          DueStatus.paid,
-          DueStatus.paid,
-          DueStatus.paid,
-          DueStatus.paid,
-        ],
-      ),
-      ..._generateForApartment(
-        buildingId: 'b2',
-        apartmentId: 'a2_2',
-        apartmentNumber: '2',
-        amount: 750,
-        pattern: List.filled(6, DueStatus.pending),
-      ),
-    ];
+    _byBuilding = {
+      for (final e in buildShowcaseDues().entries) e.key: List.of(e.value),
+    };
+    _transactions = {
+      for (final id in _byBuilding.keys)
+        id: List.of(buildShowcaseTransactions(id)),
+    };
   }
 
   /// Tur 5 §10/3 — server-side filtre simulasyonu. Backend
@@ -1271,6 +1039,12 @@ class MockDuesRepository implements DuesRepository {
         if (month != null && d.month != month) return false;
         if (year != null && d.year != year) return false;
         if (status != null && d.status != status) return false;
+        // Yönetici listesi: sakinli veya açık borç snapshot (boş daire PAID gizle)
+        if (d.resident == null &&
+            d.status != DueStatus.pending &&
+            d.status != DueStatus.overdue) {
+          return false;
+        }
         return true;
       }),
     );
@@ -1285,10 +1059,30 @@ class MockDuesRepository implements DuesRepository {
     String? cursor,
     bool paginated = true,
   }) async {
-    // Dev preview otomatik manager girişi yapıyor; sakin akışı test
-    // edilmeyeceği için boş döner.
     await Future.delayed(_delay);
-    return const PaginatedListResult(items: []);
+    final aptId = MockAuthRepository.sessionUser?.apartmentId;
+    if (aptId == null) {
+      return const PaginatedListResult(items: []);
+    }
+    final all = _byBuilding.values.expand((e) => e).where((d) {
+      if (d.apartmentId != aptId) return false;
+      if (month != null && d.month != month) return false;
+      if (year != null && d.year != year) return false;
+      if (status != null && d.status != status) return false;
+      return true;
+    }).toList();
+    return PaginatedListResult(items: all);
+  }
+
+  @override
+  Future<PaginatedListResult<DueTransactionEntity>> getDueTransactions(
+    String buildingId, {
+    String? cursor,
+    bool paginated = true,
+  }) async {
+    await Future.delayed(_delay);
+    final list = _transactions[buildingId] ?? const <DueTransactionEntity>[];
+    return PaginatedListResult(items: List.unmodifiable(list));
   }
 
   @override
@@ -1325,6 +1119,8 @@ class MockDuesRepository implements DuesRepository {
       note: old.note,
       createdAt: old.createdAt,
       updatedAt: now,
+      paidAmount: status == DueStatus.paid ? old.amount : 0,
+      remainingAmount: status == DueStatus.paid ? 0 : old.amount,
     );
     list[idx] = updated;
     return updated;
@@ -1340,13 +1136,11 @@ class MockDuesRepository implements DuesRepository {
   }) async {
     await Future.delayed(_delay);
     if (!affectCurrent) return;
-    // Mock: affectCurrent=true iken sadece PENDING aidatların amount'unu
-    // güncelle (PAID olanlar dokunulmaz — backend §7'deki davranışı
-    // simüle ediyoruz).
     final list = _byBuilding[buildingId];
     if (list == null) return;
     for (var i = 0; i < list.length; i++) {
-      if (list[i].status == DueStatus.pending) {
+      if (list[i].status == DueStatus.pending ||
+          list[i].status == DueStatus.overdue) {
         final old = list[i];
         list[i] = DueEntity(
           id: old.id,
@@ -1365,6 +1159,8 @@ class MockDuesRepository implements DuesRepository {
           note: old.note,
           createdAt: old.createdAt,
           updatedAt: DateTime.now(),
+          paidAmount: old.paidAmount,
+          remainingAmount: dueAmount,
         );
       }
     }
@@ -1401,19 +1197,51 @@ class MockTicketRepository implements TicketRepository {
 
   MockTicketRepository() {
     final now = DateTime.now();
-    _tickets.add(
+    _tickets.addAll([
       TicketEntity(
         id: 'ticket_seed_1',
-        apartmentId: 'a1_1',
-        userId: 'dev_resident_1',
-        title: _mockTicketElevatorNoiseTitle,
-        description: _mockTicketElevatorNoiseDescription,
-        category: TicketCategory.complaint,
-        status: TicketStatus.open,
+        apartmentId: 'vefa_a1',
+        userId: 'r_vefa_1',
+        buildingId: DevShowcaseIds.vefa,
+        apartmentNumber: '1',
+        residentName: 'Ayşe Demir',
+        title: 'Asansör garip ses çıkarıyor',
+        description:
+            '3. kattan itibaren inerken metal sürtünme sesi duyuluyor.',
+        category: TicketCategory.malfunction,
+        status: TicketStatus.inProgress,
         createdAt: now.subtract(const Duration(days: 2)),
-        updatedAt: now.subtract(const Duration(days: 2)),
+        updatedAt: now.subtract(const Duration(hours: 6)),
       ),
-    );
+      TicketEntity(
+        id: 'ticket_seed_2',
+        apartmentId: 'vefa_a3',
+        userId: 'r_vefa_3',
+        buildingId: DevShowcaseIds.vefa,
+        apartmentNumber: '3',
+        residentName: 'Zeynep Kaya',
+        title: 'Merdiven aydınlatması yanmıyor',
+        description: '2. kat merdiven lambası iki gündür yanmıyor.',
+        category: TicketCategory.request,
+        status: TicketStatus.open,
+        createdAt: now.subtract(const Duration(days: 1)),
+        updatedAt: now.subtract(const Duration(days: 1)),
+      ),
+      TicketEntity(
+        id: 'ticket_seed_3',
+        apartmentId: 'lale_a8',
+        userId: 'r_lale_8',
+        buildingId: DevShowcaseIds.lale,
+        apartmentNumber: '8',
+        residentName: 'Cem Aydın',
+        title: 'Interkom çalışmıyor',
+        description: 'Daire içi interkom ses vermiyor.',
+        category: TicketCategory.malfunction,
+        status: TicketStatus.open,
+        createdAt: now.subtract(const Duration(hours: 8)),
+        updatedAt: now.subtract(const Duration(hours: 8)),
+      ),
+    ]);
   }
 
   @override
@@ -1442,12 +1270,13 @@ class MockTicketRepository implements TicketRepository {
     bool paginated = true,
   }) async {
     await Future.delayed(_delay);
-    return getMyTickets(
-      status: status,
-      category: category,
-      cursor: cursor,
-      paginated: paginated,
-    );
+    var list = _tickets.where((t) => t.buildingId == buildingId).toList();
+    if (status != null) list = list.where((t) => t.status == status).toList();
+    if (category != null) {
+      list = list.where((t) => t.category == category).toList();
+    }
+    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return PaginatedListResult(items: list);
   }
 
   @override
@@ -1536,6 +1365,8 @@ class MockTicketRepository implements TicketRepository {
     required String title,
     required String description,
     required TicketCategory category,
+    Uint8List? attachmentBytes,
+    String? attachmentFilename,
   }) async {
     await Future.delayed(_delay);
     final now = DateTime.now();

@@ -23,14 +23,25 @@ DueEntity? findDueById(
 Map<String, List<String>> groupOverdueDueIdsByBuilding(
   Map<String, List<DueEntity>> allDues, {
   Set<String>? buildingIds,
+  int? month,
+  int? year,
 }) {
   final grouped = <String, List<String>>{};
+  final filterByMonth = month != null && year != null;
 
   for (final entry in allDues.entries) {
     if (buildingIds != null && !buildingIds.contains(entry.key)) continue;
 
     final overdueIds = entry.value
-        .where((due) => due.status == DueStatus.overdue && due.resident != null)
+        .where((due) {
+          if (due.status != DueStatus.overdue || due.resident == null) {
+            return false;
+          }
+          if (filterByMonth && (due.month != month || due.year != year)) {
+            return false;
+          }
+          return true;
+        })
         .map((due) => due.id)
         .toList(growable: false);
     if (overdueIds.isNotEmpty) {

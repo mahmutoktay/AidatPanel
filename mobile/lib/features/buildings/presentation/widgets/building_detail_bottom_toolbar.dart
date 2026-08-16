@@ -4,7 +4,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/detail_bottom_toolbar.dart';
 
-/// Bina detay ekranı alt araç çubuğu — Düzenle, Sil, Rapor, Aidat Ayarları, Çoklu Seç.
+/// Bina detay ekranı alt araç çubuğu —
+/// Rapor → Aidat Ayarları → Düzenle | Çoklu Seç → Sil.
 class BuildingDetailBottomToolbar extends StatelessWidget {
   const BuildingDetailBottomToolbar({
     super.key,
@@ -28,17 +29,6 @@ class BuildingDetailBottomToolbar extends StatelessWidget {
     return DetailBottomToolbar(
       actions: [
         DetailToolbarAction(
-          icon: Icons.delete_outline,
-          label: t.common.delete,
-          onTap: onDelete,
-          color: AppColors.statusRed,
-        ),
-        DetailToolbarAction(
-          icon: Icons.edit_outlined,
-          label: t.common.edit,
-          onTap: onEdit,
-        ),
-        DetailToolbarAction(
           icon: Icons.download_rounded,
           label: t.features.reports.menuDownload,
           onTap: onReport,
@@ -49,9 +39,21 @@ class BuildingDetailBottomToolbar extends StatelessWidget {
           onTap: onDueSettings,
         ),
         DetailToolbarAction(
+          icon: Icons.edit_outlined,
+          label: t.common.edit,
+          onTap: onEdit,
+        ),
+        DetailToolbarAction(
           icon: Icons.checklist_rounded,
           label: t.common.multiSelectResidents,
           onTap: onMultiSelect,
+          showDividerBefore: true,
+        ),
+        DetailToolbarAction(
+          icon: Icons.delete_outline,
+          label: t.common.delete,
+          onTap: onDelete,
+          color: AppColors.statusRed,
         ),
       ],
     );

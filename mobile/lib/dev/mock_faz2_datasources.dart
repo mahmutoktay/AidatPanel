@@ -7,69 +7,104 @@ import '../features/expenses/data/models/expense_model.dart';
 import '../features/expenses/domain/entities/expense_create_outcome.dart';
 import '../features/notifications/data/datasources/notification_remote_datasource.dart';
 import '../features/notifications/domain/entities/notification_entity.dart';
+import 'dev_showcase_seed.dart';
 
 const _delay = Duration(milliseconds: 200);
 
-// Dev preview seed data: kullanıcı/backend kaynaklı örnek veri gibi davranır;
-// datasource katmanında localization çağrısı yapılmadığı için i18n'e bağlanmaz.
-const _mockExpenseElevatorMaintenanceTitle = 'Asansör bakımı';
-const _mockExpenseCleaningTitle = 'Temizlik';
-const _mockExpenseElectricityBillTitle = 'Elektrik faturası';
-const _mockExpenseAnnualContractNote = 'Yıllık sözleşme';
+// Dev preview seed: datasource katmanında localization yok (ham örnek metin).
 const _mockNotificationNewTicketTitle = 'Yeni talep';
 const _mockNotificationElevatorNoiseBody =
-    'Asansör gürültüsü — Çamlık Apartmanı';
+    'Asansör garip ses çıkarıyor — Vefa Apartman';
 const _mockNotificationWaterOutageTitle = 'Su kesintisi';
 const _mockNotificationWaterOutageBody =
-    'Yarın 10:00–14:00 arası planlı bakım.';
-const _mockNotificationDevPreviewTitle = 'Dev preview';
-const _mockNotificationDevPreviewBody = 'Bildirim kutusu — mock veri';
+    'Lale Apartmanı: yarın 10:00–14:00 planlı bakım.';
+const _mockNotificationDekontTitle = 'Dekont inceleme bekliyor';
+const _mockNotificationDekontBody =
+    'Cem Aydın (Lale · Daire 8) dekont yükledi.';
 
 class MockExpenseDataSource implements ExpenseDataSource {
   final Map<String, List<ExpenseModel>> _byBuilding = {};
 
-  /// Backend JSON şekline uygun örnek giderler (`b1`, `b2`).
+  /// Backend JSON şekline uygun örnek giderler (showcase bina ID'leri).
   void seedPreview() {
     final now = DateTime.now();
-    _byBuilding['b1'] = [
+    _byBuilding[DevShowcaseIds.vefa] = [
       ExpenseModel(
-        id: 'exp_seed_1',
-        buildingId: 'b1',
-        title: _mockExpenseElevatorMaintenanceTitle,
-        amount: 4500,
+        id: 'exp_vefa_1',
+        buildingId: DevShowcaseIds.vefa,
+        title: 'Merdiven temizliği',
+        amount: 1800,
+        category: 'CLEANING',
+        date: DateTime(now.year, now.month, 3),
+        targetMonth: now.month,
+        targetYear: now.year,
+        perUnitAmount: 225,
+        createdAt: now.subtract(const Duration(days: 4)),
+      ),
+      ExpenseModel(
+        id: 'exp_vefa_2',
+        buildingId: DevShowcaseIds.vefa,
+        title: 'Asansör periyodik bakım',
+        amount: 3200,
         category: 'ELEVATOR',
         date: DateTime(now.year, now.month, 5),
         targetMonth: now.month,
         targetYear: now.year,
-        perUnitAmount: 1125,
-        note: _mockExpenseAnnualContractNote,
+        perUnitAmount: 400,
+        note: 'Yıllık sözleşme',
         createdAt: now.subtract(const Duration(days: 3)),
       ),
       ExpenseModel(
-        id: 'exp_seed_2',
-        buildingId: 'b1',
-        title: _mockExpenseCleaningTitle,
-        amount: 1200,
-        category: 'CLEANING',
-        date: DateTime(now.year, now.month, 12),
-        targetMonth: now.month,
-        targetYear: now.year,
-        perUnitAmount: 300,
-        createdAt: now.subtract(const Duration(days: 1)),
-      ),
-    ];
-    _byBuilding['b2'] = [
-      ExpenseModel(
-        id: 'exp_seed_3',
-        buildingId: 'b2',
-        title: _mockExpenseElectricityBillTitle,
-        amount: 3200.5,
+        id: 'exp_vefa_3',
+        buildingId: DevShowcaseIds.vefa,
+        title: 'Ortak alan elektrik',
+        amount: 1450,
         category: 'ELECTRICITY',
         date: DateTime(now.year, now.month, 8),
         targetMonth: now.month,
         targetYear: now.year,
-        perUnitAmount: 800.13,
-        createdAt: now,
+        perUnitAmount: 181.25,
+        createdAt: now.subtract(const Duration(days: 1)),
+      ),
+    ];
+    _byBuilding[DevShowcaseIds.lale] = [
+      ExpenseModel(
+        id: 'exp_lale_1',
+        buildingId: DevShowcaseIds.lale,
+        title: 'Çatı izolasyonu',
+        amount: 8500,
+        category: 'REPAIR',
+        date: DateTime(now.year, now.month, 6),
+        targetMonth: now.month,
+        targetYear: now.year,
+        perUnitAmount: 850,
+        createdAt: now.subtract(const Duration(days: 2)),
+      ),
+      ExpenseModel(
+        id: 'exp_lale_2',
+        buildingId: DevShowcaseIds.lale,
+        title: 'Temizlik şirketi',
+        amount: 2400,
+        category: 'CLEANING',
+        date: DateTime(now.year, now.month, 5),
+        targetMonth: now.month,
+        targetYear: now.year,
+        perUnitAmount: 240,
+        createdAt: now.subtract(const Duration(days: 1)),
+      ),
+    ];
+    _byBuilding[DevShowcaseIds.blockA] = [
+      ExpenseModel(
+        id: 'exp_ba_1',
+        buildingId: DevShowcaseIds.blockA,
+        title: 'Blok elektrik panosu',
+        amount: 2100,
+        category: 'ELECTRICITY',
+        date: DateTime(now.year, now.month, 4),
+        targetMonth: now.month,
+        targetYear: now.year,
+        perUnitAmount: 262.5,
+        createdAt: now.subtract(const Duration(days: 2)),
       ),
     ];
   }
@@ -106,7 +141,9 @@ class MockExpenseDataSource implements ExpenseDataSource {
     bool paginated = true,
   }) async {
     await Future.delayed(_delay);
-    var list = List<ExpenseModel>.from(_byBuilding['b1'] ?? []);
+    var list = List<ExpenseModel>.from(
+      _byBuilding[DevShowcaseIds.lale] ?? [],
+    );
     if (month != null) {
       list = list.where((e) => e.targetMonth == month).toList();
     }
@@ -286,13 +323,29 @@ class MockNotificationDataSource implements NotificationDataSource {
         data: {
           'type': 'TICKET_CREATED',
           'ticketId': 'ticket_seed_1',
-          'buildingId': 'b1',
-          'apartmentId': 'a1_1',
-          'category': 'COMPLAINT',
-          'status': 'OPEN',
+          'buildingId': DevShowcaseIds.vefa,
+          'apartmentId': 'vefa_a1',
+          'category': 'MALFUNCTION',
+          'status': 'IN_PROGRESS',
           'route': '/manager/tickets',
         },
         createdAt: now.subtract(const Duration(hours: 2)),
+      ),
+      NotificationEntity(
+        id: 'n_seed_dekont',
+        userId: 'dev_manager_1',
+        title: _mockNotificationDekontTitle,
+        body: _mockNotificationDekontBody,
+        type: NotificationType.system,
+        isRead: false,
+        data: {
+          'type': 'DEKONT_NEEDS_REVIEW',
+          'dekontId': 'dk_lale_8',
+          'buildingId': DevShowcaseIds.lale,
+          'apartmentId': 'lale_a8',
+          'route': '/manager/dekonts',
+        },
+        createdAt: now.subtract(const Duration(hours: 1)),
       ),
       NotificationEntity(
         id: 'n_seed_announcement',
@@ -303,20 +356,10 @@ class MockNotificationDataSource implements NotificationDataSource {
         isRead: true,
         data: {
           'type': 'ANNOUNCEMENT',
-          'buildingId': 'b1',
+          'buildingId': DevShowcaseIds.lale,
           'route': '/notifications',
         },
         createdAt: now.subtract(const Duration(days: 1)),
-      ),
-      NotificationEntity(
-        id: 'n_seed_system',
-        userId: 'dev_manager_1',
-        title: _mockNotificationDevPreviewTitle,
-        body: _mockNotificationDevPreviewBody,
-        type: NotificationType.system,
-        isRead: false,
-        data: {'type': 'SYSTEM', 'route': '/notifications'},
-        createdAt: now,
       ),
     ]);
   }

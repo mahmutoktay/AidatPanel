@@ -1,6 +1,8 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
+import { createRequire } from "module";
+import { pathToFileURL } from "url";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import sharp from "sharp";
@@ -10,14 +12,17 @@ import { runTesseractOnImageBuffer } from "../utils/runTesseract.js";
 import { parseReceiptText } from "../constants/bankReceiptProfiles.js";
 
 const execFileAsync = promisify(execFile);
+const require = createRequire(import.meta.url);
 
-/** pdfjs-dist lazy loader — workerSrc crash önleme (Node.js ortamında browser global yok). */
+/** pdfjs-dist lazy loader — Node'da gerçek worker yolu şart (boş workerSrc crash). */
 let _pdfjsModule = null;
 async function getPdfjs() {
   if (!_pdfjsModule) {
     _pdfjsModule = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    // Worker devre dışı — Node.js'te web worker yok, main thread kullan.
-    _pdfjsModule.GlobalWorkerOptions.workerSrc = "";
+    const workerPath = require.resolve(
+      "pdfjs-dist/legacy/build/pdf.worker.mjs"
+    );
+    _pdfjsModule.GlobalWorkerOptions.workerSrc = pathToFileURL(workerPath).href;
   }
   return _pdfjsModule;
 }

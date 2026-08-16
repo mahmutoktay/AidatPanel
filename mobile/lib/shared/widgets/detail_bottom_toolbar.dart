@@ -10,12 +10,16 @@ class DetailToolbarAction {
     required this.label,
     required this.onTap,
     this.color,
+    this.showDividerBefore = false,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final Color? color;
+
+  /// Mod değiştiren aksiyonları (ör. çoklu seç) diğerlerinden ayırmak için.
+  final bool showDividerBefore;
 }
 
 /// Bina / site / daire detay alt araç çubuğu — ortak görünüm.
@@ -45,10 +49,29 @@ class DetailBottomToolbar extends StatelessWidget {
           ),
           child: Row(
             children: [
-              for (final action in actions)
+              for (final action in actions) ...[
+                if (action.showDividerBefore) const _ToolbarDivider(),
                 _ToolbarActionButton(action: action),
+              ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ToolbarDivider extends StatelessWidget {
+  const _ToolbarDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: SizedBox(
+        width: 1,
+        child: ColoredBox(
+          color: AppColors.borderColor.withValues(alpha: 0.45),
         ),
       ),
     );

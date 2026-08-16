@@ -140,14 +140,16 @@ export const createBuildingService = async ({
       const apartmentsPerFloorNum = apartmentsPerFloor || 2;
       const apartmentRows = [];
 
+      // Kapı no: 1'den başlayan sıralı sayı (kat bilgisi `floor` alanında).
+      let unitNumber = 1;
       for (let floor = 1; floor <= totalFloorsNum; floor++) {
         for (let unit = 0; unit < apartmentsPerFloorNum; unit++) {
-          const letter = String.fromCharCode(65 + unit);
           apartmentRows.push({
-            number: `${floor}${letter}`,
+            number: String(unitNumber),
             floor,
             buildingId: building.id,
           });
+          unitNumber += 1;
         }
       }
 

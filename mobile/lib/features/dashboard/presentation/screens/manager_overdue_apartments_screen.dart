@@ -84,11 +84,14 @@ class _ManagerOverdueApartmentsScreenState
           ),
         ),
         data: (allDues) {
+          final now = DateTime.now();
           final items = ManagerDashboardMapper.overdueApartmentsFromMap(
             allDues,
             buildingNames,
             buildingId: _filterScope.buildingId,
             buildingIds: scopedBuildingIds,
+            month: now.month,
+            year: now.year,
           );
 
           return RefreshIndicator(

@@ -363,7 +363,7 @@
     "apartmentDeleteFailed": "Could not delete apartment",
     "apartmentDeleteFailedFK": "Cannot delete this apartment: resident or dues records still exist.",
     "deleteApartmentConfirm": "Are you sure you want to delete this apartment?",
-    "apartmentNumberLabel": "Apt No (e.g. 5A)",
+    "apartmentNumberLabel": "Apt No (e.g. 5)",
     "floorLabel2": "Floor (optional)",
     "floorOptional": "Floor (-5 to 200)",
     "buildingNameField": "Building name",
@@ -1622,7 +1622,7 @@
         "badgeWaived": "Waived"
       },
       "transactions": {
-        "title": "Dues Transaction History",
+        "title": "Dues Status Summary",
         "residentTitle": "Your Transaction History",
         "emptyTitle": "No transactions yet",
         "emptySubtitle": "Receipt approvals and manual payments appear here.",

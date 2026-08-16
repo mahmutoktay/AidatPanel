@@ -138,21 +138,28 @@ abstract final class ManagerDashboardMapper {
   }
 
   /// Bina haritasından gecikmiş aidat satırları; tüm binalar seçiliyken satırda bina adı gösterilir.
+  /// [month]/[year] verilirse yalnızca o ayın gecikmişleri (özet kart / Aidatlar ile aynı SoT).
   static List<ManagerOverdueApartmentItem> overdueApartmentsFromMap(
     Map<String, List<DueEntity>> allDues,
     Map<String, String> buildingNamesById, {
     String? buildingId,
     Set<String>? buildingIds,
+    int? month,
+    int? year,
   }) {
+    final filterByMonth = month != null && year != null;
     final items = <ManagerOverdueApartmentItem>[];
     for (final entry in allDues.entries) {
       if (buildingId != null && entry.key != buildingId) continue;
       if (buildingIds != null && !buildingIds.contains(entry.key)) continue;
       final buildingName =
           buildingId == null ? buildingNamesById[entry.key] : null;
+      final dues = filterByMonth
+          ? filterDuesForMonth(entry.value, month: month, year: year)
+          : entry.value;
       items.addAll(
         overdueApartments(
-          entry.value,
+          dues,
           buildingId: entry.key,
           singleBuildingName: buildingName,
         ),
@@ -194,7 +201,12 @@ abstract final class ManagerDashboardMapper {
                 d.year == year &&
                 d.resident != null,
           )
-          .fold<double>(0, (sum, d) => sum + d.paidAmount);
+          .fold<double>(0, (sum, d) {
+            final paid = d.status == DueStatus.paid && d.paidAmount <= 0.01
+                ? d.amount
+                : d.paidAmount;
+            return sum + paid;
+          });
 
       final expenses = expenseTotalsByMonth[(month, year)] ?? 0;
 
@@ -225,7 +237,11 @@ abstract final class ManagerDashboardMapper {
 
     for (final due in occupiedDues) {
       expected += due.amount;
-      collected += due.paidAmount;
+      // PAID ama payment kaydı yoksa (eski veri / seed) tutarın tamamını tahsil say.
+      final paid = due.status == DueStatus.paid && due.paidAmount <= 0.01
+          ? due.amount
+          : due.paidAmount;
+      collected += paid;
       if (due.status == DueStatus.overdue && due.hasRemainingBalance) {
         overdueCount++;
       }

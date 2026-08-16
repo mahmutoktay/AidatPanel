@@ -4,7 +4,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/detail_bottom_toolbar.dart';
 
-/// Site detay ekranı alt araç çubuğu — Sil, Düzenle, Giderler, Rapor.
+/// Site detay ekranı alt araç çubuğu —
+/// Rapor → Giderler → Düzenle → Sil.
 class SiteDetailBottomToolbar extends StatelessWidget {
   const SiteDetailBottomToolbar({
     super.key,
@@ -27,15 +28,9 @@ class SiteDetailBottomToolbar extends StatelessWidget {
     return DetailBottomToolbar(
       actions: [
         DetailToolbarAction(
-          icon: Icons.delete_outline,
-          label: t.common.delete,
-          onTap: onDelete,
-          color: AppColors.statusRed,
-        ),
-        DetailToolbarAction(
-          icon: Icons.edit_outlined,
-          label: t.common.edit,
-          onTap: onEdit,
+          icon: Icons.download_rounded,
+          label: t.features.reports.menuDownload,
+          onTap: onReport,
         ),
         DetailToolbarAction(
           icon: Icons.receipt_long_outlined,
@@ -43,9 +38,15 @@ class SiteDetailBottomToolbar extends StatelessWidget {
           onTap: onExpenses,
         ),
         DetailToolbarAction(
-          icon: Icons.download_rounded,
-          label: t.features.reports.menuDownload,
-          onTap: onReport,
+          icon: Icons.edit_outlined,
+          label: t.common.edit,
+          onTap: onEdit,
+        ),
+        DetailToolbarAction(
+          icon: Icons.delete_outline,
+          label: t.common.delete,
+          onTap: onDelete,
+          color: AppColors.statusRed,
         ),
       ],
     );

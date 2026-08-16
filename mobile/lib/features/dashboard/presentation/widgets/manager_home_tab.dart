@@ -175,10 +175,14 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
       buildingNames,
       buildingId: filterScope.buildingId,
       buildingIds: filterScope.isAll ? null : scopedBuildingIds,
+      month: now.month,
+      year: now.year,
     );
     final remindDueIdsByBuilding = groupOverdueDueIdsByBuilding(
       allDues,
       buildingIds: filterScope.isAll ? null : scopedBuildingIds,
+      month: now.month,
+      year: now.year,
     );
 
     final expenseCurrency = scopedBuildings.isNotEmpty

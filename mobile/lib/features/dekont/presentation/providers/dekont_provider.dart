@@ -558,9 +558,11 @@ class ManagerDekontsNotifier extends Notifier<ManagerDekontsState> {
       return true;
     } catch (e, st) {
       dekontDebugLog('provider.review fail', '$e\n$st');
-      state = state.copyWith(
-        reviewError: userFacingError(e, context: ApiMessageContext.dekont),
-      );
+      if (ref.mounted) {
+        state = state.copyWith(
+          reviewError: userFacingError(e, context: ApiMessageContext.dekont),
+        );
+      }
       return false;
     } finally {
       _isReviewing = false;

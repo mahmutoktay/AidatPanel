@@ -11,19 +11,19 @@
 
 ## 0. Kurulum / smoke
 
-- [ ] Play internal (veya yüklediğin track) → kurulum, soğuk açılış, splash FATAL yok
-- [ ] Uygulamayı kill → yeniden aç → oturum kalır
-- [ ] Ayarlar → Uygulama bilgisi: sürüm `0.6.13` / `2000000022`
-- [ ] Bildirim izni isteniyor / veriliyor
+- [x] Play internal (veya yüklediğin track) → kurulum, soğuk açılış, splash FATAL yok
+- [x] Uygulamayı kill → yeniden aç → oturum kalır
+- [x] Ayarlar → Uygulama bilgisi: sürüm `0.6.13` / `2000000022`
+- [x] Bildirim izni isteniyor / veriliyor
 
 ---
 
 ## 1. Yönetici auth
 
-- [ ] E-posta ile giriş («Tekrar hoş geldiniz» + isim)
-- [ ] Telefon ile yönetici giriş/kayıt
+- [x] E-posta ile giriş («Tekrar hoş geldiniz» + isim)
+- [x] Telefon ile yönetici giriş/kayıt
 - [ ] Şifremi unuttum (e-posta; phone-only ise SMS)
-- [ ] Çıkış → yeniden giriş
+- [x] Çıkış → yeniden giriş
 - [ ] «Diğer cihazlardan çıkış» (ikinci cihaz varsa)
 
 ---
@@ -113,10 +113,10 @@
 
 ## Öncelik sırası
 
-1. Kurulum + yönetici/sakin giriş + OTP  
-2. Abonelik Temel/Business + kota  
-3. Dekont + PDF  
-4. Site E2E + FCM + davet linki  
+1. Kurulum + yönetici/sakin giriş + OTP
+2. Abonelik Temel/Business + kota
+3. Dekont + PDF
+4. Site E2E + FCM + davet linki
 
 ---
 

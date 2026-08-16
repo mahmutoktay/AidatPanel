@@ -67,9 +67,12 @@ class SiteDetailScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text(userFacingError(e))),
         data: (detail) {
           final allDues = ref.watch(allBuildingsDuesProvider).value ?? const {};
+          final now = DateTime.now();
           final remindDueIdsByBuilding = groupOverdueDueIdsByBuilding(
             allDues,
             buildingIds: detail.buildings.map((b) => b.id).toSet(),
+            month: now.month,
+            year: now.year,
           );
 
           return RefreshIndicator(

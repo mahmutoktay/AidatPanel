@@ -160,7 +160,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                         .read(dashboardFilterScopeProvider.notifier)
                         .update(scope),
                   ),
-                  const SizedBox(height: AppSizes.spacingS),
+                  const SizedBox(height: AppSizes.spacingXS),
                   DuesPeriodFilterRow(
                     month: _monthFilter,
                     year: _yearFilter,
@@ -177,7 +177,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
                       _reloadDues();
                     },
                   ),
-                  const SizedBox(height: AppSizes.spacingM),
+                  const SizedBox(height: AppSizes.spacingXS),
                 ],
                 if (statsSource.isNotEmpty || scopedBuildingIds.isNotEmpty)
                   DuesStatusFilterBar(

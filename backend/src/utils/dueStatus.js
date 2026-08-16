@@ -64,11 +64,21 @@ export function resolveEffectiveOverdueDays(due) {
 
 export function serializeDueForApi(due, apartment) {
   const { payments, ...rest } = due;
-  const { paidAmount, remainingAmount } = computeDuePaymentTotals({
+  let { paidAmount, remainingAmount } = computeDuePaymentTotals({
     ...due,
     payments,
   });
   const effectiveStatus = resolveEffectiveDueStatus(due);
+  // Manuel / seed PAID: DuePayment yoksa tahsilat tutarı 0 görünmesin.
+  const amountNum = Number(due.amount ?? 0);
+  if (
+    (effectiveStatus === "PAID" || due.status === "PAID") &&
+    amountNum > 0 &&
+    paidAmount < amountNum - 0.01
+  ) {
+    paidAmount = amountNum;
+    remainingAmount = 0;
+  }
   const resident =
     apartment?.resident ??
     (due.residentNameSnapshot

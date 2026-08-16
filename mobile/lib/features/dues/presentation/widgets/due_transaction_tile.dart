@@ -7,6 +7,7 @@ import '../../../../core/utils/app_currency_format.dart';
 import '../../../../core/utils/app_date_format.dart';
 import '../../../../core/utils/app_intl_locale.dart';
 import '../../../../l10n/strings.g.dart';
+import '../../../buildings/presentation/utils/apartment_ui_utils.dart';
 import '../../domain/entities/due_transaction_entity.dart';
 import 'due_transaction_status_chip.dart';
 
@@ -24,7 +25,7 @@ class DueTransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.t.features.dues.transactions;
     final languageCode = AppIntlLocale.fromContext(context);
-    final title = _title(t);
+    final title = _title(context, t);
     final subtitle = _subtitle(context, t);
     final amountText = transaction.amount == null
         ? '—'
@@ -102,17 +103,20 @@ class DueTransactionTile extends StatelessWidget {
     );
   }
 
-  String _title(dynamic t) {
+  String _title(BuildContext context, dynamic t) {
     final apt = transaction.apartmentNumber;
     final resident = transaction.residentName;
+    final aptLabel = (apt != null && apt.trim().isNotEmpty)
+        ? ApartmentUiUtils.formatApartmentLabel(context, apt)
+        : null;
     if (resident != null && resident.isNotEmpty) {
-      if (apt != null && apt.isNotEmpty) {
-        return '$apt · $resident';
+      if (aptLabel != null && aptLabel.isNotEmpty) {
+        return '$aptLabel · $resident';
       }
       return resident;
     }
-    if (apt != null && apt.isNotEmpty) {
-      return apt;
+    if (aptLabel != null && aptLabel.isNotEmpty) {
+      return aptLabel;
     }
     return t.unknownApartment;
   }

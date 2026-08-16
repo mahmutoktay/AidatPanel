@@ -633,6 +633,8 @@ GET    /api/v1/buildings/:id/dekonts
 POST   /api/v1/buildings/:id/announcements  # body: { body } — başlık sistemde "Duyuru"
 ```
 
+Bina / site-altı blok oluştururken `totalFloors` × `apartmentsPerFloor` daire otomatik açılır; kapı no **1…N sıralı sayı**dır; kat `Apartment.floor` alanında tutulur.
+
 ### Sites (Yönetici — FAZ 8)
 ```
 GET    /api/v1/sites

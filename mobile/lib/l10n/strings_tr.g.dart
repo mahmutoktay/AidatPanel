@@ -371,7 +371,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get apartmentDeleteFailed => 'Daire silinemedi';
 	@override String get apartmentDeleteFailedFK => 'Bu daireyi silemezsiniz: sakin veya aidat kayıtları var.';
 	@override String get deleteApartmentConfirm => 'Daireyi silmek istediğinize emin misiniz?';
-	@override String get apartmentNumberLabel => 'Daire No (örn. 5A)';
+	@override String get apartmentNumberLabel => 'Daire No (örn. 5)';
 	@override String get floorLabel2 => 'Kat (opsiyonel)';
 	@override String get floorOptional => 'Kat (-5 ile 200 arası)';
 	@override String get buildingNameField => 'Bina adı';
@@ -2002,7 +2002,7 @@ class _Translations$features$dues$transactions$tr implements Translations$featur
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Aidat İşlem Geçmişi';
+	@override String get title => 'Aidat Durum Özeti';
 	@override String get residentTitle => 'İşlem Geçmişiniz';
 	@override String get emptyTitle => 'Henüz işlem yok';
 	@override String get emptySubtitle => 'Dekont onayları ve manuel ödemeler burada listelenir.';
@@ -2386,7 +2386,7 @@ extension on TranslationsTr {
 			'common.apartmentDeleteFailed' => 'Daire silinemedi',
 			'common.apartmentDeleteFailedFK' => 'Bu daireyi silemezsiniz: sakin veya aidat kayıtları var.',
 			'common.deleteApartmentConfirm' => 'Daireyi silmek istediğinize emin misiniz?',
-			'common.apartmentNumberLabel' => 'Daire No (örn. 5A)',
+			'common.apartmentNumberLabel' => 'Daire No (örn. 5)',
 			'common.floorLabel2' => 'Kat (opsiyonel)',
 			'common.floorOptional' => 'Kat (-5 ile 200 arası)',
 			'common.buildingNameField' => 'Bina adı',
@@ -3599,7 +3599,7 @@ extension on TranslationsTr {
 			'features.dues.resident.badgePending' => 'Bekliyor',
 			'features.dues.resident.badgeOverdue' => 'Gecikmiş',
 			'features.dues.resident.badgeWaived' => 'Muaf',
-			'features.dues.transactions.title' => 'Aidat İşlem Geçmişi',
+			'features.dues.transactions.title' => 'Aidat Durum Özeti',
 			'features.dues.transactions.residentTitle' => 'İşlem Geçmişiniz',
 			'features.dues.transactions.emptyTitle' => 'Henüz işlem yok',
 			'features.dues.transactions.emptySubtitle' => 'Dekont onayları ve manuel ödemeler burada listelenir.',

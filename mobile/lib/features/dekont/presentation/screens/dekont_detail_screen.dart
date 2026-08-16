@@ -494,25 +494,34 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
     }
 
     setState(() => _pendingDecision = decision);
-    final ok = await ref
-        .read(managerDekontsNotifierProvider.notifier)
-        .review(
-          id: widget.dekont.id,
-          decision: decision,
-          note: _noteController.text,
-          dueId: dueIds.isNotEmpty ? dueIds.first : null,
-          dueIds: dueIds.isNotEmpty ? dueIds : null,
-          amount: amount,
-        );
+    var ok = false;
+    String? reviewError;
+    try {
+      ok = await ref.read(managerDekontsNotifierProvider.notifier).review(
+            id: widget.dekont.id,
+            decision: decision,
+            note: _noteController.text,
+            dueId: dueIds.isNotEmpty ? dueIds.first : null,
+            dueIds: dueIds.isNotEmpty ? dueIds : null,
+            amount: amount,
+          );
+      if (!ok) {
+        reviewError = ref.read(managerDekontsNotifierProvider).reviewError;
+      }
+    } catch (e) {
+      // autoDispose notifier dispose olduktan sonra state yazımı exception
+      // üretebilir; spinner yine de kapanmalı.
+      reviewError = e is ApiException ? e.message : t.reviewFailed;
+    } finally {
+      if (mounted) setState(() => _pendingDecision = null);
+    }
     if (!mounted) return;
-    setState(() => _pendingDecision = null);
     if (ok) {
       // Modal sheet route'unu kapat (iç içe navigator olsa da doğru route).
       Navigator.of(context).pop(true);
     } else {
-      final err = ref.read(managerDekontsNotifierProvider).reviewError;
       ref.read(toastProvider.notifier).show(
-            err ?? t.reviewFailed,
+            reviewError ?? t.reviewFailed,
             type: ToastType.error,
           );
     }
@@ -520,6 +529,8 @@ class _ManagerReviewSheetState extends ConsumerState<_ManagerReviewSheet> {
 
   @override
   Widget build(BuildContext context) {
+    // Sheet açıkken autoDispose notifier'ı canlı tut.
+    ref.watch(managerDekontsNotifierProvider);
     final t = context.t.features.dekont;
     final remainingAfter = _remainingAfterApply;
     final applyPreview = _applyAmountPreview;

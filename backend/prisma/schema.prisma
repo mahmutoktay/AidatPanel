@@ -230,7 +230,7 @@ model SiteExpense {
 
 model Apartment {
   id          String       @id @default(uuid())
-  number      String // "B-12", "3A" vb.
+  number      String // kapı no: "1", "2", "12" (eski kayıtlar: "1A", "3B")
   floor       Int?
   buildingId  String
   building    Building     @relation(fields: [buildingId], references: [id])

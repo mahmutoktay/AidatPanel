@@ -5,16 +5,18 @@ import '../domain/entities/building_entity.dart';
 class InviteCodeHelpers {
   InviteCodeHelpers._();
 
-  /// "1A" → "1. Kat - Daire A", "12" → "12. Kat"
+  /// "12" → "Daire 12", "1A" → "1. Kat - Daire A" (eski şema).
   static String formatApartmentLabel(String apartmentNumber) {
-    final match = RegExp(r'(\d+)([A-Za-z]?)').firstMatch(apartmentNumber);
-    if (match == null) return apartmentNumber;
-    final floor = match.group(1);
-    final letter = match.group(2);
-    if (letter != null && letter.isNotEmpty) {
-      return '$floor. Kat - Daire $letter';
+    final trimmed = apartmentNumber.trim();
+    if (trimmed.isEmpty) return trimmed;
+    if (RegExp(r'^\d+$').hasMatch(trimmed)) {
+      return 'Daire $trimmed';
     }
-    return '$floor. Kat';
+    final match = RegExp(r'^(\d+)([A-Za-z]+)$').firstMatch(trimmed);
+    if (match != null) {
+      return '${match.group(1)}. Kat - Daire ${match.group(2)}';
+    }
+    return trimmed;
   }
 
   /// DateTime → "06.05.2026"

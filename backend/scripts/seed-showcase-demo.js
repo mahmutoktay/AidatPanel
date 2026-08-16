@@ -101,6 +101,10 @@ const DEMO_PHONES = [
   "5550303004",
   "5550303005",
   "5550303006",
+  "5550303007",
+  "5550303008",
+  "5550303009",
+  "5550303010",
 ];
 
 const NOW = new Date();
@@ -510,12 +514,23 @@ async function applyExactPaidRatio(
     const shouldPaid = i < targetPaid;
     i += 1;
     if (shouldPaid) {
+      const paidAt = new Date(year, month - 1, Math.min(dueDay + 3, 28));
+      await prisma.duePayment.deleteMany({ where: { dueId: due.id } });
       await prisma.due.update({
         where: { id: due.id },
         data: {
           status: "PAID",
-          paidAt: new Date(year, month - 1, Math.min(dueDay + 3, 28)),
+          paidAt,
           overdueDays: 0,
+        },
+      });
+      await prisma.duePayment.create({
+        data: {
+          dueId: due.id,
+          amount: due.amount,
+          paidAt,
+          currency: due.currency || "TRY",
+          note: "Tanıtım verisi",
         },
       });
     } else {
@@ -530,6 +545,7 @@ async function applyExactPaidRatio(
               Math.floor((NOW.getTime() - dd.getTime()) / (24 * 60 * 60 * 1000))
             )
           : 0;
+      await prisma.duePayment.deleteMany({ where: { dueId: due.id } });
       await prisma.due.update({
         where: { id: due.id },
         data: { status, paidAt: null, overdueDays },
@@ -639,10 +655,12 @@ async function upsertDueMonth({
 
 async function createAptsWithLayout(buildingId, floors, perFloor, seedKey) {
   const apts = [];
+  let unitNumber = 1;
   for (let f = 1; f <= floors; f += 1) {
     for (let i = 0; i < perFloor; i += 1) {
+      // ID anahtarı eski harf şemasıyla aynı kalsın (upsert sürekliliği).
       const letter = String.fromCharCode(65 + i);
-      const number = `${f}${letter}`;
+      const number = String(unitNumber);
       const id = stableUuid(`${seedKey}-apt-${f}${letter}`);
       const apt = await prisma.apartment.upsert({
         where: { id },
@@ -650,6 +668,7 @@ async function createAptsWithLayout(buildingId, floors, perFloor, seedKey) {
         create: { id, number, floor: f, buildingId },
       });
       apts.push(apt);
+      unitNumber += 1;
     }
   }
   return apts;
@@ -726,6 +745,28 @@ async function ensureDekontWithPdf({
   }
 
   const due = apt.dues[0];
+  // İnceleme / onay demosu için aidat açık kalsın (oran seed'i PAID yapmış olabilir).
+  if (status === "NEEDS_MANAGER_REVIEW" || status === "MATCHED") {
+    await prisma.duePayment.deleteMany({ where: { dueId: due.id } });
+    await prisma.dekontDueAllocation.deleteMany({
+      where: { dueId: due.id },
+    });
+    await prisma.due.update({
+      where: { id: due.id },
+      data: {
+        status: "OVERDUE",
+        paidAt: null,
+        overdueDays: Math.max(
+          1,
+          Math.floor(
+            (NOW.getTime() - new Date(due.dueDate).getTime()) /
+              (24 * 60 * 60 * 1000)
+          )
+        ),
+      },
+    });
+  }
+
   let dekont = await prisma.dekont.findFirst({ where: { referenceNumber } });
   const fileHash = createHash("sha256")
     .update(`ap-hv-pdf-${referenceNumber}`)
@@ -841,6 +882,39 @@ async function ensureDekontWithPdf({
   return dekont;
 }
 
+async function remumberApartmentsSequential(buildingId) {
+  const apts = await prisma.apartment.findMany({
+    where: { buildingId },
+    orderBy: [{ floor: "asc" }, { number: "asc" }],
+  });
+  if (apts.length === 0) return apts;
+  const needsRemumber = apts.some((a) => /[A-Za-z]/.test(String(a.number)));
+  if (!needsRemumber) return apts;
+
+  apts.sort((a, b) => {
+    const floorA = a.floor ?? 0;
+    const floorB = b.floor ?? 0;
+    if (floorA !== floorB) return floorA - floorB;
+    return String(a.number).localeCompare(String(b.number), "tr", {
+      numeric: true,
+    });
+  });
+
+  let n = 1;
+  for (const apt of apts) {
+    const next = String(n);
+    if (apt.number !== next) {
+      await prisma.apartment.update({
+        where: { id: apt.id },
+        data: { number: next },
+      });
+      apt.number = next;
+    }
+    n += 1;
+  }
+  return apts;
+}
+
 async function enrichVefa(manager, passwordHash) {
   const vefa = await prisma.building.findFirst({
     where: { managerId: manager.id, name: "Vefa Apartman" },
@@ -854,14 +928,15 @@ async function enrichVefa(manager, passwordHash) {
   }
 
   await cleanVefaArtifacts(vefa.id);
+  vefa.apartments = await remumberApartmentsSequential(vefa.id);
 
   const residents = [
-    { apt: "1B", name: "Ayşe Demir", phone: "5550101002", key: "vefa-1b" },
-    { apt: "2A", name: "Mehmet Yılmaz", phone: "5550101003", key: "vefa-2a" },
-    { apt: "2B", name: "Zeynep Kaya", phone: "5550101004", key: "vefa-2b" },
-    { apt: "3A", name: "Ali Çelik", phone: "5550101005", key: "vefa-3a" },
-    { apt: "3B", name: "Fatma Arslan", phone: "5550101006", key: "vefa-3b" },
-    { apt: "4A", name: "Emre Şahin", phone: "5550101007", key: "vefa-4a" },
+    { apt: "2", name: "Ayşe Demir", phone: "5550101002", key: "vefa-1b" },
+    { apt: "3", name: "Mehmet Yılmaz", phone: "5550101003", key: "vefa-2a" },
+    { apt: "4", name: "Zeynep Kaya", phone: "5550101004", key: "vefa-2b" },
+    { apt: "5", name: "Ali Çelik", phone: "5550101005", key: "vefa-3a" },
+    { apt: "6", name: "Fatma Arslan", phone: "5550101006", key: "vefa-3b" },
+    { apt: "7", name: "Emre Şahin", phone: "5550101007", key: "vefa-4a" },
   ];
 
   for (const row of residents) {
@@ -927,7 +1002,7 @@ async function enrichVefa(manager, passwordHash) {
 
   const ticketSeed = [
     {
-      apt: "1A",
+      apt: "1",
       title: "Asansör garip ses çıkarıyor",
       description: "3. kattan itibaren inerken metal sürtünme sesi duyuluyor.",
       category: "MALFUNCTION",
@@ -935,14 +1010,14 @@ async function enrichVefa(manager, passwordHash) {
       update: "Teknisyen randevusu pazartesi sabahına alındı.",
     },
     {
-      apt: "2A",
+      apt: "3",
       title: "Merdiven aydınlatması yanmıyor",
       description: "2. kat merdiven lambası iki gündür yanmıyor.",
       category: "REQUEST",
       status: "OPEN",
     },
     {
-      apt: "3B",
+      apt: "6",
       title: "Kapı önü su birikintisi",
       description: "Yağmur sonrası girişte su birikiyor, kayma riski var.",
       category: "COMPLAINT",
@@ -1162,7 +1237,7 @@ async function seedSiteAndBlocks(manager, passwordHash) {
   const samples = [
     {
       buildingId: ids.blockA,
-      number: "1A",
+      number: "1",
       title: "Otopark aydınlatması",
       description: "A Blok otopark giriş lambası yanmıyor.",
       category: "REQUEST",
@@ -1170,7 +1245,7 @@ async function seedSiteAndBlocks(manager, passwordHash) {
     },
     {
       buildingId: ids.blockB,
-      number: "2B",
+      number: "4",
       title: "Su basıncı düşük",
       description: "Akşam saatlerinde musluk basıncı çok düşüyor.",
       category: "COMPLAINT",
@@ -1179,7 +1254,7 @@ async function seedSiteAndBlocks(manager, passwordHash) {
     },
     {
       buildingId: ids.blockC,
-      number: "1A",
+      number: "1",
       title: "Çatı izolasyon talebi",
       description: "Son yağmurda damlama oldu, izolasyon kontrolü istiyoruz.",
       category: "REQUEST",
@@ -1261,6 +1336,10 @@ async function seedLale(manager, passwordHash) {
     ["Rıza Demirtaş", "5550303004"],
     ["Sibel Öztürk", "5550303005"],
     ["Tolga Yavuz", "5550303006"],
+    ["Hande Polat", "5550303007"],
+    ["Cem Aydın", "5550303008"],
+    ["Ece Yılmaz", "5550303009"],
+    ["Barış Tekin", "5550303010"],
   ];
   for (let i = 0; i < Math.min(names.length, apts.length); i += 1) {
     const [name, phone] = names[i];
@@ -1279,17 +1358,6 @@ async function seedLale(manager, passwordHash) {
       monthsForward: Math.max(0, 12 - M),
       paidRatio: 0.5,
       residentName: name,
-    });
-  }
-  for (let i = names.length; i < apts.length; i += 1) {
-    await ensureDuesForApartment({
-      apartmentId: apts[i].id,
-      baseAmount: 1250,
-      dueDay: 10,
-      monthsBack: 1,
-      monthsForward: Math.max(0, 12 - M),
-      paidRatio: 0.35,
-      residentName: null,
     });
   }
 
@@ -1315,7 +1383,7 @@ async function seedLale(manager, passwordHash) {
   });
 
   const apt = await prisma.apartment.findFirst({
-    where: { buildingId: ids.lale, number: "1A" },
+    where: { buildingId: ids.lale, number: "1" },
     include: { resident: true },
   });
   if (apt?.resident) {
@@ -1379,6 +1447,20 @@ async function main() {
   await seedSiteAndBlocks(manager, passwordHash);
   await seedLale(manager, passwordHash);
 
+  // Tüm yönetici binalarında harf şeması kalıntısı varsa 1…N'e çevir.
+  const managerBuildings = await prisma.building.findMany({
+    where: { managerId: manager.id },
+    select: { id: true, name: true },
+  });
+  for (const b of managerBuildings) {
+    const updated = await remumberApartmentsSequential(b.id);
+    const sample = updated
+      .slice(0, 4)
+      .map((a) => a.number)
+      .join(", ");
+    log("numbers", `${b.name}: ${updated.length} daire → ${sample}${updated.length > 4 ? "…" : ""}`);
+  }
+
   for (const buildingId of [ids.blockA, ids.blockB, ids.blockC, ids.lale]) {
     await recalculateBuildingDuesForMonth(buildingId, M, Y);
   }
@@ -1392,7 +1474,7 @@ async function main() {
   }
   log(
     "rate",
-    `Lale ${JSON.stringify(await applyExactPaidRatio(ids.lale, Y, M, 0.75, { dueDay: 10, unpaidAs: "AUTO", exactCount: 8 }))}`
+    `Lale ${JSON.stringify(await applyExactPaidRatio(ids.lale, Y, M, 0.75, { dueDay: 10, unpaidAs: "AUTO", exactCount: 10 }))}`
   );
   log(
     "rate",
@@ -1409,7 +1491,7 @@ async function main() {
 
   await ensureDekontWithPdf({
     buildingId: ids.lale,
-    apartmentNumber: "1A",
+    apartmentNumber: "1",
     referenceNumber: `AP-HV-${Y}${String(M).padStart(2, "0")}-18421`,
     status: "NEEDS_MANAGER_REVIEW",
     receiverIban: "TR460006400000112345678901",
@@ -1419,7 +1501,7 @@ async function main() {
   if (vefa) {
     await ensureDekontWithPdf({
       buildingId: vefa.id,
-      apartmentNumber: "1A",
+      apartmentNumber: "1",
       referenceNumber: `AP-HV-${Y}${String(M).padStart(2, "0")}-19003`,
       status: "NEEDS_MANAGER_REVIEW",
       receiverIban: vefa.collectionIban || "TR190001500158007357665813",
@@ -1429,7 +1511,7 @@ async function main() {
   }
   await ensureDekontWithPdf({
     buildingId: ids.lale,
-    apartmentNumber: "2A",
+    apartmentNumber: "3",
     referenceNumber: `AP-HV-${Y}${String(M).padStart(2, "0")}-18455`,
     status: "MATCHED",
     receiverIban: "TR460006400000112345678901",

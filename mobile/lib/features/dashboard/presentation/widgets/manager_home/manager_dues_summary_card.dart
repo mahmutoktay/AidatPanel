@@ -32,13 +32,9 @@ class ManagerDuesSummaryCard extends ConsumerStatefulWidget {
 class _ManagerDuesSummaryCardState extends ConsumerState<ManagerDuesSummaryCard> {
   bool _isReminding = false;
 
-  int get _overdueCount {
-    final remindMap = widget.remindDueIdsByBuilding;
-    if (remindMap != null && remindMap.isNotEmpty) {
-      return overdueDueCount(remindMap);
-    }
-    return widget.summary.overdueCount;
-  }
+  /// Rozet sayısı her zaman ay kapsamlı [summary.overdueCount] (SoT).
+  /// [remindDueIdsByBuilding] yalnızca Hatırlat aksiyonu için kullanılır.
+  int get _overdueCount => widget.summary.overdueCount;
 
   bool get _showRemind =>
       widget.remindDueIdsByBuilding != null &&

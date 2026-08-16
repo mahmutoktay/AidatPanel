@@ -1,28 +1,26 @@
 /// Dev preview entry point — sunucu yokken UI'ı test etmek için.
 ///
-/// Çalıştırma:
-///   flutter run -t lib/main_dev.dart -d emulator-5554
+/// Çalıştırma (--flavor zorunlu; aksi halde APK bulunamaz):
+///   flutter run --flavor dev -t lib/main_dev.dart
 ///
-/// Production akışını bozmadan (main.dart aynen kalır) ProviderScope.overrides
-/// ile şu repository'ler in-memory mock'lara değiştirilir:
-///   - authRepositoryProvider       → MockAuthRepository (otomatik manager girişi)
-///   - buildingRepositoryProvider   → MockBuildingRepository (2 hazır bina)
-///   - apartmentRepositoryProvider  → MockApartmentRepository (her binada birkaç daire)
-///   - duesRepositoryProvider       → MockDuesRepository (boş, sadece UI gezmesi için)
-///   - profileRepositoryProvider    → MockProfileRepository (şifre Eski123. , reset kodu ABCDEF)
-///   - ticketRepositoryProvider     → MockTicketRepository (örnek talep)
-///   - expenseDataSourceProvider    → MockExpenseDataSource (b1/b2 gider + özet)
-///   - notificationRemoteDataSourceProvider → MockNotificationDataSource (Faz 2 bildirim örnekleri)
+/// Play Store screenshot (DEV rozeti gizli):
+///   flutter run --flavor dev -t lib/main_dev.dart --dart-define=SCREENSHOT_MODE=true
+/// veya aşağıda [kScreenshotMode] `defaultValue: true` yap.
 ///
-/// Splash → restoreSession sahte manager kullanıcı döner → router otomatik
-/// olarak `/manager-dashboard` rotasına yönlendirir. Login/register ekranlarına
-/// hiç uğramazsın.
+/// Showcase seed (Vefa, Lale, Bahçeli Evler A/B/C) ile gerçekçi ekran görüntüsü.
+/// Production `main.dart` dokunulmaz; ProviderScope.overrides in-memory mock kullanır:
+///   - auth / building / apartment / dues / profile / subscription / tickets / dekont
+///   - siteRepositoryProvider → MockSiteRepository (Bahçeli Evler)
+///   - expense + notification datasources
+///
+/// Splash → restoreSession manager → `/manager-dashboard`.
 library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'core/constants/app_constants.dart';
@@ -33,6 +31,8 @@ import 'core/storage/secure_storage.dart';
 import 'core/utils/init_date_formatting.dart';
 import 'dev/dev_mocks.dart';
 import 'dev/mock_faz2_datasources.dart';
+import 'dev/mock_dekont_repository.dart';
+import 'dev/mock_site_repository.dart';
 import 'features/expenses/presentation/providers/expenses_provider.dart';
 import 'features/notifications/presentation/providers/notifications_provider.dart';
 import 'features/apartments/data/apartments_store.dart';
@@ -41,17 +41,36 @@ import 'features/auth/data/datasources/mock_firebase_phone_auth_datasource.dart'
 import 'features/buildings/data/buildings_store.dart';
 import 'features/dues/presentation/providers/dues_provider.dart';
 import 'features/profile/presentation/providers/profile_provider.dart';
+import 'features/sites/data/sites_store.dart';
 import 'features/subscription/presentation/providers/subscription_provider.dart';
 import 'features/tickets/presentation/providers/tickets_provider.dart';
 import 'features/dekont/presentation/providers/dekont_provider.dart';
-import 'dev/mock_dekont_repository.dart';
+import 'firebase_options.dart';
 import 'shared/widgets/friendly_error_screen.dart';
 import 'shared/widgets/toast_overlay.dart';
 import 'l10n/strings.g.dart';
 
+/// Play Store screenshot: `true` iken sağ üst DEV rozeti gizlenir.
+/// `--dart-define=SCREENSHOT_MODE=true` ile de açılır; tek satır için
+/// `defaultValue: true` yeterli.
+const bool kScreenshotMode = bool.fromEnvironment(
+  'SCREENSHOT_MODE',
+  defaultValue: false,
+);
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _installGlobalErrorHandlers();
+  // GoRouter FirebaseAnalyticsObserver + bazı provider'lar DEFAULT app ister.
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e, st) {
+    if (kDebugMode) {
+      debugPrint('[DEV] Firebase.initializeApp: $e\n$st');
+    }
+  }
   await _initAppInfo();
   await _initLocale();
   await initDateFormatting();
@@ -61,6 +80,7 @@ void main() async {
   // hata" simülasyonu için bağlı)
   final mockApartments = MockApartmentRepository();
   final mockBuildings = MockBuildingRepository(mockApartments);
+  final mockSites = MockSiteRepository(buildings: mockBuildings);
   final mockAuth = MockAuthRepository();
   MockAuthRepository.seedManagerSession();
   final mockDues = MockDuesRepository();
@@ -72,25 +92,28 @@ void main() async {
   final mockNotifications = MockNotificationDataSource()..seedPreview();
 
   runApp(
-    ProviderScope(
-      overrides: [
-        authRepositoryProvider.overrideWithValue(mockAuth),
-        firebasePhoneAuthDataSourceProvider.overrideWithValue(
-          MockFirebasePhoneAuthDataSource(),
-        ),
-        buildingRepositoryProvider.overrideWithValue(mockBuildings),
-        apartmentRepositoryProvider.overrideWithValue(mockApartments),
-        duesRepositoryProvider.overrideWithValue(mockDues),
-        profileRepositoryProvider.overrideWithValue(mockProfile),
-        subscriptionRepositoryProvider.overrideWithValue(mockSubscription),
-        ticketRepositoryProvider.overrideWithValue(mockTickets),
-        dekontRepositoryProvider.overrideWithValue(mockDekont),
-        expenseDataSourceProvider.overrideWithValue(mockExpenses),
-        notificationRemoteDataSourceProvider.overrideWithValue(
-          mockNotifications,
-        ),
-      ],
-      child: const _DevBanner(child: _DevApp()),
+    TranslationProvider(
+      child: ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(mockAuth),
+          firebasePhoneAuthDataSourceProvider.overrideWithValue(
+            MockFirebasePhoneAuthDataSource(),
+          ),
+          buildingRepositoryProvider.overrideWithValue(mockBuildings),
+          apartmentRepositoryProvider.overrideWithValue(mockApartments),
+          siteRepositoryProvider.overrideWithValue(mockSites),
+          duesRepositoryProvider.overrideWithValue(mockDues),
+          profileRepositoryProvider.overrideWithValue(mockProfile),
+          subscriptionRepositoryProvider.overrideWithValue(mockSubscription),
+          ticketRepositoryProvider.overrideWithValue(mockTickets),
+          dekontRepositoryProvider.overrideWithValue(mockDekont),
+          expenseDataSourceProvider.overrideWithValue(mockExpenses),
+          notificationRemoteDataSourceProvider.overrideWithValue(
+            mockNotifications,
+          ),
+        ],
+        child: const _DevBanner(child: _DevApp()),
+      ),
     ),
   );
 }
@@ -140,35 +163,34 @@ class _DevApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(inviteDeepLinkProvider);
     final router = ref.watch(appRouterProvider);
-    return TranslationProvider(
-      child: MaterialApp.router(
-        title: AppConstants.devAppName,
-        theme: AppTheme.lightTheme(),
-        debugShowCheckedModeBanner: false,
-        routerConfig: router,
-        locale: LocaleSettings.currentLocale.flutterLocale,
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocaleUtils.supportedLocales,
-        builder: (context, child) {
-          return ToastOverlay(child: child ?? const SizedBox.shrink());
-        },
-      ),
+    return MaterialApp.router(
+      title: AppConstants.devAppName,
+      theme: AppTheme.lightTheme(),
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
+      locale: TranslationProvider.of(context).flutterLocale,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocaleUtils.supportedLocales,
+      builder: (context, child) {
+        return ToastOverlay(child: child ?? const SizedBox.shrink());
+      },
     );
   }
 }
 
-/// Ekranın sağ üstüne küçük "DEV PREVIEW" rozeti — production build'den
-/// ayırt edebilmek için.
+/// Ekranın sağ üstüne küçük "DEV" rozeti — production build'den ayırt için.
+/// [kScreenshotMode] açıkken rozet render edilmez.
 class _DevBanner extends StatelessWidget {
   final Widget child;
   const _DevBanner({required this.child});
 
   @override
   Widget build(BuildContext context) {
+    if (kScreenshotMode) return child;
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Stack(

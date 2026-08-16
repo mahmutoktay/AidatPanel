@@ -363,7 +363,7 @@
     "apartmentDeleteFailed": "Daire silinemedi",
     "apartmentDeleteFailedFK": "Bu daireyi silemezsiniz: sakin veya aidat kayıtları var.",
     "deleteApartmentConfirm": "Daireyi silmek istediğinize emin misiniz?",
-    "apartmentNumberLabel": "Daire No (örn. 5A)",
+    "apartmentNumberLabel": "Daire No (örn. 5)",
     "floorLabel2": "Kat (opsiyonel)",
     "floorOptional": "Kat (-5 ile 200 arası)",
     "buildingNameField": "Bina adı",
@@ -1622,7 +1622,7 @@
         "badgeWaived": "Muaf"
       },
       "transactions": {
-        "title": "Aidat İşlem Geçmişi",
+        "title": "Aidat Durum Özeti",
         "residentTitle": "İşlem Geçmişiniz",
         "emptyTitle": "Henüz işlem yok",
         "emptySubtitle": "Dekont onayları ve manuel ödemeler burada listelenir.",

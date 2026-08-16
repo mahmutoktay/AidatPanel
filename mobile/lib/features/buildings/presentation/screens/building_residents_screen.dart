@@ -606,6 +606,8 @@ class _BuildingResidentsScreenState
     final overdueDueIdsByBuilding = groupOverdueDueIdsByBuilding(
       allDues,
       buildingIds: {building.id},
+      month: now.month,
+      year: now.year,
     );
 
     final activeCodes = ref.watch(inviteCodeStoreProvider);

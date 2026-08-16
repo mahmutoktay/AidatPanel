@@ -1013,8 +1013,8 @@ class Translations$common$en {
 	/// en: 'Are you sure you want to delete this apartment?'
 	String get deleteApartmentConfirm => 'Are you sure you want to delete this apartment?';
 
-	/// en: 'Apt No (e.g. 5A)'
-	String get apartmentNumberLabel => 'Apt No (e.g. 5A)';
+	/// en: 'Apt No (e.g. 5)'
+	String get apartmentNumberLabel => 'Apt No (e.g. 5)';
 
 	/// en: 'Floor (optional)'
 	String get floorLabel2 => 'Floor (optional)';
@@ -5267,8 +5267,8 @@ class Translations$features$dues$transactions$en {
 
 	// Translations
 
-	/// en: 'Dues Transaction History'
-	String get title => 'Dues Transaction History';
+	/// en: 'Dues Status Summary'
+	String get title => 'Dues Status Summary';
 
 	/// en: 'Your Transaction History'
 	String get residentTitle => 'Your Transaction History';
@@ -5682,7 +5682,7 @@ extension on Translations {
 			'common.apartmentDeleteFailed' => 'Could not delete apartment',
 			'common.apartmentDeleteFailedFK' => 'Cannot delete this apartment: resident or dues records still exist.',
 			'common.deleteApartmentConfirm' => 'Are you sure you want to delete this apartment?',
-			'common.apartmentNumberLabel' => 'Apt No (e.g. 5A)',
+			'common.apartmentNumberLabel' => 'Apt No (e.g. 5)',
 			'common.floorLabel2' => 'Floor (optional)',
 			'common.floorOptional' => 'Floor (-5 to 200)',
 			'common.buildingNameField' => 'Building name',
@@ -6895,7 +6895,7 @@ extension on Translations {
 			'features.dues.resident.badgePending' => 'Pending',
 			'features.dues.resident.badgeOverdue' => 'Overdue',
 			'features.dues.resident.badgeWaived' => 'Waived',
-			'features.dues.transactions.title' => 'Dues Transaction History',
+			'features.dues.transactions.title' => 'Dues Status Summary',
 			'features.dues.transactions.residentTitle' => 'Your Transaction History',
 			'features.dues.transactions.emptyTitle' => 'No transactions yet',
 			'features.dues.transactions.emptySubtitle' => 'Receipt approvals and manual payments appear here.',

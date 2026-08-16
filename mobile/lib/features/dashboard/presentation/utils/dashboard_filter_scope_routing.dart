@@ -46,7 +46,7 @@ DashboardFilterScope normalizeToBuildingScope(
   return scope;
 }
 
-/// Ana Sayfa scope'unu Aidat İşlem Geçmişi route'una kodlar.
+/// Ana Sayfa scope'unu Aidat Durum Özeti route'una kodlar.
 String dueTransactionsPath(DashboardFilterScope scope) {
   return '/manager-dashboard/due-transactions${_scopeQuery(scope)}';
 }

@@ -17,14 +17,24 @@ class StatusInfo {
 
 class ApartmentUiUtils {
   static String formatApartmentLabel(BuildContext context, String apartmentNumber) {
-    final match = RegExp(r'(\d+)([A-Za-z]?)').firstMatch(apartmentNumber);
-    if (match == null) return apartmentNumber;
-    final floor = match.group(1);
-    final letter = match.group(2);
-    if (letter != null && letter.isNotEmpty) {
+    final trimmed = apartmentNumber.trim();
+    if (trimmed.isEmpty) return trimmed;
+
+    // Sıralı kapı no (1, 2, 12…)
+    if (RegExp(r'^\d+$').hasMatch(trimmed)) {
+      return context.t.features.dashboard.apartmentTitle
+          .replaceAll('{number}', trimmed);
+    }
+
+    // Eski kat+harf şeması (1A, 2B…) — mevcut kayıtlar için
+    final match = RegExp(r'^(\d+)([A-Za-z]+)$').firstMatch(trimmed);
+    if (match != null) {
+      final floor = match.group(1)!;
+      final letter = match.group(2)!;
       return '$floor. ${context.t.common.floorLabel} • ${context.t.common.apartmentLabel} $letter';
     }
-    return '$floor. ${context.t.common.floorLabel}';
+
+    return trimmed;
   }
 
   static String formatPhone(String phone) {

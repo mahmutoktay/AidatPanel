@@ -563,7 +563,9 @@ String? _mapDekont(
     return d.errorUploadServer;
   }
 
-  if (_has(raw, 'ödeme zaten işlenmiş')) {
+  if (_has(raw, 'ödeme zaten işlenmiş') ||
+      _has(raw, 'tamamı zaten ödenmiş') ||
+      _has(raw, 'zaten ödenmiş')) {
     return d.errorReviewPaymentDone;
   }
 
@@ -571,7 +573,8 @@ String? _mapDekont(
     return d.errorReviewRejected;
   }
 
-  if (_has(raw, 'dueid') || _has(raw, 'onay için')) {
+  if (_has(raw, 'dueid') ||
+      (_has(raw, 'onay için') && _has(raw, 'aidat'))) {
     return d.errorReviewNeedDue;
   }
 
