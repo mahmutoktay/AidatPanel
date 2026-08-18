@@ -1141,8 +1141,8 @@ class Translations$common$en {
 
 	late final Translations$common$friendlyError$en friendlyError = Translations$common$friendlyError$en._(_root);
 
-	/// en: 'Must include uppercase, lowercase, and a number'
-	String get newPasswordHint => 'Must include uppercase, lowercase, and a number';
+	/// en: 'At least 6 characters; letters and numbers. Special characters optional'
+	String get newPasswordHint => 'At least 6 characters; letters and numbers. Special characters optional';
 
 	/// en: 'Not specified'
 	String get passwordStrengthUnspecified => 'Not specified';
@@ -1299,14 +1299,17 @@ class Translations$validation$en {
 	/// en: 'Password is too long'
 	String get passwordTooLong => 'Password is too long';
 
-	/// en: 'Password must be at least 6 characters and contain only letters and numbers'
-	String get passwordAlphanumericRequired => 'Password must be at least 6 characters and contain only letters and numbers';
+	/// en: 'Password must contain at least one letter and one number'
+	String get passwordAlphanumericRequired => 'Password must contain at least one letter and one number';
 
 	/// en: 'Password must contain at least 1 uppercase letter'
 	String get passwordUppercaseRequired => 'Password must contain at least 1 uppercase letter';
 
 	/// en: 'Password must contain at least 1 lowercase letter'
 	String get passwordLowercaseRequired => 'Password must contain at least 1 lowercase letter';
+
+	/// en: 'Password must contain at least 1 letter'
+	String get passwordLetterRequired => 'Password must contain at least 1 letter';
 
 	/// en: 'Password must contain at least 1 number'
 	String get passwordNumberRequired => 'Password must contain at least 1 number';
@@ -2349,6 +2352,9 @@ class Translations$features$auth$en {
 	/// en: 'At least 6 characters'
 	String get minLength => 'At least 6 characters';
 
+	/// en: 'At least 1 letter'
+	String get hasLetter => 'At least 1 letter';
+
 	/// en: 'At least 1 uppercase letter'
 	String get hasUpperCase => 'At least 1 uppercase letter';
 
@@ -2358,8 +2364,8 @@ class Translations$features$auth$en {
 	/// en: 'At least 1 number'
 	String get hasNumber => 'At least 1 number';
 
-	/// en: 'At least 1 special character'
-	String get hasSpecialChar => 'At least 1 special character';
+	/// en: 'Special character (optional)'
+	String get hasSpecialChar => 'Special character (optional)';
 
 	/// en: 'Confirm Password'
 	String get confirmPassword => 'Confirm Password';
@@ -4712,14 +4718,17 @@ class Translations$features$auth$onboarding$en {
 	/// en: 'Set your password'
 	String get managerRegisterPasswordTitle => 'Set your password';
 
-	/// en: 'At least 6 characters; letters and numbers only.'
-	String get managerRegisterPasswordSubtitle => 'At least 6 characters; letters and numbers only.';
+	/// en: 'At least 6 characters; letters and numbers required, special characters optional.'
+	String get managerRegisterPasswordSubtitle => 'At least 6 characters; letters and numbers required, special characters optional.';
 
 	/// en: 'Create Account'
 	String get managerCreateAccountButton => 'Create Account';
 
 	/// en: 'Sign In'
 	String get managerLoginButton => 'Sign In';
+
+	/// en: 'Forgot your password?'
+	String get forgotPasswordLink => 'Forgot your password?';
 
 	/// en: 'Welcome to AidatPanel'
 	String get residentExperienceTitle => 'Welcome to AidatPanel';
@@ -5733,7 +5742,7 @@ extension on Translations {
 			'common.friendlyError.genericTitle' => 'This page could not be opened',
 			'common.friendlyError.genericMessage' => 'Please close and reopen the app.',
 			'common.friendlyError.debugOnlyLabel' => 'Visible to developers only (debug):',
-			'common.newPasswordHint' => 'Must include uppercase, lowercase, and a number',
+			'common.newPasswordHint' => 'At least 6 characters; letters and numbers. Special characters optional',
 			'common.passwordStrengthUnspecified' => 'Not specified',
 			'common.passwordStrengthWeak' => 'Weak',
 			'common.passwordStrengthMedium' => 'Medium',
@@ -5875,9 +5884,10 @@ extension on Translations {
 			'validation.passwordRequired' => 'Password cannot be empty',
 			'validation.passwordTooShort' => 'Password must be at least 6 characters',
 			'validation.passwordTooLong' => 'Password is too long',
-			'validation.passwordAlphanumericRequired' => 'Password must be at least 6 characters and contain only letters and numbers',
+			'validation.passwordAlphanumericRequired' => 'Password must contain at least one letter and one number',
 			'validation.passwordUppercaseRequired' => 'Password must contain at least 1 uppercase letter',
 			'validation.passwordLowercaseRequired' => 'Password must contain at least 1 lowercase letter',
+			'validation.passwordLetterRequired' => 'Password must contain at least 1 letter',
 			'validation.passwordNumberRequired' => 'Password must contain at least 1 number',
 			'validation.passwordSpecialCharRequired' => 'Password must contain at least 1 special character',
 			'validation.field_required' => 'This field is required',
@@ -6088,10 +6098,11 @@ extension on Translations {
 			'features.auth.phoneOptional' => 'Phone (Optional)',
 			'features.auth.phoneHintOptional' => '5XX XXX XXXX',
 			'features.auth.minLength' => 'At least 6 characters',
+			'features.auth.hasLetter' => 'At least 1 letter',
 			'features.auth.hasUpperCase' => 'At least 1 uppercase letter',
 			'features.auth.hasLowerCase' => 'At least 1 lowercase letter',
 			'features.auth.hasNumber' => 'At least 1 number',
-			'features.auth.hasSpecialChar' => 'At least 1 special character',
+			'features.auth.hasSpecialChar' => 'Special character (optional)',
 			'features.auth.confirmPassword' => 'Confirm Password',
 			'features.auth.passwordsDoNotMatch' => 'Passwords do not match',
 			'features.auth.emailAndPasswordRequired' => 'Email and password cannot be empty',
@@ -6139,9 +6150,10 @@ extension on Translations {
 			'features.auth.onboarding.managerLoginWelcomeNamedTitle' => 'Welcome back, {name}!',
 			'features.auth.onboarding.managerLoginWelcomeSubtitle' => 'Enter your password to continue',
 			'features.auth.onboarding.managerRegisterPasswordTitle' => 'Set your password',
-			'features.auth.onboarding.managerRegisterPasswordSubtitle' => 'At least 6 characters; letters and numbers only.',
+			'features.auth.onboarding.managerRegisterPasswordSubtitle' => 'At least 6 characters; letters and numbers required, special characters optional.',
 			'features.auth.onboarding.managerCreateAccountButton' => 'Create Account',
 			'features.auth.onboarding.managerLoginButton' => 'Sign In',
+			'features.auth.onboarding.forgotPasswordLink' => 'Forgot your password?',
 			'features.auth.onboarding.residentExperienceTitle' => 'Welcome to AidatPanel',
 			'features.auth.onboarding.residentExperienceSubtitle' => 'How would you like to continue?',
 			'features.auth.onboarding.residentReturningOption' => 'I have signed in before',
@@ -6347,11 +6359,11 @@ extension on Translations {
 			'features.dekont.errorListLoad' => 'Receipt list could not be loaded. Try again.',
 			'features.dekont.errorDetailLoad' => 'Receipt details could not be loaded. Try again.',
 			'features.dekont.errorFileDownload' => 'Receipt file could not be opened. Try again.',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.errorReviewPaymentDone' => 'Payment for this receipt has already been processed.',
 			'features.dekont.errorReviewRejected' => 'A rejected receipt cannot be approved again.',
 			'features.dekont.errorReviewNeedDue' => 'Select a due to approve.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.errorReviewNeedAmount' => 'Receipt amount could not be read. Enter the amount to approve.',
 			'features.dekont.reviewAmountLabel' => 'Amount to approve (₺)',
 			'features.dekont.reviewAmountRequiredHint' => 'No amount was read from this receipt. Enter the amount manually — do not approve without an amount or the remaining balance will not be applied correctly.',
@@ -6861,11 +6873,11 @@ extension on Translations {
 			'features.dashboard.activityHistory.title' => 'Recent Activity',
 			'features.dashboard.activityHistory.rangeToday' => 'Today',
 			'features.dashboard.activityHistory.rangeThisWeek' => 'This Week',
+			_ => null,
+		} ?? switch (path) {
 			'features.dashboard.activityHistory.rangeThisMonth' => 'This Month',
 			'features.dashboard.activityHistory.rangeThreeMonths' => '3 Months',
 			'features.dashboard.activityHistory.rangeSixMonths' => '6 Months',
-			_ => null,
-		} ?? switch (path) {
 			'features.dashboard.activityHistory.emptyTitle' => 'No activity in this period',
 			'features.dashboard.activityHistory.emptySubtitle' => 'No payments or announcements in the range you selected.',
 			'features.dues.detailTitle' => 'Due Details',

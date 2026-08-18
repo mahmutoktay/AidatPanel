@@ -40,14 +40,12 @@ class _ChangePasswordBottomSheetState
   final _newPwFocusNode = FocusNode();
   bool _submitting = false;
 
-  final RegExp _upperRegex = RegExp(r'[A-Z]');
-  final RegExp _lowerRegex = RegExp(r'[a-z]');
+  final RegExp _letterRegex = RegExp(r'[A-Za-zÇĞİÖŞÜçğıöşü]');
   final RegExp _digitRegex = RegExp(r'[0-9]');
-  final RegExp _specialRegex = RegExp(r'[@$!%*?&.]');
+  final RegExp _specialRegex = RegExp(r'[^A-Za-zÇĞİÖŞÜçğıöşü0-9]');
 
   bool _hasMinLength = false;
-  bool _hasUpperCase = false;
-  bool _hasLowerCase = false;
+  bool _hasLetter = false;
   bool _hasNumber = false;
   bool _hasSpecialChar = false;
 
@@ -77,8 +75,7 @@ class _ChangePasswordBottomSheetState
     final value = _newPwController.text;
     setState(() {
       _hasMinLength = value.length >= 6;
-      _hasUpperCase = _upperRegex.hasMatch(value);
-      _hasLowerCase = _lowerRegex.hasMatch(value);
+      _hasLetter = _letterRegex.hasMatch(value);
       _hasNumber = _digitRegex.hasMatch(value);
       _hasSpecialChar = _specialRegex.hasMatch(value);
     });
@@ -100,6 +97,10 @@ class _ChangePasswordBottomSheetState
         return t.validation.passwordTooShort;
       case 'password_too_long':
         return t.validation.passwordTooLong;
+      case 'password_letter_required':
+        return t.validation.passwordLetterRequired;
+      case 'password_number_required':
+        return t.validation.passwordNumberRequired;
       case 'password_alphanumeric_required':
         return t.validation.passwordAlphanumericRequired;
       default:
@@ -161,12 +162,8 @@ class _ChangePasswordBottomSheetState
           isMet: _hasMinLength,
         ),
         PasswordCriterion(
-          text: context.t.features.auth.hasUpperCase,
-          isMet: _hasUpperCase,
-        ),
-        PasswordCriterion(
-          text: context.t.features.auth.hasLowerCase,
-          isMet: _hasLowerCase,
+          text: context.t.features.auth.hasLetter,
+          isMet: _hasLetter,
         ),
         PasswordCriterion(
           text: context.t.features.auth.hasNumber,
@@ -175,6 +172,7 @@ class _ChangePasswordBottomSheetState
         PasswordCriterion(
           text: context.t.features.auth.hasSpecialChar,
           isMet: _hasSpecialChar,
+          isOptional: true,
         ),
       ],
     );

@@ -16,7 +16,7 @@ model User {
   email        String?  @unique
   passwordHash String
   name         String
-  phone        String?
+  phone        String?  @unique
   /// Firebase Auth Phone uid — sakin telefon doğrulamasında bağlanır.
   firebaseUid  String?  @unique
   role         UserRole @default(RESIDENT)
@@ -48,7 +48,6 @@ model User {
   sessions            UserSession[]
   promoGrants         PromoGrant[]
 
-  @@unique([phone, role])
   @@index([apartmentId])
   @@index([role, deletedAt, createdAt])
 }

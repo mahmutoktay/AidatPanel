@@ -1,6 +1,6 @@
 # AidatPanel — Claude Code Master Reference
 
-> **Güncelleme:** 2026-07-14 · Canonical şema: `backend/prisma/schema.prisma` · Faz durumu: `resources/yol-haritası/FAZ_DURUMU.md`  
+> **Güncelleme:** 2026-08-18 · Canonical şema: `backend/prisma/schema.prisma` · Faz durumu: `resources/yol-haritası/FAZ_DURUMU.md`  
 > Bu dosya API sözleşmesi, veri modeli ve deployment özetidir. Drift olursa kod / Prisma kaynak kabul edilir.
 
 ## 📌 Proje Özeti
@@ -129,7 +129,7 @@ model User {
   email               String?   @unique          // sakinlerde opsiyonel
   passwordHash        String
   name                String
-  phone               String?
+  phone               String?   @unique         // tüm roller arasında tekil
   firebaseUid         String?   @unique         // Firebase Auth Phone uid
   role                UserRole  @default(RESIDENT)
   fcmToken            String?
@@ -144,7 +144,6 @@ model User {
   uploadedDekonts     Dekont[]
   reviewedDekonts     Dekont[]   @relation("DekontReviewer")
   // ... notifications, tickets, subscription, promoGrants, passwordResetTokens
-  @@unique([phone, role])
 }
 
 model UserSession {
@@ -610,7 +609,9 @@ POST   /api/v1/auth/reset-password
 **Yönetici identifier-öncelikli akış (mobil):**
 1. `POST /auth/check-identifier` `{ identifier, purpose: "manager_identifier" }` → `{ exists, name? }`
 2. Kayıtlıysa → `POST /auth/login`; yeniyse isim+şifre → `register` + `login`
-3. Telefon eşleşmesi kanonik 10 hane + legacy yazılışlar; aynı telefonda MANAGER+RESIDENT varsa şifre eşleşen hesap seçilir
+3. Telefon eşleşmesi kanonik 10 hane + legacy yazılışlar; **telefon tüm roller arasında tekil** — sakin numarası yönetici kaydına/profiline eklenemez (ve tersi)
+4. `POST /auth/register` `data.email` telefon-only kayıtta **null** olabilir (`User.email` opsiyonel); mobil `RegisterResponse` nullable parse eder, ardından aynı identifier ile `login` oturum açar
+5. Şifre kuralı (kayıt / sıfırlama / `PUT /me/password`): en az 6 karakter, **en az bir harf ve bir rakam**; özel karakter isteğe bağlı
 
 **Sakin telefon-öncelikli akış (mobil):**
 1. `check-identifier` (`resident_phone`) → `{ exists, name? }` → Firebase Phone Auth SMS

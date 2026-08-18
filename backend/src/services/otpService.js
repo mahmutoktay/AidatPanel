@@ -16,6 +16,7 @@ import { ensureApartmentDuesService } from "./dueBulkService.js";
 import { createSession } from "./sessionService.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateTokens.js";
 import { logger } from "../config/logger.js";
+import { assertPhoneGloballyAvailable } from "../utils/phoneAvailability.js";
 
 const OTP_TTL_MS = 5 * 60 * 1000;
 /** Join isim adımı için Firebase doğrulama kaydı biraz daha uzun tutulur. */
@@ -177,16 +178,16 @@ export async function sendOtpService({ phone, email, purpose, payload }) {
 
   if (purpose === "manager_register" || purpose === "resident_join") {
     const role = purpose === "manager_register" ? "MANAGER" : "RESIDENT";
-    const existing = await prisma.user.findFirst({
-      where: { ...contactWhere(contact), role, deletedAt: null },
-    });
-    if (existing) {
-      throw new HttpError(
-        409,
-        contact.email
-          ? "Bu e-posta adresi zaten kullanılıyor."
-          : "Bu telefon numarası zaten kullanılıyor."
-      );
+    if (contact.email) {
+      const existing = await prisma.user.findFirst({
+        where: { email: contact.email, deletedAt: null },
+      });
+      if (existing) {
+        throw new HttpError(409, "Bu e-posta adresi zaten kullanılıyor.");
+      }
+    }
+    if (contact.phone) {
+      await assertPhoneGloballyAvailable(contact.phone, { requestingRole: role });
     }
   }
 
@@ -194,13 +195,9 @@ export async function sendOtpService({ phone, email, purpose, payload }) {
     if (!contact.phone) {
       throw new HttpError(400, "Telefon numarası gereklidir.");
     }
-    const existing = await prisma.user.findFirst({
-      where: { phone: contact.phone, role: "RESIDENT", deletedAt: null },
-      select: { id: true },
+    await assertPhoneGloballyAvailable(contact.phone, {
+      requestingRole: "RESIDENT",
     });
-    if (existing) {
-      throw new HttpError(409, "Bu telefon numarası zaten kullanılıyor.");
-    }
   }
 
   await purgeExpiredOtps(contact, purpose);
@@ -589,6 +586,7 @@ export async function verifyFirebasePhoneService(body) {
   }
 
   if (purpose === "resident_join") {
+    await assertPhoneGloballyAvailable(phone10, { requestingRole: "RESIDENT" });
     const existing = await prisma.user.findFirst({
       where: { phone: phone10, role: "RESIDENT", deletedAt: null },
     });
@@ -637,6 +635,7 @@ export async function verifyFirebasePhoneService(body) {
   }
 
   if (purpose === "resident_phone_change") {
+    await assertPhoneGloballyAvailable(phone10, { requestingRole: "RESIDENT" });
     const existing = await prisma.user.findFirst({
       where: { phone: phone10, role: "RESIDENT", deletedAt: null },
       select: { id: true },
@@ -773,6 +772,12 @@ async function registerManagerWithOtp(contact, body, storedPayload) {
     );
   }
 
+  if (contact.phone) {
+    await assertPhoneGloballyAvailable(contact.phone, {
+      requestingRole: "MANAGER",
+    });
+  }
+
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
     data: {
@@ -831,6 +836,12 @@ async function joinResidentWithOtp(contact, body, storedPayload) {
         ? "Bu e-posta adresi zaten kullanılıyor."
         : "Bu telefon numarası zaten kullanılıyor."
     );
+  }
+
+  if (contact.phone) {
+    await assertPhoneGloballyAvailable(contact.phone, {
+      requestingRole: "RESIDENT",
+    });
   }
 
   const randomSecret = crypto.randomBytes(32).toString("hex");

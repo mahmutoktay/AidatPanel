@@ -16,6 +16,7 @@ import '../../../../core/utils/phone_utils.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/auth_screen_shell.dart';
 import '../../../../shared/widgets/toast_overlay.dart';
+import '../../../../shared/widgets/password_criterion.dart';
 import '../../../../shared/widgets/password_field.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
@@ -72,7 +73,15 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
   final _passwordFocusNode = FocusNode();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _hasMinLength = false;
+  bool _hasLetter = false;
+  bool _hasNumber = false;
+  bool _hasSpecialChar = false;
   Timer? _otpTimer;
+
+  static final _letterRegex = RegExp(r'[A-Za-zÇĞİÖŞÜçğıöşü]');
+  static final _digitRegex = RegExp(r'[0-9]');
+  static final _specialCharRegex = RegExp(r'[^A-Za-zÇĞİÖŞÜçğıöşü0-9]');
 
   @override
   void initState() {
@@ -164,6 +173,10 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
         return t.validation.passwordTooShort;
       case 'password_too_long':
         return t.validation.passwordTooLong;
+      case 'password_letter_required':
+        return t.validation.passwordLetterRequired;
+      case 'password_number_required':
+        return t.validation.passwordNumberRequired;
       case 'password_alphanumeric_required':
         return t.validation.passwordAlphanumericRequired;
       case 'name_required':
@@ -350,6 +363,10 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
       }
       _passwordController.clear();
       _confirmPasswordController.clear();
+      _hasMinLength = false;
+      _hasLetter = false;
+      _hasNumber = false;
+      _hasSpecialChar = false;
       onboarding.goNextStep();
     } catch (_) {
       // Hata ref.listen(authStateProvider) ile tek toast olarak gösterilir.
@@ -793,6 +810,69 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
     );
   }
 
+  void _onRegisterPasswordChanged(String value) {
+    setState(() {
+      _hasMinLength = value.length >= 6;
+      _hasLetter = _letterRegex.hasMatch(value);
+      _hasNumber = _digitRegex.hasMatch(value);
+      _hasSpecialChar = _specialCharRegex.hasMatch(value);
+    });
+  }
+
+  Widget _buildRegisterPasswordCriteria() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        PasswordCriterion(
+          text: context.t.features.auth.minLength,
+          isMet: _hasMinLength,
+        ),
+        PasswordCriterion(
+          text: context.t.features.auth.hasLetter,
+          isMet: _hasLetter,
+        ),
+        PasswordCriterion(
+          text: context.t.features.auth.hasNumber,
+          isMet: _hasNumber,
+        ),
+        PasswordCriterion(
+          text: context.t.features.auth.hasSpecialChar,
+          isMet: _hasSpecialChar,
+          isOptional: true,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildForgotPasswordLink({required bool enabled}) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton(
+        onPressed: enabled ? () => context.push('/forgot-password') : null,
+        style: TextButton.styleFrom(
+          minimumSize: const Size(
+            AppSizes.minTouchTarget,
+            AppSizes.minTouchTarget,
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.spacingXS,
+          ),
+          alignment: Alignment.centerRight,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+        ),
+        child: Text(
+          context.t.features.auth.onboarding.forgotPasswordLink,
+          textAlign: TextAlign.right,
+          style: AppTypography.body1.copyWith(
+            fontWeight: FontWeight.w700,
+            color: enabled ? AppColors.primary : AppColors.mutedText,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildStepActions(
     BuildContext context,
     AuthOnboardingState ob,
@@ -1044,8 +1124,13 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
                 hintText: context.t.features.auth.passwordHint,
                 enabled: !isLoading,
                 obscureText: _obscurePassword,
+                focusNode: isRegister ? _passwordFocusNode : null,
                 onToggleVisibility: () =>
                     setState(() => _obscurePassword = !_obscurePassword),
+                onChanged: isRegister ? _onRegisterPasswordChanged : null,
+                passwordCriteria: isRegister && _passwordFocusNode.hasFocus
+                    ? _buildRegisterPasswordCriteria()
+                    : null,
               ),
               if (isRegister) ...[
                 const SizedBox(height: AppSizes.spacingM),
@@ -1059,7 +1144,8 @@ class _AuthOnboardingScreenState extends ConsumerState<AuthOnboardingScreen> {
                     () => _obscureConfirmPassword = !_obscureConfirmPassword,
                   ),
                 ),
-              ],
+              ] else
+                _buildForgotPasswordLink(enabled: !isLoading),
             ],
           ),
         );

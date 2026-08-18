@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../../config/db.js";
 import { HttpError } from "../../utils/httpError.js";
+import { normalizeTrPhone } from "../../utils/normalizeTrPhone.js";
+import { assertPhoneGloballyAvailable } from "../../utils/phoneAvailability.js";
 
 export function buildPaymentReference(template, apartmentNumber) {
   const normalizedTemplate = template ?? "";
@@ -73,13 +75,11 @@ export async function assertEmailAvailableForUser(userId, email) {
 export async function assertPhoneAvailableForUser(userId, phone, role) {
   if (phone === null || phone === undefined) return;
 
-  const taken = await prisma.user.findFirst({
-    where: { phone, role, NOT: { id: userId }, deletedAt: null },
-    select: { id: true },
+  const normalized = normalizeTrPhone(phone) ?? phone;
+  await assertPhoneGloballyAvailable(normalized, {
+    excludeUserId: userId,
+    requestingRole: role,
   });
-  if (taken) {
-    throw new HttpError(409, "Bu telefon numarası zaten kullanılıyor.");
-  }
 }
 
 export async function findActiveUserById(userId, select) {

@@ -17,8 +17,9 @@ class InputValidators {
   static final nameRegex = RegExp(r'^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,50}$');
 
   /// Backend [`passwordSchema`](backend/src/validators/shared.js) ile eşleşir.
-  /// En az 6 karakter, yalnızca harf ve rakam. Maksimum 100 karakter.
-  static final passwordRegex = RegExp(r'^[A-Za-z0-9]{6,100}$');
+  /// En az 6 karakter, en az bir harf ve bir rakam. Özel karakter isteğe bağlı.
+  static final _passwordLetterRegex = RegExp(r'[A-Za-zÇĞİÖŞÜçğıöşü]');
+  static final _passwordDigitRegex = RegExp(r'[0-9]');
 
   /// Email validation - returns error keys for localization
   static String? validateEmail(String? value) {
@@ -66,8 +67,12 @@ class InputValidators {
       return 'password_too_long';
     }
 
-    if (!passwordRegex.hasMatch(value)) {
-      return 'password_alphanumeric_required';
+    if (!_passwordLetterRegex.hasMatch(value)) {
+      return 'password_letter_required';
+    }
+
+    if (!_passwordDigitRegex.hasMatch(value)) {
+      return 'password_number_required';
     }
 
     return null;
@@ -197,7 +202,9 @@ class InputValidators {
   /// Password strength indicator (0-3 scale)
   static int getPasswordStrength(String password) {
     if (password.length < 6) return 0;
-    if (!passwordRegex.hasMatch(password)) return 1;
+    final hasLetter = _passwordLetterRegex.hasMatch(password);
+    final hasDigit = _passwordDigitRegex.hasMatch(password);
+    if (!hasLetter || !hasDigit) return 1;
     if (password.length < 8) return 2;
     return 3;
   }

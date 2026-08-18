@@ -3,17 +3,15 @@ import { LIST_MAX_ROWS } from "../utils/listQuery.js";
 import { normalizeTrPhone } from "../utils/normalizeTrPhone.js";
 
 /**
- * Ortak şifre şeması — Flutter InputValidators.passwordRegex ile uyumlu.
- * En az 6 karakter, yalnızca harf ve rakam.
+ * Ortak şifre şeması — Flutter InputValidators ile uyumlu.
+ * En az 6 karakter, en az bir harf ve bir rakam. Özel karakter isteğe bağlı.
  */
 export const passwordSchema = z
   .string()
   .min(6, "Şifre en az 6 karakter olmalıdır")
   .max(100, "Şifre en fazla 100 karakter olabilir")
-  .regex(
-    /^[A-Za-z0-9]+$/,
-    "Şifre yalnızca harf ve rakam içermelidir"
-  );
+  .regex(/[A-Za-zÇĞİÖŞÜçğıöşü]/, "Şifre en az bir harf içermelidir")
+  .regex(/[0-9]/, "Şifre en az bir rakam içermelidir");
 
 export const optionalListLimit = z.coerce
   .number()

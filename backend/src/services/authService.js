@@ -15,6 +15,7 @@ import {
   normalizeLoginIdentifier,
   phoneLookupVariants,
 } from "../utils/normalizeTrPhone.js";
+import { assertPhoneGloballyAvailable } from "../utils/phoneAvailability.js";
 
 /** Refresh token'ın SHA-256 özeti — DB'de saklanır, replay tespiti için. */
 function hashToken(token) {
@@ -58,21 +59,9 @@ async function assertEmailAvailable(email) {
   }
 }
 
-/** Telefon — kanonik + legacy yazılışlarla çakışma kontrolü. */
-async function assertPhoneAvailable(phone, role) {
-  if (!phone) return;
-  const variants = phoneLookupVariants(phone);
-  const existing = await prisma.user.findFirst({
-    where: { phone: { in: variants }, role, deletedAt: null },
-  });
-  if (existing) {
-    throw new HttpError(409, "Bu telefon numarası zaten kullanılıyor.");
-  }
-}
-
 /**
  * Identifier ile aktif kullanıcı(lar).
- * Telefon: aynı numara MANAGER+RESIDENT olabilir → aday listesi.
+ * Telefon global tekil; e-posta da tekil.
  */
 async function findActiveUsersByIdentifier(identifier) {
   const normalized = normalizeLoginIdentifier(identifier);
@@ -166,6 +155,8 @@ export async function checkIdentifierService({ identifier, purpose }) {
     }
     if (isEmail) {
       await assertEmailAvailable(normalized);
+    } else {
+      await assertPhoneGloballyAvailable(phone, { requestingRole: "MANAGER" });
     }
     return { exists: false };
   }
@@ -178,7 +169,7 @@ export async function checkIdentifierService({ identifier, purpose }) {
       if (!phone) {
         throw new HttpError(400, "Geçerli bir telefon numarası giriniz.");
       }
-      await assertPhoneAvailable(phone, "MANAGER");
+      await assertPhoneGloballyAvailable(phone, { requestingRole: "MANAGER" });
     }
     return { ok: true };
   }
@@ -276,6 +267,11 @@ export async function registerService({ name, email, phone, password }) {
 
   // E-posta tüm roller arasında tekil.
   if (normalizedEmail) await assertEmailAvailable(normalizedEmail);
+  if (normalizedPhone) {
+    await assertPhoneGloballyAvailable(normalizedPhone, {
+      requestingRole: "MANAGER",
+    });
+  }
 
   const hashedPassword = await bcrypt.hash(password, 10);
   let user;
@@ -485,7 +481,7 @@ export async function joinWithInviteCodeService(body) {
   }
 
   await assertEmailAvailable(email);
-  await assertPhoneAvailable(phone, "RESIDENT");
+  await assertPhoneGloballyAvailable(phone, { requestingRole: "RESIDENT" });
 
   const hashedPassword = await bcrypt.hash(password, 10);
 

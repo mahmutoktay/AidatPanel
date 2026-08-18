@@ -180,7 +180,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       ApiConstants.register,
       data: request.toJson(),
     );
-    return RegisterResponse.fromJson(response.data['data']);
+    final raw = response.data['data'];
+    final map = raw is Map<String, dynamic>
+        ? raw
+        : Map<String, dynamic>.from(raw as Map);
+    return RegisterResponse.fromJson(map);
   }
 
   @override

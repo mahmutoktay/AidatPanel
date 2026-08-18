@@ -414,7 +414,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get changePasswordWrongCurrent => 'Mevcut şifre hatalı.';
 	@override String get languageSheetDescription => 'Uygulama dilini buradan değiştirebilirsiniz.';
 	@override late final _Translations$common$friendlyError$tr friendlyError = _Translations$common$friendlyError$tr._(_root);
-	@override String get newPasswordHint => 'Büyük harf, küçük harf ve rakam içermeli';
+	@override String get newPasswordHint => 'En az 6 karakter; harf ve rakam. Özel karakter isteğe bağlı';
 	@override String get passwordStrengthUnspecified => 'Belirtilmemiş';
 	@override String get passwordStrengthWeak => 'Zayıf';
 	@override String get passwordStrengthMedium => 'Orta';
@@ -473,9 +473,10 @@ class _Translations$validation$tr implements Translations$validation$en {
 	@override String get passwordRequired => 'Şifre boş bırakılamaz';
 	@override String get passwordTooShort => 'Şifre en az 6 karakter olmalıdır';
 	@override String get passwordTooLong => 'Şifre çok uzun';
-	@override String get passwordAlphanumericRequired => 'Şifre en az 6 karakter olmalı ve yalnızca harf ile rakam içermelidir';
+	@override String get passwordAlphanumericRequired => 'Şifre en az bir harf ve bir rakam içermelidir';
 	@override String get passwordUppercaseRequired => 'Şifrede en az 1 büyük harf olmalıdır';
 	@override String get passwordLowercaseRequired => 'Şifrede en az 1 küçük harf olmalıdır';
+	@override String get passwordLetterRequired => 'Şifrede en az 1 harf olmalıdır';
 	@override String get passwordNumberRequired => 'Şifrede en az 1 rakam olmalıdır';
 	@override String get passwordSpecialCharRequired => 'Şifrede en az 1 özel karakter olmalıdır';
 	@override String get field_required => 'Bu alan boş bırakılamaz';
@@ -894,10 +895,11 @@ class _Translations$features$auth$tr implements Translations$features$auth$en {
 	@override String get phoneOptional => 'Telefon (Opsiyonel)';
 	@override String get phoneHintOptional => '5XX XXX XXXX';
 	@override String get minLength => 'En az 6 karakter';
+	@override String get hasLetter => 'En az 1 harf';
 	@override String get hasUpperCase => 'En az 1 büyük harf';
 	@override String get hasLowerCase => 'En az 1 küçük harf';
 	@override String get hasNumber => 'En az 1 rakam';
-	@override String get hasSpecialChar => 'En az 1 özel karakter';
+	@override String get hasSpecialChar => 'Özel karakter (isteğe bağlı)';
 	@override String get confirmPassword => 'Şifre Tekrar';
 	@override String get passwordsDoNotMatch => 'Şifreler eşleşmiyor';
 	@override String get emailAndPasswordRequired => 'Email ve şifre boş bırakılamaz';
@@ -1775,9 +1777,10 @@ class _Translations$features$auth$onboarding$tr implements Translations$features
 	@override String get managerLoginWelcomeNamedTitle => 'Tekrar hoş geldiniz, {name}!';
 	@override String get managerLoginWelcomeSubtitle => 'Devam etmek için şifrenizi girin';
 	@override String get managerRegisterPasswordTitle => 'Şifrenizi belirleyin';
-	@override String get managerRegisterPasswordSubtitle => 'En az 6 karakter; yalnızca harf ve rakam kullanın.';
+	@override String get managerRegisterPasswordSubtitle => 'En az 6 karakter; harf ve rakam zorunlu, özel karakter isteğe bağlı.';
 	@override String get managerCreateAccountButton => 'Hesabı Oluştur';
 	@override String get managerLoginButton => 'Giriş Yap';
+	@override String get forgotPasswordLink => 'Şifrenizi mi unuttunuz?';
 	@override String get residentExperienceTitle => 'AidatPanel\'e hoş geldiniz';
 	@override String get residentExperienceSubtitle => 'Nasıl devam etmek istersiniz?';
 	@override String get residentReturningOption => 'Daha önce giriş yapmıştım';
@@ -2437,7 +2440,7 @@ extension on TranslationsTr {
 			'common.friendlyError.genericTitle' => 'Bu sayfa açılamadı',
 			'common.friendlyError.genericMessage' => 'Lütfen uygulamayı kapatıp tekrar açın.',
 			'common.friendlyError.debugOnlyLabel' => 'Sadece geliştirici görür (debug):',
-			'common.newPasswordHint' => 'Büyük harf, küçük harf ve rakam içermeli',
+			'common.newPasswordHint' => 'En az 6 karakter; harf ve rakam. Özel karakter isteğe bağlı',
 			'common.passwordStrengthUnspecified' => 'Belirtilmemiş',
 			'common.passwordStrengthWeak' => 'Zayıf',
 			'common.passwordStrengthMedium' => 'Orta',
@@ -2579,9 +2582,10 @@ extension on TranslationsTr {
 			'validation.passwordRequired' => 'Şifre boş bırakılamaz',
 			'validation.passwordTooShort' => 'Şifre en az 6 karakter olmalıdır',
 			'validation.passwordTooLong' => 'Şifre çok uzun',
-			'validation.passwordAlphanumericRequired' => 'Şifre en az 6 karakter olmalı ve yalnızca harf ile rakam içermelidir',
+			'validation.passwordAlphanumericRequired' => 'Şifre en az bir harf ve bir rakam içermelidir',
 			'validation.passwordUppercaseRequired' => 'Şifrede en az 1 büyük harf olmalıdır',
 			'validation.passwordLowercaseRequired' => 'Şifrede en az 1 küçük harf olmalıdır',
+			'validation.passwordLetterRequired' => 'Şifrede en az 1 harf olmalıdır',
 			'validation.passwordNumberRequired' => 'Şifrede en az 1 rakam olmalıdır',
 			'validation.passwordSpecialCharRequired' => 'Şifrede en az 1 özel karakter olmalıdır',
 			'validation.field_required' => 'Bu alan boş bırakılamaz',
@@ -2792,10 +2796,11 @@ extension on TranslationsTr {
 			'features.auth.phoneOptional' => 'Telefon (Opsiyonel)',
 			'features.auth.phoneHintOptional' => '5XX XXX XXXX',
 			'features.auth.minLength' => 'En az 6 karakter',
+			'features.auth.hasLetter' => 'En az 1 harf',
 			'features.auth.hasUpperCase' => 'En az 1 büyük harf',
 			'features.auth.hasLowerCase' => 'En az 1 küçük harf',
 			'features.auth.hasNumber' => 'En az 1 rakam',
-			'features.auth.hasSpecialChar' => 'En az 1 özel karakter',
+			'features.auth.hasSpecialChar' => 'Özel karakter (isteğe bağlı)',
 			'features.auth.confirmPassword' => 'Şifre Tekrar',
 			'features.auth.passwordsDoNotMatch' => 'Şifreler eşleşmiyor',
 			'features.auth.emailAndPasswordRequired' => 'Email ve şifre boş bırakılamaz',
@@ -2843,9 +2848,10 @@ extension on TranslationsTr {
 			'features.auth.onboarding.managerLoginWelcomeNamedTitle' => 'Tekrar hoş geldiniz, {name}!',
 			'features.auth.onboarding.managerLoginWelcomeSubtitle' => 'Devam etmek için şifrenizi girin',
 			'features.auth.onboarding.managerRegisterPasswordTitle' => 'Şifrenizi belirleyin',
-			'features.auth.onboarding.managerRegisterPasswordSubtitle' => 'En az 6 karakter; yalnızca harf ve rakam kullanın.',
+			'features.auth.onboarding.managerRegisterPasswordSubtitle' => 'En az 6 karakter; harf ve rakam zorunlu, özel karakter isteğe bağlı.',
 			'features.auth.onboarding.managerCreateAccountButton' => 'Hesabı Oluştur',
 			'features.auth.onboarding.managerLoginButton' => 'Giriş Yap',
+			'features.auth.onboarding.forgotPasswordLink' => 'Şifrenizi mi unuttunuz?',
 			'features.auth.onboarding.residentExperienceTitle' => 'AidatPanel\'e hoş geldiniz',
 			'features.auth.onboarding.residentExperienceSubtitle' => 'Nasıl devam etmek istersiniz?',
 			'features.auth.onboarding.residentReturningOption' => 'Daha önce giriş yapmıştım',
@@ -3051,11 +3057,11 @@ extension on TranslationsTr {
 			'features.dekont.errorListLoad' => 'Dekont listesi yüklenemedi. Tekrar deneyin.',
 			'features.dekont.errorDetailLoad' => 'Dekont detayı yüklenemedi. Tekrar deneyin.',
 			'features.dekont.errorFileDownload' => 'Dekont dosyası açılamadı. Tekrar deneyin.',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.errorReviewPaymentDone' => 'Bu dekont için ödeme zaten işlenmiş.',
 			'features.dekont.errorReviewRejected' => 'Reddedilmiş bir dekont tekrar onaylanamaz.',
 			'features.dekont.errorReviewNeedDue' => 'Onaylamak için bir aidat seçmelisiniz.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.errorReviewNeedAmount' => 'Dekont tutarı okunamadı. Onaylamak için tutarı giriniz.',
 			'features.dekont.reviewAmountLabel' => 'Onaylanacak tutar (₺)',
 			'features.dekont.reviewAmountRequiredHint' => 'Bu dekonttan tutar okunamadı. Kalan borcun tamamını kapatmak istemiyorsanız tutarı elle girin.',
@@ -3565,11 +3571,11 @@ extension on TranslationsTr {
 			'features.dashboard.activityHistory.title' => 'Son Hareketler',
 			'features.dashboard.activityHistory.rangeToday' => 'Bugün',
 			'features.dashboard.activityHistory.rangeThisWeek' => 'Bu Hafta',
+			_ => null,
+		} ?? switch (path) {
 			'features.dashboard.activityHistory.rangeThisMonth' => 'Bu Ay',
 			'features.dashboard.activityHistory.rangeThreeMonths' => '3 Ay',
 			'features.dashboard.activityHistory.rangeSixMonths' => '6 Ay',
-			_ => null,
-		} ?? switch (path) {
 			'features.dashboard.activityHistory.emptyTitle' => 'Bu dönemde hareketiniz yok',
 			'features.dashboard.activityHistory.emptySubtitle' => 'Seçtiğiniz aralıkta ödeme veya duyuru görünmüyor.',
 			'features.dues.detailTitle' => 'Aidat Detayı',

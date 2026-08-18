@@ -31,10 +31,9 @@ class SignUpScreen extends ConsumerStatefulWidget {
 }
 
 class _SignUpScreenState extends ConsumerState<SignUpScreen> {
-  static final _upperRegex = RegExp(r'[A-Z]');
-  static final _lowerRegex = RegExp(r'[a-z]');
+  static final _letterRegex = RegExp(r'[A-Za-zÇĞİÖŞÜçğıöşü]');
   static final _digitRegex = RegExp(r'\d');
-  static final _specialRegex = RegExp(r'[@$!%*?&.]');
+  static final _specialRegex = RegExp(r'[^A-Za-zÇĞİÖŞÜçğıöşü0-9]');
 
   late bool _isManager;
   late TextEditingController _inviteCodeController;
@@ -57,8 +56,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   String? _emailError;
   String? _phoneError;
   bool _hasMinLength = false;
-  bool _hasUpperCase = false;
-  bool _hasLowerCase = false;
+  bool _hasLetter = false;
   bool _hasNumber = false;
   bool _hasSpecialChar = false;
   bool _passwordsMatch = false;
@@ -166,7 +164,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     if (passwordError != null) {
       ref
           .read(toastProvider.notifier)
-          .show(passwordError, type: ToastType.error);
+          .show(_passwordErrorMessage(passwordError), type: ToastType.error);
       return;
     }
 
@@ -243,18 +241,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     final passwordError = InputValidators.validatePassword(password);
     if (passwordError != null) {
-      final errorMessage = passwordError == 'password_required'
-          ? context.t.validation.passwordRequired
-          : passwordError == 'password_too_short'
-          ? context.t.validation.passwordTooShort
-          : passwordError == 'password_too_long'
-          ? context.t.validation.passwordTooLong
-          : passwordError == 'password_alphanumeric_required'
-          ? context.t.validation.passwordAlphanumericRequired
-          : context.t.validation.passwordAlphanumericRequired;
       ref
           .read(toastProvider.notifier)
-          .show(errorMessage, type: ToastType.error);
+          .show(_passwordErrorMessage(passwordError), type: ToastType.error);
       return;
     }
 
@@ -268,6 +257,26 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           phone.isEmpty ? null : phone,
           ref,
         );
+  }
+
+  String _passwordErrorMessage(String key) {
+    final t = context.t.validation;
+    switch (key) {
+      case 'password_required':
+        return t.passwordRequired;
+      case 'password_too_short':
+        return t.passwordTooShort;
+      case 'password_too_long':
+        return t.passwordTooLong;
+      case 'password_letter_required':
+        return t.passwordLetterRequired;
+      case 'password_number_required':
+        return t.passwordNumberRequired;
+      case 'password_alphanumeric_required':
+        return t.passwordAlphanumericRequired;
+      default:
+        return t.passwordAlphanumericRequired;
+    }
   }
 
   void _onSubmit() {
@@ -411,8 +420,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           onChanged: (value) {
             setState(() {
               _hasMinLength = value.length >= 6;
-              _hasUpperCase = _upperRegex.hasMatch(value);
-              _hasLowerCase = _lowerRegex.hasMatch(value);
+              _hasLetter = _letterRegex.hasMatch(value);
               _hasNumber = _digitRegex.hasMatch(value);
               _hasSpecialChar = _specialRegex.hasMatch(value);
             });
@@ -427,12 +435,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       isMet: _hasMinLength,
                     ),
                     PasswordCriterion(
-                      text: context.t.features.auth.hasUpperCase,
-                      isMet: _hasUpperCase,
-                    ),
-                    PasswordCriterion(
-                      text: context.t.features.auth.hasLowerCase,
-                      isMet: _hasLowerCase,
+                      text: context.t.features.auth.hasLetter,
+                      isMet: _hasLetter,
                     ),
                     PasswordCriterion(
                       text: context.t.features.auth.hasNumber,
@@ -441,6 +445,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     PasswordCriterion(
                       text: context.t.features.auth.hasSpecialChar,
                       isMet: _hasSpecialChar,
+                      isOptional: true,
                     ),
                   ],
                 )

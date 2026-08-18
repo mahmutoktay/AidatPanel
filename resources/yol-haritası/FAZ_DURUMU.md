@@ -1,7 +1,7 @@
 # AidatPanel — Yol Haritası ve Faz Durumu
 
 **Tek kaynak:** Fazlar, checklist, onaylar ve eksikler (Mobil + Backend).  
-**Güncelleme:** 2026-08-09 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
+**Güncelleme:** 2026-08-18 · **Branch:** `mobile/app` · **Sorumlular:** Furkan (Mobil) & Backend Ekibi
 
 **AI asistanlar** her oturumda bu dosyayı okur; yalnızca **AKTİF** fazda kod yazar (`CLAUDE.md` faz kapısı).
 
@@ -357,6 +357,9 @@ Play Console «Optimizasyon ekleme / kod karartma» için `prodRelease` R8 açı
 - [x] Sakin auth karşılama paritesi: `resident_phone` → `{ exists, name? }`; OTP adımı «Tekrar hoş geldiniz»; giriş toast isimli (`loginSuccessNamed` / `WelcomeBackNamed`)
 - [x] `device_preview` kalıntısı doğrulandı — kodda yok (clean rebuild)
 - [x] Yönetici telefon kayıt: idempotent register + phone variant lookup; login çoklu rol; mobil auth yazma retry kapalı
+- [x] Telefon global tekil: sakin numarası yönetici kaydına/profiline eklenemez (`User.phone @unique`, migration çift kayıt temizliği)
+- [x] Yönetici telefonla kayıt: `RegisterResponse.email` null iken parse TypeError → sahte `auth_register_failed` (hesap oluşuyor, giriş olmuyordu) — düzeltildi
+- [x] Şifre kuralı: harf + rakam zorunlu, özel karakter isteğe bağlı (mobil + `passwordSchema`); yönetici girişinde «Şifrenizi mi unuttunuz?» sağa yaslı, form ile Giriş Yap arasında
 - [x] Şifre sıfırlama: e-posta öncelikli; phone-only → SMS; e-posta+telefon → opt-in SMS yedek (`deliveredVia` / `smsFallbackAvailable`)
 - [x] İlk kurulum welcome (5 sayfalık PageView, `/welcome`); SecureStorage `onboarding_completed`; gradyanlı CustomPaint illüstrasyonlar
 - [x] Liste otomatik yenileme: bina/site mutasyonu sonrası Mülkler sekmesi + dual-store senkron (`buildings_cache_refresh`); detaydan dönüşte refresh; oluşturunca doğru segment (Siteler|Binalar)

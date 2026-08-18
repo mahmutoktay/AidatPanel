@@ -207,6 +207,10 @@ class AuthNotifier extends Notifier<AuthState> {
         return t.validation.passwordTooShort;
       case 'password_too_long':
         return t.validation.passwordTooLong;
+      case 'password_letter_required':
+        return t.validation.passwordLetterRequired;
+      case 'password_number_required':
+        return t.validation.passwordNumberRequired;
       case 'password_alphanumeric_required':
         return t.validation.passwordAlphanumericRequired;
       default:

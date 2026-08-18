@@ -1,9 +1,10 @@
 /// Belge §2.2 (`RegisterData`): `user` alanı **string** (uuid).
 /// Diğer alanlar `User` ile aynıdır (`token` dönmez).
+/// E-posta veya telefon tek başına yeterli olduğu için `email` null olabilir.
 class RegisterResponse {
   final String id;
   final String name;
-  final String email;
+  final String? email;
   final String? phone;
   final String role;
   final String language;
@@ -12,7 +13,7 @@ class RegisterResponse {
   RegisterResponse({
     required this.id,
     required this.name,
-    required this.email,
+    this.email,
     this.phone,
     required this.role,
     this.language = 'tr',
@@ -23,7 +24,7 @@ class RegisterResponse {
     return RegisterResponse(
       id: json['user'] as String,
       name: json['name'] as String,
-      email: json['email'] as String,
+      email: json['email'] as String?,
       phone: json['phone'] as String?,
       role: json['role'] as String,
       language: json['language'] as String? ?? 'tr',
