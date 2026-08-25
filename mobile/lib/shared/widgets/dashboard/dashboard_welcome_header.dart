@@ -5,6 +5,7 @@ import '../../../core/theme/app_sizes.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../l10n/strings.g.dart';
 import 'dashboard_notification_button.dart';
+import '../../../features/feature_tour/presentation/feature_tour_targets.dart';
 
 /// Dashboard üst başlığı — rol başlığı + hoş geldiniz + dairesel bildirim.
 class DashboardPageHeader extends StatelessWidget {
@@ -73,7 +74,7 @@ class DashboardPageHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSizes.spacingS),
-        const DashboardNotificationButton(),
+        DashboardNotificationButton(key: FeatureTourTargets.notifications),
       ],
     );
   }

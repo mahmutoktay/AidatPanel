@@ -1668,6 +1668,30 @@
       "page4Body": "Ödeme, duyuru ve talep güncellemeleri anlık bildirimle herkese ulaşır, kimse geride kalmaz.",
       "page5Title": "Şeffaf ve Düzenli",
       "page5Body": "Giderler kayıt altında, talepler tek ekrandan takip edilir. Herkes nerede olduğunuzu bilir."
+    },
+    "featureTour": {
+      "next": "İleri",
+      "skip": "Atla",
+      "done": "Tamam",
+      "replayTitle": "Uygulama rehberi",
+      "managerSelectorTitle": "Bina veya site seçin",
+      "managerSelectorBody": "Yönettiğiniz site veya binayı buradan değiştirirsiniz. Özet ve listeler seçiminize göre güncellenir.",
+      "managerSummaryTitle": "Aidat özeti",
+      "managerSummaryBody": "Toplanan ve bekleyen aidat tutarlarını bu kartta görürsünüz.",
+      "managerQuickTitle": "Hızlı işlemler",
+      "managerQuickBody": "Aidat durumu, talepler, giderler ve duyuru için kısayollar burada.",
+      "managerNavTitle": "Alt menü",
+      "managerNavBody": "Ana sayfa, mülkler, aidatlar ve ayarlar sekmeleri arasında geçiş yapın.",
+      "managerNotifTitle": "Bildirimler",
+      "managerNotifBody": "Ödeme, talep ve duyuru bildirimlerine buradan ulaşırsınız.",
+      "residentSummaryTitle": "Aidat durumunuz",
+      "residentSummaryBody": "Bu ayki borcunuzu ve ödeme durumunu bu kartta görürsünüz.",
+      "residentQuickTitle": "Hızlı işlemler",
+      "residentQuickBody": "Aidatlarınızı ve arıza taleplerinizi buradan hızlıca açabilirsiniz.",
+      "residentNavTitle": "Alt menü",
+      "residentNavBody": "Ana sayfa, aidatlar, talepler ve ayarlar sekmeleri arasında geçiş yapın.",
+      "residentNotifTitle": "Bildirimler",
+      "residentNotifBody": "Yönetimden gelen duyuru ve ödeme bildirimlerini burada görürsünüz."
     }
   },
   "legal": {

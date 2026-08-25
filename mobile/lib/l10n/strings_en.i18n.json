@@ -1668,6 +1668,30 @@
       "page4Body": "Payments, announcements, and request updates reach everyone with instant notifications.",
       "page5Title": "Clear and organized",
       "page5Body": "Expenses stay on record and requests live in one place. Everyone knows where things stand."
+    },
+    "featureTour": {
+      "next": "Next",
+      "skip": "Skip",
+      "done": "Done",
+      "replayTitle": "App guide",
+      "managerSelectorTitle": "Choose a building or site",
+      "managerSelectorBody": "Switch the site or building you manage here. Summaries and lists update to match.",
+      "managerSummaryTitle": "Dues summary",
+      "managerSummaryBody": "See collected and outstanding dues amounts on this card.",
+      "managerQuickTitle": "Quick actions",
+      "managerQuickBody": "Shortcuts for dues status, tickets, expenses, and announcements.",
+      "managerNavTitle": "Bottom menu",
+      "managerNavBody": "Switch between home, properties, dues, and settings.",
+      "managerNotifTitle": "Notifications",
+      "managerNotifBody": "Open payment, ticket, and announcement notifications here.",
+      "residentSummaryTitle": "Your dues",
+      "residentSummaryBody": "See this month’s balance and payment status on this card.",
+      "residentQuickTitle": "Quick actions",
+      "residentQuickBody": "Open your dues and maintenance requests quickly from here.",
+      "residentNavTitle": "Bottom menu",
+      "residentNavBody": "Switch between home, dues, requests, and settings.",
+      "residentNotifTitle": "Notifications",
+      "residentNotifBody": "See announcements and payment updates from management here."
     }
   },
   "legal": {

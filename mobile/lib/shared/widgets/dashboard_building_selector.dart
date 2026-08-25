@@ -120,8 +120,8 @@ class DashboardBuildingSelector extends ConsumerWidget {
         '${_siteBuildingCount(selectedSite.id)}',
       );
     } else if (selectedBuilding != null) {
-      title = selectedBuilding.name;
-      subtitle = _buildingSubtitle(context, selectedBuilding);
+      title = selectedBuilding.displayName;
+      subtitle = _buildingSubtitle(context, selectedBuilding, sites);
     } else {
       title = t.selectBuilding;
       subtitle = t.buildingPickerTapHint;
@@ -134,14 +134,41 @@ class DashboardBuildingSelector extends ConsumerWidget {
     );
   }
 
-  String _buildingSubtitle(BuildContext context, BuildingEntity building) {
+  String? _resolveSiteName(
+    BuildingEntity building,
+    List<SiteEntity> sites,
+  ) {
+    final fromBuilding = building.siteName?.trim();
+    if (fromBuilding != null && fromBuilding.isNotEmpty) return fromBuilding;
+    final siteId = building.siteId;
+    if (siteId == null) return null;
+    for (final site in sites) {
+      if (site.id == siteId) {
+        final name = site.name.trim();
+        if (name.isNotEmpty) return name;
+      }
+    }
+    return null;
+  }
+
+  String _buildingSubtitle(
+    BuildContext context,
+    BuildingEntity building,
+    List<SiteEntity> sites,
+  ) {
     final t = context.t.features.dashboard;
     final units = t.buildingUnitsSummary.replaceAll(
       '{apartments}',
       '${building.totalApartments}',
     );
-    if (building.displayAddress.isEmpty) return units;
-    return '${building.displayAddress} · $units';
+    final parts = <String>[];
+    final siteName = _resolveSiteName(building, sites);
+    if (siteName != null) parts.add(siteName);
+    if (building.displayAddress.isNotEmpty) {
+      parts.add(building.displayAddress);
+    }
+    parts.add(units);
+    return parts.join(' · ');
   }
 }
 

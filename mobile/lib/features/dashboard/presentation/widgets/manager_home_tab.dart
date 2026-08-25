@@ -38,6 +38,7 @@ import 'manager_home/manager_dashboard_charts.dart';
 import 'manager_home/manager_overdue_apartments_section.dart';
 import 'manager_home/manager_dues_summary_card.dart';
 import 'manager_home/manager_quick_actions_section.dart';
+import '../../../feature_tour/presentation/feature_tour_targets.dart';
 
 class ManagerHomeTab extends ConsumerStatefulWidget {
   final AsyncValue<List<BuildingEntity>> buildingsAsync;
@@ -209,6 +210,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
             children: [
               if (hasProperties) ...[
                 DashboardBuildingSelector(
+                key: FeatureTourTargets.buildingSelector,
                   buildings: buildings,
                   scope: filterScope,
                   includeAllOption: true,
@@ -261,6 +263,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
                 )
               else if (duesAmountSummary.hasCollectionData)
                 ManagerDuesSummaryCard(
+                key: FeatureTourTargets.summary,
                   summary: duesAmountSummary,
                   currency: expenseCurrency,
                   remindDueIdsByBuilding: remindDueIdsByBuilding.isEmpty
@@ -269,6 +272,7 @@ class _ManagerHomeTabState extends ConsumerState<ManagerHomeTab> {
                 ),
               const SizedBox(height: AppSizes.spacingM),
               ManagerQuickActionsSection(
+                key: FeatureTourTargets.quickActions,
                 openTicketCount:
                     ticketStats.openCount + ticketStats.inProgressCount,
                 monthExpenseCount: monthExpensesCountAsync.value ?? 0,

@@ -27,6 +27,16 @@ class AppConstants {
   /// İlk kurulum welcome / tanıtım tamamlandı (çıkışta silinmez).
   static const String onboardingCompletedKey = 'onboarding_completed';
 
+  /// Spotlight tanıtım rehberi — ekip onayı gelene kadar kapalı (Play yüklemesi).
+  /// Açmak için `true` yapın; kod ve Ayarlar yeniden oynat korunur.
+  static const bool featureTourEnabled = false;
+
+  /// Yönetici ana sayfa spotlight rehberi (v1, çıkışta silinmez).
+  static const String featureTourManagerHomeV1Key = 'feature_tour_manager_home_v1';
+
+  /// Sakin ana sayfa spotlight rehberi (v1, çıkışta silinmez).
+  static const String featureTourResidentHomeV1Key = 'feature_tour_resident_home_v1';
+
   /// Kullanıcı başına tek seferlik bildirim izni açıklama diyaloğu.
   static String notificationPermissionPromptKey(String userId) =>
       'notification_permission_prompt_seen_$userId';

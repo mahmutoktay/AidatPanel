@@ -21,6 +21,10 @@ import '../../../../shared/widgets/settings_tab.dart';
 
 import '../widgets/manager_home_tab.dart';
 import '../widgets/manager_properties_tab.dart';
+import '../../../feature_tour/domain/feature_tour_models.dart';
+import '../../../feature_tour/presentation/feature_tour_host.dart';
+import '../../../feature_tour/presentation/feature_tour_provider.dart';
+import '../../../feature_tour/presentation/feature_tour_targets.dart';
 
 class ManagerDashboardScreen extends ConsumerStatefulWidget {
   const ManagerDashboardScreen({super.key});
@@ -48,13 +52,18 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
       ref.read(managerTabIndexProvider.notifier).update(_tabController.index);
       prefetchNotifications(ref);
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       prefetchNotifications(ref);
-      maybeShowNotificationPermissionPrompt(context, ref);
+      await maybeShowNotificationPermissionPrompt(context, ref);
+      if (!mounted) return;
       ref.invalidate(managerMonthExpensesCountProvider);
       ref.invalidate(managerMonthAnnouncementsCountProvider);
       ref.invalidate(managerPendingDekontsCountProvider);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(featureTourProvider.notifier).tryStart(FeatureTourId.managerHome);
+      });
     });
   }
 
@@ -111,7 +120,8 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
             type: ToastType.info,
             duration: AppBackNavigation.exitGracePeriod,
           ),
-      child: Scaffold(
+      child: FeatureTourHost(
+        child: Scaffold(
         backgroundColor: AppColors.dashboardBackground,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -153,6 +163,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
           ],
         ),
         bottomNavigationBar: DashboardBottomNavBar(
+          key: FeatureTourTargets.bottomNav,
           selectedIndex: ref.watch(
             managerTabIndexProvider.select((index) => index),
           ),
@@ -187,6 +198,7 @@ class _ManagerDashboardScreenState extends ConsumerState<ManagerDashboardScreen>
             ),
           ],
         ),
+      ),
       ),
     );
   }

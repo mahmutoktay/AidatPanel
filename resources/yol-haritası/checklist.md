@@ -1,7 +1,7 @@
 # AidatPanel — Fiziksel Cihaz Regresyon Checklist
 
 **Amaç:** Play submit öncesi gerçek cihazda doğrulama  
-**Sürüm:** `0.6.13+2000000022` (prod AAB / Play internal)  
+**Sürüm:** `0.6.14+2000000023` (prod AAB / Play internal)  
 **Güncelleme:** 2026-08-15  
 **Kaynak:** `FAZ_DURUMU.md` FAZ 7 fiziksel regresyon + lansman kontrolleri
 
@@ -13,7 +13,7 @@
 
 - [x] Play internal (veya yüklediğin track) → kurulum, soğuk açılış, splash FATAL yok
 - [x] Uygulamayı kill → yeniden aç → oturum kalır
-- [x] Ayarlar → Uygulama bilgisi: sürüm `0.6.13` / `2000000022`
+- [x] Ayarlar → Uygulama bilgisi: sürüm `0.6.14` / `2000000023`
 - [x] Bildirim izni isteniyor / veriliyor
 
 ---

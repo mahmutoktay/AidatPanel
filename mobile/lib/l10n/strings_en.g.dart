@@ -1352,6 +1352,7 @@ class Translations$features$en {
 	late final Translations$features$dues$en dues = Translations$features$dues$en._(_root);
 	late final Translations$features$faz2$en faz2 = Translations$features$faz2$en._(_root);
 	late final Translations$features$welcome$en welcome = Translations$features$welcome$en._(_root);
+	late final Translations$features$featureTour$en featureTour = Translations$features$featureTour$en._(_root);
 }
 
 // Path: legal
@@ -4356,6 +4357,81 @@ class Translations$features$welcome$en {
 	String get page5Body => 'Expenses stay on record and requests live in one place. Everyone knows where things stand.';
 }
 
+// Path: features.featureTour
+class Translations$features$featureTour$en {
+	Translations$features$featureTour$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Next'
+	String get next => 'Next';
+
+	/// en: 'Skip'
+	String get skip => 'Skip';
+
+	/// en: 'Done'
+	String get done => 'Done';
+
+	/// en: 'App guide'
+	String get replayTitle => 'App guide';
+
+	/// en: 'Choose a building or site'
+	String get managerSelectorTitle => 'Choose a building or site';
+
+	/// en: 'Switch the site or building you manage here. Summaries and lists update to match.'
+	String get managerSelectorBody => 'Switch the site or building you manage here. Summaries and lists update to match.';
+
+	/// en: 'Dues summary'
+	String get managerSummaryTitle => 'Dues summary';
+
+	/// en: 'See collected and outstanding dues amounts on this card.'
+	String get managerSummaryBody => 'See collected and outstanding dues amounts on this card.';
+
+	/// en: 'Quick actions'
+	String get managerQuickTitle => 'Quick actions';
+
+	/// en: 'Shortcuts for dues status, tickets, expenses, and announcements.'
+	String get managerQuickBody => 'Shortcuts for dues status, tickets, expenses, and announcements.';
+
+	/// en: 'Bottom menu'
+	String get managerNavTitle => 'Bottom menu';
+
+	/// en: 'Switch between home, properties, dues, and settings.'
+	String get managerNavBody => 'Switch between home, properties, dues, and settings.';
+
+	/// en: 'Notifications'
+	String get managerNotifTitle => 'Notifications';
+
+	/// en: 'Open payment, ticket, and announcement notifications here.'
+	String get managerNotifBody => 'Open payment, ticket, and announcement notifications here.';
+
+	/// en: 'Your dues'
+	String get residentSummaryTitle => 'Your dues';
+
+	/// en: 'See this month’s balance and payment status on this card.'
+	String get residentSummaryBody => 'See this month’s balance and payment status on this card.';
+
+	/// en: 'Quick actions'
+	String get residentQuickTitle => 'Quick actions';
+
+	/// en: 'Open your dues and maintenance requests quickly from here.'
+	String get residentQuickBody => 'Open your dues and maintenance requests quickly from here.';
+
+	/// en: 'Bottom menu'
+	String get residentNavTitle => 'Bottom menu';
+
+	/// en: 'Switch between home, dues, requests, and settings.'
+	String get residentNavBody => 'Switch between home, dues, requests, and settings.';
+
+	/// en: 'Notifications'
+	String get residentNotifTitle => 'Notifications';
+
+	/// en: 'See announcements and payment updates from management here.'
+	String get residentNotifBody => 'See announcements and payment updates from management here.';
+}
+
 // Path: features.buildings.collection
 class Translations$features$buildings$collection$en {
 	Translations$features$buildings$collection$en._(this._root);
@@ -6945,6 +7021,28 @@ extension on Translations {
 			'features.welcome.page4Body' => 'Payments, announcements, and request updates reach everyone with instant notifications.',
 			'features.welcome.page5Title' => 'Clear and organized',
 			'features.welcome.page5Body' => 'Expenses stay on record and requests live in one place. Everyone knows where things stand.',
+			'features.featureTour.next' => 'Next',
+			'features.featureTour.skip' => 'Skip',
+			'features.featureTour.done' => 'Done',
+			'features.featureTour.replayTitle' => 'App guide',
+			'features.featureTour.managerSelectorTitle' => 'Choose a building or site',
+			'features.featureTour.managerSelectorBody' => 'Switch the site or building you manage here. Summaries and lists update to match.',
+			'features.featureTour.managerSummaryTitle' => 'Dues summary',
+			'features.featureTour.managerSummaryBody' => 'See collected and outstanding dues amounts on this card.',
+			'features.featureTour.managerQuickTitle' => 'Quick actions',
+			'features.featureTour.managerQuickBody' => 'Shortcuts for dues status, tickets, expenses, and announcements.',
+			'features.featureTour.managerNavTitle' => 'Bottom menu',
+			'features.featureTour.managerNavBody' => 'Switch between home, properties, dues, and settings.',
+			'features.featureTour.managerNotifTitle' => 'Notifications',
+			'features.featureTour.managerNotifBody' => 'Open payment, ticket, and announcement notifications here.',
+			'features.featureTour.residentSummaryTitle' => 'Your dues',
+			'features.featureTour.residentSummaryBody' => 'See this month’s balance and payment status on this card.',
+			'features.featureTour.residentQuickTitle' => 'Quick actions',
+			'features.featureTour.residentQuickBody' => 'Open your dues and maintenance requests quickly from here.',
+			'features.featureTour.residentNavTitle' => 'Bottom menu',
+			'features.featureTour.residentNavBody' => 'Switch between home, dues, requests, and settings.',
+			'features.featureTour.residentNotifTitle' => 'Notifications',
+			'features.featureTour.residentNotifBody' => 'See announcements and payment updates from management here.',
 			'legal.companyName' => 'Vefa Yazılım',
 			'legal.contactEmail' => 'store@vefayazilim.com',
 			'legal.contactBlock' => 'Data controller: Vefa Yazılım\nEmail: store@vefayazilim.com',

@@ -507,6 +507,7 @@ class _Translations$features$tr implements Translations$features$en {
 	@override late final _Translations$features$dues$tr dues = _Translations$features$dues$tr._(_root);
 	@override late final _Translations$features$faz2$tr faz2 = _Translations$features$faz2$tr._(_root);
 	@override late final _Translations$features$welcome$tr welcome = _Translations$features$welcome$tr._(_root);
+	@override late final _Translations$features$featureTour$tr featureTour = _Translations$features$featureTour$tr._(_root);
 }
 
 // Path: legal
@@ -1638,6 +1639,37 @@ class _Translations$features$welcome$tr implements Translations$features$welcome
 	@override String get page4Body => 'Ödeme, duyuru ve talep güncellemeleri anlık bildirimle herkese ulaşır, kimse geride kalmaz.';
 	@override String get page5Title => 'Şeffaf ve Düzenli';
 	@override String get page5Body => 'Giderler kayıt altında, talepler tek ekrandan takip edilir. Herkes nerede olduğunuzu bilir.';
+}
+
+// Path: features.featureTour
+class _Translations$features$featureTour$tr implements Translations$features$featureTour$en {
+	_Translations$features$featureTour$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get next => 'İleri';
+	@override String get skip => 'Atla';
+	@override String get done => 'Tamam';
+	@override String get replayTitle => 'Uygulama rehberi';
+	@override String get managerSelectorTitle => 'Bina veya site seçin';
+	@override String get managerSelectorBody => 'Yönettiğiniz site veya binayı buradan değiştirirsiniz. Özet ve listeler seçiminize göre güncellenir.';
+	@override String get managerSummaryTitle => 'Aidat özeti';
+	@override String get managerSummaryBody => 'Toplanan ve bekleyen aidat tutarlarını bu kartta görürsünüz.';
+	@override String get managerQuickTitle => 'Hızlı işlemler';
+	@override String get managerQuickBody => 'Aidat durumu, talepler, giderler ve duyuru için kısayollar burada.';
+	@override String get managerNavTitle => 'Alt menü';
+	@override String get managerNavBody => 'Ana sayfa, mülkler, aidatlar ve ayarlar sekmeleri arasında geçiş yapın.';
+	@override String get managerNotifTitle => 'Bildirimler';
+	@override String get managerNotifBody => 'Ödeme, talep ve duyuru bildirimlerine buradan ulaşırsınız.';
+	@override String get residentSummaryTitle => 'Aidat durumunuz';
+	@override String get residentSummaryBody => 'Bu ayki borcunuzu ve ödeme durumunu bu kartta görürsünüz.';
+	@override String get residentQuickTitle => 'Hızlı işlemler';
+	@override String get residentQuickBody => 'Aidatlarınızı ve arıza taleplerinizi buradan hızlıca açabilirsiniz.';
+	@override String get residentNavTitle => 'Alt menü';
+	@override String get residentNavBody => 'Ana sayfa, aidatlar, talepler ve ayarlar sekmeleri arasında geçiş yapın.';
+	@override String get residentNotifTitle => 'Bildirimler';
+	@override String get residentNotifBody => 'Yönetimden gelen duyuru ve ödeme bildirimlerini burada görürsünüz.';
 }
 
 // Path: features.buildings.collection
@@ -3643,6 +3675,28 @@ extension on TranslationsTr {
 			'features.welcome.page4Body' => 'Ödeme, duyuru ve talep güncellemeleri anlık bildirimle herkese ulaşır, kimse geride kalmaz.',
 			'features.welcome.page5Title' => 'Şeffaf ve Düzenli',
 			'features.welcome.page5Body' => 'Giderler kayıt altında, talepler tek ekrandan takip edilir. Herkes nerede olduğunuzu bilir.',
+			'features.featureTour.next' => 'İleri',
+			'features.featureTour.skip' => 'Atla',
+			'features.featureTour.done' => 'Tamam',
+			'features.featureTour.replayTitle' => 'Uygulama rehberi',
+			'features.featureTour.managerSelectorTitle' => 'Bina veya site seçin',
+			'features.featureTour.managerSelectorBody' => 'Yönettiğiniz site veya binayı buradan değiştirirsiniz. Özet ve listeler seçiminize göre güncellenir.',
+			'features.featureTour.managerSummaryTitle' => 'Aidat özeti',
+			'features.featureTour.managerSummaryBody' => 'Toplanan ve bekleyen aidat tutarlarını bu kartta görürsünüz.',
+			'features.featureTour.managerQuickTitle' => 'Hızlı işlemler',
+			'features.featureTour.managerQuickBody' => 'Aidat durumu, talepler, giderler ve duyuru için kısayollar burada.',
+			'features.featureTour.managerNavTitle' => 'Alt menü',
+			'features.featureTour.managerNavBody' => 'Ana sayfa, mülkler, aidatlar ve ayarlar sekmeleri arasında geçiş yapın.',
+			'features.featureTour.managerNotifTitle' => 'Bildirimler',
+			'features.featureTour.managerNotifBody' => 'Ödeme, talep ve duyuru bildirimlerine buradan ulaşırsınız.',
+			'features.featureTour.residentSummaryTitle' => 'Aidat durumunuz',
+			'features.featureTour.residentSummaryBody' => 'Bu ayki borcunuzu ve ödeme durumunu bu kartta görürsünüz.',
+			'features.featureTour.residentQuickTitle' => 'Hızlı işlemler',
+			'features.featureTour.residentQuickBody' => 'Aidatlarınızı ve arıza taleplerinizi buradan hızlıca açabilirsiniz.',
+			'features.featureTour.residentNavTitle' => 'Alt menü',
+			'features.featureTour.residentNavBody' => 'Ana sayfa, aidatlar, talepler ve ayarlar sekmeleri arasında geçiş yapın.',
+			'features.featureTour.residentNotifTitle' => 'Bildirimler',
+			'features.featureTour.residentNotifBody' => 'Yönetimden gelen duyuru ve ödeme bildirimlerini burada görürsünüz.',
 			'legal.companyName' => 'Vefa Yazılım',
 			'legal.contactEmail' => 'store@vefayazilim.com',
 			'legal.contactBlock' => 'Veri sorumlusu: Vefa Yazılım\nE-posta: store@vefayazilim.com',

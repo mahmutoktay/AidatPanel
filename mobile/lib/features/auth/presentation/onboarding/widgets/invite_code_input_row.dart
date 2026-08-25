@@ -4,8 +4,9 @@ import 'package:flutter/services.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
 import '../../../../../core/theme/app_typography.dart';
+import 'code_input_cell_style.dart';
 
-/// Davet kodu girişi — `AP3-B12-A9F0` formatında 3 segment.
+/// Davet kodu girişi — `AP3-B12-A9F0` formatında 3 dikdörtgen segment.
 /// Backspace boş segmentte bir önceki segmente geçer.
 class InviteCodeInputRow extends StatefulWidget {
   const InviteCodeInputRow({
@@ -37,6 +38,7 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
     _focusNodes = List.generate(3, (_) {
       final node = FocusNode();
       node.onKeyEvent = _onKeyEvent;
+      node.addListener(_onFocusChanged);
       return node;
     });
     final initial = widget.initialCode?.trim();
@@ -45,12 +47,17 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
     }
   }
 
+  void _onFocusChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
     for (final c in _controllers) {
       c.dispose();
     }
     for (final f in _focusNodes) {
+      f.removeListener(_onFocusChanged);
       f.dispose();
     }
     super.dispose();
@@ -133,10 +140,7 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
     final upper = _sanitize(value);
     if (upper.length > _lengths[index]) {
       // Yapıştırma veya fazla karakter — tüm satıra dağıt.
-      final before = _controllers
-          .take(index)
-          .map((c) => c.text)
-          .join();
+      final before = _controllers.take(index).map((c) => c.text).join();
       _applyRaw(before + upper);
       final filled = _joined.replaceAll('-', '').length;
       final focusIdx = filled >= 10
@@ -173,9 +177,14 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
         final widths = [unit * 3, unit * 3, unit * 4];
 
         Widget segment(int i) {
-          return SizedBox(
+          final focused = _focusNodes[i].hasFocus;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeInOut,
             width: widths[i],
-            height: 56,
+            height: CodeInputCellStyle.height,
+            alignment: Alignment.center,
+            decoration: CodeInputCellStyle.decoration(focused: focused),
             child: TextField(
               controller: _controllers[i],
               focusNode: _focusNodes[i],
@@ -190,6 +199,7 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
                 leadingDistribution: TextLeadingDistribution.even,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.2,
+                color: AppColors.textPrimary,
               ),
               strutStyle: const StrutStyle(
                 fontSize: 18,
@@ -205,12 +215,8 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
               ],
               decoration: InputDecoration(
                 counterText: '',
-                isCollapsed: false,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 4,
-                  vertical: 16,
-                ),
+                isCollapsed: true,
+                contentPadding: EdgeInsets.zero,
                 hintText: i == 0
                     ? 'AP3'
                     : i == 1
@@ -222,13 +228,13 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
                   color: AppColors.textSecondary.withValues(alpha: 0.45),
                   letterSpacing: 1,
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.inputRadius),
-                  borderSide: BorderSide(color: AppColors.brand, width: 2),
-                ),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                filled: false,
               ),
               onChanged: (v) => _onChanged(i, v),
             ),
@@ -237,7 +243,7 @@ class _InviteCodeInputRowState extends State<InviteCodeInputRow> {
 
         Widget dash() => SizedBox(
               width: dashWidth,
-              height: 56,
+              height: CodeInputCellStyle.height,
               child: Center(
                 child: Text(
                   '-',

@@ -16,6 +16,7 @@ import '../../../../notifications/presentation/widgets/notification_detail_sheet
 import 'resident_debt_summary_card.dart';
 import 'resident_home_quick_actions_row.dart';
 import 'resident_recent_activity_section.dart';
+import '../../../../feature_tour/presentation/feature_tour_targets.dart';
 
 /// Sakin ana sayfa — borç özeti, hızlı işlemler, birleşik son hareketler.
 class ResidentHomeTab extends ConsumerStatefulWidget {
@@ -119,11 +120,13 @@ class _ResidentHomeTabState extends ConsumerState<ResidentHomeTab> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ResidentDebtSummaryCard(
+                key: FeatureTourTargets.summary,
                 dues: duesState.dues,
                 isLoading: duesState.isLoading,
               ),
               const SizedBox(height: AppSizes.spacingM),
               ResidentHomeQuickActionsRow(
+                key: FeatureTourTargets.quickActions,
                 onGoToDuesTab: widget.onGoToDuesTab,
                 onGoToIssuesTab: widget.onGoToIssuesTab,
               ),

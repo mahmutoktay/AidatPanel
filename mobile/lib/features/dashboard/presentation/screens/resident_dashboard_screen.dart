@@ -21,6 +21,10 @@ import '../../../tickets/presentation/providers/tickets_provider.dart';
 import '../../../tickets/presentation/screens/resident_tickets_tab.dart';
 import '../widgets/resident_home/resident_home_colors.dart';
 import '../widgets/resident_home/resident_home_tab.dart';
+import '../../../feature_tour/domain/feature_tour_models.dart';
+import '../../../feature_tour/presentation/feature_tour_host.dart';
+import '../../../feature_tour/presentation/feature_tour_provider.dart';
+import '../../../feature_tour/presentation/feature_tour_targets.dart';
 
 class ResidentDashboardScreen extends ConsumerStatefulWidget {
   const ResidentDashboardScreen({super.key});
@@ -51,10 +55,15 @@ class _ResidentDashboardScreenState
       ref.read(residentTabIndexProvider.notifier).update(_tabController.index);
       prefetchNotifications(ref);
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       prefetchNotifications(ref);
-      maybeShowNotificationPermissionPrompt(context, ref);
+      await maybeShowNotificationPermissionPrompt(context, ref);
+      if (!mounted) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(featureTourProvider.notifier).tryStart(FeatureTourId.residentHome);
+      });
     });
   }
 
@@ -146,7 +155,8 @@ class _ResidentDashboardScreenState
             type: ToastType.info,
             duration: AppBackNavigation.exitGracePeriod,
           ),
-      child: Scaffold(
+      child: FeatureTourHost(
+        child: Scaffold(
         backgroundColor: AppColors.surface,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -184,6 +194,7 @@ class _ResidentDashboardScreenState
           ],
         ),
         bottomNavigationBar: DashboardBottomNavBar(
+          key: FeatureTourTargets.bottomNav,
           selectedIndex: selectedTab,
           selectedAccentColor: ResidentHomeColors.blue,
           showSelectionPill: false,
@@ -218,6 +229,7 @@ class _ResidentDashboardScreenState
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -48,20 +48,25 @@ Future<void> maybeShowNotificationPermissionPrompt(
           isResident ? t.residentTitle : t.managerTitle,
           style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
         ),
-        content: Text(
-          isResident ? t.residentBody : t.managerBody,
-          style: AppTypography.body1.copyWith(height: 1.45),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              isResident ? t.residentBody : t.managerBody,
+              style: AppTypography.body1.copyWith(height: 1.45),
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(t.allow),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(t.notNow),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(t.notNow),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(t.allow),
-          ),
-        ],
       );
     },
   );

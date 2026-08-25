@@ -1,7 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../../features/feature_tour/domain/feature_tour_models.dart';
 import '../constants/app_constants.dart';
+
 class SecureStorage {
   static const _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(),
@@ -101,6 +104,10 @@ class SecureStorage {
     final localPresets = await readRaw(AppConstants.localCollectionPresetsKey);
     final loginHints = await readRaw(AppConstants.loginHintsKey);
     final onboardingCompleted = await isOnboardingCompleted();
+    final managerTourDone =
+        await isFeatureTourCompleted(FeatureTourId.managerHome);
+    final residentTourDone =
+        await isFeatureTourCompleted(FeatureTourId.residentHome);
     await _storage.deleteAll();
     if (language != null) await saveLanguage(language);
     if (theme != null) await saveTheme(theme);
@@ -116,6 +123,12 @@ class SecureStorage {
     if (onboardingCompleted) {
       await markOnboardingCompleted();
     }
+    if (managerTourDone) {
+      await markFeatureTourCompleted(FeatureTourId.managerHome);
+    }
+    if (residentTourDone) {
+      await markFeatureTourCompleted(FeatureTourId.residentHome);
+    }
   }
 
   Future<bool> isOnboardingCompleted() async {
@@ -128,6 +141,26 @@ class SecureStorage {
       key: AppConstants.onboardingCompletedKey,
       value: '1',
     );
+  }
+
+  String _featureTourStorageKey(FeatureTourId tourId) {
+    return switch (tourId) {
+      FeatureTourId.managerHome => AppConstants.featureTourManagerHomeV1Key,
+      FeatureTourId.residentHome => AppConstants.featureTourResidentHomeV1Key,
+    };
+  }
+
+  Future<bool> isFeatureTourCompleted(FeatureTourId tourId) async {
+    final raw = await _storage.read(key: _featureTourStorageKey(tourId));
+    return raw == '1' || raw == 'true';
+  }
+
+  Future<void> markFeatureTourCompleted(FeatureTourId tourId) async {
+    await _storage.write(key: _featureTourStorageKey(tourId), value: '1');
+  }
+
+  Future<void> clearFeatureTourCompleted(FeatureTourId tourId) async {
+    await _storage.delete(key: _featureTourStorageKey(tourId));
   }
 
   Future<String?> readRaw(String key) => _storage.read(key: key);

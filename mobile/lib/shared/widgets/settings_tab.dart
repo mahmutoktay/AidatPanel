@@ -18,6 +18,8 @@ import '../../l10n/strings.g.dart';
 import 'premium_bottom_sheet.dart';
 import 'profile_avatar.dart';
 import 'toast_overlay.dart';
+import '../../features/feature_tour/domain/feature_tour_models.dart';
+import '../../features/feature_tour/presentation/feature_tour_provider.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   const SettingsTab({super.key});
@@ -130,6 +132,18 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                   title: context.t.common.helpSupport,
                   onTap: () => context.push('/legal/help'),
                 ),
+                if (AppConstants.featureTourEnabled)
+                  _SettingsTile(
+                    icon: Icons.tour_outlined,
+                    title: context.t.features.featureTour.replayTitle,
+                    onTap: () {
+                      final role = ref.read(authStateProvider).user?.role;
+                      final tourId = role == UserRole.manager
+                          ? FeatureTourId.managerHome
+                          : FeatureTourId.residentHome;
+                      ref.read(featureTourProvider.notifier).replay(tourId);
+                    },
+                  ),
                 _SettingsTile(
                   icon: Icons.info_outline,
                   title: context.t.common.about,

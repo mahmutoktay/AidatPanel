@@ -38,6 +38,16 @@ DEMO_MANAGER_EMAIL=abdullahaslan061212@gmail.com npm run seed:showcase
 # Sıfırdan: DEMO_FORCE=1 npm run seed:showcase
 ```
 
+### Müşteri demo (tek bina)
+
+Sıfır DB’de `abdullah@demo.com` + 10 dairelik Çamlık Apartmanı (aidat %75, elden/havale, giderler, talepler, duyurular).
+
+```bash
+# SSH tüneli: uzak 5432 → yerel 5433
+npm run seed:customer-demo
+# Yerel DB: DEMO_DB_PORT=5432 npm run seed:customer-demo
+```
+
 ---
 
 ## Proje yapısı (özet)

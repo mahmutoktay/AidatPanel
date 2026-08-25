@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_sizes.dart';
 import '../../../../../core/theme/app_typography.dart';
+import 'code_input_cell_style.dart';
 
 /// 6 haneli OTP girişi — dikdörtgen hücreler, border + gölge, backspace desteği.
 class OtpInputRow extends StatefulWidget {
@@ -24,8 +25,6 @@ class OtpInputRow extends StatefulWidget {
 
 class _OtpInputRowState extends State<OtpInputRow> {
   static const _length = 6;
-  /// Daha dikdörtgen görünüm için köşe yarıçapı (genel inputRadius=12'den düşük).
-  static const _cellRadius = 8.0;
   late final List<TextEditingController> _controllers;
   late final List<FocusNode> _focusNodes;
 
@@ -122,7 +121,6 @@ class _OtpInputRowState extends State<OtpInputRow> {
         // Genişlik yüksekliğin biraz altında → dikey dikdörtgen hücreler
         final cellWidth =
             ((constraints.maxWidth - totalGaps) / _length).clamp(40.0, 52.0);
-        final cellHeight = 60.0;
         final fontSize = cellWidth >= 46 ? 22.0 : 18.0;
 
         return Row(
@@ -133,25 +131,9 @@ class _OtpInputRowState extends State<OtpInputRow> {
               duration: const Duration(milliseconds: 150),
               curve: Curves.easeInOut,
               width: cellWidth,
-              height: cellHeight,
+              height: CodeInputCellStyle.height,
               alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(_cellRadius),
-                border: Border.all(
-                  color: focused ? AppColors.brand : AppColors.border,
-                  width: focused ? 2 : 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: focused
-                        ? AppColors.brand.withValues(alpha: 0.18)
-                        : AppColors.ink.withValues(alpha: 0.08),
-                    blurRadius: focused ? 8 : 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
+              decoration: CodeInputCellStyle.decoration(focused: focused),
               child: TextField(
                 controller: _controllers[i],
                 focusNode: _focusNodes[i],

@@ -63,7 +63,7 @@ Aşağıdaki değişikliklerden **herhangi biri** yapıldıysa ilgili dokümanla
 - **Abonelik Sistemi:** RevenueCat — Temel (`aidatpanel_monthly` ₺200/ay, `aidatpanel_annual` ₺2000/yıl, ≤20 bina) ve Business (`aidatpanel_business_monthly` ₺400/ay, `aidatpanel_business_annual` ₺4000/yıl, sınırsız). Kota: **toplam bina sayısı** (site altı bloklar dahil). Abonelik yoksa mevcut veri okunur; yeni bina eklenemez.
 - **Topoloji:**
   - **Backend:** Node.js + Express RESTful API + WebSocket Realtime servisi.
- - **Mobile:** Flutter uygulaması (iOS & Android). Güncel sürüm: `0.6.13+2000000022` (`pubspec.yaml`). *(1.0.0 AAB/sürüm adı: kullanıcı açıkça söyleyene kadar yok)*
+ - **Mobile:** Flutter uygulaması (iOS & Android). Güncel sürüm: `0.6.14+2000000023` (`pubspec.yaml`). *(1.0.0 AAB/sürüm adı: kullanıcı açıkça söyleyene kadar yok)*
   - **Web:** Statik landing page (yardımcı araç, uygulamanın ana parçası değil).
   - **İletişim:** REST (JSON `{success, message, data}`) + WebSocket (`wss://api.aidatpanel.com/api/v1/realtime?token=JWT`) + FCM Push Notifications.
   - **Domain:** `aidatpanel.com` (Cloudflare). API: `api.aidatpanel.com` (Contabo VPS / CloudPanel reverse proxy, PM2 ile yönetiliyor).
@@ -172,7 +172,8 @@ mobile/lib/
 │   ├── profile/               # Profil, şifre, dil, aktif oturumlar
 │   ├── reports/               # PDF indirme + paylaşma (bina + site)
 │   ├── dekont/                # Tahsilat dekontları (sakin + yönetici)
-│   └── subscription/          # Abonelik ekranı + paywall
+│   ├── subscription/          # Abonelik ekranı + paywall
+│   └── feature_tour/          # İlk giriş spotlight rehberi (yönetici/sakin ana sayfa; SecureStorage bayrak; AppConstants.featureTourEnabled ile aç/kapa — şimdilik false)
 ├── shared/
 │   └── widgets/               # password_field.dart, empty_state_widget.dart, friendly_error_screen.dart vb.
 └── main.dart / main_dev.dart  # Entry points (flavor: dev / prod)
@@ -333,7 +334,7 @@ Abonelik kotası: buildingQuotaService → toplam bina sayısı (tekil + site al
 | Landing page güncelleme | ✅ Premium redesign (`web/` marka token + SEO) + `bash web/scripts/deploy.sh` |
 | Firebase Analytics & Crashlytics | ✅ Tamamlandı |
 | Abonelik Temel/Business + kota | ✅ Backend + mobil paywall |
-| AAB 1.0.0 üretimi / Play yükleme | Bekliyor (sürüm adı `0.6.13`; 1.0.0’a geçiş kullanıcı onayı) |
+| AAB 1.0.0 üretimi / Play yükleme | Bekliyor (sürüm adı `0.6.14`; 1.0.0’a geçiş kullanıcı onayı) |
 | v1.0.0 release tag | Bekliyor (git tag insan; önce sürüm bump) |
 
 #### FAZ 8 — Site Yönetimi (▶ AKTİF, hedef ~2026-08)
