@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/app_providers.dart';
 import '../../../core/utils/user_error_message.dart';
+import '../../../core/utils/natural_string_compare.dart';
 import '../domain/entities/apartment_entity.dart';
 import 'datasources/apartment_remote_datasource.dart';
 import 'repositories/apartment_repository.dart';
@@ -35,14 +36,16 @@ class ApartmentsNotifier extends AsyncNotifier<List<ApartmentEntity>> {
 
   @override
   Future<List<ApartmentEntity>> build() async {
-    return _repository.fetchApartments(_buildingId);
+    final apartments = await _repository.fetchApartments(_buildingId);
+    return sortByNatural(apartments, (apt) => apt.apartmentNumber);
   }
 
   Future<void> loadApartments() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => _repository.fetchApartments(_buildingId),
-    );
+    state = await AsyncValue.guard(() async {
+      final apartments = await _repository.fetchApartments(_buildingId);
+      return sortByNatural(apartments, (apt) => apt.apartmentNumber);
+    });
   }
 
   Future<void> addApartment({required String number, int? floor}) async {
@@ -55,7 +58,9 @@ class ApartmentsNotifier extends AsyncNotifier<List<ApartmentEntity>> {
         floor: floor,
       );
       final current = state.value ?? [];
-      state = AsyncValue.data([...current, apartment]);
+      state = AsyncValue.data(
+        sortByNatural([...current, apartment], (apt) => apt.apartmentNumber),
+      );
     } catch (e, st) {
       state = AsyncValue.error(wrapAsyncStateError(e), st);
     } finally {
@@ -97,7 +102,10 @@ class ApartmentsNotifier extends AsyncNotifier<List<ApartmentEntity>> {
     );
     final merged = updated.copyWith(resident: existing.resident);
     state = AsyncValue.data(
-      current.map((a) => a.id == apartmentId ? merged : a).toList(),
+      sortByNatural(
+        current.map((a) => a.id == apartmentId ? merged : a).toList(),
+        (apt) => apt.apartmentNumber,
+      ),
     );
   }
 

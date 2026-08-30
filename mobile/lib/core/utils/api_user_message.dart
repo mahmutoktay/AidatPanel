@@ -176,6 +176,8 @@ String? _mapErrorKey(Translations t, String raw) {
       return e.apartmentDeleteFailed;
     case 'resident_remove_failed':
       return e.residentRemoveFailed;
+    case 'rejoin_failed':
+      return e.rejoinFailed;
     case 'building_dues_fetch_failed':
       return e.buildingDuesFetchFailed;
     case 'my_dues_fetch_failed':
@@ -356,6 +358,12 @@ String? _mapAuth(dynamic api, String raw, String msg, int? code) {
   if (_has(raw, 'davet kodunun süresi')) {
     return api.inviteCodeExpired as String;
   }
+  if (_has(raw, 'zaten bir daireye bağlı')) {
+    return api.alreadyLinkedToApartment as String;
+  }
+  if (_has(raw, 'dairede zaten bir sakin')) {
+    return api.apartmentAlreadyOccupied as String;
+  }
   if (_has(raw, 'sıfırlama kodu') ||
       _has(raw, 'invalid or expired token') ||
       _has(raw, 'reset token')) {
@@ -466,6 +474,13 @@ String? _mapTicket(
   }
   if (_has(raw, 'talep bulunamadı')) {
     return api.notFound as String;
+  }
+  if (_has(raw, 'uygunsuz ifadeler')) {
+    return t.features.tickets.inappropriateContentBlocked as String;
+  }
+  if (_has(raw, 'kendi talebinizi bildiremezsiniz') ||
+      _has(raw, 'kendi içeriğinizi bildiremezsiniz')) {
+    return t.features.tickets.reportOwnContentBlocked as String;
   }
   return null;
 }

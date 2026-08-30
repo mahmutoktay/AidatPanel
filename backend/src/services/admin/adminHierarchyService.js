@@ -1,5 +1,6 @@
 import { prisma } from "../../config/db.js";
 import { HttpError } from "../../utils/httpError.js";
+import { sortByNatural } from "../../utils/naturalCompare.js";
 import { adminDisplayEmail, adminDisplayPhone, adminDisplayName } from "../../utils/piiMasking.js";
 import { writeAdminAuditLog } from "./adminAuditService.js";
 import { getPaymentHabitsService } from "./adminReportService.js";
@@ -162,7 +163,7 @@ export async function getHierarchyBuildingDetail(adminId, buildingId, ipAddress)
     city: building.city,
     district: building.district,
     manager: building.manager,
-    apartments: building.apartments.map((a) => ({
+    apartments: sortByNatural(building.apartments, (a) => a.number).map((a) => ({
       id: a.id,
       number: a.number,
       floor: a.floor,

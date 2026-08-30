@@ -1,6 +1,7 @@
 import { NOTIFICATION_TYPES } from "../constants/notificationConstants.js";
 import { NOTIFICATION_CODES } from "../constants/notificationCatalog.js";
 import { prisma } from "../config/db.js";
+import { naturalCompare } from "../utils/naturalCompare.js";
 import { HttpError } from "../utils/httpError.js";
 import { userPublicSelect } from "./meService.js";
 import { createForUsers } from "./notificationService.js";
@@ -119,7 +120,7 @@ export const getDuesByBuildingService = async (buildingId, managerId, filters = 
 
   const orderBy = paginated
     ? [{ createdAt: "desc" }, { id: "desc" }]
-    : [{ year: "desc" }, { month: "desc" }, { apartment: { number: "asc" } }];
+    : [{ year: "desc" }, { month: "desc" }];
 
   const dues = await prisma.due.findMany({
     where: whereClause,
@@ -138,7 +139,15 @@ export const getDuesByBuildingService = async (buildingId, managerId, filters = 
     take,
   });
 
-  const mapped = buildListResponse(filters, dues, mapDueRow);
+  const orderedDues = paginated
+    ? dues
+    : [...dues].sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year;
+        if (a.month !== b.month) return b.month - a.month;
+        return naturalCompare(a.apartment?.number, b.apartment?.number);
+      });
+
+  const mapped = buildListResponse(filters, orderedDues, mapDueRow);
   if (paginated) {
     const items = await attachBreakdownToDuesBatch(mapped.items, buildingId);
     return { ...mapped, items };

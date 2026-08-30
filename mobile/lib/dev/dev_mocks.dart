@@ -301,6 +301,13 @@ class MockAuthRepository implements AuthRepository {
     _sessionUser = _devResident;
     return _devResident;
   }
+
+  @override
+  Future<UserEntity> rejoinWithInviteCode(String inviteCode) async {
+    await Future.delayed(_delay);
+    _sessionUser = _devResident;
+    return _devResident;
+  }
 }
 
 /// Tur 5 §10/4-5 — `PUT /me/password` ve `DELETE /me` mock implementasyonu.

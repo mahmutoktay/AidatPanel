@@ -381,7 +381,10 @@ model Ticket {
   category       TicketCategory
   status         TicketStatus   @default(OPEN)
   attachmentPath String?        // → yanıtta attachmentUrl
+  needsReview    Boolean        @default(false)  // sessiz kelime filtresi
+  isReported     Boolean        @default(false)  // en az bir bildirim
   updates        TicketUpdate[]
+  reports        TicketReport[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 }
@@ -390,11 +393,45 @@ enum TicketCategory { COMPLAINT REQUEST MALFUNCTION OTHER }
 enum TicketStatus { OPEN IN_PROGRESS RESOLVED CLOSED }
 
 model TicketUpdate {
-  id        String   @id @default(uuid())
-  ticketId  String
-  message   String
-  fromRole  UserRole
-  createdAt DateTime @default(now())
+  id           String         @id @default(uuid())
+  ticketId     String
+  message      String
+  fromRole     UserRole
+  needsReview  Boolean        @default(false)
+  reports      TicketReport[]
+  createdAt    DateTime       @default(now())
+}
+
+model TicketReport {
+  id             String        @id @default(uuid())
+  ticketId       String
+  ticketUpdateId String?
+  reporterId     String
+  createdAt      DateTime      @default(now())
+  @@unique([ticketId, ticketUpdateId, reporterId])
+}
+
+model TicketCreationRestriction {
+  id         String    @id @default(uuid())
+  userId     String
+  buildingId String
+  managerId  String
+  reason     String
+  expiresAt  DateTime
+  liftedAt   DateTime?
+  liftedById String?
+  createdAt  DateTime  @default(now())
+}
+
+model TicketRestrictionAuditLog {
+  id         String    @id @default(uuid())
+  userId     String
+  managerId  String?
+  buildingId String
+  action     String    // RESTRICT | LIFT_MANUAL | EXPIRED
+  reason     String?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
 }
 
 model Notification {
@@ -583,6 +620,7 @@ POST   /api/v1/auth/otp/send          # e-posta OTP (manager_*); sakin telefon �
 POST   /api/v1/auth/otp/verify        # e-posta OTP; sakin telefon → 410
 POST   /api/v1/auth/firebase-phone    # sakin: idToken + purpose (resident_login|resident_join|resident_phone_change)
 POST   /api/v1/auth/otp/complete-resident-join  # phone + name + inviteCode (Firebase doğrulama sonrası)
+POST   /api/v1/auth/rejoin                      # Bearer — daire bağlantısı olmayan sakin + inviteCode
 POST   /api/v1/auth/forgot-password
 POST   /api/v1/auth/reset-password
 ```
@@ -698,14 +736,34 @@ Gider → aidat: `targetMonth/Year`, `perUnitAmount`, `DueExpenseCarryforward` (
 
 ### Tickets
 ```
-GET    /api/v1/buildings/:id/tickets
+GET    /api/v1/buildings/:id/tickets          # ?moderation=reported|needsReview
 GET    /api/v1/tickets/:id
 POST   /api/v1/apartments/:apartmentId/tickets
 POST   /api/v1/tickets/:id/attachment       # JPG/PNG, max 5MB — sakin, OPEN
 POST   /api/v1/tickets/:id/updates
+POST   /api/v1/tickets/:id/report           # body: { ticketUpdateId? }
 PATCH  /api/v1/tickets/:id/status
 GET    /api/v1/me/tickets
+GET    /api/v1/me/ticket-restriction        # sakin — aktif kısıt
+POST   /api/v1/apartments/:apartmentId/ticket-restriction   # MANAGER, body: { ticketId, note? } — süre sabit 3 gün
+DELETE /api/v1/apartments/:apartmentId/ticket-restriction   # MANAGER — erken kaldır
+GET    /api/v1/apartments/:apartmentId/ticket-restriction   # MANAGER
 ```
+
+**Ticket yanıt alanları:** `needsReview`, `isReported` (boolean).
+
+**Kelime filtresi:** `backend/src/constants/ticketContentFilter.words.js` — oluşturma sırasında eşleşen içerik **reddedilir** (400); yönetici güncellemelerinde `needsReview=true` sessizce set edilir.
+
+**Bildirme kuralları:** Sakin kendi talebini veya kendi güncellemesini bildiremez; yönetici sadece sakin içeriğini bildirebilir (talep veya timeline güncellemesi).
+
+**Kısıtlama gerekçesi:** `ticketId` zorunlu; gerekçe metni seçilen talepten otomatik alıntılanır, isteğe bağlı `note` eklenebilir.
+
+**Admin (cross-tenant):**
+```
+GET /api/v1/admin/tickets/summary
+GET /api/v1/admin/tickets?moderation=reported|needsReview&page=&limit=
+```
+Admin panel: `/ops/tickets`
 
 **TicketStatus geçişleri** (yalnızca MANAGER):
 
@@ -895,7 +953,10 @@ mobile/lib/
 3. Sakin → telefon → OTP (resident_join | resident_login)
 4. Yeni sakin → isim + davet kodu (linkten geldiyse kod sorulmaz)
 5. complete-resident-join → JWT → sakin dashboard
+6. Çıkarılmış sakin (apartmentId=null, oturum açık) → ana sayfa «Binaya Katıl» → `POST /auth/rejoin` + inviteCode
 ```
+
+**Rejoin:** Bearer zorunlu; yalnızca `apartmentId=null` olan `RESIDENT`. Body: `{ inviteCode }`. Yanıt: `{ user }` (JWT yenilenmez).
 
 ---
 

@@ -6,6 +6,7 @@ import {
   logoutService,
   logoutAllDevicesService,
   checkIdentifierService,
+  rejoinWithInviteCodeService,
 } from "../services/authService.js";
 import {
   sendOtpService,
@@ -167,6 +168,15 @@ export const validateInvite = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "Davet kodu geçerli.",
+    data,
+  });
+});
+
+export const rejoinWithInvite = asyncHandler(async (req, res) => {
+  const data = await rejoinWithInviteCodeService(req.user.id, req.body.inviteCode);
+  res.status(200).json({
+    success: true,
+    message: "Binaya başarıyla katıldınız.",
     data,
   });
 });

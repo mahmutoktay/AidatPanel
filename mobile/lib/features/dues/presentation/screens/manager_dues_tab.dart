@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/natural_string_compare.dart';
 import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/providers/navigation_provider.dart';
@@ -110,22 +111,7 @@ class _ManagerDuesTabState extends ConsumerState<ManagerDuesTab> {
       if (a.month != b.month) {
         return b.month.compareTo(a.month);
       }
-      
-      final regExp = RegExp(r'^(\d+)(.*)$');
-      final matchA = regExp.firstMatch(a.apartmentNumber.trim());
-      final matchB = regExp.firstMatch(b.apartmentNumber.trim());
-
-      if (matchA != null && matchB != null) {
-        final numA = int.tryParse(matchA.group(1)!) ?? 0;
-        final numB = int.tryParse(matchB.group(1)!) ?? 0;
-        if (numA != numB) {
-          return numA.compareTo(numB);
-        }
-        final restA = matchA.group(2) ?? '';
-        final restB = matchB.group(2) ?? '';
-        return restA.compareTo(restB);
-      }
-      return a.apartmentNumber.compareTo(b.apartmentNumber);
+      return compareNaturalStrings(a.apartmentNumber, b.apartmentNumber);
     });
 
     final isLoading = duesState.isLoading;

@@ -1,5 +1,6 @@
 import { prisma } from "../config/db.js";
 import { HttpError } from "../utils/httpError.js";
+import { sortByNatural } from "../utils/naturalCompare.js";
 import { userPublicSelect } from "./meService.js";
 import {
   resolveListTake,
@@ -48,7 +49,11 @@ export const getApartmentsService = async (buildingId, managerId, filters = {}) 
     take,
   });
 
-  return buildListResponse(filters, apartments, (apt) => apt);
+  const sorted = paginated
+    ? apartments
+    : sortByNatural(apartments, (apt) => apt.number);
+
+  return buildListResponse(filters, sorted, (apt) => apt);
 };
 
 /**

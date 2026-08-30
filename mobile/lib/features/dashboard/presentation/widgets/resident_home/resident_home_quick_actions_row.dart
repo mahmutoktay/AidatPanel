@@ -10,12 +10,24 @@ import '../../../../../l10n/strings.g.dart';
 class ResidentHomeQuickActionsRow extends StatelessWidget {
   const ResidentHomeQuickActionsRow({
     super.key,
+    required this.hasApartment,
+    required this.onJoinBuilding,
     required this.onGoToDuesTab,
     required this.onGoToIssuesTab,
   });
 
+  final bool hasApartment;
+  final VoidCallback onJoinBuilding;
   final VoidCallback onGoToDuesTab;
   final VoidCallback onGoToIssuesTab;
+
+  void _guardApartment(VoidCallback action) {
+    if (hasApartment) {
+      action();
+      return;
+    }
+    onJoinBuilding();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,28 +41,32 @@ class ResidentHomeQuickActionsRow extends StatelessWidget {
         label: common.duesStatus,
         iconBg: AppColors.infoBg,
         iconColor: AppColors.chartBlue,
-        onTap: onGoToDuesTab,
+        onTap: () => _guardApartment(onGoToDuesTab),
       ),
       _QuickActionSpec(
         icon: Icons.support_agent_outlined,
         label: ticketsT.myTickets,
         iconBg: AppColors.expenseAccentBg,
         iconColor: AppColors.expenseAccent,
-        onTap: onGoToIssuesTab,
+        onTap: () => _guardApartment(onGoToIssuesTab),
       ),
       _QuickActionSpec(
         icon: Icons.receipt_long_outlined,
         label: expensesT.quickActionLabel,
         iconBg: AppColors.warningBg,
         iconColor: AppColors.chartYellow,
-        onTap: () => context.push('/resident-dashboard/expenses'),
+        onTap: () => _guardApartment(
+          () => context.push('/resident-dashboard/expenses'),
+        ),
       ),
       _QuickActionSpec(
         icon: Icons.campaign_outlined,
         label: common.announcements,
         iconBg: AppColors.successBg,
         iconColor: AppColors.chartGreen,
-        onTap: () => context.push('/resident-dashboard/announcements'),
+        onTap: () => _guardApartment(
+          () => context.push('/resident-dashboard/announcements'),
+        ),
       ),
     ];
 

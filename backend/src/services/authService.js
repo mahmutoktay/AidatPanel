@@ -570,3 +570,60 @@ export async function logoutAllDevicesService(userId, currentSessionId) {
 
   return tokens;
 }
+
+/**
+ * Oturum açık sakin — daireden çıkarıldıktan sonra davet kodu ile yeni daireye bağlanır.
+ * POST /auth/rejoin (Bearer)
+ */
+export async function rejoinWithInviteCodeService(userId, inviteCode) {
+  const user = await prisma.user.findFirst({
+    where: { id: userId, deletedAt: null, role: "RESIDENT" },
+  });
+
+  if (!user) {
+    throw new HttpError(401, "Kullanıcı bulunamadı.");
+  }
+
+  if (user.apartmentId) {
+    throw new HttpError(409, "Zaten bir daireye bağlısınız.");
+  }
+
+  let inviteCodeData;
+  try {
+    inviteCodeData = await validateInviteCode(inviteCode);
+  } catch {
+    throw new HttpError(400, "Davet kodu geçersiz veya süresi dolmuş.");
+  }
+
+  const occupied = await prisma.user.findFirst({
+    where: {
+      apartmentId: inviteCodeData.apartmentId,
+      deletedAt: null,
+      role: "RESIDENT",
+    },
+    select: { id: true },
+  });
+
+  if (occupied) {
+    throw new HttpError(409, "Bu dairede zaten bir sakin kayıtlı.");
+  }
+
+  const updated = await prisma.$transaction(async (tx) => {
+    await tx.inviteCode.update({
+      where: { id: inviteCodeData.id },
+      data: {
+        usedAt: new Date(),
+        usedBy: userId,
+      },
+    });
+
+    return tx.user.update({
+      where: { id: userId },
+      data: { apartmentId: inviteCodeData.apartmentId },
+    });
+  });
+
+  await ensureApartmentDuesService(updated.apartmentId);
+
+  return { user: authUserPayload(updated) };
+}

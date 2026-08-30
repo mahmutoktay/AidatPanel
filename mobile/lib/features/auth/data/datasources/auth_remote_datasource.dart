@@ -10,6 +10,7 @@ import '../models/register_request.dart';
 import '../models/register_response.dart';
 import '../models/join_request.dart';
 import '../models/join_response.dart';
+import '../models/user_data.dart';
 
 abstract class AuthRemoteDataSource {
   Future<LoginResponse> login(LoginRequest request);
@@ -98,6 +99,9 @@ abstract class AuthRemoteDataSource {
     required String name,
     required String inviteCode,
   });
+
+  /// Oturum açık, daire bağlantısı olmayan sakin yeni daireye katılır.
+  Future<UserData> rejoinWithInviteCode(String inviteCode);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -381,5 +385,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       },
     );
     return LoginResponse.fromJson(response.data['data'] as Map<String, dynamic>);
+  }
+
+  @override
+  Future<UserData> rejoinWithInviteCode(String inviteCode) async {
+    final response = await _dioClient.post(
+      ApiConstants.authRejoin,
+      data: {'inviteCode': inviteCode},
+    );
+    final data = response.data['data'] as Map<String, dynamic>;
+    final userJson = data['user'] as Map<String, dynamic>;
+    return UserData.fromJson(userJson);
   }
 }

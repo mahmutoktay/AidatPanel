@@ -67,6 +67,7 @@ class ApiConstants {
   static const String otpCompleteResidentJoin =
       '$apiVersion/auth/otp/complete-resident-join';
   static const String inviteValidate = '$apiVersion/auth/invite/validate';
+  static const String authRejoin = '$apiVersion/auth/rejoin';
   static const String forgotPassword = '$apiVersion/auth/forgot-password';
   static const String resetPassword = '$apiVersion/auth/reset-password';
 
@@ -165,7 +166,13 @@ class ApiConstants {
       '$apiVersion/tickets/$ticketId/status';
   static String ticketAttachment(String ticketId) =>
       '$apiVersion/tickets/$ticketId/attachment';
+  static String ticketReport(String ticketId) =>
+      '$apiVersion/tickets/$ticketId/report';
   static const String myTickets = '$apiVersion/me/tickets';
+  static const String myTicketRestriction =
+      '$apiVersion/me/ticket-restriction';
+  static String apartmentTicketRestriction(String apartmentId) =>
+      '$apiVersion/apartments/$apartmentId/ticket-restriction';
 
   // Notifications endpoints
   static const String notifications = '$apiVersion/notifications';

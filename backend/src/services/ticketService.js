@@ -15,6 +15,8 @@ import {
   buildListResponse,
   mergeCreatedAtCursorWhere,
 } from "../utils/listQuery.js";
+import { matchesContentFilterCombined } from "../constants/ticketContentFilter.js";
+import { assertCanCreateTicket } from "./ticketModerationService.js";
 import fs from "fs/promises";
 import path from "path";
 import sharp from "sharp";
@@ -121,6 +123,8 @@ function buildTicketWhere(filters) {
   const where = {};
   if (filters.status) where.status = filters.status;
   if (filters.category) where.category = filters.category;
+  if (filters.moderation === "reported") where.isReported = true;
+  if (filters.moderation === "needsReview") where.needsReview = true;
   return where;
 }
 
@@ -221,6 +225,14 @@ export async function getTicketByIdService(ticketId, user) {
 
 export async function createTicketService(apartmentId, userId, { title, description, category }) {
   await assertResidentOwnsApartment(apartmentId, userId);
+  await assertCanCreateTicket(userId);
+
+  if (matchesContentFilterCombined(title, description)) {
+    throw new HttpError(
+      400,
+      "Mesajınız uygunsuz ifadeler içeriyor. Lütfen düzenleyip tekrar deneyin."
+    );
+  }
 
   const ticket = await prisma.ticket.create({
     data: {
@@ -230,6 +242,7 @@ export async function createTicketService(apartmentId, userId, { title, descript
       description,
       category,
       status: "OPEN",
+      needsReview: false,
     },
     include: ticketIncludeList,
   });
@@ -261,17 +274,25 @@ export async function addTicketUpdateService(ticketId, managerId, message) {
     throw new HttpError(409, "Kapalı veya sonuçlanmış talebe not eklenemez.");
   }
 
+  const updateNeedsReview = matchesContentFilterCombined(message);
+
+  const updateData = {
+    updates: {
+      create: {
+        message,
+        fromRole: "MANAGER",
+        needsReview: updateNeedsReview,
+      },
+    },
+    updatedAt: new Date(),
+  };
+  if (updateNeedsReview) {
+    updateData.needsReview = true;
+  }
+
   await prisma.ticket.update({
     where: { id: ticketId },
-    data: {
-      updates: {
-        create: {
-          message,
-          fromRole: "MANAGER",
-        },
-      },
-      updatedAt: new Date(),
-    },
+    data: updateData,
   });
 
   const preview =

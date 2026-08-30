@@ -21,7 +21,9 @@ import '../../../../shared/widgets/toast_overlay.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/tickets_provider.dart';
+import '../providers/ticket_restriction_provider.dart';
 import '../utils/ticket_form_helpers.dart';
+import '../widgets/ticket_restriction_banner.dart';
 
 class CreateTicketScreen extends ConsumerStatefulWidget {
   const CreateTicketScreen({super.key});
@@ -84,6 +86,15 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
   @override
   Widget build(BuildContext context) {
     final t = context.t.features.tickets;
+    final restrictionAsync = ref.watch(myTicketRestrictionProvider);
+    final isRestricted = restrictionAsync.maybeWhen(
+      data: (status) => status.active,
+      orElse: () => false,
+    );
+    final restriction = restrictionAsync.maybeWhen(
+      data: (status) => status.restriction,
+      orElse: () => null,
+    );
 
     return DashboardSecondaryScaffold(
       title: t.newTicket,
@@ -105,6 +116,8 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
                 bottom: AppSizes.spacingXL,
               ),
               children: [
+                if (restriction != null)
+                  TicketRestrictionBanner(restriction: restriction),
                 MinimalTextField(
                   controller: _descriptionController,
                   label: t.fieldDescription,
@@ -114,7 +127,7 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
                   maxLines: 6,
                   maxLength: 2000,
                   textCapitalization: TextCapitalization.sentences,
-                  enabled: !_submitting,
+                  enabled: !_submitting && !isRestricted,
                   validator: (v) {
                     final raw = v?.trim() ?? '';
                     if (raw.isEmpty) return context.t.common.fieldRequired;
@@ -132,7 +145,7 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
                 ),
                 FormStepActions(
                   primaryLabel: t.createTitle,
-                  onPrimary: _submitting ? null : _submit,
+                  onPrimary: (_submitting || isRestricted) ? null : _submit,
                   isLoading: _submitting,
                 ),
               ],
@@ -199,11 +212,11 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
     }
   }
 
-  String _createErrorMessage(String? errorKey) {
+  String _createErrorMessage(String? message) {
     final t = context.t.features.tickets;
-    if (errorKey == null || errorKey.isEmpty) return t.createFailed;
-    if (errorKey == 'service_unavailable') return t.createServiceUnavailable;
-    return t.createFailed;
+    if (message == null || message.isEmpty) return t.createFailed;
+    if (message == 'service_unavailable') return t.createServiceUnavailable;
+    return message;
   }
 }
 

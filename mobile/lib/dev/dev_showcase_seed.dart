@@ -2,6 +2,7 @@
 /// UI string değil; yalnızca in-memory repository seed’i.
 library;
 
+import '../core/utils/natural_string_compare.dart';
 import '../features/apartments/domain/entities/apartment_entity.dart';
 import '../features/apartments/domain/entities/resident_info.dart';
 import '../features/buildings/domain/entities/building_entity.dart';
@@ -407,7 +408,7 @@ List<DueTransactionEntity> buildShowcaseTransactions(String buildingId) {
             (d.status == DueStatus.paid || d.status == DueStatus.overdue),
       )
       .toList()
-    ..sort((a, b) => a.apartmentNumber.compareTo(b.apartmentNumber));
+    ..sort((a, b) => compareNaturalStrings(a.apartmentNumber, b.apartmentNumber));
 
   final txs = <DueTransactionEntity>[];
   for (var i = 0; i < thisMonth.length; i++) {

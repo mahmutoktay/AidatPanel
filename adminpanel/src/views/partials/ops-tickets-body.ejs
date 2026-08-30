@@ -1,0 +1,56 @@
+<%- include('flash') %>
+<%- include('page-header', { title: 'Talep Moderasyonu', description: 'Bildirilen ve incelemesi gereken talepler — salt okunur kuyruk.' }) %>
+
+<div class="filter-panel mb-6" x-data="{ open: false }" :class="{ 'is-open': open }">
+  <button type="button" class="filter-panel__toggle mobile-only" @click="open = !open"><span>Filtreler</span><span>▼</span></button>
+  <form class="filter-panel__body" method="get" action="/ops/tickets">
+    <div class="form-group" style="margin:0;min-width:200px">
+      <label for="moderation">Etiket</label>
+      <select class="form-control" id="moderation" name="moderation">
+        <option value="">Tümü</option>
+        <option value="reported" <%= filters.moderation === 'reported' ? 'selected' : '' %>>Bildirilen</option>
+        <option value="needsReview" <%= filters.moderation === 'needsReview' ? 'selected' : '' %>>İncelemesi gereken</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn--primary">Filtrele</button>
+  </form>
+</div>
+
+<div class="insight-grid mb-6">
+  <div class="insight-card">
+    <div class="insight-card__label">Bildirilen</div>
+    <div class="insight-card__value"><%= summary.reportedCount ?? 0 %></div>
+  </div>
+  <div class="insight-card">
+    <div class="insight-card__label">İncelemesi gereken</div>
+    <div class="insight-card__value"><%= summary.needsReviewCount ?? 0 %></div>
+  </div>
+</div>
+
+<% if (!tickets.length) { %>
+<div class="card"><div class="empty-state"><p class="empty-state__title">Talep kaydı yok</p></div></div>
+<% } else { %>
+<div class="data-row-list">
+  <% tickets.forEach(t => { %>
+  <div class="data-row" style="cursor:default">
+    <div class="data-row__avatar"><%- include('icon', { name: 'ticket' }) %></div>
+    <div class="data-row__body">
+      <p class="data-row__title"><%= t.title || '—' %></p>
+      <p class="data-row__meta">
+        <%= t.buildingName || '—' %>
+        <% if (t.apartmentNumber) { %> · Daire <%= t.apartmentNumber %><% } %>
+        <% if (t.residentName) { %> · <%= t.residentName %><% } %>
+        · <%= new Date(t.createdAt).toLocaleDateString('tr-TR') %>
+      </p>
+    </div>
+    <div class="data-row__end" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+      <span class="badge badge--muted"><%= t.status %></span>
+      <% if (t.isReported) { %><span class="badge badge--warning">Bildirilen</span><% } %>
+      <% if (t.needsReview) { %><span class="badge badge--warning">İncelemesi gereken</span><% } %>
+    </div>
+  </div>
+  <% }) %>
+</div>
+<% } %>
+
+<%- include('./pagination', { pagination, basePath: '/ops/tickets', query: filters }) %>

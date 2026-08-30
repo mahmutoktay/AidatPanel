@@ -2,7 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireRoles } from "../middlewares/roleMiddleware.js";
-import { validate, ticketSchemas } from "../middlewares/validate.js";
+import { validate, ticketSchemas, moderationSchemas } from "../middlewares/validate.js";
 import { logger } from "../config/logger.js";
 import {
   getTicketById,
@@ -10,6 +10,7 @@ import {
   patchTicketStatus,
   uploadTicketAttachment,
 } from "../controllers/ticketController.js";
+import { reportTicket } from "../controllers/ticketModerationController.js";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -62,6 +63,12 @@ router.patch(
   requireRoles("MANAGER"),
   validate(ticketSchemas.updateStatus),
   patchTicketStatus
+);
+
+router.post(
+  "/:ticketId/report",
+  validate(moderationSchemas.reportTicket),
+  reportTicket
 );
 
 export default router;

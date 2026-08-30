@@ -26,6 +26,10 @@ import {
   getDashboardKpisService,
 } from "../services/admin/adminReportService.js";
 import {
+  getTicketModerationSummaryService,
+  listAdminTicketsService,
+} from "../services/admin/adminTicketService.js";
+import {
   getActiveUsersAnalytics,
   listAdminNotificationsService,
   markNotificationReadService,
@@ -169,6 +173,16 @@ export const dekontSummary = asyncHandler(async (req, res) => {
 
 export const listDekonts = asyncHandler(async (req, res) => {
   const data = await listAdminDekontsService(req.query);
+  res.json({ success: true, data });
+});
+
+export const ticketSummary = asyncHandler(async (req, res) => {
+  const data = await getTicketModerationSummaryService();
+  res.json({ success: true, data });
+});
+
+export const listTickets = asyncHandler(async (req, res) => {
+  const data = await listAdminTicketsService(req.query);
   res.json({ success: true, data });
 });
 

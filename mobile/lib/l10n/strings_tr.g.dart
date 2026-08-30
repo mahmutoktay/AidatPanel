@@ -609,6 +609,8 @@ class _Translations$common$api$tr implements Translations$common$api$en {
 	@override String get dueNotFound => 'Aidat kaydı bulunamadı.';
 	@override String get dekontNotFound => 'Dekont bulunamadı.';
 	@override String get noApartmentForPayment => 'Ödeme bilgisi için önce bir daireye atanmanız gerekir.';
+	@override String get alreadyLinkedToApartment => 'Zaten bir daireye bağlısınız.';
+	@override String get apartmentAlreadyOccupied => 'Bu dairede zaten bir sakin kayıtlı.';
 }
 
 // Path: common.documentPreview
@@ -672,6 +674,7 @@ class _Translations$common$errorKeys$tr implements Translations$common$errorKeys
 	@override String get apartmentUpdateFailed => 'Daire güncellenemedi. Tekrar deneyin.';
 	@override String get apartmentDeleteFailed => 'Daire silinemedi. Tekrar deneyin.';
 	@override String get residentRemoveFailed => 'Sakin çıkarılamadı. Tekrar deneyin.';
+	@override String get rejoinFailed => 'Binaya katılım tamamlanamadı. Tekrar deneyin.';
 	@override String get buildingDuesFetchFailed => 'Aidat listesi alınamadı. Tekrar deneyin.';
 	@override String get dueTransactionsFetchFailed => 'Aidat işlem geçmişi alınamadı. Tekrar deneyin.';
 	@override String get myDuesFetchFailed => 'Aidatlarınız alınamadı. Tekrar deneyin.';
@@ -955,6 +958,7 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	@override String get submit => 'Gönder';
 	@override String get createSuccess => 'Talebiniz alındı';
 	@override String get createFailed => 'Talep kaydedilemedi. Tekrar deneyin.';
+	@override String get inappropriateContentBlocked => 'Mesajınız uygunsuz ifadeler içeriyor. Lütfen düzenleyip tekrar deneyin.';
 	@override String get createServiceUnavailable => 'Talep servisi şu an hazır değil. Lütfen daha sonra tekrar deneyin.';
 	@override String get emptyTitle => 'Henüz talep yok';
 	@override String get emptySubtitle => 'Talebinizi buradan oluşturabilirsiniz';
@@ -1016,6 +1020,33 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	@override String get templateAppointmentSetText => 'Daire sakini ile görüşüldü, randevu ayarlandı.';
 	@override String get templateResolvedCheck => 'Çözüldü / kontrol';
 	@override String get templateResolvedCheckText => 'Sorun giderildi, kontrol sağlandı.';
+	@override String get reportInappropriate => 'Uygunsuz içerik bildir';
+	@override String get reportSuccess => 'Bildiriminiz alındı';
+	@override String get reportOwnContentBlocked => 'Kendi içeriğinizi bildiremezsiniz';
+	@override String get badgeReported => 'Bildirilen';
+	@override String get badgeNeedsReview => 'İncelemesi gereken';
+	@override String get moderationFilterAll => 'Tümü';
+	@override String get moderationFilterReported => 'Bildirilen';
+	@override String get moderationFilterNeedsReview => 'İncelemesi gereken';
+	@override String get restrictionSheetTitle => 'Talep gönderimini kısıtla';
+	@override String get restrictionSheetSubtitle => 'Sakin yeni talep oluşturamaz; geçmiş talepler görünür kalır.';
+	@override String get restrictionSelectTicket => 'Gerekçe için bir talep seçin';
+	@override String get restrictionTicketRequired => 'Lütfen gerekçe için bir talep seçin';
+	@override String get restrictionNoTickets => 'Bu sakin için seçilebilecek talep bulunamadı.';
+	@override String get restrictionNoteLabel => 'Ek not (isteğe bağlı)';
+	@override String get restrictionNoteHint => 'İsterseniz kısa bir not ekleyin';
+	@override String get restrictionReasonTooShort => 'Gerekçe en az 3 karakter olmalıdır';
+	@override String get restrictionApplyAction => 'Kısıtla';
+	@override String get restrictionManageAction => 'Kısıtlama';
+	@override String get restrictionLiftAction => 'Kısıtlamayı kaldır';
+	@override String get restrictionApplied => 'Talep gönderimi kısıtlandı';
+	@override String get restrictionLifted => 'Kısıtlama kaldırıldı';
+	@override String get restrictionActiveTitle => 'Aktif kısıt';
+	@override String get restrictionQuotedTicket => 'Alıntılanan talep';
+	@override String get restrictionManagerNote => 'Yönetici notu';
+	@override String get restrictionEndsAt => 'Bitiş: {expiresAt}';
+	@override String get restrictionBannerIntro => 'Yeni talep gönderiminiz geçici olarak kısıtlandı.';
+	@override String get restrictionBannerBody => 'Yeni talep gönderiminiz geçici olarak kısıtlandı. Gerekçe: {reason}. Bitiş: {expiresAt}.';
 }
 
 // Path: features.dekont
@@ -1571,6 +1602,14 @@ class _Translations$features$dashboard$tr implements Translations$features$dashb
 	@override String get residentOverduePaymentsBadge => '{count} aidatınız gecikmiş';
 	@override String get featuredDuePeriod => '{month} {year} aidatı';
 	@override String get residentFeaturedDuePeriod => '{month} {year} aidatınız';
+	@override String get noBuildingTitle => 'Şu an bir binada değilsiniz';
+	@override String get noBuildingBody => 'Yöneticinizin davet kodunu veya paylaşım linkini kullanarak yeni binanıza katılabilirsiniz.';
+	@override String get joinBuildingCta => 'Binaya Katıl';
+	@override String get rejoinSheetTitle => 'Yeni Binaya Katıl';
+	@override String get rejoinSheetSubtitle => 'Yöneticinizin verdiği davet kodunu girin';
+	@override String get rejoinBuildingLabel => 'Katılacağınız yer';
+	@override String get rejoinSuccess => 'Binaya başarıyla katıldınız';
+	@override String get rejoinFailed => 'Binaya katılım tamamlanamadı';
 	@override String get residentDebtAndPaySubtitle => 'Aidat borcunuzu buradan görüntüleyip ödeyebilirsiniz.';
 	@override String get duesStatusAction => 'Aidat Durumu';
 	@override String get overdueDuesBadge => '{count} gecikmiş aidat';
@@ -2162,6 +2201,8 @@ extension on TranslationsTr {
 			'common.api.dueNotFound' => 'Aidat kaydı bulunamadı.',
 			'common.api.dekontNotFound' => 'Dekont bulunamadı.',
 			'common.api.noApartmentForPayment' => 'Ödeme bilgisi için önce bir daireye atanmanız gerekir.',
+			'common.api.alreadyLinkedToApartment' => 'Zaten bir daireye bağlısınız.',
+			'common.api.apartmentAlreadyOccupied' => 'Bu dairede zaten bir sakin kayıtlı.',
 			'common.rateLimitHint' => 'Sunucu şu an yoğun görünüyor. Kısa süre sonra yeniden denenecek.',
 			'common.tryAgain' => 'Tekrar Dene',
 			'common.documentPreview.title' => 'Belge görüntüle',
@@ -2536,6 +2577,7 @@ extension on TranslationsTr {
 			'common.errorKeys.apartmentUpdateFailed' => 'Daire güncellenemedi. Tekrar deneyin.',
 			'common.errorKeys.apartmentDeleteFailed' => 'Daire silinemedi. Tekrar deneyin.',
 			'common.errorKeys.residentRemoveFailed' => 'Sakin çıkarılamadı. Tekrar deneyin.',
+			'common.errorKeys.rejoinFailed' => 'Binaya katılım tamamlanamadı. Tekrar deneyin.',
 			'common.errorKeys.buildingDuesFetchFailed' => 'Aidat listesi alınamadı. Tekrar deneyin.',
 			'common.errorKeys.dueTransactionsFetchFailed' => 'Aidat işlem geçmişi alınamadı. Tekrar deneyin.',
 			'common.errorKeys.myDuesFetchFailed' => 'Aidatlarınız alınamadı. Tekrar deneyin.',
@@ -2572,11 +2614,11 @@ extension on TranslationsTr {
 			'common.errorKeys.siteBuildingsFetchFailed' => 'Bloklar yüklenemedi. Tekrar deneyin.',
 			'common.errorKeys.siteCreateFailed' => 'Site eklenemedi. Tekrar deneyin.',
 			'common.errorKeys.siteUpdateFailed' => 'Site güncellenemedi. Tekrar deneyin.',
+			_ => null,
+		} ?? switch (path) {
 			'common.errorKeys.siteCollectionUpdateFailed' => 'Site tahsilat bilgileri güncellenemedi. Tekrar deneyin.',
 			'common.errorKeys.siteDeleteFailed' => 'Site silinemedi. Tekrar deneyin.',
 			'common.errorKeys.siteBuildingCreateFailed' => 'Blok eklenemedi. Tekrar deneyin.',
-			_ => null,
-		} ?? switch (path) {
 			'common.errorKeys.siteExpensesFetchFailed' => 'Site giderleri yüklenemedi. Tekrar deneyin.',
 			'common.errorKeys.siteExpenseSummaryFetchFailed' => 'Site gider özeti yüklenemedi. Tekrar deneyin.',
 			'common.errorKeys.siteExpenseCreateFailed' => 'Site gideri eklenemedi. Tekrar deneyin.',
@@ -2989,6 +3031,7 @@ extension on TranslationsTr {
 			'features.tickets.submit' => 'Gönder',
 			'features.tickets.createSuccess' => 'Talebiniz alındı',
 			'features.tickets.createFailed' => 'Talep kaydedilemedi. Tekrar deneyin.',
+			'features.tickets.inappropriateContentBlocked' => 'Mesajınız uygunsuz ifadeler içeriyor. Lütfen düzenleyip tekrar deneyin.',
 			'features.tickets.createServiceUnavailable' => 'Talep servisi şu an hazır değil. Lütfen daha sonra tekrar deneyin.',
 			'features.tickets.emptyTitle' => 'Henüz talep yok',
 			'features.tickets.emptySubtitle' => 'Talebinizi buradan oluşturabilirsiniz',
@@ -3050,6 +3093,33 @@ extension on TranslationsTr {
 			'features.tickets.templateAppointmentSetText' => 'Daire sakini ile görüşüldü, randevu ayarlandı.',
 			'features.tickets.templateResolvedCheck' => 'Çözüldü / kontrol',
 			'features.tickets.templateResolvedCheckText' => 'Sorun giderildi, kontrol sağlandı.',
+			'features.tickets.reportInappropriate' => 'Uygunsuz içerik bildir',
+			'features.tickets.reportSuccess' => 'Bildiriminiz alındı',
+			'features.tickets.reportOwnContentBlocked' => 'Kendi içeriğinizi bildiremezsiniz',
+			'features.tickets.badgeReported' => 'Bildirilen',
+			'features.tickets.badgeNeedsReview' => 'İncelemesi gereken',
+			'features.tickets.moderationFilterAll' => 'Tümü',
+			'features.tickets.moderationFilterReported' => 'Bildirilen',
+			'features.tickets.moderationFilterNeedsReview' => 'İncelemesi gereken',
+			'features.tickets.restrictionSheetTitle' => 'Talep gönderimini kısıtla',
+			'features.tickets.restrictionSheetSubtitle' => 'Sakin yeni talep oluşturamaz; geçmiş talepler görünür kalır.',
+			'features.tickets.restrictionSelectTicket' => 'Gerekçe için bir talep seçin',
+			'features.tickets.restrictionTicketRequired' => 'Lütfen gerekçe için bir talep seçin',
+			'features.tickets.restrictionNoTickets' => 'Bu sakin için seçilebilecek talep bulunamadı.',
+			'features.tickets.restrictionNoteLabel' => 'Ek not (isteğe bağlı)',
+			'features.tickets.restrictionNoteHint' => 'İsterseniz kısa bir not ekleyin',
+			'features.tickets.restrictionReasonTooShort' => 'Gerekçe en az 3 karakter olmalıdır',
+			'features.tickets.restrictionApplyAction' => 'Kısıtla',
+			'features.tickets.restrictionManageAction' => 'Kısıtlama',
+			'features.tickets.restrictionLiftAction' => 'Kısıtlamayı kaldır',
+			'features.tickets.restrictionApplied' => 'Talep gönderimi kısıtlandı',
+			'features.tickets.restrictionLifted' => 'Kısıtlama kaldırıldı',
+			'features.tickets.restrictionActiveTitle' => 'Aktif kısıt',
+			'features.tickets.restrictionQuotedTicket' => 'Alıntılanan talep',
+			'features.tickets.restrictionManagerNote' => 'Yönetici notu',
+			'features.tickets.restrictionEndsAt' => 'Bitiş: {expiresAt}',
+			'features.tickets.restrictionBannerIntro' => 'Yeni talep gönderiminiz geçici olarak kısıtlandı.',
+			'features.tickets.restrictionBannerBody' => 'Yeni talep gönderiminiz geçici olarak kısıtlandı. Gerekçe: {reason}. Bitiş: {expiresAt}.',
 			'features.dekont.makePaymentTitle' => 'Ödeme Yap',
 			'features.dekont.payDebtTitle' => 'Borcu Öde',
 			'features.dekont.paymentMethodTitle' => 'Ödeme Yöntemi',
@@ -3058,6 +3128,8 @@ extension on TranslationsTr {
 			'features.dekont.paymentMethodDekont' => 'Dekont Yükle',
 			'features.dekont.paymentCardComingSoon' => 'Kart ile ödeme yakında eklenecek.',
 			'features.dekont.uploadReceiptHint' => 'Dekont yükleyin (jpg, png, webp, PDF — en fazla 5 MB).',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.myDekontsTitle' => 'Dekontlarım',
 			'features.dekont.managerTitle' => 'Dekont İnceleme',
 			'features.dekont.reviewAction' => 'Dekont İncele',
@@ -3089,8 +3161,6 @@ extension on TranslationsTr {
 			'features.dekont.errorListLoad' => 'Dekont listesi yüklenemedi. Tekrar deneyin.',
 			'features.dekont.errorDetailLoad' => 'Dekont detayı yüklenemedi. Tekrar deneyin.',
 			'features.dekont.errorFileDownload' => 'Dekont dosyası açılamadı. Tekrar deneyin.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.errorReviewPaymentDone' => 'Bu dekont için ödeme zaten işlenmiş.',
 			'features.dekont.errorReviewRejected' => 'Reddedilmiş bir dekont tekrar onaylanamaz.',
 			'features.dekont.errorReviewNeedDue' => 'Onaylamak için bir aidat seçmelisiniz.',
@@ -3572,6 +3642,8 @@ extension on TranslationsTr {
 			'features.dashboard.remindSent' => 'Hatırlatma gönderildi',
 			'features.dashboard.remindAllSent' => '{count} sakine hatırlatma gönderildi.',
 			'features.dashboard.remindCooldown' => 'Bu aidat için son 24 saat içinde hatırlatma gönderildi.',
+			_ => null,
+		} ?? switch (path) {
 			'features.dashboard.remindNoRecipient' => 'Bu dairede hatırlatma gönderilecek sakin bulunamadı.',
 			'features.dashboard.apartmentTitle' => 'Daire {number}',
 			'features.dashboard.apartmentShortLabel' => 'D{number}',
@@ -3592,6 +3664,14 @@ extension on TranslationsTr {
 			'features.dashboard.residentOverduePaymentsBadge' => '{count} aidatınız gecikmiş',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} aidatı',
 			'features.dashboard.residentFeaturedDuePeriod' => '{month} {year} aidatınız',
+			'features.dashboard.noBuildingTitle' => 'Şu an bir binada değilsiniz',
+			'features.dashboard.noBuildingBody' => 'Yöneticinizin davet kodunu veya paylaşım linkini kullanarak yeni binanıza katılabilirsiniz.',
+			'features.dashboard.joinBuildingCta' => 'Binaya Katıl',
+			'features.dashboard.rejoinSheetTitle' => 'Yeni Binaya Katıl',
+			'features.dashboard.rejoinSheetSubtitle' => 'Yöneticinizin verdiği davet kodunu girin',
+			'features.dashboard.rejoinBuildingLabel' => 'Katılacağınız yer',
+			'features.dashboard.rejoinSuccess' => 'Binaya başarıyla katıldınız',
+			'features.dashboard.rejoinFailed' => 'Binaya katılım tamamlanamadı',
 			'features.dashboard.residentDebtAndPaySubtitle' => 'Aidat borcunuzu buradan görüntüleyip ödeyebilirsiniz.',
 			'features.dashboard.duesStatusAction' => 'Aidat Durumu',
 			'features.dashboard.overdueDuesBadge' => '{count} gecikmiş aidat',
@@ -3603,8 +3683,6 @@ extension on TranslationsTr {
 			'features.dashboard.activityHistory.title' => 'Son Hareketler',
 			'features.dashboard.activityHistory.rangeToday' => 'Bugün',
 			'features.dashboard.activityHistory.rangeThisWeek' => 'Bu Hafta',
-			_ => null,
-		} ?? switch (path) {
 			'features.dashboard.activityHistory.rangeThisMonth' => 'Bu Ay',
 			'features.dashboard.activityHistory.rangeThreeMonths' => '3 Ay',
 			'features.dashboard.activityHistory.rangeSixMonths' => '6 Ay',

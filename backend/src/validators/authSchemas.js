@@ -194,6 +194,15 @@ export const authSchemas = {
     }),
   },
 
+  rejoin: {
+    body: z.object({
+      inviteCode: z.preprocess(
+        (v) => (typeof v === "string" ? v.trim().toUpperCase().replace(/\s+/g, "") : v),
+        z.string().min(1, "Davet kodu gereklidir").max(20)
+      ),
+    }),
+  },
+
   firebasePhone: {
     body: z.object({
       idToken: z

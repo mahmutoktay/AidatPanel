@@ -16,6 +16,7 @@ import meRoutes from "./src/routes/meRoutes.js";
 import notificationRoutes from "./src/routes/notificationRoutes.js";
 import ticketRoutes from "./src/routes/ticketRoutes.js";
 import apartmentTicketRoutes from "./src/routes/apartmentTicketRoutes.js";
+import apartmentTicketRestrictionRoutes from "./src/routes/apartmentTicketRestrictionRoutes.js";
 import expenseRoutes from "./src/routes/expenseRoutes.js";
 import dekontRoutes from "./src/routes/dekontRoutes.js";
 import subscriptionRoutes from "./src/routes/subscriptionRoutes.js";
@@ -29,6 +30,7 @@ import { attachWebSocketServer } from "./src/realtime/wsGateway.js";
 import { ensureDekontStorageDirs } from "./src/utils/ensureDekontStorage.js";
 import { startDueAutoGenerateScheduler } from "./src/jobs/dueAutoGenerateJob.js";
 import { startAdminActivityScheduler } from "./src/jobs/adminActivityJob.js";
+import { startTicketRestrictionExpiryJob } from "./src/jobs/ticketRestrictionExpiryJob.js";
 
 const app = express();
 
@@ -79,6 +81,10 @@ app.get("/health", async (req, res) => {
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/tickets", ticketRoutes);
 app.use("/api/v1/apartments/:apartmentId/tickets", apartmentTicketRoutes);
+app.use(
+  "/api/v1/apartments/:apartmentId/ticket-restriction",
+  apartmentTicketRestrictionRoutes
+);
 app.use("/api/v1/expenses", expenseRoutes);
 app.use("/api/v1/dekonts", dekontRoutes);
 app.use("/api/v1/auth", authRouter);
@@ -127,6 +133,7 @@ async function bootstrap() {
   attachWebSocketServer(server);
   startDueAutoGenerateScheduler();
   startAdminActivityScheduler();
+  startTicketRestrictionExpiryJob();
 }
 
 bootstrap().catch((err) => {

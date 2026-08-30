@@ -17,6 +17,8 @@ import '../providers/apartment_dues_history_provider.dart';
 import '../utils/apartment_ui_utils.dart';
 import 'apartment_account_summary_list.dart';
 import 'apartment_details_bottom_toolbar.dart';
+import '../../../tickets/presentation/providers/ticket_restriction_provider.dart';
+import '../../../tickets/presentation/widgets/ticket_restriction_sheet.dart';
 
 class ApartmentDetailsSheet {
   static void _afterApartmentSheetClosed(
@@ -170,6 +172,7 @@ class _OccupiedApartmentSheet extends ConsumerWidget {
         apartmentId: apt.id,
       )),
     );
+    final restrictionAsync = ref.watch(apartmentTicketRestrictionProvider(apt.id));
 
     return PremiumBottomSheetScaffold(
       maxHeightFactor: 0.9,
@@ -233,21 +236,53 @@ class _OccupiedApartmentSheet extends ConsumerWidget {
           ),
         ],
       ),
-      actions: ApartmentDetailsBottomToolbar(
-        onEdit: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
-          pageContext,
-          context,
-          () => EditApartmentBottomSheet.show(
+      actions: restrictionAsync.when(
+        data: (restrictionStatus) => ApartmentDetailsBottomToolbar(
+          hasActiveTicketRestriction: restrictionStatus.active,
+          onEdit: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
             pageContext,
-            apartment: apt,
+            context,
+            () => EditApartmentBottomSheet.show(
+              pageContext,
+              apartment: apt,
+            ),
+          ),
+          onTicketRestriction: () => TicketRestrictionSheet.show(
+            pageContext,
+            ref,
+            apartmentId: apt.id,
+            buildingId: apt.buildingId,
+            initialStatus: restrictionStatus,
+          ),
+          onRemoveResident: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
+            pageContext,
+            context,
+            () => RemoveResidentDialog.show(
+              pageContext,
+              apartment: apt,
+            ),
           ),
         ),
-        onRemoveResident: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
-          pageContext,
-          context,
-          () => RemoveResidentDialog.show(
+        loading: () => ApartmentDetailsBottomToolbar(
+          onEdit: () {},
+          onRemoveResident: () {},
+        ),
+        error: (_, __) => ApartmentDetailsBottomToolbar(
+          onEdit: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
             pageContext,
-            apartment: apt,
+            context,
+            () => EditApartmentBottomSheet.show(
+              pageContext,
+              apartment: apt,
+            ),
+          ),
+          onRemoveResident: () => ApartmentDetailsSheet._afterApartmentSheetClosed(
+            pageContext,
+            context,
+            () => RemoveResidentDialog.show(
+              pageContext,
+              apartment: apt,
+            ),
           ),
         ),
       ),

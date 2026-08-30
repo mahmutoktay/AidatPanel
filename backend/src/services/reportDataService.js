@@ -1,5 +1,6 @@
 import { prisma } from "../config/db.js";
 import { assertManagerOwnsBuilding, assertManagerOwnsSite } from "../utils/access.js";
+import { sortByNatural } from "../utils/naturalCompare.js";
 import { monthYearRange, yearRange } from "../utils/reportPeriod.js";
 import {
   summarizeDues,
@@ -17,15 +18,17 @@ async function loadBuildingContext(buildingId, managerId) {
     select: { name: true },
   });
 
-  const apartments = await prisma.apartment.findMany({
-    where: { buildingId },
-    include: {
-      resident: {
-        select: { name: true, deletedAt: true },
+  const apartments = sortByNatural(
+    await prisma.apartment.findMany({
+      where: { buildingId },
+      include: {
+        resident: {
+          select: { name: true, deletedAt: true },
+        },
       },
-    },
-    orderBy: [{ floor: "asc" }, { number: "asc" }],
-  });
+    }),
+    (apt) => apt.number
+  );
 
   const occupied = apartments.filter(
     (a) => a.resident != null && a.resident.deletedAt == null
@@ -44,7 +47,7 @@ async function loadBuildingContext(buildingId, managerId) {
 }
 
 async function loadDuesForPeriod(buildingId, month, year) {
-  return prisma.due.findMany({
+  const dues = await prisma.due.findMany({
     where: {
       apartment: { buildingId },
       month: parseInt(String(month), 10),
@@ -61,8 +64,9 @@ async function loadDuesForPeriod(buildingId, month, year) {
         },
       },
     },
-    orderBy: { apartment: { number: "asc" } },
   });
+
+  return sortByNatural(dues, (due) => due.apartment?.number ?? "");
 }
 
 async function loadExpenseSummary(buildingId, month, year, currency) {
@@ -301,7 +305,6 @@ export async function getAnnualReportData(buildingId, managerId, { year }) {
           },
         },
       },
-      orderBy: { apartment: { number: "asc" } },
     }),
     prisma.expense.findMany({
       where: { buildingId, targetYear: y },
@@ -309,9 +312,11 @@ export async function getAnnualReportData(buildingId, managerId, { year }) {
     }),
   ]);
 
+  const sortedDues = sortByNatural(allDues, (due) => due.apartment?.number ?? "");
+
   // Ay bazinda grupla
   const duesByMonth = new Map();
-  for (const due of allDues) {
+  for (const due of sortedDues) {
     const m = due.month;
     if (!duesByMonth.has(m)) duesByMonth.set(m, []);
     duesByMonth.get(m).push(due);
@@ -460,7 +465,7 @@ async function loadSiteDuesForPeriod(siteId, month, year) {
     where.month = parseInt(String(month), 10);
   }
 
-  return prisma.due.findMany({
+  const dues = await prisma.due.findMany({
     where,
     include: {
       apartment: {
@@ -472,8 +477,9 @@ async function loadSiteDuesForPeriod(siteId, month, year) {
         },
       },
     },
-    orderBy: { apartment: { number: "asc" } },
   });
+
+  return sortByNatural(dues, (due) => due.apartment?.number ?? "");
 }
 
 async function loadSiteExpenseSummaryOnly(siteId, month, year, currency) {

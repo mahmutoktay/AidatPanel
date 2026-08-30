@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/paginated_list_result.dart';
 import '../../domain/entities/ticket_entity.dart';
+import '../../domain/entities/ticket_restriction_entity.dart';
 import '../../domain/repositories/ticket_repository.dart';
 import '../datasources/ticket_remote_datasource.dart';
 import '../models/create_ticket_request.dart';
@@ -144,6 +145,81 @@ class TicketRepositoryImpl implements TicketRepository {
       rethrow;
     } catch (_) {
       throw ApiException(message: 'ticket_status_update_failed');
+    }
+  }
+
+  @override
+  Future<void> reportTicket({
+    required String ticketId,
+    String? ticketUpdateId,
+  }) async {
+    try {
+      await _remoteDataSource.reportTicket(
+        ticketId: ticketId,
+        ticketUpdateId: ticketUpdateId,
+      );
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'ticket_report_failed');
+    }
+  }
+
+  @override
+  Future<TicketRestrictionStatusEntity> getMyTicketRestriction() async {
+    try {
+      final model = await _remoteDataSource.getMyTicketRestriction();
+      return model.toEntity();
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'ticket_restriction_fetch_failed');
+    }
+  }
+
+  @override
+  Future<TicketRestrictionStatusEntity> getApartmentTicketRestriction(
+    String apartmentId,
+  ) async {
+    try {
+      final model =
+          await _remoteDataSource.getApartmentTicketRestriction(apartmentId);
+      return model.toEntity();
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'ticket_restriction_fetch_failed');
+    }
+  }
+
+  @override
+  Future<TicketRestrictionStatusEntity> createApartmentTicketRestriction({
+    required String apartmentId,
+    required String ticketId,
+    String? note,
+  }) async {
+    try {
+      final model = await _remoteDataSource.createApartmentTicketRestriction(
+        apartmentId: apartmentId,
+        ticketId: ticketId,
+        note: note,
+      );
+      return model.toEntity();
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'ticket_restriction_create_failed');
+    }
+  }
+
+  @override
+  Future<void> liftApartmentTicketRestriction(String apartmentId) async {
+    try {
+      await _remoteDataSource.liftApartmentTicketRestriction(apartmentId);
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'ticket_restriction_lift_failed');
     }
   }
 }

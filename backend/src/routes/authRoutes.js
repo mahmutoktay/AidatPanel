@@ -14,6 +14,7 @@ import {
   completeResidentJoin,
   validateInvite,
   checkIdentifier,
+  rejoinWithInvite,
 } from "../controllers/authControllers.js";
 import {
   authLimiter,
@@ -56,6 +57,13 @@ router.post(
   completeResidentJoin
 );
 router.post("/invite/validate", strictLimiter, validate(authSchemas.inviteValidate), validateInvite);
+router.post(
+  "/rejoin",
+  authMiddleware,
+  strictLimiter,
+  validate(authSchemas.rejoin),
+  rejoinWithInvite
+);
 router.post("/forgot-password", strictLimiter, validate(authSchemas.forgotPassword), forgotPassword);
 router.post("/reset-password", strictLimiter, validate(authSchemas.resetPassword), resetPassword);
 router.post("/logout", authMiddleware, logout);

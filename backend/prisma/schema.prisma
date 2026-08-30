@@ -47,6 +47,9 @@ model User {
   reviewedDekonts     Dekont[]     @relation("DekontReviewer")
   sessions            UserSession[]
   promoGrants         PromoGrant[]
+  ticketReports              TicketReport[]
+  ticketCreationRestrictions TicketCreationRestriction[] @relation("RestrictedUser")
+  ticketRestrictionsIssued   TicketCreationRestriction[] @relation("RestrictingManager")
 
   @@index([apartmentId])
   @@index([role, deletedAt, createdAt])
@@ -173,6 +176,7 @@ model Building {
   apartments        Apartment[]
   expenses          Expense[]
   dekonts           Dekont[]
+  ticketCreationRestrictions TicketCreationRestriction[]
 
   // Aidat ayarları
   dueAmount         Decimal?    @db.Decimal(10, 2)  // Daire başına aidat
@@ -377,13 +381,19 @@ model Ticket {
   category       TicketCategory
   status         TicketStatus   @default(OPEN)
   attachmentPath String?
+  needsReview    Boolean        @default(false)
+  isReported     Boolean        @default(false)
   updates        TicketUpdate[]
+  reports        TicketReport[]
+  creationRestrictions TicketCreationRestriction[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
   @@index([apartmentId])
   @@index([userId])
   @@index([status, createdAt])
+  @@index([isReported, createdAt])
+  @@index([needsReview, createdAt])
 }
 
 enum TicketCategory {
@@ -401,14 +411,65 @@ enum TicketStatus {
 }
 
 model TicketUpdate {
-  id        String   @id @default(uuid())
-  ticketId  String
-  ticket    Ticket   @relation(fields: [ticketId], references: [id])
-  message   String
-  fromRole  UserRole
-  createdAt DateTime @default(now())
+  id           String         @id @default(uuid())
+  ticketId     String
+  ticket       Ticket         @relation(fields: [ticketId], references: [id])
+  message      String
+  fromRole     UserRole
+  needsReview  Boolean        @default(false)
+  reports      TicketReport[]
+  createdAt    DateTime       @default(now())
 
   @@index([ticketId])
+}
+
+model TicketReport {
+  id             String        @id @default(uuid())
+  ticketId       String
+  ticket         Ticket        @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticketUpdateId String?
+  ticketUpdate   TicketUpdate? @relation(fields: [ticketUpdateId], references: [id], onDelete: Cascade)
+  reporterId     String
+  reporter       User          @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  createdAt      DateTime      @default(now())
+
+  @@unique([ticketId, ticketUpdateId, reporterId])
+  @@index([ticketId, createdAt])
+}
+
+model TicketCreationRestriction {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation("RestrictedUser", fields: [userId], references: [id], onDelete: Cascade)
+  buildingId String
+  building   Building  @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  managerId  String
+  manager    User      @relation("RestrictingManager", fields: [managerId], references: [id], onDelete: Cascade)
+  relatedTicketId String?
+  relatedTicket   Ticket?   @relation(fields: [relatedTicketId], references: [id], onDelete: SetNull)
+  reason     String
+  expiresAt  DateTime
+  liftedAt   DateTime?
+  liftedById String?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, expiresAt])
+  @@index([buildingId])
+}
+
+/// Append-only — silme veya güncelleme API'si yok.
+model TicketRestrictionAuditLog {
+  id         String    @id @default(uuid())
+  userId     String
+  managerId  String?
+  buildingId String
+  action     String
+  reason     String?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([buildingId, createdAt])
 }
 
 model Notification {

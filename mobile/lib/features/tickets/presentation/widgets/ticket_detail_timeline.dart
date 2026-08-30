@@ -11,11 +11,13 @@ import '../../domain/entities/ticket_update_entity.dart';
 class TicketDetailUpdatesTimeline extends StatelessWidget {
   final List<TicketUpdateEntity> updates;
   final bool viewerIsResident;
+  final void Function(String updateId, String fromRole)? onReportUpdate;
 
   const TicketDetailUpdatesTimeline({
     super.key,
     required this.updates,
     this.viewerIsResident = false,
+    this.onReportUpdate,
   });
 
   @override
@@ -27,9 +29,27 @@ class TicketDetailUpdatesTimeline extends StatelessWidget {
             update: updates[i],
             isLast: i == updates.length - 1,
             viewerIsResident: viewerIsResident,
+            onLongPress: onReportUpdate == null
+                ? null
+                : _canReportUpdate(updates[i], viewerIsResident)
+                    ? () => onReportUpdate!(
+                          updates[i].id,
+                          updates[i].fromRole,
+                        )
+                    : null,
           ),
       ],
     );
+  }
+
+  static bool _canReportUpdate(
+    TicketUpdateEntity update,
+    bool viewerIsResident,
+  ) {
+    if (viewerIsResident) {
+      return update.fromRole == 'MANAGER';
+    }
+    return update.fromRole == 'RESIDENT';
   }
 }
 
@@ -37,12 +57,14 @@ class TicketDetailTimelineEntry extends StatelessWidget {
   final TicketUpdateEntity update;
   final bool isLast;
   final bool viewerIsResident;
+  final VoidCallback? onLongPress;
 
   const TicketDetailTimelineEntry({
     super.key,
     required this.update,
     required this.isLast,
     this.viewerIsResident = false,
+    this.onLongPress,
   });
 
   @override
@@ -100,7 +122,9 @@ class TicketDetailTimelineEntry extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: EdgeInsets.only(bottom: isLast ? 0 : AppSizes.spacingL),
-              child: Container(
+              child: GestureDetector(
+                onLongPress: onLongPress,
+                child: Container(
                 padding: const EdgeInsets.all(AppSizes.spacingM),
                 decoration: DashboardScreenStyle.whiteCard().copyWith(
                   borderRadius: BorderRadius.circular(16),
@@ -157,6 +181,7 @@ class TicketDetailTimelineEntry extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
             ),
           ),
         ],

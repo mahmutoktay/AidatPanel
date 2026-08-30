@@ -9,6 +9,7 @@ import '../../../../core/network/paginated_list_result.dart';
 import '../../../../core/network/pagination_parse.dart';
 import '../models/create_ticket_request.dart';
 import '../models/ticket_model.dart';
+import '../models/ticket_restriction_model.dart';
 
 abstract class TicketRemoteDataSource {
   Future<PaginatedListResult<TicketModel>> getMyTickets({
@@ -42,6 +43,25 @@ abstract class TicketRemoteDataSource {
   Future<void> addTicketUpdate(String ticketId, String message);
 
   Future<TicketModel> patchTicketStatus(String ticketId, String status);
+
+  Future<void> reportTicket({
+    required String ticketId,
+    String? ticketUpdateId,
+  });
+
+  Future<TicketRestrictionStatusModel> getMyTicketRestriction();
+
+  Future<TicketRestrictionStatusModel> getApartmentTicketRestriction(
+    String apartmentId,
+  );
+
+  Future<TicketRestrictionStatusModel> createApartmentTicketRestriction({
+    required String apartmentId,
+    required String ticketId,
+    String? note,
+  });
+
+  Future<void> liftApartmentTicketRestriction(String apartmentId);
 }
 
 class TicketRemoteDataSourceImpl implements TicketRemoteDataSource {
@@ -157,5 +177,63 @@ class TicketRemoteDataSourceImpl implements TicketRemoteDataSource {
       data: {'status': status},
     );
     return TicketModel.fromJson(response.data['data'] as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> reportTicket({
+    required String ticketId,
+    String? ticketUpdateId,
+  }) async {
+    await _dioClient.post(
+      ApiConstants.ticketReport(ticketId),
+      data: {
+        if (ticketUpdateId != null) 'ticketUpdateId': ticketUpdateId,
+      },
+    );
+  }
+
+  TicketRestrictionStatusModel _parseRestrictionStatus(dynamic data) {
+    return TicketRestrictionStatusModel.fromJson(
+      data as Map<String, dynamic>,
+    );
+  }
+
+  @override
+  Future<TicketRestrictionStatusModel> getMyTicketRestriction() async {
+    final response = await _dioClient.get(ApiConstants.myTicketRestriction);
+    return _parseRestrictionStatus(response.data['data']);
+  }
+
+  @override
+  Future<TicketRestrictionStatusModel> getApartmentTicketRestriction(
+    String apartmentId,
+  ) async {
+    final response = await _dioClient.get(
+      ApiConstants.apartmentTicketRestriction(apartmentId),
+    );
+    return _parseRestrictionStatus(response.data['data']);
+  }
+
+  @override
+  Future<TicketRestrictionStatusModel> createApartmentTicketRestriction({
+    required String apartmentId,
+    required String ticketId,
+    String? note,
+  }) async {
+    final response = await _dioClient.post(
+      ApiConstants.apartmentTicketRestriction(apartmentId),
+      data: {
+        'ticketId': ticketId,
+        if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+      },
+    );
+    return _parseRestrictionStatus(response.data['data']);
+  }
+
+  @override
+  Future<void> liftApartmentTicketRestriction(String apartmentId) async {
+    await _dioClient.delete(
+      ApiConstants.apartmentTicketRestriction(apartmentId),
+    );
   }
 }

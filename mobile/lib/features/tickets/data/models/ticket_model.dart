@@ -20,6 +20,8 @@ class TicketModel {
   final String? creatorName;
   final String? attachmentUrl;
   final List<TicketUpdateModel> updates;
+  final bool needsReview;
+  final bool isReported;
 
   const TicketModel({
     required this.id,
@@ -40,6 +42,8 @@ class TicketModel {
     this.creatorName,
     this.attachmentUrl,
     this.updates = const [],
+    this.needsReview = false,
+    this.isReported = false,
   });
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {
@@ -120,6 +124,8 @@ class TicketModel {
       creatorName: crName,
       attachmentUrl: attachmentUrl,
       updates: updates,
+      needsReview: json['needsReview'] == true,
+      isReported: json['isReported'] == true,
     );
   }
 
@@ -149,6 +155,8 @@ class TicketModel {
         creatorName: creatorName,
         attachmentUrl: attachmentUrl,
         updates: updates.map((u) => u.toEntity()).toList(),
+        needsReview: needsReview,
+        isReported: isReported,
       );
 
   static TicketCategory _parseCategory(String value) {

@@ -11,10 +11,11 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const getTicketsByBuilding = asyncHandler(async (req, res) => {
   const { id: buildingId } = req.params;
-  const { status, category, cursor, limit, paginated } = req.query;
+  const { status, category, moderation, cursor, limit, paginated } = req.query;
   const data = await listTicketsByBuildingService(buildingId, req.user.id, {
     status,
     category,
+    moderation,
     cursor,
     limit,
     paginated,
@@ -23,10 +24,11 @@ export const getTicketsByBuilding = asyncHandler(async (req, res) => {
 });
 
 export const getMyTickets = asyncHandler(async (req, res) => {
-  const { status, category, cursor, limit, paginated } = req.query;
+  const { status, category, moderation, cursor, limit, paginated } = req.query;
   const data = await listMyTicketsService(req.user.id, {
     status,
     category,
+    moderation,
     cursor,
     limit,
     paginated,

@@ -29,8 +29,11 @@
         <a href="/growth" class="sidebar__link" aria-current="<%= navActive('/growth') ? 'page' : 'false' %>">
           <%- include('icon', { name: 'subscription' }) %><span class="sidebar__label">Büyüme & Abonelik</span>
         </a>
-        <a href="/ops/dekonts" class="sidebar__link" aria-current="<%= navActive('/ops') ? 'page' : 'false' %>">
-          <%- include('icon', { name: 'dekont' }) %><span class="sidebar__label">Operasyon</span>
+        <a href="/ops/dekonts" class="sidebar__link" aria-current="<%= currentPath === '/ops/dekonts' ? 'page' : 'false' %>">
+          <%- include('icon', { name: 'dekont' }) %><span class="sidebar__label">Dekontlar</span>
+        </a>
+        <a href="/ops/tickets" class="sidebar__link" aria-current="<%= currentPath === '/ops/tickets' ? 'page' : 'false' %>">
+          <%- include('icon', { name: 'ticket' }) %><span class="sidebar__label">Talepler</span>
         </a>
         <a href="/analytics" class="sidebar__link" aria-current="<%= navActive('/analytics') ? 'page' : 'false' %>">
           <%- include('icon', { name: 'analytics' }) %><span class="sidebar__label">Analitik</span>

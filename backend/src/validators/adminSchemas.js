@@ -83,6 +83,13 @@ export const adminSchemas = {
       limit: z.coerce.number().int().min(1).max(100).optional(),
     }),
   },
+  listTickets: {
+    query: z.object({
+      moderation: z.enum(["reported", "needsReview"]).optional(),
+      page: z.coerce.number().int().min(1).optional(),
+      limit: z.coerce.number().int().min(1).max(100).optional(),
+    }),
+  },
   analytics: {
     query: z.object({
       period: z.enum(["day", "month"]).optional(),

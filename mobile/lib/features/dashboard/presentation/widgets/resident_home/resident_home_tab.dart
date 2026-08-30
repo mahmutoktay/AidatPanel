@@ -9,11 +9,14 @@ import '../../../../dekont/presentation/providers/dekont_provider.dart';
 import '../../../../dues/presentation/providers/dues_provider.dart';
 import '../../../../dues/presentation/providers/resident_due_transactions_provider.dart';
 import '../../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../auth/presentation/providers/pending_rejoin_invite_provider.dart';
 import '../../../../notifications/domain/entities/notification_entity.dart';
 import '../../../../notifications/presentation/providers/notifications_provider.dart';
 import '../../../../notifications/presentation/utils/notification_labels.dart';
 import '../../../../notifications/presentation/widgets/notification_detail_sheet.dart';
 import 'resident_debt_summary_card.dart';
+import 'resident_no_building_card.dart';
+import 'resident_rejoin_bottom_sheet.dart';
 import 'resident_home_quick_actions_row.dart';
 import 'resident_recent_activity_section.dart';
 import '../../../../feature_tour/presentation/feature_tour_targets.dart';
@@ -34,10 +37,31 @@ class ResidentHomeTab extends ConsumerStatefulWidget {
 }
 
 class _ResidentHomeTabState extends ConsumerState<ResidentHomeTab> {
+  bool _handledPendingInvite = false;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _ensureDataLoaded());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureDataLoaded();
+      _maybeOpenPendingRejoin();
+    });
+  }
+
+  Future<void> _maybeOpenPendingRejoin() async {
+    if (_handledPendingInvite || !mounted) return;
+    final apartmentId = ref.read(authStateProvider).user?.apartmentId;
+    if (apartmentId != null && apartmentId.isNotEmpty) return;
+
+    final pending = ref.read(pendingRejoinInviteCodeProvider.notifier).take();
+    if (pending == null || pending.isEmpty) return;
+
+    _handledPendingInvite = true;
+    await ResidentRejoinBottomSheet.show(context, initialCode: pending);
+  }
+
+  Future<void> _openRejoinSheet({String? initialCode}) async {
+    await ResidentRejoinBottomSheet.show(context, initialCode: initialCode);
   }
 
   Future<void> _ensureDataLoaded() async {
@@ -96,9 +120,26 @@ class _ResidentHomeTabState extends ConsumerState<ResidentHomeTab> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(pendingRejoinInviteCodeProvider, (previous, next) {
+      if (next == null || next.isEmpty || _handledPendingInvite) return;
+      final apartmentId = ref.read(authStateProvider).user?.apartmentId;
+      if (apartmentId != null && apartmentId.isNotEmpty) return;
+      _handledPendingInvite = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        final code = ref.read(pendingRejoinInviteCodeProvider.notifier).take();
+        if (code == null) return;
+        await ResidentRejoinBottomSheet.show(context, initialCode: code);
+      });
+    });
+
     final duesState = ref.watch(duesNotifierProvider);
     final transactionsState = ref.watch(residentDueTransactionsProvider);
     final notificationsState = ref.watch(notificationsNotifierProvider);
+    final apartmentId = ref.watch(
+      authStateProvider.select((state) => state.user?.apartmentId),
+    );
+    final hasApartment = apartmentId != null && apartmentId.isNotEmpty;
     final announcements = notificationsState.items
         .where((item) => item.type == NotificationType.announcement)
         .toList(growable: false);
@@ -119,14 +160,22 @@ class _ResidentHomeTabState extends ConsumerState<ResidentHomeTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ResidentDebtSummaryCard(
-                key: FeatureTourTargets.summary,
-                dues: duesState.dues,
-                isLoading: duesState.isLoading,
-              ),
+              if (!hasApartment)
+                ResidentNoBuildingCard(
+                  key: FeatureTourTargets.summary,
+                  onJoinTap: () => _openRejoinSheet(),
+                )
+              else
+                ResidentDebtSummaryCard(
+                  key: FeatureTourTargets.summary,
+                  dues: duesState.dues,
+                  isLoading: duesState.isLoading,
+                ),
               const SizedBox(height: AppSizes.spacingM),
               ResidentHomeQuickActionsRow(
                 key: FeatureTourTargets.quickActions,
+                hasApartment: hasApartment,
+                onJoinBuilding: () => _openRejoinSheet(),
                 onGoToDuesTab: widget.onGoToDuesTab,
                 onGoToIssuesTab: widget.onGoToIssuesTab,
               ),

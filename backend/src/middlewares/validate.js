@@ -12,6 +12,7 @@ export { apartmentSchemas } from "../validators/apartmentSchemas.js";
 export { dueSchemas } from "../validators/dueSchemas.js";
 export { expenseSchemas } from "../validators/expenseSchemas.js";
 export { ticketSchemas } from "../validators/ticketSchemas.js";
+export { moderationSchemas } from "../validators/moderationSchemas.js";
 export { dekontSchemas } from "../validators/dekontSchemas.js";
 export { notificationSchemas } from "../validators/notificationValidator.js";
 export { reportSchemas } from "../validators/reportSchemas.js";

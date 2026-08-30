@@ -8,6 +8,7 @@ import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../utils/ticket_labels.dart';
 import '../utils/ticket_status_style.dart';
+import 'ticket_moderation_badges.dart';
 
 class TicketListCard extends StatelessWidget {
   final TicketEntity ticket;
@@ -118,6 +119,12 @@ class TicketListCard extends StatelessWidget {
                         ),
                       ],
                       const SizedBox(height: AppSizes.spacingS),
+                      TicketModerationBadges(
+                        isReported: ticket.isReported,
+                        needsReview: ticket.needsReview,
+                      ),
+                      if (ticket.isReported || ticket.needsReview)
+                        const SizedBox(height: AppSizes.spacingXS),
                       Row(
                         children: [
                           Icon(

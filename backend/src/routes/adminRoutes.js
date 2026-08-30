@@ -15,6 +15,8 @@ import {
   createPromo,
   dekontSummary,
   listDekonts,
+  ticketSummary,
+  listTickets,
   listResidents,
   paymentHabits,
   dashboardKpis,
@@ -75,6 +77,9 @@ router.post("/promos", strictLimiter, validate(adminSchemas.createPromo), create
 
 router.get("/dekonts/summary", dekontSummary);
 router.get("/dekonts", validate(adminSchemas.listDekonts), listDekonts);
+
+router.get("/tickets/summary", ticketSummary);
+router.get("/tickets", validate(adminSchemas.listTickets), listTickets);
 
 router.get("/residents", listResidents);
 router.get("/residents/:id/payment-habits", paymentHabits);

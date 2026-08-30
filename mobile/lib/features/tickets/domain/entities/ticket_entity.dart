@@ -26,6 +26,8 @@ class TicketEntity extends Equatable {
   /// İleride eklenecek ek dosya URL'si; yoksa null.
   final String? attachmentUrl;
   final List<TicketUpdateEntity> updates;
+  final bool needsReview;
+  final bool isReported;
 
   const TicketEntity({
     required this.id,
@@ -46,6 +48,8 @@ class TicketEntity extends Equatable {
     this.creatorName,
     this.attachmentUrl,
     this.updates = const [],
+    this.needsReview = false,
+    this.isReported = false,
   });
 
   @override
@@ -68,5 +72,7 @@ class TicketEntity extends Equatable {
         creatorName,
         attachmentUrl,
         updates,
+        needsReview,
+        isReported,
       ];
 }

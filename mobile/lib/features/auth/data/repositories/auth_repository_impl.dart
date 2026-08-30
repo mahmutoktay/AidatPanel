@@ -118,6 +118,9 @@ abstract class AuthRepository {
     required String inviteCode,
   });
 
+  /// Daire bağlantısı olmayan oturum açık sakin — davet kodu ile yeni daireye katılır.
+  Future<UserEntity> rejoinWithInviteCode(String inviteCode);
+
   Future<SavedLoginHint?> getSavedLoginHint(UserRole role);
 }
 
@@ -615,6 +618,19 @@ class AuthRepositoryImpl implements AuthRepository {
       rethrow;
     } catch (_) {
       throw ApiException(message: 'otp_verify_failed');
+    }
+  }
+
+  @override
+  Future<UserEntity> rejoinWithInviteCode(String inviteCode) async {
+    try {
+      final userData = await _remoteDataSource.rejoinWithInviteCode(inviteCode);
+      await _secureStorage.saveUser(jsonEncode(userData.toJson()));
+      return userData.toEntity();
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(message: 'rejoin_failed');
     }
   }
 }

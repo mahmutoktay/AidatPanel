@@ -106,6 +106,8 @@ export const ticketCategoryEnum = z.enum([
   "OTHER",
 ]);
 
+export const ticketModerationEnum = z.enum(["reported", "needsReview"]);
+
 export const dueStatusEnum = z.enum(["PENDING", "PAID", "OVERDUE", "WAIVED"], {
   errorMap: () => ({ message: "Geçersiz durum değeri" }),
 });

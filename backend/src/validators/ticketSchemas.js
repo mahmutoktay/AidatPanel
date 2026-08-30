@@ -3,6 +3,7 @@ import {
   listPaginationFields,
   ticketCategoryEnum,
   ticketStatusEnum,
+  ticketModerationEnum,
 } from "./shared.js";
 
 export const ticketSchemas = {
@@ -13,6 +14,7 @@ export const ticketSchemas = {
     query: z.object({
       status: ticketStatusEnum.optional(),
       category: ticketCategoryEnum.optional(),
+      moderation: ticketModerationEnum.optional(),
       ...listPaginationFields,
     }),
   },
@@ -21,6 +23,7 @@ export const ticketSchemas = {
     query: z.object({
       status: ticketStatusEnum.optional(),
       category: ticketCategoryEnum.optional(),
+      moderation: ticketModerationEnum.optional(),
       ...listPaginationFields,
     }),
   },

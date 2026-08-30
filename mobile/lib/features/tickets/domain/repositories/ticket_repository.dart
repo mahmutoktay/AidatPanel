@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import '../../../../core/network/paginated_list_result.dart';
 import '../entities/ticket_entity.dart';
+import '../entities/ticket_restriction_entity.dart';
 
 abstract class TicketRepository {
   Future<PaginatedListResult<TicketEntity>> getMyTickets({
@@ -39,4 +40,23 @@ abstract class TicketRepository {
     required String ticketId,
     required TicketStatus status,
   });
+
+  Future<void> reportTicket({
+    required String ticketId,
+    String? ticketUpdateId,
+  });
+
+  Future<TicketRestrictionStatusEntity> getMyTicketRestriction();
+
+  Future<TicketRestrictionStatusEntity> getApartmentTicketRestriction(
+    String apartmentId,
+  );
+
+  Future<TicketRestrictionStatusEntity> createApartmentTicketRestriction({
+    required String apartmentId,
+    required String ticketId,
+    String? note,
+  });
+
+  Future<void> liftApartmentTicketRestriction(String apartmentId);
 }

@@ -1602,6 +1602,12 @@ class Translations$common$api$en {
 
 	/// en: 'You must be assigned to an apartment before viewing payment details.'
 	String get noApartmentForPayment => 'You must be assigned to an apartment before viewing payment details.';
+
+	/// en: 'You are already linked to an apartment.'
+	String get alreadyLinkedToApartment => 'You are already linked to an apartment.';
+
+	/// en: 'This apartment already has a resident.'
+	String get apartmentAlreadyOccupied => 'This apartment already has a resident.';
 }
 
 // Path: common.documentPreview
@@ -1737,6 +1743,9 @@ class Translations$common$errorKeys$en {
 
 	/// en: 'Could not remove the resident. Try again.'
 	String get residentRemoveFailed => 'Could not remove the resident. Try again.';
+
+	/// en: 'Could not join the building. Try again.'
+	String get rejoinFailed => 'Could not join the building. Try again.';
 
 	/// en: 'Could not load the dues list. Try again.'
 	String get buildingDuesFetchFailed => 'Could not load the dues list. Try again.';
@@ -2493,6 +2502,9 @@ class Translations$features$tickets$en {
 	/// en: 'Could not save your request. Try again.'
 	String get createFailed => 'Could not save your request. Try again.';
 
+	/// en: 'Your message contains inappropriate language. Please edit and try again.'
+	String get inappropriateContentBlocked => 'Your message contains inappropriate language. Please edit and try again.';
+
 	/// en: 'The request service is not available right now. Try again later.'
 	String get createServiceUnavailable => 'The request service is not available right now. Try again later.';
 
@@ -2675,6 +2687,87 @@ class Translations$features$tickets$en {
 
 	/// en: 'Issue fixed; verification completed.'
 	String get templateResolvedCheckText => 'Issue fixed; verification completed.';
+
+	/// en: 'Report inappropriate content'
+	String get reportInappropriate => 'Report inappropriate content';
+
+	/// en: 'Your report has been received'
+	String get reportSuccess => 'Your report has been received';
+
+	/// en: 'You cannot report your own content'
+	String get reportOwnContentBlocked => 'You cannot report your own content';
+
+	/// en: 'Reported'
+	String get badgeReported => 'Reported';
+
+	/// en: 'Needs review'
+	String get badgeNeedsReview => 'Needs review';
+
+	/// en: 'All'
+	String get moderationFilterAll => 'All';
+
+	/// en: 'Reported'
+	String get moderationFilterReported => 'Reported';
+
+	/// en: 'Needs review'
+	String get moderationFilterNeedsReview => 'Needs review';
+
+	/// en: 'Restrict new requests'
+	String get restrictionSheetTitle => 'Restrict new requests';
+
+	/// en: 'The resident cannot create new requests; past requests stay visible.'
+	String get restrictionSheetSubtitle => 'The resident cannot create new requests; past requests stay visible.';
+
+	/// en: 'Select a request for the reason'
+	String get restrictionSelectTicket => 'Select a request for the reason';
+
+	/// en: 'Please select a request for the reason'
+	String get restrictionTicketRequired => 'Please select a request for the reason';
+
+	/// en: 'No requests found for this resident.'
+	String get restrictionNoTickets => 'No requests found for this resident.';
+
+	/// en: 'Additional note (optional)'
+	String get restrictionNoteLabel => 'Additional note (optional)';
+
+	/// en: 'Add a short note if needed'
+	String get restrictionNoteHint => 'Add a short note if needed';
+
+	/// en: 'Reason must be at least 3 characters'
+	String get restrictionReasonTooShort => 'Reason must be at least 3 characters';
+
+	/// en: 'Restrict'
+	String get restrictionApplyAction => 'Restrict';
+
+	/// en: 'Restriction'
+	String get restrictionManageAction => 'Restriction';
+
+	/// en: 'Lift restriction'
+	String get restrictionLiftAction => 'Lift restriction';
+
+	/// en: 'Request submission restricted'
+	String get restrictionApplied => 'Request submission restricted';
+
+	/// en: 'Restriction lifted'
+	String get restrictionLifted => 'Restriction lifted';
+
+	/// en: 'Active restriction'
+	String get restrictionActiveTitle => 'Active restriction';
+
+	/// en: 'Quoted request'
+	String get restrictionQuotedTicket => 'Quoted request';
+
+	/// en: 'Manager note'
+	String get restrictionManagerNote => 'Manager note';
+
+	/// en: 'Ends: {expiresAt}'
+	String get restrictionEndsAt => 'Ends: {expiresAt}';
+
+	/// en: 'Your ability to submit new requests is temporarily restricted.'
+	String get restrictionBannerIntro => 'Your ability to submit new requests is temporarily restricted.';
+
+	/// en: 'Your ability to submit new requests is temporarily restricted. Reason: {reason}. Ends: {expiresAt}.'
+	String get restrictionBannerBody => 'Your ability to submit new requests is temporarily restricted. Reason: {reason}. Ends: {expiresAt}.';
 }
 
 // Path: features.dekont
@@ -4210,6 +4303,30 @@ class Translations$features$dashboard$en {
 	/// en: 'Your {month} {year} dues'
 	String get residentFeaturedDuePeriod => 'Your {month} {year} dues';
 
+	/// en: 'You are not in a building right now'
+	String get noBuildingTitle => 'You are not in a building right now';
+
+	/// en: 'Use your manager's invite code or share link to join your new building.'
+	String get noBuildingBody => 'Use your manager\'s invite code or share link to join your new building.';
+
+	/// en: 'Join Building'
+	String get joinBuildingCta => 'Join Building';
+
+	/// en: 'Join a New Building'
+	String get rejoinSheetTitle => 'Join a New Building';
+
+	/// en: 'Enter the invite code from your manager'
+	String get rejoinSheetSubtitle => 'Enter the invite code from your manager';
+
+	/// en: 'You will join'
+	String get rejoinBuildingLabel => 'You will join';
+
+	/// en: 'You have joined the building'
+	String get rejoinSuccess => 'You have joined the building';
+
+	/// en: 'Could not join the building'
+	String get rejoinFailed => 'Could not join the building';
+
 	/// en: 'View and pay your dues here.'
 	String get residentDebtAndPaySubtitle => 'View and pay your dues here.';
 
@@ -5508,6 +5625,8 @@ extension on Translations {
 			'common.api.dueNotFound' => 'Due record not found.',
 			'common.api.dekontNotFound' => 'Receipt not found.',
 			'common.api.noApartmentForPayment' => 'You must be assigned to an apartment before viewing payment details.',
+			'common.api.alreadyLinkedToApartment' => 'You are already linked to an apartment.',
+			'common.api.apartmentAlreadyOccupied' => 'This apartment already has a resident.',
 			'common.rateLimitHint' => 'The server is currently busy. We\'ll retry shortly.',
 			'common.tryAgain' => 'Try Again',
 			'common.documentPreview.title' => 'View document',
@@ -5882,6 +6001,7 @@ extension on Translations {
 			'common.errorKeys.apartmentUpdateFailed' => 'Could not update the apartment. Try again.',
 			'common.errorKeys.apartmentDeleteFailed' => 'Could not delete the apartment. Try again.',
 			'common.errorKeys.residentRemoveFailed' => 'Could not remove the resident. Try again.',
+			'common.errorKeys.rejoinFailed' => 'Could not join the building. Try again.',
 			'common.errorKeys.buildingDuesFetchFailed' => 'Could not load the dues list. Try again.',
 			'common.errorKeys.dueTransactionsFetchFailed' => 'Could not load dues transaction history. Try again.',
 			'common.errorKeys.myDuesFetchFailed' => 'Could not load your dues. Try again.',
@@ -5918,11 +6038,11 @@ extension on Translations {
 			'common.errorKeys.siteBuildingsFetchFailed' => 'Could not load blocks. Try again.',
 			'common.errorKeys.siteCreateFailed' => 'Could not add the site. Try again.',
 			'common.errorKeys.siteUpdateFailed' => 'Could not update the site. Try again.',
+			_ => null,
+		} ?? switch (path) {
 			'common.errorKeys.siteCollectionUpdateFailed' => 'Could not update site collection details. Try again.',
 			'common.errorKeys.siteDeleteFailed' => 'Could not delete the site. Try again.',
 			'common.errorKeys.siteBuildingCreateFailed' => 'Could not add the block. Try again.',
-			_ => null,
-		} ?? switch (path) {
 			'common.errorKeys.siteExpensesFetchFailed' => 'Could not load site expenses. Try again.',
 			'common.errorKeys.siteExpenseSummaryFetchFailed' => 'Could not load the site expense summary. Try again.',
 			'common.errorKeys.siteExpenseCreateFailed' => 'Could not add the site expense. Try again.',
@@ -6335,6 +6455,7 @@ extension on Translations {
 			'features.tickets.submit' => 'Submit',
 			'features.tickets.createSuccess' => 'Your request has been submitted',
 			'features.tickets.createFailed' => 'Could not save your request. Try again.',
+			'features.tickets.inappropriateContentBlocked' => 'Your message contains inappropriate language. Please edit and try again.',
 			'features.tickets.createServiceUnavailable' => 'The request service is not available right now. Try again later.',
 			'features.tickets.emptyTitle' => 'No requests yet',
 			'features.tickets.emptySubtitle' => 'You can create your request here',
@@ -6396,6 +6517,33 @@ extension on Translations {
 			'features.tickets.templateAppointmentSetText' => 'Spoke with resident; appointment scheduled.',
 			'features.tickets.templateResolvedCheck' => 'Resolved / verified',
 			'features.tickets.templateResolvedCheckText' => 'Issue fixed; verification completed.',
+			'features.tickets.reportInappropriate' => 'Report inappropriate content',
+			'features.tickets.reportSuccess' => 'Your report has been received',
+			'features.tickets.reportOwnContentBlocked' => 'You cannot report your own content',
+			'features.tickets.badgeReported' => 'Reported',
+			'features.tickets.badgeNeedsReview' => 'Needs review',
+			'features.tickets.moderationFilterAll' => 'All',
+			'features.tickets.moderationFilterReported' => 'Reported',
+			'features.tickets.moderationFilterNeedsReview' => 'Needs review',
+			'features.tickets.restrictionSheetTitle' => 'Restrict new requests',
+			'features.tickets.restrictionSheetSubtitle' => 'The resident cannot create new requests; past requests stay visible.',
+			'features.tickets.restrictionSelectTicket' => 'Select a request for the reason',
+			'features.tickets.restrictionTicketRequired' => 'Please select a request for the reason',
+			'features.tickets.restrictionNoTickets' => 'No requests found for this resident.',
+			'features.tickets.restrictionNoteLabel' => 'Additional note (optional)',
+			'features.tickets.restrictionNoteHint' => 'Add a short note if needed',
+			'features.tickets.restrictionReasonTooShort' => 'Reason must be at least 3 characters',
+			'features.tickets.restrictionApplyAction' => 'Restrict',
+			'features.tickets.restrictionManageAction' => 'Restriction',
+			'features.tickets.restrictionLiftAction' => 'Lift restriction',
+			'features.tickets.restrictionApplied' => 'Request submission restricted',
+			'features.tickets.restrictionLifted' => 'Restriction lifted',
+			'features.tickets.restrictionActiveTitle' => 'Active restriction',
+			'features.tickets.restrictionQuotedTicket' => 'Quoted request',
+			'features.tickets.restrictionManagerNote' => 'Manager note',
+			'features.tickets.restrictionEndsAt' => 'Ends: {expiresAt}',
+			'features.tickets.restrictionBannerIntro' => 'Your ability to submit new requests is temporarily restricted.',
+			'features.tickets.restrictionBannerBody' => 'Your ability to submit new requests is temporarily restricted. Reason: {reason}. Ends: {expiresAt}.',
 			'features.dekont.makePaymentTitle' => 'Make Payment',
 			'features.dekont.payDebtTitle' => 'Pay debt',
 			'features.dekont.paymentMethodTitle' => 'Payment method',
@@ -6404,6 +6552,8 @@ extension on Translations {
 			'features.dekont.paymentMethodDekont' => 'Upload receipt',
 			'features.dekont.paymentCardComingSoon' => 'Card payments coming soon.',
 			'features.dekont.uploadReceiptHint' => 'Upload receipt (jpg, png, webp, PDF — max 5 MB).',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.myDekontsTitle' => 'My Receipts',
 			'features.dekont.managerTitle' => 'Receipt Review',
 			'features.dekont.reviewAction' => 'Review receipt',
@@ -6435,8 +6585,6 @@ extension on Translations {
 			'features.dekont.errorListLoad' => 'Receipt list could not be loaded. Try again.',
 			'features.dekont.errorDetailLoad' => 'Receipt details could not be loaded. Try again.',
 			'features.dekont.errorFileDownload' => 'Receipt file could not be opened. Try again.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.errorReviewPaymentDone' => 'Payment for this receipt has already been processed.',
 			'features.dekont.errorReviewRejected' => 'A rejected receipt cannot be approved again.',
 			'features.dekont.errorReviewNeedDue' => 'Select a due to approve.',
@@ -6918,6 +7066,8 @@ extension on Translations {
 			'features.dashboard.remindSent' => 'Reminder sent',
 			'features.dashboard.remindAllSent' => 'Reminders sent to {count} residents.',
 			'features.dashboard.remindCooldown' => 'A reminder was already sent for this due within the last 24 hours.',
+			_ => null,
+		} ?? switch (path) {
 			'features.dashboard.remindNoRecipient' => 'No resident found to send a reminder for this apartment.',
 			'features.dashboard.apartmentTitle' => 'Apt. {number}',
 			'features.dashboard.apartmentShortLabel' => 'A{number}',
@@ -6938,6 +7088,14 @@ extension on Translations {
 			'features.dashboard.residentOverduePaymentsBadge' => '{count} of your dues are overdue',
 			'features.dashboard.featuredDuePeriod' => '{month} {year} dues',
 			'features.dashboard.residentFeaturedDuePeriod' => 'Your {month} {year} dues',
+			'features.dashboard.noBuildingTitle' => 'You are not in a building right now',
+			'features.dashboard.noBuildingBody' => 'Use your manager\'s invite code or share link to join your new building.',
+			'features.dashboard.joinBuildingCta' => 'Join Building',
+			'features.dashboard.rejoinSheetTitle' => 'Join a New Building',
+			'features.dashboard.rejoinSheetSubtitle' => 'Enter the invite code from your manager',
+			'features.dashboard.rejoinBuildingLabel' => 'You will join',
+			'features.dashboard.rejoinSuccess' => 'You have joined the building',
+			'features.dashboard.rejoinFailed' => 'Could not join the building',
 			'features.dashboard.residentDebtAndPaySubtitle' => 'View and pay your dues here.',
 			'features.dashboard.duesStatusAction' => 'Dues Status',
 			'features.dashboard.overdueDuesBadge' => '{count} overdue dues',
@@ -6949,8 +7107,6 @@ extension on Translations {
 			'features.dashboard.activityHistory.title' => 'Recent Activity',
 			'features.dashboard.activityHistory.rangeToday' => 'Today',
 			'features.dashboard.activityHistory.rangeThisWeek' => 'This Week',
-			_ => null,
-		} ?? switch (path) {
 			'features.dashboard.activityHistory.rangeThisMonth' => 'This Month',
 			'features.dashboard.activityHistory.rangeThreeMonths' => '3 Months',
 			'features.dashboard.activityHistory.rangeSixMonths' => '6 Months',

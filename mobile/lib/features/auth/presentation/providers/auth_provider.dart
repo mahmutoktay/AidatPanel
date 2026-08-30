@@ -555,6 +555,29 @@ class AuthNotifier extends Notifier<AuthState> {
     return _authRepository.validateInvite(code);
   }
 
+  Future<UserEntity> rejoinWithInviteCode({
+    required String inviteCode,
+    required WidgetRef ref,
+  }) async {
+    if (state.isLoading) return Future.error('loading');
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final user = await _authRepository.rejoinWithInviteCode(inviteCode);
+      resetResidentTabIndex(ref);
+      await _onAuthenticated(ref, user);
+      state = state.copyWith(
+        isLoading: false,
+        user: user,
+        isAuthenticated: true,
+        clearError: true,
+      );
+      return user;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: userFacingError(e));
+      rethrow;
+    }
+  }
+
   Future<void> _onAuthenticated(WidgetRef ref, UserEntity user) async {
     final previousId = state.user?.id;
     ref.read(dioClientProvider).clearResponseCache();

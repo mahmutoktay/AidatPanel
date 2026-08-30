@@ -5,6 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/domain/entities/user_entity.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/pending_rejoin_invite_provider.dart';
 import '../router/app_router.dart';
 
 /// `aidatpanel://join?code=` ve `https://aidatpanel.com/join?code=` deep link'leri.
@@ -46,7 +49,21 @@ class InviteDeepLinkNotifier extends Notifier<void> {
     final code = _extractInviteCode(uri);
     if (code == null) return;
 
-    final path = '/login?role=resident&code=${Uri.encodeComponent(code)}';
+    final auth = ref.read(authStateProvider);
+    final residentUnlinked = auth.isAuthenticated &&
+        auth.user?.role == UserRole.resident &&
+        (auth.user?.apartmentId == null || auth.user!.apartmentId!.isEmpty);
+
+    if (residentUnlinked) {
+      ref.read(pendingRejoinInviteCodeProvider.notifier).set(code);
+      _navigate('/resident-dashboard');
+      return;
+    }
+
+    _navigate('/login?role=resident&code=${Uri.encodeComponent(code)}');
+  }
+
+  void _navigate(String path) {
     if (kDebugMode) {
       debugPrint('[invite_deep_link] navigate → $path');
     }

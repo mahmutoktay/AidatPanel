@@ -14,6 +14,7 @@ import {
   uploadProfilePicture,
   deleteProfilePicture,
 } from "../controllers/meController.js";
+import { getMyTicketRestriction } from "../controllers/ticketModerationController.js";
 import { getMySubscription } from "../controllers/subscriptionController.js";
 import { getMySessions, revokeMySession } from "../controllers/sessionController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
@@ -66,6 +67,9 @@ router.get("/expenses", requireRoles("RESIDENT"), validate(meSchemas.myExpenses)
 
 /** GET /api/v1/me/tickets — yalnızca sakin */
 router.get("/tickets", requireRoles("RESIDENT"), validate(ticketSchemas.myTickets), getMyTickets);
+
+/** GET /api/v1/me/ticket-restriction — sakin talep gönderim kısıtı */
+router.get("/ticket-restriction", requireRoles("RESIDENT"), getMyTicketRestriction);
 
 /** GET /api/v1/me/dekonts — yalnızca sakin */
 router.get("/dekonts", requireRoles("RESIDENT"), validate(dekontSchemas.myList), getMyDekonts);
