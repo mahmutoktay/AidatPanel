@@ -9,9 +9,7 @@ import '../../../../core/utils/pagination_scroll.dart';
 import '../../../../l10n/strings.g.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../providers/tickets_provider.dart';
-import '../providers/ticket_restriction_provider.dart';
 import '../widgets/resident_application_card.dart';
-import '../widgets/ticket_restriction_banner.dart';
 
 class ResidentTicketsTab extends ConsumerStatefulWidget {
   const ResidentTicketsTab({super.key});
@@ -43,16 +41,7 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
   @override
   Widget build(BuildContext context) {
     final ticketsState = ref.watch(ticketsNotifierProvider);
-    final restrictionAsync = ref.watch(myTicketRestrictionProvider);
     final ticketsT = context.t.features.tickets;
-    final isRestricted = restrictionAsync.maybeWhen(
-      data: (status) => status.active,
-      orElse: () => false,
-    );
-    final restriction = restrictionAsync.maybeWhen(
-      data: (status) => status.restriction,
-      orElse: () => null,
-    );
 
     if (!_requested) {
       _requested = true;
@@ -63,11 +52,7 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
     }
 
     final tickets = ticketsState.tickets;
-    final listItemCount = _listItemCount(
-      ticketsState,
-      tickets,
-      hasRestrictionBanner: restriction != null,
-    );
+    final listItemCount = _listItemCount(ticketsState, tickets);
 
     return ColoredBox(
       color: AppColors.dashboardBackground,
@@ -86,14 +71,8 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
               ),
               itemCount: listItemCount,
               itemBuilder: (context, index) {
-                if (restriction != null && index == 0) {
-                  return TicketRestrictionBanner(restriction: restriction);
-                }
-
-                final ticketIndex = restriction != null ? index - 1 : index;
-
                 if (ticketsState.isLoading && tickets.isEmpty) {
-                  if (ticketIndex == 0) {
+                  if (index == 0) {
                     return const Padding(
                       padding: EdgeInsets.only(top: AppSizes.spacingXL),
                       child: Center(child: CircularProgressIndicator()),
@@ -103,7 +82,7 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
                 }
 
                 if (tickets.isEmpty) {
-                  if (ticketIndex == 0) {
+                  if (index == 0) {
                     return EmptyStateWidget(
                       icon: Icons.assignment_outlined,
                       title: ticketsT.residentEmptyTitle,
@@ -113,8 +92,8 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
                   return const SizedBox.shrink();
                 }
 
-                if (ticketIndex < tickets.length) {
-                  final ticket = tickets[ticketIndex];
+                if (index < tickets.length) {
+                  final ticket = tickets[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: AppSizes.spacingM),
                     child: ResidentApplicationCard(
@@ -131,7 +110,7 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
                   );
                 }
 
-                if (ticketIndex == tickets.length && ticketsState.isLoadingMore) {
+                if (index == tickets.length && ticketsState.isLoadingMore) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: AppSizes.spacingM),
                     child: Center(child: CircularProgressIndicator()),
@@ -141,40 +120,34 @@ class _ResidentTicketsTabState extends ConsumerState<ResidentTicketsTab> {
               },
             ),
           ),
-          if (!isRestricted)
-            Positioned(
-              right: AppSizes.dashboardScreenPaddingHorizontal,
-              bottom: AppSizes.spacingM,
-              child: SafeArea(
-                child: FloatingActionButton.extended(
-                  onPressed: () => _openCreate(context),
-                  backgroundColor: AppColors.actionButton,
-                  foregroundColor: AppColors.actionButtonForeground,
-                  icon: const Icon(Icons.add),
-                  label: Text(
-                    ticketsT.createTitle,
-                    style: AppTypography.button.copyWith(
-                      color: AppColors.actionButtonForeground,
-                      fontWeight: FontWeight.w700,
-                    ),
+          Positioned(
+            right: AppSizes.dashboardScreenPaddingHorizontal,
+            bottom: AppSizes.spacingM,
+            child: SafeArea(
+              child: FloatingActionButton.extended(
+                onPressed: () => _openCreate(context),
+                backgroundColor: AppColors.actionButton,
+                foregroundColor: AppColors.actionButtonForeground,
+                icon: const Icon(Icons.add),
+                label: Text(
+                  ticketsT.createTitle,
+                  style: AppTypography.button.copyWith(
+                    color: AppColors.actionButtonForeground,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
   }
 
-  int _listItemCount(
-    TicketsState ticketsState,
-    List tickets, {
-    bool hasRestrictionBanner = false,
-  }) {
-    final bannerCount = hasRestrictionBanner ? 1 : 0;
-    if (ticketsState.isLoading && tickets.isEmpty) return 1 + bannerCount;
-    if (tickets.isEmpty) return 1 + bannerCount;
-    return tickets.length + bannerCount + (ticketsState.isLoadingMore ? 1 : 0);
+  int _listItemCount(TicketsState ticketsState, List tickets) {
+    if (ticketsState.isLoading && tickets.isEmpty) return 1;
+    if (tickets.isEmpty) return 1;
+    return tickets.length + (ticketsState.isLoadingMore ? 1 : 0);
   }
 
   Future<void> _openCreate(BuildContext context) async {

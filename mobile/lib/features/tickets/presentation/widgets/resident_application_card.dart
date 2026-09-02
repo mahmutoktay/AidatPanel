@@ -7,7 +7,6 @@ import '../../../../core/utils/month_labels.dart';
 import '../../../../shared/theme/dashboard_screen_style.dart';
 import '../utils/ticket_labels.dart';
 import '../utils/ticket_status_style.dart';
-import 'ticket_moderation_badges.dart';
 import '../../domain/entities/ticket_entity.dart';
 
 class ResidentApplicationCard extends StatelessWidget {
@@ -72,11 +71,6 @@ class ResidentApplicationCard extends StatelessWidget {
                         style: AppTypography.caption.copyWith(
                           color: AppColors.textSecondary,
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      TicketModerationBadges(
-                        isReported: ticket.isReported,
-                        needsReview: ticket.needsReview,
                       ),
                     ],
                   ),

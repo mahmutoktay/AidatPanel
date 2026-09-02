@@ -253,6 +253,7 @@ class Translations$common$en {
 	String get tryAgain => 'Try Again';
 
 	late final Translations$common$documentPreview$en documentPreview = Translations$common$documentPreview$en._(_root);
+	late final Translations$common$filePick$en filePick = Translations$common$filePick$en._(_root);
 
 	/// en: 'Home'
 	String get home => 'Home';
@@ -1631,6 +1632,27 @@ class Translations$common$documentPreview$en {
 	String get pinchHint => 'Pinch to zoom and drag to pan';
 }
 
+// Path: common.filePick
+class Translations$common$filePick$en {
+	Translations$common$filePick$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Choose a file'
+	String get sourceTitle => 'Choose a file';
+
+	/// en: 'Photo from gallery'
+	String get gallery => 'Photo from gallery';
+
+	/// en: 'Take a photo'
+	String get camera => 'Take a photo';
+
+	/// en: 'PDF file'
+	String get pdf => 'PDF file';
+}
+
 // Path: common.friendlyError
 class Translations$common$friendlyError$en {
 	Translations$common$friendlyError$en._(this._root);
@@ -2687,87 +2709,6 @@ class Translations$features$tickets$en {
 
 	/// en: 'Issue fixed; verification completed.'
 	String get templateResolvedCheckText => 'Issue fixed; verification completed.';
-
-	/// en: 'Report inappropriate content'
-	String get reportInappropriate => 'Report inappropriate content';
-
-	/// en: 'Your report has been received'
-	String get reportSuccess => 'Your report has been received';
-
-	/// en: 'You cannot report your own content'
-	String get reportOwnContentBlocked => 'You cannot report your own content';
-
-	/// en: 'Reported'
-	String get badgeReported => 'Reported';
-
-	/// en: 'Needs review'
-	String get badgeNeedsReview => 'Needs review';
-
-	/// en: 'All'
-	String get moderationFilterAll => 'All';
-
-	/// en: 'Reported'
-	String get moderationFilterReported => 'Reported';
-
-	/// en: 'Needs review'
-	String get moderationFilterNeedsReview => 'Needs review';
-
-	/// en: 'Restrict new requests'
-	String get restrictionSheetTitle => 'Restrict new requests';
-
-	/// en: 'The resident cannot create new requests; past requests stay visible.'
-	String get restrictionSheetSubtitle => 'The resident cannot create new requests; past requests stay visible.';
-
-	/// en: 'Select a request for the reason'
-	String get restrictionSelectTicket => 'Select a request for the reason';
-
-	/// en: 'Please select a request for the reason'
-	String get restrictionTicketRequired => 'Please select a request for the reason';
-
-	/// en: 'No requests found for this resident.'
-	String get restrictionNoTickets => 'No requests found for this resident.';
-
-	/// en: 'Additional note (optional)'
-	String get restrictionNoteLabel => 'Additional note (optional)';
-
-	/// en: 'Add a short note if needed'
-	String get restrictionNoteHint => 'Add a short note if needed';
-
-	/// en: 'Reason must be at least 3 characters'
-	String get restrictionReasonTooShort => 'Reason must be at least 3 characters';
-
-	/// en: 'Restrict'
-	String get restrictionApplyAction => 'Restrict';
-
-	/// en: 'Restriction'
-	String get restrictionManageAction => 'Restriction';
-
-	/// en: 'Lift restriction'
-	String get restrictionLiftAction => 'Lift restriction';
-
-	/// en: 'Request submission restricted'
-	String get restrictionApplied => 'Request submission restricted';
-
-	/// en: 'Restriction lifted'
-	String get restrictionLifted => 'Restriction lifted';
-
-	/// en: 'Active restriction'
-	String get restrictionActiveTitle => 'Active restriction';
-
-	/// en: 'Quoted request'
-	String get restrictionQuotedTicket => 'Quoted request';
-
-	/// en: 'Manager note'
-	String get restrictionManagerNote => 'Manager note';
-
-	/// en: 'Ends: {expiresAt}'
-	String get restrictionEndsAt => 'Ends: {expiresAt}';
-
-	/// en: 'Your ability to submit new requests is temporarily restricted.'
-	String get restrictionBannerIntro => 'Your ability to submit new requests is temporarily restricted.';
-
-	/// en: 'Your ability to submit new requests is temporarily restricted. Reason: {reason}. Ends: {expiresAt}.'
-	String get restrictionBannerBody => 'Your ability to submit new requests is temporarily restricted. Reason: {reason}. Ends: {expiresAt}.';
 }
 
 // Path: features.dekont
@@ -5633,6 +5574,10 @@ extension on Translations {
 			'common.documentPreview.share' => 'Share',
 			'common.documentPreview.pdfUnavailable' => 'PDF could not be opened on this device. Use Share to open it in another app.',
 			'common.documentPreview.pinchHint' => 'Pinch to zoom and drag to pan',
+			'common.filePick.sourceTitle' => 'Choose a file',
+			'common.filePick.gallery' => 'Photo from gallery',
+			'common.filePick.camera' => 'Take a photo',
+			'common.filePick.pdf' => 'PDF file',
 			'common.home' => 'Home',
 			'common.buildings' => 'Buildings',
 			'common.dues' => 'Dues',
@@ -6034,12 +5979,12 @@ extension on Translations {
 			'common.errorKeys.notificationsMarkAllReadFailed' => 'Could not mark notifications as read. Try again.',
 			'common.errorKeys.announcementSendFailed' => 'Could not send the announcement. Try again.',
 			'common.errorKeys.sitesFetchFailed' => 'Could not load sites. Try again.',
+			_ => null,
+		} ?? switch (path) {
 			'common.errorKeys.siteDetailFetchFailed' => 'Could not load site details. Try again.',
 			'common.errorKeys.siteBuildingsFetchFailed' => 'Could not load blocks. Try again.',
 			'common.errorKeys.siteCreateFailed' => 'Could not add the site. Try again.',
 			'common.errorKeys.siteUpdateFailed' => 'Could not update the site. Try again.',
-			_ => null,
-		} ?? switch (path) {
 			'common.errorKeys.siteCollectionUpdateFailed' => 'Could not update site collection details. Try again.',
 			'common.errorKeys.siteDeleteFailed' => 'Could not delete the site. Try again.',
 			'common.errorKeys.siteBuildingCreateFailed' => 'Could not add the block. Try again.',
@@ -6517,33 +6462,6 @@ extension on Translations {
 			'features.tickets.templateAppointmentSetText' => 'Spoke with resident; appointment scheduled.',
 			'features.tickets.templateResolvedCheck' => 'Resolved / verified',
 			'features.tickets.templateResolvedCheckText' => 'Issue fixed; verification completed.',
-			'features.tickets.reportInappropriate' => 'Report inappropriate content',
-			'features.tickets.reportSuccess' => 'Your report has been received',
-			'features.tickets.reportOwnContentBlocked' => 'You cannot report your own content',
-			'features.tickets.badgeReported' => 'Reported',
-			'features.tickets.badgeNeedsReview' => 'Needs review',
-			'features.tickets.moderationFilterAll' => 'All',
-			'features.tickets.moderationFilterReported' => 'Reported',
-			'features.tickets.moderationFilterNeedsReview' => 'Needs review',
-			'features.tickets.restrictionSheetTitle' => 'Restrict new requests',
-			'features.tickets.restrictionSheetSubtitle' => 'The resident cannot create new requests; past requests stay visible.',
-			'features.tickets.restrictionSelectTicket' => 'Select a request for the reason',
-			'features.tickets.restrictionTicketRequired' => 'Please select a request for the reason',
-			'features.tickets.restrictionNoTickets' => 'No requests found for this resident.',
-			'features.tickets.restrictionNoteLabel' => 'Additional note (optional)',
-			'features.tickets.restrictionNoteHint' => 'Add a short note if needed',
-			'features.tickets.restrictionReasonTooShort' => 'Reason must be at least 3 characters',
-			'features.tickets.restrictionApplyAction' => 'Restrict',
-			'features.tickets.restrictionManageAction' => 'Restriction',
-			'features.tickets.restrictionLiftAction' => 'Lift restriction',
-			'features.tickets.restrictionApplied' => 'Request submission restricted',
-			'features.tickets.restrictionLifted' => 'Restriction lifted',
-			'features.tickets.restrictionActiveTitle' => 'Active restriction',
-			'features.tickets.restrictionQuotedTicket' => 'Quoted request',
-			'features.tickets.restrictionManagerNote' => 'Manager note',
-			'features.tickets.restrictionEndsAt' => 'Ends: {expiresAt}',
-			'features.tickets.restrictionBannerIntro' => 'Your ability to submit new requests is temporarily restricted.',
-			'features.tickets.restrictionBannerBody' => 'Your ability to submit new requests is temporarily restricted. Reason: {reason}. Ends: {expiresAt}.',
 			'features.dekont.makePaymentTitle' => 'Make Payment',
 			'features.dekont.payDebtTitle' => 'Pay debt',
 			'features.dekont.paymentMethodTitle' => 'Payment method',
@@ -6552,8 +6470,6 @@ extension on Translations {
 			'features.dekont.paymentMethodDekont' => 'Upload receipt',
 			'features.dekont.paymentCardComingSoon' => 'Card payments coming soon.',
 			'features.dekont.uploadReceiptHint' => 'Upload receipt (jpg, png, webp, PDF — max 5 MB).',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.myDekontsTitle' => 'My Receipts',
 			'features.dekont.managerTitle' => 'Receipt Review',
 			'features.dekont.reviewAction' => 'Review receipt',
@@ -6577,6 +6493,8 @@ extension on Translations {
 			'features.dekont.uploadSuccess' => 'Receipt uploaded',
 			'features.dekont.uploadRecoveredExisting' => 'This receipt was already on file; your existing record was opened.',
 			'features.dekont.uploadFailed' => 'Upload failed',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.errorUploadDuplicate' => 'You have already uploaded this receipt. Check My Receipts.',
 			'features.dekont.errorUploadRateLimit' => 'You uploaded too many receipts in a short time. Please wait.',
 			'features.dekont.errorUploadServer' => 'Receipt could not be saved on the server. Try again later.',
@@ -7066,8 +6984,6 @@ extension on Translations {
 			'features.dashboard.remindSent' => 'Reminder sent',
 			'features.dashboard.remindAllSent' => 'Reminders sent to {count} residents.',
 			'features.dashboard.remindCooldown' => 'A reminder was already sent for this due within the last 24 hours.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dashboard.remindNoRecipient' => 'No resident found to send a reminder for this apartment.',
 			'features.dashboard.apartmentTitle' => 'Apt. {number}',
 			'features.dashboard.apartmentShortLabel' => 'A{number}',
@@ -7091,6 +7007,8 @@ extension on Translations {
 			'features.dashboard.noBuildingTitle' => 'You are not in a building right now',
 			'features.dashboard.noBuildingBody' => 'Use your manager\'s invite code or share link to join your new building.',
 			'features.dashboard.joinBuildingCta' => 'Join Building',
+			_ => null,
+		} ?? switch (path) {
 			'features.dashboard.rejoinSheetTitle' => 'Join a New Building',
 			'features.dashboard.rejoinSheetSubtitle' => 'Enter the invite code from your manager',
 			'features.dashboard.rejoinBuildingLabel' => 'You will join',

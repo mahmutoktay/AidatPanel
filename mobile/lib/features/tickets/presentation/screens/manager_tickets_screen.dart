@@ -20,7 +20,6 @@ import '../../domain/entities/ticket_entity.dart';
 import '../providers/manager_open_tickets_count_provider.dart';
 import '../providers/tickets_provider.dart';
 import '../providers/manager_ticket_filter_provider.dart';
-import '../providers/manager_ticket_moderation_filter_provider.dart';
 import '../utils/ticket_labels.dart';
 import '../widgets/ticket_list_card.dart';
 
@@ -135,21 +134,10 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
 
   List<TicketEntity> _filteredTickets(List<TicketEntity> tickets) {
     final filterStatus = ref.watch(managerTicketFilterProvider);
-    final moderationFilter = ref.watch(managerTicketModerationFilterProvider);
 
     Iterable<TicketEntity> result = tickets;
     if (filterStatus != null && filterStatus != TicketStatus.open) {
       result = result.where((t) => t.status == filterStatus);
-    }
-    switch (moderationFilter) {
-      case TicketModerationFilter.reported:
-        result = result.where((t) => t.isReported);
-        break;
-      case TicketModerationFilter.needsReview:
-        result = result.where((t) => t.needsReview);
-        break;
-      case TicketModerationFilter.all:
-        break;
     }
     return result.toList(growable: false);
   }
@@ -173,27 +161,6 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
       for (final status in _statusFilterOptions.skip(1))
         status!.label(context),
     ];
-  }
-
-  List<String> _moderationFilterLabels(BuildContext context) {
-    final t = context.t.features.tickets;
-    return [
-      t.moderationFilterAll,
-      t.moderationFilterReported,
-      t.moderationFilterNeedsReview,
-    ];
-  }
-
-  int get _moderationFilterIndex {
-    final filter = ref.watch(managerTicketModerationFilterProvider);
-    return TicketModerationFilter.values.indexOf(filter);
-  }
-
-  void _onModerationFilterIndexChanged(int index) {
-    if (index < 0 || index >= TicketModerationFilter.values.length) return;
-    final next = TicketModerationFilter.values[index];
-    if (next == ref.read(managerTicketModerationFilterProvider)) return;
-    ref.read(managerTicketModerationFilterProvider.notifier).select(next);
   }
 
   @override
@@ -230,14 +197,6 @@ class _ManagerTicketsScreenState extends ConsumerState<ManagerTicketsScreen> {
                     onChanged: _onFilterIndexChanged,
                     enabled: canFilter,
                     fontSize: 14,
-                  ),
-                  const SizedBox(height: AppSizes.spacingM),
-                  SlidingSegmentedControl(
-                    segments: _moderationFilterLabels(context),
-                    selectedIndex: _moderationFilterIndex,
-                    onChanged: _onModerationFilterIndexChanged,
-                    enabled: canFilter,
-                    fontSize: 13,
                   ),
                 ],
               ),

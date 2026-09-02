@@ -478,10 +478,6 @@ String? _mapTicket(
   if (_has(raw, 'uygunsuz ifadeler')) {
     return t.features.tickets.inappropriateContentBlocked as String;
   }
-  if (_has(raw, 'kendi talebinizi bildiremezsiniz') ||
-      _has(raw, 'kendi içeriğinizi bildiremezsiniz')) {
-    return t.features.tickets.reportOwnContentBlocked as String;
-  }
   return null;
 }
 

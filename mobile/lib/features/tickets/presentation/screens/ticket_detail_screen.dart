@@ -15,7 +15,6 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/ticket_entity.dart';
 import '../providers/tickets_provider.dart';
 import '../widgets/ticket_detail_content_card.dart';
-import '../widgets/ticket_detail_bottom_toolbar.dart';
 import '../widgets/ticket_detail_manager_actions.dart';
 import '../widgets/ticket_detail_resident_info_card.dart';
 import '../widgets/ticket_detail_timeline.dart';
@@ -32,41 +31,6 @@ class TicketDetailScreen extends ConsumerStatefulWidget {
 
 class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
   bool _submitting = false;
-  bool _reporting = false;
-  bool _reportSubmitted = false;
-
-  Future<void> _reportTicket({String? ticketUpdateId}) async {
-    if (_reporting) return;
-    setState(() => _reporting = true);
-    try {
-      await ref.read(ticketRepositoryProvider).reportTicket(
-            ticketId: widget.ticketId,
-            ticketUpdateId: ticketUpdateId,
-          );
-      ref.invalidate(ticketDetailProvider(widget.ticketId));
-      invalidateTicketsRelatedCaches(ref);
-      if (!mounted) return;
-      setState(() => _reportSubmitted = true);
-      ref.read(toastProvider.notifier).show(
-            context.t.features.tickets.reportSuccess,
-            type: ToastType.success,
-          );
-    } on ApiException catch (e) {
-      if (mounted) {
-        ref
-            .read(toastProvider.notifier)
-            .show(userFacingError(e), type: ToastType.error);
-      }
-    } catch (e) {
-      if (mounted) {
-        ref
-            .read(toastProvider.notifier)
-            .show(userFacingError(e), type: ToastType.error);
-      }
-    } finally {
-      if (mounted) setState(() => _reporting = false);
-    }
-  }
 
   Future<void> _reload() async {
     ref.invalidate(ticketDetailProvider(widget.ticketId));
@@ -99,8 +63,6 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
           SnackBar(
             content: Text(t.statusUpdated),
             duration: const Duration(seconds: 5),
-            // Flutter 3.44+: aksiyonlu SnackBar varsayılan persist:true —
-            // süre dolunca kaybolmaz; geri alma için süreye izin ver.
             persist: false,
             action: SnackBarAction(
               label: t.undo,
@@ -144,24 +106,10 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
     final isManager =
         ref.watch(authStateProvider.select((state) => state.user?.role)) ==
         UserRole.manager;
-    final t = context.t.features.tickets;
 
     return DashboardSecondaryScaffold(
-      title: t.detailTitle,
+      title: context.t.features.tickets.detailTitle,
       fallbackRoute: isManager ? '/manager-dashboard/tickets' : null,
-      bottomNavigationBar: detail.maybeWhen(
-        data: (ticket) {
-          final canReport = !ticket.isReported &&
-              !_reportSubmitted &&
-              isManager;
-          if (!canReport) return null;
-          return TicketDetailBottomToolbar(
-            isSubmitting: _reporting,
-            onReport: () => _reportTicket(),
-          );
-        },
-        orElse: () => null,
-      ),
       onFallback: isManager
           ? null
           : () {
@@ -206,19 +154,6 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
                 TicketDetailUpdatesTimeline(
                   updates: ticket.updates,
                   viewerIsResident: !isManager,
-                  onReportUpdate: ticket.isReported || _reportSubmitted
-                      ? null
-                      : isManager
-                      ? (updateId, fromRole) {
-                          if (fromRole == 'RESIDENT') {
-                            _reportTicket(ticketUpdateId: updateId);
-                          }
-                        }
-                      : (updateId, fromRole) {
-                          if (fromRole == 'MANAGER') {
-                            _reportTicket(ticketUpdateId: updateId);
-                          }
-                        },
                 ),
               ],
               if (!isManager) ...[

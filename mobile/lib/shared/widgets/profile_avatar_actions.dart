@@ -231,10 +231,9 @@ class _ProfilePhotoEditSheetState extends ConsumerState<ProfilePhotoEditSheet> {
   Future<void> _pickFromGallery() async {
     if (_isProcessing) return;
     try {
-      // pickMedia allows selecting GIFs (pickImage filters them out)
+      // pickMedia: Android Photo Picker (READ_MEDIA_IMAGES gerekmez); GIF destekler.
       final picked = await _picker.pickMedia();
       if (picked != null) {
-        // Only accept image types (reject video etc.)
         final ext = p.extension(picked.path).toLowerCase();
         const allowedExts = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif'};
         if (!allowedExts.contains(ext)) {

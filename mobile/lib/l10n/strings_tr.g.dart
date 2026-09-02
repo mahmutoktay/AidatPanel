@@ -118,6 +118,7 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get rateLimitHint => 'Sunucu şu an yoğun görünüyor. Kısa süre sonra yeniden denenecek.';
 	@override String get tryAgain => 'Tekrar Dene';
 	@override late final _Translations$common$documentPreview$tr documentPreview = _Translations$common$documentPreview$tr._(_root);
+	@override late final _Translations$common$filePick$tr filePick = _Translations$common$filePick$tr._(_root);
 	@override String get home => 'Ana Sayfa';
 	@override String get buildings => 'Binalar';
 	@override String get dues => 'Aidatlar';
@@ -626,6 +627,19 @@ class _Translations$common$documentPreview$tr implements Translations$common$doc
 	@override String get pinchHint => 'İki parmakla yakınlaştırıp kaydırın';
 }
 
+// Path: common.filePick
+class _Translations$common$filePick$tr implements Translations$common$filePick$en {
+	_Translations$common$filePick$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get sourceTitle => 'Dosya seçin';
+	@override String get gallery => 'Galeriden fotoğraf';
+	@override String get camera => 'Kamera ile çek';
+	@override String get pdf => 'PDF dosyası';
+}
+
 // Path: common.friendlyError
 class _Translations$common$friendlyError$tr implements Translations$common$friendlyError$en {
 	_Translations$common$friendlyError$tr._(this._root);
@@ -1020,33 +1034,6 @@ class _Translations$features$tickets$tr implements Translations$features$tickets
 	@override String get templateAppointmentSetText => 'Daire sakini ile görüşüldü, randevu ayarlandı.';
 	@override String get templateResolvedCheck => 'Çözüldü / kontrol';
 	@override String get templateResolvedCheckText => 'Sorun giderildi, kontrol sağlandı.';
-	@override String get reportInappropriate => 'Uygunsuz içerik bildir';
-	@override String get reportSuccess => 'Bildiriminiz alındı';
-	@override String get reportOwnContentBlocked => 'Kendi içeriğinizi bildiremezsiniz';
-	@override String get badgeReported => 'Bildirilen';
-	@override String get badgeNeedsReview => 'İncelemesi gereken';
-	@override String get moderationFilterAll => 'Tümü';
-	@override String get moderationFilterReported => 'Bildirilen';
-	@override String get moderationFilterNeedsReview => 'İncelemesi gereken';
-	@override String get restrictionSheetTitle => 'Talep gönderimini kısıtla';
-	@override String get restrictionSheetSubtitle => 'Sakin yeni talep oluşturamaz; geçmiş talepler görünür kalır.';
-	@override String get restrictionSelectTicket => 'Gerekçe için bir talep seçin';
-	@override String get restrictionTicketRequired => 'Lütfen gerekçe için bir talep seçin';
-	@override String get restrictionNoTickets => 'Bu sakin için seçilebilecek talep bulunamadı.';
-	@override String get restrictionNoteLabel => 'Ek not (isteğe bağlı)';
-	@override String get restrictionNoteHint => 'İsterseniz kısa bir not ekleyin';
-	@override String get restrictionReasonTooShort => 'Gerekçe en az 3 karakter olmalıdır';
-	@override String get restrictionApplyAction => 'Kısıtla';
-	@override String get restrictionManageAction => 'Kısıtlama';
-	@override String get restrictionLiftAction => 'Kısıtlamayı kaldır';
-	@override String get restrictionApplied => 'Talep gönderimi kısıtlandı';
-	@override String get restrictionLifted => 'Kısıtlama kaldırıldı';
-	@override String get restrictionActiveTitle => 'Aktif kısıt';
-	@override String get restrictionQuotedTicket => 'Alıntılanan talep';
-	@override String get restrictionManagerNote => 'Yönetici notu';
-	@override String get restrictionEndsAt => 'Bitiş: {expiresAt}';
-	@override String get restrictionBannerIntro => 'Yeni talep gönderiminiz geçici olarak kısıtlandı.';
-	@override String get restrictionBannerBody => 'Yeni talep gönderiminiz geçici olarak kısıtlandı. Gerekçe: {reason}. Bitiş: {expiresAt}.';
 }
 
 // Path: features.dekont
@@ -2209,6 +2196,10 @@ extension on TranslationsTr {
 			'common.documentPreview.share' => 'Paylaş',
 			'common.documentPreview.pdfUnavailable' => 'PDF bu cihazda açılamadı. Paylaş ile başka bir uygulamada açabilirsiniz.',
 			'common.documentPreview.pinchHint' => 'İki parmakla yakınlaştırıp kaydırın',
+			'common.filePick.sourceTitle' => 'Dosya seçin',
+			'common.filePick.gallery' => 'Galeriden fotoğraf',
+			'common.filePick.camera' => 'Kamera ile çek',
+			'common.filePick.pdf' => 'PDF dosyası',
 			'common.home' => 'Ana Sayfa',
 			'common.buildings' => 'Binalar',
 			'common.dues' => 'Aidatlar',
@@ -2610,12 +2601,12 @@ extension on TranslationsTr {
 			'common.errorKeys.notificationsMarkAllReadFailed' => 'Bildirimler okunamadı. Tekrar deneyin.',
 			'common.errorKeys.announcementSendFailed' => 'Duyuru gönderilemedi. Tekrar deneyin.',
 			'common.errorKeys.sitesFetchFailed' => 'Siteler yüklenemedi. Tekrar deneyin.',
+			_ => null,
+		} ?? switch (path) {
 			'common.errorKeys.siteDetailFetchFailed' => 'Site detayı yüklenemedi. Tekrar deneyin.',
 			'common.errorKeys.siteBuildingsFetchFailed' => 'Bloklar yüklenemedi. Tekrar deneyin.',
 			'common.errorKeys.siteCreateFailed' => 'Site eklenemedi. Tekrar deneyin.',
 			'common.errorKeys.siteUpdateFailed' => 'Site güncellenemedi. Tekrar deneyin.',
-			_ => null,
-		} ?? switch (path) {
 			'common.errorKeys.siteCollectionUpdateFailed' => 'Site tahsilat bilgileri güncellenemedi. Tekrar deneyin.',
 			'common.errorKeys.siteDeleteFailed' => 'Site silinemedi. Tekrar deneyin.',
 			'common.errorKeys.siteBuildingCreateFailed' => 'Blok eklenemedi. Tekrar deneyin.',
@@ -3093,33 +3084,6 @@ extension on TranslationsTr {
 			'features.tickets.templateAppointmentSetText' => 'Daire sakini ile görüşüldü, randevu ayarlandı.',
 			'features.tickets.templateResolvedCheck' => 'Çözüldü / kontrol',
 			'features.tickets.templateResolvedCheckText' => 'Sorun giderildi, kontrol sağlandı.',
-			'features.tickets.reportInappropriate' => 'Uygunsuz içerik bildir',
-			'features.tickets.reportSuccess' => 'Bildiriminiz alındı',
-			'features.tickets.reportOwnContentBlocked' => 'Kendi içeriğinizi bildiremezsiniz',
-			'features.tickets.badgeReported' => 'Bildirilen',
-			'features.tickets.badgeNeedsReview' => 'İncelemesi gereken',
-			'features.tickets.moderationFilterAll' => 'Tümü',
-			'features.tickets.moderationFilterReported' => 'Bildirilen',
-			'features.tickets.moderationFilterNeedsReview' => 'İncelemesi gereken',
-			'features.tickets.restrictionSheetTitle' => 'Talep gönderimini kısıtla',
-			'features.tickets.restrictionSheetSubtitle' => 'Sakin yeni talep oluşturamaz; geçmiş talepler görünür kalır.',
-			'features.tickets.restrictionSelectTicket' => 'Gerekçe için bir talep seçin',
-			'features.tickets.restrictionTicketRequired' => 'Lütfen gerekçe için bir talep seçin',
-			'features.tickets.restrictionNoTickets' => 'Bu sakin için seçilebilecek talep bulunamadı.',
-			'features.tickets.restrictionNoteLabel' => 'Ek not (isteğe bağlı)',
-			'features.tickets.restrictionNoteHint' => 'İsterseniz kısa bir not ekleyin',
-			'features.tickets.restrictionReasonTooShort' => 'Gerekçe en az 3 karakter olmalıdır',
-			'features.tickets.restrictionApplyAction' => 'Kısıtla',
-			'features.tickets.restrictionManageAction' => 'Kısıtlama',
-			'features.tickets.restrictionLiftAction' => 'Kısıtlamayı kaldır',
-			'features.tickets.restrictionApplied' => 'Talep gönderimi kısıtlandı',
-			'features.tickets.restrictionLifted' => 'Kısıtlama kaldırıldı',
-			'features.tickets.restrictionActiveTitle' => 'Aktif kısıt',
-			'features.tickets.restrictionQuotedTicket' => 'Alıntılanan talep',
-			'features.tickets.restrictionManagerNote' => 'Yönetici notu',
-			'features.tickets.restrictionEndsAt' => 'Bitiş: {expiresAt}',
-			'features.tickets.restrictionBannerIntro' => 'Yeni talep gönderiminiz geçici olarak kısıtlandı.',
-			'features.tickets.restrictionBannerBody' => 'Yeni talep gönderiminiz geçici olarak kısıtlandı. Gerekçe: {reason}. Bitiş: {expiresAt}.',
 			'features.dekont.makePaymentTitle' => 'Ödeme Yap',
 			'features.dekont.payDebtTitle' => 'Borcu Öde',
 			'features.dekont.paymentMethodTitle' => 'Ödeme Yöntemi',
@@ -3128,8 +3092,6 @@ extension on TranslationsTr {
 			'features.dekont.paymentMethodDekont' => 'Dekont Yükle',
 			'features.dekont.paymentCardComingSoon' => 'Kart ile ödeme yakında eklenecek.',
 			'features.dekont.uploadReceiptHint' => 'Dekont yükleyin (jpg, png, webp, PDF — en fazla 5 MB).',
-			_ => null,
-		} ?? switch (path) {
 			'features.dekont.myDekontsTitle' => 'Dekontlarım',
 			'features.dekont.managerTitle' => 'Dekont İnceleme',
 			'features.dekont.reviewAction' => 'Dekont İncele',
@@ -3153,6 +3115,8 @@ extension on TranslationsTr {
 			'features.dekont.uploadSuccess' => 'Dekont yüklendi',
 			'features.dekont.uploadRecoveredExisting' => 'Bu dekont zaten kayıtlı; mevcut kaydınız açıldı.',
 			'features.dekont.uploadFailed' => 'Dekont yüklenemedi',
+			_ => null,
+		} ?? switch (path) {
 			'features.dekont.errorUploadDuplicate' => 'Bu dekontu daha önce yüklemişsiniz. Dekontlarım bölümünden kontrol edebilirsiniz.',
 			'features.dekont.errorUploadRateLimit' => 'Kısa sürede çok fazla dekont yüklediniz. Lütfen bir süre bekleyin.',
 			'features.dekont.errorUploadServer' => 'Dekont sunucuya kaydedilemedi. Biraz sonra tekrar deneyin.',
@@ -3642,8 +3606,6 @@ extension on TranslationsTr {
 			'features.dashboard.remindSent' => 'Hatırlatma gönderildi',
 			'features.dashboard.remindAllSent' => '{count} sakine hatırlatma gönderildi.',
 			'features.dashboard.remindCooldown' => 'Bu aidat için son 24 saat içinde hatırlatma gönderildi.',
-			_ => null,
-		} ?? switch (path) {
 			'features.dashboard.remindNoRecipient' => 'Bu dairede hatırlatma gönderilecek sakin bulunamadı.',
 			'features.dashboard.apartmentTitle' => 'Daire {number}',
 			'features.dashboard.apartmentShortLabel' => 'D{number}',
@@ -3667,6 +3629,8 @@ extension on TranslationsTr {
 			'features.dashboard.noBuildingTitle' => 'Şu an bir binada değilsiniz',
 			'features.dashboard.noBuildingBody' => 'Yöneticinizin davet kodunu veya paylaşım linkini kullanarak yeni binanıza katılabilirsiniz.',
 			'features.dashboard.joinBuildingCta' => 'Binaya Katıl',
+			_ => null,
+		} ?? switch (path) {
 			'features.dashboard.rejoinSheetTitle' => 'Yeni Binaya Katıl',
 			'features.dashboard.rejoinSheetSubtitle' => 'Yöneticinizin verdiği davet kodunu girin',
 			'features.dashboard.rejoinBuildingLabel' => 'Katılacağınız yer',

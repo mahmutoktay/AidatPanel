@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
+import '../../../../core/utils/receipt_file_picker.dart';
 import '../../../../core/utils/upload_file_utils.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_sizes.dart';
@@ -33,18 +34,22 @@ class ExpenseReceiptSection extends StatelessWidget {
 
   Future<void> _pick(BuildContext context) async {
     try {
-      final result = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: UploadFileUtils.allowedExtensions.toList(),
+      final picked = await pickReceiptUploadFile(context);
+      if (picked == null) return;
+      final validationError = UploadFileUtils.validateReceiptBytes(
+        picked.bytes,
+        picked.fileName,
       );
-      if (result != null && result.files.isNotEmpty) {
-        final newFiles = List<PlatformFile>.from(pickedFiles);
-        for (var file in result.files) {
-          if (file.path == null) continue;
-          if (!newFiles.any((f) => f.name == file.name && f.size == file.size)) {
-            newFiles.add(file);
-          }
-        }
+      if (validationError != null) {
+        onPickFailed?.call();
+        return;
+      }
+      final platformFile = picked.toPlatformFile();
+      final newFiles = List<PlatformFile>.from(pickedFiles);
+      if (!newFiles.any(
+        (f) => f.name == platformFile.name && f.size == platformFile.size,
+      )) {
+        newFiles.add(platformFile);
         onChanged(newFiles);
       }
     } catch (_) {

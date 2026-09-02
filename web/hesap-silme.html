@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hesap Silme | AidatPanel</title>
+    <meta name="description" content="AidatPanel hesap kapatma ve veri silme talebi: adımlar, silinen veriler ve saklama politikası.">
+    <link rel="canonical" href="https://aidatpanel.com/hesap-silme.html">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('aidatpanel-theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3.1">
+    <style>
+        body { padding-top: 50px; }
+        .legal-container { max-width: 800px; margin: 0 auto; padding: 40px; background: var(--white); border-radius: 16px; border: 1px solid var(--border-light); }
+        h1 { color: var(--primary); margin-bottom: 30px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+        h2 { color: var(--primary); margin-top: 30px; font-size: 22px; }
+        p, li { color: var(--text-sec); font-size: 18px; line-height: 1.8; }
+        ol { padding-left: 1.4rem; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: var(--accent); text-decoration: none; font-weight: 700; font-size: 18px; }
+        .back-link:hover { text-decoration: underline; }
+        .meta { color: var(--text-sec); font-size: 15px; margin-bottom: 24px; }
+        .note { background: var(--bg-soft, #f5f7fa); border-left: 4px solid var(--accent); padding: 16px 20px; border-radius: 8px; margin: 24px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
+        <div class="legal-container">
+            <h1>AidatPanel — Hesap Silme ve Veri Talepleri</h1>
+            <p class="meta">Son güncelleme: Eylül 2026 · Uygulama: AidatPanel (Vefa Yazılım) · İletişim: <a href="mailto:store@vefayazilim.com">store@vefayazilim.com</a></p>
+
+            <p>Bu sayfa, AidatPanel mobil uygulamasında hesabınızı kapatma ve kişisel verilerinizin silinmesini talep etme yöntemlerini açıklar.</p>
+
+            <h2>1. Uygulama içinden hesap kapatma (önerilen)</h2>
+            <ol>
+                <li>AidatPanel uygulamasını açın ve giriş yapın.</li>
+                <li>Alt menüden <strong>Ayarlar</strong> sekmesine gidin.</li>
+                <li>Profil alanına dokunarak <strong>Profil Detayları</strong> ekranını açın.</li>
+                <li>En alttaki <strong>Hesabımı Kapat</strong> seçeneğine dokunun.</li>
+                <li>Onay kutusuna <strong>HESABIMI KAPAT</strong> yazıp işlemi onaylayın.</li>
+            </ol>
+
+            <div class="note">
+                <p><strong>Yönetici hesapları:</strong> Yönettiğiniz bina veya site kayıtları varken hesap kapatılamaz. Önce binaları silmeniz veya başka bir yöneticiye devretmeniz gerekir.</p>
+            </div>
+
+            <h2>2. E-posta ile talep</h2>
+            <p>Uygulamaya erişemiyorsanız <a href="mailto:store@vefayazilim.com">store@vefayazilim.com</a> adresine kayıtlı e-posta veya telefon numaranızı belirterek hesap silme talebi gönderebilirsiniz. Talepler KVKK kapsamında en geç 30 gün içinde yanıtlanır.</p>
+
+            <h2>3. Silinen veya anonimleştirilen veriler</h2>
+            <p>Hesap kapatıldığında aşağıdaki kişisel veriler silinir veya anonimleştirilir:</p>
+            <ul>
+                <li>Ad, e-posta, telefon numarası</li>
+                <li>Profil fotoğrafı</li>
+                <li>Oturum ve bildirim anahtarı (FCM) kayıtları</li>
+                <li>Hesap kimlik bilgileri (şifre hash’i geçersiz kılınır)</li>
+            </ul>
+
+            <h2>4. Saklanabilecek veriler</h2>
+            <p>Yasal yükümlülükler veya apartman yönetimi kayıtlarının bütünlüğü nedeniyle aşağıdaki veriler kimliksiz (anonim) olarak saklanabilir:</p>
+            <ul>
+                <li>Geçmiş aidat ve ödeme kayıtları (kişisel bilgiler maskelenmiş)</li>
+                <li>Yüklenmiş dekont ve makbuz dosyaları (yönetim kaydı olarak)</li>
+                <li>Destek talebi (ticket) metinleri ve ekleri (anonimleştirilmiş)</li>
+            </ul>
+            <p>Bu veriler artık sizi tanımlamaz ve yalnızca yasal veya operasyonel amaçlarla tutulur.</p>
+
+            <h2>5. Abonelik (yönetici)</h2>
+            <p>Google Play üzerinden satın alınan abonelikler, hesap kapatılsa bile Google Play abonelik ayarlarınızdan ayrıca iptal edilmelidir. AidatPanel abonelik yönetimi Google Play / RevenueCat altyapısı üzerinden yapılır.</p>
+
+            <h2>6. İlgili bağlantılar</h2>
+            <ul>
+                <li><a href="gizlilik.html">Gizlilik Politikası</a></li>
+                <li><a href="kvkk.html">KVKK Aydınlatma Metni</a></li>
+            </ul>
+        </div>
+    </div>
+<script src="js/theme.js" defer></script>
+</body>
+</html>
