@@ -1,8 +1,8 @@
 # AidatPanel — Fiziksel Cihaz Regresyon Checklist
 
 **Amaç:** Play submit öncesi gerçek cihazda doğrulama  
-**Sürüm:** `0.6.14+2000000023` (prod AAB / Play internal)  
-**Güncelleme:** 2026-08-15  
+**Sürüm:** `0.6.14+2000000026` (prod AAB / Play kapalı test adayı)  
+**Güncelleme:** 2026-09-03  
 **Kaynak:** `FAZ_DURUMU.md` FAZ 7 fiziksel regresyon + lansman kontrolleri
 
 > Play’den kurulu AAB ile test et. Lisans test hesabı + abonelik ürünleri Active olmadan §3 tam geçmez.

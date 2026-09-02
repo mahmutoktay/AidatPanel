@@ -3836,8 +3836,8 @@ class Translations$features$subscription$en {
 	/// en: 'Subscribe annually'
 	String get purchaseAnnualCta => 'Subscribe annually';
 
-	/// en: 'Prices exclude VAT · Cancel anytime'
-	String get kdvNote => 'Prices exclude VAT · Cancel anytime';
+	/// en: 'Listed prices exclude VAT; VAT is added at checkout · Cancel anytime'
+	String get kdvNote => 'Listed prices exclude VAT; VAT is added at checkout · Cancel anytime';
 
 	/// en: 'User'
 	String get guestUser => 'User';
@@ -6874,7 +6874,7 @@ extension on Translations {
 			'features.subscription.bestValueBadge' => 'Best value',
 			'features.subscription.purchaseMonthlyCta' => 'Subscribe monthly',
 			'features.subscription.purchaseAnnualCta' => 'Subscribe annually',
-			'features.subscription.kdvNote' => 'Prices exclude VAT · Cancel anytime',
+			'features.subscription.kdvNote' => 'Listed prices exclude VAT; VAT is added at checkout · Cancel anytime',
 			'features.subscription.guestUser' => 'User',
 			'features.subscription.priceUnavailable' => '—',
 			'features.subscription.loadingPlans' => 'Loading plans…',

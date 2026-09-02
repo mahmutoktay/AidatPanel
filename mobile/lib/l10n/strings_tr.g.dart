@@ -1441,7 +1441,7 @@ class _Translations$features$subscription$tr implements Translations$features$su
 	@override String get bestValueBadge => 'En avantajlı';
 	@override String get purchaseMonthlyCta => 'Aylık aboneliği satın al';
 	@override String get purchaseAnnualCta => 'Yıllık aboneliği satın al';
-	@override String get kdvNote => 'Fiyatlara KDV dahil değildir · İstediğin zaman iptal edebilirsin';
+	@override String get kdvNote => 'Gösterilen fiyatlara KDV dahil değildir; ödeme sırasında KDV eklenir · İstediğin zaman iptal edebilirsin';
 	@override String get guestUser => 'Kullanıcı';
 	@override String get priceUnavailable => '—';
 	@override String get loadingPlans => 'Planlar yükleniyor…';
@@ -3496,7 +3496,7 @@ extension on TranslationsTr {
 			'features.subscription.bestValueBadge' => 'En avantajlı',
 			'features.subscription.purchaseMonthlyCta' => 'Aylık aboneliği satın al',
 			'features.subscription.purchaseAnnualCta' => 'Yıllık aboneliği satın al',
-			'features.subscription.kdvNote' => 'Fiyatlara KDV dahil değildir · İstediğin zaman iptal edebilirsin',
+			'features.subscription.kdvNote' => 'Gösterilen fiyatlara KDV dahil değildir; ödeme sırasında KDV eklenir · İstediğin zaman iptal edebilirsin',
 			'features.subscription.guestUser' => 'Kullanıcı',
 			'features.subscription.priceUnavailable' => '—',
 			'features.subscription.loadingPlans' => 'Planlar yükleniyor…',
